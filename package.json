@@ -1,0 +1,44 @@
+{
+  "name": "harmony-app",
+  "version": "0.1.0",
+  "description": "A React App made with create-react-app-extended",
+  "private": true,
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "keywords": [],
+  "author": "",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@material-ui/core": "^4.5.1",
+    "@material-ui/icons": "^4.5.1",
+    "@types/react": "^16.9.7",
+    "@types/react-dom": "^16.9.2",
+    "@types/react-redux": "^7.1.4",
+    "@types/socket.io-client": "^1.4.32",
+    "react": "^16.10.2",
+    "react-dom": "^16.10.2",
+    "react-redux": "^7.1.1",
+    "react-scripts": "^3.2.0",
+    "redux": "^4.0.4",
+    "socket.io-client": "^2.3.0"
+  },
+  "devDependencies": {
+    "typescript": "^3.6.4"
+  }
+}

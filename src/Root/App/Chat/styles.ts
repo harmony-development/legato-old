@@ -1,0 +1,24 @@
+import { makeStyles } from '@material-ui/core';
+import { Theme } from '@material-ui/core';
+
+export const useStyles = makeStyles((theme: Theme) => ({
+  container: {
+    display: 'flex',
+    overflow: 'auto',
+    flex: 1,
+    flexFlow: 'column',
+    flexDirection: 'column'
+  },
+  messageBoxContainer: {
+    flex: '0 0 auto',
+    paddingLeft: theme.spacing(1),
+    paddingRight: theme.spacing(1)
+  },
+  chatBoxContainer: {
+    flex: '1 1 auto',
+    overflow: 'auto'
+  },
+  messageBox: {
+    width: '100%'
+  }
+}));
