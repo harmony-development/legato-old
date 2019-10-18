@@ -11,8 +11,12 @@ export const useStyles = makeStyles((theme: Theme) => ({
   },
   messageBoxContainer: {
     flex: '0 0 auto',
-    paddingLeft: theme.spacing(1),
+    display: 'flex',
     paddingRight: theme.spacing(1)
+  },
+  valign: {
+    display: 'flex',
+    alignItems: 'center'
   },
   chatBoxContainer: {
     flex: '1 1 auto',

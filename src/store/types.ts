@@ -34,7 +34,8 @@ export const Events = {
   USERNAME_UPDATE: 'USERNAME_UPDATE',
   MESSAGE: 'MESSAGE',
   LOGIN: 'LOGIN',
-  DISCONNECT: 'DISCONNECT'
+  DISCONNECT: 'DISCONNECT',
+  IMAGE: 'IMAGE'
 };
 
 export type ActionTypes = IInvertTheme | IShowChangeNameDialog | IChangeName;
