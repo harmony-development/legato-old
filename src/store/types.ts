@@ -30,5 +30,11 @@ export interface IChangeName {
   payload: string;
 }
 
-// this is not practical when using just a single action, but this good practice when you start making your app bigger
+export const Events = {
+  USERNAME_UPDATE: 'USERNAME_UPDATE',
+  MESSAGE: 'MESSAGE',
+  LOGIN: 'LOGIN',
+  DISCONNECT: 'DISCONNECT'
+};
+
 export type ActionTypes = IInvertTheme | IShowChangeNameDialog | IChangeName;
