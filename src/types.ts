@@ -1,5 +1,7 @@
 export interface IMessage {
+  author: string;
   message: string;
+  files?: File[];
 }
 
 export interface IUserData {
@@ -8,15 +10,11 @@ export interface IUserData {
   };
 }
 
-export interface IImageData {
-  file: File;
-}
-
 export interface IUsernameUpdate {
   name: string;
 }
 
-export interface IConnectData {
+export interface ILoginData {
   name: string;
 }
 
@@ -24,6 +22,7 @@ export const Events = {
   USERNAME_UPDATE: 'USERNAME_UPDATE',
   MESSAGE: 'MESSAGE',
   LOGIN: 'LOGIN',
-  DISCONNECT: 'DISCONNECT',
-  IMAGE: 'IMAGE'
+  DISCONNECT: 'DISCONNECT'
 };
+
+export type EventData = IUserData | IUsernameUpdate | ILoginData | IMessage;

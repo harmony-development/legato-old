@@ -7,7 +7,6 @@ var http_1 = __importDefault(require("http"));
 var express_1 = __importDefault(require("express"));
 var socket_io_1 = __importDefault(require("socket.io"));
 var Message_1 = __importDefault(require("./socket-events/Message"));
-var types_1 = require("./types");
 var Disconnect_1 = __importDefault(require("./socket-events/Disconnect"));
 var UsernameUpdate_1 = __importDefault(require("./socket-events/UsernameUpdate"));
 var Login_1 = __importDefault(require("./socket-events/Login"));
@@ -18,12 +17,6 @@ var Server = /** @class */ (function () {
             if (_this.users[userID]) {
                 _this.users[userID].name = name;
             }
-        };
-        this.sendMessage = function (author, message) {
-            _this.SocketServer.emit(types_1.Events.MESSAGE, {
-                author: author,
-                message: message
-            });
         };
         this.getUsers = function () {
             return _this.users;
@@ -53,6 +46,9 @@ var Server = /** @class */ (function () {
     }
     Server.prototype.errorHandler = function (err) {
         console.log(err.name);
+    };
+    Server.prototype.emit = function (event, data) {
+        this.SocketServer.emit(event, data);
     };
     return Server;
 }());
