@@ -11,6 +11,11 @@ export const useStyles = makeStyles((theme: Theme) => ({
   inline: {
     display: 'inline'
   },
+  message: {
+    paddingTop: theme.spacing(2),
+    paddingBottom: theme.spacing(2),
+    paddingLeft: theme.spacing(1)
+  },
   messageLight: {
     backgroundColor: 'rgb(133, 133, 133, 0.1)'
   },
@@ -19,5 +24,11 @@ export const useStyles = makeStyles((theme: Theme) => ({
   },
   userText: {
     marginRight: theme.spacing(1)
+  },
+  fileSection: {
+    width: '100%'
+  },
+  imageUpload: {
+    height: '200px'
   }
 }));

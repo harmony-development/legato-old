@@ -9,5 +9,5 @@ export const Events = {
 export interface IMessage {
   author: string;
   message: string;
-  files: File[];
+  files: string[];
 }

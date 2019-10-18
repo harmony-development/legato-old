@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 
 import { useStyles } from './styles';
-import { TextField, List, IconButton, Grid, Tooltip } from '@material-ui/core';
+import { TextField, Grid, IconButton, Tooltip } from '@material-ui/core';
 import ChatMessage from './ChatMessage/ChatMessage';
 import { useSelector } from 'react-redux';
 import { IAppState } from '../../../store/types';
@@ -43,10 +43,14 @@ const Chat = () => {
 
   const onFileSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.currentTarget.files && event.currentTarget.files.length > 0) {
-      socket.emit(Events.MESSAGE, {
-        message: 'Image Upload',
-        author: name,
-        files: event.currentTarget.files
+      const imageReader = new FileReader();
+      imageReader.readAsDataURL(event.currentTarget.files[0]);
+      imageReader.addEventListener('load', () => {
+        socket.emit(Events.MESSAGE, {
+          message: 'Image Upload',
+          author: name,
+          files: [imageReader.result]
+        });
       });
     }
   };
@@ -67,7 +71,7 @@ const Chat = () => {
       setConnected(false);
     });
     socket.on(Events.MESSAGE, (response: IMessage) => {
-      setMessages(prevMessages => [
+      setMessages((prevMessages) => [
         ...prevMessages,
         {
           author: response.author,
@@ -81,42 +85,22 @@ const Chat = () => {
   return (
     <div className={classes.container}>
       <div className={classes.chatBoxContainer}>
-        <List>
+        <Grid>
           {messages.map((message, index) => (
-            <ChatMessage
-              index={index % 2}
-              user={message.author}
-              files={message.files}
-              message={message.message}
-            />
+            <ChatMessage index={index % 2} user={message.author} files={message.files} message={message.message} />
           ))}
-        </List>
+        </Grid>
       </div>
       <div className={classes.messageBoxContainer}>
         <div className={classes.valign}>
-          <input
-            type='file'
-            id='file'
-            ref={inputFile}
-            style={{ display: 'none' }}
-            onChange={onFileSelected}
-          />
+          <input type='file' id='file' ref={inputFile} style={{ display: 'none' }} onChange={onFileSelected} />
           <Tooltip title='Send Image'>
             <IconButton onClick={sendFile}>
               <Image />
             </IconButton>
           </Tooltip>
         </div>
-        <TextField
-          onKeyPress={chatBoxKeyEvent}
-          value={draftMessage}
-          onChange={event => setDraftMessage(event.target.value)}
-          className={classes.chatBox}
-          label={connected ? 'Send Message' : 'Currently Offline'}
-          multiline
-          rows='2'
-          margin='normal'
-        />
+        <TextField onKeyPress={chatBoxKeyEvent} value={draftMessage} onChange={(event) => setDraftMessage(event.target.value)} className={classes.chatBox} label={connected ? 'Send Message' : 'Currently Offline'} multiline rows='2' margin='normal' />
         {!connected ? (
           <div className={classes.valign}>
             <Tooltip title='Currently Offline. You will not be able to send messages.'>

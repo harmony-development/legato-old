@@ -1,11 +1,11 @@
 import React from 'react';
 import { useStyles } from './styles';
-import { Typography, ListItem, ListItemText, Divider } from '@material-ui/core';
+import { Typography, ListItem, ListItemText, Divider, Grid } from '@material-ui/core';
 
 interface IProps {
   message: string;
   user: string;
-  files: File[];
+  files: string[];
   index: number;
 }
 
@@ -14,39 +14,26 @@ export default function ChatMessage(props: IProps) {
 
   return (
     <>
-      <ListItem
-        alignItems='flex-start'
-        className={props.index === 0 ? classes.messageLight : ''}
-      >
+      <Grid item alignItems='flex-start' className={`${classes.message} ${props.index === 0 ? classes.messageLight : ''}`}>
         <ListItemText
+          className={classes.fileSection}
           primary={
-            <Typography
-              component='span'
-              variant='body2'
-              className={classes.userText}
-              color='textPrimary'
-            >
+            <Typography component='span' variant='body2' className={classes.userText} color='textPrimary'>
               {props.user}
             </Typography>
           }
           secondary={
-            <Typography
-              component='span'
-              variant='body2'
-              className={classes.messageText}
-              color='textSecondary'
-            >
+            <Typography component='span' variant='body2' className={classes.messageText} color='textSecondary'>
               {props.message}
             </Typography>
           }
         />
-        {
-          props.files.map((data) => {
-            <img
-          })
-        }
-      </ListItem>
-      <Divider variant='fullWidth' component='li' />
+        <div className={classes.fileSection}>
+          {props.files.map((data) => {
+            return <img className={classes.imageUpload} src={data}></img>;
+          })}
+        </div>
+      </Grid>
     </>
   );
 }
