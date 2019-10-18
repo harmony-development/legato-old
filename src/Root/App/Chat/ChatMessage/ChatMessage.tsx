@@ -1,6 +1,6 @@
 import React from 'react';
 import { useStyles } from './styles';
-import { Typography, ListItem, ListItemText, Divider, Grid } from '@material-ui/core';
+import { Typography, ListItem, ListItemText, Divider } from '@material-ui/core';
 
 interface IProps {
   message: string;
@@ -9,31 +9,50 @@ interface IProps {
   index: number;
 }
 
-export default function ChatMessage(props: IProps) {
+const ChatMessage: React.FC<IProps> = (props: IProps) => {
   const classes = useStyles();
 
   return (
     <>
-      <Grid item alignItems='flex-start' className={`${classes.message} ${props.index === 0 ? classes.messageLight : ''}`}>
+      <ListItem
+        alignItems="flex-start"
+        className={`${classes.message} ${
+          props.index === 0 ? classes.messageLight : ''
+        }`}
+      >
         <ListItemText
-          className={classes.fileSection}
           primary={
-            <Typography component='span' variant='body2' className={classes.userText} color='textPrimary'>
+            <Typography
+              component="span"
+              variant="body2"
+              className={classes.userText}
+              color="textPrimary"
+            >
               {props.user}
             </Typography>
           }
           secondary={
-            <Typography component='span' variant='body2' className={classes.messageText} color='textSecondary'>
+            <Typography
+              component="span"
+              variant="body2"
+              className={classes.messageText}
+              color="textSecondary"
+            >
               {props.message}
             </Typography>
           }
         />
+        <Divider variant="middle" />
         <div className={classes.fileSection}>
-          {props.files.map((data) => {
-            return <img className={classes.imageUpload} src={data}></img>;
+          {props.files.map(data => {
+            return (
+              <img key={data} className={classes.imageUpload} src={data}></img>
+            );
           })}
         </div>
-      </Grid>
+      </ListItem>
     </>
   );
-}
+};
+
+export default ChatMessage;
