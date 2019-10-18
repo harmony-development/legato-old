@@ -5,18 +5,9 @@ import { useStyles } from './styles';
 import { TextField, List, IconButton, Grid, Tooltip } from '@material-ui/core';
 import ChatMessage from './ChatMessage/ChatMessage';
 import { useSelector } from 'react-redux';
-import { IAppState, Events } from '../../../store/types';
+import { IAppState } from '../../../store/types';
 import { Warning, Image } from '@material-ui/icons';
-
-interface IMessage {
-  author: string;
-  message: string;
-}
-
-interface IImageUpload {
-  author: string;
-  data: string;
-}
+import { IMessage, Events } from '../../../types';
 
 const socket = io('http://localhost:4000');
 
@@ -35,7 +26,7 @@ const Chat = () => {
       event.preventDefault();
       if (!event.shiftKey && socket !== null) {
         let message = (event.target as HTMLInputElement).value;
-        socket.emit(Events.MESSAGE, { message });
+        socket.emit(Events.MESSAGE, { author: name, message, files: [] });
         (event.target as HTMLInputElement).selectionEnd = 0;
         setDraftMessage('');
       } else {
@@ -52,7 +43,11 @@ const Chat = () => {
 
   const onFileSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.currentTarget.files && event.currentTarget.files.length > 0) {
-      socket.emit(Events.IMAGE, event.currentTarget.files[0]);
+      socket.emit(Events.MESSAGE, {
+        message: 'Image Upload',
+        author: name,
+        files: event.currentTarget.files
+      });
     }
   };
 
@@ -72,9 +67,15 @@ const Chat = () => {
       setConnected(false);
     });
     socket.on(Events.MESSAGE, (response: IMessage) => {
-      setMessages((prevMessages) => [...prevMessages, { author: response.author, message: response.message }]);
+      setMessages(prevMessages => [
+        ...prevMessages,
+        {
+          author: response.author,
+          message: response.message,
+          files: response.files
+        }
+      ]);
     });
-    socket.on(Events.IMAGE, (response: IImageUpload) => {});
   }, []);
 
   return (
@@ -82,20 +83,40 @@ const Chat = () => {
       <div className={classes.chatBoxContainer}>
         <List>
           {messages.map((message, index) => (
-            <ChatMessage index={index % 2} user={message.author} message={message.message} />
+            <ChatMessage
+              index={index % 2}
+              user={message.author}
+              files={message.files}
+              message={message.message}
+            />
           ))}
         </List>
       </div>
       <div className={classes.messageBoxContainer}>
         <div className={classes.valign}>
-          <input type='file' id='file' ref={inputFile} style={{ display: 'none' }} onChange={onFileSelected} />
+          <input
+            type='file'
+            id='file'
+            ref={inputFile}
+            style={{ display: 'none' }}
+            onChange={onFileSelected}
+          />
           <Tooltip title='Send Image'>
             <IconButton onClick={sendFile}>
               <Image />
             </IconButton>
           </Tooltip>
         </div>
-        <TextField onKeyPress={chatBoxKeyEvent} value={draftMessage} onChange={(event) => setDraftMessage(event.target.value)} className={classes.chatBox} label={connected ? 'Send Message' : 'Currently Offline'} multiline rows='2' margin='normal' />
+        <TextField
+          onKeyPress={chatBoxKeyEvent}
+          value={draftMessage}
+          onChange={event => setDraftMessage(event.target.value)}
+          className={classes.chatBox}
+          label={connected ? 'Send Message' : 'Currently Offline'}
+          multiline
+          rows='2'
+          margin='normal'
+        />
         {!connected ? (
           <div className={classes.valign}>
             <Tooltip title='Currently Offline. You will not be able to send messages.'>

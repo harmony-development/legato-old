@@ -1,4 +1,4 @@
-import { Color } from '@material-ui/core';
+import { Color } from "@material-ui/core";
 
 export enum Actions {
   INVERT_THEME,
@@ -9,7 +9,7 @@ export enum Actions {
 // this is the interface which lays out the types for each state item.
 export interface IAppState {
   theme: {
-    type: 'dark' | 'light';
+    type: "dark" | "light";
     primary: Color;
     secondary: Color;
   };
@@ -29,13 +29,5 @@ export interface IChangeName {
   type: Actions.CHANGE_NAME;
   payload: string;
 }
-
-export const Events = {
-  USERNAME_UPDATE: 'USERNAME_UPDATE',
-  MESSAGE: 'MESSAGE',
-  LOGIN: 'LOGIN',
-  DISCONNECT: 'DISCONNECT',
-  IMAGE: 'IMAGE'
-};
 
 export type ActionTypes = IInvertTheme | IShowChangeNameDialog | IChangeName;
