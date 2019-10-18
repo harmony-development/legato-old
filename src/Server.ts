@@ -2,7 +2,7 @@ import http from 'http';
 import express from 'express';
 import socketio from 'socket.io';
 import onMessage from './socket-events/Message';
-import { IUserData, Events } from './types';
+import { IUserData, Events, IMessage, ILoginData, EventData } from './types';
 import onDisconnect from './socket-events/Disconnect';
 import onUsernameUpdate from './socket-events/UsernameUpdate';
 import onLogin from './socket-events/Login';
@@ -39,12 +39,11 @@ export class Server {
     }
   };
 
-  sendMessage = (author: string, message: string) => {
-    this.SocketServer.emit(Events.MESSAGE, {
-      author,
-      message
-    });
-  };
+  emit(event: 'MESSAGE', data: IMessage): void;
+
+  emit(event: string, data: EventData) {
+    this.SocketServer.emit(event, data);
+  }
 
   getUsers = () => {
     return this.users;
