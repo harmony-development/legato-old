@@ -5,9 +5,13 @@ import { harmonyServer } from '..';
 export default function onLogin(socket: Socket) {
   socket.on(Events.LOGIN, (data: IConnectData) => {
     if (data.name) {
-      if (harmonyServer.getUsers()[socket.id])
+      if (harmonyServer.getUsers()[socket.id]) {
         harmonyServer.getUsers()[socket.id].name = data.name;
-      else harmonyServer.getUsers()[socket.id] = { name: data.name };
+        harmonyServer.sendMessage(
+          harmonyServer.getUsers()[socket.id].name,
+          'has joined the channel'
+        );
+      } else harmonyServer.getUsers()[socket.id] = { name: data.name };
     }
   });
 }

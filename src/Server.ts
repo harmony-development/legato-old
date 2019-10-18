@@ -2,9 +2,10 @@ import http from 'http';
 import express from 'express';
 import socketio from 'socket.io';
 import onMessage from './socket-events/Message';
-import { IUserData } from './types';
+import { IUserData, Events } from './types';
 import onDisconnect from './socket-events/Disconnect';
 import onUsernameUpdate from './socket-events/UsernameUpdate';
+import onLogin from './socket-events/Login';
 
 export class Server {
   private app: Express.Application;
@@ -20,6 +21,7 @@ export class Server {
     this.SocketServer.on('connection', socket => {
       onMessage(socket);
       onDisconnect(socket);
+      onLogin(socket);
       onUsernameUpdate(socket);
     });
     this.port = port;
@@ -38,7 +40,7 @@ export class Server {
   };
 
   sendMessage = (author: string, message: string) => {
-    this.SocketServer.emit('message', {
+    this.SocketServer.emit(Events.MESSAGE, {
       author,
       message
     });

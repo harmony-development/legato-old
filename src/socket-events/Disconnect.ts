@@ -9,6 +9,7 @@ export default function onDisconnect(socket: Socket) {
         harmonyServer.getUsers()[socket.id].name,
         'has left the channel'
       );
+      delete harmonyServer.getUsers()[socket.id]; // free up RAM
     } else {
       harmonyServer.sendMessage('Anonymous User', 'has left the channel');
     }
