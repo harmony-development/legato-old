@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 
 import { useStyles } from './styles';
-import { TextField, List, IconButton } from '@material-ui/core';
+import { TextField, List, IconButton, Grid, Tooltip } from '@material-ui/core';
 import ChatMessage from './ChatMessage/ChatMessage';
 import { useSelector } from 'react-redux';
 import { IAppState, Events } from '../../../store/types';
@@ -67,9 +67,20 @@ const Chat = () => {
           ))}
         </List>
       </div>
-      <div className={classes.messageBoxContainer}>
-        <TextField onKeyPress={chatBoxKeyEvent} value={draftMessage} onChange={(event) => setDraftMessage(event.target.value)} fullWidth label={connected ? 'Send Message' : 'Currently Offline'} multiline rows='2' margin='normal' />
-      </div>
+      <Grid container className={classes.messageBoxContainer}>
+        <TextField onKeyPress={chatBoxKeyEvent} value={draftMessage} onChange={(event) => setDraftMessage(event.target.value)} className={classes.chatBox} label={connected ? 'Send Message' : 'Currently Offline'} multiline rows='2' margin='normal' />
+        {!connected ? (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Tooltip title='Currently Offline. You will not be able to send messages.'>
+              <IconButton>
+                <Warning />
+              </IconButton>
+            </Tooltip>
+          </div>
+        ) : (
+          undefined
+        )}
+      </Grid>
     </div>
   );
 };
