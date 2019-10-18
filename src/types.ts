@@ -8,6 +8,10 @@ export interface IUserData {
   };
 }
 
+export interface IImageData {
+  file: File;
+}
+
 export interface IUsernameUpdate {
   name: string;
 }
@@ -20,5 +24,6 @@ export const Events = {
   USERNAME_UPDATE: 'USERNAME_UPDATE',
   MESSAGE: 'MESSAGE',
   LOGIN: 'LOGIN',
-  DISCONNECT: 'DISCONNECT'
+  DISCONNECT: 'DISCONNECT',
+  IMAGE: 'IMAGE'
 };
