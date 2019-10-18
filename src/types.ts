@@ -1,7 +1,7 @@
 export interface IMessage {
   author: string;
   message: string;
-  files?: File[];
+  files?: string[];
 }
 
 export interface IUserData {
