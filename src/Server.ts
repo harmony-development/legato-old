@@ -8,14 +8,13 @@ import onUsernameUpdate from './socket-events/UsernameUpdate';
 import onLogin from './socket-events/Login';
 
 export class Server {
-  private app: Express.Application;
-  private HTTPServer: http.Server;
-  private SocketServer: SocketIO.Server;
-  private port: number;
-  private users: IUserData;
+  app = express();
+  HTTPServer: http.Server;
+  SocketServer: SocketIO.Server;
+  port: number;
+  users: IUserData;
 
   constructor(port: number) {
-    this.app = express();
     this.HTTPServer = http.createServer(this.app);
     this.SocketServer = socketio(this.HTTPServer);
     this.SocketServer.on('connection', socket => {
@@ -24,6 +23,9 @@ export class Server {
       onLogin(socket);
       onUsernameUpdate(socket);
     });
+
+    this.app.use(express.static('public'));
+
     this.port = port;
     this.HTTPServer.on('error', this.errorHandler);
     this.users = {};
