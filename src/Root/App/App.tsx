@@ -8,9 +8,15 @@ import { IAppState } from '../../store/types';
 import { ThemeProvider } from '@material-ui/styles';
 import ChangeNameDialog from './ChangeNameDialog/ChangeNameDialog';
 
-const App = () => {
+const Theme: React.FC<{}> = () => {
   const classes = useStyles();
+
+  return <></>;
+};
+
+const App: React.FC<{}> = () => {
   const { type, primary, secondary } = useSelector((state: IAppState) => state.theme);
+  const classes = useStyles();
   const theme = createMuiTheme({
     palette: {
       type,
@@ -22,6 +28,7 @@ const App = () => {
   return (
     <div className='app-container'>
       <ThemeProvider theme={theme}>
+        <Theme />
         <CssBaseline />
         <NavBar />
         <div className={classes.navbarSpacer} />
