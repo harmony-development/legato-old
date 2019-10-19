@@ -1,8 +1,10 @@
 import chalk from 'chalk';
 import { Server } from './Server';
 
-export const harmonyServer = new Server(4000);
+const PORT = 4000;
+
+export const harmonyServer = new Server(PORT);
 
 harmonyServer.open().then(() => {
-  console.log(chalk.green('Successfully listening on port 4000'));
+  console.log(chalk.green(`Listening on port ${PORT}`));
 });

@@ -2,9 +2,9 @@ import http from 'http';
 import express from 'express';
 import socketio from 'socket.io';
 import onMessage from './socket-events/Message';
-import { IUserData, Events, IMessage, ILoginData, EventData } from './types';
+import { IUserData, IMessage, EventData } from './types';
 import onDisconnect from './socket-events/Disconnect';
-import onUsernameUpdate from './socket-events/UsernameUpdate';
+import onProfileUpdate from './socket-events/ProfileUpdate';
 import onLogin from './socket-events/Login';
 
 export class Server {
@@ -21,7 +21,7 @@ export class Server {
       onMessage(socket);
       onDisconnect(socket);
       onLogin(socket);
-      onUsernameUpdate(socket);
+      onProfileUpdate(socket);
     });
 
     this.app.use(express.static('public'));
@@ -57,7 +57,7 @@ export class Server {
 
   open = (): Promise<void> => {
     return new Promise((resolve, reject) => {
-      this.HTTPServer.listen(this.port, () => {
+      this.HTTPServer.listen(this.port, '0.0.0.0', () => {
         resolve();
       });
     });
