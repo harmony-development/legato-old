@@ -16,7 +16,10 @@ const initialState: IAppState = {
     secondary: deepPurple
   },
   nameDialog: false,
-  name: `Anonymous User #${Math.floor(Math.random() * 1000)}`
+  user: {
+    name: `Anonymous User #${Math.floor(Math.random() * 1000)}`,
+    icon: ''
+  }
 };
 
 export default function AppReducer(state = initialState, action: ActionTypes): IAppState {
@@ -36,10 +39,10 @@ export default function AppReducer(state = initialState, action: ActionTypes): I
         nameDialog: !state.nameDialog
       };
     }
-    case Actions.CHANGE_NAME: {
+    case Actions.UPDATE_USER: {
       return {
         ...state,
-        name: action.payload
+        user: action.payload
       };
     }
     default:

@@ -12,6 +12,12 @@ export const useStyles = makeStyles((theme: Theme) => ({
     },
     '::-webkit-scrollbar-thumb': {
       backgroundColor: theme.palette.type === 'dark' ? 'rgb(200, 200, 200)' : 'rgb(64, 64, 64)'
+    },
+    '::-webkit-scrollbar-corner': {
+      backgroundColor: theme.palette.type === 'dark' ? 'rgb(200, 200, 200)' : 'rgb(64, 64, 64)'
+    },
+    '*': {
+      scrollbarColor: `${theme.palette.type === 'dark' ? 'rgb(200, 200, 200)' : 'rgb(64, 64, 64)'} ${theme.palette.type === 'dark' ? 'rgb(245, 245, 245)' : 'rgb(46, 46, 46)'}`
     }
   }
 }));

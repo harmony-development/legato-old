@@ -26,7 +26,10 @@ export const useStyles = makeStyles((theme: Theme) => ({
   fileSection: {
     backgroundColor: 'rgb(133, 133, 133, 0.1)',
     display: 'flex',
-    width: '100%'
+    width: '100%',
+    paddingLeft: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
+    paddingTop: theme.spacing(1)
   },
   imageUpload: {
     height: '200px'

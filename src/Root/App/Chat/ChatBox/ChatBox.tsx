@@ -31,7 +31,7 @@ const ChatBox: React.FC<IProps> = (props: IProps) => {
           imageReader.readAsDataURL(file);
           imageReader.addEventListener('load', () => {
             if (typeof imageReader.result === 'string') {
-              setFileQueue([...fileQueue, imageReader.result]);
+              setFileQueue((prevQueue) => [...prevQueue, imageReader.result as string]);
             }
           });
         }
@@ -66,7 +66,7 @@ const ChatBox: React.FC<IProps> = (props: IProps) => {
     <>
       <Box display='flex' className={classes.fileQueue}>
         {fileQueue.map((file: string, index) => {
-          return <FileCard image={file} removeFromQueue={removeFromQueue} index={index} />;
+          return <FileCard image={file} removeFromQueue={removeFromQueue} index={index} key={index} />;
         })}
       </Box>
       <div className={classes.messageBoxContainer}>

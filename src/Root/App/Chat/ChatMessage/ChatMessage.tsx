@@ -1,10 +1,11 @@
 import React from 'react';
 import { useStyles } from './styles';
-import { Typography, ListItem, ListItemText, Divider, Grid } from '@material-ui/core';
+import { ListItemText, ListItemAvatar, Avatar, Box } from '@material-ui/core';
 
 interface IProps {
   message: string;
   user: string;
+  usericon: string | undefined;
   files: string[];
   index: number;
 }
@@ -14,27 +15,22 @@ const ChatMessage: React.FC<IProps> = (props: IProps) => {
 
   return (
     <>
-      <Grid item alignItems='flex-start' className={`${classes.message} ${props.index === 0 ? classes.messageLight : ''}`}>
-        <ListItemText
-          primary={
-            <Typography component='span' variant='body2' className={classes.userText} color='textPrimary'>
-              {props.user}
-            </Typography>
-          }
-          secondary={
-            <Typography component='span' variant='body2' className={classes.messageText} color='textSecondary'>
-              {props.message}
-            </Typography>
-          }
-        />
-        <div className={classes.fileSection}>
-          {props.files
-            ? props.files.map((data) => {
-                return <img key={data} className={classes.imageUpload} src={data}></img>;
-              })
-            : undefined}
-        </div>
-      </Grid>
+      <Box display='flex' alignItems='center' className={`${classes.message} ${props.index === 0 ? classes.messageLight : ''}`}>
+        <ListItemAvatar>
+          <Avatar alt={props.user} src={props.usericon} />
+        </ListItemAvatar>
+        <ListItemText primary={props.user} secondary={props.message} />
+      </Box>
+        {
+            (props.files && props.files.length > 0) ?
+                <div className={classes.fileSection}>
+                    {
+                        props.files.map((data) => {
+                            return <img key={data} className={classes.imageUpload} src={data}/>;
+                        })}
+                </div>
+                : undefined
+        }
     </>
   );
 };
