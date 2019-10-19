@@ -32,6 +32,6 @@ export const useStyles = makeStyles((theme: Theme) => ({
     paddingTop: theme.spacing(1)
   },
   imageUpload: {
-    height: '200px'
+    height: '400px'
   }
 }));

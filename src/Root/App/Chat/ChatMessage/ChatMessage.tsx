@@ -21,16 +21,15 @@ const ChatMessage: React.FC<IProps> = (props: IProps) => {
         </ListItemAvatar>
         <ListItemText primary={props.user} secondary={props.message} />
       </Box>
-        {
-            (props.files && props.files.length > 0) ?
-                <div className={classes.fileSection}>
-                    {
-                        props.files.map((data) => {
-                            return <img key={data} className={classes.imageUpload} src={data}/>;
-                        })}
-                </div>
-                : undefined
-        }
+      {props.files && props.files.length > 0 ? (
+        <div className={classes.fileSection}>
+          {props.files.map((data) => {
+            return <img key={data} className={classes.imageUpload} src={data} />;
+          })}
+        </div>
+      ) : (
+        undefined
+      )}
     </>
   );
 };
