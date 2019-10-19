@@ -14,9 +14,21 @@ export const useStyles = makeStyles((theme: Theme) => ({
     paddingBottom: theme.spacing(2),
     paddingLeft: theme.spacing(1)
   },
-  messageLight: { backgroundColor: 'rgb(133, 133, 133, 0.1)' },
-  messageText: { whiteSpace: 'pre-line' },
-  userText: { marginRight: theme.spacing(1) },
-  fileSection: { width: '100%' },
-  imageUpload: { height: '200px' }
+  messageLight: {
+    backgroundColor: 'rgb(133, 133, 133, 0.1)'
+  },
+  messageText: {
+    whiteSpace: 'pre-line'
+  },
+  userText: {
+    marginRight: theme.spacing(1)
+  },
+  fileSection: {
+    backgroundColor: 'rgb(133, 133, 133, 0.1)',
+    display: 'flex',
+    width: '100%'
+  },
+  imageUpload: {
+    height: '200px'
+  }
 }));

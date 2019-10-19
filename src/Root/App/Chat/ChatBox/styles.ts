@@ -14,8 +14,21 @@ export const useStyles = makeStyles((theme: Theme) => ({
     display: 'flex',
     paddingRight: theme.spacing(1)
   },
-  valign: { display: 'flex', alignItems: 'center' },
-  chatBoxContainer: { flex: '1 1 auto', overflow: 'auto' },
-  chatBox: { flex: 1 },
-  messageBox: { width: '100%' }
+  fileQueue: {
+    overflowX: 'scroll'
+  },
+  valign: {
+    display: 'flex',
+    alignItems: 'center'
+  },
+  chatBoxContainer: {
+    flex: '1 1 auto',
+    overflow: 'auto'
+  },
+  chatBox: {
+    flex: 1
+  },
+  messageBox: {
+    width: '100%'
+  }
 }));

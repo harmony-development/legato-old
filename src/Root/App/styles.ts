@@ -8,10 +8,10 @@ export const useStyles = makeStyles((theme: Theme) => ({
       width: '10px'
     },
     '::-webkit-scrollbar-track': {
-      backgroundColor: theme.palette.type === 'dark' ? 'rgb(46, 46, 46)' : 'rgb(245, 245, 245)'
+      backgroundColor: theme.palette.type === 'dark' ? 'rgb(245, 245, 245)' : 'rgb(46, 46, 46)'
     },
     '::-webkit-scrollbar-thumb': {
-      backgroundColor: theme.palette.type === 'dark' ? 'rgb(64, 64, 64)' : 'rgb(200, 200, 200)'
+      backgroundColor: theme.palette.type === 'dark' ? 'rgb(200, 200, 200)' : 'rgb(64, 64, 64)'
     }
   }
 }));

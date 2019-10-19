@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 
 import { useStyles } from './styles';
-import { List } from '@material-ui/core';
+import { List, Grid } from '@material-ui/core';
 import ChatMessage from './ChatMessage/ChatMessage';
 import { useSelector } from 'react-redux';
 import { IAppState } from '../../../store/types';
@@ -49,7 +49,7 @@ const Chat: React.FC<{}> = () => {
   return (
     <div className={classes.container}>
       <div className={classes.chatBoxContainer}>
-        <List>
+        <Grid>
           {messages.map((message, index) => (
             <ChatMessage
               key={index}
@@ -59,7 +59,7 @@ const Chat: React.FC<{}> = () => {
               message={message.message}
             />
           ))}
-        </List>
+        </Grid>
       </div>
       <ChatBox socket={socket} connected={connected} name={name} />
     </div>
