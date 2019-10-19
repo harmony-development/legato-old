@@ -32,6 +32,7 @@
     "@types/socket.io-client": "^1.4.32",
     "react": "^16.10.2",
     "react-dom": "^16.10.2",
+    "react-hot-loader": "^4.12.15",
     "react-redux": "^7.1.1",
     "react-scripts": "^3.2.0",
     "redux": "^4.0.4",
