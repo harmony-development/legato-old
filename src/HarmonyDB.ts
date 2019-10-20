@@ -23,8 +23,7 @@ export class HarmonyDB {
     const newUser: IUser = new User({
       username,
       password,
-      email,
-      userid: new mongoose.mongo.ObjectId()
+      email
     });
     await newUser.save();
   }

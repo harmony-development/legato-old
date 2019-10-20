@@ -2,9 +2,6 @@ import http from 'http';
 import express from 'express';
 import socketio from 'socket.io';
 
-import registerRoute from './routes/register';
-import loginRoute from './routes/login';
-
 // import onMessage from './socket-events/Message';
 // import onDisconnect from './socket-events/Disconnect';
 // import onProfileUpdate from './socket-events/ProfileUpdate';
@@ -30,8 +27,6 @@ export class Server {
     this.Database = new HarmonyDB();
 
     this.app.use(express.static('public'));
-    this.app.use('/api', registerRoute);
-    this.app.use('/api', loginRoute);
   }
 
   private errorHandler(err: Error) {
