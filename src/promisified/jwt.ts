@@ -25,3 +25,24 @@ export function sign(
     }
   });
 }
+
+interface IVerify {
+  valid: boolean;
+  decoded?: string | object;
+}
+
+export function verify(
+  token: string,
+  secretOrPublicKey: string,
+  options?: jwt.VerifyOptions
+): Promise<IVerify> {
+  return new Promise<IVerify>((resolve, reject) => {
+    jwt.verify(token, secretOrPublicKey, options, (err, decoded) => {
+      if (decoded && !err) {
+        resolve({ valid: true, decoded });
+      } else {
+        resolve({ valid: false });
+      }
+    });
+  });
+}

@@ -26,7 +26,7 @@ export default function onLogin(socket: Socket) {
                       { expiresIn: '7d' }
                     )
                       .then(token => {
-                        socket.emit(Events.LOGIN, token);
+                        socket.emit(Events.LOGIN, { token, theme: user.theme });
                       })
                       .catch(() => {
                         socket.emit(
@@ -57,7 +57,9 @@ export default function onLogin(socket: Socket) {
             socket.emit(Events.LOGIN_ERROR, 'Uhm. The API is having a stroke.');
           }
         })
-        .catch(() => {});
+        .catch(() => {
+          socket.emit(Events.LOGIN_ERROR, 'Invalid email or password');
+        });
     } else {
       socket.emit(Events.LOGIN_ERROR, 'Missing username or password');
     }
