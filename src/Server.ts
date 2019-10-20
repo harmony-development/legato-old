@@ -1,55 +1,42 @@
 import http from 'http';
 import express from 'express';
 import socketio from 'socket.io';
-import onMessage from './socket-events/Message';
-import { IUserData, IMessage, EventData } from './types';
-import onDisconnect from './socket-events/Disconnect';
-import onProfileUpdate from './socket-events/ProfileUpdate';
-import onLogin from './socket-events/Login';
+
+import registerRoute from './routes/register';
+import loginRoute from './routes/login';
+
+// import onMessage from './socket-events/Message';
+// import onDisconnect from './socket-events/Disconnect';
+// import onProfileUpdate from './socket-events/ProfileUpdate';
+// import onLogin from './socket-events/Login';
+import { HarmonyDB } from './HarmonyDB';
 
 export class Server {
   app = express();
   HTTPServer: http.Server;
   SocketServer: SocketIO.Server;
+  Database: HarmonyDB;
   port: number;
-  users: IUserData;
 
   constructor(port: number) {
+    this.port = port;
+
     this.HTTPServer = http.createServer(this.app);
+    this.HTTPServer.on('error', this.errorHandler);
+
     this.SocketServer = socketio(this.HTTPServer);
-    this.SocketServer.on('connection', socket => {
-      onMessage(socket);
-      onDisconnect(socket);
-      onLogin(socket);
-      onProfileUpdate(socket);
-    });
+    this.SocketServer.on('connection', socket => {});
+
+    this.Database = new HarmonyDB();
 
     this.app.use(express.static('public'));
-
-    this.port = port;
-    this.HTTPServer.on('error', this.errorHandler);
-    this.users = {};
+    this.app.use('/api', registerRoute);
+    this.app.use('/api', loginRoute);
   }
 
   private errorHandler(err: Error) {
     console.log(err.name);
   }
-
-  updateName = (userID: string, name: string) => {
-    if (this.users[userID]) {
-      this.users[userID].name = name;
-    }
-  };
-
-  emit(event: 'MESSAGE', data: IMessage): void;
-
-  emit(event: string, data: EventData) {
-    this.SocketServer.emit(event, data);
-  }
-
-  getUsers = () => {
-    return this.users;
-  };
 
   getSocketServer = () => {
     return this.SocketServer;
