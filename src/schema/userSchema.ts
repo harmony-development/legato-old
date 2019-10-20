@@ -1,8 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import randomstring from 'crypto-random-string';
-import { IUser } from '../types';
+import { IUser, ITheme } from '../types';
 
 export const userSchema: Schema = new mongoose.Schema({
   userid: {
@@ -24,6 +23,23 @@ export const userSchema: Schema = new mongoose.Schema({
     unique: false,
     required: true,
     type: String
+  },
+  theme: {
+    unique: false,
+    required: false,
+    type: {
+      primary: {
+        light: String,
+        dark: String,
+        contrastText: String
+      },
+      secondary: {
+        light: String,
+        dark: String,
+        contrastText: String
+      },
+      type: String
+    }
   }
 });
 
