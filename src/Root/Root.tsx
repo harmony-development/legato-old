@@ -12,6 +12,9 @@ import { ThemeProvider } from '@material-ui/styles';
 import { Switch, Route, BrowserRouter as Router } from 'react-router-dom';
 import EntryScreen from './EntryScreen/EntryScreen';
 import App from './App/App';
+import { HarmonyConnection } from '../socket/socket';
+
+export const socketServer = new HarmonyConnection();
 
 const Theme: React.FC<{}> = () => {
   const classes = useStyles();
