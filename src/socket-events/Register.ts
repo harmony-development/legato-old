@@ -1,8 +1,9 @@
 import { Socket } from 'socket.io';
 import isemail from 'isemail';
-import { Events, IRegisterDetails } from '../types';
+import { Events, IRegisterDetails, IUser } from '../types';
 import { harmonyServer, config } from '..';
 import { sign } from '../promisified/jwt';
+import { User } from '../schema/userSchema';
 
 interface IValidationResult {
   valid: boolean;
@@ -37,21 +38,31 @@ export default function onRegister(socket: Socket) {
     ) {
       if (isemail.validate(data.email, { errorLevel: true }) <= 5) {
         if (validPassword(data.password).valid) {
-          harmonyServer.Database.register(
-            data.email,
-            data.password,
-            data.username
-          )
-            .then(() => {
-              sign(
-                {
-                  email: data.email
-                },
-                config.config.jwtsecret,
-                { expiresIn: '7d' }
+          User.findOne({ email: data.email }, (err, user: IUser) => {
+            if (!user) {
+              harmonyServer.Database.register(
+                data.email,
+                data.password,
+                data.username
               )
-                .then(token => {
-                  socket.emit(Events.REGISTER, token);
+                .then(() => {
+                  sign(
+                    {
+                      email: data.email
+                    },
+                    config.config.jwtsecret,
+                    { expiresIn: '7d' }
+                  )
+                    .then(token => {
+                      socket.emit(Events.REGISTER, token);
+                    })
+                    .catch(err => {
+                      console.log(err);
+                      socket.emit(
+                        Events.REGISTER_ERROR,
+                        'Sorry, but the API is having a stroke right now'
+                      );
+                    });
                 })
                 .catch(err => {
                   console.log(err);
@@ -60,14 +71,15 @@ export default function onRegister(socket: Socket) {
                     'Sorry, but the API is having a stroke right now'
                   );
                 });
-            })
-            .catch(err => {
-              console.log(err);
-              socket.emit(
-                Events.REGISTER_ERROR,
-                'Sorry, but the API is having a stroke right now'
-              );
-            });
+            } else {
+              socket.emit(Events.REGISTER_ERROR, 'Email already registered');
+            }
+          }).catch(() => {
+            socket.emit(
+              Events.REGISTER_ERROR,
+              'Sorry, but the API is having a stroke right now'
+            );
+          });
         } else {
           socket.emit(
             Events.REGISTER_ERROR,
