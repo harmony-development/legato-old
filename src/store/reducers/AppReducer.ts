@@ -7,7 +7,7 @@
  */
 
 import { Actions, ActionTypes, IAppState } from '../types';
-import { red, deepPurple, purple } from '@material-ui/core/colors';
+import { red, purple } from '@material-ui/core/colors';
 
 const initialState: IAppState = {
   theme: {

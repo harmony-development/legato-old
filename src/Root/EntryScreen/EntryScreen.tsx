@@ -1,6 +1,6 @@
 import React from 'react';
 import { useStyles } from './styles';
-import { Paper, Button, Tabs, Tab } from '@material-ui/core';
+import { Paper, Tabs, Tab } from '@material-ui/core';
 import LoginForm from './LoginForm/LoginForm';
 import RegisterForm from './RegisterForm/RegisterForm';
 

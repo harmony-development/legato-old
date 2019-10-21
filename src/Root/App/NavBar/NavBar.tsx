@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Palette, InvertColors, AccountCircle } from '@material-ui/icons';
+import { Menu, InvertColors, AccountCircle } from '@material-ui/icons';
 import { AppBar, Toolbar, IconButton, Typography } from '@material-ui/core';
 import { useStyles } from './styles';
 import { useDispatch } from 'react-redux';

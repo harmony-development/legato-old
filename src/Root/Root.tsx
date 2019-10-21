@@ -20,7 +20,7 @@ export const socketServer = new HarmonyConnection();
 let previouslyDisconnected = false;
 
 const Theme: React.FC<{}> = () => {
-  const classes = useStyles();
+  useStyles();
 
   return <></>;
 };
@@ -37,12 +37,12 @@ const Root: React.FC<{}> = () => {
 
   socketServer.connection.on('connect', () => {
     if (previouslyDisconnected) {
-      toast.success('Server back online');
+      toast.success('You have reconnected to the server');
     }
   });
 
   socketServer.connection.on('disconnect', () => {
-    toast.error('Server went offline');
+    toast.error('You have lost connection to the server');
     previouslyDisconnected = true;
   });
 
