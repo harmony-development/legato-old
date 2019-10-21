@@ -10,6 +10,7 @@ import { HarmonyDB } from './HarmonyDB';
 import onLogin from './socket-events/Login';
 import onMessage from './socket-events/Message';
 import onRegister from './socket-events/Register';
+import onUpdateUser from './socket-events/UpdateUser';
 
 export class Server {
   app = express();
@@ -29,6 +30,7 @@ export class Server {
       onLogin(socket);
       onMessage(socket);
       onRegister(socket);
+      onUpdateUser(socket);
     });
 
     this.Database = new HarmonyDB();

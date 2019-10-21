@@ -26,7 +26,12 @@ export default function onLogin(socket: Socket) {
                       { expiresIn: '7d' }
                     )
                       .then(token => {
-                        socket.emit(Events.LOGIN, { token, theme: user.theme });
+                        socket.emit(Events.LOGIN, {
+                          token,
+                          theme: user.theme,
+                          username: user.username,
+                          avatar: user.avatar
+                        });
                       })
                       .catch(() => {
                         socket.emit(
@@ -57,7 +62,8 @@ export default function onLogin(socket: Socket) {
             socket.emit(Events.LOGIN_ERROR, 'Invalid email or password');
           }
         })
-        .catch(() => {
+        .catch(err => {
+          console.log(err);
           socket.emit(Events.LOGIN_ERROR, 'Invalid email or password');
         });
     } else {

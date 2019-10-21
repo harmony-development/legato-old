@@ -23,7 +23,12 @@ function onLogin(socket) {
                                     userid: user.userid
                                 }, __1.config.config.jwtsecret, { expiresIn: '7d' })
                                     .then(function (token) {
-                                    socket.emit(types_1.Events.LOGIN, { token: token, theme: user.theme });
+                                    socket.emit(types_1.Events.LOGIN, {
+                                        token: token,
+                                        theme: user.theme,
+                                        username: user.username,
+                                        avatar: user.avatar
+                                    });
                                 })
                                     .catch(function () {
                                     socket.emit(types_1.Events.LOGIN_ERROR, 'Uhm. The API is having a stroke.');
@@ -45,7 +50,8 @@ function onLogin(socket) {
                     socket.emit(types_1.Events.LOGIN_ERROR, 'Invalid email or password');
                 }
             })
-                .catch(function () {
+                .catch(function (err) {
+                console.log(err);
                 socket.emit(types_1.Events.LOGIN_ERROR, 'Invalid email or password');
             });
         }
