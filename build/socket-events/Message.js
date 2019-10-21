@@ -14,6 +14,7 @@ function onMessage(socket) {
                         .then(function (user) {
                         if (user) {
                             __1.harmonyServer.getSocketServer().emit(types_1.Events.MESSAGE, {
+                                username: user.username,
                                 message: data.message,
                                 avatar: user.avatar,
                                 files: data.files

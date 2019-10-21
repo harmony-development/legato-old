@@ -23,6 +23,7 @@ export interface IUser extends mongoose.Document {
 
 export const Events = {
   PROFILE_UPDATE: 'PROFILE_UPDATE',
+  PROFILE_UPDATE_ERROR: 'PROFILE_UPDATE_ERROR',
   MESSAGE: 'MESSAGE',
   LOGIN: 'LOGIN',
   LOGIN_ERROR: 'LOGIN_ERROR',
@@ -50,4 +51,10 @@ export interface IMessageData {
 
 export interface IToken {
   userid: string;
+}
+
+export interface IUserUpdateData {
+  username?: string;
+  avatar?: string;
+  token: string;
 }

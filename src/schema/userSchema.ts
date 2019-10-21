@@ -24,6 +24,11 @@ export const userSchema: Schema = new mongoose.Schema({
     required: true,
     type: String
   },
+  avatar: {
+    unique: false,
+    required: false,
+    type: String
+  },
   theme: {
     unique: false,
     required: false,
@@ -44,16 +49,19 @@ export const userSchema: Schema = new mongoose.Schema({
 });
 
 userSchema.pre<IUser>('save', function(next) {
-  bcrypt
-    .hash(this.password, 10)
-    .then(hash => {
-      this.password = hash;
-      this.userid = randomstring({ length: 15 });
-      next();
-    })
-    .catch(err => {
-      next(err);
-    });
+  if (!this.password) {
+    bcrypt
+      .hash(this.password, 10)
+      .then(hash => {
+        this.password = hash;
+        this.userid = randomstring({ length: 15 });
+        next();
+      })
+      .catch(err => {
+        next(err);
+      });
+  }
+  next();
 });
 
 export const User = mongoose.model<IUser>('User', userSchema);

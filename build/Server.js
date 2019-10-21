@@ -14,6 +14,7 @@ var HarmonyDB_1 = require("./HarmonyDB");
 var Login_1 = __importDefault(require("./socket-events/Login"));
 var Message_1 = __importDefault(require("./socket-events/Message"));
 var Register_1 = __importDefault(require("./socket-events/Register"));
+var UpdateUser_1 = __importDefault(require("./socket-events/UpdateUser"));
 var Server = /** @class */ (function () {
     function Server(port) {
         var _this = this;
@@ -36,6 +37,7 @@ var Server = /** @class */ (function () {
             Login_1.default(socket);
             Message_1.default(socket);
             Register_1.default(socket);
+            UpdateUser_1.default(socket);
         });
         this.Database = new HarmonyDB_1.HarmonyDB();
         this.app.use(express_1.default.static('public'));
