@@ -25,13 +25,16 @@ export default function onMessage(socket: Socket) {
                 console.log(err);
               });
           } else {
+            console.log('Missing userid');
             socket.emit(Events.INVALIDATE_SESSION, 'invalid session token');
           }
         } else {
+          console.log('invalid jwt');
           socket.emit(Events.INVALIDATE_SESSION, 'invalid session token');
         }
       })
-      .catch(() => {
+      .catch(err => {
+        console.log(err);
         socket.emit(Events.INVALIDATE_SESSION, 'invalid session token');
       });
   });

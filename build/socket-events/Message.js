@@ -26,14 +26,17 @@ function onMessage(socket) {
                     });
                 }
                 else {
+                    console.log('Missing userid');
                     socket.emit(types_1.Events.INVALIDATE_SESSION, 'invalid session token');
                 }
             }
             else {
+                console.log('invalid jwt');
                 socket.emit(types_1.Events.INVALIDATE_SESSION, 'invalid session token');
             }
         })
-            .catch(function () {
+            .catch(function (err) {
+            console.log(err);
             socket.emit(types_1.Events.INVALIDATE_SESSION, 'invalid session token');
         });
     });

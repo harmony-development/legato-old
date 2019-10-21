@@ -49,6 +49,8 @@ export const userSchema: Schema = new mongoose.Schema({
 });
 
 userSchema.pre<IUser>('save', function(next) {
+  if (!this.isModified('password')) return next();
+
   bcrypt
     .hash(this.password, 10)
     .then(hash => {

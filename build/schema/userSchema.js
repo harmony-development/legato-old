@@ -52,6 +52,8 @@ exports.userSchema = new mongoose_1.default.Schema({
 });
 exports.userSchema.pre('save', function (next) {
     var _this = this;
+    if (!this.isModified('password'))
+        return next();
     bcrypt_1.default
         .hash(this.password, 10)
         .then(function (hash) {
