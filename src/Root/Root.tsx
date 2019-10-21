@@ -17,6 +17,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 export const socketServer = new HarmonyConnection();
+let previouslyDisconnected = false;
 
 const Theme: React.FC<{}> = () => {
   const classes = useStyles();
@@ -34,8 +35,15 @@ const Root: React.FC<{}> = () => {
     }
   });
 
+  socketServer.connection.on('connect', () => {
+    if (previouslyDisconnected) {
+      toast.success('Server back online');
+    }
+  });
+
   socketServer.connection.on('disconnect', () => {
     toast.error('Server went offline');
+    previouslyDisconnected = true;
   });
 
   return (
