@@ -67,9 +67,7 @@ var HarmonyDB = /** @class */ (function () {
                             email: email
                         });
                         return [4 /*yield*/, newUser.save()];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
+                    case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });

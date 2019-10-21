@@ -36,9 +36,9 @@ function onRegister(socket) {
                     userSchema_1.User.findOne({ email: data.email }, function (err, user) {
                         if (!user) {
                             __1.harmonyServer.Database.register(data.email, data.password, data.username)
-                                .then(function () {
+                                .then(function (user) {
                                 jwt_1.sign({
-                                    email: data.email
+                                    userid: user.userid
                                 }, __1.config.config.jwtsecret, { expiresIn: '7d' })
                                     .then(function (token) {
                                     socket.emit(types_1.Events.REGISTER, {

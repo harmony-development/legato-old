@@ -20,13 +20,6 @@ export default function onUpdateUser(socket: Socket) {
                     if (data.username) {
                       user.username = data.username;
                     }
-                    User.update(
-                      { userid: user.userid },
-                      {
-                        username: user.username,
-                        avatar: user.avatar
-                      }
-                    );
                     user.save();
                   } else {
                     socket.emit(

@@ -45,10 +45,10 @@ export default function onRegister(socket: Socket) {
                 data.password,
                 data.username
               )
-                .then(() => {
+                .then((user: IUser) => {
                   sign(
                     {
-                      email: data.email
+                      userid: user.userid
                     },
                     config.config.jwtsecret,
                     { expiresIn: '7d' }

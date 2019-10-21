@@ -25,6 +25,6 @@ export class HarmonyDB {
       password,
       email
     });
-    await newUser.save();
+    return await newUser.save();
   }
 }
