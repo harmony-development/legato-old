@@ -5,12 +5,13 @@ import { Box } from '@material-ui/core';
 import ChatMessage from './ChatMessage/ChatMessage';
 import { useSelector } from 'react-redux';
 import { IAppState } from '../../../store/types';
-import { IMessage, Events } from '../../../types';
+import { IMessage } from '../../../types';
 import ChatBox from './ChatBox/ChatBox';
 import { socketServer } from '../../Root';
+import { Events } from '../../../socket/socket';
 
 const Chat: React.FC<{}> = () => {
-  const classes = useStyles(); // CSS styles
+  const classes = useStyles();
 
   const [messages, setMessages] = useState<IMessage[]>([]);
   const user = useSelector((state: IAppState) => state.user);
@@ -37,14 +38,7 @@ const Chat: React.FC<{}> = () => {
       <div className={classes.chatBoxContainer} ref={MessagesArea}>
         <Box>
           {messages.map((message, index) => (
-            <ChatMessage
-              key={index}
-              index={index % 2}
-              user={message.author}
-              usericon={message.avatar || undefined}
-              files={message.files}
-              message={message.message}
-            />
+            <ChatMessage key={index} index={index % 2} user={message.username} avatar={message.avatar || undefined} files={message.files} message={message.message} />
           ))}
         </Box>
       </div>

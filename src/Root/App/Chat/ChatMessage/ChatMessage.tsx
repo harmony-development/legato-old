@@ -5,7 +5,7 @@ import { ListItemText, ListItemAvatar, Avatar, Box } from '@material-ui/core';
 interface IProps {
   message: string;
   user: string;
-  usericon: string | undefined;
+  avatar: string | undefined;
   files: string[];
   index: number;
 }
@@ -17,7 +17,7 @@ const ChatMessage: React.FC<IProps> = (props: IProps) => {
     <>
       <Box display='flex' alignItems='center' className={`${classes.message} ${props.index === 0 ? classes.messageLight : ''}`}>
         <ListItemAvatar>
-          <Avatar alt={props.user} src={props.usericon} />
+          <Avatar alt={props.user} src={props.avatar} />
         </ListItemAvatar>
         <ListItemText primary={props.user} secondary={props.message} />
       </Box>

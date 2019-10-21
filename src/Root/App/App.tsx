@@ -1,8 +1,8 @@
 import React from 'react';
 import NavBar from './NavBar/NavBar';
 import ChangeNameDialog from './ChangeNameDialog/ChangeNameDialog';
-import { Chat } from '@material-ui/icons';
 import { useStyles } from './styles';
+import Chat from './Chat/Chat';
 
 const App: React.FC<{}> = () => {
   const classes = useStyles();
