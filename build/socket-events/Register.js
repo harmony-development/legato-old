@@ -41,7 +41,12 @@ function onRegister(socket) {
                                     email: data.email
                                 }, __1.config.config.jwtsecret, { expiresIn: '7d' })
                                     .then(function (token) {
-                                    socket.emit(types_1.Events.REGISTER, token);
+                                    socket.emit(types_1.Events.REGISTER, {
+                                        token: token,
+                                        theme: {},
+                                        username: data.username,
+                                        avatar: ''
+                                    });
                                 })
                                     .catch(function (err) {
                                     console.log(err);

@@ -54,7 +54,12 @@ export default function onRegister(socket: Socket) {
                     { expiresIn: '7d' }
                   )
                     .then(token => {
-                      socket.emit(Events.REGISTER, token);
+                      socket.emit(Events.REGISTER, {
+                        token,
+                        theme: {},
+                        username: data.username,
+                        avatar: ''
+                      });
                     })
                     .catch(err => {
                       console.log(err);

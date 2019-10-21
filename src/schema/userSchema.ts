@@ -49,19 +49,16 @@ export const userSchema: Schema = new mongoose.Schema({
 });
 
 userSchema.pre<IUser>('save', function(next) {
-  if (!this.password) {
-    bcrypt
-      .hash(this.password, 10)
-      .then(hash => {
-        this.password = hash;
-        this.userid = randomstring({ length: 15 });
-        next();
-      })
-      .catch(err => {
-        next(err);
-      });
-  }
-  next();
+  bcrypt
+    .hash(this.password, 10)
+    .then(hash => {
+      this.password = hash;
+      this.userid = randomstring({ length: 15 });
+      next();
+    })
+    .catch(err => {
+      next(err);
+    });
 });
 
 export const User = mongoose.model<IUser>('User', userSchema);
