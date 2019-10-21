@@ -13,6 +13,8 @@ import { Switch, Route, BrowserRouter as Router } from 'react-router-dom';
 import EntryScreen from './EntryScreen/EntryScreen';
 import App from './App/App';
 import { HarmonyConnection } from '../socket/socket';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export const socketServer = new HarmonyConnection();
 
@@ -32,6 +34,10 @@ const Root: React.FC<{}> = () => {
     }
   });
 
+  socketServer.connection.on('disconnect', () => {
+    toast.error('Server went offline');
+  });
+
   return (
     <div className='app-container'>
       <ThemeProvider theme={theme}>
@@ -43,6 +49,7 @@ const Root: React.FC<{}> = () => {
             <Route exact path='/app' component={App}></Route>
           </Switch>
         </Router>
+        <ToastContainer />
       </ThemeProvider>
     </div>
   );
