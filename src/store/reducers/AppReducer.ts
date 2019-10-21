@@ -7,13 +7,13 @@
  */
 
 import { Actions, ActionTypes, IAppState } from '../types';
-import { red, deepPurple } from '@material-ui/core/colors';
+import { red, deepPurple, purple } from '@material-ui/core/colors';
 
 const initialState: IAppState = {
   theme: {
     type: 'dark',
     primary: red,
-    secondary: deepPurple
+    secondary: purple
   },
   nameDialog: false,
   user: {
