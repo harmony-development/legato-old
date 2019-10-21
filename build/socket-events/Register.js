@@ -7,6 +7,7 @@ var isemail_1 = __importDefault(require("isemail"));
 var types_1 = require("../types");
 var __1 = require("..");
 var jwt_1 = require("../promisified/jwt");
+var userSchema_1 = require("../schema/userSchema");
 function validPassword(password) {
     if (password.length < 5) {
         return { valid: false, message: 'Password must be at least 5 characters.' };
@@ -32,21 +33,30 @@ function onRegister(socket) {
             typeof data.username === 'string') {
             if (isemail_1.default.validate(data.email, { errorLevel: true }) <= 5) {
                 if (validPassword(data.password).valid) {
-                    __1.harmonyServer.Database.register(data.email, data.password, data.username)
-                        .then(function () {
-                        jwt_1.sign({
-                            email: data.email
-                        }, __1.config.config.jwtsecret, { expiresIn: '7d' })
-                            .then(function (token) {
-                            socket.emit(types_1.Events.REGISTER, token);
-                        })
-                            .catch(function (err) {
-                            console.log(err);
-                            socket.emit(types_1.Events.REGISTER_ERROR, 'Sorry, but the API is having a stroke right now');
-                        });
-                    })
-                        .catch(function (err) {
-                        console.log(err);
+                    userSchema_1.User.findOne({ email: data.email }, function (err, user) {
+                        if (!user) {
+                            __1.harmonyServer.Database.register(data.email, data.password, data.username)
+                                .then(function () {
+                                jwt_1.sign({
+                                    email: data.email
+                                }, __1.config.config.jwtsecret, { expiresIn: '7d' })
+                                    .then(function (token) {
+                                    socket.emit(types_1.Events.REGISTER, token);
+                                })
+                                    .catch(function (err) {
+                                    console.log(err);
+                                    socket.emit(types_1.Events.REGISTER_ERROR, 'Sorry, but the API is having a stroke right now');
+                                });
+                            })
+                                .catch(function (err) {
+                                console.log(err);
+                                socket.emit(types_1.Events.REGISTER_ERROR, 'Sorry, but the API is having a stroke right now');
+                            });
+                        }
+                        else {
+                            socket.emit(types_1.Events.REGISTER_ERROR, 'Email already registered');
+                        }
+                    }).catch(function () {
                         socket.emit(types_1.Events.REGISTER_ERROR, 'Sorry, but the API is having a stroke right now');
                     });
                 }
