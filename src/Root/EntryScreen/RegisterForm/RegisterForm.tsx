@@ -26,6 +26,10 @@ const RegisterForm: React.FC<{}> = () => {
     }
   };
 
+  const onFormSubmit = (e: React.FormEvent<EventTarget>): void => {
+    e.preventDefault();
+  };
+
   useEffect(() => {
     socketServer.connection.on(Events.REGISTER_ERROR, (error: string) => {
       setError(error);
@@ -43,55 +47,58 @@ const RegisterForm: React.FC<{}> = () => {
 
   return (
     <div className={classes.root}>
-      <TextField
-        label='Email'
-        type='email'
-        name='email'
-        autoComplete='email'
-        margin='normal'
-        fullWidth
-        onChange={(event): void => setEmail(event.target.value)}
-      />
-      <TextField
-        label='Username'
-        type='username'
-        name='username'
-        autoComplete='username'
-        margin='normal'
-        fullWidth
-        onChange={(event): void => setUsername(event.target.value)}
-      />
-      <TextField
-        label='Password'
-        type='password'
-        name='password'
-        margin='normal'
-        fullWidth
-        onChange={(event): void => setPassword(event.target.value)}
-      />
-      <TextField
-        label='Confirm Password'
-        type='password'
-        name='confirmpassword'
-        margin='normal'
-        fullWidth
-        onChange={(event): void => setConfirmPassword(event.target.value)}
-      />
-      {error ? (
-        <Typography variant='subtitle1' color={'error'}>
-          {error}
-        </Typography>
-      ) : (
-        undefined
-      )}
-      <Button
-        variant='contained'
-        color='primary'
-        className={classes.submitButton}
-        onClick={register}
-      >
-        Register
-      </Button>
+      <form onSubmit={onFormSubmit}>
+        <TextField
+          label='Email'
+          type='email'
+          name='email'
+          autoComplete='email'
+          margin='normal'
+          fullWidth
+          onChange={(event): void => setEmail(event.target.value)}
+        />
+        <TextField
+          label='Username'
+          type='username'
+          name='username'
+          autoComplete='username'
+          margin='normal'
+          fullWidth
+          onChange={(event): void => setUsername(event.target.value)}
+        />
+        <TextField
+          label='Password'
+          type='password'
+          name='password'
+          margin='normal'
+          fullWidth
+          onChange={(event): void => setPassword(event.target.value)}
+        />
+        <TextField
+          label='Confirm Password'
+          type='password'
+          name='confirmpassword'
+          margin='normal'
+          fullWidth
+          onChange={(event): void => setConfirmPassword(event.target.value)}
+        />
+        {error ? (
+          <Typography variant='subtitle1' color={'error'}>
+            {error}
+          </Typography>
+        ) : (
+          undefined
+        )}
+        <Button
+          variant='contained'
+          color='primary'
+          className={classes.submitButton}
+          onClick={register}
+          type='submit'
+        >
+          Register
+        </Button>
+      </form>
     </div>
   );
 };
