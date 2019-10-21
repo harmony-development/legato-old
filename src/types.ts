@@ -7,7 +7,7 @@ export const Events = {
 
 export interface IMessage {
   author: string;
-  icon?: string;
   message: string;
+  avatar: string;
   files: string[];
 }

@@ -6,8 +6,6 @@ import { Events } from '../../../../types';
 import FileCard from './FileCard/FileCard';
 
 interface IProps {
-  socket: SocketIOClient.Socket;
-  connected: boolean;
   name: string;
 }
 
@@ -25,13 +23,16 @@ const ChatBox: React.FC<IProps> = (props: IProps) => {
 
   const onFileSelected = (event: React.ChangeEvent<HTMLInputElement>): void => {
     if (event.currentTarget.files && event.currentTarget.files.length > 0) {
-      Array.from(event.currentTarget.files).forEach((file) => {
+      Array.from(event.currentTarget.files).forEach(file => {
         if (file.type.startsWith('image/') && file.size < 33554432) {
           const imageReader = new FileReader();
           imageReader.readAsDataURL(file);
           imageReader.addEventListener('load', () => {
             if (typeof imageReader.result === 'string') {
-              setFileQueue((prevQueue) => [...prevQueue, imageReader.result as string]);
+              setFileQueue(prevQueue => [
+                ...prevQueue,
+                imageReader.result as string
+              ]);
             }
           });
         }
@@ -39,7 +40,9 @@ const ChatBox: React.FC<IProps> = (props: IProps) => {
     }
   };
 
-  const chatBoxKeyEvent = (event: React.KeyboardEvent<HTMLInputElement>): void => {
+  const chatBoxKeyEvent = (
+    event: React.KeyboardEvent<HTMLInputElement>
+  ): void => {
     if (event.key === 'Enter') {
       event.preventDefault();
       if (!event.shiftKey) {
@@ -66,19 +69,42 @@ const ChatBox: React.FC<IProps> = (props: IProps) => {
     <>
       <Box display='flex' className={classes.fileQueue}>
         {fileQueue.map((file: string, index) => {
-          return <FileCard image={file} removeFromQueue={removeFromQueue} index={index} key={index} />;
+          return (
+            <FileCard
+              image={file}
+              removeFromQueue={removeFromQueue}
+              index={index}
+              key={index}
+            />
+          );
         })}
       </Box>
       <div className={classes.messageBoxContainer}>
         <div className={classes.valign}>
-          <input type='file' id='file' multiple ref={inputFile} style={{ display: 'none' }} onChange={onFileSelected} />
+          <input
+            type='file'
+            id='file'
+            multiple
+            ref={inputFile}
+            style={{ display: 'none' }}
+            onChange={onFileSelected}
+          />
           <Tooltip title='Send Image'>
             <IconButton onClick={sendFile}>
               <Image />
             </IconButton>
           </Tooltip>
         </div>
-        <TextField onKeyPress={chatBoxKeyEvent} value={draftMessage} onChange={(event): void => setDraftMessage(event.target.value)} className={classes.chatBox} label={props.connected ? 'Send Message' : 'Currently Offline'} multiline rows='2' margin='normal' />
+        <TextField
+          onKeyPress={chatBoxKeyEvent}
+          value={draftMessage}
+          onChange={(event): void => setDraftMessage(event.target.value)}
+          className={classes.chatBox}
+          label={props.connected ? 'Send Message' : 'Currently Offline'}
+          multiline
+          rows='2'
+          margin='normal'
+        />
         {!props.connected ? (
           <div className={classes.valign}>
             <Tooltip title='Currently Offline. You will not be able to send messages.'>
