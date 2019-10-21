@@ -12,8 +12,8 @@ import { socketServer } from '../../Root';
 const Chat: React.FC<{}> = () => {
   const classes = useStyles(); // CSS styles
 
-  const [messages, setMessages] = useState<IMessage[]>([]); // array of messages to render on screen
-  const user = useSelector((state: IAppState) => state.user); // the username
+  const [messages, setMessages] = useState<IMessage[]>([]);
+  const user = useSelector((state: IAppState) => state.user);
   const MessagesArea = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
