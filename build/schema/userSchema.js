@@ -52,18 +52,15 @@ exports.userSchema = new mongoose_1.default.Schema({
 });
 exports.userSchema.pre('save', function (next) {
     var _this = this;
-    if (!this.password) {
-        bcrypt_1.default
-            .hash(this.password, 10)
-            .then(function (hash) {
-            _this.password = hash;
-            _this.userid = crypto_random_string_1.default({ length: 15 });
-            next();
-        })
-            .catch(function (err) {
-            next(err);
-        });
-    }
-    next();
+    bcrypt_1.default
+        .hash(this.password, 10)
+        .then(function (hash) {
+        _this.password = hash;
+        _this.userid = crypto_random_string_1.default({ length: 15 });
+        next();
+    })
+        .catch(function (err) {
+        next(err);
+    });
 });
 exports.User = mongoose_1.default.model('User', exports.userSchema);
