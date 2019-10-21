@@ -64,8 +64,7 @@ var HarmonyDB = /** @class */ (function () {
                         newUser = new userSchema_1.User({
                             username: username,
                             password: password,
-                            email: email,
-                            userid: new mongoose_1.default.mongo.ObjectId()
+                            email: email
                         });
                         return [4 /*yield*/, newUser.save()];
                     case 1:

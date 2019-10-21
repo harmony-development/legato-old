@@ -54,7 +54,7 @@ export default function onLogin(socket: Socket) {
               );
             }
           } else {
-            socket.emit(Events.LOGIN_ERROR, 'Uhm. The API is having a stroke.');
+            socket.emit(Events.LOGIN_ERROR, 'Invalid email or password');
           }
         })
         .catch(() => {

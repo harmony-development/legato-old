@@ -1,27 +1,40 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var lodash_1 = __importDefault(require("lodash"));
-var __1 = require("..");
 var types_1 = require("../types");
+var jwt_1 = require("../promisified/jwt");
+var __1 = require("..");
+var userSchema_1 = require("../schema/userSchema");
 function onMessage(socket) {
     socket.on(types_1.Events.MESSAGE, function (data) {
-        if (data.message && typeof data.message == 'string') {
-            __1.harmonyServer.emit('MESSAGE', __assign(__assign({}, data), { icon: lodash_1.default.get(__1.harmonyServer.getUsers()[socket.id], 'icon', '') }));
-        }
+        jwt_1.verify(data.token, __1.config.config.jwtsecret)
+            .then(function (result) {
+            if (result.valid && result.decoded) {
+                if (result.decoded.userid) {
+                    userSchema_1.User.findOne({ userid: result.decoded.userid })
+                        .then(function (user) {
+                        if (user) {
+                            __1.harmonyServer.getSocketServer().emit(types_1.Events.MESSAGE, {
+                                message: data.message,
+                                avatar: user.avatar,
+                                files: data.files
+                            });
+                        }
+                    })
+                        .catch(function (err) {
+                        console.log(err);
+                    });
+                }
+                else {
+                    socket.emit(types_1.Events.INVALIDATE_SESSION, 'invalid session token');
+                }
+            }
+            else {
+                socket.emit(types_1.Events.INVALIDATE_SESSION, 'invalid session token');
+            }
+        })
+            .catch(function () {
+            socket.emit(types_1.Events.INVALIDATE_SESSION, 'invalid session token');
+        });
     });
 }
 exports.default = onMessage;
