@@ -5,12 +5,15 @@ import { socketServer } from '../../Root';
 import { Events } from '../../../socket/socket';
 import { useHistory } from 'react-router';
 import { ILoginDetails } from '../../types';
+import { useDispatch } from 'react-redux';
+import { updateUser } from '../../../store/actions/AppActions';
 
 const LoginForm: React.FC<{}> = () => {
   const classes = useStyles();
   const [email, setEmail] = React.useState<string | undefined>(undefined);
   const [password, setPassword] = React.useState<string | undefined>(undefined);
   const [error, setError] = React.useState<string | undefined>(undefined);
+  const dispatch = useDispatch();
   const history = useHistory();
 
   const login = (): void => {
@@ -33,6 +36,7 @@ const LoginForm: React.FC<{}> = () => {
     socketServer.connection.on(Events.LOGIN, (response: ILoginDetails) => {
       history.push('/app');
       localStorage.setItem('token', response.token);
+      dispatch(updateUser({ username: response.username, avatar: response.avatar }));
     });
 
     return (): void => {

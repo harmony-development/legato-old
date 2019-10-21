@@ -17,8 +17,8 @@ const initialState: IAppState = {
   },
   nameDialog: false,
   user: {
-    name: `Anonymous User #${Math.floor(Math.random() * 1000)}`,
-    icon: ''
+    username: '',
+    avatar: ''
   }
 };
 

@@ -1,4 +1,5 @@
 import io from 'socket.io-client';
+import { IProfileUpdate } from '../types';
 
 export const Events = {
   PROFILE_UPDATE: 'PROFILE_UPDATE',
@@ -23,5 +24,9 @@ export class HarmonyConnection {
 
   login(email: string, password: string): void {
     this.connection.emit(Events.LOGIN, { email, password });
+  }
+
+  saveProfile(newUser: IProfileUpdate): void {
+    this.connection.emit(Events.PROFILE_UPDATE, newUser);
   }
 }

@@ -18,8 +18,8 @@ export interface IAppState {
 }
 
 export interface IUser {
-  name: string;
-  icon: string;
+  username: string;
+  avatar: string;
 }
 
 export interface IInvertTheme {

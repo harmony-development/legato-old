@@ -42,7 +42,7 @@ const Chat: React.FC<{}> = () => {
           ))}
         </Box>
       </div>
-      <ChatBox name={user.name} />
+      <ChatBox name={user.username} />
     </div>
   );
 };

@@ -4,3 +4,9 @@ export interface IMessage {
   avatar: string;
   files: string[];
 }
+
+export interface IProfileUpdate {
+  username?: string;
+  avatar?: string;
+  token: string;
+}
