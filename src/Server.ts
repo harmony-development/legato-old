@@ -7,6 +7,9 @@ import socketio from 'socket.io';
 // import onProfileUpdate from './socket-events/ProfileUpdate';
 // import onLogin from './socket-events/Login';
 import { HarmonyDB } from './HarmonyDB';
+import onLogin from './socket-events/Login';
+import onMessage from './socket-events/Message';
+import onRegister from './socket-events/Register';
 
 export class Server {
   app = express();
@@ -22,7 +25,11 @@ export class Server {
     this.HTTPServer.on('error', this.errorHandler);
 
     this.SocketServer = socketio(this.HTTPServer);
-    this.SocketServer.on('connection', socket => {});
+    this.SocketServer.on('connection', socket => {
+      onLogin(socket);
+      onMessage(socket);
+      onRegister(socket);
+    });
 
     this.Database = new HarmonyDB();
 

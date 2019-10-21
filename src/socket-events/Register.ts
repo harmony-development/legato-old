@@ -22,17 +22,8 @@ function validPassword(password: string): IValidationResult {
   if (!/[a-z]/.test(password)) {
     return { valid: false, message: 'Password must contain lowercase letters' };
   }
-  if (!/[A-Z]/.test(password)) {
-    return { valid: false, message: 'Password must contain uppercase letters' };
-  }
   if (!/[0-9]/.test(password)) {
     return { valid: false, message: 'Password must contain numbers' };
-  }
-  if (!/[^[a-zA-Z0-9!@#\$%\^\&*\)\(+=._-]+$]/.test(password)) {
-    return {
-      valid: false,
-      message: 'Password must contain special characters'
-    };
   }
   return { valid: true };
 }
@@ -62,14 +53,16 @@ export default function onRegister(socket: Socket) {
                 .then(token => {
                   socket.emit(Events.REGISTER, token);
                 })
-                .catch(() => {
+                .catch(err => {
+                  console.log(err);
                   socket.emit(
                     Events.REGISTER_ERROR,
                     'Sorry, but the API is having a stroke right now'
                   );
                 });
             })
-            .catch(() => {
+            .catch(err => {
+              console.log(err);
               socket.emit(
                 Events.REGISTER_ERROR,
                 'Sorry, but the API is having a stroke right now'

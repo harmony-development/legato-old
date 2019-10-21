@@ -6,7 +6,7 @@ import { IUser, ITheme } from '../types';
 export const userSchema: Schema = new mongoose.Schema({
   userid: {
     unique: true,
-    required: true,
+    required: false,
     type: String
   },
   username: {
