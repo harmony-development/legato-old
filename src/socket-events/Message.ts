@@ -6,36 +6,27 @@ import { User } from '../schema/userSchema';
 
 export default function onMessage(socket: Socket) {
   socket.on(Events.MESSAGE, (data: IMessageData) => {
-    verify(data.token, config.config.jwtsecret)
-      .then(result => {
-        if (result.valid && result.decoded) {
-          if ((result.decoded as IToken).userid) {
-            User.findOne({ userid: (result.decoded as IToken).userid })
-              .then(user => {
-                if (user) {
-                  harmonyServer.getSocketServer().emit(Events.MESSAGE, {
-                    username: user.username,
-                    message: data.message,
-                    avatar: user.avatar,
-                    files: data.files
-                  });
-                }
-              })
-              .catch(err => {
-                console.log(err);
+    harmonyServer.Database.verifyToken(data.token)
+      .then(userid => {
+        User.findOne({ userid })
+          .then(user => {
+            if (user) {
+              harmonyServer.getSocketServer().emit(Events.MESSAGE, {
+                username: user.username,
+                message: data.message,
+                avatar: user.avatar,
+                files: data.files
               });
-          } else {
-            console.log('Missing userid');
-            socket.emit(Events.INVALIDATE_SESSION, 'invalid session token');
-          }
-        } else {
-          console.log('invalid jwt');
-          socket.emit(Events.INVALIDATE_SESSION, 'invalid session token');
-        }
+            }
+          })
+          .catch(err => {
+            console.log(err);
+          });
       })
-      .catch(err => {
-        console.log(err);
-        socket.emit(Events.INVALIDATE_SESSION, 'invalid session token');
+      .then(() => {
+        harmonyServer
+          .getSocketServer()
+          .emit(Events.INVALIDATE_SESSION, 'Invalid token');
       });
   });
 }

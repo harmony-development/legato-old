@@ -42,6 +42,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var mongoose_1 = __importDefault(require("mongoose"));
 var userSchema_1 = require("./schema/userSchema");
 var chalk_1 = __importDefault(require("chalk"));
+var jwt_1 = require("./promisified/jwt");
+var _1 = require(".");
 var HarmonyDB = /** @class */ (function () {
     function HarmonyDB() {
         mongoose_1.default.connect('mongodb://localhost/harmony', {
@@ -69,6 +71,34 @@ var HarmonyDB = /** @class */ (function () {
                         return [4 /*yield*/, newUser.save()];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
+            });
+        });
+    };
+    HarmonyDB.prototype.verifyToken = function (token) {
+        return new Promise(function (resolve, reject) {
+            if (!token || typeof token === 'string') {
+                reject();
+                return;
+            }
+            jwt_1.verify(token, _1.config.config.jwtsecret)
+                .then(function (result) {
+                if (result.valid && result.decoded) {
+                    if (result.decoded.userid) {
+                        resolve(result.decoded.userid);
+                    }
+                    else {
+                        reject();
+                        return;
+                    }
+                }
+                else {
+                    reject();
+                    return;
+                }
+            })
+                .catch(function () {
+                reject();
+                return;
             });
         });
     };

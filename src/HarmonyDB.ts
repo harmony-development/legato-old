@@ -1,7 +1,9 @@
 import mongoose from 'mongoose';
 import { User } from './schema/userSchema';
 import chalk from 'chalk';
-import { IUser } from './types';
+import { IUser, IToken } from './types';
+import { verify } from './promisified/jwt';
+import { config } from '.';
 
 export class HarmonyDB {
   private db: mongoose.Connection;
@@ -26,5 +28,32 @@ export class HarmonyDB {
       email
     });
     return await newUser.save();
+  }
+
+  verifyToken(token: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      if (!token || typeof token === 'string') {
+        reject();
+        return;
+      }
+      verify(token, config.config.jwtsecret)
+        .then(result => {
+          if (result.valid && result.decoded) {
+            if ((result.decoded as IToken).userid) {
+              resolve((result.decoded as IToken).userid);
+            } else {
+              reject();
+              return;
+            }
+          } else {
+            reject();
+            return;
+          }
+        })
+        .catch(() => {
+          reject();
+          return;
+        });
+    });
   }
 }
