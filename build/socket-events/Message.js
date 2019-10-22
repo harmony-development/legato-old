@@ -22,7 +22,7 @@ function onMessage(socket) {
                 console.log(err);
             });
         })
-            .then(function () {
+            .catch(function () {
             __1.harmonyServer
                 .getSocketServer()
                 .emit(types_1.Events.INVALIDATE_SESSION, 'Invalid token');
