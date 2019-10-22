@@ -1,16 +1,12 @@
 import http from 'http';
 import express from 'express';
 import socketio from 'socket.io';
-
-// import onMessage from './socket-events/Message';
-// import onDisconnect from './socket-events/Disconnect';
-// import onProfileUpdate from './socket-events/ProfileUpdate';
-// import onLogin from './socket-events/Login';
 import { HarmonyDB } from './HarmonyDB';
 import onLogin from './socket-events/Login';
 import onMessage from './socket-events/Message';
 import onRegister from './socket-events/Register';
 import onUpdateUser from './socket-events/UpdateUser';
+import onGetUserData from './socket-events/GetUserData';
 
 export class Server {
   app = express();
@@ -31,6 +27,7 @@ export class Server {
       onMessage(socket);
       onRegister(socket);
       onUpdateUser(socket);
+      onGetUserData(socket);
     });
 
     this.Database = new HarmonyDB();
