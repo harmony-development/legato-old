@@ -6,15 +6,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var http_1 = __importDefault(require("http"));
 var express_1 = __importDefault(require("express"));
 var socket_io_1 = __importDefault(require("socket.io"));
-// import onMessage from './socket-events/Message';
-// import onDisconnect from './socket-events/Disconnect';
-// import onProfileUpdate from './socket-events/ProfileUpdate';
-// import onLogin from './socket-events/Login';
 var HarmonyDB_1 = require("./HarmonyDB");
 var Login_1 = __importDefault(require("./socket-events/Login"));
 var Message_1 = __importDefault(require("./socket-events/Message"));
 var Register_1 = __importDefault(require("./socket-events/Register"));
 var UpdateUser_1 = __importDefault(require("./socket-events/UpdateUser"));
+var GetUserData_1 = __importDefault(require("./socket-events/GetUserData"));
 var Server = /** @class */ (function () {
     function Server(port) {
         var _this = this;
@@ -38,6 +35,7 @@ var Server = /** @class */ (function () {
             Message_1.default(socket);
             Register_1.default(socket);
             UpdateUser_1.default(socket);
+            GetUserData_1.default(socket);
         });
         this.Database = new HarmonyDB_1.HarmonyDB();
         this.app.use(express_1.default.static('public'));

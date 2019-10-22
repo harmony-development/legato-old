@@ -37,16 +37,17 @@ exports.userSchema = new mongoose_1.default.Schema({
         required: false,
         type: {
             primary: {
-                light: String,
-                dark: String,
-                contrastText: String
+                unique: false,
+                required: false
             },
             secondary: {
-                light: String,
-                dark: String,
-                contrastText: String
+                unique: false,
+                required: false
             },
-            type: String
+            type: {
+                unique: false,
+                required: false
+            }
         }
     }
 });

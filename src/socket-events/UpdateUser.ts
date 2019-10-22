@@ -20,6 +20,9 @@ export default function onUpdateUser(socket: Socket) {
                     if (data.username) {
                       user.username = data.username;
                     }
+                    if (data.theme) {
+                      user.theme = data.theme;
+                    }
                     user.save();
                   } else {
                     socket.emit(

@@ -1,14 +1,8 @@
 import mongoose from 'mongoose';
 
-interface IColor {
-  light: string;
-  dark: string;
-  contrastText: string;
-}
-
 export interface ITheme {
-  primary: IColor;
-  secondary: IColor;
+  primary: object;
+  secondary: object;
   type: 'dark' | 'light';
 }
 
@@ -24,6 +18,8 @@ export interface IUser extends mongoose.Document {
 export const Events = {
   PROFILE_UPDATE: 'PROFILE_UPDATE',
   PROFILE_UPDATE_ERROR: 'PROFILE_UPDATE_ERROR',
+  GET_USER_DATA: 'GET_USER_DATA',
+  GET_USER_DATA_ERROR: 'GET_USER_DATA_ERROR',
   MESSAGE: 'MESSAGE',
   LOGIN: 'LOGIN',
   LOGIN_ERROR: 'LOGIN_ERROR',
@@ -56,5 +52,10 @@ export interface IToken {
 export interface IUserUpdateData {
   username?: string;
   avatar?: string;
+  theme: ITheme;
+  token: string;
+}
+
+export interface IGetUserData {
   token: string;
 }
