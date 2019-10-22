@@ -19,6 +19,7 @@ export interface IMessage extends mongoose.Document {
   author: string;
   message: string;
   files: string[];
+  messageid: string;
 }
 
 export const Events = {
@@ -26,6 +27,7 @@ export const Events = {
   PROFILE_UPDATE_ERROR: 'PROFILE_UPDATE_ERROR',
   GET_USER_DATA: 'GET_USER_DATA',
   GET_USER_DATA_ERROR: 'GET_USER_DATA_ERROR',
+  LOAD_MESSAGES: 'LOAD_MESSAGES',
   MESSAGE: 'MESSAGE',
   LOGIN: 'LOGIN',
   LOGIN_ERROR: 'LOGIN_ERROR',
@@ -64,4 +66,9 @@ export interface IUserUpdateData {
 
 export interface IGetUserData {
   token: string;
+}
+
+export interface ILoadMessagesData {
+  token: string;
+  amount: number;
 }
