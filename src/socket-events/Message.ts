@@ -3,6 +3,7 @@ import { Events, IMessageData, IToken } from '../types';
 import { verify } from '../promisified/jwt';
 import { config, harmonyServer } from '..';
 import { User } from '../schema/userSchema';
+import { Message } from '../schema/messageSchema';
 
 export default function onMessage(socket: Socket) {
   socket.on(Events.MESSAGE, (data: IMessageData) => {
@@ -11,6 +12,11 @@ export default function onMessage(socket: Socket) {
         User.findOne({ userid })
           .then(user => {
             if (user) {
+              harmonyServer.Database.addMessage(
+                userid,
+                data.message,
+                data.files
+              );
               harmonyServer.getSocketServer().emit(Events.MESSAGE, {
                 username: user.username,
                 message: data.message,

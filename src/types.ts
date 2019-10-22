@@ -15,6 +15,12 @@ export interface IUser extends mongoose.Document {
   theme: ITheme;
 }
 
+export interface IMessage extends mongoose.Document {
+  author: string;
+  message: string;
+  files: string[];
+}
+
 export const Events = {
   PROFILE_UPDATE: 'PROFILE_UPDATE',
   PROFILE_UPDATE_ERROR: 'PROFILE_UPDATE_ERROR',

@@ -1,9 +1,10 @@
 import mongoose from 'mongoose';
 import { User } from './schema/userSchema';
 import chalk from 'chalk';
-import { IUser, IToken } from './types';
+import { IUser, IToken, IMessage } from './types';
 import { verify } from './promisified/jwt';
 import { config } from '.';
+import { Message } from './schema/messageSchema';
 
 export class HarmonyDB {
   private db: mongoose.Connection;
@@ -28,6 +29,15 @@ export class HarmonyDB {
       email
     });
     return await newUser.save();
+  }
+
+  async addMessage(userid: string, message: string, files: string[]) {
+    const newMessage: IMessage = new Message({
+      author: userid,
+      message,
+      files
+    });
+    return await newMessage.save();
   }
 
   verifyToken(token: string): Promise<string> {

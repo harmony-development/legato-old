@@ -44,6 +44,7 @@ var userSchema_1 = require("./schema/userSchema");
 var chalk_1 = __importDefault(require("chalk"));
 var jwt_1 = require("./promisified/jwt");
 var _1 = require(".");
+var messageSchema_1 = require("./schema/messageSchema");
 var HarmonyDB = /** @class */ (function () {
     function HarmonyDB() {
         mongoose_1.default.connect('mongodb://localhost/harmony', {
@@ -69,6 +70,23 @@ var HarmonyDB = /** @class */ (function () {
                             email: email
                         });
                         return [4 /*yield*/, newUser.save()];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    HarmonyDB.prototype.addMessage = function (userid, message, files) {
+        return __awaiter(this, void 0, void 0, function () {
+            var newMessage;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        newMessage = new messageSchema_1.Message({
+                            author: userid,
+                            message: message,
+                            files: files
+                        });
+                        return [4 /*yield*/, newMessage.save()];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
             });
