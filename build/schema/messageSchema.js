@@ -17,5 +17,5 @@ exports.messageSchema = new mongoose_1.Schema({
         required: true,
         type: Array()
     }
-});
+}, { timestamps: { createdAt: 'created_at' } });
 exports.Message = mongoose_1.model('Message', exports.messageSchema);
