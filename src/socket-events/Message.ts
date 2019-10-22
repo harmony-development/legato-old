@@ -23,7 +23,7 @@ export default function onMessage(socket: Socket) {
             console.log(err);
           });
       })
-      .then(() => {
+      .catch(() => {
         harmonyServer
           .getSocketServer()
           .emit(Events.INVALIDATE_SESSION, 'Invalid token');

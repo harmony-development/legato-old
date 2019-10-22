@@ -76,7 +76,7 @@ var HarmonyDB = /** @class */ (function () {
     };
     HarmonyDB.prototype.verifyToken = function (token) {
         return new Promise(function (resolve, reject) {
-            if (!token || typeof token === 'string') {
+            if (!token || typeof token !== 'string') {
                 reject();
                 return;
             }

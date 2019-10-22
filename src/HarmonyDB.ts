@@ -32,7 +32,7 @@ export class HarmonyDB {
 
   verifyToken(token: string): Promise<string> {
     return new Promise((resolve, reject) => {
-      if (!token || typeof token === 'string') {
+      if (!token || typeof token !== 'string') {
         reject();
         return;
       }
