@@ -18,10 +18,6 @@ export class HarmonyConnection {
 
   constructor() {
     this.connection = io('0.0.0.0:4000');
-
-    this.connection.on(Events.INVALIDATE_SESSION, () => {
-      console.log('Session Invalid');
-    });
   }
 
   register(email: string, username: string, password: string): void {
