@@ -1,12 +1,13 @@
 import React from 'react';
 import { useStyles } from './styles';
-import { ListItemText, ListItemAvatar, Avatar, Box } from '@material-ui/core';
+import { ListItemText, ListItemAvatar, Avatar, Box, CardActionArea, ButtonBase } from '@material-ui/core';
 
 interface IProps {
   message: string;
   user: string;
   avatar: string | undefined;
   files: string[];
+  openImgDialog: (image: string) => void;
   index: number;
 }
 
@@ -23,8 +24,12 @@ const ChatMessage: React.FC<IProps> = (props: IProps) => {
       </Box>
       {props.files && props.files.length > 0 ? (
         <div className={classes.fileSection}>
-          {props.files.map((data) => {
-            return <img key={data} className={classes.imageUpload} src={data} />;
+          {props.files.map((data, index) => {
+            return (
+              <ButtonBase key={index}>
+                <img className={classes.imageUpload} src={data} onClick={(): void => props.openImgDialog(data)} />
+              </ButtonBase>
+            );
           })}
         </div>
       ) : (

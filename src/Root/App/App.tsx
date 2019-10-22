@@ -1,6 +1,6 @@
 import React from 'react';
 import NavBar from './NavBar/NavBar';
-import ChangeNameDialog from './ChangeNameDialog/ChangeNameDialog';
+import ChangeNameDialog from './ProfileSettingsDialog/ProfileSettingsDialog';
 import { useStyles } from './styles';
 import Chat from './Chat/Chat';
 

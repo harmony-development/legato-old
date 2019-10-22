@@ -9,13 +9,21 @@ import { IMessage } from '../../../types';
 import ChatBox from './ChatBox/ChatBox';
 import { socketServer } from '../../Root';
 import { Events } from '../../../socket/socket';
+import ImageDialog from './ImageDialog/ImageDialog';
 
 const Chat: React.FC<{}> = () => {
   const classes = useStyles();
 
   const [messages, setMessages] = useState<IMessage[]>([]);
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState('');
   const user = useSelector((state: IAppState) => state.user);
   const MessagesArea = useRef<HTMLDivElement>(null);
+
+  const openImageDialog = (image: string): void => {
+    setPreviewImage(image);
+    setImageDialogOpen(true);
+  };
 
   useEffect(() => {
     socketServer.connection.on(Events.MESSAGE, (newMessage: IMessage) => {
@@ -35,14 +43,17 @@ const Chat: React.FC<{}> = () => {
 
   return (
     <div className={classes.container}>
+      <ImageDialog open={imageDialogOpen} setOpen={setImageDialogOpen} image={previewImage} />
       <div className={classes.chatBoxContainer} ref={MessagesArea}>
         <Box>
           {messages.map((message, index) => (
-            <ChatMessage key={index} index={index % 2} user={message.username} avatar={message.avatar || undefined} files={message.files} message={message.message} />
+            <ChatMessage key={index} index={index % 2} user={message.username} avatar={message.avatar || undefined} files={message.files} message={message.message} openImgDialog={openImageDialog} />
           ))}
         </Box>
       </div>
-      <ChatBox name={user.username} />
+      <Box>
+        <ChatBox name={user.username} />
+      </Box>
     </div>
   );
 };

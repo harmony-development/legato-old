@@ -1,8 +1,8 @@
 /**
  * This file is intended for adding things such as Redux Providers and other things.
  */
-import React from 'react';
-import { Provider } from 'react-redux';
+import React, { useEffect } from 'react';
+import { Provider, useDispatch } from 'react-redux';
 import { store } from '../store/store';
 import { useStyles } from './styles';
 import { createMuiTheme, CssBaseline } from '@material-ui/core';
@@ -12,9 +12,12 @@ import { ThemeProvider } from '@material-ui/styles';
 import { Switch, Route, BrowserRouter as Router } from 'react-router-dom';
 import EntryScreen from './EntryScreen/EntryScreen';
 import App from './App/App';
-import { HarmonyConnection } from '../socket/socket';
+import { HarmonyConnection, Events } from '../socket/socket';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { IGetUserData } from '../types';
+import { updateUser } from '../store/actions/AppActions';
+import { red, purple } from '@material-ui/core/colors';
 
 export const socketServer = new HarmonyConnection();
 let previouslyDisconnected = false;
@@ -25,8 +28,20 @@ const Theme: React.FC<{}> = () => {
   return <></>;
 };
 
+socketServer.connection.on('connect', () => {
+  if (previouslyDisconnected) {
+    toast.success('You have reconnected to the server');
+  }
+});
+
+socketServer.connection.on('disconnect', () => {
+  toast.error('You have lost connection to the server');
+  previouslyDisconnected = true;
+});
+
 const Root: React.FC<{}> = () => {
   const { type, primary, secondary } = useSelector((state: IAppState) => state.theme);
+  const dispatch = useDispatch();
   const theme = createMuiTheme({
     palette: {
       type,
@@ -35,16 +50,22 @@ const Root: React.FC<{}> = () => {
     }
   });
 
-  socketServer.connection.on('connect', () => {
-    if (previouslyDisconnected) {
-      toast.success('You have reconnected to the server');
-    }
-  });
+  useEffect(() => {
+    socketServer.saveProfile({ theme: { type, primary, secondary }, token: localStorage.getItem('token') as string });
+  }, [type, primary, secondary]);
 
-  socketServer.connection.on('disconnect', () => {
-    toast.error('You have lost connection to the server');
-    previouslyDisconnected = true;
-  });
+  useEffect(() => {
+    socketServer.getUserData();
+
+    socketServer.connection.on(Events.GET_USER_DATA, (data: IGetUserData) => {
+      dispatch(
+        updateUser({
+          username: data.username,
+          avatar: data.avatar || ''
+        })
+      );
+    });
+  }, []);
 
   return (
     <div className='app-container'>

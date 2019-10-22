@@ -6,6 +6,7 @@ export const useStyles = makeStyles((theme: Theme) => ({
   },
   root: {
     position: 'relative',
+    height: '100%',
     '&:hover $overlay': {
       opacity: 100,
       visibility: 'visible'

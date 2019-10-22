@@ -15,7 +15,8 @@ export const useStyles = makeStyles((theme: Theme) => ({
     paddingRight: theme.spacing(1)
   },
   fileQueue: {
-    overflowX: 'scroll'
+    overflowX: 'scroll',
+    height: 'auto'
   },
   valign: {
     display: 'flex',

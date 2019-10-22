@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { IAppState, IShowChangeNameDialog } from '../../../store/types';
-import { toggleChangeNameDialog, updateUser } from '../../../store/actions/AppActions';
+import { IAppState, IToggleProfileSettingsDialog } from '../../../store/types';
+import { toggleProfileSettingsDialog, updateUser } from '../../../store/actions/AppActions';
 import { Dialog, DialogTitle, DialogContent, TextField, DialogActions, Button } from '@material-ui/core';
 import UserIcon from './UserIcon/UserIcon';
 import { socketServer } from '../../Root';
@@ -25,7 +25,7 @@ const ChangeNameDialog: React.FC<{}> = () => {
     } else {
       toast.error('We were unable to save your profile.');
     }
-    dispatch(toggleChangeNameDialog());
+    dispatch(toggleProfileSettingsDialog());
   };
 
   useEffect(() => {
@@ -34,7 +34,7 @@ const ChangeNameDialog: React.FC<{}> = () => {
   }, [open]);
 
   return (
-    <Dialog open={open} onClose={(): IShowChangeNameDialog => dispatch(toggleChangeNameDialog())}>
+    <Dialog open={open} onClose={(): IToggleProfileSettingsDialog => dispatch(toggleProfileSettingsDialog())}>
       <DialogTitle>Change Username</DialogTitle>
       <DialogContent>
         <UserIcon setIcon={setDraftIcon} icon={draftIcon} />

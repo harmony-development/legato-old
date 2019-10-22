@@ -2,7 +2,7 @@ import { Color } from '@material-ui/core';
 
 export enum Actions {
   INVERT_THEME,
-  TOGGLE_NAME_DIALOG,
+  TOGGLE_PROFILE_SETTINGS_DIALOG,
   UPDATE_USER
 }
 
@@ -26,8 +26,8 @@ export interface IInvertTheme {
   type: Actions.INVERT_THEME;
 }
 
-export interface IShowChangeNameDialog {
-  type: Actions.TOGGLE_NAME_DIALOG;
+export interface IToggleProfileSettingsDialog {
+  type: Actions.TOGGLE_PROFILE_SETTINGS_DIALOG;
 }
 
 export interface IUpdateUser {
@@ -35,4 +35,4 @@ export interface IUpdateUser {
   payload: IUser;
 }
 
-export type ActionTypes = IInvertTheme | IShowChangeNameDialog | IUpdateUser;
+export type ActionTypes = IInvertTheme | IToggleProfileSettingsDialog | IUpdateUser;

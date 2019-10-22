@@ -3,6 +3,8 @@ import { IProfileUpdate } from '../types';
 
 export const Events = {
   PROFILE_UPDATE: 'PROFILE_UPDATE',
+  GET_USER_DATA: 'GET_USER_DATA',
+  GET_USER_DATA_ERROR: 'GET_USER_DATA_ERROR',
   MESSAGE: 'MESSAGE',
   LOGIN: 'LOGIN',
   LOGIN_ERROR: 'LOGIN_ERROR',
@@ -32,5 +34,9 @@ export class HarmonyConnection {
 
   saveProfile(newUser: IProfileUpdate): void {
     this.connection.emit(Events.PROFILE_UPDATE, newUser);
+  }
+
+  getUserData(): void {
+    this.connection.emit(Events.GET_USER_DATA, { token: localStorage.getItem('token') as string });
   }
 }

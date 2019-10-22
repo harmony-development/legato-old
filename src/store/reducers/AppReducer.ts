@@ -8,6 +8,7 @@
 
 import { Actions, ActionTypes, IAppState } from '../types';
 import { red, purple } from '@material-ui/core/colors';
+import { socketServer } from '../../Root/Root';
 
 const initialState: IAppState = {
   theme: {
@@ -25,6 +26,7 @@ const initialState: IAppState = {
 export default function AppReducer(state = initialState, action: ActionTypes): IAppState {
   switch (action.type) {
     case Actions.INVERT_THEME: {
+      socketServer.saveProfile({ theme: state.theme, token: localStorage.getItem('token') as string });
       return {
         ...state,
         theme: {
@@ -33,7 +35,7 @@ export default function AppReducer(state = initialState, action: ActionTypes): I
         }
       };
     }
-    case Actions.TOGGLE_NAME_DIALOG: {
+    case Actions.TOGGLE_PROFILE_SETTINGS_DIALOG: {
       return {
         ...state,
         nameDialog: !state.nameDialog

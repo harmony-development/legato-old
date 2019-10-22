@@ -1,7 +1,7 @@
 import React from 'react';
-import { Paper, CardMedia, Grid, Box, IconButton } from '@material-ui/core';
+import { Box, IconButton } from '@material-ui/core';
 import { useStyles } from './styles';
-import { Remove, Delete } from '@material-ui/icons';
+import { Delete } from '@material-ui/icons';
 
 interface IProps {
   image: string;
@@ -9,10 +9,10 @@ interface IProps {
   index: number;
 }
 
-const FileCard = (props: IProps) => {
+const FileCard: React.FC<IProps> = (props: IProps) => {
   const classes = useStyles();
 
-  const handleDelete = () => {
+  const handleDelete = (): void => {
     props.removeFromQueue(props.index);
   };
 

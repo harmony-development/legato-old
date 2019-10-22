@@ -3,8 +3,8 @@ import { Menu, InvertColors, AccountCircle } from '@material-ui/icons';
 import { AppBar, Toolbar, IconButton, Typography } from '@material-ui/core';
 import { useStyles } from './styles';
 import { useDispatch } from 'react-redux';
-import { invertTheme, toggleChangeNameDialog } from '../../../store/actions/AppActions';
-import { IInvertTheme, IShowChangeNameDialog } from '../../../store/types';
+import { invertTheme, toggleProfileSettingsDialog } from '../../../store/actions/AppActions';
+import { IInvertTheme, IToggleProfileSettingsDialog } from '../../../store/types';
 
 const NavBar: React.FC<{}> = () => {
   const classes = useStyles();
@@ -19,7 +19,7 @@ const NavBar: React.FC<{}> = () => {
         <Typography variant='h6' className={classes.title}>
           #general
         </Typography>
-        <IconButton onClick={(): IShowChangeNameDialog => dispatch(toggleChangeNameDialog())}>
+        <IconButton onClick={(): IToggleProfileSettingsDialog => dispatch(toggleProfileSettingsDialog())}>
           <AccountCircle />
         </IconButton>
         <IconButton onClick={(): IInvertTheme => dispatch(invertTheme())}>

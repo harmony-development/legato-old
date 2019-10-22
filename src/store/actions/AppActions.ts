@@ -1,9 +1,4 @@
-import {
-  Actions,
-  IInvertTheme,
-  IShowChangeNameDialog as IToggleChangeNameDialog,
-  IUpdateUser, IUser
-} from '../types';
+import { Actions, IInvertTheme, IToggleProfileSettingsDialog, IUpdateUser, IUser } from '../types';
 
 export function invertTheme(): IInvertTheme {
   return {
@@ -11,15 +6,15 @@ export function invertTheme(): IInvertTheme {
   };
 }
 
-export function toggleChangeNameDialog(): IToggleChangeNameDialog {
+export function toggleProfileSettingsDialog(): IToggleProfileSettingsDialog {
   return {
-    type: Actions.TOGGLE_NAME_DIALOG
+    type: Actions.TOGGLE_PROFILE_SETTINGS_DIALOG
   };
 }
 
 export function updateUser(payload: IUser): IUpdateUser {
-  return  {
+  return {
     type: Actions.UPDATE_USER,
     payload
-  }
+  };
 }
