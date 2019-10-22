@@ -1,6 +1,6 @@
 import React from 'react';
 import { useStyles } from './styles';
-import { ListItemText, ListItemAvatar, Avatar, Box, CardActionArea, ButtonBase } from '@material-ui/core';
+import { ListItemText, ListItemAvatar, Avatar, Box, ButtonBase } from '@material-ui/core';
 
 interface IProps {
   message: string;
@@ -27,7 +27,7 @@ const ChatMessage: React.FC<IProps> = (props: IProps) => {
           {props.files.map((data, index) => {
             return (
               <ButtonBase key={index}>
-                <img className={classes.imageUpload} src={data} onClick={(): void => props.openImgDialog(data)} />
+                <img className={classes.imageUpload} src={data} onClick={(): void => props.openImgDialog(data)} alt='' />
               </ButtonBase>
             );
           })}

@@ -7,6 +7,7 @@ import { useHistory } from 'react-router';
 import { ILoginDetails } from '../../types';
 import { useDispatch } from 'react-redux';
 import { updateUser } from '../../../store/actions/AppActions';
+import { toast } from 'react-toastify';
 
 const LoginForm: React.FC<{}> = () => {
   const classes = useStyles();
@@ -17,6 +18,9 @@ const LoginForm: React.FC<{}> = () => {
   const history = useHistory();
 
   const login = (): void => {
+    if (!socketServer.connection.connected) {
+      toast.error('Unable to login. No connection to server.');
+    }
     if (email && password) {
       socketServer.login(email, password);
     } else {
@@ -44,7 +48,7 @@ const LoginForm: React.FC<{}> = () => {
       socketServer.connection.removeListener(Events.LOGIN);
       socketServer.connection.removeListener(Events.LOGIN_ERROR);
     };
-  }, []);
+  }, [dispatch, history]);
 
   return (
     <div className={classes.root}>

@@ -7,6 +7,7 @@ import { updateUser } from '../../../store/actions/AppActions';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router';
 import { ILoginDetails } from '../../types';
+import { toast } from 'react-toastify';
 
 const RegisterForm: React.FC<{}> = () => {
   const classes = useStyles();
@@ -19,6 +20,9 @@ const RegisterForm: React.FC<{}> = () => {
   const history = useHistory();
 
   const register = (): void => {
+    if (!socketServer.connection.connected) {
+      toast.error('Unable to register. No connection to server.');
+    }
     if (confirmPassword !== password) {
       setError('Passwords do not match!');
     } else {
@@ -49,7 +53,7 @@ const RegisterForm: React.FC<{}> = () => {
       socketServer.connection.removeListener(Events.REGISTER);
       socketServer.connection.removeListener(Events.REGISTER_ERROR);
     };
-  }, []);
+  }, [dispatch, history]);
 
   return (
     <div className={classes.root}>

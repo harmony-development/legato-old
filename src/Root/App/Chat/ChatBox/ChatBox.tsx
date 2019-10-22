@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { useStyles } from './styles';
 import { Tooltip, IconButton, TextField, Box } from '@material-ui/core';
 import { Warning, Image } from '@material-ui/icons';
@@ -15,31 +15,12 @@ const ChatBox: React.FC<IProps> = (props: IProps) => {
   const [draftMessage, setDraftMessage] = useState('');
   const inputFile = useRef<HTMLInputElement>(null);
   const [fileQueue, setFileQueue] = useState<string[]>([]);
-  const [connected, setConnected] = useState<boolean>(false);
 
   const sendFile = (): void => {
     if (inputFile.current) {
       inputFile.current.click();
     }
   };
-
-  useEffect(() => {
-    const onConnect = (): void => {
-      setConnected(true);
-    };
-
-    const onDisconnect = (): void => {
-      setConnected(false);
-    };
-
-    socketServer.connection.on('connect', onConnect);
-    socketServer.connection.on('disconnect', onDisconnect);
-
-    return (): void => {
-      socketServer.connection.removeEventListener('connect', onConnect);
-      socketServer.connection.removeEventListener('disconnect', onDisconnect);
-    };
-  }, []);
 
   const onFileSelected = (event: React.ChangeEvent<HTMLInputElement>): void => {
     if (event.currentTarget.files && event.currentTarget.files.length > 0) {

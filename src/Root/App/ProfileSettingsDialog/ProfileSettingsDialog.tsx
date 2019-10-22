@@ -31,7 +31,7 @@ const ChangeNameDialog: React.FC<{}> = () => {
   useEffect(() => {
     setDraftName(user.username);
     setDraftIcon(user.avatar);
-  }, [open]);
+  }, [open, user.username, user.avatar]);
 
   return (
     <Dialog open={open} onClose={(): IToggleProfileSettingsDialog => dispatch(toggleProfileSettingsDialog())}>

@@ -13,7 +13,7 @@ const ImageDialog: React.FC<IProps> = (props: IProps) => {
       <DialogTitle>Image Preview</DialogTitle>
       <DialogContent>
         <CardActionArea>
-          <img src={props.image} style={{ width: '100%' }} />
+          <img src={props.image} style={{ width: '100%' }} alt='' />
         </CardActionArea>
       </DialogContent>
     </Dialog>

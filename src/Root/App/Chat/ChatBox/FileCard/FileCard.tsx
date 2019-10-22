@@ -23,7 +23,7 @@ const FileCard: React.FC<IProps> = (props: IProps) => {
           <Delete />
         </IconButton>
       </div>
-      <img src={props.image} className={classes.thumbnail}></img>
+      <img src={props.image} className={classes.thumbnail} alt=''></img>
     </Box>
   );
 };

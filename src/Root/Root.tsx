@@ -17,7 +17,6 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { IGetUserData } from '../types';
 import { updateUser } from '../store/actions/AppActions';
-import { red, purple } from '@material-ui/core/colors';
 
 export const socketServer = new HarmonyConnection();
 let previouslyDisconnected = false;
@@ -65,7 +64,7 @@ const Root: React.FC<{}> = () => {
         })
       );
     });
-  }, []);
+  }, [dispatch]);
 
   return (
     <div className='app-container'>
