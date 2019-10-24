@@ -16,12 +16,13 @@ export default function onMessage(socket: Socket) {
                 userid,
                 data.message,
                 data.files
-              );
-              harmonyServer.getSocketServer().emit(Events.MESSAGE, {
-                username: user.username,
-                message: data.message,
-                avatar: user.avatar,
-                files: data.files
+              ).then(() => {
+                harmonyServer.getSocketServer().emit(Events.MESSAGE, {
+                  username: user.username,
+                  message: data.message,
+                  avatar: user.avatar,
+                  files: data.files
+                });
               });
             }
           })

@@ -10,12 +10,13 @@ function onMessage(socket) {
             userSchema_1.User.findOne({ userid: userid })
                 .then(function (user) {
                 if (user) {
-                    __1.harmonyServer.Database.addMessage(userid, data.message, data.files);
-                    __1.harmonyServer.getSocketServer().emit(types_1.Events.MESSAGE, {
-                        username: user.username,
-                        message: data.message,
-                        avatar: user.avatar,
-                        files: data.files
+                    __1.harmonyServer.Database.addMessage(userid, data.message, data.files).then(function () {
+                        __1.harmonyServer.getSocketServer().emit(types_1.Events.MESSAGE, {
+                            username: user.username,
+                            message: data.message,
+                            avatar: user.avatar,
+                            files: data.files
+                        });
                     });
                 }
             })

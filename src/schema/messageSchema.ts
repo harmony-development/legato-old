@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose';
 import { IMessage } from '../types';
 import randomstring from 'crypto-random-string';
 
-export const messageSchema: Schema = new Schema<IMessage>(
+export const messageSchema: Schema = new Schema(
   {
     author: {
       unique: false,
@@ -28,9 +28,8 @@ export const messageSchema: Schema = new Schema<IMessage>(
   { timestamps: { createdAt: 'created_at' } }
 );
 
-messageSchema.pre<IMessage>('save', function(next) {
-  if (!this.isModified('messageid')) return next();
-
+messageSchema.pre<IMessage>('validate', function(next) {
+  //if (!this.isModified('messageid')) return next();
   this.messageid = randomstring({ length: 30 });
   next();
 });

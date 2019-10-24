@@ -28,6 +28,7 @@ export const Events = {
   GET_USER_DATA: 'GET_USER_DATA',
   GET_USER_DATA_ERROR: 'GET_USER_DATA_ERROR',
   LOAD_MESSAGES: 'LOAD_MESSAGES',
+  LOAD_MESSAGES_ERROR: 'LOAD_MESSAGES_ERROR',
   MESSAGE: 'MESSAGE',
   LOGIN: 'LOGIN',
   LOGIN_ERROR: 'LOGIN_ERROR',
@@ -70,5 +71,5 @@ export interface IGetUserData {
 
 export interface ILoadMessagesData {
   token: string;
-  amount: number;
+  lastmessageid: string;
 }
