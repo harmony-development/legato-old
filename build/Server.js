@@ -12,6 +12,7 @@ var Message_1 = __importDefault(require("./socket-events/Message"));
 var Register_1 = __importDefault(require("./socket-events/Register"));
 var UpdateUser_1 = __importDefault(require("./socket-events/UpdateUser"));
 var GetUserData_1 = __importDefault(require("./socket-events/GetUserData"));
+var LoadMessages_1 = __importDefault(require("./socket-events/LoadMessages"));
 var Server = /** @class */ (function () {
     function Server(port) {
         var _this = this;
@@ -36,6 +37,7 @@ var Server = /** @class */ (function () {
             Register_1.default(socket);
             UpdateUser_1.default(socket);
             GetUserData_1.default(socket);
+            LoadMessages_1.default(socket);
         });
         this.Database = new HarmonyDB_1.HarmonyDB();
         this.app.use(express_1.default.static('public'));

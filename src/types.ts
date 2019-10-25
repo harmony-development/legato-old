@@ -26,6 +26,7 @@ export const Events = {
   PROFILE_UPDATE: 'PROFILE_UPDATE',
   PROFILE_UPDATE_ERROR: 'PROFILE_UPDATE_ERROR',
   GET_USER_DATA: 'GET_USER_DATA',
+  GET_TARGET_USER_DATA: 'GET_TARGET_USER_DATA',
   GET_USER_DATA_ERROR: 'GET_USER_DATA_ERROR',
   LOAD_MESSAGES: 'LOAD_MESSAGES',
   LOAD_MESSAGES_ERROR: 'LOAD_MESSAGES_ERROR',
@@ -67,6 +68,7 @@ export interface IUserUpdateData {
 
 export interface IGetUserData {
   token: string;
+  targetuser?: string;
 }
 
 export interface ILoadMessagesData {

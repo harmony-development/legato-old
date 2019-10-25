@@ -12,9 +12,9 @@ function onMessage(socket) {
                 if (user) {
                     __1.harmonyServer.Database.addMessage(userid, data.message, data.files).then(function () {
                         __1.harmonyServer.getSocketServer().emit(types_1.Events.MESSAGE, {
-                            username: user.username,
-                            message: data.message,
+                            author: userid,
                             avatar: user.avatar,
+                            message: data.message,
                             files: data.files
                         });
                     });

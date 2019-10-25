@@ -18,9 +18,9 @@ export default function onMessage(socket: Socket) {
                 data.files
               ).then(() => {
                 harmonyServer.getSocketServer().emit(Events.MESSAGE, {
-                  username: user.username,
-                  message: data.message,
+                  author: userid,
                   avatar: user.avatar,
+                  message: data.message,
                   files: data.files
                 });
               });

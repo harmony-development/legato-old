@@ -7,6 +7,7 @@ import onMessage from './socket-events/Message';
 import onRegister from './socket-events/Register';
 import onUpdateUser from './socket-events/UpdateUser';
 import onGetUserData from './socket-events/GetUserData';
+import onLoadMessages from './socket-events/LoadMessages';
 
 export class Server {
   app = express();
@@ -28,6 +29,7 @@ export class Server {
       onRegister(socket);
       onUpdateUser(socket);
       onGetUserData(socket);
+      onLoadMessages(socket);
     });
 
     this.Database = new HarmonyDB();
