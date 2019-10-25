@@ -29,3 +29,22 @@
   display: flex;
   flex-direction: column;
 }
+
+.chat-message-anim-enter {
+  transform: translate(-500px);
+  opacity: 0.01;
+}
+.chat-message-anim-enter-active {
+  opacity: 1;
+  transform: none;
+  transition: all 300ms ease-in;
+}
+.chat-message-anim-exit {
+  opacity: 1;
+  transform: none;
+}
+.chat-message-anim-exit-active {
+  opacity: 0.01;
+  transform: translate(-500px);
+  transition: all 300ms ease-in;
+}

@@ -4,8 +4,11 @@ import { IProfileUpdate } from '../types';
 export const Events = {
   PROFILE_UPDATE: 'PROFILE_UPDATE',
   GET_USER_DATA: 'GET_USER_DATA',
+  GET_TARGET_USER_DATA: 'GET_TARGET_USER_DATA',
   GET_USER_DATA_ERROR: 'GET_USER_DATA_ERROR',
   MESSAGE: 'MESSAGE',
+  LOAD_MESSAGES: 'LOAD_MESSAGES',
+  LOAD_MESSAGES_ERROR: 'LOAD_MESSAGES_ERROR',
   LOGIN: 'LOGIN',
   LOGIN_ERROR: 'LOGIN_ERROR',
   REGISTER: 'REGISTER',
@@ -33,6 +36,8 @@ export class HarmonyConnection {
   }
 
   getUserData(): void {
-    this.connection.emit(Events.GET_USER_DATA, { token: localStorage.getItem('token') as string });
+    this.connection.emit(Events.GET_USER_DATA, {
+      token: localStorage.getItem('token') as string
+    });
   }
 }

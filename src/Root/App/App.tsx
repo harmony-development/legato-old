@@ -13,6 +13,7 @@ const App: React.FC<{}> = () => {
 
   useEffect(() => {
     socketServer.connection.on(Events.INVALIDATE_SESSION, () => {
+      localStorage.removeItem('token');
       history.push('/');
     });
 

@@ -1,9 +1,9 @@
 import { Color, Theme } from '@material-ui/core';
 
 export interface IMessage {
-  username: string;
+  author: string;
   message: string;
-  avatar: string;
+  messageid: string;
   files: string[];
 }
 
@@ -26,4 +26,17 @@ export interface IGetUserData {
     secondary: Color;
     type: 'dark' | 'light';
   };
+}
+
+export interface IUserData {
+  [userid: string]: {
+    avatar: string;
+    username: string;
+  };
+}
+
+export interface IGetTargetUserData {
+  username: string;
+  avatar: string;
+  userid: string;
 }
