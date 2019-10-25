@@ -134,25 +134,18 @@ const Chat: React.FC<{}> = () => {
         ref={MessagesArea}
         onScroll={onScroll}
       >
-        <TransitionGroup className='chat-message-anim'>
-          {messages.map((message, index) => (
-            <CSSTransition
-              key={index}
-              classNames='chat-message-anim'
-              timeout={300}
-            >
-              <ChatMessage
-                index={index % 2}
-                userid={message.author}
-                userData={userData}
-                setUserData={setUserData}
-                files={message.files}
-                message={message.message}
-                openImgDialog={openImageDialog}
-              />
-            </CSSTransition>
-          ))}
-        </TransitionGroup>
+        {messages.map((message, index) => (
+          <ChatMessage
+            index={index % 2}
+            key={index}
+            userid={message.author}
+            userData={userData}
+            setUserData={setUserData}
+            files={message.files}
+            message={message.message}
+            openImgDialog={openImageDialog}
+          />
+        ))}
       </div>
       <Box>
         <ChatBox name={user.username} />
