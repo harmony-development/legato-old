@@ -5,22 +5,24 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/bluskript/harmony-server/rest"
 	"github.com/julienschmidt/httprouter"
+	. "github.com/logrusorgru/aurora"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func startMongoServer() {
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
-	client, err := mongo.Connect(context.TODO(), clientOptions)
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(Red(err.Error()).Bold())
 	}
-	err = client.Ping(context.TODO(), nil)
+	err = client.Connect(ctx)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(Red(err.Error()).Bold())
 	}
 	rest.MongoInstance = client
 }
@@ -31,7 +33,8 @@ func startServer(port int, callback func(error)) {
 	router.GET("/ping", rest.Ping)
 
 	startMongoServer()
+	startSocketServer()
 
-	log.Println("Server successfully started on port " + strconv.Itoa(port))
+	log.Println(Green("Server successfully started on port " + strconv.Itoa(port)).Bold())
 	callback(http.ListenAndServe(":"+strconv.Itoa(port), router))
 }
