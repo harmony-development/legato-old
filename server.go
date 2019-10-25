@@ -22,6 +22,7 @@ func startMongoServer() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	rest.MongoInstance = client
 }
 
 func startServer(port int, callback func(error)) {
@@ -29,7 +30,7 @@ func startServer(port int, callback func(error)) {
 	http.Handle("/", http.FileServer(http.Dir("public/")))
 	router.GET("/ping", rest.Ping)
 
-	go startMongoServer()
+	startMongoServer()
 
 	log.Println("Server successfully started on port " + strconv.Itoa(port))
 	callback(http.ListenAndServe(":"+strconv.Itoa(port), router))

@@ -1,14 +1,17 @@
 package rest
 
 import (
-	"github.com/julienschmidt/httprouter"
+	"context"
 	"log"
 	"net/http"
+
+	"github.com/julienschmidt/httprouter"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
+var MongoInstance *mongo.Client
+
 func Ping(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	_, err := w.Write([]byte("pong"))
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	log.Println(MongoInstance.ListDatabaseNames(context.TODO(), bson.D{}))
 }
