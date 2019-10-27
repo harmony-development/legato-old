@@ -60,7 +60,7 @@ func (ws *WebSocket) Reader() {
 			break
 		}
 		if handler, exists := ws.Events[event.Name]; exists {
-			handler(event.Data)
+			handler(event.Data, ws)
 		}
 	}
 }
@@ -85,6 +85,6 @@ func (ws *WebSocket) Writer() {
 }
 
 // On is a helper function that registers an event handler for a specific event
-func (ws *WebSocket) On(event string, callback func(data interface{})) {
+func (ws *WebSocket) On(event string, callback func(data interface{}, ws *WebSocket)) {
 	ws.Events[event] = callback
 }
