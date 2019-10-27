@@ -5,7 +5,7 @@ import (
 )
 
 // EventHandler is a type of function that handles an event
-type EventHandler func(data interface{})
+type EventHandler func(data interface{}, ws *WebSocket)
 
 // Event is the structure the client sends to the server for handling
 type Event struct {
@@ -18,4 +18,10 @@ func ParseMessage(unparsed []byte) (*Event, error) {
 	event := new(Event)
 	err := json.Unmarshal(unparsed, event)
 	return event, err
+}
+
+// Raw converts things back to byte to send to clients
+func (e *Event) Raw() []byte {
+	raw, _ := json.Marshal(e)
+	return raw
 }
