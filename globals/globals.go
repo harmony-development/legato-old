@@ -7,6 +7,7 @@ import (
 )
 
 type Server struct {
+	JwtSecret     string
 	SocketServer  *socket.WebSocket
 	Collections   map[string]*mongo.Collection
 	MongoInstance *mongo.Client
