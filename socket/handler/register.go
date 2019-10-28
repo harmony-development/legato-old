@@ -2,14 +2,17 @@ package handler
 
 import (
 	"context"
-	"github.com/bluskript/harmony-server/globals"
-	"github.com/bluskript/harmony-server/socket"
-	"github.com/thanhpk/randstr"
-	. "github.com/logrusorgru/aurora"
-	"go.mongodb.org/mongo-driver/bson"
-	"golang.org/x/crypto/bcrypt"
 	"log"
 	"regexp"
+	"time"
+
+	"github.com/bluskript/harmony-server/globals"
+	"github.com/bluskript/harmony-server/socket"
+	"github.com/dgrijalva/jwt-go"
+	. "github.com/logrusorgru/aurora"
+	"github.com/thanhpk/randstr"
+	"go.mongodb.org/mongo-driver/bson"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type registerData struct {
@@ -67,11 +70,12 @@ func RegisterHandler(raw interface{}, ws *socket.WebSocket) {
 		}
 
 		// all inputs are valid here
+		userid := randstr.Hex(16)
 		_, err = globals.HarmonyServer.Collections["users"].InsertOne(context.TODO(), bson.D{
 			{Key: "email", Value: data.email},
 			{Key: "username", Value: data.username},
 			{Key: "password", Value: string(hash)},
-			{Key: "userid", Value: randstr.Hex(16)},
+			{Key: "userid", Value: userid},
 		})
 
 		if err != nil {
@@ -79,5 +83,22 @@ func RegisterHandler(raw interface{}, ws *socket.WebSocket) {
 			whoops("REGISTER_ERROR", ws)
 			return
 		}
+
+		expireTime := time.Now().Add(30 * 24 * time.Hour).UTC()
+
+		claims := &Claims{
+			Userid: userid,
+			StandardClaims: jwt.StandardClaims{
+				ExpiresAt: expireTime.Unix(),
+			},
+		}
+
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		tokenString, err := token.SignedString(globals.HarmonyServer.JwtSecret)
+		if err != nil {
+			regErr("Unable to create token", ws)
+			return
+		}
+
 	}
 }

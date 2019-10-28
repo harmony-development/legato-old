@@ -1,6 +1,15 @@
 package handler
 
-import "github.com/bluskript/harmony-server/socket"
+import (
+	"github.com/bluskript/harmony-server/socket"
+	"github.com/dgrijalva/jwt-go"
+)
+
+// Claims is a structure for the authentication JWT
+type Claims struct {
+	Userid string
+	jwt.StandardClaims
+}
 
 func whoops(name string, ws *socket.WebSocket) {
 	ws.Out <- (&socket.Event{
@@ -12,6 +21,13 @@ func whoops(name string, ws *socket.WebSocket) {
 func regErr(reason string, ws *socket.WebSocket) {
 	ws.Out <- (&socket.Event{
 		Name: "REGISTER_ERROR",
+		Data: reason,
+	}).Raw()
+}
+
+func loginErr(reason string, ws *socket.WebSocket) {
+	ws.Out <- (&socket.Event{
+		Name: "LOGIN_ERROR",
 		Data: reason,
 	}).Raw()
 }

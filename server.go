@@ -2,12 +2,15 @@ package main
 
 import (
 	"context"
-	"github.com/bluskript/harmony-server/globals"
-	"go.mongodb.org/mongo-driver/x/bsonx"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
+
+	"github.com/bluskript/harmony-server/globals"
+	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/x/bsonx"
 
 	"github.com/bluskript/harmony-server/rest"
 	"github.com/bluskript/harmony-server/socket"
@@ -59,6 +62,13 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func startServer(port int, callback func(error)) {
+	err := godotenv.Load()
+
+	if err != nil {
+		log.Fatal(Red("Unable to read .env file! Please assign JWT_SECRET variable in .env!").Bold())
+	}
+
+	globals.HarmonyServer.JwtSecret = os.Getenv("JWT_SECRET")
 	globals.HarmonyServer.Router = mux.NewRouter()
 	globals.HarmonyServer.Router.Handle("/", http.FileServer(http.Dir("public/")))
 	globals.HarmonyServer.Router.HandleFunc("/api/ping", rest.Ping)

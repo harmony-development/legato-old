@@ -2,13 +2,15 @@ package handler
 
 import (
 	"context"
+	"log"
+
 	"github.com/bluskript/harmony-server/globals"
 	"github.com/bluskript/harmony-server/mongodocs"
 	"github.com/bluskript/harmony-server/socket"
 	"github.com/logrusorgru/aurora"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type loginData struct {
@@ -26,26 +28,33 @@ func LoginHandler(raw interface{}, ws *socket.WebSocket) {
 		return
 	}
 	rawMap, ok := raw.(map[string]interface{})
-	if ok {
-		var data loginData
-		if data.email, ok = rawMap["email"].(string); ok {
-			if data.password, ok = rawMap["password"].(string); ok {
-				var user mongodocs.User
-				err := globals.HarmonyServer.Collections["users"].FindOne(context.TODO(), bson.D{
-					{"email", data.email},
-				}).Decode(&user)
-				if err != nil {
-					log.Println(err.Error())
-					return
-				}
-				log.Println(user)
-			} else {
-				return
-			}
-		} else {
-			return
-		}
-	} else {
+	if !ok {
+		loginErr("Invalid arguments", ws)
 		return
 	}
+	var data loginData
+	data.email, ok = rawMap["email"].(string)
+	if !ok {
+		loginErr("Invalid Email", ws)
+		return
+	}
+	data.password, ok = rawMap["password"].(string)
+	if !ok {
+		loginErr("Invalid Password", ws)
+		return
+	}
+	var user *mongodocs.User
+	err := globals.HarmonyServer.Collections["users"].FindOne(context.TODO(), bson.D{
+		{"email", data.email},
+	}).Decode(&user)
+	if err != nil {
+		loginErr("Invalid Email Or Password", ws)
+		return
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.password))
+	if err != nil {
+		loginErr("Invalid Email Or Password", ws)
+		return
+	}
+
 }
