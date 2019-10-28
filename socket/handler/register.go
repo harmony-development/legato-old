@@ -31,49 +31,31 @@ func RegisterHandler(raw interface{}, ws *socket.WebSocket) {
 		var data registerData
 		data.email, ok = rawMap["email"].(string)
 		if !ok {
-			ws.Out <- (&socket.Event{
-				Name: "REGISTER_ERROR",
-				Data: "Missing email",
-			}).Raw()
+			regErr("Missing Email", ws)
 			return
 		}
 		data.username, ok = rawMap["username"].(string)
 		if !ok {
-			ws.Out <- (&socket.Event{
-				Name: "REGISTER_ERROR",
-				Data: "Invalid username",
-			}).Raw()
+			regErr("Missing Username", ws)
 			return
 		}
 		data.password, ok = rawMap["password"].(string)
 		if !ok {
-			ws.Out <- (&socket.Event{
-				Name: "REGISTER_ERROR",
-				Data: "Missing Password",
-			}).Raw()
+			regErr("Missing Password", ws)
 			return
 		}
 		if !emailRegex.MatchString(data.email) {
-			ws.Out <- (&socket.Event{
-				Name: "REGISTER_ERROR",
-				Data: "Invalid email",
-			}).Raw()
+			regErr("Invalid Email", ws)
 			return
 		}
 
 		if len(data.username) >= 20 {
-			ws.Out <- (&socket.Event{
-				Name: "REGISTER_ERROR",
-				Data: "Username is too long",
-			}).Raw()
+			regErr("Your name is too long", ws)
 			return
 		}
 
-		if len(data.password) < 3 || len(data.password) >= 30 {
-			ws.Out <- (&socket.Event{
-				Name: "REGISTER_ERROR",
-				Data: "Password must be between 3 and 30 characters long",
-			}).Raw()
+		if len(data.password) < 3 || len(data.password) > 30 {
+			regErr("Password must be at least 3 characters and at most 30 characters long", ws)
 			return
 		}
 		hash, err := bcrypt.GenerateFromPassword([]byte(data.password), bcrypt.DefaultCost)
@@ -85,9 +67,9 @@ func RegisterHandler(raw interface{}, ws *socket.WebSocket) {
 
 		// all inputs are valid here
 		_, err = globals.HarmonyServer.Collections["users"].InsertOne(context.TODO(), bson.D{
-			{Key: "email", Value: string(hash)},
+			{Key: "email", Value: data.email},
 			{Key: "username", Value: data.username},
-			{Key: "password", Value: data.password},
+			{Key: "password", Value: string(hash)},
 		})
 		if err != nil {
 			log.Println(Red(err.Error()).Bold())
