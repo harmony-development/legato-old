@@ -1,0 +1,4 @@
+echo -e "\e[33mBuilding Harmony Server..."
+go build 
+echo -e "\e[32m\e[1mBuild Complete, Starting Server\e[0m"
+./harmony-server
