@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/bluskript/harmony-server/globals"
 	"github.com/bluskript/harmony-server/socket"
+	"github.com/thanhpk/randstr"
 	. "github.com/logrusorgru/aurora"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
@@ -70,7 +71,9 @@ func RegisterHandler(raw interface{}, ws *socket.WebSocket) {
 			{Key: "email", Value: data.email},
 			{Key: "username", Value: data.username},
 			{Key: "password", Value: string(hash)},
+			{Key: "userid", Value: randstr.Hex(16)},
 		})
+
 		if err != nil {
 			log.Println(Red(err.Error()).Bold())
 			whoops("REGISTER_ERROR", ws)
