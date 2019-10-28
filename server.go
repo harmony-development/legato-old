@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"github.com/bluskript/harmony-server/globals"
+	"go.mongodb.org/mongo-driver/x/bsonx"
 	"log"
 	"net/http"
 	"strconv"
@@ -29,6 +30,19 @@ func startMongoServer() {
 		log.Print(Red(err.Error()).Bold())
 	}
 	globals.HarmonyServer.Collections["users"] = client.Database("harmony").Collection("users")
+	_, err = globals.HarmonyServer.Collections["users"].Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
+		{
+			Keys:    bsonx.Doc{{"email", bsonx.Int32(1)}},
+			Options: options.Index().SetUnique(true),
+		},
+		{
+			Keys:    bsonx.Doc{{"userid", bsonx.Int32(1)}},
+			Options: options.Index().SetUnique(true),
+		},
+	})
+	if err != nil {
+		log.Fatal(Red("Unable to create indexes : " + err.Error()).Bold())
+	}
 	globals.HarmonyServer.MongoInstance = client
 }
 
