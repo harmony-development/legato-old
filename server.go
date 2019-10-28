@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/bluskript/harmony-server/globals"
 	"log"
 	"net/http"
 	"strconv"
@@ -21,31 +22,36 @@ func startMongoServer() {
 	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
 		log.Print(Red(err.Error()).Bold())
+		return
 	}
 	err = client.Connect(ctx)
 	if err != nil {
 		log.Print(Red(err.Error()).Bold())
 	}
-	rest.MongoInstance = client
+	globals.HarmonyServer.Collections["users"] = client.Database("harmony").Collection("users")
+	globals.HarmonyServer.MongoInstance = client
 }
 
 func websocketHandler(w http.ResponseWriter, r *http.Request) {
-	ws, err := socket.CreateServer(w, r)
+	var err error
+	globals.HarmonyServer.SocketServer, err = socket.CreateServer(w, r)
 	if err != nil {
 		log.Printf("Error creating websocket server: %v", err)
 		return
 	}
-	ws.On("ping", handler.PingHandler)
+	globals.HarmonyServer.SocketServer.On("ping", handler.PingHandler)
+	globals.HarmonyServer.SocketServer.On("login", handler.LoginHandler)
+	globals.HarmonyServer.SocketServer.On("register", handler.RegisterHandler)
 }
 
 func startServer(port int, callback func(error)) {
-	router := mux.NewRouter()
-	router.Handle("/", http.FileServer(http.Dir("public/")))
-	router.HandleFunc("/api/ping", rest.Ping)
-	router.HandleFunc("/api/socket", websocketHandler)
+	globals.HarmonyServer.Router = mux.NewRouter()
+	globals.HarmonyServer.Router.Handle("/", http.FileServer(http.Dir("public/")))
+	globals.HarmonyServer.Router.HandleFunc("/api/ping", rest.Ping)
+	globals.HarmonyServer.Router.HandleFunc("/api/socket", websocketHandler)
 
 	startMongoServer()
 
 	log.Println(Green("Server successfully started on port " + strconv.Itoa(port)).Bold())
-	callback(http.ListenAndServe(":"+strconv.Itoa(port), router))
+	callback(http.ListenAndServe(":"+strconv.Itoa(port), globals.HarmonyServer.Router))
 }

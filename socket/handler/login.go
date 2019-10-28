@@ -2,12 +2,13 @@ package handler
 
 import (
 	"context"
-	"log"
-
+	"github.com/bluskript/harmony-server/globals"
 	"github.com/bluskript/harmony-server/mongodocs"
 	"github.com/bluskript/harmony-server/socket"
+	"github.com/logrusorgru/aurora"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"log"
 )
 
 type loginData struct {
@@ -20,14 +21,17 @@ var MongoInstance *mongo.Client
 
 // LoginHandler authenticates harmony users
 func LoginHandler(raw interface{}, ws *socket.WebSocket) {
-	rawmap, ok := raw.(map[string]interface{})
+	if globals.HarmonyServer.Collections["users"] == nil {
+		log.Println(aurora.Red("Users collection not available").Bold())
+		return
+	}
+	rawMap, ok := raw.(map[string]interface{})
 	if ok {
 		var data loginData
-		if data.email, ok = rawmap["email"].(string); ok {
-			if data.password, ok = rawmap["password"].(string); ok {
-				userCollection := MongoInstance.Database("harmony").Collection("users")
+		if data.email, ok = rawMap["email"].(string); ok {
+			if data.password, ok = rawMap["password"].(string); ok {
 				var user mongodocs.User
-				err := userCollection.FindOne(context.TODO(), bson.D{
+				err := globals.HarmonyServer.Collections["users"].FindOne(context.TODO(), bson.D{
 					{"email", data.email},
 				}).Decode(&user)
 				if err != nil {
