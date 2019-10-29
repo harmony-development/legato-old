@@ -26,11 +26,14 @@ func startMongoServer() {
 	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
 		log.Print(Red(err.Error()).Bold())
+		cancel()
 		return
 	}
 	err = client.Connect(ctx)
 	if err != nil {
 		log.Print(Red(err.Error()).Bold())
+		cancel()
+		return
 	}
 	globals.HarmonyServer.Collections["users"] = client.Database("harmony").Collection("users")
 	_, err = globals.HarmonyServer.Collections["users"].Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
@@ -44,7 +47,9 @@ func startMongoServer() {
 		},
 	})
 	if err != nil {
+		cancel()
 		log.Fatal(Red("Unable to create indexes : " + err.Error()).Bold())
+		return
 	}
 	globals.HarmonyServer.MongoInstance = client
 	cancel()
