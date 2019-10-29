@@ -43,7 +43,7 @@ func LoginHandler(raw interface{}, ws *socket.WebSocket) {
 	}
 	var user *mongodocs.User
 	err := globals.HarmonyServer.Collections["users"].FindOne(context.TODO(), bson.D{
-		{"email", data.email},
+		{Key: "email", Value: data.email},
 	}).Decode(&user)
 	if err != nil {
 		loginErr("Invalid Email Or Password", ws)
