@@ -80,7 +80,7 @@ func RegisterHandler(raw interface{}, ws *socket.WebSocket) {
 
 		if err != nil {
 			log.Println(Red(err.Error()).Bold())
-			whoops("REGISTER_ERROR", ws)
+			regErr("Something went wrong while registering. The email specified might already be registered", ws)
 			return
 		}
 
@@ -94,11 +94,12 @@ func RegisterHandler(raw interface{}, ws *socket.WebSocket) {
 		}
 
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		tokenString, err := token.SignedString(globals.HarmonyServer.JwtSecret)
+		tokenString, err := token.SignedString([]byte(globals.HarmonyServer.JwtSecret))
 		if err != nil {
+			log.Println(Red(err.Error()).Bold())
 			regErr("Unable to create token", ws)
 			return
 		}
-
+		register(tokenString, ws)
 	}
 }

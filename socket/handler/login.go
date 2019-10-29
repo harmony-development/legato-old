@@ -2,7 +2,9 @@ package handler
 
 import (
 	"context"
+	"github.com/dgrijalva/jwt-go"
 	"log"
+	"time"
 
 	"github.com/bluskript/harmony-server/globals"
 	"github.com/bluskript/harmony-server/mongodocs"
@@ -57,4 +59,17 @@ func LoginHandler(raw interface{}, ws *socket.WebSocket) {
 		return
 	}
 
+	expireTime := time.Now().Add(30 * 24 * time.Hour).UTC()
+	claims := &Claims{
+		Userid: user.Userid,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expireTime.Unix(),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString([]byte(globals.HarmonyServer.JwtSecret))
+	if err != nil {
+		whoops("LOGIN", ws)
+	}
+	login(tokenString, ws)
 }
