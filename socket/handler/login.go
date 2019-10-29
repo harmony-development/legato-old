@@ -11,7 +11,6 @@ import (
 	"github.com/bluskript/harmony-server/socket"
 	"github.com/logrusorgru/aurora"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -19,9 +18,6 @@ type loginData struct {
 	email    string
 	password string
 }
-
-// MongoInstance is an instance of the mongo client to do queries with
-var MongoInstance *mongo.Client
 
 // LoginHandler authenticates harmony users
 func LoginHandler(raw interface{}, ws *socket.WebSocket) {
