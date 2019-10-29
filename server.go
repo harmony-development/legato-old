@@ -22,7 +22,7 @@ import (
 )
 
 func startMongoServer() {
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
 		log.Print(Red(err.Error()).Bold())
@@ -35,11 +35,11 @@ func startMongoServer() {
 	globals.HarmonyServer.Collections["users"] = client.Database("harmony").Collection("users")
 	_, err = globals.HarmonyServer.Collections["users"].Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
 		{
-			Keys:    bsonx.Doc{{"email", bsonx.Int32(1)}},
+			Keys:    bsonx.Doc{{Key: "email", Value: bsonx.Int32(1)}},
 			Options: options.Index().SetUnique(true),
 		},
 		{
-			Keys:    bsonx.Doc{{"userid", bsonx.Int32(1)}},
+			Keys:    bsonx.Doc{{Key: "userid", Value: bsonx.Int32(1)}},
 			Options: options.Index().SetUnique(true),
 		},
 	})
@@ -47,6 +47,7 @@ func startMongoServer() {
 		log.Fatal(Red("Unable to create indexes : " + err.Error()).Bold())
 	}
 	globals.HarmonyServer.MongoInstance = client
+	cancel()
 }
 
 func websocketHandler(w http.ResponseWriter, r *http.Request) {
