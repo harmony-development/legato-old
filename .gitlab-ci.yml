@@ -13,6 +13,7 @@ stages:
   - build
 
 build:
+  stage: build
   script:
     - npm install
     - npm build
