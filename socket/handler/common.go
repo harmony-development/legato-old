@@ -18,10 +18,24 @@ func whoops(name string, ws *socket.WebSocket) {
 	}).Raw()
 }
 
+func register(token string, ws *socket.WebSocket) {
+	ws.Out <- (&socket.Event{
+		Name: "REGISTER",
+		Data: token,
+	}).Raw()
+}
+
 func regErr(reason string, ws *socket.WebSocket) {
 	ws.Out <- (&socket.Event{
 		Name: "REGISTER_ERROR",
 		Data: reason,
+	}).Raw()
+}
+
+func login(token string, ws *socket.WebSocket) {
+	ws.Out <- (&socket.Event{
+		Name: "LOGIN",
+		Data: token,
 	}).Raw()
 }
 
