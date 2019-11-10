@@ -47,7 +47,7 @@ func CreateServer(w http.ResponseWriter, r *http.Request) (*WebSocket, error) {
 // Reader handles reading for the socket server
 func (ws *WebSocket) Reader() {
 	defer func() {
-		ws.Conn.Close()
+		_ = ws.Conn.Close()
 	}()
 	for {
 		_, message, err := ws.Conn.ReadMessage()
@@ -71,15 +71,15 @@ func (ws *WebSocket) Writer() {
 		select {
 		case message, exists := <-ws.Out:
 			if !exists {
-				ws.Conn.WriteMessage(websocket.CloseMessage, make([]byte, 0))
+				_ = ws.Conn.WriteMessage(websocket.CloseMessage, make([]byte, 0))
 				return
 			}
 			w, err := ws.Conn.NextWriter(websocket.TextMessage)
 			if err != nil {
 				return
 			}
-			w.Write(message)
-			w.Close()
+			_, _ = w.Write(message)
+			_ = w.Close()
 		}
 	}
 }

@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"context"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 	"regexp"
 	"time"
@@ -11,8 +11,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	. "github.com/logrusorgru/aurora"
 	"github.com/thanhpk/randstr"
-	"go.mongodb.org/mongo-driver/bson"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type registerData struct {
@@ -25,8 +23,8 @@ var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9.!#$%&'*+/=?^_` + "`" + `{|}~-]+
 
 // RegisterHandler handles user registration in harmony
 func RegisterHandler(raw interface{}, ws *socket.WebSocket) {
-	if globals.HarmonyServer.Collections["users"] == nil {
-		log.Println(Red("Users collection not available").Bold())
+	if globals.HarmonyServer.DatabaseInstance == nil {
+		log.Println(Red("Database Instance not available").Bold())
 		return
 	}
 
@@ -71,12 +69,7 @@ func RegisterHandler(raw interface{}, ws *socket.WebSocket) {
 
 		// all inputs are valid here
 		userid := randstr.Hex(16)
-		_, err = globals.HarmonyServer.Collections["users"].InsertOne(context.TODO(), bson.D{
-			{Key: "email", Value: data.email},
-			{Key: "username", Value: data.username},
-			{Key: "password", Value: string(hash)},
-			{Key: "userid", Value: userid},
-		})
+		_, err = globals.HarmonyServer.DatabaseInstance.Exec("INSERT INTO users (id, email, password, username) VALUES (?, ?, ?, ?)", userid, data.email, hash, data.username)
 
 		if err != nil {
 			log.Println(Red(err.Error()).Bold())
@@ -85,7 +78,6 @@ func RegisterHandler(raw interface{}, ws *socket.WebSocket) {
 		}
 
 		expireTime := time.Now().Add(30 * 24 * time.Hour).UTC()
-
 		claims := &Claims{
 			Userid: userid,
 			StandardClaims: jwt.StandardClaims{
