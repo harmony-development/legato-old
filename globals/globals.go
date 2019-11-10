@@ -1,22 +1,21 @@
 package globals
 
 import (
+	"database/sql"
 	"github.com/bluskript/harmony-server/socket"
 	"github.com/gorilla/mux"
-	"go.mongodb.org/mongo-driver/mongo"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type Server struct {
-	JwtSecret     string
-	SocketServer  *socket.WebSocket
-	Collections   map[string]*mongo.Collection
-	MongoInstance *mongo.Client
-	Router        *mux.Router
+	JwtSecret        string
+	SocketServer     *socket.WebSocket
+	DatabaseInstance *sql.DB
+	Router           *mux.Router
 }
 
 var HarmonyServer = Server{
-	SocketServer:  nil,
-	Collections:   make(map[string]*mongo.Collection),
-	MongoInstance: nil,
-	Router:        nil,
+	SocketServer:     nil,
+	DatabaseInstance: nil,
+	Router:           nil,
 }

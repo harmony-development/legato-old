@@ -1,58 +1,42 @@
 package main
 
 import (
-	"context"
+	"database/sql"
+	"github.com/bluskript/harmony-server/globals"
+	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
-	"time"
-
-	"github.com/bluskript/harmony-server/globals"
-	"github.com/joho/godotenv"
-	"go.mongodb.org/mongo-driver/x/bsonx"
 
 	"github.com/bluskript/harmony-server/rest"
 	"github.com/bluskript/harmony-server/socket"
 	"github.com/bluskript/harmony-server/socket/handler"
 	"github.com/gorilla/mux"
 	. "github.com/logrusorgru/aurora"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	_ "github.com/mattn/go-sqlite3"
 )
 
-func startMongoServer() {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+func openDatabase() {
+	database, err := sql.Open("sqlite3", "harmony.db")
 	if err != nil {
-		log.Print(Red(err.Error()).Bold())
-		cancel()
-		return
+		log.Fatal(Red("unable to open harmony.db, harmony cannot continue " + err.Error()).Bold())
 	}
-	err = client.Connect(ctx)
+	statement, err := database.Prepare(`CREATE TABLE IF NOT EXISTS users (
+		id TEXT NOT NULL PRIMARY KEY UNIQUE,
+		email TEXT UNIQUE NOT NULL,
+		password TEXT NOT NULL,
+		username TEXT
+	)`)
 	if err != nil {
-		log.Print(Red(err.Error()).Bold())
-		cancel()
-		return
+		log.Fatal(Red("Cannot prepare database initialization statements, harmony cannot continue. " + err.Error()).Bold())
 	}
-	globals.HarmonyServer.Collections["users"] = client.Database("harmony").Collection("users")
-	_, err = globals.HarmonyServer.Collections["users"].Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
-		{
-			Keys:    bsonx.Doc{{Key: "email", Value: bsonx.Int32(1)}},
-			Options: options.Index().SetUnique(true),
-		},
-		{
-			Keys:    bsonx.Doc{{Key: "userid", Value: bsonx.Int32(1)}},
-			Options: options.Index().SetUnique(true),
-		},
-	})
+	_, err = statement.Exec()
 	if err != nil {
-		cancel()
-		log.Fatal(Red("Unable to create indexes : " + err.Error()).Bold())
-		return
+		log.Fatal(Red("Cannot execute initialization statements, harmony cannot continue " + err.Error()).Bold())
 	}
-	globals.HarmonyServer.MongoInstance = client
-	cancel()
+
+	globals.HarmonyServer.DatabaseInstance = database
 }
 
 func websocketHandler(w http.ResponseWriter, r *http.Request) {
@@ -79,9 +63,7 @@ func startServer(port int, callback func(error)) {
 	globals.HarmonyServer.Router.Handle("/", http.FileServer(http.Dir("public/")))
 	globals.HarmonyServer.Router.HandleFunc("/api/ping", rest.Ping)
 	globals.HarmonyServer.Router.HandleFunc("/api/socket", websocketHandler)
-
-	startMongoServer()
-
+	openDatabase()
 	log.Println(Green("Server successfully started on port " + strconv.Itoa(port)).Bold())
 	callback(http.ListenAndServe(":"+strconv.Itoa(port), globals.HarmonyServer.Router))
 }

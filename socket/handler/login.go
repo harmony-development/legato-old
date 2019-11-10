@@ -1,16 +1,14 @@
 package handler
 
 import (
-	"context"
+	"github.com/bluskript/harmony-server/tablestructs"
 	"github.com/dgrijalva/jwt-go"
 	"log"
 	"time"
 
 	"github.com/bluskript/harmony-server/globals"
-	"github.com/bluskript/harmony-server/mongodocs"
 	"github.com/bluskript/harmony-server/socket"
 	"github.com/logrusorgru/aurora"
-	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -21,8 +19,8 @@ type loginData struct {
 
 // LoginHandler authenticates harmony users
 func LoginHandler(raw interface{}, ws *socket.WebSocket) {
-	if globals.HarmonyServer.Collections["users"] == nil {
-		log.Println(aurora.Red("Users collection not available").Bold())
+	if globals.HarmonyServer.DatabaseInstance == nil {
+		log.Println(aurora.Red("Database Instance not available").Bold())
 		return
 	}
 	rawMap, ok := raw.(map[string]interface{})
@@ -41,14 +39,14 @@ func LoginHandler(raw interface{}, ws *socket.WebSocket) {
 		loginErr("Invalid Password", ws)
 		return
 	}
-	var user *mongodocs.User
-	err := globals.HarmonyServer.Collections["users"].FindOne(context.TODO(), bson.D{
-		{Key: "email", Value: data.email},
-	}).Decode(&user)
+	var user = new(tablestructs.User)
+	err := globals.HarmonyServer.DatabaseInstance.QueryRow("SELECT id, email, password, username FROM users WHERE email=?", data.email).Scan(&user.Id, &user.Email, &user.Password, &user.Username)
 	if err != nil {
+		log.Println(aurora.Yellow("Error querying for user " + err.Error()).Bold())
 		loginErr("Invalid Email Or Password", ws)
 		return
 	}
+
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.password))
 	if err != nil {
 		loginErr("Invalid Email Or Password", ws)
@@ -57,7 +55,7 @@ func LoginHandler(raw interface{}, ws *socket.WebSocket) {
 
 	expireTime := time.Now().Add(30 * 24 * time.Hour).UTC()
 	claims := &Claims{
-		Userid: user.Userid,
+		Userid: user.Id,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expireTime.Unix(),
 		},
