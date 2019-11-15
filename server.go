@@ -4,10 +4,12 @@ import (
 	"database/sql"
 	"github.com/bluskript/harmony-server/globals"
 	"github.com/joho/godotenv"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/bluskript/harmony-server/rest"
 	"github.com/bluskript/harmony-server/socket"
@@ -22,17 +24,14 @@ func openDatabase() {
 	if err != nil {
 		log.Fatal(Red("unable to open harmony.db, harmony cannot continue " + err.Error()).Bold())
 	}
-		statement, err := database.Prepare(`CREATE TABLE IF NOT EXISTS users (
-		id TEXT NOT NULL PRIMARY KEY UNIQUE,
-		email TEXT UNIQUE NOT NULL,
-		password TEXT NOT NULL,
-		username TEXT)`)
-	if err != nil {
-		log.Fatal(Red("Cannot prepare database initialization statements, harmony cannot continue. " + err.Error()).Bold())
-	}
-	_, err = statement.Exec()
-	if err != nil {
-		log.Fatal(Red("Cannot execute initialization statements, harmony cannot continue " + err.Error()).Bold())
+	rawQuery, err := ioutil.ReadFile("schema.sql")
+	initQuery := string(rawQuery)
+	requests := strings.Split(initQuery, ";")
+	for _, request := range requests {
+		_, err = database.Exec(request)
+		if err != nil {
+			log.Fatal(Red("Cannot prepare database initialization statements, harmony cannot continue. " + err.Error()).Bold())
+		}
 	}
 
 	globals.HarmonyServer.DatabaseInstance = database
