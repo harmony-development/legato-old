@@ -51,7 +51,7 @@ func deauth(ws *socket.WebSocket) {
 func verifyToken(rawToken string) (*AuthToken, error) {
 	token, err := jwt.Parse(rawToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method %v", token.Header["alg"])
+			return nil, fmt.Errorf("unexpected signing method %v", token.Header["alg"])
 		}
 		return globals.HarmonyServer.JwtSecret, nil
 	})
@@ -61,7 +61,7 @@ func verifyToken(rawToken string) (*AuthToken, error) {
 	if claims, ok := token.Claims.(AuthToken); ok && token.Valid {
 		return &claims, nil
 	}
-	return nil, nil
+	return nil, fmt.Errorf("error parsing claims")
 }
 
 func loginErr(reason string, ws *socket.WebSocket) {
