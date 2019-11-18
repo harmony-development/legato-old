@@ -1,12 +1,14 @@
 package handler
 
 import (
+	"fmt"
+	"github.com/bluskript/harmony-server/globals"
 	"github.com/bluskript/harmony-server/socket"
 	"github.com/dgrijalva/jwt-go"
 )
 
-// Claims is a structure for the authentication JWT
-type Claims struct {
+// AuthToken is a structure for the authentication JWT
+type AuthToken struct {
 	Userid string
 	jwt.StandardClaims
 }
@@ -37,6 +39,29 @@ func login(token string, ws *socket.WebSocket) {
 		Name: "LOGIN",
 		Data: token,
 	}).Raw()
+}
+
+func deauth(ws *socket.WebSocket) {
+	ws.Out <- (&socket.Event{
+		Name: "DEAUTH",
+		Data: nil,
+	}).Raw()
+}
+
+func verifyToken(rawToken string) (*AuthToken, error) {
+	token, err := jwt.Parse(rawToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method %v", token.Header["alg"])
+		}
+		return globals.HarmonyServer.JwtSecret, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if claims, ok := token.Claims.(AuthToken); ok && token.Valid {
+		return &claims, nil
+	}
+	return nil, nil
 }
 
 func loginErr(reason string, ws *socket.WebSocket) {

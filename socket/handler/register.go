@@ -78,7 +78,7 @@ func RegisterHandler(raw interface{}, ws *socket.WebSocket) {
 		}
 
 		expireTime := time.Now().Add(30 * 24 * time.Hour).UTC()
-		claims := &Claims{
+		claims := &AuthToken{
 			Userid: userid,
 			StandardClaims: jwt.StandardClaims{
 				ExpiresAt: expireTime.Unix(),
