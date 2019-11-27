@@ -25,5 +25,28 @@ func getServers(raw interface{}, ws *socket.WebSocket) {
 	if !ok {
 		return
 	}
-	
+	token, err := verifyToken(data.token)
+
+	if err != nil {
+		deauth(ws)
+		return
+	}
+	servers, err := globals.HarmonyServer.DatabaseInstance.Query("SELECT server_id FROM user_servers WHERE user_id=?", token.Userid)
+	if err != nil {
+		return
+	}
+	defer func() {
+		err := servers.Close()
+		if err != nil {
+			log.Printf("Error closing row %v", err)
+		}
+	}()
+	err = servers.Err()
+	if err != nil {
+		log.Printf(err.Error())
+	}
+	for servers.Next() {
+		
+	}
+
 }
