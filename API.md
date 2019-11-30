@@ -7,7 +7,7 @@ All of the API is structured like this :
     "data": interface{}
 }
 ```
-This applies to all serverbound and clientbound packets.
+This applies to all server-bound and client-bound packets.
 
 ## Server Bound API
 * **Login Event**
@@ -31,23 +31,97 @@ This applies to all serverbound and clientbound packets.
 		}
 	}
 	```
-* **GetServers Event**
-	```json
+* **GetGuilds Event**
+  ```json
 	{
-		"type": "getservers",
+		"type": "getguilds",
 		"data": {
 			"token": string
 		}
 	}
 	```
+* **JoinGuild Event**
+  ```json
+  {
+    "type": "joinguild",
+    "data": {
+      "token": string,
+      "invitecode": string
+    }
+  }
+  ```
 
 ## Client Bound API
+* **RegisterError**
+  ```json
+  {
+    "type": "registererror",
+    "data": {
+      "message": string
+    }
+  }
+  ```
+* **LoginError**
+  ```json
+  {
+    "type": "loginerror",
+    "data": {
+      "message": string
+    }
+  }
+    ```
 * **Deauth**
 	```json
 	{
-		"type": "Deauth",
+		"type": "deauth",
 		"data": {
 			"message": "token is missing or invalid"
 		}
 	}
 	```
+* **Token**
+  ```json
+  {
+    "type": "token",
+    "data": {
+      "token": string
+    }
+  }
+  ```
+* **GetGuilds**
+  ```json
+  {
+    "type": "getguilds",
+    "data": {
+      "guilds": [
+        {
+          "guildid": string,
+          "guildname": string,
+          "picture": string
+        }
+      ]
+    }
+  }
+  ```
+* **JoinGuild**
+  ```json
+  {
+    "type": "joinguild",
+    "data": {
+      "guild": string
+    }
+  }
+  ```
+
+  ```
+* **Message**
+  ```json
+  {
+    "type": "message",
+    "data": {
+      "guild": string,
+      "userid": string,
+      "message": string
+    }
+  }
+  ```
