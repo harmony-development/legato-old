@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/kataras/golog"
+	"harmony-server/globals"
 	"harmony-server/socket"
 	"os"
 	"time"
@@ -13,7 +14,7 @@ var jwtSecret = os.Getenv("JWT_SECRET")
 
 func regErr(ws *socket.Client, msg string) {
 	ws.Send(&socket.Packet{
-		Type: "RegisterError",
+		Type: "registererror",
 		Data: map[string]interface{}{
 			"message": msg,
 		},
@@ -22,7 +23,7 @@ func regErr(ws *socket.Client, msg string) {
 
 func loginErr(ws *socket.Client, msg string) {
 	ws.Send(&socket.Packet{
-		Type: "LoginError",
+		Type: "loginerror",
 		Data: map[string]interface{}{
 			"message": msg,
 		},
@@ -31,7 +32,7 @@ func loginErr(ws *socket.Client, msg string) {
 
 func deauth(ws *socket.Client) {
 	ws.Send(&socket.Packet{
-		Type: "Deauth",
+		Type: "deauth",
 		Data: map[string]interface{}{
 			"message": "token is missing or invalid",
 		},
@@ -50,7 +51,7 @@ func sendToken(ws *socket.Client, id string) {
 	}
 
 	ws.Send(&socket.Packet{
-		Type: "Token",
+		Type: "token",
 		Data: map[string]interface{}{
 			"token": tokenString,
 		},
@@ -74,5 +75,17 @@ func verifyToken(tokenstr string) string {
 		return claims["id"].(string)
 	} else {
 		return ""
+	}
+}
+
+func registerSocket(guildid string, ws *socket.Client, userid string) {
+	if globals.Guilds[guildid] != nil {
+		globals.Guilds[guildid].Clients[userid] = ws
+	} else {
+		globals.Guilds[guildid] = &globals.Guild{
+			Clients: map[string]*socket.Client{
+				userid: ws,
+			},
+		}
 	}
 }

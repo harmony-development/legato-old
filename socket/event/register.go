@@ -43,6 +43,7 @@ func OnRegister(ws *socket.Client, rawMap map[string]interface{}) {
 	}
 	if len(data.Username) < 5 || len(data.Username) > 48 {
 		regErr(ws, "Username must be between 5 and 48 characters long")
+		return
 	}
 	if !verifyEmail(data.Email) {
 		regErr(ws, "Invalid email")
