@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY UNIQUE, email TEXT UNIQUE, username TEXT, avatar TEXT, password TEXT)
