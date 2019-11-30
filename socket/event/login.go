@@ -20,6 +20,7 @@ func OnLogin(ws *socket.Client, rawMap map[string]interface{}) {
 	}
 	if data.Password, ok = rawMap["password"].(string); !ok {
 		loginErr(ws, "Password is required")
+		return
 	}
 	var passwd string
 	var id string
