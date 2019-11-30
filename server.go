@@ -11,4 +11,5 @@ func handleSocket(w http.ResponseWriter, r *http.Request) {
 	ws.Bind("login", event.OnLogin)
 	ws.Bind("register", event.OnRegister)
 	ws.Bind("getservers", event.OnGetServers)
+	ws.Bind("message", event.OnMessage)
 }
