@@ -5,11 +5,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/kataras/golog"
 	"net/http"
-	"time"
-)
-
-const (
-	PingTimeout = 60 * time.Second
 )
 
 var (

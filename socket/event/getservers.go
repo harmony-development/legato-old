@@ -2,6 +2,7 @@ package event
 
 import (
 	"github.com/kataras/golog"
+	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"harmony-server/socket"
 )
@@ -39,6 +40,17 @@ func OnGetServers(ws *socket.Client, rawMap map[string]interface{}) {
 		err := res.Scan(&fetchedServer.Guildid, &fetchedServer.Servername, &fetchedServer.Picture)
 		if err != nil {
 			return
+		}
+
+		// Now subscribe to all guilds that the client is a member of!
+		if globals.Guilds[fetchedServer.Guildid] != nil {
+			globals.Guilds[fetchedServer.Guildid].Clients[userid] = ws
+		} else {
+			globals.Guilds[fetchedServer.Guildid] = &globals.Guild{
+				Clients: map[string]*socket.Client{
+					userid: ws,
+				},
+			}
 		}
 		returnServers = append(returnServers, fetchedServer)
 	}
