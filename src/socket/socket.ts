@@ -1,43 +1,40 @@
-import io from 'socket.io-client';
-import { IProfileUpdate } from '../types';
+interface ISocketEvent {
+    type: string;
+    data: unknown;
+}
 
-export const Events = {
-  PROFILE_UPDATE: 'PROFILE_UPDATE',
-  GET_USER_DATA: 'GET_USER_DATA',
-  GET_TARGET_USER_DATA: 'GET_TARGET_USER_DATA',
-  GET_USER_DATA_ERROR: 'GET_USER_DATA_ERROR',
-  MESSAGE: 'MESSAGE',
-  LOAD_MESSAGES: 'LOAD_MESSAGES',
-  LOAD_MESSAGES_ERROR: 'LOAD_MESSAGES_ERROR',
-  LOGIN: 'LOGIN',
-  LOGIN_ERROR: 'LOGIN_ERROR',
-  REGISTER: 'REGISTER',
-  REGISTER_ERROR: 'REGISTER_ERROR',
-  INVALIDATE_SESSION: 'INVALIDATE_SESSION'
-};
+interface IDeauth {
+    message: string;
+}
+
+interface IMessage {
+    guild: string;
+    userid: string;
+    message: string;
+}
 
 export class HarmonyConnection {
-  connection: SocketIOClient.Socket;
+    connection: WebSocket;
 
-  constructor() {
-    this.connection = io('0.0.0.0:4000');
-  }
-
-  register(email: string, username: string, password: string): void {
-    this.connection.emit(Events.REGISTER, { email, username, password });
-  }
-
-  login(email: string, password: string): void {
-    this.connection.emit(Events.LOGIN, { email, password });
-  }
-
-  saveProfile(newUser: IProfileUpdate): void {
-    this.connection.emit(Events.PROFILE_UPDATE, newUser);
-  }
-
-  getUserData(): void {
-    this.connection.emit(Events.GET_USER_DATA, {
-      token: localStorage.getItem('token') as string
-    });
-  }
+    constructor() {
+        this.connection = new WebSocket('ws://localhost:8080/api/socket/');
+        this.connection.addEventListener('message', function(event) {
+            const message = event.data;
+            const parsed: ISocketEvent = JSON.parse(message);
+            switch (parsed.type) {
+                case 'Deauth': {
+                    localStorage.removeItem('token');
+                    break;
+                }
+                case 'Message': {
+                    const parsedMessage = parsed.data as IMessage;
+                    console.log(`Message in ${parsedMessage.guild} from ${parsedMessage.userid} with message ${parsedMessage.message}`);
+                    break;
+                }
+                default: {
+                    console.log(`Unknown event received : ${parsed.type}`);
+                }
+            }
+        });
+    }
 }

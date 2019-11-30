@@ -12,83 +12,72 @@ import { ThemeProvider } from '@material-ui/styles';
 import { Switch, Route, BrowserRouter as Router } from 'react-router-dom';
 import EntryScreen from './EntryScreen/EntryScreen';
 import App from './App/App';
-import { HarmonyConnection, Events } from '../socket/socket';
+import { HarmonyConnection } from '../socket/socket';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { IGetUserData } from '../types';
-import { updateUser } from '../store/actions/AppActions';
 
 export const socketServer = new HarmonyConnection();
 let previouslyDisconnected = false;
 
 const Theme: React.FC<{}> = () => {
-  useStyles();
+    useStyles();
 
-  return <></>;
+    return <></>;
 };
 
-socketServer.connection.on('connect', () => {
-  if (previouslyDisconnected) {
-    toast.success('You have reconnected to the server');
-  }
+socketServer.connection.addEventListener('open', () => {
+    if (previouslyDisconnected) {
+        toast.success('You have reconnected to the server');
+    }
 });
 
-socketServer.connection.on('disconnect', () => {
-  toast.error('You have lost connection to the server');
-  previouslyDisconnected = true;
+socketServer.connection.addEventListener('close', () => {
+    toast.error('You have lost connection to the server');
+    previouslyDisconnected = true;
 });
 
 const Root: React.FC<{}> = () => {
-  const { type, primary, secondary } = useSelector((state: IAppState) => state.theme);
-  const dispatch = useDispatch();
-  const theme = createMuiTheme({
-    palette: {
-      type,
-      primary,
-      secondary
-    }
-  });
-
-  useEffect(() => {
-    socketServer.saveProfile({ theme: { type, primary, secondary }, token: localStorage.getItem('token') as string });
-  }, [type, primary, secondary]);
-
-  useEffect(() => {
-    socketServer.getUserData();
-
-    socketServer.connection.on(Events.GET_USER_DATA, (data: IGetUserData) => {
-      dispatch(
-        updateUser({
-          username: data.username,
-          avatar: data.avatar || ''
-        })
-      );
+    const { type, primary, secondary } = useSelector((state: IAppState) => state.theme);
+    const dispatch = useDispatch();
+    const theme = createMuiTheme({
+        palette: {
+            type,
+            primary,
+            secondary
+        }
     });
-  }, [dispatch]);
 
-  return (
-    <div className='app-container'>
-      <ThemeProvider theme={theme}>
-        <Theme />
-        <CssBaseline />
-        <Router>
-          <Switch>
-            <Route exact path='/' component={EntryScreen}></Route>
-            <Route exact path='/app' component={App}></Route>
-          </Switch>
-        </Router>
-        <ToastContainer />
-      </ThemeProvider>
-    </div>
-  );
+    useEffect(() => {
+        // TODO : ADD PROFILE SAVING
+    }, [type, primary, secondary]);
+
+    useEffect(() => {
+        //TODO : ADD GETTING PROFILE FEATURES
+    }, [dispatch]);
+
+    return (
+        <div className='app-container'>
+            <ThemeProvider theme={theme}>
+                <Theme />
+                <CssBaseline />
+                <Router>
+                    <Switch>
+                        <Route exact path='/' component={EntryScreen}></Route>
+                        <Route exact path='/app' component={App}></Route>
+                    </Switch>
+                </Router>
+                <ToastContainer />
+            </ThemeProvider>
+        </div>
+    );
 };
 
 const ReduxRoot: React.FC<{}> = () => {
-  return (
-    <Provider store={store}>
-      <Root />
-    </Provider>
-  );
+    return (
+        <Provider store={store}>
+            <Root />
+        </Provider>
+    );
 };
 
 export default ReduxRoot;

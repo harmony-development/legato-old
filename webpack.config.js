@@ -1,3 +1,3 @@
 module.exports = {
-  entry: ['react-hot-loader/patch', './src']
+    entry: ['react-hot-loader/patch', './src']
 };

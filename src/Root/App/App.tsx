@@ -8,28 +8,28 @@ import { useHistory } from 'react-router';
 import { socketServer } from '../Root';
 
 const App: React.FC<{}> = () => {
-  const classes = useStyles();
-  const history = useHistory();
+    const classes = useStyles();
+    const history = useHistory();
 
-  useEffect(() => {
-    socketServer.connection.on(Events.INVALIDATE_SESSION, () => {
-      localStorage.removeItem('token');
-      history.push('/');
+    useEffect(() => {
+        socketServer.connection.on(Events.INVALIDATE_SESSION, () => {
+            localStorage.removeItem('token');
+            history.push('/');
+        });
+
+        return (): void => {
+            socketServer.connection.removeEventListener(Events.INVALIDATE_SESSION);
+        };
     });
 
-    return (): void => {
-      socketServer.connection.removeEventListener(Events.INVALIDATE_SESSION);
-    };
-  });
-
-  return (
-    <>
-      <NavBar />
-      <div className={classes.navbarSpacer} />
-      <ChangeNameDialog />
-      <Chat />
-    </>
-  );
+    return (
+        <>
+            <NavBar />
+            <div className={classes.navbarSpacer} />
+            <ChangeNameDialog />
+            <Chat />
+        </>
+    );
 };
 
 export default App;

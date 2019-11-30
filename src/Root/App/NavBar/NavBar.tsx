@@ -7,27 +7,27 @@ import { invertTheme, toggleProfileSettingsDialog } from '../../../store/actions
 import { IInvertTheme, IToggleProfileSettingsDialog } from '../../../store/types';
 
 const NavBar: React.FC<{}> = () => {
-  const classes = useStyles();
-  const dispatch = useDispatch();
+    const classes = useStyles();
+    const dispatch = useDispatch();
 
-  return (
-    <AppBar>
-      <Toolbar>
-        <IconButton edge='start' className={classes.drawerButton} color='inherit' aria-label='menu'>
-          <Menu />
-        </IconButton>
-        <Typography variant='h6' className={classes.title}>
-          #general
-        </Typography>
-        <IconButton onClick={(): IToggleProfileSettingsDialog => dispatch(toggleProfileSettingsDialog())}>
-          <AccountCircle />
-        </IconButton>
-        <IconButton onClick={(): IInvertTheme => dispatch(invertTheme())}>
-          <InvertColors />
-        </IconButton>
-      </Toolbar>
-    </AppBar>
-  );
+    return (
+        <AppBar>
+            <Toolbar>
+                <IconButton edge='start' className={classes.drawerButton} color='inherit' aria-label='menu'>
+                    <Menu />
+                </IconButton>
+                <Typography variant='h6' className={classes.title}>
+                    #general
+                </Typography>
+                <IconButton onClick={(): IToggleProfileSettingsDialog => dispatch(toggleProfileSettingsDialog())}>
+                    <AccountCircle />
+                </IconButton>
+                <IconButton onClick={(): IInvertTheme => dispatch(invertTheme())}>
+                    <InvertColors />
+                </IconButton>
+            </Toolbar>
+        </AppBar>
+    );
 };
 
 export default NavBar;
