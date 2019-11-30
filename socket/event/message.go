@@ -37,9 +37,10 @@ func OnMessage(ws *socket.Client, rawMap map[string]interface{}) {
 	// unfortunately O(n) is the only way to do this, we just need to make n really smol (︶︹︶)
 	for _, client := range globals.Guilds[data.targetGuild].Clients {
 		client.Send(&socket.Packet{
-			Type: "message",
+			Type: "Message",
 			Data: map[string]interface{}{
-				"guild": data.targetGuild,
+				"guild":   data.targetGuild,
+				"userid":  userid,
 				"message": data.message,
 			},
 		})
