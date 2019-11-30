@@ -27,6 +27,7 @@
     "dependencies": {
         "@material-ui/core": "^4.7.0",
         "@material-ui/icons": "^4.5.1",
+        "@types/fbemitter": "^2.0.32",
         "@types/react-dom": "^16.9.4",
         "@types/react-infinite-scroller": "^1.2.1",
         "@types/react-redux": "^7.1.5",
@@ -36,6 +37,7 @@
         "@types/react-virtualized-auto-sizer": "^1.0.0",
         "@types/react-window": "^1.8.1",
         "@types/react-window-infinite-loader": "^1.0.2",
+        "fbemitter": "^2.1.1",
         "react": "^16.12.0",
         "react-dom": "^16.12.0",
         "react-hot-loader": "^4.12.18",

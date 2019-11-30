@@ -13,13 +13,12 @@ const EntryScreen: React.FC<{}> = () => {
 
     useEffect(() => {
         if (typeof localStorage.getItem('token') === 'string') {
-            socketServer.getUserData();
-            socketServer.connection.on(Events.GET_USER_DATA, () => {
+            socketServer.emitter.addListener('GetServers', () => {
                 history.push('/app');
             });
         }
         return (): void => {
-            socketServer.connection.removeEventListener(Events.GET_USER_DATA);
+            socketServer.emitter.removeAllListeners('GetServers');
         };
     });
 
