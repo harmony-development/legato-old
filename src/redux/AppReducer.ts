@@ -6,7 +6,8 @@ const appState: IState = {
         type: 'dark',
         primary: red,
         secondary: orange
-    }
+    },
+    themeDialog: false
 };
 
 export default function AppReducer(state = appState, action: Action): IState {
@@ -17,6 +18,30 @@ export default function AppReducer(state = appState, action: Action): IState {
                 theme: {
                     ...state.theme,
                     type: state.theme.type === 'dark' ? 'light' : 'dark'
+                }
+            };
+        }
+        case Actions.TOGGLE_THEME_DIALOG: {
+            return {
+                ...state,
+                themeDialog: !state.themeDialog
+            };
+        }
+        case Actions.CHANGE_PRIMARY: {
+            return {
+                ...state,
+                theme: {
+                    ...state.theme,
+                    primary: action.payload
+                }
+            };
+        }
+        case Actions.CHANGE_SECONDARY: {
+            return {
+                ...state,
+                theme: {
+                    ...state.theme,
+                    secondary: action.payload
                 }
             };
         }

@@ -1,14 +1,12 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography } from '@material-ui/core';
+import { HarmonyBar } from './HarmonyBar/HarmonyBar';
+import { ThemeDialog } from './Dialog/ThemeDialog';
 
 export const App = () => {
     return (
         <div>
-            <AppBar position='static'>
-                <Toolbar>
-                    <Typography variant='h6'>Harmony</Typography>
-                </Toolbar>
-            </AppBar>
+            <ThemeDialog />
+            <HarmonyBar />
         </div>
     );
 };

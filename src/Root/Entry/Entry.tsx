@@ -14,7 +14,7 @@ export const Entry = () => {
         if (typeof localStorage.getItem('token') === 'string') {
             history.push('/app');
         }
-    }, []);
+    }, [history]);
 
     return (
         <div className={classes.root}>
