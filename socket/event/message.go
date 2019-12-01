@@ -1,7 +1,10 @@
 package event
 
 import (
+	"github.com/kataras/golog"
+	"github.com/thanhpk/randstr"
 	"harmony-server/globals"
+	"harmony-server/harmonydb"
 	"harmony-server/socket"
 )
 
@@ -31,6 +34,13 @@ func OnMessage(ws *socket.Client, rawMap map[string]interface{}) {
 	}
 	// either the guild doesn't exist or the client isn't subbed to it - it doesn't matter.
 	if globals.Guilds[data.targetGuild] == nil || globals.Guilds[data.targetGuild].Clients[userid] == nil {
+		return
+	}
+
+	_, err := harmonydb.DBInst.Exec("INSERT INTO messages(messageid, guildid, author, message) VALUES(?, ?, ?, ?)", randstr.Hex(16), data.targetGuild, userid, data.message)
+
+	if err != nil {
+		golog.Warnf("error saving message to database : %v", err)
 		return
 	}
 
