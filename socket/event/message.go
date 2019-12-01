@@ -6,6 +6,7 @@ import (
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"harmony-server/socket"
+	"time"
 )
 
 type messageData struct {
@@ -37,7 +38,7 @@ func OnMessage(ws *socket.Client, rawMap map[string]interface{}) {
 		return
 	}
 
-	_, err := harmonydb.DBInst.Exec("INSERT INTO messages(messageid, guildid, author, message) VALUES(?, ?, ?, ?)", randstr.Hex(16), data.targetGuild, userid, data.message)
+	_, err := harmonydb.DBInst.Exec("INSERT INTO messages(messageid, guildid, createdat, author, message) VALUES(?, ?, ?, ?, ?)", randstr.Hex(16), time.Now().UTC().Unix(), data.targetGuild, userid, data.message)
 
 	if err != nil {
 		golog.Warnf("error saving message to database : %v", err)
@@ -51,6 +52,7 @@ func OnMessage(ws *socket.Client, rawMap map[string]interface{}) {
 			Data: map[string]interface{}{
 				"guild":   data.targetGuild,
 				"userid":  userid,
+				"createdat": time.Now().UTC().Unix(),
 				"message": data.message,
 			},
 		})
