@@ -3,16 +3,10 @@ import { Box, IconButton } from '@material-ui/core';
 import { useStyles } from './styles';
 import { Delete } from '@material-ui/icons';
 
-interface IProps {
-    image: string;
-    removeFromQueue: (index: number) => void;
-    index: number;
-}
-
-const FileCard: React.FC<IProps> = (props: IProps) => {
+const FileCard = (props) => {
     const classes = useStyles();
 
-    const handleDelete = (): void => {
+    const handleDelete = () => {
         props.removeFromQueue(props.index);
     };
 

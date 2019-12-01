@@ -6,26 +6,26 @@ import RegisterForm from './RegisterForm/RegisterForm';
 import { socketServer } from '../Root';
 import { useHistory } from 'react-router';
 
-const EntryScreen: React.FC<{}> = () => {
+const EntryScreen = () => {
     const classes = useStyles();
     const [value, setValue] = React.useState(0);
     const history = useHistory();
 
     useEffect(() => {
         if (typeof localStorage.getItem('token') === 'string') {
-            socketServer.emitter.addListener('GetServers', () => {
+            socketServer.emitter.addListener('getservers', () => {
                 history.push('/app');
             });
         }
-        return (): void => {
-            socketServer.emitter.removeAllListeners('GetServers');
+        return () => {
+            socketServer.emitter.removeAllListeners('getservers');
         };
     });
 
     return (
         <div className={classes.root}>
             <Paper className={classes.form}>
-                <Tabs value={value} onChange={(event: React.ChangeEvent<{}>, newValue: number): void => setValue(newValue)} variant='fullWidth' indicatorColor={'primary'}>
+                <Tabs value={value} onChange={(event, newValue) => setValue(newValue)} variant='fullWidth' indicatorColor={'primary'}>
                     <Tab label='Login' id='form-tab-0' />
                     <Tab label='Register' id='form-tab-1' />
                 </Tabs>

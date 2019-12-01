@@ -1,17 +1,12 @@
-import React, { useRef, Dispatch, SetStateAction } from 'react';
+import React, { useRef } from 'react';
 import { Avatar, Button } from '@material-ui/core';
 import { useStyles } from './styles';
 
-interface IProps {
-    icon: string;
-    setIcon: Dispatch<SetStateAction<string>>;
-}
-
-const UserIcon: React.FC<IProps> = (props: IProps) => {
-    const inputFile = useRef<HTMLInputElement>(null);
+const UserIcon: = (props) => {
+    const inputFile = useRef(null);
     const classes = useStyles();
 
-    const onFileSelected = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const onFileSelected = (event) => {
         if (event.currentTarget.files && event.currentTarget.files.length > 0) {
             const newIcon = event.currentTarget.files[0];
             if (newIcon.type.startsWith('image/') && newIcon.size < 33554432) {
@@ -26,7 +21,7 @@ const UserIcon: React.FC<IProps> = (props: IProps) => {
         }
     };
 
-    const onIconButtonPressed = (): void => {
+    const onIconButtonPressed = () => {
         if (inputFile.current) {
             inputFile.current.click();
         }

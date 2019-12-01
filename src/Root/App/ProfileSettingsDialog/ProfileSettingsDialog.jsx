@@ -7,15 +7,15 @@ import UserIcon from './UserIcon/UserIcon';
 import { socketServer } from '../../Root';
 import { toast } from 'react-toastify';
 
-const ChangeNameDialog: React.FC<{}> = () => {
+const ChangeNameDialog = () => {
     const dispatch = useDispatch();
-    const [open, user] = useSelector((state: IAppState) => [state.nameDialog, state.user]);
+    const [open, user] = useSelector((state) => [state.nameDialog, state.user]);
     const [draftName, setDraftName] = useState(user.username);
     const [draftIcon, setDraftIcon] = useState(user.avatar);
 
-    const setProfileAndClose = (): void => {
+    const setProfileAndClose = () => {
         if (localStorage.getItem('token') && typeof localStorage.getItem('token') === 'string') {
-            socketServer.saveProfile({ username: draftName, avatar: draftIcon, token: localStorage.getItem('token') as string });
+            socketServer.saveProfile({ username: draftName, avatar: draftIcon, token: localStorage.getItem('token') });
             dispatch(
                 updateUser({
                     username: draftName,
@@ -34,13 +34,13 @@ const ChangeNameDialog: React.FC<{}> = () => {
     }, [open, user.username, user.avatar]);
 
     return (
-        <Dialog open={open} onClose={(): IToggleProfileSettingsDialog => dispatch(toggleProfileSettingsDialog())}>
+        <Dialog open={open} onClose={() => dispatch(toggleProfileSettingsDialog())}>
             <DialogTitle>Change Username</DialogTitle>
             <DialogContent>
                 <UserIcon setIcon={setDraftIcon} icon={draftIcon} />
             </DialogContent>
             <DialogContent>
-                <TextField label='Username' value={draftName} onChange={(e: React.ChangeEvent<HTMLInputElement>): void => setDraftName(e.target.value)} />
+                <TextField label='Username' value={draftName} onChange={(e) => setDraftName(e.target.value)} />
             </DialogContent>
             <DialogActions>
                 <Button onClick={setProfileAndClose} color='primary' autoFocus>

@@ -9,17 +9,17 @@ import { useHistory } from 'react-router';
 import { ILoginDetails } from '../../types';
 import { toast } from 'react-toastify';
 
-const RegisterForm: React.FC<{}> = () => {
+const RegisterForm = () => {
     const classes = useStyles();
-    const [email, setEmail] = React.useState<string | undefined>(undefined);
-    const [username, setUsername] = React.useState<string | undefined>(undefined);
-    const [password, setPassword] = React.useState<string | undefined>(undefined);
-    const [confirmPassword, setConfirmPassword] = React.useState<string | undefined>(undefined);
-    const [error, setError] = React.useState<string | undefined>(undefined);
+    const [email, setEmail] = React.useState(undefined);
+    const [username, setUsername] = React.useState(undefined);
+    const [password, setPassword] = React.useState(undefined);
+    const [confirmPassword, setConfirmPassword] = React.useState(undefined);
+    const [error, setError] = React.useState(undefined);
     const dispatch = useDispatch();
     const history = useHistory();
 
-    const register = (): void => {
+    const register = () => {
         if (!socketServer.connection.connected) {
             toast.error('Unable to register. No connection to server.');
         }
@@ -34,21 +34,21 @@ const RegisterForm: React.FC<{}> = () => {
         }
     };
 
-    const onFormSubmit = (e: React.FormEvent<EventTarget>): void => {
+    const onFormSubmit = () => {
         e.preventDefault();
     };
 
     useEffect(() => {
-        socketServer.connection.on(Events.REGISTER_ERROR, (error: string) => {
-            setError(error);
+        socketServer.emitter.addListener('registererror', (data) => {
+            const parsed = setError(data);
         });
-        socketServer.connection.on(Events.REGISTER, (response: ILoginDetails) => {
+        socketServer.connection.on(Events.REGISTER, (response) => {
             history.push('/app');
             localStorage.setItem('token', response.token);
             dispatch(updateUser({ username: response.username, avatar: response.avatar }));
         });
 
-        return (): void => {
+        return () => {
             // cleanup event listeners
             socketServer.connection.removeListener(Events.REGISTER);
             socketServer.connection.removeListener(Events.REGISTER_ERROR);
@@ -58,10 +58,10 @@ const RegisterForm: React.FC<{}> = () => {
     return (
         <div className={classes.root}>
             <form onSubmit={onFormSubmit}>
-                <TextField label='Email' type='email' name='email' autoComplete='email' margin='normal' fullWidth onChange={(event): void => setEmail(event.target.value)} />
-                <TextField label='Username' type='username' name='username' autoComplete='username' margin='normal' fullWidth onChange={(event): void => setUsername(event.target.value)} />
-                <TextField label='Password' type='password' name='password' margin='normal' fullWidth onChange={(event): void => setPassword(event.target.value)} />
-                <TextField label='Confirm Password' type='password' name='confirmpassword' margin='normal' fullWidth onChange={(event): void => setConfirmPassword(event.target.value)} />
+                <TextField label='Email' type='email' name='email' autoComplete='email' margin='normal' fullWidth onChange={(event) => setEmail(event.target.value)} />
+                <TextField label='Username' type='username' name='username' autoComplete='username' margin='normal' fullWidth onChange={(event) => setUsername(event.target.value)} />
+                <TextField label='Password' type='password' name='password' margin='normal' fullWidth onChange={(event) => setPassword(event.target.value)} />
+                <TextField label='Confirm Password' type='password' name='confirmpassword' margin='normal' fullWidth onChange={(event) => setConfirmPassword(event.target.value)} />
                 {error ? (
                     <Typography variant='subtitle1' color={'error'}>
                         {error}

@@ -7,7 +7,7 @@ import { Events } from '../../socket/socket';
 import { useHistory } from 'react-router';
 import { socketServer } from '../Root';
 
-const App: React.FC<{}> = () => {
+const App = () => {
     const classes = useStyles();
     const history = useHistory();
 
@@ -17,7 +17,7 @@ const App: React.FC<{}> = () => {
             history.push('/');
         });
 
-        return (): void => {
+        return () => {
             socketServer.connection.removeEventListener(Events.INVALIDATE_SESSION);
         };
     });

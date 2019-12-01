@@ -6,23 +6,19 @@ import FileCard from './FileCard/FileCard';
 import { Events } from '../../../../socket/socket';
 import { socketServer } from '../../../Root';
 
-interface IProps {
-    name: string;
-}
-
-const ChatBox: React.FC<IProps> = (props: IProps) => {
+const ChatBox = (props) => {
     const classes = useStyles();
     const [draftMessage, setDraftMessage] = useState('');
-    const inputFile = useRef<HTMLInputElement>(null);
-    const [fileQueue, setFileQueue] = useState<string[]>([]);
+    const inputFile = useRef(null);
+    const [fileQueue, setFileQueue] = useState([]);
 
-    const sendFile = (): void => {
+    const sendFile = () => {
         if (inputFile.current) {
             inputFile.current.click();
         }
     };
 
-    const onFileSelected = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const onFileSelected = (event) => {
         if (event.currentTarget.files && event.currentTarget.files.length > 0) {
             Array.from(event.currentTarget.files).forEach((file) => {
                 if (file.type.startsWith('image/') && file.size < 33554432) {
@@ -30,7 +26,7 @@ const ChatBox: React.FC<IProps> = (props: IProps) => {
                     imageReader.readAsDataURL(file);
                     imageReader.addEventListener('load', () => {
                         if (typeof imageReader.result === 'string') {
-                            setFileQueue((prevQueue) => [...prevQueue, imageReader.result as string]);
+                            setFileQueue((prevQueue) => [...prevQueue, imageReader.result]);
                         }
                     });
                 }
@@ -38,18 +34,18 @@ const ChatBox: React.FC<IProps> = (props: IProps) => {
         }
     };
 
-    const chatBoxKeyEvent = (event: React.KeyboardEvent<HTMLInputElement>): void => {
+    const chatBoxKeyEvent = (event) => {
         if (event.key === 'Enter') {
             event.preventDefault();
             if (!event.shiftKey) {
-                const message = (event.target as HTMLInputElement).value;
+                const message = event.target.value;
                 socketServer.connection.emit(Events.MESSAGE, {
                     token: localStorage.getItem('token'),
                     message,
                     files: fileQueue
                 });
                 setFileQueue([]);
-                (event.target as HTMLInputElement).selectionEnd = 0;
+                event.target.selectionEnd = 0;
                 setDraftMessage('');
             } else {
                 setDraftMessage(draftMessage + '\n');
@@ -57,14 +53,14 @@ const ChatBox: React.FC<IProps> = (props: IProps) => {
         }
     };
 
-    const removeFromQueue = (index: number): void => {
+    const removeFromQueue = (index) => {
         setFileQueue([...fileQueue.slice(0, index), ...fileQueue.slice(index + 1)]);
     };
 
     return (
         <>
             <Box display='flex' className={classes.fileQueue}>
-                {fileQueue.map((file: string, index) => {
+                {fileQueue.map((file, index) => {
                     return <FileCard image={file} removeFromQueue={removeFromQueue} index={index} key={index} />;
                 })}
             </Box>
@@ -77,7 +73,7 @@ const ChatBox: React.FC<IProps> = (props: IProps) => {
                         </IconButton>
                     </Tooltip>
                 </div>
-                <TextField onKeyPress={chatBoxKeyEvent} value={draftMessage} onChange={(event): void => setDraftMessage(event.target.value)} className={classes.chatBox} label={socketServer.connection.connected ? 'Send Message' : 'Currently Offline'} multiline rows='2' margin='normal' />
+                <TextField onKeyPress={chatBoxKeyEvent} value={draftMessage} onChange={(event) => setDraftMessage(event.target.value)} className={classes.chatBox} label={socketServer.connection.connected ? 'Send Message' : 'Currently Offline'} multiline rows='2' margin='normal' />
                 {!socketServer.connection.connected ? (
                     <div className={classes.valign}>
                         <Tooltip title='Currently Offline. You will not be able to send messages.'>

@@ -19,25 +19,24 @@ import 'react-toastify/dist/ReactToastify.css';
 export const socketServer = new HarmonyConnection();
 let previouslyDisconnected = false;
 
-const Theme: React.FC<{}> = () => {
+socketServer.emitter.addListener('open', () => {
+    if (previouslyDisconnected) toast.success('You have reconnected to the server');
+});
+
+socketServer.emitter.addListener('close', () => {
+    toast.error('You have lost connection to the server');
+    previouslyDisconnected = true;
+});
+
+// this is a really rarted way of applying the theming without another nested layer
+const Theme = () => {
     useStyles();
 
     return <></>;
 };
 
-socketServer.connection.addEventListener('open', () => {
-    if (previouslyDisconnected) {
-        toast.success('You have reconnected to the server');
-    }
-});
-
-socketServer.connection.addEventListener('close', () => {
-    toast.error('You have lost connection to the server');
-    previouslyDisconnected = true;
-});
-
-const Root: React.FC<{}> = () => {
-    const { type, primary, secondary } = useSelector((state: IAppState) => state.theme);
+const Root = () => {
+    const { type, primary, secondary } = useSelector((state) => state.theme);
     const dispatch = useDispatch();
     const theme = createMuiTheme({
         palette: {
@@ -72,7 +71,7 @@ const Root: React.FC<{}> = () => {
     );
 };
 
-const ReduxRoot: React.FC<{}> = () => {
+const ReduxRoot = () => {
     return (
         <Provider store={store}>
             <Root />

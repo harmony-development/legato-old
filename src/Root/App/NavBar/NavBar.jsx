@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 import { invertTheme, toggleProfileSettingsDialog } from '../../../store/actions/AppActions';
 import { IInvertTheme, IToggleProfileSettingsDialog } from '../../../store/types';
 
-const NavBar: React.FC<{}> = () => {
+const NavBar = () => {
     const classes = useStyles();
     const dispatch = useDispatch();
 
@@ -19,10 +19,10 @@ const NavBar: React.FC<{}> = () => {
                 <Typography variant='h6' className={classes.title}>
                     #general
                 </Typography>
-                <IconButton onClick={(): IToggleProfileSettingsDialog => dispatch(toggleProfileSettingsDialog())}>
+                <IconButton onClick={() => dispatch(toggleProfileSettingsDialog())}>
                     <AccountCircle />
                 </IconButton>
-                <IconButton onClick={(): IInvertTheme => dispatch(invertTheme())}>
+                <IconButton onClick={() => dispatch(invertTheme())}>
                     <InvertColors />
                 </IconButton>
             </Toolbar>

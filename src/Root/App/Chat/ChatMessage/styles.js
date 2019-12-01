@@ -1,7 +1,6 @@
 import { makeStyles } from '@material-ui/core';
-import { Theme } from '@material-ui/core';
 
-export const useStyles = makeStyles((theme: Theme) => ({
+export const useStyles = makeStyles((theme) => ({
     messageContainer: {
         minHeight: '60px',
         paddingLeft: theme.spacing(1),

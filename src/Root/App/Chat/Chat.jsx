@@ -4,34 +4,31 @@ import { useStyles } from './styles';
 import { Box } from '@material-ui/core';
 import ChatMessage from './ChatMessage/ChatMessage';
 import { useSelector } from 'react-redux';
-import { IAppState } from '../../../store/types';
-import { IMessage, IUserData, IGetTargetUserData } from '../../../types';
 import ChatBox from './ChatBox/ChatBox';
 import { socketServer } from '../../Root';
 import { Events } from '../../../socket/socket';
 import ImageDialog from './ImageDialog/ImageDialog';
-import { TransitionGroup, CSSTransition } from 'react-transition-group';
 
 let scrollTrigger = false;
 let preScrollHeight = 0;
 let preScrollTop = 0;
 let gettingMessages = false;
-const Chat: React.FC<{}> = () => {
+const Chat = () => {
     const classes = useStyles();
 
-    const [messages, setMessages] = useState<IMessage[]>([]);
-    const [userData, setUserData] = useState<IUserData>({});
+    const [messages, setMessages] = useState([]);
+    const [userData, setUserData] = useState({});
     const [imageDialogOpen, setImageDialogOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState('');
-    const user = useSelector((state: IAppState) => state.user);
-    const MessagesArea = useRef<HTMLDivElement>(null);
+    const user = useSelector((state) => state.user);
+    const MessagesArea = useRef(null);
 
-    const openImageDialog = (image: string): void => {
+    const openImageDialog = (image) => {
         setPreviewImage(image);
         setImageDialogOpen(true);
     };
 
-    const onScroll = (event: React.UIEvent<HTMLDivElement>): void => {
+    const onScroll = (event) => {
         if (typeof localStorage.getItem('token') === 'string' && messages[0] && event.currentTarget && !gettingMessages) {
             if (event.currentTarget.scrollTop === 0) {
                 scrollTrigger = true;
@@ -55,7 +52,7 @@ const Chat: React.FC<{}> = () => {
 
     useEffect(() => {
         if (typeof localStorage.getItem('userData') === 'string') {
-            setUserData(JSON.parse(localStorage.getItem('userData') as string));
+            setUserData(JSON.parse(localStorage.getItem('userData')));
         }
 
         if (typeof localStorage.getItem('token') === 'string') {
@@ -64,13 +61,13 @@ const Chat: React.FC<{}> = () => {
             });
         }
 
-        socketServer.connection.on(Events.MESSAGE, (newMessage: IMessage) => {
-            setMessages((oldMessages: IMessage[]) => [...oldMessages, newMessage]);
+        socketServer.connection.on(Events.MESSAGE, (newMessage) => {
+            setMessages((oldMessages) => [...oldMessages, newMessage]);
         });
 
-        socketServer.connection.on(Events.LOAD_MESSAGES, (loadedMessages: IMessage[]) => {
+        socketServer.connection.on(Events.LOAD_MESSAGES, (loadedMessages) => {
             if (MessagesArea.current) {
-                setMessages((oldMessages: IMessage[]) => [...loadedMessages, ...oldMessages]);
+                setMessages((oldMessages) => [...loadedMessages, ...oldMessages]);
                 if (MessagesArea.current) {
                     MessagesArea.current.scrollTop = MessagesArea.current.scrollHeight - preScrollHeight + preScrollTop;
                 }
@@ -80,10 +77,10 @@ const Chat: React.FC<{}> = () => {
 
         socketServer.connection.on(Events.LOAD_MESSAGES_ERROR, (err) => console.log(err));
 
-        socketServer.connection.on(Events.GET_TARGET_USER_DATA, (data: IGetTargetUserData) => {
+        socketServer.connection.on(Events.GET_TARGET_USER_DATA, (data) => {
             if (data) {
                 if (data.userid) {
-                    setUserData((oldUserData: IUserData) => ({
+                    setUserData((oldUserData) => ({
                         ...oldUserData,
                         [data.userid]: { avatar: data.avatar, username: data.username }
                     }));
@@ -91,7 +88,7 @@ const Chat: React.FC<{}> = () => {
             }
         });
 
-        return (): void => {
+        return () => {
             socketServer.connection.removeListener(Events.MESSAGE);
             socketServer.connection.removeListener(Events.GET_TARGET_USER_DATA);
             socketServer.connection.removeListener(Events.LOAD_MESSAGES);

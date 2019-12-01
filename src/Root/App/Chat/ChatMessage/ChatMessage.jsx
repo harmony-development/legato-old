@@ -1,21 +1,10 @@
 import React, { useEffect } from 'react';
 import { useStyles } from './styles';
 import { ListItemText, ListItemAvatar, Avatar, Box, ButtonBase } from '@material-ui/core';
-import { IUserData, IGetTargetUserData } from '../../../../types';
 import { socketServer } from '../../../Root';
 import { Events } from '../../../../socket/socket';
 
-interface IProps {
-    message: string;
-    userid: string;
-    files: string[];
-    userData: IUserData;
-    setUserData: React.Dispatch<React.SetStateAction<IUserData>>;
-    openImgDialog: (image: string) => void;
-    index: number;
-}
-
-const ChatMessage: React.FC<IProps> = (props: IProps) => {
+const ChatMessage = (props) => {
     const classes = useStyles();
 
     useEffect(() => {
@@ -38,7 +27,7 @@ const ChatMessage: React.FC<IProps> = (props: IProps) => {
                     {props.files.map((data, index) => {
                         return (
                             <ButtonBase key={index}>
-                                <img className={classes.imageUpload} src={data} onClick={(): void => props.openImgDialog(data)} alt='' />
+                                <img className={classes.imageUpload} src={data} onClick={() => props.openImgDialog(data)} alt='' />
                             </ButtonBase>
                         );
                     })}
