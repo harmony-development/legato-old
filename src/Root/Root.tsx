@@ -1,19 +1,20 @@
 import React from 'react';
-import './Root.css';
 import { CssBaseline, createMuiTheme } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
+import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 import { useSelector } from 'react-redux';
 import { IState } from '../types/redux';
 import HarmonySocket from '../socket/socket';
 import { Switch, Route } from 'react-router';
 import { BrowserRouter } from 'react-router-dom';
-import { Login } from './Entry/Login/Login';
-import { Register } from './Entry/Register/Register';
+import './Root.css';
+import { App } from './App/App';
+import { Entry } from './Entry/Entry';
 
 export const harmonySocket = new HarmonySocket();
 
-const App: React.FC = () => {
+const Root: React.FC = () => {
     const themeState = useSelector((state: IState) => state.theme);
 
     const theme = createMuiTheme({
@@ -31,13 +32,12 @@ const App: React.FC = () => {
                 <ToastContainer />
                 <BrowserRouter>
                     <Switch>
-                        <Route exact path='/login'>
-                            <Login />
+                        <Route exact path='/'>
+                            <Entry />
                         </Route>
-                        <Route exact path='/register'>
-                            <Register />
+                        <Route exact path='/app'>
+                            <App />
                         </Route>
-                        <Route exact path='/app'></Route>
                     </Switch>
                 </BrowserRouter>
             </ThemeProvider>
@@ -45,4 +45,4 @@ const App: React.FC = () => {
     );
 };
 
-export default App;
+export default Root;
