@@ -33,4 +33,18 @@ export default class HarmonySocket {
             password
         });
     }
+
+    register(email: string, username: string, password: string) {
+        this.emitEvent('register', {
+            email,
+            username,
+            password
+        });
+    }
+
+    getGuilds() {
+        this.emitEvent('getguilds', {
+            token: localStorage.getItem('token')
+        });
+    }
 }

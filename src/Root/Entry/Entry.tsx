@@ -4,6 +4,7 @@ import { useEntryStyles } from './EntryStyle';
 import { Login } from './Login/Login';
 import { Register } from './Register/Register';
 import { useHistory } from 'react-router';
+import { harmonySocket } from '../Root';
 
 export const Entry = () => {
     const history = useHistory();
@@ -11,7 +12,7 @@ export const Entry = () => {
     const [tabIDX, setTabIDX] = React.useState(0);
 
     useEffect(() => {
-        if (typeof localStorage.getItem('token') === 'string') {
+        if (typeof localStorage.getItem('token') === 'string' && harmonySocket.conn.readyState === WebSocket.OPEN) {
             history.push('/app');
         }
     }, [history]);

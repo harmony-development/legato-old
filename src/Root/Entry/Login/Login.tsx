@@ -7,12 +7,11 @@ import { useHistory } from 'react-router';
 
 export const Login: React.FC = () => {
     const history = useHistory(); // history for better routing
+    const classes = useLoginStyles();
 
     const [err, setErr] = React.useState<string | undefined>(undefined);
     const emailRef = useRef<HTMLInputElement | undefined>(undefined);
     const pwdRef = useRef<HTMLInputElement | undefined>(undefined);
-    const classes = useLoginStyles();
-    const onFormSubmit = (e: React.FormEvent<EventTarget>) => e.preventDefault();
 
     const login = () => {
         if (harmonySocket.conn.readyState === WebSocket.CLOSED) {
@@ -44,7 +43,7 @@ export const Login: React.FC = () => {
 
     return (
         <div className={classes.root}>
-            <form onSubmit={onFormSubmit}>
+            <form onSubmit={(e: React.FormEvent<EventTarget>) => e.preventDefault()}>
                 <TextField label='Email' type='email' name='email' autoComplete='email' margin='normal' fullWidth inputRef={emailRef} />
                 <TextField label='Password' type='password' name='password' margin='normal' fullWidth inputRef={pwdRef} />
                 {err ? (
