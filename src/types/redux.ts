@@ -5,12 +5,14 @@ export enum Actions {
     INVERT_THEME,
     TOGGLE_THEME_DIALOG,
     CHANGE_PRIMARY,
-    CHANGE_SECONDARY
+    CHANGE_SECONDARY,
+    SET_CONNECTED
 }
 
 export interface IState {
     theme: ITheme;
     themeDialog: boolean;
+    connected: boolean;
 }
 
 export interface IInvertTheme {
@@ -31,4 +33,9 @@ export interface IChangeSecondary {
     payload: Color;
 }
 
-export type Action = IInvertTheme | IToggleThemeDialog | IChangePrimary | IChangeSecondary;
+export interface ISetConnected {
+    type: Actions.SET_CONNECTED;
+    payload: boolean;
+}
+
+export type Action = IInvertTheme | IToggleThemeDialog | IChangePrimary | IChangeSecondary | ISetConnected;

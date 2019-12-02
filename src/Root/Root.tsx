@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { CssBaseline, createMuiTheme } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
-import { useSelector } from 'react-redux';
-import { IState } from '../types/redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { IState, Actions } from '../types/redux';
 import HarmonySocket from '../socket/socket';
 import { Switch, Route } from 'react-router';
 import { BrowserRouter } from 'react-router-dom';
@@ -16,6 +16,20 @@ export const harmonySocket = new HarmonySocket();
 
 const Root: React.FC = () => {
     const themeState = useSelector((state: IState) => state.theme);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        harmonySocket.events.addListener('close', () => {
+            dispatch({ type: Actions.SET_CONNECTED, payload: false });
+        });
+        harmonySocket.events.addListener('open', () => {
+            dispatch({ type: Actions.SET_CONNECTED, payload: true });
+        });
+        return () => {
+            harmonySocket.events.removeAllListeners('close'); // cleanup all socket events registered here
+            harmonySocket.events.removeAllListeners('open');
+        };
+    }, [dispatch]);
 
     const theme = createMuiTheme({
         palette: {

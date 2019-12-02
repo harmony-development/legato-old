@@ -11,7 +11,7 @@ export const HarmonyBar = () => {
     const dispatch = useDispatch();
 
     return (
-        <AppBar position='static'>
+        <AppBar position='absolute'>
             <Toolbar>
                 <IconButton edge='start' color='inherit' className={classes.leftMenuBtn}>
                     <MenuIcon />

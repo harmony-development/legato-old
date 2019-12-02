@@ -7,7 +7,8 @@ const appState: IState = {
         primary: red,
         secondary: orange
     },
-    themeDialog: false
+    themeDialog: false,
+    connected: false
 };
 
 export default function AppReducer(state = appState, action: Action): IState {
@@ -43,6 +44,12 @@ export default function AppReducer(state = appState, action: Action): IState {
                     ...state.theme,
                     secondary: action.payload
                 }
+            };
+        }
+        case Actions.SET_CONNECTED: {
+            return {
+                ...state,
+                connected: action.payload
             };
         }
         default: {
