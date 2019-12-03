@@ -1,21 +1,12 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Paper, Tabs, Tab } from '@material-ui/core';
 import { useEntryStyles } from './EntryStyle';
 import { Login } from './Login/Login';
 import { Register } from './Register/Register';
-import { useHistory } from 'react-router';
-import { harmonySocket } from '../Root';
 
 export const Entry = () => {
-    const history = useHistory();
     const classes = useEntryStyles();
     const [tabIDX, setTabIDX] = React.useState(0);
-
-    useEffect(() => {
-        if (typeof localStorage.getItem('token') === 'string' && harmonySocket.conn.readyState === WebSocket.OPEN) {
-            history.push('/app');
-        }
-    }, [history]);
 
     return (
         <div className={classes.root}>

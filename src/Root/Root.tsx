@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { CssBaseline, createMuiTheme } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
 import 'react-toastify/dist/ReactToastify.css';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import { useSelector, useDispatch } from 'react-redux';
 import { IState, Actions } from '../types/redux';
 import HarmonySocket from '../socket/socket';
@@ -13,6 +13,7 @@ import { App } from './App/App';
 import { Entry } from './Entry/Entry';
 
 export const harmonySocket = new HarmonySocket();
+export let previouslyDisconnected = false;
 
 const Root: React.FC = () => {
     const themeState = useSelector((state: IState) => state.theme);
@@ -20,9 +21,16 @@ const Root: React.FC = () => {
 
     useEffect(() => {
         harmonySocket.events.addListener('close', () => {
-            dispatch({ type: Actions.SET_CONNECTED, payload: false });
+            // lol plz no spahm
+            if (!previouslyDisconnected) {
+                toast.error('You have lost connection to the server');
+                dispatch({ type: Actions.SET_CONNECTED, payload: false });
+                previouslyDisconnected = true;
+            }
+            setTimeout(harmonySocket.connect, 3000);
         });
         harmonySocket.events.addListener('open', () => {
+            if (previouslyDisconnected) toast.success('You have reconnected to the server');
             dispatch({ type: Actions.SET_CONNECTED, payload: true });
         });
         return () => {

@@ -2,7 +2,7 @@ import React from 'react';
 import { useChatAreaStyles } from './ChatAreaStyle';
 import { Messages } from './Messages/Messages';
 import { Input } from './Input/Input';
-import { ListItem, List, ListItemAvatar, Avatar, ButtonBase } from '@material-ui/core';
+import { GuildList } from './GuildList/GuildList';
 
 export const ChatArea = () => {
     const classes = useChatAreaStyles();
@@ -10,9 +10,7 @@ export const ChatArea = () => {
     return (
         <div className={classes.root}>
             <div className={classes.guildlist}>
-                <ButtonBase className={classes.guildiconroot}>
-                    <img className={classes.guildicon} alt='' src='https://gitlab.com/uploads/-/system/group/avatar/6322234/harmony-icon.png?width=64' />
-                </ButtonBase>
+                <GuildList />
             </div>
             <div className={classes.chatArea}>
                 <div className={classes.messages}>

@@ -6,13 +6,21 @@ export enum Actions {
     TOGGLE_THEME_DIALOG,
     CHANGE_PRIMARY,
     CHANGE_SECONDARY,
-    SET_CONNECTED
+    SET_CONNECTED,
+    SET_GUILDS
+}
+
+interface IGuild {
+    guildid: string;
+    picture: string;
+    guildname: string;
 }
 
 export interface IState {
     theme: ITheme;
     themeDialog: boolean;
     connected: boolean;
+    guildList: IGuild[];
 }
 
 export interface IInvertTheme {
@@ -38,4 +46,9 @@ export interface ISetConnected {
     payload: boolean;
 }
 
-export type Action = IInvertTheme | IToggleThemeDialog | IChangePrimary | IChangeSecondary | ISetConnected;
+export interface ISetGuilds {
+    type: Actions.SET_GUILDS;
+    payload: IGuild[];
+}
+
+export type Action = IInvertTheme | IToggleThemeDialog | IChangePrimary | IChangeSecondary | ISetConnected | ISetGuilds;

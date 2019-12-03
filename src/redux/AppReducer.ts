@@ -7,6 +7,7 @@ const appState: IState = {
         primary: red,
         secondary: orange
     },
+    guildList: [],
     themeDialog: false,
     connected: false
 };
@@ -50,6 +51,12 @@ export default function AppReducer(state = appState, action: Action): IState {
             return {
                 ...state,
                 connected: action.payload
+            };
+        }
+        case Actions.SET_GUILDS: {
+            return {
+                ...state,
+                guildList: action.payload
             };
         }
         default: {

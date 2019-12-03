@@ -6,10 +6,21 @@ import { ChatArea } from './ChatArea/ChatArea';
 import { harmonySocket } from '../Root';
 import { useHistory } from 'react-router';
 import { IGuildData } from '../../types/socket';
+import { useDispatch, useSelector } from 'react-redux';
+import { Actions, IState } from '../../types/redux';
 
 export const App = () => {
     const classes = useAppStyles();
+    const dispatch = useDispatch();
+    const connected = useSelector((state: IState) => state.connected);
     const history = useHistory();
+
+    // event when the client has connected
+    useEffect(() => {
+        if (connected) {
+            harmonySocket.getGuilds();
+        }
+    }, [connected]);
 
     useEffect(() => {
         if ((harmonySocket.conn.readyState !== WebSocket.OPEN && harmonySocket.conn.readyState !== WebSocket.CONNECTING) || typeof localStorage.getItem('token') !== 'string') {
@@ -18,21 +29,12 @@ export const App = () => {
             return;
         }
         harmonySocket.events.addListener('getguilds', (raw: any) => {
-            console.log(raw);
             if (Array.isArray(raw['guilds']) && raw['guilds'].length > 0) {
                 const guildsList = raw['guilds'] as IGuildData[];
-                guildsList.forEach((guild) => {
-                    console.log(guild.guildid);
-                });
+                dispatch({ type: Actions.SET_GUILDS, payload: guildsList });
             }
         });
-        const guildReqID = setInterval(() => {
-            if (harmonySocket.conn.readyState === WebSocket.OPEN) {
-                harmonySocket.getGuilds();
-                clearInterval(guildReqID);
-            }
-        }, 500);
-    }, [history]);
+    }, [history, dispatch]);
 
     return (
         <div className={classes.root}>

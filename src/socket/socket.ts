@@ -23,8 +23,18 @@ export default class HarmonySocket {
         };
     }
 
+    connect = () => {
+        this.conn = new WebSocket('ws://localhost:8080/api/socket');
+        this.conn.addEventListener('open', () => this.events.emit('open'));
+        this.conn.addEventListener('close', () => this.events.emit('close'));
+        this.conn.addEventListener('error', () => this.events.emit('error'));
+    };
+
     emitEvent(type: string, data: unknown) {
-        this.conn.send(JSON.stringify({ type, data }));
+        // choke all packets if connection is not working
+        if (this.conn.readyState === WebSocket.OPEN) {
+            this.conn.send(JSON.stringify({ type, data }));
+        }
     }
 
     login(email: string, password: string) {
