@@ -62,7 +62,7 @@ func OnRegister(ws *socket.Client, rawMap map[string]interface{}) {
 	userid := randstr.Hex(16)
 	_, err = insertQuery.Exec(userid, data.Email, data.Username, "", string(hash))
 	if err != nil {
-		loginErr(ws, "Email already registered")
+		regErr(ws, "Email already registered")
 		golog.Debugf("Error inserting user. Reason : %v", err)
 		return
 	}

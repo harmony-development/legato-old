@@ -39,9 +39,9 @@ func OnGetGuilds(ws *socket.Client, rawMap map[string]interface{}) {
 		var fetchedGuild guildsData
 		err := res.Scan(&fetchedGuild.Guildid, &fetchedGuild.Guildname, &fetchedGuild.Picture)
 		if err != nil {
+			golog.Warnf("Error scanning next row. Reason: %v", err)
 			return
 		}
-
 		// Now subscribe to all guilds that the client is a member of!
 		if globals.Guilds[fetchedGuild.Guildid] != nil {
 			globals.Guilds[fetchedGuild.Guildid].Clients[userid] = ws
