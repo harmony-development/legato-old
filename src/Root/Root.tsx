@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { CssBaseline, createMuiTheme } from '@material-ui/core';
+import { CssBaseline, createMuiTheme, Button } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer, toast } from 'react-toastify';
@@ -59,6 +59,9 @@ const Root: React.FC = () => {
                         </Route>
                         <Route exact path='/app'>
                             <App />
+                        </Route>
+                        <Route exact path='/bruh'>
+                            <Button onClick={()=>{toast.info("GET BRUHED ON KID")}}>Bruh Buttyon</Button>
                         </Route>
                     </Switch>
                 </BrowserRouter>
