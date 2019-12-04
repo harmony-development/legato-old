@@ -12,7 +12,6 @@ type getGuildsData struct {
 }
 
 type guildsData struct {
-	Guildid   string `json:"guildid"`
 	Guildname string `json:"guildname"`
 	Picture   string `json:"picture"`
 }
@@ -34,25 +33,26 @@ func OnGetGuilds(ws *socket.Client, rawMap map[string]interface{}) {
 		golog.Warnf("Error selecting guilds. Reason : %v", err)
 		return
 	}
-	var returnGuilds []guildsData
+	var returnGuilds = make(map[string]guildsData)
 	for res.Next() {
+		var guildID string
 		var fetchedGuild guildsData
-		err := res.Scan(&fetchedGuild.Guildid, &fetchedGuild.Guildname, &fetchedGuild.Picture)
+		err := res.Scan(&guildID, &fetchedGuild.Guildname, &fetchedGuild.Picture)
 		if err != nil {
 			golog.Warnf("Error scanning next row. Reason: %v", err)
 			return
 		}
 		// Now subscribe to all guilds that the client is a member of!
-		if globals.Guilds[fetchedGuild.Guildid] != nil {
-			globals.Guilds[fetchedGuild.Guildid].Clients[userid] = ws
+		if guildID != "" {
+			globals.Guilds[guildID].Clients[userid] = ws
 		} else {
-			globals.Guilds[fetchedGuild.Guildid] = &globals.Guild{
+			globals.Guilds[guildID] = &globals.Guild{
 				Clients: map[string]*socket.Client{
 					userid: ws,
 				},
 			}
 		}
-		returnGuilds = append(returnGuilds, fetchedGuild)
+		returnGuilds[guildID] = fetchedGuild
 	}
 	ws.Send(&socket.Packet{
 		Type: "getguilds",
