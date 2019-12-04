@@ -7,7 +7,7 @@ import { harmonySocket } from '../Root';
 import { useHistory } from 'react-router';
 import { IGuildData } from '../../types/socket';
 import { useDispatch, useSelector } from 'react-redux';
-import { Actions, IState } from '../../types/redux';
+import { Actions, IState, IMessage } from '../../types/redux';
 
 export const App = () => {
     const classes = useAppStyles();
@@ -42,6 +42,17 @@ export const App = () => {
                 dispatch({ type: Actions.SET_GUILDS, payload: guildsList });
             }
         });
+
+        harmonySocket.events.addListener('message', (raw: any) => {
+            if (Array.isArray(raw)) {
+                dispatch({ type: Actions.SET_MESSAGES, payload: raw as IMessage[] });
+            }
+        });
+
+        return () => {
+            harmonySocket.events.removeAllListeners('getguilds');
+            harmonySocket.events.removeAllListeners('message');
+        };
     }, [history, dispatch]);
 
     return (

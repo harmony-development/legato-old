@@ -10,7 +10,8 @@ const appState: IState = {
     guildList: {},
     themeDialog: false,
     connected: false,
-    selectedGuild: ''
+    selectedGuild: '',
+    messages: []
 };
 
 export default function AppReducer(state = appState, action: Action): IState {
@@ -64,6 +65,12 @@ export default function AppReducer(state = appState, action: Action): IState {
             return {
                 ...state,
                 selectedGuild: action.payload
+            };
+        }
+        case Actions.SET_MESSAGES: {
+            return {
+                ...state,
+                messages: action.payload
             };
         }
         default: {

@@ -1,11 +1,17 @@
 import React from 'react';
 import { List } from '@material-ui/core';
 import { Message } from './Message';
+import { useSelector } from 'react-redux';
+import { IState } from '../../../../types/redux';
 
 export const Messages = () => {
+    const messages = useSelector((state: IState) => state.messages);
+
     return (
         <List>
-            <Message guild='harmony dev' userid='13jifrb' createdat={1575243386} message='Hi' />
+            {messages.map((val) => {
+                return <Message guild={val.guild} userid={val.userid} createdat={val.createdat} message={val.message} />;
+            })}
         </List>
     );
 };
