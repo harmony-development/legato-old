@@ -14,7 +14,7 @@ var (
 		CheckOrigin:       func(r *http.Request) bool { // we will allow all domains... For now...
 			return true
 		},
-		EnableCompression: true,
+		EnableCompression: false,
 	}
 )
 
@@ -52,18 +52,17 @@ func NewSocket(w http.ResponseWriter, r *http.Request) *Client {
 func reader(ws *Client) {
 	for {
 		_, msg, err := ws.Connection.ReadMessage()
-		if err != nil {
+		if err == nil {
+			var p Packet
+			if err = json.Unmarshal(msg, &p); err == nil {
+				if ws.EventBus[p.Type] != nil {
+					ws.EventBus[p.Type](ws, p.Data) // call an event from the eventbus if it exists
+				}
+			}
+		} else {
 			golog.Warnf("Error reading data from event : %v", err)
 			return
 		}
-		var p Packet
-		if err = json.Unmarshal(msg, &p); err != nil {
-			return
-		}
-		if ws.EventBus[p.Type] == nil {
-			return
-		}
-		ws.EventBus[p.Type](ws, p.Data) // call an event from the eventbus if it exists
 	}
 }
 
