@@ -13,6 +13,7 @@ export const App = () => {
     const classes = useAppStyles();
     const dispatch = useDispatch();
     const connected = useSelector((state: IState) => state.connected);
+    const selectedGuild = useSelector((state: IState) => state.selectedGuild);
     const history = useHistory();
 
     // event when the client has connected
@@ -21,6 +22,13 @@ export const App = () => {
             harmonySocket.getGuilds();
         }
     }, [connected]);
+
+    useEffect(() => {
+        if (connected) {
+            console.log(selectedGuild);
+            harmonySocket.getMessages(selectedGuild);
+        }
+    });
 
     useEffect(() => {
         if ((harmonySocket.conn.readyState !== WebSocket.OPEN && harmonySocket.conn.readyState !== WebSocket.CONNECTING) || typeof localStorage.getItem('token') !== 'string') {

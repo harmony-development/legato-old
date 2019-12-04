@@ -7,7 +7,8 @@ export enum Actions {
     CHANGE_PRIMARY,
     CHANGE_SECONDARY,
     SET_CONNECTED,
-    SET_GUILDS
+    SET_GUILDS,
+    SET_SELECTED_GUILD
 }
 
 interface IGuild {
@@ -23,6 +24,7 @@ export interface IState {
     guildList: {
         [key: string]: IGuild;
     };
+    selectedGuild: string;
 }
 
 export interface IInvertTheme {
@@ -55,4 +57,9 @@ export interface ISetGuilds {
     };
 }
 
-export type Action = IInvertTheme | IToggleThemeDialog | IChangePrimary | IChangeSecondary | ISetConnected | ISetGuilds;
+export interface ISetSelectedGuild {
+    type: Actions.SET_SELECTED_GUILD;
+    payload: string;
+}
+
+export type Action = IInvertTheme | IToggleThemeDialog | IChangePrimary | IChangeSecondary | ISetConnected | ISetGuilds | ISetSelectedGuild;

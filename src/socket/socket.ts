@@ -67,4 +67,11 @@ export default class HarmonySocket {
             token: localStorage.getItem('token')
         });
     }
+
+    getMessages(guildID: string) {
+        this.emitEvent('getmessages', {
+            token: localStorage.getItem('token'),
+            guildid: guildID
+        });
+    }
 }

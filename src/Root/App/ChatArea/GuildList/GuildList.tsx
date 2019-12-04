@@ -1,8 +1,8 @@
 import React from 'react';
-import { ButtonBase, Tooltip } from '@material-ui/core';
 import { useGuildListStyle } from './GuildListStyle';
 import { useSelector } from 'react-redux';
 import { IState } from '../../../../types/redux';
+import { GuildIcon } from './GuildIcon';
 
 export const GuildList = () => {
     const classes = useGuildListStyle();
@@ -11,13 +11,7 @@ export const GuildList = () => {
     return (
         <div className={classes.guildlist}>
             {Object.keys(guildList).map((key) => {
-                return (
-                    <ButtonBase className={classes.guildiconroot} key={key}>
-                        <Tooltip title={guildList[key].guildname} placement='right'>
-                            <img className={classes.guildicon} alt='' src={guildList[key].picture} draggable={false} />
-                        </Tooltip>
-                    </ButtonBase>
-                );
+                return <GuildIcon guildid={key} key={key} guildname={guildList[key].guildname} picture={guildList[key].picture} />;
             })}
         </div>
     );
