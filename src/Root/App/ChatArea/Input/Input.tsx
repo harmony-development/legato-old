@@ -21,8 +21,8 @@ export const Input = () => {
     };
 
     return (
-        <div>
-            <TextField label={connected ? 'Message' : 'Currently Offline'} variant='filled' fullWidth multiline rowsMax={3} rows={3} onKeyPress={onKeyPress} inputRef={inputField} />
+        <div style={{ paddingLeft: '8px' }}>
+            <TextField label={connected ? 'Message' : 'Currently Offline'} variant='standard' fullWidth multiline rowsMax={3} rows={3} onKeyPress={onKeyPress} inputRef={inputField} />
         </div>
     );
 };

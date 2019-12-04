@@ -8,6 +8,7 @@ import { orange, red } from '@material-ui/core/colors';
 export const ThemeDialog = () => {
     const open = useSelector((state: IState) => state.themeDialog);
     const themeType = useSelector((state: IState) => state.theme.type);
+    const theme = useSelector((state: IState) => state.theme);
     const [primary, setPrimary] = useState<Color>(red);
     const [secondary, setSecondary] = useState<Color>(orange);
     const dispatch = useDispatch();

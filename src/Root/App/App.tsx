@@ -8,12 +8,14 @@ import { useHistory } from 'react-router';
 import { IGuildData } from '../../types/socket';
 import { useDispatch, useSelector } from 'react-redux';
 import { Actions, IState, IMessage } from '../../types/redux';
+import { toast } from 'react-toastify';
+import { Color } from '@material-ui/core';
 
 export const App = () => {
     const classes = useAppStyles();
     const dispatch = useDispatch();
     const connected = useSelector((state: IState) => state.connected);
-    const messages = useSelector((state: IState) => state.messages);
+    const themeType = useSelector((state: IState) => state.theme.type);
     const selectedGuild = useSelector((state: IState) => state.selectedGuild);
     const history = useHistory();
 
@@ -36,6 +38,7 @@ export const App = () => {
             history.push('/');
             return;
         }
+
         harmonySocket.events.addListener('getguilds', (raw: any) => {
             if (Object.keys(raw['guilds']).length > 0) {
                 let guildsList = raw['guilds'] as IGuildData;
@@ -55,7 +58,9 @@ export const App = () => {
         });
 
         harmonySocket.events.addListener('deauth', () => {
-            console.log('invalid token');
+            toast.warn('Your session has expired. Please login again');
+            history.push('/');
+            return;
         });
 
         return () => {

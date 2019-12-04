@@ -13,6 +13,6 @@ export const useGuildListStyle = makeStyles((theme: Theme) => ({
         width: '64px',
         height: '64px',
         borderRadius: '64px',
-        backgroundColor: theme.palette.grey[800]
+        backgroundColor: theme.palette.type === 'dark' ? theme.palette.grey[800] : theme.palette.grey[400]
     }
 }));
