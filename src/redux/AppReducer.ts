@@ -7,7 +7,7 @@ const appState: IState = {
         primary: red,
         secondary: orange
     },
-    guildList: [],
+    guildList: {},
     themeDialog: false,
     connected: false
 };

@@ -29,7 +29,7 @@ export const App = () => {
             return;
         }
         harmonySocket.events.addListener('getguilds', (raw: any) => {
-            if (Array.isArray(raw['guilds']) && raw['guilds'].length > 0) {
+            if (Object.keys(raw['guilds']).length) {
                 const guildsList = raw['guilds'] as IGuildData[];
                 dispatch({ type: Actions.SET_GUILDS, payload: guildsList });
             }

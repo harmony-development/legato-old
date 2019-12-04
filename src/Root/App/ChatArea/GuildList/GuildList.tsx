@@ -10,11 +10,11 @@ export const GuildList = () => {
 
     return (
         <div className={classes.guildlist}>
-            {guildList.map((guild) => {
+            {Object.keys(guildList).map((key) => {
                 return (
-                    <ButtonBase className={classes.guildiconroot} key={guild.guildid}>
-                        <Tooltip title={guild.guildname} placement='right'>
-                            <img className={classes.guildicon} alt='' src={guild.picture} draggable={false} />
+                    <ButtonBase className={classes.guildiconroot} key={key}>
+                        <Tooltip title={guildList[key].guildname} placement='right'>
+                            <img className={classes.guildicon} alt='' src={guildList[key].picture} draggable={false} />
                         </Tooltip>
                     </ButtonBase>
                 );

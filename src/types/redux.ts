@@ -20,7 +20,9 @@ export interface IState {
     theme: ITheme;
     themeDialog: boolean;
     connected: boolean;
-    guildList: IGuild[];
+    guildList: {
+        [key: string]: IGuild;
+    };
 }
 
 export interface IInvertTheme {
@@ -48,7 +50,9 @@ export interface ISetConnected {
 
 export interface ISetGuilds {
     type: Actions.SET_GUILDS;
-    payload: IGuild[];
+    payload: {
+        [key: string]: IGuild;
+    };
 }
 
 export type Action = IInvertTheme | IToggleThemeDialog | IChangePrimary | IChangeSecondary | ISetConnected | ISetGuilds;
