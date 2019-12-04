@@ -24,12 +24,14 @@ export const useChatAreaStyles = makeStyles((theme: Theme) => ({
     chatArea: {
         display: 'flex',
         flexDirection: 'column',
-        width: '100%'
+        flexFlow: 'column',
+        width: '100%',
+        height: '100%'
     },
     messages: {
         width: '100%',
-        flex: 1,
-        flexGrow: 1
+        flex: '1 1 auto',
+        overflow: 'auto'
     },
     input: {
         width: '100%'

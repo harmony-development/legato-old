@@ -11,13 +11,33 @@ import { BrowserRouter } from 'react-router-dom';
 import './Root.css';
 import { App } from './App/App';
 import { Entry } from './Entry/Entry';
+import { useRootStyles } from './RootStyle';
 
 export const harmonySocket = new HarmonySocket();
 export let previouslyDisconnected = false;
 
-const Root: React.FC = () => {
+const ThemedRoot = () => {
     const themeState = useSelector((state: IState) => state.theme);
+    const theme = createMuiTheme({
+        palette: {
+            primary: themeState.primary,
+            secondary: themeState.secondary,
+            type: themeState.type
+        }
+    });
+
+    return (
+        <div className='root'>
+            <ThemeProvider theme={theme}>
+                <Root />
+            </ThemeProvider>
+        </div>
+    );
+};
+
+const Root: React.FC = () => {
     const dispatch = useDispatch();
+    useRootStyles();
 
     useEffect(() => {
         harmonySocket.events.addListener('close', () => {
@@ -39,35 +59,31 @@ const Root: React.FC = () => {
         };
     }, [dispatch]);
 
-    const theme = createMuiTheme({
-        palette: {
-            primary: themeState.primary,
-            secondary: themeState.secondary,
-            type: themeState.type
-        }
-    });
-
     return (
-        <div className='root'>
-            <ThemeProvider theme={theme}>
-                <CssBaseline />
-                <ToastContainer />
-                <BrowserRouter>
-                    <Switch>
-                        <Route exact path='/'>
-                            <Entry />
-                        </Route>
-                        <Route exact path='/app'>
-                            <App />
-                        </Route>
-                        <Route exact path='/bruh'>
-                            <Button onClick={()=>{toast.info("GET BRUHED ON KID")}}>Bruh Buttyon</Button>
-                        </Route>
-                    </Switch>
-                </BrowserRouter>
-            </ThemeProvider>
-        </div>
+        <>
+            <CssBaseline />
+            <ToastContainer />
+            <BrowserRouter>
+                <Switch>
+                    <Route exact path='/'>
+                        <Entry />
+                    </Route>
+                    <Route exact path='/app'>
+                        <App />
+                    </Route>
+                    <Route exact path='/bruh'>
+                        <Button
+                            onClick={() => {
+                                toast.info('GET BRUHED ON KID');
+                            }}
+                        >
+                            Bruh Button
+                        </Button>
+                    </Route>
+                </Switch>
+            </BrowserRouter>
+        </>
     );
 };
 
-export default Root;
+export default ThemedRoot;

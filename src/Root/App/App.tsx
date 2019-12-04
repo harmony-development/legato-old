@@ -13,6 +13,7 @@ export const App = () => {
     const classes = useAppStyles();
     const dispatch = useDispatch();
     const connected = useSelector((state: IState) => state.connected);
+    const messages = useSelector((state: IState) => state.messages);
     const selectedGuild = useSelector((state: IState) => state.selectedGuild);
     const history = useHistory();
 
@@ -25,10 +26,9 @@ export const App = () => {
 
     useEffect(() => {
         if (connected) {
-            console.log(selectedGuild);
             harmonySocket.getMessages(selectedGuild);
         }
-    });
+    }, [selectedGuild]);
 
     useEffect(() => {
         if ((harmonySocket.conn.readyState !== WebSocket.OPEN && harmonySocket.conn.readyState !== WebSocket.CONNECTING) || typeof localStorage.getItem('token') !== 'string') {
@@ -42,11 +42,20 @@ export const App = () => {
                 dispatch({ type: Actions.SET_GUILDS, payload: guildsList });
             }
         });
-
-        harmonySocket.events.addListener('message', (raw: any) => {
-            if (Array.isArray(raw)) {
-                dispatch({ type: Actions.SET_MESSAGES, payload: raw as IMessage[] });
+        harmonySocket.events.addListener('getmessages', (raw: any) => {
+            if (typeof raw['messages']) {
+                dispatch({ type: Actions.SET_MESSAGES, payload: raw['messages'] as IMessage[] });
             }
+        });
+        harmonySocket.events.addListener('message', (raw: any) => {
+            // prevent stupid API responses
+            if (typeof raw['userid'] === 'string' && typeof raw['createdat'] === 'number' && typeof raw['guild'] === 'string' && typeof raw['message'] === 'string') {
+                dispatch({ type: Actions.ADD_MESSAGE, payload: raw as IMessage });
+            }
+        });
+
+        harmonySocket.events.addListener('deauth', () => {
+            console.log('invalid token');
         });
 
         return () => {

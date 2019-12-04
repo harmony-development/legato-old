@@ -9,6 +9,7 @@ export enum Actions {
     SET_CONNECTED,
     SET_GUILDS,
     SET_SELECTED_GUILD,
+    ADD_MESSAGE,
     SET_MESSAGES
 }
 
@@ -23,6 +24,7 @@ export interface IMessage {
     createdat: number;
     guild: string;
     message: string;
+    messageid: string;
 }
 
 export interface IState {
@@ -71,9 +73,14 @@ export interface ISetSelectedGuild {
     payload: string;
 }
 
+export interface IAddMessage {
+    type: Actions.ADD_MESSAGE;
+    payload: IMessage;
+}
+
 export interface ISetMessages {
     type: Actions.SET_MESSAGES;
     payload: IMessage[];
 }
 
-export type Action = IInvertTheme | IToggleThemeDialog | IChangePrimary | IChangeSecondary | ISetConnected | ISetGuilds | ISetSelectedGuild | ISetMessages;
+export type Action = IInvertTheme | IToggleThemeDialog | IChangePrimary | IChangeSecondary | ISetConnected | ISetGuilds | ISetSelectedGuild | IAddMessage | ISetMessages;

@@ -67,6 +67,12 @@ export default function AppReducer(state = appState, action: Action): IState {
                 selectedGuild: action.payload
             };
         }
+        case Actions.ADD_MESSAGE: {
+            return {
+                ...state,
+                messages: [...state.messages, action.payload]
+            };
+        }
         case Actions.SET_MESSAGES: {
             return {
                 ...state,
