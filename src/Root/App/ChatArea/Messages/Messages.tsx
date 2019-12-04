@@ -17,9 +17,11 @@ export const Messages = () => {
 
     return (
         <List innerRef={messageList}>
-            {messages.map((val) => {
-                return <Message key={val.messageid} guild={val.guild} userid={val.userid} createdat={val.createdat} message={val.message} />;
-            })}
+            {messages
+                ? messages.map((val) => {
+                      return <Message key={val.messageid} guild={val.guild} userid={val.userid} createdat={val.createdat} message={val.message} />;
+                  })
+                : undefined}
         </List>
     );
 };

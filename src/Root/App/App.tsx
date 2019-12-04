@@ -37,14 +37,14 @@ export const App = () => {
             return;
         }
         harmonySocket.events.addListener('getguilds', (raw: any) => {
-            if (Object.keys(raw['guilds']).length) {
-                const guildsList = raw['guilds'] as IGuildData[];
+            if (Object.keys(raw['guilds']).length > 0) {
+                let guildsList = raw['guilds'] as IGuildData;
                 dispatch({ type: Actions.SET_GUILDS, payload: guildsList });
             }
         });
         harmonySocket.events.addListener('getmessages', (raw: any) => {
             if (typeof raw['messages']) {
-                dispatch({ type: Actions.SET_MESSAGES, payload: raw['messages'] as IMessage[] });
+                dispatch({ type: Actions.SET_MESSAGES, payload: (raw['messages'] as IMessage[]).reverse() });
             }
         });
         harmonySocket.events.addListener('message', (raw: any) => {
