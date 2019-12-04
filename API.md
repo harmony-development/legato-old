@@ -93,13 +93,12 @@ This applies to all server-bound and client-bound packets.
   {
     "type": "getguilds",
     "data": {
-      "guilds": [
-        {
-          "guildid": string,
+      "guilds": {
+        "guildid": {
           "guildname": string,
           "picture": string
         }
-      ]
+      }
     }
   }
   ```
@@ -121,7 +120,8 @@ This applies to all server-bound and client-bound packets.
     "data": {
       "guild": string,
       "userid": string,
-      "message": string
+      "message": string,
+      "messageid": string
     }
   }
   ```

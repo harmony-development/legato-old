@@ -37,13 +37,7 @@ func OnMessage(ws *socket.Client, rawMap map[string]interface{}) {
 	if globals.Guilds[data.targetGuild] == nil || globals.Guilds[data.targetGuild].Clients[userid] == nil {
 		return
 	}
-
-	_, err := harmonydb.DBInst.Exec("INSERT INTO messages(messageid, guildid, createdat, author, message) VALUES(?, ?, ?, ?, ?)", randstr.Hex(16), time.Now().UTC().Unix(), data.targetGuild, userid, data.message)
-
-	if err != nil {
-		golog.Warnf("error saving message to database : %v", err)
-		return
-	}
+	var messageID = randstr.Hex(16)
 
 	// unfortunately O(n) is the only way to do this, we just need to make n really smol (︶︹︶)
 	for _, client := range globals.Guilds[data.targetGuild].Clients {
@@ -54,7 +48,15 @@ func OnMessage(ws *socket.Client, rawMap map[string]interface{}) {
 				"userid":  userid,
 				"createdat": time.Now().UTC().Unix(),
 				"message": data.message,
+				"messageid": messageID,
 			},
 		})
+	}
+
+	_, err := harmonydb.DBInst.Exec("INSERT INTO messages(messageid, guildid, createdat, author, message) VALUES(?, ?, ?, ?, ?)", messageID, data.targetGuild, time.Now().UTC().Unix(), userid, data.message)
+
+	if err != nil {
+		golog.Warnf("error saving message to database : %v", err)
+		return
 	}
 }
