@@ -14,7 +14,8 @@ const appState: IState = {
     messages: [],
     inputStyle: 'standard',
     channels: {},
-    selectedChannel: undefined
+    selectedChannel: undefined,
+    joinGuildDialog: false
 };
 
 export default function AppReducer(state = appState, action: Action): IState {
@@ -98,6 +99,12 @@ export default function AppReducer(state = appState, action: Action): IState {
             return {
                 ...state,
                 selectedChannel: action.payload
+            };
+        }
+        case Actions.TOGGLE_JOIN_GUILD_DIALOG: {
+            return {
+                ...state,
+                joinGuildDialog: !state.joinGuildDialog
             };
         }
         default: {

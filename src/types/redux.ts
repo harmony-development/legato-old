@@ -13,7 +13,8 @@ export enum Actions {
     SET_MESSAGES,
     SET_INPUT_STYLE,
     SET_CHANNELS,
-    SET_SELECTED_CHANNEL
+    SET_SELECTED_CHANNEL,
+    TOGGLE_JOIN_GUILD_DIALOG
 }
 
 interface IGuild {
@@ -49,6 +50,7 @@ export interface IState {
         [key: string]: string;
     };
     selectedChannel: string | undefined;
+    joinGuildDialog: boolean;
 }
 
 export interface IInvertTheme {
@@ -113,4 +115,8 @@ export interface ISetSelectedChannel {
     payload: string;
 }
 
-export type Action = IInvertTheme | IToggleThemeDialog | IChangePrimary | IChangeSecondary | ISetConnected | ISetGuilds | ISetSelectedGuild | IAddMessage | ISetMessages | ISetInputStyle | ISetChannels | ISetSelectedChannel;
+export interface IToggleJoinGuildDialog {
+    type: Actions.TOGGLE_JOIN_GUILD_DIALOG;
+}
+
+export type Action = IInvertTheme | IToggleThemeDialog | IChangePrimary | IChangeSecondary | ISetConnected | ISetGuilds | ISetSelectedGuild | IAddMessage | ISetMessages | ISetInputStyle | ISetChannels | ISetSelectedChannel | IToggleJoinGuildDialog;

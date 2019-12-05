@@ -40,7 +40,7 @@ export const ThemeDialog = () => {
                 <ColorPicker color={primary} setColor={setPrimary} label={'Primary Color'} />
                 <ColorPicker color={secondary} setColor={setSecondary} label={'Secondary Color'} />
                 <Typography>Text Input Style</Typography>
-                <Select value={inputStyle || 'standard'} onChange={changeInputStyle}>
+                <Select value={inputStyle || 'standard'} onChange={changeInputStyle} variant={inputStyle as any} fullWidth>
                     <MenuItem value={'standard'}>Standard</MenuItem>
                     <MenuItem value={'filled'}>Filled</MenuItem>
                     <MenuItem value={'outlined'}>Outlined</MenuItem>

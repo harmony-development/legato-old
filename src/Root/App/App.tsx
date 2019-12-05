@@ -9,6 +9,7 @@ import { IGuildData } from '../../types/socket';
 import { useDispatch, useSelector } from 'react-redux';
 import { Actions, IState, IMessage } from '../../types/redux';
 import { toast } from 'react-toastify';
+import { JoinGuild } from './Dialog/JoinGuildDialog/JoinGuild';
 
 export const App = () => {
     const classes = useAppStyles();
@@ -69,12 +70,16 @@ export const App = () => {
         return () => {
             harmonySocket.events.removeAllListeners('getguilds');
             harmonySocket.events.removeAllListeners('message');
+            harmonySocket.events.removeAllListeners('deauth');
+            harmonySocket.events.removeAllListeners('getchannels');
+            harmonySocket.events.removeAllListeners('getmessages');
         };
     }, [history, dispatch]);
 
     return (
         <div className={classes.root}>
             <ThemeDialog />
+            <JoinGuild />
             <HarmonyBar />
             <div className={classes.navFill} /> {/* this fills the area where the navbar is*/}
             <ChatArea />

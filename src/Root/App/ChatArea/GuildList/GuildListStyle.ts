@@ -14,5 +14,12 @@ export const useGuildListStyle = makeStyles((theme: Theme) => ({
         height: '64px',
         borderRadius: '64px',
         backgroundColor: theme.palette.type === 'dark' ? theme.palette.grey[800] : theme.palette.grey[400]
+    },
+    joinGuild: {
+        marginTop: theme.spacing(1),
+        width: '64px',
+        height: '64px',
+        borderRadius: '64px',
+        backgroundColor: theme.palette.secondary.dark
     }
 }));

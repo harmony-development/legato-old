@@ -90,4 +90,18 @@ export default class HarmonySocket {
             guild: guildID
         });
     }
+
+    joinGuild(inviteCode: string) {
+        this.emitEvent('joinguild', {
+            token: localStorage.getItem('token'),
+            invitecode: inviteCode
+        });
+    }
+
+    createGuild(guildName: string) {
+        this.emitEvent('createguild', {
+            token: localStorage.getItem('token'),
+            guildname: guildName
+        });
+    }
 }
