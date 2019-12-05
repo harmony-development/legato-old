@@ -11,7 +11,6 @@ export const Messages = () => {
 
     useEffect(() => {
         if (messageList.current) {
-            console.log(messageList.current);
             messageList.current.scrollTop = messageList.current.scrollHeight;
         }
     }, [messages]);

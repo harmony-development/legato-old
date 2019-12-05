@@ -6,8 +6,13 @@ export const useGuildListStyle = makeStyles((theme: Theme) => ({
         width: '68px'
     },
     guildiconroot: {
-        borderRadius: '64px',
-        marginTop: theme.spacing(1)
+        boxSizing: 'border-box',
+        borderRadius: '50%',
+        marginTop: theme.spacing(1),
+        border: `2px solid transparent`
+    },
+    selectedguildicon: {
+        border: `2px solid ${theme.palette.primary.light}`
     },
     guildicon: {
         width: '64px',

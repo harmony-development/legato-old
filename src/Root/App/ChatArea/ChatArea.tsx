@@ -14,7 +14,6 @@ export const ChatArea = () => {
 
     useEffect(() => {
         if (messagesRef.current) {
-            console.log(messagesRef.current);
             messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
         }
     }, [messages]);

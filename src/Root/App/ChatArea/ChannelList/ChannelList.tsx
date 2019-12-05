@@ -2,6 +2,7 @@ import React from 'react';
 import { List, ListItem, ListItemText } from '@material-ui/core';
 import { useSelector, useDispatch } from 'react-redux';
 import { IState, Actions } from '../../../../types/redux';
+import { useChannelListStyle } from './ChannelListStyle';
 
 interface IChannelProps {
     channelid: string;
@@ -10,8 +11,11 @@ interface IChannelProps {
 }
 
 const Channel = (props: IChannelProps) => {
+    const selectedChannel = useSelector((state: IState) => state.selectedChannel);
+    const classes = useChannelListStyle();
+
     return (
-        <ListItem button key={props.channelid} onClick={() => props.setSelectedChannel(props.channelid)}>
+        <ListItem button key={props.channelid} className={props.channelid === selectedChannel ? classes.selectedChannel : undefined} onClick={() => props.setSelectedChannel(props.channelid)}>
             <ListItemText secondary={`#${props.channelname}`} />
         </ListItem>
     );

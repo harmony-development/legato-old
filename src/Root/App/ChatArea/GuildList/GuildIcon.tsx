@@ -8,6 +8,7 @@ interface IProps {
     guildid: string;
     guildname: string;
     picture: string;
+    selected: boolean;
 }
 
 export const GuildIcon = (props: IProps) => {
@@ -22,10 +23,12 @@ export const GuildIcon = (props: IProps) => {
     };
 
     return (
-        <ButtonBase className={classes.guildiconroot} key={props.guildid} onClick={onClick}>
-            <Tooltip title={props.guildname} placement='right'>
-                <img className={classes.guildicon} alt='' src={props.picture} draggable={false} />
-            </Tooltip>
-        </ButtonBase>
+        <>
+            <ButtonBase className={`${classes.guildiconroot} ${props.selected ? classes.selectedguildicon : undefined}`} key={props.guildid} onClick={onClick}>
+                <Tooltip title={props.guildname} placement='right'>
+                    <img className={classes.guildicon} alt='' src={props.picture} draggable={false} />
+                </Tooltip>
+            </ButtonBase>
+        </>
     );
 };

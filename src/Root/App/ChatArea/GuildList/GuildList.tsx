@@ -9,12 +9,13 @@ import { ButtonBase, Tooltip } from '@material-ui/core';
 export const GuildList = () => {
     const classes = useGuildListStyle();
     const guildList = useSelector((state: IState) => state.guildList);
+    const selectedGuild = useSelector((state: IState) => state.selectedGuild);
     const dispatch = useDispatch();
 
     return (
         <div className={classes.guildlist}>
             {Object.keys(guildList).map((key) => {
-                return <GuildIcon guildid={key} key={key} guildname={guildList[key].guildname} picture={guildList[key].picture} />;
+                return <GuildIcon guildid={key} key={key} selected={selectedGuild === key} guildname={guildList[key].guildname} picture={guildList[key].picture} />;
             })}
             <ButtonBase className={classes.joinGuild} onClick={() => dispatch({ type: Actions.TOGGLE_JOIN_GUILD_DIALOG })}>
                 <Tooltip title={'Join Or Create Guild'} placement='right'>
