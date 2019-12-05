@@ -9,13 +9,11 @@ import { IGuildData } from '../../types/socket';
 import { useDispatch, useSelector } from 'react-redux';
 import { Actions, IState, IMessage } from '../../types/redux';
 import { toast } from 'react-toastify';
-import { Color } from '@material-ui/core';
 
 export const App = () => {
     const classes = useAppStyles();
     const dispatch = useDispatch();
     const connected = useSelector((state: IState) => state.connected);
-    const themeType = useSelector((state: IState) => state.theme.type);
     const selectedGuild = useSelector((state: IState) => state.selectedGuild);
     const history = useHistory();
 

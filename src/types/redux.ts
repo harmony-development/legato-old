@@ -10,7 +10,8 @@ export enum Actions {
     SET_GUILDS,
     SET_SELECTED_GUILD,
     ADD_MESSAGE,
-    SET_MESSAGES
+    SET_MESSAGES,
+    SET_INPUT_STYLE
 }
 
 interface IGuild {
@@ -36,6 +37,7 @@ export interface IState {
     };
     selectedGuild: string;
     messages: IMessage[];
+    inputStyle: 'standard' | 'filled' | 'outlined';
 }
 
 export interface IInvertTheme {
@@ -83,4 +85,9 @@ export interface ISetMessages {
     payload: IMessage[];
 }
 
-export type Action = IInvertTheme | IToggleThemeDialog | IChangePrimary | IChangeSecondary | ISetConnected | ISetGuilds | ISetSelectedGuild | IAddMessage | ISetMessages;
+export interface ISetInputStyle {
+    type: Actions.SET_INPUT_STYLE;
+    payload: 'standard' | 'filled' | 'outlined';
+}
+
+export type Action = IInvertTheme | IToggleThemeDialog | IChangePrimary | IChangeSecondary | ISetConnected | ISetGuilds | ISetSelectedGuild | IAddMessage | ISetMessages | ISetInputStyle;

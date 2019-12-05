@@ -11,7 +11,8 @@ const appState: IState = {
     themeDialog: false,
     connected: false,
     selectedGuild: '',
-    messages: []
+    messages: [],
+    inputStyle: 'standard'
 };
 
 export default function AppReducer(state = appState, action: Action): IState {
@@ -77,6 +78,12 @@ export default function AppReducer(state = appState, action: Action): IState {
             return {
                 ...state,
                 messages: action.payload
+            };
+        }
+        case Actions.SET_INPUT_STYLE: {
+            return {
+                ...state,
+                inputStyle: action.payload
             };
         }
         default: {

@@ -5,6 +5,7 @@ import { Input } from './Input/Input';
 import { GuildList } from './GuildList/GuildList';
 import { useSelector } from 'react-redux';
 import { IState } from '../../../types/redux';
+import { ChannelList } from './ChannelList/ChannelList';
 
 export const ChatArea = () => {
     const classes = useChatAreaStyles();
@@ -22,6 +23,9 @@ export const ChatArea = () => {
         <div className={classes.root}>
             <div className={classes.guildlist}>
                 <GuildList />
+            </div>
+            <div className={classes.channellist}>
+                <ChannelList />
             </div>
             <div className={classes.chatArea}>
                 <div className={classes.messages} ref={messagesRef}>

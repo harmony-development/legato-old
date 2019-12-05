@@ -12,10 +12,14 @@ export const useChatAreaStyles = makeStyles((theme: Theme) => ({
     },
     guildlist: {
         backgroundColor: theme.palette.type === 'dark' ? theme.palette.grey[900] : theme.palette.grey[200],
-        padding: theme.spacing(1)
+        padding: theme.spacing(1),
+        borderRight: '1px solid grey'
     },
     channellist: {
-        backgroundColor: theme.palette.background.paper
+        backgroundColor: theme.palette.type === 'dark' ? theme.palette.grey[900] : theme.palette.grey[300],
+        padding: 0,
+        width: '300px',
+        overflow: 'hidden'
     },
     guildiconroot: {
         borderRadius: '64px'

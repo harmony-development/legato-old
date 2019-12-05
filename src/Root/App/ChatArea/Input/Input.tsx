@@ -7,6 +7,7 @@ import { harmonySocket } from '../../../Root';
 export const Input = () => {
     const inputField = useRef<HTMLInputElement | undefined>(undefined);
     const connected = useSelector((state: IState) => state.connected);
+    const inputStyle = useSelector((state: IState) => state.inputStyle);
     const guildID = useSelector((state: IState) => state.selectedGuild);
 
     const onKeyPress = (e: React.KeyboardEvent) => {
@@ -21,8 +22,8 @@ export const Input = () => {
     };
 
     return (
-        <div style={{ paddingLeft: '8px' }}>
-            <TextField label={connected ? 'Message' : 'Currently Offline'} variant='standard' fullWidth multiline rowsMax={3} rows={3} onKeyPress={onKeyPress} inputRef={inputField} />
+        <div>
+            <TextField label={connected ? 'Message' : 'Currently Offline'} variant={inputStyle as any} fullWidth multiline rowsMax={3} rows={3} onKeyPress={onKeyPress} inputRef={inputField} color='secondary' />
         </div>
     );
 };
