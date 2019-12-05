@@ -119,6 +119,7 @@ This applies to all server-bound and client-bound packets.
     "type": "message",
     "data": {
       "guild": string,
+      "channel": string,
       "userid": string,
       "message": string,
       "messageid": string
