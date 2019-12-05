@@ -125,3 +125,14 @@ This applies to all server-bound and client-bound packets.
     }
   }
   ```
+* **GetChannels**
+  ```json
+  {
+    "type": "getchannels",
+    "data": {
+      "channels": {
+        "channelid": "channelname"
+      }
+    }
+  }
+  ```

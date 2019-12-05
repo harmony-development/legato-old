@@ -13,5 +13,6 @@ func handleSocket(w http.ResponseWriter, r *http.Request) {
 	ws.Bind("getguilds", event.OnGetGuilds)
 	ws.Bind("message", event.OnMessage)
 	ws.Bind("getmessages", event.OnGetMessages)
+	ws.Bind("getchannels", event.OnGetChannels)
 	ws.Bind("joinguild", event.OnJoinGuild)
 }
