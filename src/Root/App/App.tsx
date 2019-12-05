@@ -45,7 +45,7 @@ export const App = () => {
             }
         });
         harmonySocket.events.addListener('getmessages', (raw: any) => {
-            if (typeof raw['messages']) {
+            if (raw['messages']) {
                 dispatch({ type: Actions.SET_MESSAGES, payload: (raw['messages'] as IMessage[]).reverse() });
             }
         });

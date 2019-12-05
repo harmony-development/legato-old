@@ -12,7 +12,8 @@ export enum Actions {
     ADD_MESSAGE,
     SET_MESSAGES,
     SET_INPUT_STYLE,
-    SET_CHANNELS
+    SET_CHANNELS,
+    SET_SELECTED_CHANNEL
 }
 
 interface IGuild {
@@ -29,6 +30,7 @@ export interface IMessage {
     userid: string;
     createdat: number;
     guild: string;
+    channel: string;
     message: string;
     messageid: string;
 }
@@ -46,6 +48,7 @@ export interface IState {
     channels: {
         [key: string]: string;
     };
+    selectedChannel: string | undefined;
 }
 
 export interface IInvertTheme {
@@ -105,4 +108,9 @@ export interface ISetChannels {
     };
 }
 
-export type Action = IInvertTheme | IToggleThemeDialog | IChangePrimary | IChangeSecondary | ISetConnected | ISetGuilds | ISetSelectedGuild | IAddMessage | ISetMessages | ISetInputStyle | ISetChannels;
+export interface ISetSelectedChannel {
+    type: Actions.SET_SELECTED_CHANNEL;
+    payload: string;
+}
+
+export type Action = IInvertTheme | IToggleThemeDialog | IChangePrimary | IChangeSecondary | ISetConnected | ISetGuilds | ISetSelectedGuild | IAddMessage | ISetMessages | ISetInputStyle | ISetChannels | ISetSelectedChannel;

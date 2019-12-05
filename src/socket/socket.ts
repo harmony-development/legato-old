@@ -75,10 +75,11 @@ export default class HarmonySocket {
         });
     }
 
-    sendMessage(guildID: string, text: string) {
+    sendMessage(guildID: string, channelID: string, text: string) {
         this.emitEvent('message', {
             token: localStorage.getItem('token'),
             guild: guildID,
+            channel: channelID,
             message: text
         });
     }

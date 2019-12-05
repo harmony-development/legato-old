@@ -9,13 +9,14 @@ export const Input = () => {
     const connected = useSelector((state: IState) => state.connected);
     const inputStyle = useSelector((state: IState) => state.inputStyle);
     const guildID = useSelector((state: IState) => state.selectedGuild);
+    const channelID = useSelector((state: IState) => state.selectedChannel);
 
     const onKeyPress = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             // does the input field exist and is it not blank
-            if (inputField.current && !/^\s*$/.test(inputField.current.value)) {
-                harmonySocket.sendMessage(guildID, inputField.current.value);
+            if (inputField.current && !/^\s*$/.test(inputField.current.value) && channelID) {
+                harmonySocket.sendMessage(guildID, channelID, inputField.current.value);
                 inputField.current.value = '';
             }
         }
