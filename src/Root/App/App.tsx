@@ -27,6 +27,14 @@ export const App = () => {
 
     useEffect(() => {
         if (connected) {
+            dispatch({
+                type: Actions.SET_MESSAGES,
+                payload: []
+            });
+            dispatch({
+                type: Actions.SET_SELECTED_CHANNEL,
+                payload: undefined
+            });
             harmonySocket.getMessages(selectedGuild);
             harmonySocket.getChannels(selectedGuild);
         }
