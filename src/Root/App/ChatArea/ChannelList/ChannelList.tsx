@@ -1,19 +1,23 @@
 import React from 'react';
-import { List, ListItem, ListItemText, Typography } from '@material-ui/core';
+import { List, ListItem, ListItemText } from '@material-ui/core';
+import { useSelector } from 'react-redux';
+import { IState } from '../../../../types/redux';
 
 export const ChannelList = () => {
+    const channels = useSelector((state: IState) => state.channels);
+
     return (
         <div>
             <List style={{ padding: 0 }}>
-                <ListItem button>
-                    <ListItemText secondary={'#general'} />
-                </ListItem>
-                <ListItem button>
-                    <ListItemText secondary={'#media'} />
-                </ListItem>
-                <ListItem button>
-                    <ListItemText secondary={'#bruh'} />
-                </ListItem>
+                {channels
+                    ? Object.keys(channels).map((key) => {
+                          return (
+                              <ListItem button key={key}>
+                                  <ListItemText secondary={`#${channels[key]}`} />
+                              </ListItem>
+                          );
+                      })
+                    : undefined}
             </List>
         </div>
     );

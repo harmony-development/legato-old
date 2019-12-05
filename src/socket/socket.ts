@@ -82,4 +82,11 @@ export default class HarmonySocket {
             message: text
         });
     }
+
+    getChannels(guildID: string) {
+        this.emitEvent('getchannels', {
+            token: localStorage.getItem('token'),
+            guild: guildID
+        });
+    }
 }

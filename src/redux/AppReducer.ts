@@ -12,7 +12,8 @@ const appState: IState = {
     connected: false,
     selectedGuild: '',
     messages: [],
-    inputStyle: 'standard'
+    inputStyle: 'standard',
+    channels: {}
 };
 
 export default function AppReducer(state = appState, action: Action): IState {
@@ -84,6 +85,12 @@ export default function AppReducer(state = appState, action: Action): IState {
             return {
                 ...state,
                 inputStyle: action.payload
+            };
+        }
+        case Actions.SET_CHANNELS: {
+            return {
+                ...state,
+                channels: action.payload
             };
         }
         default: {

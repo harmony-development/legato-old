@@ -27,6 +27,7 @@ export const App = () => {
     useEffect(() => {
         if (connected) {
             harmonySocket.getMessages(selectedGuild);
+            harmonySocket.getChannels(selectedGuild);
         }
     }, [selectedGuild]);
 
@@ -54,7 +55,11 @@ export const App = () => {
                 dispatch({ type: Actions.ADD_MESSAGE, payload: raw as IMessage });
             }
         });
-
+        harmonySocket.events.addListener('getchannels', (raw: any) => {
+            if (typeof raw === 'object') {
+                dispatch({ type: Actions.SET_CHANNELS, payload: raw['channels'] });
+            }
+        });
         harmonySocket.events.addListener('deauth', () => {
             toast.warn('Your session has expired. Please login again');
             history.push('/');

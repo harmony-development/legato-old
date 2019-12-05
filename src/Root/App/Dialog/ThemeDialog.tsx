@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Color, FormControlLabel, FormControl, FormLabel, RadioGroup, Radio, Typography, Select, MenuItem, Menu } from '@material-ui/core';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Color, FormControlLabel, FormControl, FormLabel, RadioGroup, Radio, Typography, Select, MenuItem } from '@material-ui/core';
 import { useSelector, useDispatch } from 'react-redux';
 import { IState, Actions } from '../../../types/redux';
 import { ColorPicker } from './ColorPicker';
