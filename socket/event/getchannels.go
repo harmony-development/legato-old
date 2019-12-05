@@ -2,6 +2,7 @@ package event
 
 import (
 	"github.com/kataras/golog"
+	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"harmony-server/socket"
 )
@@ -24,6 +25,9 @@ func OnGetChannels(ws *socket.Client, rawMap map[string]interface{}) {
 	userid := verifyToken(data.Token)
 	if userid == "" {
 		deauth(ws)
+		return
+	}
+	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil {
 		return
 	}
 	res, err := harmonydb.DBInst.Query("SELECT channelid, channelname FROM channels WHERE guildid=?", data.Guild)

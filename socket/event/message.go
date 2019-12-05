@@ -12,6 +12,7 @@ import (
 type messageData struct {
 	token       string
 	targetGuild string
+	targetChannel string
 	message     string
 }
 
@@ -26,6 +27,9 @@ func OnMessage(ws *socket.Client, rawMap map[string]interface{}) {
 		return
 	}
 	if data.targetGuild, ok = rawMap["guild"].(string); !ok {
+		return
+	}
+	if data.targetChannel, ok = rawMap["channel"].(string); !ok {
 		return
 	}
 	userid := verifyToken(data.token)
@@ -45,6 +49,7 @@ func OnMessage(ws *socket.Client, rawMap map[string]interface{}) {
 			Type: "message",
 			Data: map[string]interface{}{
 				"guild":   data.targetGuild,
+				"channel": data.targetChannel,
 				"userid":  userid,
 				"createdat": time.Now().UTC().Unix(),
 				"message": data.message,
@@ -52,9 +57,7 @@ func OnMessage(ws *socket.Client, rawMap map[string]interface{}) {
 			},
 		})
 	}
-
-	_, err := harmonydb.DBInst.Exec("INSERT INTO messages(messageid, guildid, createdat, author, message) VALUES(?, ?, ?, ?, ?)", messageID, data.targetGuild, time.Now().UTC().Unix(), userid, data.message)
-
+	_, err := harmonydb.DBInst.Exec("INSERT INTO messages(messageid, guildid, channelid, createdat, author, message) VALUES(?, ?, ?, ?, ?, ?)", messageID, data.targetGuild, data.targetChannel, time.Now().UTC().Unix(), userid, data.message)
 	if err != nil {
 		golog.Warnf("error saving message to database : %v", err)
 		return
