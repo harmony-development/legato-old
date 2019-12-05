@@ -14,6 +14,7 @@ type GetMessagesData struct {
 
 type Message struct {
 	Guild string `json:"guild"`
+	Channel string `json:"channel"`
 	Userid string `json:"userid"`
 	Createdat int `json:"createdat"`
 	Message string `json:"message"`
@@ -38,7 +39,7 @@ func OnGetMessages(ws *socket.Client, rawMap map[string]interface{}) {
 	if globals.Guilds[data.targetGuild] == nil || globals.Guilds[data.targetGuild].Clients[userid] == nil {
 		return
 	}
-	res, err := harmonydb.DBInst.Query("SELECT messageid, author, guildid, createdat, message FROM messages ORDER BY createdat DESC LIMIT 30")
+	res, err := harmonydb.DBInst.Query("SELECT messageid, author, guildid, channelid, createdat, message FROM messages ORDER BY createdat DESC LIMIT 30")
 	if err != nil {
 		golog.Warnf("Error getting recent messages : %v", err)
 		return
@@ -46,7 +47,7 @@ func OnGetMessages(ws *socket.Client, rawMap map[string]interface{}) {
 	var returnMsgs[] Message
 	for res.Next() {
 		var msg Message
-		err := res.Scan(&msg.Messageid, &msg.Userid, &msg.Guild, &msg.Createdat, &msg.Message)
+		err := res.Scan(&msg.Messageid, &msg.Userid, &msg.Guild, &msg.Channel, &msg.Createdat, &msg.Message)
 		if err != nil {
 			golog.Warnf("Error scanning next row getting messages. Reason: %v", err)
 			return
