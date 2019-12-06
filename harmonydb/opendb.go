@@ -10,6 +10,7 @@ var queries = []string{
 	`CREATE TABLE IF NOT EXISTS guilds(
 		guildid TEXT PRIMARY KEY NOT NULL, 
 		guildname TEXT NOT NULL, 
+		owner TEXT NOT NULL REFERENCES users(id),
 		picture TEXT NOT NULL
 	);`,
 	`CREATE TABLE IF NOT EXISTS guildmembers(
@@ -41,8 +42,9 @@ var queries = []string{
 		guildid TEXT REFERENCES guilds(guildid), 
 		channelname TEXT
 	);`,
-	`INSERT INTO guilds(guildid, guildname, picture) VALUES(
+	`INSERT INTO guilds(guildid, owner, guildname, picture) VALUES(
 		"harmony-devs", 
+		"82ee9c8dc9e165205548b7c3833e7372",
 		"Harmony Development", 
 		"") ON CONFLICT DO NOTHING;`,
 	`INSERT INTO invites(inviteid, guildid) VALUES(

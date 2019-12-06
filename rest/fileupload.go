@@ -9,6 +9,7 @@ import (
 )
 
 func FileUpload(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	err := r.ParseMultipartForm(30 << 20)
 	if err != nil {
 		return

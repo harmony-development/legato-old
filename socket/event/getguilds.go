@@ -14,6 +14,7 @@ type getGuildsData struct {
 type guildsData struct {
 	Guildname string `json:"guildname"`
 	Picture   string `json:"picture"`
+	IsOwner bool `json:"owner"`
 }
 
 func OnGetGuilds(ws *socket.Client, rawMap map[string]interface{}) {
@@ -28,7 +29,7 @@ func OnGetGuilds(ws *socket.Client, rawMap map[string]interface{}) {
 		deauth(ws)
 		return
 	}
-	res, err := harmonydb.DBInst.Query("SELECT guilds.guildid, guilds.guildname, guilds.picture FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=?", userid)
+	res, err := harmonydb.DBInst.Query("SELECT guilds.guildid, guilds.guildname, guilds.owner, guilds.picture FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=?", userid)
 	if err != nil {
 		golog.Warnf("Error selecting guilds. Reason : %v", err)
 		return
@@ -37,7 +38,11 @@ func OnGetGuilds(ws *socket.Client, rawMap map[string]interface{}) {
 	for res.Next() {
 		var guildID string
 		var fetchedGuild guildsData
-		err := res.Scan(&guildID, &fetchedGuild.Guildname, &fetchedGuild.Picture)
+		var guildOwner string
+		err := res.Scan(&guildID, &fetchedGuild.Guildname, &guildOwner, &fetchedGuild.Picture)
+		if guildOwner == userid {
+			fetchedGuild.IsOwner = true
+		}
 		if err != nil {
 			golog.Warnf("Error scanning next row. Reason: %v", err)
 			return
