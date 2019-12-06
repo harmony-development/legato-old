@@ -7,4 +7,5 @@ export interface IGuildData {
     guildid: string;
     guildname: string;
     picture: string;
+    owner: boolean;
 }

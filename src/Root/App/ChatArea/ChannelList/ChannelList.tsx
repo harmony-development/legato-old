@@ -30,6 +30,7 @@ const Channel = (props: IChannelProps) => {
 export const ChannelList = () => {
     const channels = useSelector((state: IState) => state.channels);
     const selectedGuild = useSelector((state: IState) => state.selectedGuild);
+    const guildsList = useSelector((state: IState) => state.guildList);
     const [actionsExpanded, setActionsExpanded] = useState<boolean>(false);
     const dispatch = useDispatch();
     const classes = useChannelListStyle();
@@ -57,12 +58,18 @@ export const ChannelList = () => {
                         </ListItem>
                         <Collapse in={actionsExpanded} timeout='auto' unmountOnExit>
                             <List component='div' disablePadding>
-                                <ListItem button className={classes.nested} onClick={toggleGuildSettings}>
-                                    <ListItemIcon>
-                                        <SettingsIcon />
-                                    </ListItemIcon>
-                                    <ListItemText primary='Guild Settings' />
-                                </ListItem>
+                                {guildsList[selectedGuild] && guildsList[selectedGuild].owner ? (
+                                    <>
+                                        <ListItem button className={classes.nested} onClick={toggleGuildSettings}>
+                                            <ListItemIcon>
+                                                <SettingsIcon />
+                                            </ListItemIcon>
+                                            <ListItemText primary='Guild Settings' />
+                                        </ListItem>
+                                    </>
+                                ) : (
+                                    undefined
+                                )}
                                 <ListItem button className={classes.nested} onClick={leaveGuild}>
                                     <ListItemIcon>
                                         <LeaveIcon />

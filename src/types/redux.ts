@@ -22,6 +22,7 @@ interface IGuild {
     guildid: string;
     picture: string;
     guildname: string;
+    owner: boolean;
 }
 
 export interface IChannels {
