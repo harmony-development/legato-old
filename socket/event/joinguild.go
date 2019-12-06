@@ -46,14 +46,20 @@ func OnJoinGuild(ws *socket.Client, rawMap map[string]interface{}) {
 	}
 	_, err = harmonydb.DBInst.Exec("INSERT INTO guildmembers(userid, guildid) VALUES(?, ?)", userid, guildid)
 	if err != nil {
+		ws.Send(&socket.Packet{
+			Type: "joinguild",
+			Data: map[string]interface{}{
+				"message": "Error Joining Guild!",
+			},
+		})
 		golog.Warnf("Error adding user to guildmembers : %v", err)
 		return
 	}
-	registerSocket(guildid, ws, userid)
 	ws.Send(&socket.Packet{
 		Type: "joinguild",
 		Data: map[string]interface{}{
 			"guild": guildid,
 		},
 	})
+	registerSocket(guildid, ws, userid)
 }
