@@ -13,27 +13,6 @@ export const JoinGuild = () => {
     const guildNameRef = useRef<HTMLInputElement | null>(null);
     const dispatch = useDispatch();
 
-    useEffect(() => {
-        harmonySocket.events.addListener('joinguild', (raw: any) => {
-            if (!raw['message']) {
-                harmonySocket.getGuilds();
-                dispatch({ type: Actions.TOGGLE_JOIN_GUILD_DIALOG });
-                harmonySocket.events.removeCurrentListener();
-            } else {
-                setJoinErr(raw['message']);
-            }
-        });
-        harmonySocket.events.addListener('createguild', (raw: any) => {
-            if (!raw['message']) {
-                harmonySocket.getGuilds();
-                dispatch({ type: Actions.TOGGLE_JOIN_GUILD_DIALOG });
-                harmonySocket.events.removeCurrentListener();
-            } else {
-                setCreateErr(raw['message']);
-            }
-        });
-    }, []);
-
     const createGuild = () => {
         if (guildNameRef.current && guildNameRef.current.value) {
             harmonySocket.createGuild(guildNameRef.current.value);

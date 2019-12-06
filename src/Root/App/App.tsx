@@ -48,10 +48,14 @@ export const App = () => {
         }
 
         harmonySocket.events.addListener('getguilds', (raw: any) => {
-            if (Object.keys(raw['guilds']).length > 0) {
-                let guildsList = raw['guilds'] as IGuildData;
-                dispatch({ type: Actions.SET_GUILDS, payload: guildsList });
+            let guildsList = raw['guilds'] as IGuildData;
+            if (Object.keys(guildsList).length === 0) {
+                dispatch({ type: Actions.SET_MESSAGES, payload: [] });
+                dispatch({ type: Actions.SET_SELECTED_CHANNEL, payload: undefined });
+                dispatch({ type: Actions.SET_SELECTED_GUILD, payload: '' });
+                dispatch({ type: Actions.SET_CHANNELS, payload: {} });
             }
+            dispatch({ type: Actions.SET_GUILDS, payload: guildsList });
         });
         harmonySocket.events.addListener('getmessages', (raw: any) => {
             if (raw['messages']) {
@@ -73,6 +77,26 @@ export const App = () => {
             toast.warn('Your session has expired. Please login again');
             history.push('/');
             return;
+        });
+        harmonySocket.events.addListener('leaveguild', (raw: any) => {
+            if (typeof raw['message'] === 'string') {
+                toast.error(raw['message']);
+                return;
+            }
+            harmonySocket.getGuilds();
+        });
+
+        harmonySocket.events.addListener('joinguild', (raw: any) => {
+            if (!raw['message']) {
+                harmonySocket.getGuilds();
+                dispatch({ type: Actions.TOGGLE_JOIN_GUILD_DIALOG });
+            }
+        });
+        harmonySocket.events.addListener('createguild', (raw: any) => {
+            if (!raw['message']) {
+                harmonySocket.getGuilds();
+                dispatch({ type: Actions.TOGGLE_JOIN_GUILD_DIALOG });
+            }
         });
 
         return () => {
