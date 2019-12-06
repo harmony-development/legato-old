@@ -4,6 +4,7 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import LeaveIcon from '@material-ui/icons/ExitToApp';
+import LinkIcon from '@material-ui/icons/Link';
 import { useSelector, useDispatch } from 'react-redux';
 import { IState, Actions } from '../../../../types/redux';
 import { useChannelListStyle } from './ChannelListStyle';
@@ -41,20 +42,27 @@ export const ChannelList = () => {
         dispatch({ type: Actions.SET_SELECTED_CHANNEL, payload: value });
     };
 
+    const toggleGuildSettings = () => {
+        dispatch({ type: Actions.TOGGLE_GUILD_SETTINGS_DIALOG });
+    };
+
     return (
         <div>
             <List style={{ padding: 0 }}>
                 {selectedGuild !== '' ? (
                     <>
                         <ListItem button onClick={() => setActionsExpanded(!actionsExpanded)}>
-                            <ListItemIcon>
-                                <SettingsIcon />
-                            </ListItemIcon>
                             <ListItemText primary='Guild Options' />
                             {actionsExpanded ? <ExpandLess /> : <ExpandMore />}
                         </ListItem>
                         <Collapse in={actionsExpanded} timeout='auto' unmountOnExit>
                             <List component='div' disablePadding>
+                                <ListItem button className={classes.nested} onClick={toggleGuildSettings}>
+                                    <ListItemIcon>
+                                        <SettingsIcon />
+                                    </ListItemIcon>
+                                    <ListItemText primary='Guild Settings' />
+                                </ListItem>
                                 <ListItem button className={classes.nested} onClick={leaveGuild}>
                                     <ListItemIcon>
                                         <LeaveIcon />

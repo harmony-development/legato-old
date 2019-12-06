@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { IState, Actions } from '../../../../types/redux';
 import { Dialog, TextField, Typography, DialogContent, Button, Grid } from '@material-ui/core';
@@ -7,8 +7,8 @@ import { harmonySocket } from '../../../Root';
 export const JoinGuild = () => {
     const open = useSelector((state: IState) => state.joinGuildDialog);
     const inputStyle = useSelector((state: IState) => state.inputStyle);
-    const [joinErr, setJoinErr] = useState<string>('');
-    const [createErr, setCreateErr] = useState<string>('');
+    const [joinErr] = useState<string>('');
+    const [createErr] = useState<string>('');
     const joinCodeRef = useRef<HTMLInputElement | null>(null);
     const guildNameRef = useRef<HTMLInputElement | null>(null);
     const dispatch = useDispatch();

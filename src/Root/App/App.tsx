@@ -10,12 +10,16 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Actions, IState, IMessage } from '../../types/redux';
 import { toast } from 'react-toastify';
 import { JoinGuild } from './Dialog/JoinGuildDialog/JoinGuild';
+import { GuildSettings } from './Dialog/GuildSettingsDialog/GuildSettings';
 
 export const App = () => {
     const classes = useAppStyles();
     const dispatch = useDispatch();
     const connected = useSelector((state: IState) => state.connected);
     const selectedGuild = useSelector((state: IState) => state.selectedGuild);
+    const themeDialogOpen = useSelector((state: IState) => state.themeDialog);
+    const joinDialogOpen = useSelector((state: IState) => state.joinGuildDialog);
+    const guildSettingsDialogOpen = useSelector((state: IState) => state.guildSettingsDialog);
     const history = useHistory();
 
     // event when the client has connected
@@ -38,6 +42,7 @@ export const App = () => {
             harmonySocket.getMessages(selectedGuild);
             harmonySocket.getChannels(selectedGuild);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedGuild]);
 
     useEffect(() => {
@@ -110,8 +115,9 @@ export const App = () => {
 
     return (
         <div className={classes.root}>
-            <ThemeDialog />
-            <JoinGuild />
+            {themeDialogOpen ? <ThemeDialog /> : undefined}
+            {joinDialogOpen ? <JoinGuild /> : undefined}
+            {guildSettingsDialogOpen ? <GuildSettings /> : undefined}
             <HarmonyBar />
             <div className={classes.navFill} /> {/* this fills the area where the navbar is*/}
             <ChatArea />

@@ -1,5 +1,5 @@
 import { EventEmitter } from 'fbemitter';
-import { IPacket } from '../types/socket';
+import { IPacket, IGuildData } from '../types/socket';
 
 export default class HarmonySocket {
     conn: WebSocket;
@@ -109,6 +109,22 @@ export default class HarmonySocket {
         this.emitEvent('leaveguild', {
             token: localStorage.getItem('token'),
             guild: guildID
+        });
+    }
+
+    sendGuildNameUpdate(guildID: string, newname: string) {
+        this.emitEvent('updateguildname', {
+            token: localStorage.getItem('token'),
+            guild: guildID,
+            name: newname
+        });
+    }
+
+    sendGuildPictureUpdate(guildID: string, newpicture: string) {
+        this.emitEvent('updateguildname', {
+            token: localStorage.getItem('token'),
+            guild: guildID,
+            picture: newpicture
         });
     }
 }
