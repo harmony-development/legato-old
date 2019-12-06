@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="Harmony DB" uuid="14d71eee-c193-4c4f-8179-3614332aa156">
+    <data-source source="LOCAL" name="harmony.db" uuid="6702b800-1778-488f-97cc-ddc2286855f2">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>

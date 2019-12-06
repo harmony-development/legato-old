@@ -14,7 +14,8 @@ var queries = []string{
 	);`,
 	`CREATE TABLE IF NOT EXISTS guildmembers(
 		userid TEXT NOT NULL REFERENCES users(id), 
-		guildid TEXT REFERENCES guilds(guildid)
+		guildid TEXT REFERENCES guilds(guildid),
+		UNIQUE(userid, guildid)
 	);`,
 	`CREATE TABLE IF NOT EXISTS users(
 		id TEXT PRIMARY KEY NOT NULL, 
@@ -46,7 +47,7 @@ var queries = []string{
 		"") ON CONFLICT DO NOTHING;`,
 	`INSERT INTO invites(inviteid, guildid) VALUES(
 		"join-harmony-dev", 
-		"harmony-dev")
+		"harmony-devs")
 		ON CONFLICT DO NOTHING;`,
 	`INSERT INTO users(id, email, username, avatar, password) VALUES(
 		"82ee9c8dc9e165205548b7c3833e7372", 
@@ -64,11 +65,11 @@ var queries = []string{
 	`INSERT INTO guildmembers(userid, guildid) VALUES(
 		"82ee9c8dc9e165205548b7c3833e7372", 
 		"harmony-devs"
-	);`,
+	) ON CONFLICT DO NOTHING;`,
 	`INSERT INTO guildmembers(userid, guildid) VALUES(
 		"dadcd6bf8c0338cbfc9aa9c369ea93cc", 
 		"harmony-devs"
-	);`,
+	) ON CONFLICT DO NOTHING;`,
 	`INSERT INTO channels(channelid, guildid, channelname) VALUES(
 		"FNhj3bhbKFBYHUKG", 
 		"harmony-devs", 
@@ -88,7 +89,7 @@ func OpenDB() *sql.DB {
 	for i := range queries {
 		_, err := database.Exec(queries[i])
 		if err != nil {
-			golog.Fatalf("Harmony was not able to initialize the database! The server cannot continue! Reason : %v", err)
+			golog.Fatalf("Harmony was not able to initialize the database! The server cannot continue! Query: \n%v\nReason : %v", queries[i], err)
 		}
 	}
 	return database
