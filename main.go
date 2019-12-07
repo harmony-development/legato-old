@@ -26,5 +26,6 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/socket", handleSocket)
 	router.HandleFunc("/api/rest/fileupload", rest.FileUpload)
+	router.PathPrefix("/filestore/").Handler(http.StripPrefix("/filestore/", http.FileServer(http.Dir("./filestore"))))
 	golog.Fatalf("Fatal error caused server to crash! %v", http.ListenAndServe(PORT, router))
 }

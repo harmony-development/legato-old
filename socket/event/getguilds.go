@@ -50,12 +50,14 @@ func OnGetGuilds(ws *socket.Client, rawMap map[string]interface{}) {
 		// Now subscribe to all guilds that the client is a member of!
 		if globals.Guilds[guildID] != nil {
 			globals.Guilds[guildID].Clients[userid] = ws
+			globals.Guilds[guildID].Owner = guildOwner
 		} else {
 			globals.Guilds[guildID] = &globals.Guild{
 				Clients: map[string]*socket.Client{
 					userid: ws,
 				},
 			}
+			globals.Guilds[guildID].Owner = guildOwner
 		}
 		returnGuilds[guildID] = fetchedGuild
 	}
