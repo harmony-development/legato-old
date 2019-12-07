@@ -28,9 +28,9 @@ func OnCreateGuild(ws *socket.Client, rawMap map[string]interface{}) {
 		return
 	}
 	guildid := randstr.Hex(16)
-	_, err := harmonydb.DBInst.Exec(`INSERT INTO guilds(guildid, guildname, picture) VALUES(?, ?, ?); 
+	_, err := harmonydb.DBInst.Exec(`INSERT INTO guilds(guildid, guildname, picture, owner) VALUES(?, ?, ?, ?); 
 										   INSERT INTO guildmembers(userid, guildid) VALUES(?, ?);
-										   INSERT INTO channels(channelid, guildid, channelname) VALUES(?, ?, ?)`, guildid, data.Guildname, "", userid, guildid, randstr.Hex(16), guildid, "general")
+										   INSERT INTO channels(channelid, guildid, channelname) VALUES(?, ?, ?)`, guildid, data.Guildname, "", userid, userid, guildid, randstr.Hex(16), guildid, "general")
 	if err != nil {
 		golog.Warnf("Error creating guild : %v", err)
 		ws.Send(&socket.Packet{

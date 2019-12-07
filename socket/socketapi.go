@@ -57,6 +57,8 @@ func reader(ws *Client) {
 			if err = json.Unmarshal(msg, &p); err == nil {
 				if ws.EventBus[p.Type] != nil {
 					ws.EventBus[p.Type](ws, p.Data) // call an event from the eventbus if it exists
+				} else {
+					golog.Warnf("Unrecognized API Query Detected : %v", p.Type)
 				}
 			}
 		} else {
