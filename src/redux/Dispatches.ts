@@ -93,3 +93,14 @@ export function SetGuildPicture(guild: string, picture: string) {
         }
     };
 }
+
+interface IInvites {
+    [key: string]: number;
+}
+
+export function SetInvites(invites: IInvites) {
+    return {
+        type: Actions.SET_INVITES,
+        payload: invites
+    };
+}

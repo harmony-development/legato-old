@@ -6,14 +6,19 @@ export default class HarmonySocket {
     events: EventEmitter;
 
     constructor() {
-        this.conn = new WebSocket(`ws://${window.location.hostname}:2288/api/socket`);
+        this.conn = new WebSocket(
+            `ws://${window.location.hostname}:2288/api/socket`
+        );
         this.events = new EventEmitter();
         this.conn.addEventListener('open', () => this.events.emit('open'));
         this.conn.addEventListener('close', () => this.events.emit('close'));
         this.conn.addEventListener('error', () => this.events.emit('error'));
         this.conn.onmessage = (e: MessageEvent) => {
             const unprocessed = JSON.parse(e.data);
-            if (typeof unprocessed['type'] === 'string' && typeof unprocessed['data'] === 'object') {
+            if (
+                typeof unprocessed['type'] === 'string' &&
+                typeof unprocessed['data'] === 'object'
+            ) {
                 const packet: IPacket = unprocessed;
                 this.events.emit(packet.type, packet.data);
             } else {
@@ -24,13 +29,18 @@ export default class HarmonySocket {
     }
 
     connect = () => {
-        this.conn = new WebSocket(`ws://${window.location.hostname}:2288/api/socket`);
+        this.conn = new WebSocket(
+            `ws://${window.location.hostname}:2288/api/socket`
+        );
         this.conn.addEventListener('open', () => this.events.emit('open'));
         this.conn.addEventListener('close', () => this.events.emit('close'));
         this.conn.addEventListener('error', () => this.events.emit('error'));
         this.conn.onmessage = (e: MessageEvent) => {
             const unprocessed = JSON.parse(e.data);
-            if (typeof unprocessed['type'] === 'string' && typeof unprocessed['data'] === 'object') {
+            if (
+                typeof unprocessed['type'] === 'string' &&
+                typeof unprocessed['data'] === 'object'
+            ) {
                 const packet: IPacket = unprocessed;
                 this.events.emit(packet.type, packet.data);
             } else {
@@ -125,6 +135,13 @@ export default class HarmonySocket {
             token: localStorage.getItem('token'),
             guild: guildID,
             picture: newpicture
+        });
+    }
+
+    sendGetInvites(guildID: string) {
+        this.emitEvent('getinvites', {
+            token: localStorage.getItem('token'),
+            guild: guildID
         });
     }
 }

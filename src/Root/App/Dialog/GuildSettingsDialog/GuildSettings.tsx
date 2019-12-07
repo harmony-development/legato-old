@@ -29,6 +29,7 @@ export const GuildSettings = () => {
     const selectedGuild = useSelector((state: IState) => state.selectedGuild);
     const inputStyle = useSelector((state: IState) => state.inputStyle);
     const guilds = useSelector((state: IState) => state.guildList);
+    const invites = useSelector((state: IState) => state.invites);
     const dispatch = useDispatch();
     const guildIconUpload = useRef<HTMLInputElement | null>(null);
     const [guildName, setGuildName] = useState<string | undefined>(
@@ -163,7 +164,20 @@ export const GuildSettings = () => {
                                 <TableCell>Amount Used</TableCell>
                             </TableRow>
                         </TableHead>
-                        <TableBody></TableBody>
+                        <TableBody>
+                            {Object.keys(invites).map((key) => {
+                                return (
+                                    <TableRow key={key}>
+                                        <TableCell component='th' scope='row'>
+                                            {key}
+                                        </TableCell>
+                                        <TableCell component='th' scope='row'>
+                                            {invites[key]}
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
+                        </TableBody>
                     </Table>
                 </div>
             </DialogContent>

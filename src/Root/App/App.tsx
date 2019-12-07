@@ -19,7 +19,8 @@ import {
     SetGuilds,
     AddMessage,
     ToggleGuildSettingsDialog,
-    SetGuildPicture
+    SetGuildPicture,
+    SetInvites
 } from '../../redux/Dispatches';
 
 export const App = () => {
@@ -141,10 +142,11 @@ export const App = () => {
                     }
                 }
             );
-            harmonySocket.events.addListener(
-                'updateguildname',
-                (raw: any) => {}
-            );
+            harmonySocket.events.addListener('getinvites', (raw: any) => {
+                if (raw['invites'] && raw['guild']) {
+                    dispatch(SetInvites(raw['invites']));
+                }
+            });
             return () => {
                 harmonySocket.events.removeAllListeners('getguilds');
                 harmonySocket.events.removeAllListeners('getmessages');

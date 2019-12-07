@@ -17,7 +17,8 @@ export enum Actions {
     TOGGLE_JOIN_GUILD_DIALOG,
     TOGGLE_GUILD_SETTINGS_DIALOG,
     SET_GUILD_PICTURE,
-    SET_GUILD_NAME
+    SET_GUILD_NAME,
+    SET_INVITES
 }
 
 interface IGuild {
@@ -61,6 +62,9 @@ export interface IState {
     selectedChannel: string | undefined;
     joinGuildDialog: boolean;
     guildSettingsDialog: boolean;
+    invites: {
+        [key: string]: number;
+    };
 }
 
 export interface IInvertTheme {
@@ -143,6 +147,13 @@ export interface ISetGuildName {
     payload: string;
 }
 
+export interface ISetInvites {
+    type: Actions.SET_INVITES;
+    payload: {
+        [key: string]: number;
+    };
+}
+
 export type Action =
     | IInvertTheme
     | IToggleThemeDialog
@@ -159,4 +170,5 @@ export type Action =
     | IToggleJoinGuildDialog
     | IToggleGuildSettingsDialog
     | ISetGuildPicture
-    | ISetGuildName;
+    | ISetGuildName
+    | ISetInvites;

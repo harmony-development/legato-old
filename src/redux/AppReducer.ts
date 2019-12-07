@@ -12,6 +12,7 @@ const appState: IState = {
     connected: false,
     selectedGuild: '',
     messages: [],
+    invites: {},
     inputStyle: 'filled',
     channels: {},
     selectedChannel: undefined,
@@ -115,16 +116,6 @@ export default function AppReducer(state = appState, action: Action): IState {
             };
         }
         case Actions.SET_GUILD_PICTURE: {
-            console.log({
-                ...state,
-                guildList: {
-                    ...state.guildList,
-                    [action.payload.guild]: {
-                        ...state.guildList[action.payload.guild],
-                        picture: action.payload.picture
-                    }
-                }
-            });
             return {
                 ...state,
                 guildList: {
@@ -134,6 +125,12 @@ export default function AppReducer(state = appState, action: Action): IState {
                         picture: action.payload.picture
                     }
                 }
+            };
+        }
+        case Actions.SET_INVITES: {
+            return {
+                ...state,
+                invites: action.payload
             };
         }
         default: {
