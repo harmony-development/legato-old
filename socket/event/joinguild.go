@@ -44,7 +44,7 @@ func OnJoinGuild(ws *socket.Client, rawMap map[string]interface{}) {
 		golog.Warnf("Error getting invite guild. This probably means the guild invite code doesn't exist. %v", err)
 		return
 	}
-	_, err = harmonydb.DBInst.Exec("INSERT INTO guildmembers(userid, guildid) VALUES(?, ?)", userid, guildid)
+	_, err = harmonydb.DBInst.Exec("INSERT INTO guildmembers(userid, guildid) VALUES(?, ?); UPDATE invites SET invitecount=invitecount+1 WHERE inviteid=?", userid, guildid, data.InviteCode)
 	if err != nil {
 		ws.Send(&socket.Packet{
 			Type: "joinguild",

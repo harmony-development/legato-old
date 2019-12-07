@@ -26,7 +26,8 @@ var queries = []string{
 		password TEXT NOT NULL
 	);`,
 	`CREATE TABLE IF NOT EXISTS invites(
-		inviteid TEXT PRIMARY KEY UNIQUE, 
+		inviteid TEXT PRIMARY KEY UNIQUE,
+		invitecount INTEGER NOT NULL DEFAULT 0,
 		guildid TEXT REFERENCES guilds(guildid)
 	);`,
 	`CREATE TABLE IF NOT EXISTS messages(
