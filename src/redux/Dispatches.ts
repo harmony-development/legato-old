@@ -94,6 +94,16 @@ export function SetGuildPicture(guild: string, picture: string) {
     };
 }
 
+export function SetGuildName(guild: string, name: string) {
+    return {
+        type: Actions.SET_GUILD_NAME,
+        payload: {
+            guild,
+            name
+        }
+    };
+}
+
 interface IInvites {
     [key: string]: number;
 }

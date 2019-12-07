@@ -11,17 +11,7 @@ import { Actions, IState, IMessage } from '../../types/redux';
 import { toast } from 'react-toastify';
 import { JoinGuild } from './Dialog/JoinGuildDialog/JoinGuild';
 import { GuildSettings } from './Dialog/GuildSettingsDialog/GuildSettings';
-import {
-    SetMessages,
-    SetSelectedChannel,
-    SetSelectedGuild,
-    SetChannels,
-    SetGuilds,
-    AddMessage,
-    ToggleGuildSettingsDialog,
-    SetGuildPicture,
-    SetInvites
-} from '../../redux/Dispatches';
+import { SetMessages, SetSelectedChannel, SetSelectedGuild, SetChannels, SetGuilds, AddMessage, ToggleGuildSettingsDialog, SetGuildPicture, SetInvites, SetGuildName } from '../../redux/Dispatches';
 
 export const App = () => {
     const classes = useAppStyles();
@@ -29,12 +19,8 @@ export const App = () => {
     const connected = useSelector((state: IState) => state.connected);
     const selectedGuild = useSelector((state: IState) => state.selectedGuild);
     const themeDialogOpen = useSelector((state: IState) => state.themeDialog);
-    const joinDialogOpen = useSelector(
-        (state: IState) => state.joinGuildDialog
-    );
-    const guildSettingsDialogOpen = useSelector(
-        (state: IState) => state.guildSettingsDialog
-    );
+    const joinDialogOpen = useSelector((state: IState) => state.joinGuildDialog);
+    const guildSettingsDialogOpen = useSelector((state: IState) => state.guildSettingsDialog);
     const history = useHistory();
     let eventsBound = false;
 
@@ -57,11 +43,7 @@ export const App = () => {
 
     useEffect(() => {
         if (!eventsBound) {
-            if (
-                (harmonySocket.conn.readyState !== WebSocket.OPEN &&
-                    harmonySocket.conn.readyState !== WebSocket.CONNECTING) ||
-                typeof localStorage.getItem('token') !== 'string'
-            ) {
+            if ((harmonySocket.conn.readyState !== WebSocket.OPEN && harmonySocket.conn.readyState !== WebSocket.CONNECTING) || typeof localStorage.getItem('token') !== 'string') {
                 // bounce the user to the login screen if the socket is disconnected or there's no token
                 history.push('/');
                 return;
@@ -79,19 +61,12 @@ export const App = () => {
             });
             harmonySocket.events.addListener('getmessages', (raw: any) => {
                 if (raw['messages']) {
-                    dispatch(
-                        SetMessages((raw['messages'] as IMessage[]).reverse())
-                    );
+                    dispatch(SetMessages((raw['messages'] as IMessage[]).reverse()));
                 }
             });
             harmonySocket.events.addListener('message', (raw: any) => {
                 // prevent stupid API responses
-                if (
-                    typeof raw['userid'] === 'string' &&
-                    typeof raw['createdat'] === 'number' &&
-                    typeof raw['guild'] === 'string' &&
-                    typeof raw['message'] === 'string'
-                ) {
+                if (typeof raw['userid'] === 'string' && typeof raw['createdat'] === 'number' && typeof raw['guild'] === 'string' && typeof raw['message'] === 'string') {
                     dispatch(AddMessage(raw as IMessage));
                 }
             });
@@ -112,7 +87,6 @@ export const App = () => {
                 }
                 harmonySocket.getGuilds();
             });
-
             harmonySocket.events.addListener('joinguild', (raw: any) => {
                 if (!raw['message']) {
                     harmonySocket.getGuilds();
@@ -125,23 +99,26 @@ export const App = () => {
                     dispatch({ type: Actions.TOGGLE_JOIN_GUILD_DIALOG });
                 }
             });
-            harmonySocket.events.addListener(
-                'updateguildpicture',
-                (raw: any) => {
-                    if (
-                        raw['success'] === true &&
-                        raw['picture'] &&
-                        raw['guild']
-                    ) {
-                        dispatch(SetGuildPicture(raw['guild'], raw['picture']));
-                        if (guildSettingsDialogOpen) {
-                            dispatch(ToggleGuildSettingsDialog());
-                        }
-                    } else {
-                        toast.error('Error saving guild');
+            harmonySocket.events.addListener('updateguildpicture', (raw: any) => {
+                if (raw['success'] === true && raw['picture'] && raw['guild']) {
+                    dispatch(SetGuildPicture(raw['guild'], raw['picture']));
+                    if (guildSettingsDialogOpen) {
+                        dispatch(ToggleGuildSettingsDialog());
                     }
+                } else {
+                    toast.error('Error saving guild');
                 }
-            );
+            });
+            harmonySocket.events.addListener('updateguildname', (raw: any) => {
+                if (raw['success'] === true && raw['name'] && raw['guild']) {
+                    dispatch(SetGuildName(raw['guild'], raw['name']));
+                    if (guildSettingsDialogOpen) {
+                        dispatch(ToggleGuildSettingsDialog());
+                    }
+                } else {
+                    toast.error('Error saving guild');
+                }
+            });
             harmonySocket.events.addListener('getinvites', (raw: any) => {
                 if (raw['invites'] && raw['guild']) {
                     dispatch(SetInvites(raw['invites']));
@@ -157,6 +134,8 @@ export const App = () => {
                 harmonySocket.events.removeAllListeners('joinguild');
                 harmonySocket.events.removeAllListeners('createguild');
                 harmonySocket.events.removeAllListeners('updateguildpicture');
+                harmonySocket.events.removeAllListeners('updateguildname');
+                harmonySocket.events.removeAllListeners('getinvites');
             };
         }
     }, [history, dispatch, guildSettingsDialogOpen, eventsBound]);
@@ -167,8 +146,7 @@ export const App = () => {
             {joinDialogOpen ? <JoinGuild /> : undefined}
             {guildSettingsDialogOpen ? <GuildSettings /> : undefined}
             <HarmonyBar />
-            <div className={classes.navFill} />{' '}
-            {/* this fills the area where the navbar is*/}
+            <div className={classes.navFill} /> {/* this fills the area where the navbar is*/}
             <ChatArea />
         </div>
     );

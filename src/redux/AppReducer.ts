@@ -127,6 +127,18 @@ export default function AppReducer(state = appState, action: Action): IState {
                 }
             };
         }
+        case Actions.SET_GUILD_NAME: {
+            return {
+                ...state,
+                guildList: {
+                    ...state.guildList,
+                    [action.payload.guild]: {
+                        ...state.guildList[action.payload.guild],
+                        guildname: action.payload.name
+                    }
+                }
+            };
+        }
         case Actions.SET_INVITES: {
             return {
                 ...state,

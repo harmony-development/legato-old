@@ -33,6 +33,11 @@ interface ISetGuildPicturePayload {
     picture: string;
 }
 
+interface ISetGuildNamePayload {
+    guild: string;
+    name: string;
+}
+
 export interface IChannels {
     [key: string]: string;
 }
@@ -144,7 +149,7 @@ export interface ISetGuildPicture {
 
 export interface ISetGuildName {
     type: Actions.SET_GUILD_NAME;
-    payload: string;
+    payload: ISetGuildNamePayload;
 }
 
 export interface ISetInvites {
