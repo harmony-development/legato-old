@@ -7,5 +7,9 @@ export const useChannelListStyle = makeStyles((theme: Theme) => ({
     },
     nested: {
         paddingLeft: theme.spacing(4)
+    },
+    newChannelInput: {
+        marginLeft: theme.spacing(2),
+        marginRight: theme.spacing(2)
     }
 }));

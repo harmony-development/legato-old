@@ -17,6 +17,7 @@ export const App = () => {
     const classes = useAppStyles();
     const dispatch = useDispatch();
     const connected = useSelector((state: IState) => state.connected);
+    const channels = useSelector((state: IState) => state.channels);
     const selectedGuild = useSelector((state: IState) => state.selectedGuild);
     const themeDialogOpen = useSelector((state: IState) => state.themeDialog);
     const joinDialogOpen = useSelector((state: IState) => state.joinGuildDialog);
@@ -124,6 +125,20 @@ export const App = () => {
                     dispatch(SetInvites(raw['invites']));
                 }
             });
+            harmonySocket.events.addListener('addguildchannel', (raw: any) => {
+                if (raw['success'] === true && raw['guild'] && raw['channelname'] && raw['channelid']) {
+                    dispatch(SetChannels({ ...channels, [raw['channelid']]: raw['channelname'] }));
+                }
+            });
+            harmonySocket.events.addListener('deleteguildchannel', (raw: any) => {
+                if (raw['success'] === true && raw['guild'] && raw['channelid']) {
+                    const channelDeleted = {
+                        ...channels
+                    };
+                    delete channelDeleted[raw['channelid']];
+                    dispatch(SetChannels({ ...channelDeleted }));
+                }
+            });
             return () => {
                 harmonySocket.events.removeAllListeners('getguilds');
                 harmonySocket.events.removeAllListeners('getmessages');
@@ -136,9 +151,11 @@ export const App = () => {
                 harmonySocket.events.removeAllListeners('updateguildpicture');
                 harmonySocket.events.removeAllListeners('updateguildname');
                 harmonySocket.events.removeAllListeners('getinvites');
+                harmonySocket.events.removeAllListeners('addguildchannel');
+                harmonySocket.events.removeAllListeners('deleteguildchannel');
             };
         }
-    }, [history, dispatch, guildSettingsDialogOpen, eventsBound]);
+    }, [history, dispatch, guildSettingsDialogOpen, eventsBound, channels]);
 
     return (
         <div className={classes.root}>

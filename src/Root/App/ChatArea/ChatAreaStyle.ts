@@ -19,7 +19,7 @@ export const useChatAreaStyles = makeStyles((theme: Theme) => ({
         backgroundColor: theme.palette.type === 'dark' ? theme.palette.grey[900] : theme.palette.grey[300],
         padding: 0,
         width: '300px',
-        overflow: 'hidden'
+        overflowY: 'auto'
     },
     guildiconroot: {
         borderRadius: '64px'
