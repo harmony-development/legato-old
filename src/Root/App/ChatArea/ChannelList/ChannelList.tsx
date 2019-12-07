@@ -18,7 +18,7 @@ interface IChannelProps {
 }
 
 const Channel = (props: IChannelProps) => {
-    const guildList = useSelector((state: IState) => state.guildList);
+    //const guildList = useSelector((state: IState) => state.guildList);
     const selectedGuild = useSelector((state: IState) => state.selectedGuild);
     const selectedChannel = useSelector((state: IState) => state.selectedChannel);
     const classes = useChannelListStyle();
@@ -36,8 +36,8 @@ const Channel = (props: IChannelProps) => {
             </ContextMenuTrigger>
             <ContextMenu id={props.channelid}>
                 <List>
-                    <ListItem button>
-                        <ListItemText primary='Delete Channel' onClick={handleDelete} />
+                    <ListItem button onClick={handleDelete}>
+                        <ListItemText primary='Delete Channel' />
                     </ListItem>
                 </List>
             </ContextMenu>
