@@ -19,4 +19,5 @@ func handleSocket(w http.ResponseWriter, r *http.Request) {
 	ws.Bind("leaveguild", event.OnLeaveGuild)
 	ws.Bind("updateguildpicture", event.OnUpdateGuildPicture)
 	ws.Bind("updateguildname", event.OnUpdateGuildName)
+	ws.Bind("getinvites", event.OnGetInvites)
 }
