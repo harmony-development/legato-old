@@ -20,4 +20,6 @@ func handleSocket(w http.ResponseWriter, r *http.Request) {
 	ws.Bind("updateguildpicture", event.OnUpdateGuildPicture)
 	ws.Bind("updateguildname", event.OnUpdateGuildName)
 	ws.Bind("getinvites", event.OnGetInvites)
+	ws.Bind("addchannel", event.OnAddChannel)
+	ws.Bind("deletechannel", event.OnDeleteChannel)
 }

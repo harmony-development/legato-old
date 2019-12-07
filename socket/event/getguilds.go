@@ -14,7 +14,7 @@ type getGuildsData struct {
 type guildsData struct {
 	Guildname string `json:"guildname"`
 	Picture   string `json:"picture"`
-	IsOwner bool `json:"owner"`
+	IsOwner   bool   `json:"owner"`
 }
 
 func OnGetGuilds(ws *socket.Client, rawMap map[string]interface{}) {

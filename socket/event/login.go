@@ -7,7 +7,7 @@ import (
 )
 
 type loginData struct {
-	Email string
+	Email    string
 	Password string
 }
 

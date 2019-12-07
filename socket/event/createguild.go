@@ -8,7 +8,7 @@ import (
 )
 
 type createGuildData struct {
-	Token string
+	Token     string
 	Guildname string
 }
 

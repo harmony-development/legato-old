@@ -27,7 +27,7 @@ func OnGetInvites(ws *socket.Client, rawMap map[string]interface{}) {
 		deauth(ws)
 		return
 	}
-	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil || globals.Guilds[data.Guild].Owner != userid  {
+	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil || globals.Guilds[data.Guild].Owner != userid {
 		return
 	}
 	res, err := harmonydb.DBInst.Query("SElECT inviteid, invitecount FROM invites WHERE guildid=? ORDER BY invitecount", data.Guild)
@@ -50,7 +50,7 @@ func OnGetInvites(ws *socket.Client, rawMap map[string]interface{}) {
 		Type: "getinvites",
 		Data: map[string]interface{}{
 			"invites": returnInvites,
-			"guild": data.Guild,
+			"guild":   data.Guild,
 		},
 	})
 }

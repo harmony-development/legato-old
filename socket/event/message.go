@@ -10,10 +10,10 @@ import (
 )
 
 type messageData struct {
-	token       string
-	targetGuild string
+	token         string
+	targetGuild   string
 	targetChannel string
-	message     string
+	message       string
 }
 
 func OnMessage(ws *socket.Client, rawMap map[string]interface{}) {
@@ -48,11 +48,11 @@ func OnMessage(ws *socket.Client, rawMap map[string]interface{}) {
 		client.Send(&socket.Packet{
 			Type: "message",
 			Data: map[string]interface{}{
-				"guild":   data.targetGuild,
-				"channel": data.targetChannel,
-				"userid":  userid,
+				"guild":     data.targetGuild,
+				"channel":   data.targetChannel,
+				"userid":    userid,
 				"createdat": time.Now().UTC().Unix(),
-				"message": data.message,
+				"message":   data.message,
 				"messageid": messageID,
 			},
 		})

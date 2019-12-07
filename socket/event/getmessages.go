@@ -8,16 +8,16 @@ import (
 )
 
 type GetMessagesData struct {
-	token string
+	token       string
 	targetGuild string
 }
 
 type Message struct {
-	Guild string `json:"guild"`
-	Channel string `json:"channel"`
-	Userid string `json:"userid"`
-	Createdat int `json:"createdat"`
-	Message string `json:"message"`
+	Guild     string `json:"guild"`
+	Channel   string `json:"channel"`
+	Userid    string `json:"userid"`
+	Createdat int    `json:"createdat"`
+	Message   string `json:"message"`
 	Messageid string `json:"messageid"`
 }
 
@@ -44,7 +44,7 @@ func OnGetMessages(ws *socket.Client, rawMap map[string]interface{}) {
 		golog.Warnf("Error getting recent messages : %v", err)
 		return
 	}
-	var returnMsgs[] Message
+	var returnMsgs [] Message
 	for res.Next() {
 		var msg Message
 		err := res.Scan(&msg.Messageid, &msg.Userid, &msg.Guild, &msg.Channel, &msg.Createdat, &msg.Message)

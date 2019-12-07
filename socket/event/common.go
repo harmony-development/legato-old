@@ -41,7 +41,7 @@ func deauth(ws *socket.Client) {
 
 func sendToken(ws *socket.Client, id string) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id": id,
+		"id":  id,
 		"exp": time.Now().UTC().Add(7 * 24 * time.Hour).Unix(),
 	})
 	tokenString, err := token.SignedString([]byte(jwtSecret))
