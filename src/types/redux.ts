@@ -15,7 +15,9 @@ export enum Actions {
     SET_CHANNELS,
     SET_SELECTED_CHANNEL,
     TOGGLE_JOIN_GUILD_DIALOG,
-    TOGGLE_GUILD_SETTINGS_DIALOG
+    TOGGLE_GUILD_SETTINGS_DIALOG,
+    SET_GUILD_PICTURE,
+    SET_GUILD_NAME
 }
 
 interface IGuild {
@@ -23,6 +25,11 @@ interface IGuild {
     picture: string;
     guildname: string;
     owner: boolean;
+}
+
+interface ISetGuildPicturePayload {
+    guild: string;
+    picture: string;
 }
 
 export interface IChannels {
@@ -126,4 +133,30 @@ export interface IToggleGuildSettingsDialog {
     type: Actions.TOGGLE_GUILD_SETTINGS_DIALOG;
 }
 
-export type Action = IInvertTheme | IToggleThemeDialog | IChangePrimary | IChangeSecondary | ISetConnected | ISetGuilds | ISetSelectedGuild | IAddMessage | ISetMessages | ISetInputStyle | ISetChannels | ISetSelectedChannel | IToggleJoinGuildDialog | IToggleGuildSettingsDialog;
+export interface ISetGuildPicture {
+    type: Actions.SET_GUILD_PICTURE;
+    payload: ISetGuildPicturePayload;
+}
+
+export interface ISetGuildName {
+    type: Actions.SET_GUILD_NAME;
+    payload: string;
+}
+
+export type Action =
+    | IInvertTheme
+    | IToggleThemeDialog
+    | IChangePrimary
+    | IChangeSecondary
+    | ISetConnected
+    | ISetGuilds
+    | ISetSelectedGuild
+    | IAddMessage
+    | ISetMessages
+    | ISetInputStyle
+    | ISetChannels
+    | ISetSelectedChannel
+    | IToggleJoinGuildDialog
+    | IToggleGuildSettingsDialog
+    | ISetGuildPicture
+    | ISetGuildName;

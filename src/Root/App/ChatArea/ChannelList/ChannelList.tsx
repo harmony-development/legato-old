@@ -4,11 +4,11 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import LeaveIcon from '@material-ui/icons/ExitToApp';
-import LinkIcon from '@material-ui/icons/Link';
 import { useSelector, useDispatch } from 'react-redux';
-import { IState, Actions } from '../../../../types/redux';
+import { IState } from '../../../../types/redux';
 import { useChannelListStyle } from './ChannelListStyle';
 import { harmonySocket } from '../../../Root';
+import { ToggleGuildSettingsDialog, SetSelectedChannel } from '../../../../redux/Dispatches';
 
 interface IChannelProps {
     channelid: string;
@@ -40,17 +40,17 @@ export const ChannelList = () => {
     };
 
     const setSelectedChannel = (value: string) => {
-        dispatch({ type: Actions.SET_SELECTED_CHANNEL, payload: value });
+        dispatch(SetSelectedChannel(value));
     };
 
     const toggleGuildSettings = () => {
-        dispatch({ type: Actions.TOGGLE_GUILD_SETTINGS_DIALOG });
+        dispatch(ToggleGuildSettingsDialog());
     };
 
     return (
         <div>
             <List style={{ padding: 0 }}>
-                {selectedGuild !== '' ? (
+                {selectedGuild ? (
                     <>
                         <ListItem button onClick={() => setActionsExpanded(!actionsExpanded)}>
                             <ListItemText primary='Guild Options' />

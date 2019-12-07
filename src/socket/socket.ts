@@ -1,5 +1,5 @@
 import { EventEmitter } from 'fbemitter';
-import { IPacket, IGuildData } from '../types/socket';
+import { IPacket } from '../types/socket';
 
 export default class HarmonySocket {
     conn: WebSocket;
@@ -121,7 +121,7 @@ export default class HarmonySocket {
     }
 
     sendGuildPictureUpdate(guildID: string, newpicture: string) {
-        this.emitEvent('updateguildname', {
+        this.emitEvent('updateguildpicture', {
             token: localStorage.getItem('token'),
             guild: guildID,
             picture: newpicture

@@ -11,6 +11,16 @@ import { Actions, IState, IMessage } from '../../types/redux';
 import { toast } from 'react-toastify';
 import { JoinGuild } from './Dialog/JoinGuildDialog/JoinGuild';
 import { GuildSettings } from './Dialog/GuildSettingsDialog/GuildSettings';
+import {
+    SetMessages,
+    SetSelectedChannel,
+    SetSelectedGuild,
+    SetChannels,
+    SetGuilds,
+    AddMessage,
+    ToggleGuildSettingsDialog,
+    SetGuildPicture
+} from '../../redux/Dispatches';
 
 export const App = () => {
     const classes = useAppStyles();
@@ -18,9 +28,14 @@ export const App = () => {
     const connected = useSelector((state: IState) => state.connected);
     const selectedGuild = useSelector((state: IState) => state.selectedGuild);
     const themeDialogOpen = useSelector((state: IState) => state.themeDialog);
-    const joinDialogOpen = useSelector((state: IState) => state.joinGuildDialog);
-    const guildSettingsDialogOpen = useSelector((state: IState) => state.guildSettingsDialog);
+    const joinDialogOpen = useSelector(
+        (state: IState) => state.joinGuildDialog
+    );
+    const guildSettingsDialogOpen = useSelector(
+        (state: IState) => state.guildSettingsDialog
+    );
     const history = useHistory();
+    let eventsBound = false;
 
     // event when the client has connected
     useEffect(() => {
@@ -31,14 +46,8 @@ export const App = () => {
 
     useEffect(() => {
         if (connected) {
-            dispatch({
-                type: Actions.SET_MESSAGES,
-                payload: []
-            });
-            dispatch({
-                type: Actions.SET_SELECTED_CHANNEL,
-                payload: undefined
-            });
+            dispatch(SetMessages([]));
+            dispatch(SetSelectedChannel(undefined));
             harmonySocket.getMessages(selectedGuild);
             harmonySocket.getChannels(selectedGuild);
         }
@@ -46,72 +55,109 @@ export const App = () => {
     }, [selectedGuild]);
 
     useEffect(() => {
-        if ((harmonySocket.conn.readyState !== WebSocket.OPEN && harmonySocket.conn.readyState !== WebSocket.CONNECTING) || typeof localStorage.getItem('token') !== 'string') {
-            // bounce the user to the login screen if the socket is disconnected or there's no token
-            history.push('/');
-            return;
-        }
-
-        harmonySocket.events.addListener('getguilds', (raw: any) => {
-            let guildsList = raw['guilds'] as IGuildData;
-            if (Object.keys(guildsList).length === 0) {
-                dispatch({ type: Actions.SET_MESSAGES, payload: [] });
-                dispatch({ type: Actions.SET_SELECTED_CHANNEL, payload: undefined });
-                dispatch({ type: Actions.SET_SELECTED_GUILD, payload: '' });
-                dispatch({ type: Actions.SET_CHANNELS, payload: {} });
-            }
-            dispatch({ type: Actions.SET_GUILDS, payload: guildsList });
-        });
-        harmonySocket.events.addListener('getmessages', (raw: any) => {
-            if (raw['messages']) {
-                dispatch({ type: Actions.SET_MESSAGES, payload: (raw['messages'] as IMessage[]).reverse() });
-            }
-        });
-        harmonySocket.events.addListener('message', (raw: any) => {
-            // prevent stupid API responses
-            if (typeof raw['userid'] === 'string' && typeof raw['createdat'] === 'number' && typeof raw['guild'] === 'string' && typeof raw['message'] === 'string') {
-                dispatch({ type: Actions.ADD_MESSAGE, payload: raw as IMessage });
-            }
-        });
-        harmonySocket.events.addListener('getchannels', (raw: any) => {
-            if (typeof raw === 'object') {
-                dispatch({ type: Actions.SET_CHANNELS, payload: raw['channels'] });
-            }
-        });
-        harmonySocket.events.addListener('deauth', () => {
-            toast.warn('Your session has expired. Please login again');
-            history.push('/');
-            return;
-        });
-        harmonySocket.events.addListener('leaveguild', (raw: any) => {
-            if (typeof raw['message'] === 'string') {
-                toast.error(raw['message']);
+        if (!eventsBound) {
+            if (
+                (harmonySocket.conn.readyState !== WebSocket.OPEN &&
+                    harmonySocket.conn.readyState !== WebSocket.CONNECTING) ||
+                typeof localStorage.getItem('token') !== 'string'
+            ) {
+                // bounce the user to the login screen if the socket is disconnected or there's no token
+                history.push('/');
                 return;
             }
-            harmonySocket.getGuilds();
-        });
 
-        harmonySocket.events.addListener('joinguild', (raw: any) => {
-            if (!raw['message']) {
+            harmonySocket.events.addListener('getguilds', (raw: any) => {
+                let guildsList = raw['guilds'] as IGuildData[];
+                if (Object.keys(guildsList).length === 0) {
+                    dispatch(SetMessages([]));
+                    dispatch(SetSelectedChannel(undefined));
+                    dispatch(SetSelectedGuild(undefined));
+                    dispatch(SetChannels({}));
+                }
+                dispatch(SetGuilds(guildsList));
+            });
+            harmonySocket.events.addListener('getmessages', (raw: any) => {
+                if (raw['messages']) {
+                    dispatch(
+                        SetMessages((raw['messages'] as IMessage[]).reverse())
+                    );
+                }
+            });
+            harmonySocket.events.addListener('message', (raw: any) => {
+                // prevent stupid API responses
+                if (
+                    typeof raw['userid'] === 'string' &&
+                    typeof raw['createdat'] === 'number' &&
+                    typeof raw['guild'] === 'string' &&
+                    typeof raw['message'] === 'string'
+                ) {
+                    dispatch(AddMessage(raw as IMessage));
+                }
+            });
+            harmonySocket.events.addListener('getchannels', (raw: any) => {
+                if (typeof raw === 'object') {
+                    dispatch(SetChannels(raw['channels']));
+                }
+            });
+            harmonySocket.events.addListener('deauth', () => {
+                toast.warn('Your session has expired. Please login again');
+                history.push('/');
+                return;
+            });
+            harmonySocket.events.addListener('leaveguild', (raw: any) => {
+                if (typeof raw['message'] === 'string') {
+                    toast.error(raw['message']);
+                    return;
+                }
                 harmonySocket.getGuilds();
-                dispatch({ type: Actions.TOGGLE_JOIN_GUILD_DIALOG });
-            }
-        });
-        harmonySocket.events.addListener('createguild', (raw: any) => {
-            if (!raw['message']) {
-                harmonySocket.getGuilds();
-                dispatch({ type: Actions.TOGGLE_JOIN_GUILD_DIALOG });
-            }
-        });
+            });
 
-        return () => {
-            harmonySocket.events.removeAllListeners('getguilds');
-            harmonySocket.events.removeAllListeners('message');
-            harmonySocket.events.removeAllListeners('deauth');
-            harmonySocket.events.removeAllListeners('getchannels');
-            harmonySocket.events.removeAllListeners('getmessages');
-        };
-    }, [history, dispatch]);
+            harmonySocket.events.addListener('joinguild', (raw: any) => {
+                if (!raw['message']) {
+                    harmonySocket.getGuilds();
+                    dispatch({ type: Actions.TOGGLE_JOIN_GUILD_DIALOG });
+                }
+            });
+            harmonySocket.events.addListener('createguild', (raw: any) => {
+                if (!raw['message']) {
+                    harmonySocket.getGuilds();
+                    dispatch({ type: Actions.TOGGLE_JOIN_GUILD_DIALOG });
+                }
+            });
+            harmonySocket.events.addListener(
+                'updateguildpicture',
+                (raw: any) => {
+                    if (
+                        raw['success'] === true &&
+                        raw['picture'] &&
+                        raw['guild']
+                    ) {
+                        dispatch(SetGuildPicture(raw['guild'], raw['picture']));
+                        if (guildSettingsDialogOpen) {
+                            dispatch(ToggleGuildSettingsDialog());
+                        }
+                    } else {
+                        toast.error('Error saving guild');
+                    }
+                }
+            );
+            harmonySocket.events.addListener(
+                'updateguildname',
+                (raw: any) => {}
+            );
+            return () => {
+                harmonySocket.events.removeAllListeners('getguilds');
+                harmonySocket.events.removeAllListeners('getmessages');
+                harmonySocket.events.removeAllListeners('message');
+                harmonySocket.events.removeAllListeners('getchannels');
+                harmonySocket.events.removeAllListeners('deauth');
+                harmonySocket.events.removeAllListeners('leaveguild');
+                harmonySocket.events.removeAllListeners('joinguild');
+                harmonySocket.events.removeAllListeners('createguild');
+                harmonySocket.events.removeAllListeners('updateguildpicture');
+            };
+        }
+    }, [history, dispatch, guildSettingsDialogOpen, eventsBound]);
 
     return (
         <div className={classes.root}>
@@ -119,7 +165,8 @@ export const App = () => {
             {joinDialogOpen ? <JoinGuild /> : undefined}
             {guildSettingsDialogOpen ? <GuildSettings /> : undefined}
             <HarmonyBar />
-            <div className={classes.navFill} /> {/* this fills the area where the navbar is*/}
+            <div className={classes.navFill} />{' '}
+            {/* this fills the area where the navbar is*/}
             <ChatArea />
         </div>
     );
