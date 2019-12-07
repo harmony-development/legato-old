@@ -10,7 +10,7 @@ import (
 )
 
 type registerData struct {
-	Email string
+	Email    string
 	Username string
 	Password string
 }

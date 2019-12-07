@@ -8,7 +8,7 @@ import (
 
 type joinGuildData struct {
 	InviteCode string
-	Token string
+	Token      string
 }
 
 func OnJoinGuild(ws *socket.Client, rawMap map[string]interface{}) {

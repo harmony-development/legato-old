@@ -7,15 +7,15 @@ import (
 	"harmony-server/socket"
 )
 
-type updateGuildPictureData struct {
-	Token   string
-	Guild   string
-	Picture string
+type deleteChannelData struct {
+	Token       string
+	Guild       string
+	ChannelID   string
 }
 
-func OnUpdateGuildPicture(ws *socket.Client, rawMap map[string]interface{}) {
+func OnDeleteChannel(ws *socket.Client, rawMap map[string]interface{}) {
+	var data deleteChannelData
 	var ok bool
-	var data updateGuildPictureData
 	if data.Token, ok = rawMap["token"].(string); !ok {
 		deauth(ws)
 		return
@@ -23,7 +23,7 @@ func OnUpdateGuildPicture(ws *socket.Client, rawMap map[string]interface{}) {
 	if data.Guild, ok = rawMap["guild"].(string); !ok {
 		return
 	}
-	if data.Picture, ok = rawMap["picture"].(string); !ok {
+	if data.ChannelID, ok = rawMap["channel"].(string); !ok {
 		return
 	}
 	userid := verifyToken(data.Token)
@@ -34,23 +34,17 @@ func OnUpdateGuildPicture(ws *socket.Client, rawMap map[string]interface{}) {
 	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil || globals.Guilds[data.Guild].Owner != userid {
 		return
 	}
-	_, err := harmonydb.DBInst.Exec("UPDATE guilds SET picture=? WHERE guildid=?", data.Picture, data.Guild)
+	_, err := harmonydb.DBInst.Exec("DELETE FROM channels WHERE channelid=? AND guildid=?", data.ChannelID, data.Guild)
 	if err != nil {
-		golog.Warnf("Error updating picture. %v", err)
-		ws.Send(&socket.Packet{
-			Type: "updateguildpicture",
-			Data: map[string]interface{}{
-				"success": false,
-			},
-		})
+		golog.Warnf("Error creating channel : %v", err)
 		return
 	}
 	for _, client := range globals.Guilds[data.Guild].Clients {
 		client.Send(&socket.Packet{
-			Type: "updateguildpicture",
+			Type: "deleteguildchannel",
 			Data: map[string]interface{}{
 				"guild":   data.Guild,
-				"picture": data.Picture,
+				"channelid": data.ChannelID,
 				"success": true,
 			},
 		})

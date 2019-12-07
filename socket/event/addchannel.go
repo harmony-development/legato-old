@@ -2,20 +2,21 @@ package event
 
 import (
 	"github.com/kataras/golog"
+	"github.com/thanhpk/randstr"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"harmony-server/socket"
 )
 
-type updateGuildPictureData struct {
-	Token   string
-	Guild   string
-	Picture string
+type addChannelData struct {
+	Token       string
+	Guild       string
+	Channelname string
 }
 
-func OnUpdateGuildPicture(ws *socket.Client, rawMap map[string]interface{}) {
+func OnAddChannel(ws *socket.Client, rawMap map[string]interface{}) {
+	var data addChannelData
 	var ok bool
-	var data updateGuildPictureData
 	if data.Token, ok = rawMap["token"].(string); !ok {
 		deauth(ws)
 		return
@@ -23,7 +24,7 @@ func OnUpdateGuildPicture(ws *socket.Client, rawMap map[string]interface{}) {
 	if data.Guild, ok = rawMap["guild"].(string); !ok {
 		return
 	}
-	if data.Picture, ok = rawMap["picture"].(string); !ok {
+	if data.Channelname, ok = rawMap["channelname"].(string); !ok {
 		return
 	}
 	userid := verifyToken(data.Token)
@@ -34,23 +35,19 @@ func OnUpdateGuildPicture(ws *socket.Client, rawMap map[string]interface{}) {
 	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil || globals.Guilds[data.Guild].Owner != userid {
 		return
 	}
-	_, err := harmonydb.DBInst.Exec("UPDATE guilds SET picture=? WHERE guildid=?", data.Picture, data.Guild)
+	var channelID = randstr.Hex(16)
+	_, err := harmonydb.DBInst.Exec("INSERT INTO channels(channelid, guildid, channelname) VALUES(?, ?, ?)", channelID, data.Guild, data.Channelname)
 	if err != nil {
-		golog.Warnf("Error updating picture. %v", err)
-		ws.Send(&socket.Packet{
-			Type: "updateguildpicture",
-			Data: map[string]interface{}{
-				"success": false,
-			},
-		})
+		golog.Warnf("Error creating channel : %v", err)
 		return
 	}
 	for _, client := range globals.Guilds[data.Guild].Clients {
 		client.Send(&socket.Packet{
-			Type: "updateguildpicture",
+			Type: "addguildchannel",
 			Data: map[string]interface{}{
 				"guild":   data.Guild,
-				"picture": data.Picture,
+				"channelname": data.Channelname,
+				"channelid": channelID,
 				"success": true,
 			},
 		})
