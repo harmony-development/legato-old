@@ -139,7 +139,7 @@ export default class HarmonySocket {
         this.emitEvent('addchannel', {
             token: localStorage.getItem('token'),
             guild: guildID,
-            channelname
+            channel: channelname
         });
     }
 
