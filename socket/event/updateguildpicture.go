@@ -26,7 +26,7 @@ func OnUpdateGuildPicture(ws *socket.Client, rawMap map[string]interface{}) {
 	if data.Picture, ok = rawMap["picture"].(string); !ok {
 		return
 	}
-	userid := verifyToken(data.Token)
+	userid := VerifyToken(data.Token)
 	if userid == "" {
 		deauth(ws)
 		return

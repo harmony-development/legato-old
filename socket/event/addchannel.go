@@ -27,7 +27,7 @@ func OnAddChannel(ws *socket.Client, rawMap map[string]interface{}) {
 	if data.Channelname, ok = rawMap["channelname"].(string); !ok {
 		return
 	}
-	userid := verifyToken(data.Token)
+	userid := VerifyToken(data.Token)
 	if userid == "" {
 		deauth(ws)
 		return

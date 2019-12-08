@@ -26,7 +26,7 @@ func OnDeleteChannel(ws *socket.Client, rawMap map[string]interface{}) {
 	if data.ChannelID, ok = rawMap["channel"].(string); !ok {
 		return
 	}
-	userid := verifyToken(data.Token)
+	userid := VerifyToken(data.Token)
 	if userid == "" {
 		deauth(ws)
 		return

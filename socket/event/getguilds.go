@@ -24,7 +24,7 @@ func OnGetGuilds(ws *socket.Client, rawMap map[string]interface{}) {
 		deauth(ws)
 		return
 	}
-	userid := verifyToken(data.Token)
+	userid := VerifyToken(data.Token)
 	if userid == "" {
 		deauth(ws)
 		return

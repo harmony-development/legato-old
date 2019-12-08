@@ -19,7 +19,7 @@ func OnLeaveGuild(ws *socket.Client, rawMap map[string]interface{}) {
 		deauth(ws)
 		return
 	}
-	userid := verifyToken(data.Token)
+	userid := VerifyToken(data.Token)
 	if userid == "" {
 		deauth(ws)
 		return
@@ -42,6 +42,7 @@ func OnLeaveGuild(ws *socket.Client, rawMap map[string]interface{}) {
 		})
 		return
 	}
+	delete(globals.Guilds[data.Guild].Clients, userid)
 	ws.Send(&socket.Packet{
 		Type: "leaveguild",
 		Data: map[string]interface{}{},

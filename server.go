@@ -22,4 +22,6 @@ func handleSocket(w http.ResponseWriter, r *http.Request) {
 	ws.Bind("getinvites", event.OnGetInvites)
 	ws.Bind("addchannel", event.OnAddChannel)
 	ws.Bind("deletechannel", event.OnDeleteChannel)
+	ws.Bind("deleteinvite", event.OnDeleteInvite)
+	ws.Bind("createinvite", event.OnCreateInvite)
 }

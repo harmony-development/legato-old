@@ -26,7 +26,7 @@ func OnUpdateGuildName(ws *socket.Client, rawMap map[string]interface{}) {
 	if data.Name, ok = rawMap["name"].(string); !ok {
 		return
 	}
-	userid := verifyToken(data.Token)
+	userid := VerifyToken(data.Token)
 	if userid == "" {
 		deauth(ws)
 		return

@@ -22,7 +22,7 @@ func OnGetChannels(ws *socket.Client, rawMap map[string]interface{}) {
 	if data.Guild, ok = rawMap["guild"].(string); !ok {
 		return
 	}
-	userid := verifyToken(data.Token)
+	userid := VerifyToken(data.Token)
 	if userid == "" {
 		deauth(ws)
 		return
