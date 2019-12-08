@@ -18,6 +18,7 @@ export const App = () => {
     const dispatch = useDispatch();
     const connected = useSelector((state: IState) => state.connected);
     const channels = useSelector((state: IState) => state.channels);
+    const invites = useSelector((state: IState) => state.invites);
     const selectedGuild = useSelector((state: IState) => state.selectedGuild);
     const themeDialogOpen = useSelector((state: IState) => state.themeDialog);
     const joinDialogOpen = useSelector((state: IState) => state.joinGuildDialog);
@@ -139,6 +140,24 @@ export const App = () => {
                     dispatch(SetChannels({ ...channelDeleted }));
                 }
             });
+            harmonySocket.events.addListener('deleteinvite', (raw: any) => {
+                if (raw['success'] === true && raw['invite']) {
+                    const invitesDeleted = {
+                        ...invites
+                    };
+                    delete invitesDeleted[raw['invite']];
+                    dispatch(SetInvites(invitesDeleted));
+                }
+            });
+            harmonySocket.events.addListener('createinvite', (raw: any) => {
+                if (raw['success'] === true && raw['invite']) {
+                    const invitesDeleted = {
+                        ...invites,
+                        [raw['invite']]: 0
+                    };
+                    dispatch(SetInvites(invitesDeleted));
+                }
+            });
             return () => {
                 harmonySocket.events.removeAllListeners('getguilds');
                 harmonySocket.events.removeAllListeners('getmessages');
@@ -153,9 +172,11 @@ export const App = () => {
                 harmonySocket.events.removeAllListeners('getinvites');
                 harmonySocket.events.removeAllListeners('addguildchannel');
                 harmonySocket.events.removeAllListeners('deleteguildchannel');
+                harmonySocket.events.removeAllListeners('deleteinvite');
+                harmonySocket.events.removeAllListeners('createinvite');
             };
         }
-    }, [history, dispatch, guildSettingsDialogOpen, eventsBound, channels]);
+    }, [history, dispatch, guildSettingsDialogOpen, eventsBound, channels, invites]);
 
     return (
         <div className={classes.root}>

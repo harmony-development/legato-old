@@ -8,5 +8,8 @@ export const useGuildSettingsStyle = makeStyles((theme: Theme) => ({
     },
     menuEntry: {
         marginTop: theme.spacing(2)
+    },
+    clipboardbtn: {
+        marginLeft: theme.spacing(3)
     }
 }));

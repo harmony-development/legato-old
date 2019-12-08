@@ -150,4 +150,19 @@ export default class HarmonySocket {
             channel: channelID
         });
     }
+
+    sendDeleteInvite(invite: string, guild: string) {
+        this.emitEvent('deleteinvite', {
+            token: localStorage.getItem('token'),
+            invite,
+            guild
+        });
+    }
+
+    sendCreateInvite(guild: string) {
+        this.emitEvent('createinvite', {
+            token: localStorage.getItem('token'),
+            guild
+        });
+    }
 }
