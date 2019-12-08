@@ -20,6 +20,13 @@ func OnAddChannel(ws *socket.Client, rawMap map[string]interface{}) {
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
+	if data.Token == "" {
+		deauth(ws)
+		return
+	}
+	if data.Guild == "" || data.Channel == "" {
+		return
+	}
 	userid := VerifyToken(data.Token)
 	if userid == "" {
 		deauth(ws)
