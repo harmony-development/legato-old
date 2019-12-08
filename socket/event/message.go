@@ -32,7 +32,7 @@ func OnMessage(ws *socket.Client, rawMap map[string]interface{}) {
 	if data.targetChannel, ok = rawMap["channel"].(string); !ok {
 		return
 	}
-	userid := verifyToken(data.token)
+	userid := VerifyToken(data.token)
 	if userid == "" { // token is invalid! Get outta here!
 		deauth(ws)
 		return

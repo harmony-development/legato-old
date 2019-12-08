@@ -31,7 +31,7 @@ func OnGetMessages(ws *socket.Client, rawMap map[string]interface{}) {
 	if data.targetGuild, ok = rawMap["guild"].(string); !ok {
 		return
 	}
-	userid := verifyToken(data.token)
+	userid := VerifyToken(data.token)
 	if userid == "" { // token is invalid! Get outta here!
 		deauth(ws)
 		return
