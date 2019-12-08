@@ -2,14 +2,15 @@ package event
 
 import (
 	"github.com/kataras/golog"
+	"github.com/mitchellh/mapstructure"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"harmony-server/socket"
 )
 
 type GetMessagesData struct {
-	token       string
-	targetGuild string
+	Token string `mapstructure:"token"`
+	Guild string `mapstructure:"guild"`
 }
 
 type Message struct {
@@ -22,21 +23,16 @@ type Message struct {
 }
 
 func OnGetMessages(ws *socket.Client, rawMap map[string]interface{}) {
-	var ok bool
 	var data GetMessagesData
-	if data.token, ok = rawMap["token"].(string); !ok {
-		deauth(ws)
+	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
-	if data.targetGuild, ok = rawMap["guild"].(string); !ok {
-		return
-	}
-	userid := VerifyToken(data.token)
+	userid := VerifyToken(data.Token)
 	if userid == "" { // token is invalid! Get outta here!
 		deauth(ws)
 		return
 	}
-	if globals.Guilds[data.targetGuild] == nil || globals.Guilds[data.targetGuild].Clients[userid] == nil {
+	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil {
 		return
 	}
 	res, err := harmonydb.DBInst.Query("SELECT messageid, author, guildid, channelid, createdat, message FROM messages ORDER BY createdat DESC LIMIT 30")

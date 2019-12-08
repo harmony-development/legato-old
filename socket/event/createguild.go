@@ -2,24 +2,20 @@ package event
 
 import (
 	"github.com/kataras/golog"
+	"github.com/mitchellh/mapstructure"
 	"github.com/thanhpk/randstr"
 	"harmony-server/harmonydb"
 	"harmony-server/socket"
 )
 
 type createGuildData struct {
-	Token     string
-	Guildname string
+	Token string `mapstructure:"token"`
+	Guild string `mapstructure:"guild"`
 }
 
 func OnCreateGuild(ws *socket.Client, rawMap map[string]interface{}) {
 	var data createGuildData
-	var ok bool
-	if data.Token, ok = rawMap["token"].(string); !ok {
-		deauth(ws)
-		return
-	}
-	if data.Guildname, ok = rawMap["guildname"].(string); !ok {
+	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
 	userid := VerifyToken(data.Token)
@@ -30,7 +26,7 @@ func OnCreateGuild(ws *socket.Client, rawMap map[string]interface{}) {
 	guildid := randstr.Hex(16)
 	_, err := harmonydb.DBInst.Exec(`INSERT INTO guilds(guildid, guildname, picture, owner) VALUES(?, ?, ?, ?); 
 										   INSERT INTO guildmembers(userid, guildid) VALUES(?, ?);
-										   INSERT INTO channels(channelid, guildid, channelname) VALUES(?, ?, ?)`, guildid, data.Guildname, "", userid, userid, guildid, randstr.Hex(16), guildid, "general")
+										   INSERT INTO channels(channelid, guildid, channelname) VALUES(?, ?, ?)`, guildid, data.Guild, "", userid, userid, guildid, randstr.Hex(16), guildid, "general")
 	if err != nil {
 		golog.Warnf("Error creating guild : %v", err)
 		ws.Send(&socket.Packet{

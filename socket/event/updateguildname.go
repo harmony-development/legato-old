@@ -2,28 +2,21 @@ package event
 
 import (
 	"github.com/kataras/golog"
+	"github.com/mitchellh/mapstructure"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"harmony-server/socket"
 )
 
 type updateGuildName struct {
-	Token string
-	Guild string
-	Name string
+	Token string `mapstructure:"token"`
+	Guild string `mapstructure:"guild"`
+	Name string `mapstructure:"name"`
 }
 
 func OnUpdateGuildName(ws *socket.Client, rawMap map[string]interface{}) {
-	var ok bool
 	var data updateGuildName
-	if data.Token, ok = rawMap["token"].(string); !ok {
-		deauth(ws)
-		return
-	}
-	if data.Guild, ok = rawMap["guild"].(string); !ok {
-		return
-	}
-	if data.Name, ok = rawMap["name"].(string); !ok {
+	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
 	userid := VerifyToken(data.Token)

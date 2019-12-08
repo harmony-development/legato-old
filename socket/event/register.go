@@ -2,6 +2,7 @@ package event
 
 import (
 	"github.com/kataras/golog"
+	"github.com/mitchellh/mapstructure"
 	"github.com/thanhpk/randstr"
 	"golang.org/x/crypto/bcrypt"
 	"harmony-server/harmonydb"
@@ -10,9 +11,9 @@ import (
 )
 
 type registerData struct {
-	Email    string
-	Username string
-	Password string
+	Email    string `mapstructure:"email"`
+	Username string `mapstructure:"username"`
+	Password string `mapstructure:"password"`
 }
 
 // compiling inside a function will slow it down a teensy bit
@@ -24,17 +25,8 @@ func verifyEmail(email string) bool {
 
 func OnRegister(ws *socket.Client, rawMap map[string]interface{}) {
 	var data registerData
-	var ok bool
-	if data.Email, ok = rawMap["email"].(string); !ok {
-		regErr(ws, "Email is required")
-		return
-	}
-	if data.Username, ok = rawMap["username"].(string); !ok {
-		regErr(ws, "Username is required")
-		return
-	}
-	if data.Password, ok = rawMap["password"].(string); !ok {
-		regErr(ws, "Password is required")
+	if err := mapstructure.Decode(rawMap, &data); err != nil {
+		golog.Warnf("Error decoding register data : %v", err)
 		return
 	}
 	if len(data.Password) < 5 || len(data.Password) > 64 {

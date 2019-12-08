@@ -2,28 +2,21 @@ package event
 
 import (
 	"github.com/kataras/golog"
+	"github.com/mitchellh/mapstructure"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"harmony-server/socket"
 )
 
 type deleteChannelData struct {
-	Token       string
-	Guild       string
-	ChannelID   string
+	Token       string `mapstructure:"token"`
+	Guild       string `mapstructure:"guild"`
+	ChannelID   string `mapstructure:"channel"`
 }
 
 func OnDeleteChannel(ws *socket.Client, rawMap map[string]interface{}) {
 	var data deleteChannelData
-	var ok bool
-	if data.Token, ok = rawMap["token"].(string); !ok {
-		deauth(ws)
-		return
-	}
-	if data.Guild, ok = rawMap["guild"].(string); !ok {
-		return
-	}
-	if data.ChannelID, ok = rawMap["channel"].(string); !ok {
+	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
 	userid := VerifyToken(data.Token)
