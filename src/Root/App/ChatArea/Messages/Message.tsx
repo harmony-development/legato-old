@@ -19,7 +19,7 @@ export const Message = (props: IProps) => {
     return (
         <ListItem alignItems='flex-start'>
             <ListItemAvatar>
-                <Avatar alt={props.userid} src={props.icon ? `http://localhost:8080/avatar/${props.icon}` : undefined} />
+                <Avatar alt={props.userid} src={props.icon ? `http://localhost:2288/filestore/${props.icon}` : undefined} />
             </ListItemAvatar>
             <ListItemText
                 primary={

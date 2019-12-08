@@ -14,6 +14,7 @@ import HarmonySocket from '../socket/socket';
 import { useRootStyles } from './RootStyle';
 import './Root.css';
 import { SetConnected } from '../redux/Dispatches';
+import { InviteHandler } from './InviteHandler/HandleInvite';
 
 export const harmonySocket = new HarmonySocket();
 export let previouslyDisconnected = false;
@@ -53,6 +54,9 @@ const Root: React.FC = () => {
                     </Route>
                     <Route exact path='/app'>
                         <App />
+                    </Route>
+                    <Route exact path='/invite/:invitecode'>
+                        <InviteHandler />
                     </Route>
                     <Route exact path='/bruh'>
                         <Button

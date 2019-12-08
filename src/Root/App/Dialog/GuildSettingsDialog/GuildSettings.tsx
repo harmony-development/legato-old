@@ -2,23 +2,8 @@ import React, { useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
 import { IState, Actions } from '../../../../types/redux';
-import {
-    Dialog,
-    DialogContent,
-    AppBar,
-    Toolbar,
-    IconButton,
-    Typography,
-    Button,
-    TextField,
-    Avatar,
-    ButtonBase,
-    Table,
-    TableHead,
-    TableRow,
-    TableCell,
-    TableBody
-} from '@material-ui/core';
+import { Dialog, DialogContent, AppBar, Toolbar, IconButton, Typography, Button, TextField, Avatar, ButtonBase, Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
 import CloseIcon from '@material-ui/icons/Close';
 import { useGuildSettingsStyle } from './GuildSettingsStyle';
 import { toast } from 'react-toastify';
@@ -32,13 +17,9 @@ export const GuildSettings = () => {
     const invites = useSelector((state: IState) => state.invites);
     const dispatch = useDispatch();
     const guildIconUpload = useRef<HTMLInputElement | null>(null);
-    const [guildName, setGuildName] = useState<string | undefined>(
-        guilds[selectedGuild] ? guilds[selectedGuild].guildname : undefined
-    );
+    const [guildName, setGuildName] = useState<string | undefined>(guilds[selectedGuild] ? guilds[selectedGuild].guildname : undefined);
     const [guildIconFile, setGuildIconFile] = useState<File | null>(null);
-    const [guildIcon, setGuildIcon] = useState<string | undefined>(
-        guilds[selectedGuild] ? guilds[selectedGuild].picture : undefined
-    );
+    const [guildIcon, setGuildIcon] = useState<string | undefined>(guilds[selectedGuild] ? guilds[selectedGuild].picture : undefined);
     const classes = useGuildSettingsStyle();
 
     const onSaveChanges = () => {
@@ -47,18 +28,11 @@ export const GuildSettings = () => {
                 const guildIconUpload = new FormData();
                 guildIconUpload.append('file', guildIconFile);
                 axios
-                    .post(
-                        `http://${window.location.hostname}:2288/api/rest/fileupload`,
-                        guildIconUpload,
-                        {}
-                    )
+                    .post(`http://${window.location.hostname}:2288/api/rest/fileupload`, guildIconUpload, {})
                     .then((res) => {
                         if (res.data) {
                             const uploadID = res.data;
-                            harmonySocket.sendGuildPictureUpdate(
-                                selectedGuild,
-                                `http://${window.location.hostname}:2288/filestore/${uploadID}`
-                            );
+                            harmonySocket.sendGuildPictureUpdate(selectedGuild, `http://${window.location.hostname}:2288/filestore/${uploadID}`);
                         }
                     })
                     .catch(() => {
@@ -71,9 +45,7 @@ export const GuildSettings = () => {
         }
     };
 
-    const onGuildIconSelected = (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => {
+    const onGuildIconSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.currentTarget.files && event.currentTarget.files.length > 0) {
             const file = event.currentTarget.files[0];
             setGuildIconFile(file);
@@ -90,13 +62,7 @@ export const GuildSettings = () => {
     };
 
     return (
-        <Dialog
-            open={open}
-            onClose={() =>
-                dispatch({ type: Actions.TOGGLE_GUILD_SETTINGS_DIALOG })
-            }
-            fullScreen
-        >
+        <Dialog open={open} onClose={() => dispatch({ type: Actions.TOGGLE_GUILD_SETTINGS_DIALOG })} fullScreen>
             <AppBar style={{ position: 'relative' }}>
                 <Toolbar>
                     <IconButton
@@ -115,14 +81,7 @@ export const GuildSettings = () => {
             </AppBar>
             <DialogContent>
                 <div style={{ width: '33%' }}>
-                    <input
-                        type='file'
-                        id='file'
-                        multiple
-                        ref={guildIconUpload}
-                        style={{ display: 'none' }}
-                        onChange={onGuildIconSelected}
-                    />
+                    <input type='file' id='file' multiple ref={guildIconUpload} style={{ display: 'none' }} onChange={onGuildIconSelected} />
                     <ButtonBase
                         style={{ borderRadius: '50%' }}
                         onClick={() => {
@@ -131,10 +90,7 @@ export const GuildSettings = () => {
                             }
                         }}
                     >
-                        <Avatar
-                            className={classes.guildIcon}
-                            src={guildIcon}
-                        ></Avatar>
+                        <Avatar className={classes.guildIcon} src={guildIcon}></Avatar>
                     </ButtonBase>
                     <TextField
                         label='Guild Name'
@@ -142,16 +98,9 @@ export const GuildSettings = () => {
                         variant={inputStyle as any}
                         className={classes.menuEntry}
                         value={guildName}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setGuildName(e.currentTarget.value)
-                        }
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGuildName(e.currentTarget.value)}
                     />
-                    <Button
-                        variant='contained'
-                        color='secondary'
-                        className={classes.menuEntry}
-                        onClick={onSaveChanges}
-                    >
+                    <Button variant='contained' color='secondary' className={classes.menuEntry} onClick={onSaveChanges}>
                         Save Changes
                     </Button>
                     <Typography variant='h4' className={classes.menuEntry}>
@@ -178,6 +127,9 @@ export const GuildSettings = () => {
                                 );
                             })}
                         </TableBody>
+                        <Button fullWidth>
+                            <AddIcon />
+                        </Button>
                     </Table>
                 </div>
             </DialogContent>
