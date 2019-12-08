@@ -2,28 +2,21 @@ package event
 
 import (
 	"github.com/kataras/golog"
+	"github.com/mitchellh/mapstructure"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"harmony-server/socket"
 )
 
 type updateGuildPictureData struct {
-	Token   string
-	Guild   string
-	Picture string
+	Token   string `mapstructure:"token"`
+	Guild   string `mapstructure:"guild"`
+	Picture string `mapstructure:"picture"`
 }
 
 func OnUpdateGuildPicture(ws *socket.Client, rawMap map[string]interface{}) {
-	var ok bool
 	var data updateGuildPictureData
-	if data.Token, ok = rawMap["token"].(string); !ok {
-		deauth(ws)
-		return
-	}
-	if data.Guild, ok = rawMap["guild"].(string); !ok {
-		return
-	}
-	if data.Picture, ok = rawMap["picture"].(string); !ok {
+	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
 	userid := VerifyToken(data.Token)

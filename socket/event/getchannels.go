@@ -2,24 +2,20 @@ package event
 
 import (
 	"github.com/kataras/golog"
+	"github.com/mitchellh/mapstructure"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"harmony-server/socket"
 )
 
 type getChannelsData struct {
-	Token string
-	Guild string
+	Token string `mapstructure:"token"`
+	Guild string `mapstructure:"guild"`
 }
 
 func OnGetChannels(ws *socket.Client, rawMap map[string]interface{}) {
 	var data getChannelsData
-	var ok bool
-	if data.Token, ok = rawMap["token"].(string); !ok {
-		deauth(ws)
-		return
-	}
-	if data.Guild, ok = rawMap["guild"].(string); !ok {
+	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
 	userid := VerifyToken(data.Token)

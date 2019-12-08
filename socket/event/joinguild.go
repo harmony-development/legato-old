@@ -2,36 +2,22 @@ package event
 
 import (
 	"github.com/kataras/golog"
+	"github.com/mitchellh/mapstructure"
 	"harmony-server/harmonydb"
 	"harmony-server/socket"
 )
 
 type joinGuildData struct {
-	InviteCode string
-	Token      string
+	InviteCode string `mapstructure:"invite"`
+	Token      string `mapstructure:"token"`
 }
 
 func OnJoinGuild(ws *socket.Client, rawMap map[string]interface{}) {
 	var data joinGuildData
-	var ok bool
-	if data.Token, ok = rawMap["token"].(string); !ok {
-		deauth(ws)
+	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
 	userid := VerifyToken(data.Token)
-	if userid == "" {
-		deauth(ws)
-		return
-	}
-	if data.InviteCode, ok = rawMap["invitecode"].(string); !ok {
-		ws.Send(&socket.Packet{
-			Type: "joinguild",
-			Data: map[string]interface{}{
-				"message": "Invalid Invite Code!",
-			},
-		})
-		return
-	}
 	var guildid string
 	err := harmonydb.DBInst.QueryRow("SELECT guildid FROM invites WHERE inviteid=?", data.InviteCode).Scan(&guildid)
 	if err != nil {

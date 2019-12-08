@@ -2,24 +2,20 @@ package event
 
 import (
 	"github.com/kataras/golog"
+	"github.com/mitchellh/mapstructure"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"harmony-server/socket"
 )
 
 type getInvitesData struct {
-	Token string
-	Guild string
+	Token string `mapstructure:"token"`
+	Guild string `mapstructure:"guild"`
 }
 
 func OnGetInvites(ws *socket.Client, rawMap map[string]interface{}) {
-	var ok bool
 	var data getInvitesData
-	if data.Token, ok = rawMap["token"].(string); !ok {
-		deauth(ws)
-		return
-	}
-	if data.Guild, ok = rawMap["guild"].(string); !ok {
+	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
 	userid := VerifyToken(data.Token)

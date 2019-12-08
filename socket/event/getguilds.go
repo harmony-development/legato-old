@@ -2,13 +2,14 @@ package event
 
 import (
 	"github.com/kataras/golog"
+	"github.com/mitchellh/mapstructure"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"harmony-server/socket"
 )
 
 type getGuildsData struct {
-	Token string
+	Token string `mapstructure:"token"`
 }
 
 type guildsData struct {
@@ -19,9 +20,7 @@ type guildsData struct {
 
 func OnGetGuilds(ws *socket.Client, rawMap map[string]interface{}) {
 	var data getGuildsData
-	var ok bool
-	if data.Token, ok = rawMap["token"].(string); !ok {
-		deauth(ws)
+	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
 	userid := VerifyToken(data.Token)
