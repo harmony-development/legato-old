@@ -17,6 +17,10 @@ func OnLogin(ws *socket.Client, rawMap map[string]interface{}) {
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
+	if data.Email == "" || data.Password == "" {
+		loginErr(ws, "Missing Email Or Password")
+		return
+	}
 	var passwd string
 	var id string
 	err := harmonydb.DBInst.QueryRow("SELECT password, id from users WHERE email=?", data.Email).Scan(&passwd, &id)
