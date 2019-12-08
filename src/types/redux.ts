@@ -18,7 +18,8 @@ export enum Actions {
     TOGGLE_GUILD_SETTINGS_DIALOG,
     SET_GUILD_PICTURE,
     SET_GUILD_NAME,
-    SET_INVITES
+    SET_INVITES,
+    SET_USERNAME
 }
 
 interface IGuild {
@@ -69,6 +70,9 @@ export interface IState {
     guildSettingsDialog: boolean;
     invites: {
         [key: string]: number;
+    };
+    usernames: {
+        [key: string]: string;
     };
 }
 
@@ -159,6 +163,14 @@ export interface ISetInvites {
     };
 }
 
+export interface ISetUsername {
+    type: Actions.SET_USERNAME;
+    payload: {
+        userid: string;
+        username: string;
+    };
+}
+
 export type Action =
     | IInvertTheme
     | IToggleThemeDialog
@@ -176,4 +188,5 @@ export type Action =
     | IToggleGuildSettingsDialog
     | ISetGuildPicture
     | ISetGuildName
-    | ISetInvites;
+    | ISetInvites
+    | ISetUsername;

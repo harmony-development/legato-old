@@ -7,6 +7,7 @@ import { IState } from '../../../../types/redux';
 export const Messages = () => {
     const messages = useSelector((state: IState) => state.messages);
     const selectedChannel = useSelector((state: IState) => state.selectedChannel);
+    const usernames = useSelector((state: IState) => state.usernames);
     const messageList = useRef<HTMLUListElement | undefined>(undefined);
 
     useEffect(() => {
@@ -20,7 +21,7 @@ export const Messages = () => {
             {messages
                 ? messages.map((val) => {
                       if (val.channel === selectedChannel) {
-                          return <Message key={val.messageid} guild={val.guild} userid={val.userid} createdat={val.createdat} message={val.message} />;
+                          return <Message key={val.messageid} guild={val.guild} userid={val.userid} username={usernames[val.userid]} createdat={val.createdat} message={val.message} />;
                       } else {
                           return undefined;
                       }

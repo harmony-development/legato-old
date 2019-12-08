@@ -165,4 +165,11 @@ export default class HarmonySocket {
             guild
         });
     }
+
+    sendGetUsername(userid: string) {
+        this.emitEvent('getusername', {
+            token: localStorage.getItem('token'),
+            userid
+        });
+    }
 }

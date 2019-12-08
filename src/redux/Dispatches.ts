@@ -114,3 +114,13 @@ export function SetInvites(invites: IInvites) {
         payload: invites
     };
 }
+
+export function SetUsername(userid: string, username: string) {
+    return {
+        type: Actions.SET_USERNAME,
+        payload: {
+            userid,
+            username
+        }
+    };
+}

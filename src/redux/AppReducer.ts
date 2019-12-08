@@ -17,7 +17,8 @@ const appState: IState = {
     channels: {},
     selectedChannel: undefined,
     joinGuildDialog: false,
-    guildSettingsDialog: false
+    guildSettingsDialog: false,
+    usernames: {}
 };
 
 export default function AppReducer(state = appState, action: Action): IState {
@@ -143,6 +144,15 @@ export default function AppReducer(state = appState, action: Action): IState {
             return {
                 ...state,
                 invites: action.payload
+            };
+        }
+        case Actions.SET_USERNAME: {
+            return {
+                ...state,
+                usernames: {
+                    ...state.usernames,
+                    [action.payload.userid]: action.payload.username
+                }
             };
         }
         default: {

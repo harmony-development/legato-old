@@ -11,7 +11,19 @@ import { Actions, IState, IMessage } from '../../types/redux';
 import { toast } from 'react-toastify';
 import { JoinGuild } from './Dialog/JoinGuildDialog/JoinGuild';
 import { GuildSettings } from './Dialog/GuildSettingsDialog/GuildSettings';
-import { SetMessages, SetSelectedChannel, SetSelectedGuild, SetChannels, SetGuilds, AddMessage, ToggleGuildSettingsDialog, SetGuildPicture, SetInvites, SetGuildName } from '../../redux/Dispatches';
+import {
+    SetMessages,
+    SetSelectedChannel,
+    SetSelectedGuild,
+    SetChannels,
+    SetGuilds,
+    AddMessage,
+    ToggleGuildSettingsDialog,
+    SetGuildPicture,
+    SetInvites,
+    SetGuildName,
+    SetUsername
+} from '../../redux/Dispatches';
 
 export const App = () => {
     const classes = useAppStyles();
@@ -156,6 +168,11 @@ export const App = () => {
                         [raw['invite']]: 0
                     };
                     dispatch(SetInvites(invitesDeleted));
+                }
+            });
+            harmonySocket.events.addListener('getusername', (raw: any) => {
+                if (raw['userid'] && raw['username']) {
+                    dispatch(SetUsername(raw['userid'], raw['username']));
                 }
             });
             return () => {
