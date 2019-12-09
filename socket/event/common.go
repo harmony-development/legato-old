@@ -54,6 +54,7 @@ func sendToken(ws *socket.Client, id string) {
 		Type: "token",
 		Data: map[string]interface{}{
 			"token": tokenString,
+			"userid": id,
 		},
 	})
 }
