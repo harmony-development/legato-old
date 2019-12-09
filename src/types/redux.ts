@@ -20,7 +20,8 @@ export enum Actions {
     SET_GUILD_NAME,
     SET_INVITES,
     SET_USERNAME,
-    TOGGLE_USER_SETTINGS_DIALOG
+    TOGGLE_USER_SETTINGS_DIALOG,
+    SET_CHAT_INPUT
 }
 
 interface IGuild {
@@ -76,6 +77,7 @@ export interface IState {
         [key: string]: string;
     };
     userSettingsDialog: boolean;
+    chatInput: HTMLInputElement | undefined;
 }
 
 export interface IInvertTheme {
@@ -177,6 +179,11 @@ export interface IToggleUserSettingsDialog {
     type: Actions.TOGGLE_USER_SETTINGS_DIALOG;
 }
 
+export interface ISetChatInput {
+    type: Actions.SET_CHAT_INPUT;
+    payload: HTMLInputElement;
+}
+
 export type Action =
     | IInvertTheme
     | IToggleThemeDialog
@@ -196,4 +203,5 @@ export type Action =
     | ISetGuildName
     | ISetInvites
     | ISetUsername
-    | IToggleUserSettingsDialog;
+    | IToggleUserSettingsDialog
+    | ISetChatInput;

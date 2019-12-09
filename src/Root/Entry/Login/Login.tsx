@@ -30,8 +30,9 @@ export const Login: React.FC = () => {
             }
         });
         harmonySocket.events.addListener('token', (raw: any) => {
-            if (typeof raw['token'] === 'string') {
+            if (typeof raw['token'] === 'string' && typeof raw['userid'] === 'string') {
                 localStorage.setItem('token', raw['token']);
+                localStorage.setItem('userid', raw['userid']);
                 history.push('/app');
             }
         });

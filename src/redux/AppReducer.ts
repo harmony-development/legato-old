@@ -19,7 +19,8 @@ const appState: IState = {
     joinGuildDialog: false,
     guildSettingsDialog: false,
     usernames: {},
-    userSettingsDialog: false
+    userSettingsDialog: false,
+    chatInput: undefined
 };
 
 export default function AppReducer(state = appState, action: Action): IState {
@@ -160,6 +161,12 @@ export default function AppReducer(state = appState, action: Action): IState {
             return {
                 ...state,
                 userSettingsDialog: !state.userSettingsDialog
+            };
+        }
+        case Actions.SET_CHAT_INPUT: {
+            return {
+                ...state,
+                chatInput: action.payload
             };
         }
         default: {

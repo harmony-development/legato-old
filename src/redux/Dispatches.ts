@@ -124,3 +124,10 @@ export function SetUsername(userid: string, username: string) {
         }
     };
 }
+
+export function SetChatInput(input: HTMLInputElement) {
+    return {
+        type: Actions.SET_CHAT_INPUT,
+        payload: input
+    };
+}

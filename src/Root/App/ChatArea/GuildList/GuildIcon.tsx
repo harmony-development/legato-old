@@ -1,10 +1,11 @@
 import React from 'react';
 import { ButtonBase, Tooltip, List, ListItem, ListItemText } from '@material-ui/core';
-import { useDispatch } from 'react-redux';
-import { Actions } from '../../../../types/redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { Actions, IState } from '../../../../types/redux';
 import { useGuildListStyle } from './GuildListStyle';
-import { ContextMenuTrigger, ContextMenu } from 'react-contextmenu';
+import { ContextMenuTrigger, ContextMenu, MenuItem } from 'react-contextmenu';
 import { harmonySocket } from '../../../Root';
+import { ToggleGuildSettingsDialog } from '../../../../redux/Dispatches';
 
 interface IProps {
     guildid: string;
@@ -14,6 +15,7 @@ interface IProps {
 }
 
 export const GuildIcon = (props: IProps) => {
+    const guildsList = useSelector((state: IState) => state.guildList);
     const classes = useGuildListStyle();
     const dispatch = useDispatch();
 
@@ -39,9 +41,22 @@ export const GuildIcon = (props: IProps) => {
             </ContextMenuTrigger>
             <ContextMenu id={props.guildid}>
                 <List>
-                    <ListItem button onClick={handleLeave}>
-                        <ListItemText primary='Leave Guild' />
-                    </ListItem>
+                    <MenuItem>
+                        <ListItem button onClick={handleLeave}>
+                            <ListItemText primary='Leave Guild' />
+                        </ListItem>
+                    </MenuItem>
+                    {guildsList && guildsList[props.guildid].owner ? (
+                        <>
+                            <MenuItem>
+                                <ListItem button onClick={() => dispatch(ToggleGuildSettingsDialog())}>
+                                    <ListItemText primary='Guild Settings' />
+                                </ListItem>
+                            </MenuItem>
+                        </>
+                    ) : (
+                        undefined
+                    )}
                 </List>
             </ContextMenu>
         </>

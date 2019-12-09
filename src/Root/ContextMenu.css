@@ -18,14 +18,3 @@
     pointer-events: auto;
     z-index: 9999;
 }
-
-.react-contextmenu-item {
-    background: 0 0;
-    border: 0;
-    cursor: pointer;
-    font-weight: 400;
-    line-height: 1.5;
-    padding: 3px 20px;
-    text-align: inherit;
-    white-space: nowrap;
-}

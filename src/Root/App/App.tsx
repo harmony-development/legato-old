@@ -31,6 +31,7 @@ export const App = () => {
     const dispatch = useDispatch();
     const connected = useSelector((state: IState) => state.connected);
     const channels = useSelector((state: IState) => state.channels);
+    const chatInput = useSelector((state: IState) => state.chatInput);
     const invites = useSelector((state: IState) => state.invites);
     const selectedGuild = useSelector((state: IState) => state.selectedGuild);
     const themeDialogOpen = useSelector((state: IState) => state.themeDialog);
@@ -177,6 +178,11 @@ export const App = () => {
                     dispatch(SetUsername(raw['userid'], raw['username']));
                 }
             });
+            window.addEventListener('keydown', (ev: KeyboardEvent) => {
+                if (ev.key !== 'Tab' && chatInput) {
+                    chatInput.focus();
+                }
+            });
             return () => {
                 harmonySocket.events.removeAllListeners('getguilds');
                 harmonySocket.events.removeAllListeners('getmessages');
@@ -196,7 +202,7 @@ export const App = () => {
                 harmonySocket.events.removeAllListeners('getusername');
             };
         }
-    }, [history, dispatch, guildSettingsDialogOpen, eventsBound, channels, invites]);
+    }, [history, dispatch, guildSettingsDialogOpen, eventsBound, channels, invites, chatInput]);
 
     return (
         <div className={classes.root}>
