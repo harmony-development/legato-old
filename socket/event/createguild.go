@@ -24,23 +24,48 @@ func OnCreateGuild(ws *socket.Client, rawMap map[string]interface{}) {
 		return
 	}
 	guildid := randstr.Hex(16)
-	_, err := harmonydb.DBInst.Exec(`INSERT INTO guilds(guildid, guildname, picture, owner) VALUES($1, $2, $3, $4); 
-										   INSERT INTO guildmembers(userid, guildid) VALUES($5, $6);
-										   INSERT INTO channels(channelid, guildid, channelname) VALUES($7, $8, $9)`, guildid, data.Guild, "", userid, userid, guildid, randstr.Hex(16), guildid, "general")
+	createGuildTransaction, err := harmonydb.DBInst.Begin()
 	if err != nil {
-		golog.Warnf("Error creating guild : %v", err)
-		ws.Send(&socket.Packet{
-			Type: "createguild",
-			Data: map[string]interface{}{
-				"message": "error creating guild",
-			},
-		})
+		golog.Warnf("Error beginning createGuildTransaction : %v", err)
+		return
+	}
+	_, err = createGuildTransaction.Exec(`INSERT INTO guilds(guildid, guildname, picture, owner) VALUES($1, $2, $3, $4);`, guildid, data.Guild, "", userid)
+	if err != nil {
+		createGuildError(ws)
+		golog.Warnf("Error inserting guild : %v", err)
+		return
+	}
+	_, err = createGuildTransaction.Exec(`INSERT INTO guildmembers(userid, guildid) VALUES($1, $2);`, userid, guildid)
+	if err != nil {
+		createGuildError(ws)
+		golog.Warnf("Error inserting guild member on guild create : %v", err)
+		return
+	}
+	_, err = createGuildTransaction.Exec(`INSERT INTO channels(channelid, guildid, channelname) VALUES($1, $2, $3)`, randstr.Hex(16), guildid, "general")
+	if err != nil {
+		createGuildError(ws)
+		golog.Warnf("Error inserting channel on guild create : %v", err)
+		return
+	}
+	err = createGuildTransaction.Commit()
+	if err != nil {
+		createGuildError(ws)
+		golog.Warnf("Error commiting createGuildTransaction : %v", err)
 		return
 	}
 	ws.Send(&socket.Packet{
 		Type: "createguild",
 		Data: map[string]interface{}{
 			"guild": guildid,
+		},
+	})
+}
+
+func createGuildError(ws *socket.Client) {
+	ws.Send(&socket.Packet{
+		Type: "createguild",
+		Data: map[string]interface{}{
+			"message": "error creating guild",
 		},
 	})
 }
