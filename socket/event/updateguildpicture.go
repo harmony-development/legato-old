@@ -27,7 +27,7 @@ func OnUpdateGuildPicture(ws *socket.Client, rawMap map[string]interface{}) {
 	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil || globals.Guilds[data.Guild].Owner != userid {
 		return
 	}
-	_, err := harmonydb.DBInst.Exec("UPDATE guilds SET picture=? WHERE guildid=?", data.Picture, data.Guild)
+	_, err := harmonydb.DBInst.Exec("UPDATE guilds SET picture=$1 WHERE guildid=$2", data.Picture, data.Guild)
 	if err != nil {
 		golog.Warnf("Error updating picture. %v", err)
 		ws.Send(&socket.Packet{

@@ -26,7 +26,7 @@ func OnGetChannels(ws *socket.Client, rawMap map[string]interface{}) {
 	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil {
 		return
 	}
-	res, err := harmonydb.DBInst.Query("SELECT channelid, channelname FROM channels WHERE guildid=?", data.Guild)
+	res, err := harmonydb.DBInst.Query("SELECT channelid, channelname FROM channels WHERE guildid=$1", data.Guild)
 	if err != nil {
 		golog.Warnf("Error selecting channels : %v", err)
 		return

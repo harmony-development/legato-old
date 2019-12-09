@@ -22,7 +22,7 @@ func OnGetUsername(ws *socket.Client, rawMap map[string]interface{}) {
 		return
 	}
 	var username string
-	err := harmonydb.DBInst.QueryRow("SELECT username FROM users WHERE id=?", data.Userid).Scan(&username)
+	err := harmonydb.DBInst.QueryRow("SELECT username FROM users WHERE id=$1", data.Userid).Scan(&username)
 	if err != nil {
 		return
 	}

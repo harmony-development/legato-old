@@ -19,7 +19,7 @@ func OnJoinGuild(ws *socket.Client, rawMap map[string]interface{}) {
 	}
 	userid := VerifyToken(data.Token)
 	var guildid string
-	err := harmonydb.DBInst.QueryRow("SELECT guildid FROM invites WHERE inviteid=?", data.InviteCode).Scan(&guildid)
+	err := harmonydb.DBInst.QueryRow("SELECT guildid FROM invites WHERE inviteid=$1", data.InviteCode).Scan(&guildid)
 	if err != nil {
 		ws.Send(&socket.Packet{
 			Type: "joinguild",
@@ -30,7 +30,22 @@ func OnJoinGuild(ws *socket.Client, rawMap map[string]interface{}) {
 		golog.Warnf("Error getting invite guild. This probably means the guild invite code doesn't exist. %v", err)
 		return
 	}
-	_, err = harmonydb.DBInst.Exec("INSERT INTO guildmembers(userid, guildid) VALUES(?, ?); UPDATE invites SET invitecount=invitecount+1 WHERE inviteid=?", userid, guildid, data.InviteCode)
+	joinGuildTransaction, err := harmonydb.DBInst.Begin()
+	if err != nil {
+		golog.Warnf("Error creating joinGuildTransaction : %v", err)
+		return
+	}
+	_, err = joinGuildTransaction.Exec("INSERT INTO guildmembers(userid, guildid) VALUES($1, $2)", userid, guildid)
+	if err != nil {
+		golog.Warn(err)
+		return
+	}
+	_, err = joinGuildTransaction.Exec("UPDATE invites SET invitecount=invitecount+1 WHERE inviteid=$1", data.InviteCode)
+	if err != nil {
+		golog.Warn(err)
+		return
+	}
+	err = joinGuildTransaction.Commit()
 	if err != nil {
 		ws.Send(&socket.Packet{
 			Type: "joinguild",

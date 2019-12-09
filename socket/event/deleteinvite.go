@@ -26,7 +26,7 @@ func OnDeleteInvite(ws *socket.Client, rawMap map[string]interface{}) {
 	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil || globals.Guilds[data.Guild].Owner != userid {
 		return
 	}
-	_, err := harmonydb.DBInst.Exec("DELETE FROM invites WHERE inviteid=? AND guildid=?", data.Invite, data.Guild)
+	_, err := harmonydb.DBInst.Exec("DELETE FROM invites WHERE inviteid=$1 AND guildid=$2", data.Invite, data.Guild)
 	if err != nil {
 		return
 	}

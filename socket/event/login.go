@@ -23,7 +23,7 @@ func OnLogin(ws *socket.Client, rawMap map[string]interface{}) {
 	}
 	var passwd string
 	var id string
-	err := harmonydb.DBInst.QueryRow("SELECT password, id from users WHERE email=?", data.Email).Scan(&passwd, &id)
+	err := harmonydb.DBInst.QueryRow("SELECT password, id from users WHERE email=$1", data.Email).Scan(&passwd, &id)
 	if err != nil {
 		loginErr(ws, "Invalid email or password") // either something weird happened or the email doesn't exist
 		return
