@@ -24,6 +24,7 @@ import {
     SetGuildName,
     SetUsername
 } from '../../redux/Dispatches';
+import { UserSettingsDialog } from './Dialog/UserSettingsDialog/UserSettingsDialog';
 
 export const App = () => {
     const classes = useAppStyles();
@@ -35,6 +36,7 @@ export const App = () => {
     const themeDialogOpen = useSelector((state: IState) => state.themeDialog);
     const joinDialogOpen = useSelector((state: IState) => state.joinGuildDialog);
     const guildSettingsDialogOpen = useSelector((state: IState) => state.guildSettingsDialog);
+    const userSettingsDialogOpen = useSelector((state: IState) => state.userSettingsDialog);
     const history = useHistory();
     let eventsBound = false;
 
@@ -191,6 +193,7 @@ export const App = () => {
                 harmonySocket.events.removeAllListeners('deleteguildchannel');
                 harmonySocket.events.removeAllListeners('deleteinvite');
                 harmonySocket.events.removeAllListeners('createinvite');
+                harmonySocket.events.removeAllListeners('getusername');
             };
         }
     }, [history, dispatch, guildSettingsDialogOpen, eventsBound, channels, invites]);
@@ -200,6 +203,7 @@ export const App = () => {
             {themeDialogOpen ? <ThemeDialog /> : undefined}
             {joinDialogOpen ? <JoinGuild /> : undefined}
             {guildSettingsDialogOpen ? <GuildSettings /> : undefined}
+            {userSettingsDialogOpen ? <UserSettingsDialog /> : undefined}
             <HarmonyBar />
             <div className={classes.navFill} /> {/* this fills the area where the navbar is*/}
             <ChatArea />

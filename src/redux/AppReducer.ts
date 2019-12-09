@@ -18,7 +18,8 @@ const appState: IState = {
     selectedChannel: undefined,
     joinGuildDialog: false,
     guildSettingsDialog: false,
-    usernames: {}
+    usernames: {},
+    userSettingsDialog: false
 };
 
 export default function AppReducer(state = appState, action: Action): IState {
@@ -153,6 +154,12 @@ export default function AppReducer(state = appState, action: Action): IState {
                     ...state.usernames,
                     [action.payload.userid]: action.payload.username
                 }
+            };
+        }
+        case Actions.TOGGLE_USER_SETTINGS_DIALOG: {
+            return {
+                ...state,
+                userSettingsDialog: !state.userSettingsDialog
             };
         }
         default: {

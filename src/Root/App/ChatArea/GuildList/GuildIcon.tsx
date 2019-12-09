@@ -1,8 +1,10 @@
 import React from 'react';
-import { ButtonBase, Tooltip } from '@material-ui/core';
+import { ButtonBase, Tooltip, List, ListItem, ListItemText } from '@material-ui/core';
 import { useDispatch } from 'react-redux';
 import { Actions } from '../../../../types/redux';
 import { useGuildListStyle } from './GuildListStyle';
+import { ContextMenuTrigger, ContextMenu } from 'react-contextmenu';
+import { harmonySocket } from '../../../Root';
 
 interface IProps {
     guildid: string;
@@ -22,13 +24,26 @@ export const GuildIcon = (props: IProps) => {
         });
     };
 
+    const handleLeave = () => {
+        harmonySocket.leaveGuild(props.guildid);
+    };
+
     return (
         <>
-            <ButtonBase className={`${classes.guildiconroot} ${props.selected ? classes.selectedguildicon : undefined}`} key={props.guildid} onClick={onClick}>
-                <Tooltip title={props.guildname} placement='right'>
-                    <img className={classes.guildicon} alt='' src={props.picture} draggable={false} />
-                </Tooltip>
-            </ButtonBase>
+            <ContextMenuTrigger id={props.guildid}>
+                <ButtonBase className={`${classes.guildiconroot} ${props.selected ? classes.selectedguildicon : undefined}`} key={props.guildid} onClick={onClick}>
+                    <Tooltip title={props.guildname} placement='right'>
+                        <img className={classes.guildicon} alt='' src={props.picture} draggable={false} />
+                    </Tooltip>
+                </ButtonBase>
+            </ContextMenuTrigger>
+            <ContextMenu id={props.guildid}>
+                <List>
+                    <ListItem button onClick={handleLeave}>
+                        <ListItemText primary='Leave Guild' />
+                    </ListItem>
+                </List>
+            </ContextMenu>
         </>
     );
 };

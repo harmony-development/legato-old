@@ -94,7 +94,7 @@ export default class HarmonySocket {
     joinGuild(inviteCode: string) {
         this.emitEvent('joinguild', {
             token: localStorage.getItem('token'),
-            invitecode: inviteCode
+            invite: inviteCode
         });
     }
 

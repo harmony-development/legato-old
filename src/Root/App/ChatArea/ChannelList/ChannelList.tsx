@@ -21,6 +21,7 @@ const Channel = (props: IChannelProps) => {
     //const guildList = useSelector((state: IState) => state.guildList);
     const selectedGuild = useSelector((state: IState) => state.selectedGuild);
     const selectedChannel = useSelector((state: IState) => state.selectedChannel);
+    const guildsList = useSelector((state: IState) => state.guildList);
     const classes = useChannelListStyle();
 
     const handleDelete = () => {
@@ -34,13 +35,17 @@ const Channel = (props: IChannelProps) => {
                     <ListItemText secondary={`#${props.channelname}`} />
                 </ListItem>
             </ContextMenuTrigger>
-            <ContextMenu id={props.channelid}>
-                <List>
-                    <ListItem button onClick={handleDelete}>
-                        <ListItemText primary='Delete Channel' />
-                    </ListItem>
-                </List>
-            </ContextMenu>
+            {guildsList[selectedGuild] && guildsList[selectedGuild].owner ? (
+                <ContextMenu id={props.channelid}>
+                    <List>
+                        <ListItem button onClick={handleDelete}>
+                            <ListItemText primary='Delete Channel' />
+                        </ListItem>
+                    </List>
+                </ContextMenu>
+            ) : (
+                undefined
+            )}
         </>
     );
 };
