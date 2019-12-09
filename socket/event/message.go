@@ -47,7 +47,7 @@ func OnMessage(ws *socket.Client, rawMap map[string]interface{}) {
 			},
 		})
 	}
-	_, err := harmonydb.DBInst.Exec("INSERT INTO messages(messageid, guildid, channelid, createdat, author, message) VALUES(?, ?, ?, ?, ?, ?)", messageID, data.Guild, data.Channel, time.Now().UTC().Unix(), userid, data.Message)
+	_, err := harmonydb.DBInst.Exec("INSERT INTO messages(messageid, guildid, channelid, createdat, author, message) VALUES($1, $2, $3, $4, $5, $6)", messageID, data.Guild, data.Channel, time.Now().UTC().Unix(), userid, data.Message)
 	if err != nil {
 		golog.Warnf("error saving message to database : %v", err)
 		return

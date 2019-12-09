@@ -27,7 +27,7 @@ func OnCreateInvite(ws *socket.Client, rawMap map[string]interface{}) {
 		return
 	}
 	var inviteID = randstr.Hex(5)
-	_, err := harmonydb.DBInst.Exec("INSERT INTO invites(inviteid, guildid) VALUES(?, ?)", inviteID, data.Guild)
+	_, err := harmonydb.DBInst.Exec("INSERT INTO invites(inviteid, guildid) VALUES($1, $2)", inviteID, data.Guild)
 	if err != nil {
 		return
 	}

@@ -26,7 +26,7 @@ func OnGetInvites(ws *socket.Client, rawMap map[string]interface{}) {
 	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil || globals.Guilds[data.Guild].Owner != userid {
 		return
 	}
-	res, err := harmonydb.DBInst.Query("SElECT inviteid, invitecount FROM invites WHERE guildid=? ORDER BY invitecount", data.Guild)
+	res, err := harmonydb.DBInst.Query("SElECT inviteid, invitecount FROM invites WHERE guildid=$1 ORDER BY invitecount", data.Guild)
 	if err != nil {
 		golog.Warnf("Error getting invites : %v", err)
 		return

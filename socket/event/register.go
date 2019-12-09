@@ -46,7 +46,7 @@ func OnRegister(ws *socket.Client, rawMap map[string]interface{}) {
 		golog.Warnf("Error hashing password! Reason : %v", err)
 		return
 	}
-	insertQuery, err := harmonydb.DBInst.Prepare("INSERT INTO users (id, email, username, avatar, password) VALUES (?, ?, ?, ?, ?)")
+	insertQuery, err := harmonydb.DBInst.Prepare("INSERT INTO users (id, email, username, avatar, password) VALUES ($1, $2, $3, $4, $5)")
 	if err != nil {
 		golog.Errorf("Failed to prepare query. Reason : %v", err)
 		return

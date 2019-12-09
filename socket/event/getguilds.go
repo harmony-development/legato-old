@@ -28,7 +28,7 @@ func OnGetGuilds(ws *socket.Client, rawMap map[string]interface{}) {
 		deauth(ws)
 		return
 	}
-	res, err := harmonydb.DBInst.Query("SELECT guilds.guildid, guilds.guildname, guilds.owner, guilds.picture FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=?", userid)
+	res, err := harmonydb.DBInst.Query("SELECT guilds.guildid, guilds.guildname, guilds.owner, guilds.picture FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=$1", userid)
 	if err != nil {
 		golog.Warnf("Error selecting guilds. Reason : %v", err)
 		return

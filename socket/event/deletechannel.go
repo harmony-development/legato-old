@@ -27,9 +27,23 @@ func OnDeleteChannel(ws *socket.Client, rawMap map[string]interface{}) {
 	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil || globals.Guilds[data.Guild].Owner != userid {
 		return
 	}
-	_, err := harmonydb.DBInst.Exec("DELETE FROM channels WHERE channelid=? AND guildid=?", data.ChannelID, data.Guild)
+	transaction, err := harmonydb.DBInst.Begin()
 	if err != nil {
-		golog.Warnf("Error creating channel : %v", err)
+		golog.Warnf("Error making channel delete transaction : %v", err)
+		return
+	}
+	_, err = transaction.Exec("DELETE FROM messages WHERE channelid=$1 AND guildid=$2", data.ChannelID, data.Guild)
+	if err != nil {
+		golog.Warnf("Error deleting channel : %v", err)
+		return
+	}
+	_, err = transaction.Exec("DELETE FROM channels WHERE channelid=$1 AND guildid=$2", data.ChannelID, data.Guild)
+	if err != nil {
+		golog.Warnf("Error deleting channel : %v", err)
+		return
+	}
+	if err = transaction.Commit(); err != nil {
+		golog.Warnf("Error deleting channel : %v", err)
 		return
 	}
 	for _, client := range globals.Guilds[data.Guild].Clients {

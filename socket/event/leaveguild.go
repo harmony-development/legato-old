@@ -26,7 +26,7 @@ func OnLeaveGuild(ws *socket.Client, rawMap map[string]interface{}) {
 	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil {
 		return
 	}
-	_, err := harmonydb.DBInst.Exec("DELETE FROM guildmembers WHERE userid=? AND guildid=?", userid, data.Guild)
+	_, err := harmonydb.DBInst.Exec("DELETE FROM guildmembers WHERE userid=$1 AND guildid=$2", userid, data.Guild)
 	// GUILD STUCK! GUILD STUCK! PLEASE! I BEG YOU!
 	if err != nil {
 		golog.Warnf("Error removing member from guild : %v", err)

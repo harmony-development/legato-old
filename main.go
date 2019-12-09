@@ -15,11 +15,11 @@ const (
 )
 
 func main() {
-	harmonydb.DBInst = harmonydb.OpenDB()
 	err := godotenv.Load()
 	if err != nil {
 		golog.Fatalf("Error loading .env! Reason : %v", err)
 	}
+	harmonydb.DBInst = harmonydb.OpenDB()
 	golog.SetLevel(os.Getenv("VERBOSITY_LEVEL"))
 	_ = os.Mkdir("./filestore", 0777)
 	golog.Infof("Started Harmony Server On Port %v", PORT)
