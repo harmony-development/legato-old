@@ -22,7 +22,7 @@ import {
     SetGuildPicture,
     SetInvites,
     SetGuildName,
-    SetUsername
+    SetUser
 } from '../../redux/Dispatches';
 import { UserSettingsDialog } from './Dialog/UserSettingsDialog/UserSettingsDialog';
 
@@ -31,7 +31,6 @@ export const App = () => {
     const dispatch = useDispatch();
     const connected = useSelector((state: IState) => state.connected);
     const channels = useSelector((state: IState) => state.channels);
-    const chatInput = useSelector((state: IState) => state.chatInput);
     const invites = useSelector((state: IState) => state.invites);
     const selectedGuild = useSelector((state: IState) => state.selectedGuild);
     const themeDialogOpen = useSelector((state: IState) => state.themeDialog);
@@ -173,14 +172,10 @@ export const App = () => {
                     dispatch(SetInvites(invitesDeleted));
                 }
             });
-            harmonySocket.events.addListener('getusername', (raw: any) => {
-                if (raw['userid'] && raw['username']) {
-                    dispatch(SetUsername(raw['userid'], raw['username']));
-                }
-            });
-            window.addEventListener('keydown', (ev: KeyboardEvent) => {
-                if (ev.key !== 'Tab' && chatInput) {
-                    chatInput.focus();
+            harmonySocket.events.addListener('getuser', (raw: any) => {
+                console.log(raw);
+                if (typeof raw['userid'] === 'string' && typeof raw['username'] === 'string' && typeof raw['avatar'] === 'string') {
+                    dispatch(SetUser(raw['userid'], raw['username'], raw['avatar']));
                 }
             });
             return () => {
@@ -202,7 +197,7 @@ export const App = () => {
                 harmonySocket.events.removeAllListeners('getusername');
             };
         }
-    }, [history, dispatch, guildSettingsDialogOpen, eventsBound, channels, invites, chatInput]);
+    }, [history, dispatch, guildSettingsDialogOpen, eventsBound, channels, invites]);
 
     return (
         <div className={classes.root}>

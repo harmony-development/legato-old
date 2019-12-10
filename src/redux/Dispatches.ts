@@ -115,12 +115,13 @@ export function SetInvites(invites: IInvites) {
     };
 }
 
-export function SetUsername(userid: string, username: string) {
+export function SetUser(userid: string, username: string, avatar: string) {
     return {
-        type: Actions.SET_USERNAME,
+        type: Actions.SET_USER,
         payload: {
             userid,
-            username
+            username,
+            avatar
         }
     };
 }

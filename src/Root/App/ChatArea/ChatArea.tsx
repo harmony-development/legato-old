@@ -11,12 +11,20 @@ export const ChatArea = () => {
     const classes = useChatAreaStyles();
     const messages = useSelector((state: IState) => state.messages);
     const messagesRef = useRef<HTMLDivElement | null>(null);
+    const chatInput = useSelector((state: IState) => state.chatInput);
 
     useEffect(() => {
         if (messagesRef.current) {
             messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
         }
     }, [messages]);
+
+    const onKeyDown = (ev: React.KeyboardEvent<HTMLDivElement>) => {
+        console.log('bruh');
+        if (ev.key !== 'Tab' && chatInput) {
+            chatInput.focus();
+        }
+    };
 
     return (
         <div className={classes.root}>
@@ -27,7 +35,7 @@ export const ChatArea = () => {
                 <ChannelList />
             </div>
             <div className={classes.chatArea}>
-                <div className={classes.messages} ref={messagesRef}>
+                <div className={classes.messages} ref={messagesRef} onKeyDown={onKeyDown} tabIndex={-1}>
                     <Messages />
                 </div>
                 <div className={classes.input}>

@@ -166,8 +166,8 @@ export default class HarmonySocket {
         });
     }
 
-    sendGetUsername(userid: string) {
-        this.emitEvent('getusername', {
+    sendGetUser(userid: string) {
+        this.emitEvent('getuser', {
             token: localStorage.getItem('token'),
             userid
         });

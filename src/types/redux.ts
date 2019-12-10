@@ -19,7 +19,7 @@ export enum Actions {
     SET_GUILD_PICTURE,
     SET_GUILD_NAME,
     SET_INVITES,
-    SET_USERNAME,
+    SET_USER,
     TOGGLE_USER_SETTINGS_DIALOG,
     SET_CHAT_INPUT
 }
@@ -73,8 +73,11 @@ export interface IState {
     invites: {
         [key: string]: number;
     };
-    usernames: {
-        [key: string]: string;
+    users: {
+        [key: string]: {
+            username: string;
+            avatar: string;
+        };
     };
     userSettingsDialog: boolean;
     chatInput: HTMLInputElement | undefined;
@@ -167,11 +170,12 @@ export interface ISetInvites {
     };
 }
 
-export interface ISetUsername {
-    type: Actions.SET_USERNAME;
+export interface ISetUser {
+    type: Actions.SET_USER;
     payload: {
         userid: string;
         username: string;
+        avatar: string;
     };
 }
 
@@ -202,6 +206,6 @@ export type Action =
     | ISetGuildPicture
     | ISetGuildName
     | ISetInvites
-    | ISetUsername
+    | ISetUser
     | IToggleUserSettingsDialog
     | ISetChatInput;

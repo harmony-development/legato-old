@@ -8,7 +8,7 @@ interface IProps {
     username: string;
     createdat: number;
     message: string;
-    icon?: string;
+    avatar?: string;
 }
 
 const UtcEpochToLocalDate = (time: number) => {
@@ -20,14 +20,14 @@ const UtcEpochToLocalDate = (time: number) => {
 export const Message = (props: IProps) => {
     useEffect(() => {
         if (!props.username) {
-            harmonySocket.sendGetUsername(props.userid);
+            harmonySocket.sendGetUser(props.userid);
         }
     }, [props]);
 
     return (
         <ListItem alignItems='flex-start'>
             <ListItemAvatar>
-                <Avatar alt={props.userid} src={props.icon ? `http://localhost:2288/filestore/${props.icon}` : undefined} />
+                <Avatar alt={props.userid} src={props.avatar ? `http://localhost:2288/filestore/${props.avatar}` : undefined} />
             </ListItemAvatar>
             <ListItemText
                 primary={
