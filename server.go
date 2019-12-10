@@ -24,5 +24,5 @@ func handleSocket(w http.ResponseWriter, r *http.Request) {
 	ws.Bind("deletechannel", event.OnDeleteChannel)
 	ws.Bind("deleteinvite", event.OnDeleteInvite)
 	ws.Bind("createinvite", event.OnCreateInvite)
-	ws.Bind("getusername", event.OnGetUsername)
+	ws.Bind("getuser", event.OnGetUser)
 }

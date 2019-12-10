@@ -11,7 +11,7 @@ type getUsernameData struct {
 	Userid string `mapstructure:"userid"`
 }
 
-func OnGetUsername(ws *socket.Client, rawMap map[string]interface{}) {
+func OnGetUser(ws *socket.Client, rawMap map[string]interface{}) {
 	var data getUsernameData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -22,15 +22,17 @@ func OnGetUsername(ws *socket.Client, rawMap map[string]interface{}) {
 		return
 	}
 	var username string
-	err := harmonydb.DBInst.QueryRow("SELECT username FROM users WHERE id=$1", data.Userid).Scan(&username)
+	var avatar string
+	err := harmonydb.DBInst.QueryRow("SELECT username, avatar FROM users WHERE id=$1", data.Userid).Scan(&username, &avatar)
 	if err != nil {
 		return
 	}
 	ws.Send(&socket.Packet{
-		Type: "getusername",
+		Type: "getuser",
 		Data: map[string]interface{}{
 			"userid": data.Userid,
 			"username": username,
+			"avatar": avatar,
 		},
 	})
 }
