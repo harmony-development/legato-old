@@ -28,6 +28,7 @@
         "react-scripts": "^3.3.0",
         "react-toastify": "^5.4.1",
         "redux": "^4.0.4",
+        "redux-persist": "^6.0.0",
         "typescript": "3.7.3"
     },
     "scripts": {

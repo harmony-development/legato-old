@@ -19,7 +19,7 @@ import { InviteHandler } from './InviteHandler/HandleInvite';
 export const harmonySocket = new HarmonySocket();
 export let previouslyDisconnected = false;
 
-const Root: React.FC = () => {
+const Root = () => {
     const dispatch = useDispatch();
     useRootStyles();
 
