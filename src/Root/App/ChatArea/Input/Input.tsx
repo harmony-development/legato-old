@@ -6,7 +6,7 @@ import { harmonySocket } from '../../../Root';
 
 export const Input = () => {
     const connected = useSelector((state: IState) => state.connected);
-    const inputStyle = useSelector((state: IState) => state.inputStyle);
+    const inputStyle = useSelector((state: IState) => state.theme.inputStyle);
     const guildID = useSelector((state: IState) => state.selectedGuild);
     const focus = useSelector((state: IState) => state.chatInputFocus);
     const channelID = useSelector((state: IState) => state.selectedChannel);

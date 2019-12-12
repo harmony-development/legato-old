@@ -10,7 +10,7 @@ export const ThemeDialog = () => {
     const themeType = useSelector((state: IState) => state.theme.type);
     const [primary, setPrimary] = useState<Color>(red);
     const [secondary, setSecondary] = useState<Color>(orange);
-    const inputStyle = useSelector((state: IState) => state.inputStyle);
+    const inputStyle = useSelector((state: IState) => state.theme.inputStyle);
     const dispatch = useDispatch();
 
     const changeInputStyle = (ev: React.ChangeEvent<{ value: unknown }>) => {

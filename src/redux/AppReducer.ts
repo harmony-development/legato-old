@@ -5,7 +5,8 @@ const appState: IState = {
     theme: {
         type: 'dark',
         primary: red,
-        secondary: orange
+        secondary: orange,
+        inputStyle: 'filled'
     },
     guildList: {},
     themeDialog: false,
@@ -13,7 +14,6 @@ const appState: IState = {
     selectedGuild: '',
     messages: [],
     invites: {},
-    inputStyle: 'filled',
     channels: {},
     selectedChannel: undefined,
     joinGuildDialog: false,
@@ -91,7 +91,10 @@ export default function AppReducer(state = appState, action: Action): IState {
         case Actions.SET_INPUT_STYLE: {
             return {
                 ...state,
-                inputStyle: action.payload
+                theme: {
+                    ...state.theme,
+                    inputStyle: action.payload
+                }
             };
         }
         case Actions.SET_CHANNELS: {

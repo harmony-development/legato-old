@@ -8,7 +8,7 @@ import { useUserSettingsStyle } from './UserSettingsStyle';
 export const UserSettingsDialog = () => {
     const open = useSelector((state: IState) => state.userSettingsDialog);
     const userAvatarUpload = useRef<HTMLInputElement | null>(null);
-    const inputStyle = useSelector((state: IState) => state.inputStyle);
+    const inputStyle = useSelector((state: IState) => state.theme.inputStyle);
     const [username, setUsername] = useState<string>('');
     const dispatch = useDispatch();
     const classes = useUserSettingsStyle();

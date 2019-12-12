@@ -15,7 +15,7 @@ import { harmonySocket } from '../../../Root';
 export const GuildSettings = () => {
     const open = useSelector((state: IState) => state.guildSettingsDialog);
     const selectedGuild = useSelector((state: IState) => state.selectedGuild);
-    const inputStyle = useSelector((state: IState) => state.inputStyle);
+    const inputStyle = useSelector((state: IState) => state.theme.inputStyle);
     const guilds = useSelector((state: IState) => state.guildList);
     const invites = useSelector((state: IState) => state.invites);
     const dispatch = useDispatch();

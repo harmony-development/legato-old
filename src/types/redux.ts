@@ -171,7 +171,6 @@ export interface IState {
     };
     selectedGuild: string;
     messages: IMessage[];
-    inputStyle: 'standard' | 'filled' | 'outlined';
     channels: {
         [key: string]: string;
     };

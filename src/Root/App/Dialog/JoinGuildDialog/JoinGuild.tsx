@@ -6,7 +6,7 @@ import { harmonySocket } from '../../../Root';
 
 export const JoinGuild = () => {
     const open = useSelector((state: IState) => state.joinGuildDialog);
-    const inputStyle = useSelector((state: IState) => state.inputStyle);
+    const inputStyle = useSelector((state: IState) => state.theme.inputStyle);
     const [joinErr] = useState<string>('');
     const [createErr] = useState<string>('');
     const joinCodeRef = useRef<HTMLInputElement | null>(null);
