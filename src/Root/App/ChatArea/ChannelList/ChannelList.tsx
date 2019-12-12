@@ -18,10 +18,11 @@ interface IChannelProps {
 }
 
 const Channel = (props: IChannelProps) => {
-    //const guildList = useSelector((state: IState) => state.guildList);
-    const selectedGuild = useSelector((state: IState) => state.selectedGuild);
-    const selectedChannel = useSelector((state: IState) => state.selectedChannel);
-    const guildsList = useSelector((state: IState) => state.guildList);
+    const [selectedGuild, selectedChannel, guildsList] = useSelector((state: IState) => [
+        state.selectedGuild,
+        state.selectedChannel,
+        state.guildList
+    ]);
     const classes = useChannelListStyle();
 
     const handleDelete = () => {
@@ -31,7 +32,12 @@ const Channel = (props: IChannelProps) => {
     return (
         <>
             <ContextMenuTrigger id={props.channelid}>
-                <ListItem button key={props.channelid} className={props.channelid === selectedChannel ? classes.selectedChannel : undefined} onClick={() => props.setSelectedChannel(props.channelid)}>
+                <ListItem
+                    button
+                    key={props.channelid}
+                    className={props.channelid === selectedChannel ? classes.selectedChannel : undefined}
+                    onClick={() => props.setSelectedChannel(props.channelid)}
+                >
                     <ListItemText secondary={`#${props.channelname}`} />
                 </ListItem>
             </ContextMenuTrigger>
@@ -51,9 +57,11 @@ const Channel = (props: IChannelProps) => {
 };
 
 export const ChannelList = () => {
-    const channels = useSelector((state: IState) => state.channels);
-    const selectedGuild = useSelector((state: IState) => state.selectedGuild);
-    const guildsList = useSelector((state: IState) => state.guildList);
+    const [channels, selectedGuild, guildsList] = useSelector((state: IState) => [
+        state.channels,
+        state.selectedGuild,
+        state.guildList
+    ]);
     const [actionsExpanded, setActionsExpanded] = useState<boolean>(false);
     const [addingChannel, setAddingChannel] = useState<boolean>(false);
     const addChannelInput = useRef<HTMLInputElement | null>(null);
@@ -121,12 +129,26 @@ export const ChannelList = () => {
                 )}
                 {channels
                     ? Object.keys(channels).map((key) => {
-                          return <Channel key={key} channelid={key} channelname={channels[key]} setSelectedChannel={setSelectedChannel} />;
+                          return (
+                              <Channel
+                                  key={key}
+                                  channelid={key}
+                                  channelname={channels[key]}
+                                  setSelectedChannel={setSelectedChannel}
+                              />
+                          );
                       })
                     : undefined}
                 <div className={classes.newChannelInput}>
                     {addingChannel ? (
-                        <Input fullWidth autoFocus onKeyPress={handleChannelNameFinish} onBlur={() => setAddingChannel(false)} placeholder={'Channel Name'} inputRef={addChannelInput} />
+                        <Input
+                            fullWidth
+                            autoFocus
+                            onKeyPress={handleChannelNameFinish}
+                            onBlur={() => setAddingChannel(false)}
+                            placeholder={'Channel Name'}
+                            inputRef={addChannelInput}
+                        />
                     ) : (
                         undefined
                     )}

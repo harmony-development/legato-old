@@ -11,7 +11,7 @@ import { FocusChatInput } from '../../../redux/Dispatches';
 
 export const ChatArea = () => {
     const classes = useChatAreaStyles();
-    const messages = useSelector((state: IState) => state.messages);
+    const [messages] = useSelector((state: IState) => [state.messages]);
     const messagesRef = useRef<HTMLDivElement | null>(null);
     const dispatch = useDispatch();
 

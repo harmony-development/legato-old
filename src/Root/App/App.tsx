@@ -29,14 +29,16 @@ import { UserSettingsDialog } from './Dialog/UserSettingsDialog/UserSettingsDial
 export const App = () => {
     const classes = useAppStyles();
     const dispatch = useDispatch();
-    const connected = useSelector((state: IState) => state.connected);
-    const channels = useSelector((state: IState) => state.channels);
-    const invites = useSelector((state: IState) => state.invites);
-    const selectedGuild = useSelector((state: IState) => state.selectedGuild);
-    const themeDialogOpen = useSelector((state: IState) => state.themeDialog);
-    const joinDialogOpen = useSelector((state: IState) => state.joinGuildDialog);
-    const guildSettingsDialogOpen = useSelector((state: IState) => state.guildSettingsDialog);
-    const userSettingsDialogOpen = useSelector((state: IState) => state.userSettingsDialog);
+    const [connected, channels, invites, selectedGuild, themeDialogOpen, joinDialogOpen, guildSettingsDialogOpen, userSettingsDialogOpen] = useSelector((state: IState) => [
+        state.connected,
+        state.channels,
+        state.invites,
+        state.selectedGuild,
+        state.themeDialog,
+        state.joinGuildDialog,
+        state.guildSettingsDialog,
+        state.userSettingsDialog
+    ]);
     const history = useHistory();
     let eventsBound = false;
 

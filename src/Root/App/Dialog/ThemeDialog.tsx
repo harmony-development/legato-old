@@ -1,16 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Color, FormControlLabel, FormControl, FormLabel, RadioGroup, Radio, Typography, Select, MenuItem } from '@material-ui/core';
+import {
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Button,
+    Color,
+    FormControlLabel,
+    FormControl,
+    FormLabel,
+    RadioGroup,
+    Radio,
+    Typography,
+    Select,
+    MenuItem
+} from '@material-ui/core';
 import { useSelector, useDispatch } from 'react-redux';
 import { IState, Actions } from '../../../types/redux';
 import { ColorPicker } from './ColorPicker';
 import { orange, red } from '@material-ui/core/colors';
 
 export const ThemeDialog = () => {
-    const open = useSelector((state: IState) => state.themeDialog);
-    const themeType = useSelector((state: IState) => state.theme.type);
+    const [open, themeType, inputStyle] = useSelector((state: IState) => [
+        state.themeDialog,
+        state.theme.type,
+        state.theme.inputStyle
+    ]);
     const [primary, setPrimary] = useState<Color>(red);
     const [secondary, setSecondary] = useState<Color>(orange);
-    const inputStyle = useSelector((state: IState) => state.theme.inputStyle);
     const dispatch = useDispatch();
 
     const changeInputStyle = (ev: React.ChangeEvent<{ value: unknown }>) => {
@@ -32,15 +49,34 @@ export const ThemeDialog = () => {
             <DialogContent>
                 <FormControl component='fieldset'>
                     <FormLabel component='legend'>Theme Type</FormLabel>
-                    <RadioGroup value={themeType} row onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: Actions.INVERT_THEME })}>
-                        <FormControlLabel value='light' control={<Radio color='secondary' />} label='Light' labelPlacement='end' />
-                        <FormControlLabel value='dark' control={<Radio color='secondary' />} label='Dark' labelPlacement='end' />
+                    <RadioGroup
+                        value={themeType}
+                        row
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: Actions.INVERT_THEME })}
+                    >
+                        <FormControlLabel
+                            value='light'
+                            control={<Radio color='secondary' />}
+                            label='Light'
+                            labelPlacement='end'
+                        />
+                        <FormControlLabel
+                            value='dark'
+                            control={<Radio color='secondary' />}
+                            label='Dark'
+                            labelPlacement='end'
+                        />
                     </RadioGroup>
                 </FormControl>
                 <ColorPicker color={primary} setColor={setPrimary} label={'Primary Color'} />
                 <ColorPicker color={secondary} setColor={setSecondary} label={'Secondary Color'} />
                 <Typography>Text Input Style</Typography>
-                <Select value={inputStyle || 'standard'} onChange={changeInputStyle} variant={inputStyle as any} fullWidth>
+                <Select
+                    value={inputStyle || 'standard'}
+                    onChange={changeInputStyle}
+                    variant={inputStyle as any}
+                    fullWidth
+                >
                     <MenuItem value={'standard'}>Standard</MenuItem>
                     <MenuItem value={'filled'}>Filled</MenuItem>
                     <MenuItem value={'outlined'}>Outlined</MenuItem>

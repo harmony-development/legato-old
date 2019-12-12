@@ -5,8 +5,7 @@ import { Dialog, TextField, Typography, DialogContent, Button, Grid } from '@mat
 import { harmonySocket } from '../../../Root';
 
 export const JoinGuild = () => {
-    const open = useSelector((state: IState) => state.joinGuildDialog);
-    const inputStyle = useSelector((state: IState) => state.theme.inputStyle);
+    const [open, inputStyle] = useSelector((state: IState) => [state.joinGuildDialog, state.theme.inputStyle]);
     const [joinErr] = useState<string>('');
     const [createErr] = useState<string>('');
     const joinCodeRef = useRef<HTMLInputElement | null>(null);
@@ -42,7 +41,12 @@ export const JoinGuild = () => {
                     <Grid item xs={6}>
                         <div>
                             <Typography variant='h5'>Create Guild</Typography>
-                            <TextField label='Guild Name' variant={inputStyle as any} fullWidth inputRef={guildNameRef} />
+                            <TextField
+                                label='Guild Name'
+                                variant={inputStyle as any}
+                                fullWidth
+                                inputRef={guildNameRef}
+                            />
                             <Typography color='error' variant='body2'>
                                 {createErr || <br />}
                             </Typography>

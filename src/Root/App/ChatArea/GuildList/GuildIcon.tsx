@@ -15,7 +15,7 @@ interface IProps {
 }
 
 export const GuildIcon = (props: IProps) => {
-    const guildsList = useSelector((state: IState) => state.guildList);
+    const [guildsList] = useSelector((state: IState) => [state.guildList]);
     const classes = useGuildListStyle();
     const dispatch = useDispatch();
 
@@ -33,7 +33,11 @@ export const GuildIcon = (props: IProps) => {
     return (
         <>
             <ContextMenuTrigger id={props.guildid}>
-                <ButtonBase className={`${classes.guildiconroot} ${props.selected ? classes.selectedguildicon : undefined}`} key={props.guildid} onClick={onClick}>
+                <ButtonBase
+                    className={`${classes.guildiconroot} ${props.selected ? classes.selectedguildicon : undefined}`}
+                    key={props.guildid}
+                    onClick={onClick}
+                >
                     <Tooltip title={props.guildname} placement='right'>
                         <img className={classes.guildicon} alt='' src={props.picture} draggable={false} />
                     </Tooltip>

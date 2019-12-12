@@ -5,11 +5,13 @@ import { IState } from '../../../../types/redux';
 import { harmonySocket } from '../../../Root';
 
 export const Input = () => {
-    const connected = useSelector((state: IState) => state.connected);
-    const inputStyle = useSelector((state: IState) => state.theme.inputStyle);
-    const guildID = useSelector((state: IState) => state.selectedGuild);
-    const focus = useSelector((state: IState) => state.chatInputFocus);
-    const channelID = useSelector((state: IState) => state.selectedChannel);
+    const [connected, inputStyle, guildID, channelID, focus] = useSelector((state: IState) => [
+        state.connected,
+        state.theme.inputStyle,
+        state.selectedGuild,
+        state.selectedChannel,
+        state.chatInputFocus
+    ]);
     const inputField = useRef<HTMLInputElement | undefined>();
 
     const onKeyPress = (e: React.KeyboardEvent) => {

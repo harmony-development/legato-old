@@ -5,9 +5,11 @@ import { useSelector } from 'react-redux';
 import { IState } from '../../../../types/redux';
 
 export const Messages = () => {
-    const messages = useSelector((state: IState) => state.messages);
-    const selectedChannel = useSelector((state: IState) => state.selectedChannel);
-    const users = useSelector((state: IState) => state.users);
+    const [messages, selectedChannel, users] = useSelector((state: IState) => [
+        state.messages,
+        state.selectedChannel,
+        state.users
+    ]);
     const messageList = useRef<HTMLUListElement | undefined>(undefined);
 
     useEffect(() => {

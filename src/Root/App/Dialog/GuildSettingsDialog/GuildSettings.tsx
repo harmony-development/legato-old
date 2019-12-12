@@ -2,7 +2,24 @@ import React, { useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
 import { IState, Actions } from '../../../../types/redux';
-import { Dialog, DialogContent, AppBar, Toolbar, IconButton, Typography, Button, TextField, Avatar, ButtonBase, Table, TableHead, TableRow, TableCell, TableBody, Tooltip } from '@material-ui/core';
+import {
+    Dialog,
+    DialogContent,
+    AppBar,
+    Toolbar,
+    IconButton,
+    Typography,
+    Button,
+    TextField,
+    Avatar,
+    ButtonBase,
+    Table,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableBody,
+    Tooltip
+} from '@material-ui/core';
 import copy from 'copy-to-clipboard';
 import AddIcon from '@material-ui/icons/Add';
 import CloseIcon from '@material-ui/icons/Close';
@@ -13,16 +30,22 @@ import { toast } from 'react-toastify';
 import { harmonySocket } from '../../../Root';
 
 export const GuildSettings = () => {
-    const open = useSelector((state: IState) => state.guildSettingsDialog);
-    const selectedGuild = useSelector((state: IState) => state.selectedGuild);
-    const inputStyle = useSelector((state: IState) => state.theme.inputStyle);
-    const guilds = useSelector((state: IState) => state.guildList);
-    const invites = useSelector((state: IState) => state.invites);
+    const [open, selectedGuild, inputStyle, guilds, invites] = useSelector((state: IState) => [
+        state.guildSettingsDialog,
+        state.selectedGuild,
+        state.theme.inputStyle,
+        state.guildList,
+        state.invites
+    ]);
     const dispatch = useDispatch();
     const guildIconUpload = useRef<HTMLInputElement | null>(null);
-    const [guildName, setGuildName] = useState<string | undefined>(guilds[selectedGuild] ? guilds[selectedGuild].guildname : undefined);
+    const [guildName, setGuildName] = useState<string | undefined>(
+        guilds[selectedGuild] ? guilds[selectedGuild].guildname : undefined
+    );
     const [guildIconFile, setGuildIconFile] = useState<File | null>(null);
-    const [guildIcon, setGuildIcon] = useState<string | undefined>(guilds[selectedGuild] ? guilds[selectedGuild].picture : undefined);
+    const [guildIcon, setGuildIcon] = useState<string | undefined>(
+        guilds[selectedGuild] ? guilds[selectedGuild].picture : undefined
+    );
     const classes = useGuildSettingsStyle();
 
     const deleteInviteLink = (invite: string) => {
@@ -43,7 +66,10 @@ export const GuildSettings = () => {
                     .then((res) => {
                         if (res.data) {
                             const uploadID = res.data;
-                            harmonySocket.sendGuildPictureUpdate(selectedGuild, `http://${window.location.hostname}:2288/filestore/${uploadID}`);
+                            harmonySocket.sendGuildPictureUpdate(
+                                selectedGuild,
+                                `http://${window.location.hostname}:2288/filestore/${uploadID}`
+                            );
                         }
                     })
                     .catch(() => {
@@ -92,7 +118,14 @@ export const GuildSettings = () => {
             </AppBar>
             <DialogContent>
                 <div style={{ width: '33%' }}>
-                    <input type='file' id='file' multiple ref={guildIconUpload} style={{ display: 'none' }} onChange={onGuildIconSelected} />
+                    <input
+                        type='file'
+                        id='file'
+                        multiple
+                        ref={guildIconUpload}
+                        style={{ display: 'none' }}
+                        onChange={onGuildIconSelected}
+                    />
                     <ButtonBase
                         style={{ borderRadius: '50%' }}
                         onClick={() => {
@@ -139,7 +172,11 @@ export const GuildSettings = () => {
                                             <Tooltip title='Copy Invite Link'>
                                                 <IconButton
                                                     onClick={() => {
-                                                        copy(`http://${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/invite/${key}`);
+                                                        copy(
+                                                            `http://${window.location.hostname}${
+                                                                window.location.port ? ':' + window.location.port : ''
+                                                            }/invite/${key}`
+                                                        );
                                                         toast.info('Successfully copied to clipboard!');
                                                     }}
                                                 >
