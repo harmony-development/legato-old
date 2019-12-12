@@ -2,25 +2,29 @@ import { ITheme } from './theming';
 import { Color } from '@material-ui/core';
 
 export enum Actions {
-    INVERT_THEME,
     TOGGLE_THEME_DIALOG,
-    CHANGE_PRIMARY,
-    CHANGE_SECONDARY,
-    SET_CONNECTED,
-    SET_GUILDS,
-    SET_SELECTED_GUILD,
-    ADD_MESSAGE,
-    SET_MESSAGES,
-    SET_INPUT_STYLE,
-    SET_CHANNELS,
-    SET_SELECTED_CHANNEL,
     TOGGLE_JOIN_GUILD_DIALOG,
     TOGGLE_GUILD_SETTINGS_DIALOG,
+    TOGGLE_USER_SETTINGS_DIALOG,
+
+    INVERT_THEME,
+    CHANGE_PRIMARY,
+    CHANGE_SECONDARY,
+    SET_INPUT_STYLE,
+
+    SET_CONNECTED,
+
+    SET_GUILDS,
+    SET_SELECTED_GUILD,
+    SET_CHANNELS,
+    SET_SELECTED_CHANNEL,
     SET_GUILD_PICTURE,
     SET_GUILD_NAME,
     SET_INVITES,
     SET_USER,
-    TOGGLE_USER_SETTINGS_DIALOG,
+    SET_MESSAGES,
+    ADD_MESSAGE,
+
     SET_CHAT_INPUT
 }
 
@@ -52,35 +56,6 @@ export interface IMessage {
     channel: string;
     message: string;
     messageid: string;
-}
-
-export interface IState {
-    theme: ITheme;
-    themeDialog: boolean;
-    connected: boolean;
-    guildList: {
-        [key: string]: IGuild;
-    };
-    selectedGuild: string;
-    messages: IMessage[];
-    inputStyle: 'standard' | 'filled' | 'outlined';
-    channels: {
-        [key: string]: string;
-    };
-    selectedChannel: string | undefined;
-    joinGuildDialog: boolean;
-    guildSettingsDialog: boolean;
-    invites: {
-        [key: string]: number;
-    };
-    users: {
-        [key: string]: {
-            username: string;
-            avatar: string;
-        };
-    };
-    userSettingsDialog: boolean;
-    chatInput: HTMLInputElement | undefined;
 }
 
 export interface IInvertTheme {
@@ -186,6 +161,35 @@ export interface IToggleUserSettingsDialog {
 export interface ISetChatInput {
     type: Actions.SET_CHAT_INPUT;
     payload: HTMLInputElement;
+}
+
+export interface IState {
+    theme: ITheme;
+    themeDialog: boolean;
+    connected: boolean;
+    guildList: {
+        [key: string]: IGuild;
+    };
+    selectedGuild: string;
+    messages: IMessage[];
+    inputStyle: 'standard' | 'filled' | 'outlined';
+    channels: {
+        [key: string]: string;
+    };
+    selectedChannel: string | undefined;
+    joinGuildDialog: boolean;
+    guildSettingsDialog: boolean;
+    invites: {
+        [key: string]: number;
+    };
+    users: {
+        [key: string]: {
+            username: string;
+            avatar: string;
+        };
+    };
+    userSettingsDialog: boolean;
+    chatInput: HTMLInputElement | undefined;
 }
 
 export type Action =
