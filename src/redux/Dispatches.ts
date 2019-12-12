@@ -126,9 +126,8 @@ export function SetUser(userid: string, username: string, avatar: string) {
     };
 }
 
-export function SetChatInput(input: HTMLInputElement) {
+export function FocusChatInput() {
     return {
-        type: Actions.SET_CHAT_INPUT,
-        payload: input
+        type: Actions.FOCUS_CHAT_INPUT
     };
 }

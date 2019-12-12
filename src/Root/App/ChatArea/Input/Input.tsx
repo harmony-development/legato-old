@@ -1,17 +1,16 @@
 import React, { useRef, useEffect } from 'react';
 import { TextField } from '@material-ui/core';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { IState } from '../../../../types/redux';
 import { harmonySocket } from '../../../Root';
-import { SetChatInput } from '../../../../redux/Dispatches';
 
 export const Input = () => {
-    const inputField = useRef<HTMLInputElement | undefined>(undefined);
     const connected = useSelector((state: IState) => state.connected);
     const inputStyle = useSelector((state: IState) => state.inputStyle);
     const guildID = useSelector((state: IState) => state.selectedGuild);
+    const focus = useSelector((state: IState) => state.chatInputFocus);
     const channelID = useSelector((state: IState) => state.selectedChannel);
-    const dispatch = useDispatch();
+    const inputField = useRef<HTMLInputElement | undefined>();
 
     const onKeyPress = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -26,9 +25,9 @@ export const Input = () => {
 
     useEffect(() => {
         if (inputField.current) {
-            dispatch(SetChatInput(inputField.current));
+            inputField.current.focus();
         }
-    }, [inputField, dispatch]);
+    }, [focus]);
 
     return (
         <div>

@@ -25,7 +25,7 @@ export enum Actions {
     SET_MESSAGES,
     ADD_MESSAGE,
 
-    SET_CHAT_INPUT
+    FOCUS_CHAT_INPUT
 }
 
 interface IGuild {
@@ -158,9 +158,8 @@ export interface IToggleUserSettingsDialog {
     type: Actions.TOGGLE_USER_SETTINGS_DIALOG;
 }
 
-export interface ISetChatInput {
-    type: Actions.SET_CHAT_INPUT;
-    payload: HTMLInputElement;
+export interface IFocusChatInput {
+    type: Actions.FOCUS_CHAT_INPUT;
 }
 
 export interface IState {
@@ -189,7 +188,7 @@ export interface IState {
         };
     };
     userSettingsDialog: boolean;
-    chatInput: HTMLInputElement | undefined;
+    chatInputFocus: boolean;
 }
 
 export type Action =
@@ -212,4 +211,4 @@ export type Action =
     | ISetInvites
     | ISetUser
     | IToggleUserSettingsDialog
-    | ISetChatInput;
+    | IFocusChatInput;
