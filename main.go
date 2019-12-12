@@ -27,5 +27,9 @@ func main() {
 	router.HandleFunc("/api/socket", handleSocket)
 	router.HandleFunc("/api/rest/fileupload", rest.FileUpload)
 	router.PathPrefix("/filestore/").Handler(http.StripPrefix("/filestore/", http.FileServer(http.Dir("./filestore"))))
+	router.Handle("/", http.FileServer(http.Dir("./static")))
+	router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./static/index.html")
+	})
 	golog.Fatalf("Fatal error caused server to crash! %v", http.ListenAndServe(PORT, router))
 }
