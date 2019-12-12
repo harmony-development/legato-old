@@ -90,3 +90,10 @@ func registerSocket(guildid string, ws *socket.Client, userid string) {
 		}
 	}
 }
+
+func DeleteFromFilestore(fileid string) {
+	err := os.Remove(fmt.Sprintf("./filestore/%v", fileid))
+	if err != nil {
+		golog.Warnf("Error deleting from filestore : %v", err)
+	}
+}

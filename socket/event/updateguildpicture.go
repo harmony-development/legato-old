@@ -6,6 +6,7 @@ import (
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"harmony-server/socket"
+	"path"
 )
 
 type updateGuildPictureData struct {
@@ -27,7 +28,9 @@ func OnUpdateGuildPicture(ws *socket.Client, rawMap map[string]interface{}) {
 	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil || globals.Guilds[data.Guild].Owner != userid {
 		return
 	}
-	_, err := harmonydb.DBInst.Exec("UPDATE guilds SET picture=$1 WHERE guildid=$2", data.Picture, data.Guild)
+	var oldPictureID string
+	err := harmonydb.DBInst.QueryRow("SELECT picture FROM guilds WHERE guildid=$1", data.Guild).Scan(&oldPictureID)
+	_, err = harmonydb.DBInst.Exec("UPDATE guilds SET picture=$1 WHERE guildid=$2", data.Picture, data.Guild)
 	if err != nil {
 		golog.Warnf("Error updating picture. %v", err)
 		ws.Send(&socket.Packet{
@@ -38,6 +41,7 @@ func OnUpdateGuildPicture(ws *socket.Client, rawMap map[string]interface{}) {
 		})
 		return
 	}
+	go DeleteFromFilestore(path.Base(oldPictureID))
 	for _, client := range globals.Guilds[data.Guild].Clients {
 		client.Send(&socket.Packet{
 			Type: "updateguildpicture",
