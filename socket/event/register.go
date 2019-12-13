@@ -58,5 +58,6 @@ func OnRegister(ws *socket.Client, rawMap map[string]interface{}) {
 		golog.Debugf("Error inserting user. Reason : %v", err)
 		return
 	}
+	ws.Userid = userid
 	sendToken(ws, userid)
 }

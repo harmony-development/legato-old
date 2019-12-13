@@ -29,6 +29,7 @@ type (
 	Client struct {
 		Connection *websocket.Conn
 		EventBus map[string]Event
+		Userid string
 		Out chan []byte
 	}
 )
@@ -63,6 +64,10 @@ func reader(ws *Client) {
 			}
 		} else {
 			golog.Warnf("Error reading data from event : %v", err)
+			_ = ws.Connection.Close()
+			if ws.Userid != "" {
+				deregister(ws)
+			}
 			return
 		}
 	}
@@ -75,6 +80,10 @@ func writer(ws *Client) {
 		err := ws.Connection.WriteMessage(websocket.TextMessage, msg)
 		if err != nil {
 			golog.Warnf("Error writing data to event : %v", err)
+			_ = ws.Connection.Close()
+			if ws.Userid != "" {
+				deregister(ws)
+			}
 			return
 		}
 	}
