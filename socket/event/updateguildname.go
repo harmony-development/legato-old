@@ -5,7 +5,6 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
-	"harmony-server/socket"
 )
 
 type updateGuildName struct {
@@ -14,7 +13,7 @@ type updateGuildName struct {
 	Name string `mapstructure:"name"`
 }
 
-func OnUpdateGuildName(ws *socket.Client, rawMap map[string]interface{}) {
+func OnUpdateGuildName(ws *globals.Client, rawMap map[string]interface{}) {
 	var data updateGuildName
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -30,7 +29,7 @@ func OnUpdateGuildName(ws *socket.Client, rawMap map[string]interface{}) {
 	_, err := harmonydb.DBInst.Exec("UPDATE guilds SET guildname=$1 WHERE guildid=$2", data.Name, data.Guild)
 	if err != nil {
 		golog.Warnf("Error updating name. %v", err)
-		ws.Send(&socket.Packet{
+		ws.Send(&globals.Packet{
 			Type: "updateguildname",
 			Data: map[string]interface{}{
 				"success": false,
@@ -39,7 +38,7 @@ func OnUpdateGuildName(ws *socket.Client, rawMap map[string]interface{}) {
 		return
 	}
 	for _, client := range globals.Guilds[data.Guild].Clients {
-		client.Send(&socket.Packet{
+		client.Send(&globals.Packet{
 			Type: "updateguildname",
 			Data: map[string]interface{}{
 				"guild": data.Guild,

@@ -5,7 +5,6 @@ import (
 	"github.com/thanhpk/randstr"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
-	"harmony-server/socket"
 )
 
 type createInviteData struct {
@@ -13,7 +12,7 @@ type createInviteData struct {
 	Guild string `mapstructure:"guild"`
 }
 
-func OnCreateInvite(ws *socket.Client, rawMap map[string]interface{}) {
+func OnCreateInvite(ws *globals.Client, rawMap map[string]interface{}) {
 	var data createInviteData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -31,7 +30,7 @@ func OnCreateInvite(ws *socket.Client, rawMap map[string]interface{}) {
 	if err != nil {
 		return
 	}
-	ws.Send(&socket.Packet{
+	ws.Send(&globals.Packet{
 		Type: "createinvite",
 		Data: map[string]interface{}{
 			"success": true,

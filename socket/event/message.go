@@ -6,7 +6,6 @@ import (
 	"github.com/thanhpk/randstr"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
-	"harmony-server/socket"
 	"time"
 )
 
@@ -17,7 +16,7 @@ type messageData struct {
 	Message string `mapstructure:"message"`
 }
 
-func OnMessage(ws *socket.Client, rawMap map[string]interface{}) {
+func OnMessage(ws *globals.Client, rawMap map[string]interface{}) {
 	var data messageData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -35,7 +34,7 @@ func OnMessage(ws *socket.Client, rawMap map[string]interface{}) {
 
 	// unfortunately O(n) is the only way to do this, we just need to make n really smol (︶︹︶)
 	for _, client := range globals.Guilds[data.Guild].Clients {
-		client.Send(&socket.Packet{
+		client.Send(&globals.Packet{
 			Type: "message",
 			Data: map[string]interface{}{
 				"guild":     data.Guild,

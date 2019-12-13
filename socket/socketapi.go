@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/websocket"
 	"github.com/kataras/golog"
+	"harmony-server/globals"
 	"net/http"
 )
 
@@ -18,30 +19,14 @@ var (
 	}
 )
 
-type (
-	Event func(ws *Client, data map[string]interface{})
-
-	Packet struct {
-		Type string `json:"type"`
-		Data map[string]interface{} `json:"data"`
-	}
-
-	Client struct {
-		Connection *websocket.Conn
-		EventBus map[string]Event
-		Userid string
-		Out chan []byte
-	}
-)
-
-func NewSocket(w http.ResponseWriter, r *http.Request) *Client {
+func NewSocket(w http.ResponseWriter, r *http.Request) *globals.Client {
 	rawsocket, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		golog.Warnf("error upgrading event for reason : %v", err)
 	}
-	ws := &Client{
+	ws := &globals.Client{
 		Connection: rawsocket,
-		EventBus: make(map[string]Event),
+		EventBus: make(map[string]globals.Event),
 		Out: make(chan []byte),
 	}
 	go reader(ws)
@@ -50,11 +35,11 @@ func NewSocket(w http.ResponseWriter, r *http.Request) *Client {
 }
 
 // reader eternally waits for things to read from the event
-func reader(ws *Client) {
+func reader(ws *globals.Client) {
 	for {
 		_, msg, err := ws.Connection.ReadMessage()
 		if err == nil {
-			var p Packet
+			var p globals.Packet
 			if err = json.Unmarshal(msg, &p); err == nil {
 				if ws.EventBus[p.Type] != nil {
 					ws.EventBus[p.Type](ws, p.Data) // call an event from the eventbus if it exists
@@ -74,7 +59,7 @@ func reader(ws *Client) {
 }
 
 // writer eternally waits for things to write to the event
-func writer(ws *Client) {
+func writer(ws *globals.Client) {
 	for {
 		msg := <- ws.Out // wait for a new message to be sent
 		err := ws.Connection.WriteMessage(websocket.TextMessage, msg)
@@ -87,16 +72,4 @@ func writer(ws *Client) {
 			return
 		}
 	}
-}
-
-func (ws *Client) Bind(s string, event Event) {
-	ws.EventBus[s] = event
-}
-
-func (ws *Client) Send(p *Packet) {
-	data, err := json.Marshal(p)
-	if err != nil {
-		return
-	}
-	ws.Out <- data
 }

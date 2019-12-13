@@ -6,7 +6,6 @@ import (
 	"github.com/thanhpk/randstr"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
-	"harmony-server/socket"
 )
 
 type addChannelData struct {
@@ -15,7 +14,7 @@ type addChannelData struct {
 	Channel string `mapstructure:"channel"`
 }
 
-func OnAddChannel(ws *socket.Client, rawMap map[string]interface{}) {
+func OnAddChannel(ws *globals.Client, rawMap map[string]interface{}) {
 	var data addChannelData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -42,7 +41,7 @@ func OnAddChannel(ws *socket.Client, rawMap map[string]interface{}) {
 		return
 	}
 	for _, client := range globals.Guilds[data.Guild].Clients {
-		client.Send(&socket.Packet{
+		client.Send(&globals.Packet{
 			Type: "addguildchannel",
 			Data: map[string]interface{}{
 				"guild":       data.Guild,

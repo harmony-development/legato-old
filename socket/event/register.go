@@ -5,8 +5,8 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/thanhpk/randstr"
 	"golang.org/x/crypto/bcrypt"
+	"harmony-server/globals"
 	"harmony-server/harmonydb"
-	"harmony-server/socket"
 	"regexp"
 )
 
@@ -23,7 +23,7 @@ func verifyEmail(email string) bool {
 	return emailMatch.MatchString(email)
 }
 
-func OnRegister(ws *socket.Client, rawMap map[string]interface{}) {
+func OnRegister(ws *globals.Client, rawMap map[string]interface{}) {
 	var data registerData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		golog.Warnf("Error decoding register data : %v", err)

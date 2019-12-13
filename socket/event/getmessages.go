@@ -5,7 +5,6 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
-	"harmony-server/socket"
 )
 
 type GetMessagesData struct {
@@ -22,7 +21,7 @@ type Message struct {
 	Messageid string `json:"messageid"`
 }
 
-func OnGetMessages(ws *socket.Client, rawMap map[string]interface{}) {
+func OnGetMessages(ws *globals.Client, rawMap map[string]interface{}) {
 	var data GetMessagesData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -50,7 +49,7 @@ func OnGetMessages(ws *socket.Client, rawMap map[string]interface{}) {
 		}
 		returnMsgs = append(returnMsgs, msg)
 	}
-	ws.Send(&socket.Packet{
+	ws.Send(&globals.Packet{
 		Type: "getmessages",
 		Data: map[string]interface{}{
 			"messages": returnMsgs,

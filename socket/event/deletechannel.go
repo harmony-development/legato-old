@@ -5,7 +5,6 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
-	"harmony-server/socket"
 )
 
 type deleteChannelData struct {
@@ -14,7 +13,7 @@ type deleteChannelData struct {
 	ChannelID   string `mapstructure:"channel"`
 }
 
-func OnDeleteChannel(ws *socket.Client, rawMap map[string]interface{}) {
+func OnDeleteChannel(ws *globals.Client, rawMap map[string]interface{}) {
 	var data deleteChannelData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -47,7 +46,7 @@ func OnDeleteChannel(ws *socket.Client, rawMap map[string]interface{}) {
 		return
 	}
 	for _, client := range globals.Guilds[data.Guild].Clients {
-		client.Send(&socket.Packet{
+		client.Send(&globals.Packet{
 			Type: "deleteguildchannel",
 			Data: map[string]interface{}{
 				"guild":   data.Guild,

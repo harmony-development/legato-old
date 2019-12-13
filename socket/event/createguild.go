@@ -4,8 +4,8 @@ import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
 	"github.com/thanhpk/randstr"
+	"harmony-server/globals"
 	"harmony-server/harmonydb"
-	"harmony-server/socket"
 )
 
 type createGuildData struct {
@@ -13,7 +13,7 @@ type createGuildData struct {
 	Guild string `mapstructure:"guild"`
 }
 
-func OnCreateGuild(ws *socket.Client, rawMap map[string]interface{}) {
+func OnCreateGuild(ws *globals.Client, rawMap map[string]interface{}) {
 	var data createGuildData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -53,7 +53,7 @@ func OnCreateGuild(ws *socket.Client, rawMap map[string]interface{}) {
 		golog.Warnf("Error commiting createGuildTransaction : %v", err)
 		return
 	}
-	ws.Send(&socket.Packet{
+	ws.Send(&globals.Packet{
 		Type: "createguild",
 		Data: map[string]interface{}{
 			"guild": guildid,
@@ -61,8 +61,8 @@ func OnCreateGuild(ws *socket.Client, rawMap map[string]interface{}) {
 	})
 }
 
-func createGuildError(ws *socket.Client) {
-	ws.Send(&socket.Packet{
+func createGuildError(ws *globals.Client) {
+	ws.Send(&globals.Packet{
 		Type: "createguild",
 		Data: map[string]interface{}{
 			"message": "error creating guild",

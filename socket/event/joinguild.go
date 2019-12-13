@@ -3,8 +3,8 @@ package event
 import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
+	"harmony-server/globals"
 	"harmony-server/harmonydb"
-	"harmony-server/socket"
 )
 
 type joinGuildData struct {
@@ -12,7 +12,7 @@ type joinGuildData struct {
 	Token      string `mapstructure:"token"`
 }
 
-func OnJoinGuild(ws *socket.Client, rawMap map[string]interface{}) {
+func OnJoinGuild(ws *globals.Client, rawMap map[string]interface{}) {
 	var data joinGuildData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -21,7 +21,7 @@ func OnJoinGuild(ws *socket.Client, rawMap map[string]interface{}) {
 	var guildid string
 	err := harmonydb.DBInst.QueryRow("SELECT guildid FROM invites WHERE inviteid=$1", data.InviteCode).Scan(&guildid)
 	if err != nil {
-		ws.Send(&socket.Packet{
+		ws.Send(&globals.Packet{
 			Type: "joinguild",
 			Data: map[string]interface{}{
 				"message": "Invalid Invite Code!",
@@ -47,7 +47,7 @@ func OnJoinGuild(ws *socket.Client, rawMap map[string]interface{}) {
 	}
 	err = joinGuildTransaction.Commit()
 	if err != nil {
-		ws.Send(&socket.Packet{
+		ws.Send(&globals.Packet{
 			Type: "joinguild",
 			Data: map[string]interface{}{
 				"message": "Error Joining Guild!",
@@ -56,7 +56,7 @@ func OnJoinGuild(ws *socket.Client, rawMap map[string]interface{}) {
 		golog.Warnf("Error adding user to guildmembers : %v", err)
 		return
 	}
-	ws.Send(&socket.Packet{
+	ws.Send(&globals.Packet{
 		Type: "joinguild",
 		Data: map[string]interface{}{
 			"guild": guildid,

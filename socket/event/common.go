@@ -5,15 +5,14 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/kataras/golog"
 	"harmony-server/globals"
-	"harmony-server/socket"
 	"os"
 	"time"
 )
 
 var jwtSecret = os.Getenv("JWT_SECRET")
 
-func regErr(ws *socket.Client, msg string) {
-	ws.Send(&socket.Packet{
+func regErr(ws *globals.Client, msg string) {
+	ws.Send(&globals.Packet{
 		Type: "registererror",
 		Data: map[string]interface{}{
 			"message": msg,
@@ -21,8 +20,8 @@ func regErr(ws *socket.Client, msg string) {
 	})
 }
 
-func loginErr(ws *socket.Client, msg string) {
-	ws.Send(&socket.Packet{
+func loginErr(ws *globals.Client, msg string) {
+	ws.Send(&globals.Packet{
 		Type: "loginerror",
 		Data: map[string]interface{}{
 			"message": msg,
@@ -30,8 +29,8 @@ func loginErr(ws *socket.Client, msg string) {
 	})
 }
 
-func deauth(ws *socket.Client) {
-	ws.Send(&socket.Packet{
+func deauth(ws *globals.Client) {
+	ws.Send(&globals.Packet{
 		Type: "deauth",
 		Data: map[string]interface{}{
 			"message": "token is missing or invalid",
@@ -39,7 +38,7 @@ func deauth(ws *socket.Client) {
 	})
 }
 
-func sendToken(ws *socket.Client, id string) {
+func sendToken(ws *globals.Client, id string) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":  id,
 		"exp": time.Now().UTC().Add(7 * 24 * time.Hour).Unix(),
@@ -50,7 +49,7 @@ func sendToken(ws *socket.Client, id string) {
 		return
 	}
 
-	ws.Send(&socket.Packet{
+	ws.Send(&globals.Packet{
 		Type: "token",
 		Data: map[string]interface{}{
 			"token": tokenString,
@@ -79,12 +78,12 @@ func VerifyToken(tokenstr string) string {
 	}
 }
 
-func registerSocket(guildid string, ws *socket.Client, userid string) {
+func registerSocket(guildid string, ws *globals.Client, userid string) {
 	if globals.Guilds[guildid] != nil {
 		globals.Guilds[guildid].Clients[userid] = ws
 	} else {
 		globals.Guilds[guildid] = &globals.Guild{
-			Clients: map[string]*socket.Client{
+			Clients: map[string]*globals.Client{
 				userid: ws,
 			},
 		}

@@ -5,7 +5,6 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
-	"harmony-server/socket"
 )
 
 type leaveGuildData struct {
@@ -13,7 +12,7 @@ type leaveGuildData struct {
 	Guild string `mapstructure:"guild"`
 }
 
-func OnLeaveGuild(ws *socket.Client, rawMap map[string]interface{}) {
+func OnLeaveGuild(ws *globals.Client, rawMap map[string]interface{}) {
 	var data leaveGuildData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -30,7 +29,7 @@ func OnLeaveGuild(ws *socket.Client, rawMap map[string]interface{}) {
 	// GUILD STUCK! GUILD STUCK! PLEASE! I BEG YOU!
 	if err != nil {
 		golog.Warnf("Error removing member from guild : %v", err)
-		ws.Send(&socket.Packet{
+		ws.Send(&globals.Packet{
 			Type: "leaveguild",
 			Data: map[string]interface{}{
 				"message": "Error leaving guild",
@@ -39,7 +38,7 @@ func OnLeaveGuild(ws *socket.Client, rawMap map[string]interface{}) {
 		return
 	}
 	delete(globals.Guilds[data.Guild].Clients, userid)
-	ws.Send(&socket.Packet{
+	ws.Send(&globals.Packet{
 		Type: "leaveguild",
 		Data: map[string]interface{}{},
 	})

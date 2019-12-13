@@ -2,8 +2,8 @@ package event
 
 import (
 	"github.com/mitchellh/mapstructure"
+	"harmony-server/globals"
 	"harmony-server/harmonydb"
-	"harmony-server/socket"
 )
 
 type getUsernameData struct {
@@ -11,7 +11,7 @@ type getUsernameData struct {
 	Userid string `mapstructure:"userid"`
 }
 
-func OnGetUser(ws *socket.Client, rawMap map[string]interface{}) {
+func OnGetUser(ws *globals.Client, rawMap map[string]interface{}) {
 	var data getUsernameData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -27,7 +27,7 @@ func OnGetUser(ws *socket.Client, rawMap map[string]interface{}) {
 	if err != nil {
 		return
 	}
-	ws.Send(&socket.Packet{
+	ws.Send(&globals.Packet{
 		Type: "getuser",
 		Data: map[string]interface{}{
 			"userid": data.Userid,
