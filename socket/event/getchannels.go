@@ -5,7 +5,6 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
-	"harmony-server/socket"
 )
 
 type getChannelsData struct {
@@ -13,7 +12,7 @@ type getChannelsData struct {
 	Guild string `mapstructure:"guild"`
 }
 
-func OnGetChannels(ws *socket.Client, rawMap map[string]interface{}) {
+func OnGetChannels(ws *globals.Client, rawMap map[string]interface{}) {
 	var data getChannelsData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -42,7 +41,7 @@ func OnGetChannels(ws *socket.Client, rawMap map[string]interface{}) {
 		}
 		returnChannels[channelid] = channelname
 	}
-	ws.Send(&socket.Packet{
+	ws.Send(&globals.Packet{
 		Type: "getchannels",
 		Data: map[string]interface{}{
 			"channels": returnChannels,

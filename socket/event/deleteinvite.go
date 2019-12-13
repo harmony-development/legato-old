@@ -4,7 +4,6 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
-	"harmony-server/socket"
 )
 
 type deleteInviteData struct {
@@ -13,7 +12,7 @@ type deleteInviteData struct {
 	Invite string `mapstructure:"invite"`
 }
 
-func OnDeleteInvite(ws *socket.Client, rawMap map[string]interface{}) {
+func OnDeleteInvite(ws *globals.Client, rawMap map[string]interface{}) {
 	var data deleteInviteData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -30,7 +29,7 @@ func OnDeleteInvite(ws *socket.Client, rawMap map[string]interface{}) {
 	if err != nil {
 		return
 	}
-	ws.Send(&socket.Packet{
+	ws.Send(&globals.Packet{
 		Type: "deleteinvite",
 		Data: map[string]interface{}{
 			"success": true,

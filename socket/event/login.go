@@ -3,8 +3,8 @@ package event
 import (
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/crypto/bcrypt"
+	"harmony-server/globals"
 	"harmony-server/harmonydb"
-	"harmony-server/socket"
 )
 
 type loginData struct {
@@ -12,7 +12,7 @@ type loginData struct {
 	Password string `mapstructure:"password"`
 }
 
-func OnLogin(ws *socket.Client, rawMap map[string]interface{}) {
+func OnLogin(ws *globals.Client, rawMap map[string]interface{}) {
 	var data loginData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return

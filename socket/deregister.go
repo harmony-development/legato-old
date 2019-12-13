@@ -6,7 +6,7 @@ import (
 	"harmony-server/harmonydb"
 )
 
-func deregister(ws *Client) {
+func deregister(ws *globals.Client) {
 	guildsQuery, err := harmonydb.DBInst.Query("SELECT guildid FROM guildmembers WHERE userid=$1", ws.Userid)
 	if err != nil {
 		golog.Warnf("ERROR deregistering socket! POTENTIAL MEMORY LEAK! %v", err)

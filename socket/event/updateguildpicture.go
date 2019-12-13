@@ -5,7 +5,6 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
-	"harmony-server/socket"
 	"path"
 )
 
@@ -15,7 +14,7 @@ type updateGuildPictureData struct {
 	Picture string `mapstructure:"picture"`
 }
 
-func OnUpdateGuildPicture(ws *socket.Client, rawMap map[string]interface{}) {
+func OnUpdateGuildPicture(ws *globals.Client, rawMap map[string]interface{}) {
 	var data updateGuildPictureData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -33,7 +32,7 @@ func OnUpdateGuildPicture(ws *socket.Client, rawMap map[string]interface{}) {
 	_, err = harmonydb.DBInst.Exec("UPDATE guilds SET picture=$1 WHERE guildid=$2", data.Picture, data.Guild)
 	if err != nil { 
 		golog.Warnf("Error updating picture. %v", err)
-		ws.Send(&socket.Packet{
+		ws.Send(&globals.Packet{
 			Type: "updateguildpicture",
 			Data: map[string]interface{}{
 				"success": false,
@@ -43,7 +42,7 @@ func OnUpdateGuildPicture(ws *socket.Client, rawMap map[string]interface{}) {
 	}
 	go DeleteFromFilestore(path.Base(oldPictureID))
 	for _, client := range globals.Guilds[data.Guild].Clients {
-		client.Send(&socket.Packet{
+		client.Send(&globals.Packet{
 			Type: "updateguildpicture",
 			Data: map[string]interface{}{
 				"guild":   data.Guild,

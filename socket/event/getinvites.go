@@ -5,7 +5,6 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
-	"harmony-server/socket"
 )
 
 type getInvitesData struct {
@@ -13,7 +12,7 @@ type getInvitesData struct {
 	Guild string `mapstructure:"guild"`
 }
 
-func OnGetInvites(ws *socket.Client, rawMap map[string]interface{}) {
+func OnGetInvites(ws *globals.Client, rawMap map[string]interface{}) {
 	var data getInvitesData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -42,7 +41,7 @@ func OnGetInvites(ws *socket.Client, rawMap map[string]interface{}) {
 		}
 		returnInvites[invitecode] = invitecount
 	}
-	ws.Send(&socket.Packet{
+	ws.Send(&globals.Packet{
 		Type: "getinvites",
 		Data: map[string]interface{}{
 			"invites": returnInvites,

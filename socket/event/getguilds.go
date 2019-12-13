@@ -5,7 +5,6 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
-	"harmony-server/socket"
 )
 
 type getGuildsData struct {
@@ -18,7 +17,7 @@ type guildsData struct {
 	IsOwner   bool   `json:"owner"`
 }
 
-func OnGetGuilds(ws *socket.Client, rawMap map[string]interface{}) {
+func OnGetGuilds(ws *globals.Client, rawMap map[string]interface{}) {
 	var data getGuildsData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -52,7 +51,7 @@ func OnGetGuilds(ws *socket.Client, rawMap map[string]interface{}) {
 			globals.Guilds[guildID].Owner = guildOwner
 		} else {
 			globals.Guilds[guildID] = &globals.Guild{
-				Clients: map[string]*socket.Client{
+				Clients: map[string]*globals.Client{
 					userid: ws,
 				},
 			}
@@ -60,7 +59,7 @@ func OnGetGuilds(ws *socket.Client, rawMap map[string]interface{}) {
 		}
 		returnGuilds[guildID] = fetchedGuild
 	}
-	ws.Send(&socket.Packet{
+	ws.Send(&globals.Packet{
 		Type: "getguilds",
 		Data: map[string]interface{}{
 			"guilds": returnGuilds,
