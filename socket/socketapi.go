@@ -14,7 +14,7 @@ var (
 		CheckOrigin:       func(r *http.Request) bool { // we will allow all domains... For now...
 			return true
 		},
-		EnableCompression: false,
+		EnableCompression: true,
 	}
 )
 
@@ -75,6 +75,7 @@ func writer(ws *Client) {
 		err := ws.Connection.WriteMessage(websocket.TextMessage, msg)
 		if err != nil {
 			golog.Warnf("Error writing data to event : %v", err)
+			return
 		}
 	}
 }

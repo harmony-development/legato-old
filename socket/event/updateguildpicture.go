@@ -31,7 +31,7 @@ func OnUpdateGuildPicture(ws *socket.Client, rawMap map[string]interface{}) {
 	var oldPictureID string
 	err := harmonydb.DBInst.QueryRow("SELECT picture FROM guilds WHERE guildid=$1", data.Guild).Scan(&oldPictureID)
 	_, err = harmonydb.DBInst.Exec("UPDATE guilds SET picture=$1 WHERE guildid=$2", data.Picture, data.Guild)
-	if err != nil {
+	if err != nil { 
 		golog.Warnf("Error updating picture. %v", err)
 		ws.Send(&socket.Packet{
 			Type: "updateguildpicture",
