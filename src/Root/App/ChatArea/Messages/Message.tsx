@@ -1,6 +1,5 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { ListItem, ListItemAvatar, Avatar, ListItemText, Typography } from '@material-ui/core';
-import { harmonySocket } from '../../../Root';
 
 interface IProps {
     guild: string;
@@ -18,16 +17,13 @@ const UtcEpochToLocalDate = (time: number) => {
 };
 
 export const Message = (props: IProps) => {
-    useEffect(() => {
-        if (!props.username) {
-            harmonySocket.sendGetUser(props.userid);
-        }
-    }, [props]);
-
     return (
         <ListItem alignItems='flex-start'>
             <ListItemAvatar>
-                <Avatar alt={props.userid} src={props.avatar ? `http://localhost:2288/filestore/${props.avatar}` : undefined} />
+                <Avatar
+                    alt={props.userid}
+                    src={props.avatar ? `http://localhost:2288/filestore/${props.avatar}` : undefined}
+                />
             </ListItemAvatar>
             <ListItemText
                 primary={

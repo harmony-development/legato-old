@@ -29,7 +29,16 @@ import { UserSettingsDialog } from './Dialog/UserSettingsDialog/UserSettingsDial
 export const App = () => {
     const classes = useAppStyles();
     const dispatch = useDispatch();
-    const [connected, channels, invites, selectedGuild, themeDialogOpen, joinDialogOpen, guildSettingsDialogOpen, userSettingsDialogOpen] = useSelector((state: IState) => [
+    const [
+        connected,
+        channels,
+        invites,
+        selectedGuild,
+        themeDialogOpen,
+        joinDialogOpen,
+        guildSettingsDialogOpen,
+        userSettingsDialogOpen
+    ] = useSelector((state: IState) => [
         state.connected,
         state.channels,
         state.invites,
@@ -61,7 +70,11 @@ export const App = () => {
 
     useEffect(() => {
         if (!eventsBound) {
-            if ((harmonySocket.conn.readyState !== WebSocket.OPEN && harmonySocket.conn.readyState !== WebSocket.CONNECTING) || typeof localStorage.getItem('token') !== 'string') {
+            if (
+                (harmonySocket.conn.readyState !== WebSocket.OPEN &&
+                    harmonySocket.conn.readyState !== WebSocket.CONNECTING) ||
+                typeof localStorage.getItem('token') !== 'string'
+            ) {
                 // bounce the user to the login screen if the socket is disconnected or there's no token
                 history.push('/');
                 return;
@@ -84,7 +97,12 @@ export const App = () => {
             });
             harmonySocket.events.addListener('message', (raw: any) => {
                 // prevent stupid API responses
-                if (typeof raw['userid'] === 'string' && typeof raw['createdat'] === 'number' && typeof raw['guild'] === 'string' && typeof raw['message'] === 'string') {
+                if (
+                    typeof raw['userid'] === 'string' &&
+                    typeof raw['createdat'] === 'number' &&
+                    typeof raw['guild'] === 'string' &&
+                    typeof raw['message'] === 'string'
+                ) {
                     dispatch(AddMessage(raw as IMessage));
                 }
             });
@@ -175,8 +193,11 @@ export const App = () => {
                 }
             });
             harmonySocket.events.addListener('getuser', (raw: any) => {
-                console.log(raw);
-                if (typeof raw['userid'] === 'string' && typeof raw['username'] === 'string' && typeof raw['avatar'] === 'string') {
+                if (
+                    typeof raw['userid'] === 'string' &&
+                    typeof raw['username'] === 'string' &&
+                    typeof raw['avatar'] === 'string'
+                ) {
                     dispatch(SetUser(raw['userid'], raw['username'], raw['avatar']));
                 }
             });
