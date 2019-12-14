@@ -35,6 +35,7 @@ export const App = () => {
         channels,
         invites,
         selectedGuild,
+        selectedChannel,
         themeDialogOpen,
         joinDialogOpen,
         guildSettingsDialogOpen,
@@ -44,6 +45,7 @@ export const App = () => {
         state.channels,
         state.invites,
         state.selectedGuild,
+        state.selectedChannel,
         state.themeDialog,
         state.joinGuildDialog,
         state.guildSettingsDialog,
@@ -74,20 +76,29 @@ export const App = () => {
     }, [connected]);
 
     useEffect(() => {
-        if (connected) {
-            dispatch(SetMessages([]));
-            dispatch(SetSelectedChannel(undefined));
-            harmonySocket.getMessages(selectedGuild);
-            harmonySocket.getChannels(selectedGuild);
+        if (selectedGuild) {
+            history.push(`/app/${selectedGuild}/${selectedChannel || ''}`);
+            if (connected) {
+                dispatch(SetMessages([]));
+                dispatch(SetSelectedChannel(undefined));
+                harmonySocket.getMessages(selectedGuild);
+                harmonySocket.getChannels(selectedGuild);
+            }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedGuild]);
+    }, [selectedGuild, history, selectedGuild]);
+
+    useEffect(() => {
+        if (selectedGuild && selectedChannel) {
+            history.push(`/app/${selectedGuild}/${selectedChannel}`);
+        }
+    }, [selectedChannel]);
 
     useEffect(() => {
         if (!eventsBound) {
             if (
-                (harmonySocket.conn.readyState !== WebSocket.OPEN &&
-                    harmonySocket.conn.readyState !== WebSocket.CONNECTING) ||
+                harmonySocket.conn.readyState === WebSocket.CLOSED ||
+                harmonySocket.conn.readyState === WebSocket.CLOSING ||
                 typeof localStorage.getItem('token') !== 'string'
             ) {
                 // bounce the user to the login screen if the socket is disconnected or there's no token
