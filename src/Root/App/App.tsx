@@ -32,6 +32,7 @@ export const App = () => {
     const { selectedguildparam: selectedGuildParam, selectedchannelparam: selectedChannelParam } = useParams();
     const [
         connected,
+        guilds,
         channels,
         invites,
         selectedGuild,
@@ -42,6 +43,7 @@ export const App = () => {
         userSettingsDialogOpen
     ] = useSelector((state: IState) => [
         state.connected,
+        state.guildList,
         state.channels,
         state.invites,
         state.selectedGuild,
@@ -85,11 +87,11 @@ export const App = () => {
                 harmonySocket.getChannels(selectedGuild);
             }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedGuild, history, selectedGuild]);
+    }, [selectedGuild]);
 
     useEffect(() => {
         if (selectedGuild && selectedChannel) {
+            document.title = `Harmony - ${channels[selectedChannel] || 'FOSS Chat Client'}`;
             history.push(`/app/${selectedGuild}/${selectedChannel}`);
         }
     }, [selectedChannel]);
@@ -101,7 +103,7 @@ export const App = () => {
                 harmonySocket.conn.readyState === WebSocket.CLOSING ||
                 typeof localStorage.getItem('token') !== 'string'
             ) {
-                // bounce the user to the login screen if the socket is disconnected or there's no token
+                // send the user to the login screen if the socket is disconnected or there's no token
                 history.push('/');
                 return;
             }
@@ -247,7 +249,7 @@ export const App = () => {
                 harmonySocket.events.removeAllListeners('getusername');
             };
         }
-    }, [history, dispatch, guildSettingsDialogOpen, eventsBound, channels, invites]);
+    }, [channels, invites]);
 
     return (
         <div className={classes.root}>
