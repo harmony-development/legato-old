@@ -20,15 +20,15 @@ export const Messages = () => {
         }
     }, [messages]);
 
-    // TODO : FIX DOUBLE REQUEST
     useEffect(() => {
         const userIDs = [...new Set(messages.map((val) => val.userid))];
         userIDs.forEach((val) => {
             if (!users[val]) {
+                console.log(val);
                 harmonySocket.sendGetUser(val);
             }
         });
-    }, [messages, users]);
+    }, [messages]);
 
     return (
         <List innerRef={messageList}>
