@@ -8,7 +8,7 @@ export const useChatAreaStyles = makeStyles((theme: Theme) => ({
         flexDirection: 'row',
         flexGrow: 1,
         width: '100%',
-        height: '100%'
+        overflow: 'auto'
     },
     guildlist: {
         backgroundColor: theme.palette.type === 'dark' ? theme.palette.grey[900] : theme.palette.grey[200],

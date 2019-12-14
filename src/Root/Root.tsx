@@ -52,7 +52,7 @@ const Root = () => {
                     <Route exact path='/'>
                         <Entry />
                     </Route>
-                    <Route exact path='/app'>
+                    <Route exact path='/app/:selectedguildparam?/:selectedchannelparam?'>
                         <App />
                     </Route>
                     <Route exact path='/invite/:invitecode'>

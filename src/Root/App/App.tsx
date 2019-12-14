@@ -4,7 +4,7 @@ import { ThemeDialog } from './Dialog/ThemeDialog';
 import { useAppStyles } from './AppStyle';
 import { ChatArea } from './ChatArea/ChatArea';
 import { harmonySocket } from '../Root';
-import { useHistory } from 'react-router';
+import { useHistory, useParams } from 'react-router';
 import { IGuildData } from '../../types/socket';
 import { useDispatch, useSelector } from 'react-redux';
 import { Actions, IState, IMessage } from '../../types/redux';
@@ -29,6 +29,7 @@ import { UserSettingsDialog } from './Dialog/UserSettingsDialog/UserSettingsDial
 export const App = () => {
     const classes = useAppStyles();
     const dispatch = useDispatch();
+    const { selectedguildparam: selectedGuildParam, selectedchannelparam: selectedChannelParam } = useParams();
     const [
         connected,
         channels,
@@ -50,6 +51,20 @@ export const App = () => {
     ]);
     const history = useHistory();
     let eventsBound = false;
+
+    useEffect(() => {
+        if (selectedGuildParam) {
+            dispatch(SetSelectedGuild(selectedGuildParam));
+            harmonySocket.events.addListener('open', function() {
+                harmonySocket.getChannels(selectedGuildParam);
+                harmonySocket.getMessages(selectedGuildParam);
+                harmonySocket.events.removeCurrentListener();
+            });
+        }
+        if (selectedChannelParam) {
+            dispatch(SetSelectedChannel(selectedChannelParam));
+        }
+    }, [selectedGuildParam, selectedChannelParam, dispatch]);
 
     // event when the client has connected
     useEffect(() => {
@@ -107,6 +122,7 @@ export const App = () => {
                 }
             });
             harmonySocket.events.addListener('getchannels', (raw: any) => {
+                console.log(raw);
                 if (typeof raw === 'object') {
                     dispatch(SetChannels(raw['channels']));
                 }
