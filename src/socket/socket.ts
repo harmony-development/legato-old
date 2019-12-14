@@ -6,7 +6,7 @@ export default class HarmonySocket {
     events: EventEmitter;
 
     constructor() {
-        this.conn = new WebSocket(`ws://${window.location.hostname}:2288/api/socket`);
+        this.conn = new WebSocket(`ws://${process.env.REACT_APP_HARMONY_SERVER_HOST}/api/socket`);
         this.events = new EventEmitter();
         this.conn.addEventListener('open', () => this.events.emit('open'));
         this.conn.addEventListener('close', () => this.events.emit('close'));
@@ -24,7 +24,7 @@ export default class HarmonySocket {
     }
 
     connect = () => {
-        this.conn = new WebSocket(`ws://${window.location.hostname}:2288/api/socket`);
+        this.conn = new WebSocket(`ws://${process.env.REACT_APP_HARMONY_SERVER_HOST}/api/socket`);
         this.conn.addEventListener('open', () => this.events.emit('open'));
         this.conn.addEventListener('close', () => this.events.emit('close'));
         this.conn.addEventListener('error', () => this.events.emit('error'));

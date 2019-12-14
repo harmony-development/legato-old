@@ -22,7 +22,11 @@ export const Message = (props: IProps) => {
             <ListItemAvatar>
                 <Avatar
                     alt={props.userid}
-                    src={props.avatar ? `http://localhost:2288/filestore/${props.avatar}` : undefined}
+                    src={
+                        props.avatar
+                            ? `http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${props.avatar}`
+                            : undefined
+                    }
                 />
             </ListItemAvatar>
             <ListItemText

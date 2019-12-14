@@ -62,13 +62,17 @@ export const GuildSettings = () => {
                 const guildIconUpload = new FormData();
                 guildIconUpload.append('file', guildIconFile);
                 axios
-                    .post(`http://${window.location.hostname}:2288/api/rest/fileupload`, guildIconUpload, {})
+                    .post(
+                        `http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/api/rest/fileupload`,
+                        guildIconUpload,
+                        {}
+                    )
                     .then((res) => {
                         if (res.data) {
                             const uploadID = res.data;
                             harmonySocket.sendGuildPictureUpdate(
                                 selectedGuild,
-                                `http://${window.location.hostname}:2288/filestore/${uploadID}`
+                                `http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${uploadID}`
                             );
                         }
                     })
@@ -173,9 +177,7 @@ export const GuildSettings = () => {
                                                 <IconButton
                                                     onClick={() => {
                                                         copy(
-                                                            `http://${window.location.hostname}${
-                                                                window.location.port ? ':' + window.location.port : ''
-                                                            }/invite/${key}`
+                                                            `http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/invite/${key}`
                                                         );
                                                         toast.info('Successfully copied to clipboard!');
                                                     }}
