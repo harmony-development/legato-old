@@ -3,6 +3,7 @@ package event
 import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
+	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 )
@@ -18,15 +19,15 @@ func OnUpdateGuildName(ws *globals.Client, rawMap map[string]interface{}) {
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
-	userid := VerifyToken(data.Token)
-	if userid == "" {
+	userid ,err := authentication.VerifyToken(data.Token)
+	if err != nil {
 		deauth(ws)
 		return
 	}
 	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil || globals.Guilds[data.Guild].Owner != userid {
 		return
 	}
-	_, err := harmonydb.DBInst.Exec("UPDATE guilds SET guildname=$1 WHERE guildid=$2", data.Name, data.Guild)
+	_, err = harmonydb.DBInst.Exec("UPDATE guilds SET guildname=$1 WHERE guildid=$2", data.Name, data.Guild)
 	if err != nil {
 		golog.Warnf("Error updating name. %v", err)
 		ws.Send(&globals.Packet{

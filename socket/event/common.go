@@ -52,30 +52,10 @@ func sendToken(ws *globals.Client, id string) {
 	ws.Send(&globals.Packet{
 		Type: "token",
 		Data: map[string]interface{}{
-			"token": tokenString,
+			"token":  tokenString,
 			"userid": id,
 		},
 	})
-}
-
-func VerifyToken(tokenstr string) string {
-	token, err := jwt.Parse(tokenstr, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-
-		return []byte(jwtSecret), nil
-	})
-
-	if err != nil {
-		return ""
-	}
-
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		return claims["id"].(string)
-	} else {
-		return ""
-	}
 }
 
 func registerSocket(guildid string, ws *globals.Client, userid string) {
@@ -90,6 +70,7 @@ func registerSocket(guildid string, ws *globals.Client, userid string) {
 	}
 }
 
+// DeleteFromFilestore deletes a file from the storage
 func DeleteFromFilestore(fileid string) {
 	err := os.Remove(fmt.Sprintf("./filestore/%v", fileid))
 	if err != nil {

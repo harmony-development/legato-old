@@ -3,6 +3,7 @@ package event
 import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
+	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"path"
@@ -19,8 +20,8 @@ func OnUpdateGuildPicture(ws *globals.Client, rawMap map[string]interface{}) {
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
-	userid := VerifyToken(data.Token)
-	if userid == "" {
+	userid ,err := authentication.VerifyToken(data.Token)
+	if err != nil {
 		deauth(ws)
 		return
 	}
@@ -28,7 +29,7 @@ func OnUpdateGuildPicture(ws *globals.Client, rawMap map[string]interface{}) {
 		return
 	}
 	var oldPictureID string
-	err := harmonydb.DBInst.QueryRow("SELECT picture FROM guilds WHERE guildid=$1", data.Guild).Scan(&oldPictureID)
+	err = harmonydb.DBInst.QueryRow("SELECT picture FROM guilds WHERE guildid=$1", data.Guild).Scan(&oldPictureID)
 	_, err = harmonydb.DBInst.Exec("UPDATE guilds SET picture=$1 WHERE guildid=$2", data.Picture, data.Guild)
 	if err != nil { 
 		golog.Warnf("Error updating picture. %v", err)

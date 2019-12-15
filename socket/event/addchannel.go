@@ -4,6 +4,7 @@ import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
 	"github.com/thanhpk/randstr"
+	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 )
@@ -26,8 +27,8 @@ func OnAddChannel(ws *globals.Client, rawMap map[string]interface{}) {
 	if data.Guild == "" || data.Channel == "" {
 		return
 	}
-	userid := VerifyToken(data.Token)
-	if userid == "" {
+	userid, err := authentication.VerifyToken(data.Token)
+	if err != nil {
 		deauth(ws)
 		return
 	}
@@ -35,7 +36,7 @@ func OnAddChannel(ws *globals.Client, rawMap map[string]interface{}) {
 		return
 	}
 	var channelID = randstr.Hex(16)
-	_, err := harmonydb.DBInst.Exec("INSERT INTO channels(channelid, guildid, channelname) VALUES($1, $2, $3)", channelID, data.Guild, data.Channel)
+	_, err = harmonydb.DBInst.Exec("INSERT INTO channels(channelid, guildid, channelname) VALUES($1, $2, $3)", channelID, data.Guild, data.Channel)
 	if err != nil {
 		golog.Warnf("Error creating channel : %v", err)
 		return

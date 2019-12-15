@@ -2,6 +2,7 @@ package event
 
 import (
 	"github.com/mitchellh/mapstructure"
+	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 )
@@ -16,14 +17,14 @@ func OnGetUser(ws *globals.Client, rawMap map[string]interface{}) {
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
-	userid := VerifyToken(data.Token)
-	if userid == "" {
+	_, err := authentication.VerifyToken(data.Token)
+	if err != nil {
 		deauth(ws)
 		return
 	}
 	var username string
 	var avatar string
-	err := harmonydb.DBInst.QueryRow("SELECT username, avatar FROM users WHERE id=$1", data.Userid).Scan(&username, &avatar)
+	err = harmonydb.DBInst.QueryRow("SELECT username, avatar FROM users WHERE id=$1", data.Userid).Scan(&username, &avatar)
 	if err != nil {
 		return
 	}

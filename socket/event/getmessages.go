@@ -3,6 +3,7 @@ package event
 import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
+	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 )
@@ -26,8 +27,8 @@ func OnGetMessages(ws *globals.Client, rawMap map[string]interface{}) {
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
-	userid := VerifyToken(data.Token)
-	if userid == "" { // token is invalid! Get outta here!
+	userid ,err := authentication.VerifyToken(data.Token)
+	if err != nil { // token is invalid! Get outta here!
 		deauth(ws)
 		return
 	}
