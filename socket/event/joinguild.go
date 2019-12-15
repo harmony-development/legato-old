@@ -3,6 +3,7 @@ package event
 import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
+	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 )
@@ -17,9 +18,9 @@ func OnJoinGuild(ws *globals.Client, rawMap map[string]interface{}) {
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
-	userid := VerifyToken(data.Token)
+	userid ,err := authentication.VerifyToken(data.Token)
 	var guildid string
-	err := harmonydb.DBInst.QueryRow("SELECT guildid FROM invites WHERE inviteid=$1", data.InviteCode).Scan(&guildid)
+	err = harmonydb.DBInst.QueryRow("SELECT guildid FROM invites WHERE inviteid=$1", data.InviteCode).Scan(&guildid)
 	if err != nil {
 		ws.Send(&globals.Packet{
 			Type: "joinguild",

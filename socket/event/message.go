@@ -4,6 +4,7 @@ import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
 	"github.com/thanhpk/randstr"
+	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"time"
@@ -21,8 +22,8 @@ func OnMessage(ws *globals.Client, rawMap map[string]interface{}) {
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
-	userid := VerifyToken(data.Token)
-	if userid == "" { // token is invalid! Get outta here!
+	userid ,err := authentication.VerifyToken(data.Token)
+	if err != nil { // token is invalid! Get outta here!
 		deauth(ws)
 		return
 	}
@@ -46,7 +47,7 @@ func OnMessage(ws *globals.Client, rawMap map[string]interface{}) {
 			},
 		})
 	}
-	_, err := harmonydb.DBInst.Exec("INSERT INTO messages(messageid, guildid, channelid, createdat, author, message) VALUES($1, $2, $3, $4, $5, $6)", messageID, data.Guild, data.Channel, time.Now().UTC().Unix(), userid, data.Message)
+	_, err = harmonydb.DBInst.Exec("INSERT INTO messages(messageid, guildid, channelid, createdat, author, message) VALUES($1, $2, $3, $4, $5, $6)", messageID, data.Guild, data.Channel, time.Now().UTC().Unix(), userid, data.Message)
 	if err != nil {
 		golog.Warnf("error saving message to database : %v", err)
 		return
