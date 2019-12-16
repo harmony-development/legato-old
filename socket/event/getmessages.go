@@ -11,6 +11,7 @@ import (
 type GetMessagesData struct {
 	Token string `mapstructure:"token"`
 	Guild string `mapstructure:"guild"`
+	Channel string `mapstructure:"channel"`
 }
 
 type Message struct {
@@ -27,6 +28,10 @@ func OnGetMessages(ws *globals.Client, rawMap map[string]interface{}) {
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
+	if data.Guild == "" || data.Token == "" || data.Channel == "" {
+		golog.Warnf("Error decoding getmessages request")
+		return
+	}
 	userid ,err := authentication.VerifyToken(data.Token)
 	if err != nil { // token is invalid! Get outta here!
 		deauth(ws)
@@ -35,7 +40,7 @@ func OnGetMessages(ws *globals.Client, rawMap map[string]interface{}) {
 	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil {
 		return
 	}
-	res, err := harmonydb.DBInst.Query("SELECT messageid, author, guildid, channelid, createdat, message FROM messages ORDER BY createdat DESC LIMIT 30")
+	res, err := harmonydb.DBInst.Query("SELECT messageid, author, guildid, channelid, createdat, message FROM messages WHERE guildid=$1 ORDER BY createdat DESC LIMIT 30")
 	if err != nil {
 		golog.Warnf("Error getting recent messages : %v", err)
 		return

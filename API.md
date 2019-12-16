@@ -9,8 +9,22 @@ All of the API is structured like this :
 ```
 This applies to all server-bound and client-bound packets.
 
+# Table Of Contents
+- [<h2>Server Bound API</h2>](#Server-Bound-API)
+  - [**Login Event**](#Login-Event)
+  - [**Register Event**](#Register-Event)
+  - [**GetGuilds Event**](#GetGuilds-Event)
+  - [**JoinGuild Event**](#JoinGuild-Event)
+- [<h2>Client Bound API</h2>](#Client-Bound-API)
+  - [**Token Event**](#Token-Event)
+  - [**GetGuilds Event**](#GetGuilds-Event)
+  - [**GetChannels Event**](#GetChannels-Event)
+  - [**Deauth Event**](#Deauth-Event)
+  - [**Message Event**](#Message-Event)
+  - [**GetMessages Event**](#GetMessages-Event)
+
 ## Server Bound API
-* **Login Event**
+* ### Login Event
 	```json
 	{
 		"type": "login",
@@ -20,7 +34,7 @@ This applies to all server-bound and client-bound packets.
 		}
 	}
 	```
-*  **Register Event**
+* ### Register Event
 	```json
 	{
 		"type": "register",
@@ -31,7 +45,7 @@ This applies to all server-bound and client-bound packets.
 		}
 	}
 	```
-* **GetGuilds Event**
+* ### GetGuilds Event
   ```json
 	{
 		"type": "getguilds",
@@ -40,7 +54,7 @@ This applies to all server-bound and client-bound packets.
 		}
 	}
 	```
-* **JoinGuild Event**
+* ### JoinGuild Event
   ```json
   {
     "type": "joinguild",
@@ -52,88 +66,70 @@ This applies to all server-bound and client-bound packets.
   ```
 
 ## Client Bound API
-* **RegisterError**
+* ### Token Event
+  > Returns a token and userid, to use for subsequent requests to the server.
   ```json
-  {
-    "type": "registererror",
-    "data": {
-      "message": string
-    }
+  "data": {
+    "token": string,
+    "userid": string
   }
   ```
-* **LoginError**
+* ### GetGuilds Event
+  > Returns a guildid-guild pair, containing the guild's name, picture, and whether the user is the owner or not
   ```json
-  {
-    "type": "loginerror",
-    "data": {
-      "message": string
-    }
-  }
-    ```
-* **Deauth**
-	```json
-	{
-		"type": "deauth",
-		"data": {
-			"message": "token is missing or invalid"
-		}
-	}
-	```
-* **Token**
-  ```json
-  {
-    "type": "token",
-    "data": {
-      "token": string
-    }
-  }
-  ```
-* **GetGuilds**
-  ```json
-  {
-    "type": "getguilds",
-    "data": {
-      "guilds": {
-        "guildid": {
-          "guildname": string,
-          "picture": string
-        }
+  "data": {
+    "guilds": {
+      "guildid": {
+        "guildname": string,
+        "picture": string,
+        "owner": string
       }
     }
   }
   ```
-* **JoinGuild**
+* ### GetChannels Event
+  > Returns an channelid-channelname pair
   ```json
-  {
-    "type": "joinguild",
-    "data": {
-      "guild": string
+  "data": {
+    "channels": {
+      "guildid": string
     }
+  }
+  ```
+* ### Deauth Event
+  > Returns a request to deauthenticate the client and send em back to the login screen ( comes with a bonus message )
+  ```json
+  "data": {
+    "message": string
   }
   ```
 
-  ```
-* **Message**
+* ### Message Event
+  > Returns the data for a new message being received from the server
   ```json
-  {
-    "type": "message",
-    "data": {
-      "guild": string,
-      "channel": string,
-      "userid": string,
-      "message": string,
-      "messageid": string
-    }
+  "data": {
+    "messageid": string,
+    "createdat": number,
+    "guild": string,
+    "channel": string,
+    "userid": string,
+    "message": string
   }
   ```
-* **GetChannels**
+
+* ### GetMessages Event
+  > Returns an array of the 30 messages in a specific channel
   ```json
-  {
-    "type": "getchannels",
-    "data": {
-      "channels": {
-        "channelid": "channelname"
+  "data": {
+    "messages": [
+      {
+        "messageid": string,
+        "createdat": number,
+        "guild": string,
+        "channel": string,
+        "userid": string,
+        "message": string
       }
-    }
+    ]
   }
   ```
