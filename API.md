@@ -10,18 +10,18 @@ All of the API is structured like this :
 This applies to all server-bound and client-bound packets.
 
 # Table Of Contents
-- [<h2>Server Bound API</h2>](#Server-Bound-API)
-  - [**Login Event**](#Login-Event)
-  - [**Register Event**](#Register-Event)
-  - [**GetGuilds Event**](#GetGuilds-Event)
-  - [**JoinGuild Event**](#JoinGuild-Event)
-- [<h2>Client Bound API</h2>](#Client-Bound-API)
-  - [**Token Event**](#Token-Event)
-  - [**GetGuilds Event**](#GetGuilds-Event)
-  - [**GetChannels Event**](#GetChannels-Event)
-  - [**Deauth Event**](#Deauth-Event)
-  - [**Message Event**](#Message-Event)
-  - [**GetMessages Event**](#GetMessages-Event)
+- [<h2>Server Bound API</h2>](#server-bound-api)
+  - [**Login Event**](#login-event)
+  - [**Register Event**](#register-event)
+  - [**GetGuilds Event**](#getguilds-event)
+  - [**JoinGuild Event**](#joinguild-event)
+- [<h2>Client Bound API</h2>](#client-bound-api)
+  - [**Token Event**](#token-event)
+  - [**GetGuilds Event**](#getguilds-event)
+  - [**GetChannels Event**](#getchannels-event)
+  - [**Deauth Event**](#deauth-event)
+  - [**Message Event**](#message-event)
+  - [**GetMessages Event**](#getmessages-event)
 
 ## Server Bound API
 * ### Login Event
