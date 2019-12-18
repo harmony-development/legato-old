@@ -30,31 +30,33 @@ func OnRegister(ws *globals.Client, rawMap map[string]interface{}) {
 		return
 	}
 	if len(data.Password) < 5 || len(data.Password) > 64 {
-		regErr(ws, "Password must be between 5 and 64 characters long")
+		sendErr(ws, "Password must be between 5 and 64 characters long")
 		return
 	}
 	if len(data.Username) < 5 || len(data.Username) > 48 {
-		regErr(ws, "Username must be between 5 and 48 characters long")
+		sendErr(ws, "Username must be between 5 and 48 characters long")
 		return
 	}
 	if !verifyEmail(data.Email) {
-		regErr(ws, "Invalid email")
+		sendErr(ws, "Invalid email")
 		return
 	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
 	if err != nil {
+		sendErr(ws, "Something went wrong during registration. Please submit again")
 		golog.Warnf("Error hashing password! Reason : %v", err)
 		return
 	}
 	insertQuery, err := harmonydb.DBInst.Prepare("INSERT INTO users (id, email, username, avatar, password) VALUES ($1, $2, $3, $4, $5)")
 	if err != nil {
+		sendErr(ws, "Something went wrong during registration. Please submit again")
 		golog.Errorf("Failed to prepare query. Reason : %v", err)
 		return
 	}
 	userid := randstr.Hex(16)
 	_, err = insertQuery.Exec(userid, data.Email, data.Username, "", string(hash))
 	if err != nil {
-		regErr(ws, "Email already registered")
+		sendErr(ws, "Email already registered")
 		golog.Debugf("Error inserting user. Reason : %v", err)
 		return
 	}

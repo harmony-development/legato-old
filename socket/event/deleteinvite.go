@@ -1,6 +1,7 @@
 package event
 
 import (
+	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
 	"harmony-server/authentication"
 	"harmony-server/globals"
@@ -28,6 +29,8 @@ func OnDeleteInvite(ws *globals.Client, rawMap map[string]interface{}) {
 	}
 	_, err = harmonydb.DBInst.Exec("DELETE FROM invites WHERE inviteid=$1 AND guildid=$2", data.Invite, data.Guild)
 	if err != nil {
+		sendErr(ws, "We weren't able to delete that invite for some reason. You should try again")
+		golog.Warnf("Error deleting invite : %v", err)
 		return
 	}
 	ws.Send(&globals.Packet{

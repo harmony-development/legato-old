@@ -30,6 +30,7 @@ func OnGetGuilds(ws *globals.Client, rawMap map[string]interface{}) {
 	}
 	res, err := harmonydb.DBInst.Query("SELECT guilds.guildid, guilds.guildname, guilds.owner, guilds.picture FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=$1", userid)
 	if err != nil {
+		sendErr(ws, "We weren't able to get a list of guilds for you. Try reloading the page / logging back in")
 		golog.Warnf("Error selecting guilds. Reason : %v", err)
 		return
 	}
@@ -43,6 +44,7 @@ func OnGetGuilds(ws *globals.Client, rawMap map[string]interface{}) {
 			fetchedGuild.IsOwner = true
 		}
 		if err != nil {
+			sendErr(ws, "We weren't able to get a list of guilds for you. Try reloading the page / logging back in")
 			golog.Warnf("Error scanning next row. Reason: %v", err)
 			return
 		}

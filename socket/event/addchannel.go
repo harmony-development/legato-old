@@ -38,6 +38,7 @@ func OnAddChannel(ws *globals.Client, rawMap map[string]interface{}) {
 	var channelID = randstr.Hex(16)
 	_, err = harmonydb.DBInst.Exec("INSERT INTO channels(channelid, guildid, channelname) VALUES($1, $2, $3)", channelID, data.Guild, data.Channel)
 	if err != nil {
+		sendErr(ws, "Hmm the channel couldn't be created. You should try again.")
 		golog.Warnf("Error creating channel : %v", err)
 		return
 	}

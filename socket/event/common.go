@@ -11,18 +11,9 @@ import (
 
 var jwtSecret = os.Getenv("JWT_SECRET")
 
-func regErr(ws *globals.Client, msg string) {
+func sendErr(ws *globals.Client, msg string) {
 	ws.Send(&globals.Packet{
-		Type: "registererror",
-		Data: map[string]interface{}{
-			"message": msg,
-		},
-	})
-}
-
-func loginErr(ws *globals.Client, msg string) {
-	ws.Send(&globals.Packet{
-		Type: "loginerror",
+		Type: "error",
 		Data: map[string]interface{}{
 			"message": msg,
 		},

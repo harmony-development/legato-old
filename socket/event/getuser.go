@@ -15,6 +15,7 @@ type getUsernameData struct {
 func OnGetUser(ws *globals.Client, rawMap map[string]interface{}) {
 	var data getUsernameData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
+		sendErr(ws, "Something's wrong with your request dude")
 		return
 	}
 	_, err := authentication.VerifyToken(data.Token)

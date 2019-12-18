@@ -33,27 +33,25 @@ func OnJoinGuild(ws *globals.Client, rawMap map[string]interface{}) {
 	}
 	joinGuildTransaction, err := harmonydb.DBInst.Begin()
 	if err != nil {
+		sendErr(ws, "We couldn't get you to join that guild. Please try again")
 		golog.Warnf("Error creating joinGuildTransaction : %v", err)
 		return
 	}
 	_, err = joinGuildTransaction.Exec("INSERT INTO guildmembers(userid, guildid) VALUES($1, $2)", userid, guildid)
 	if err != nil {
+		sendErr(ws, "We couldn't get you to join that guild. Please try again")
 		golog.Warn(err)
 		return
 	}
 	_, err = joinGuildTransaction.Exec("UPDATE invites SET invitecount=invitecount+1 WHERE inviteid=$1", data.InviteCode)
 	if err != nil {
+		sendErr(ws, "We couldn't get you to join that guild. Please try again")
 		golog.Warn(err)
 		return
 	}
 	err = joinGuildTransaction.Commit()
 	if err != nil {
-		ws.Send(&globals.Packet{
-			Type: "joinguild",
-			Data: map[string]interface{}{
-				"message": "Error Joining Guild!",
-			},
-		})
+		sendErr(ws, "We couldn't get you to join that guild. Please try again")
 		golog.Warnf("Error adding user to guildmembers : %v", err)
 		return
 	}
