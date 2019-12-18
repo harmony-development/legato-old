@@ -28,6 +28,7 @@ func OnGetChannels(ws *globals.Client, rawMap map[string]interface{}) {
 	}
 	res, err := harmonydb.DBInst.Query("SELECT channelid, channelname FROM channels WHERE guildid=$1", data.Guild)
 	if err != nil {
+		sendErr(ws, "We weren't able to get a list of channels for this guild. You should try again")
 		golog.Warnf("Error selecting channels : %v", err)
 		return
 	}
@@ -37,6 +38,7 @@ func OnGetChannels(ws *globals.Client, rawMap map[string]interface{}) {
 		var channelid, channelname string
 		err = res.Scan(&channelid, &channelname)
 		if err != nil {
+			sendErr(ws, "We weren't able to get a full listing of guild channels. You should try again")
 			golog.Warnf("Error scanning channels : %v", err)
 			return
 		}

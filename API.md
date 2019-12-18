@@ -1,3 +1,4 @@
+
 # Harmony API
 ## Overview
 All of the API is structured like this :
@@ -103,7 +104,13 @@ This applies to all server-bound and client-bound packets.
     "message": string
   }
   ```
-
+* ### Error Event
+	> Returns a general-purpose error message to be displayed to the client
+	```json
+	"data": {
+		"message": string
+	}
+  ```
 * ### Message Event
   > Returns the data for a new message being received from the server
   ```json

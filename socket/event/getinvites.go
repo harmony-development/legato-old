@@ -28,6 +28,7 @@ func OnGetInvites(ws *globals.Client, rawMap map[string]interface{}) {
 	}
 	res, err := harmonydb.DBInst.Query("SElECT inviteid, invitecount FROM invites WHERE guildid=$1 ORDER BY invitecount", data.Guild)
 	if err != nil {
+		sendErr(ws, "We weren't able to get a list of invites for this guild. Please try again")
 		golog.Warnf("Error getting invites : %v", err)
 		return
 	}
@@ -37,6 +38,7 @@ func OnGetInvites(ws *globals.Client, rawMap map[string]interface{}) {
 		var invitecount int
 		err = res.Scan(&invitecode, &invitecount)
 		if err != nil {
+			sendErr(ws, "We weren't able to get a list of invites for this guild. Please try again")
 			golog.Warnf("Error scanning invite codes : %v", err)
 			return
 		}

@@ -27,6 +27,7 @@ func OnCreateGuild(ws *globals.Client, rawMap map[string]interface{}) {
 	guildid := randstr.Hex(16)
 	createGuildTransaction, err := harmonydb.DBInst.Begin()
 	if err != nil {
+		sendErr(ws, "That guild didn't work. Please try again")
 		golog.Warnf("Error beginning createGuildTransaction : %v", err)
 		return
 	}

@@ -26,9 +26,12 @@ type Message struct {
 func OnGetMessages(ws *globals.Client, rawMap map[string]interface{}) {
 	var data GetMessagesData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
+		sendErr(ws, "")
+		sendErr(ws, "Something was wrong with your request. Please try again")
 		return
 	}
 	if data.Guild == "" || data.Token == "" || data.Channel == "" {
+		sendErr(ws, "Something was wrong with your request. Please try again")
 		golog.Warnf("Error decoding getmessages request")
 		return
 	}
@@ -42,6 +45,7 @@ func OnGetMessages(ws *globals.Client, rawMap map[string]interface{}) {
 	}
 	res, err := harmonydb.DBInst.Query("SELECT messageid, author, guildid, channelid, createdat, message FROM messages WHERE guildid=$1 ORDER BY createdat DESC LIMIT 30")
 	if err != nil {
+		sendErr(ws, "We weren't able to get a list of messages. Please try again")
 		golog.Warnf("Error getting recent messages : %v", err)
 		return
 	}
@@ -50,6 +54,7 @@ func OnGetMessages(ws *globals.Client, rawMap map[string]interface{}) {
 		var msg Message
 		err := res.Scan(&msg.Messageid, &msg.Userid, &msg.Guild, &msg.Channel, &msg.Createdat, &msg.Message)
 		if err != nil {
+			sendErr(ws, "We weren't able to get a list of messages. Please try again")
 			golog.Warnf("Error scanning next row getting messages. Reason: %v", err)
 			return
 		}

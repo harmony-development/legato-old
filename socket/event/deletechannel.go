@@ -29,20 +29,24 @@ func OnDeleteChannel(ws *globals.Client, rawMap map[string]interface{}) {
 	}
 	transaction, err := harmonydb.DBInst.Begin()
 	if err != nil {
+		sendErr(ws, "We weren't able to delete that channel for some reason. You should try again")
 		golog.Warnf("Error making channel delete transaction : %v", err)
 		return
 	}
 	_, err = transaction.Exec("DELETE FROM messages WHERE channelid=$1 AND guildid=$2", data.ChannelID, data.Guild)
 	if err != nil {
+		sendErr(ws, "For some reason we couldn't delete the messages in that channel. You should try again")
 		golog.Warnf("Error deleting channel : %v", err)
 		return
 	}
 	_, err = transaction.Exec("DELETE FROM channels WHERE channelid=$1 AND guildid=$2", data.ChannelID, data.Guild)
 	if err != nil {
+		sendErr(ws, "We weren't able to delete that channel for some reason. You should try again")
 		golog.Warnf("Error deleting channel : %v", err)
 		return
 	}
 	if err = transaction.Commit(); err != nil {
+		sendErr(ws, "We weren't able to delete that channel for some reason. You should try again")
 		golog.Warnf("Error deleting channel : %v", err)
 		return
 	}

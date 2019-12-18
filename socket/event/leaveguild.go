@@ -30,12 +30,7 @@ func OnLeaveGuild(ws *globals.Client, rawMap map[string]interface{}) {
 	// GUILD STUCK! GUILD STUCK! PLEASE! I BEG YOU!
 	if err != nil {
 		golog.Warnf("Error removing member from guild : %v", err)
-		ws.Send(&globals.Packet{
-			Type: "leaveguild",
-			Data: map[string]interface{}{
-				"message": "Error leaving guild",
-			},
-		})
+		sendErr(ws, "Uh oh. Seems like you couldn't leave the guild. Please try again. If this keeps happening, please contact administration")
 		return
 	}
 	delete(globals.Guilds[data.Guild].Clients, userid)
