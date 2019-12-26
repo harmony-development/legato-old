@@ -3,6 +3,7 @@ package event
 import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
+	"golang.org/x/time/rate"
 	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
@@ -13,7 +14,7 @@ type getChannelsData struct {
 	Guild string `mapstructure:"guild"`
 }
 
-func OnGetChannels(ws *globals.Client, rawMap map[string]interface{}) {
+func OnGetChannels(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
 	var data getChannelsData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -24,6 +25,10 @@ func OnGetChannels(ws *globals.Client, rawMap map[string]interface{}) {
 		return
 	}
 	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil {
+		return
+	}
+	if !limiter.Allow() {
+		sendErr(ws, "You're getting channel listings too fast, try again soon")
 		return
 	}
 	res, err := harmonydb.DBInst.Query("SELECT channelid, channelname FROM channels WHERE guildid=$1", data.Guild)

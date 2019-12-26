@@ -5,6 +5,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/thanhpk/randstr"
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/time/rate"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"regexp"
@@ -23,7 +24,7 @@ func verifyEmail(email string) bool {
 	return emailMatch.MatchString(email)
 }
 
-func OnRegister(ws *globals.Client, rawMap map[string]interface{}) {
+func OnRegister(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
 	var data registerData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		golog.Warnf("Error decoding register data : %v", err)
@@ -39,6 +40,10 @@ func OnRegister(ws *globals.Client, rawMap map[string]interface{}) {
 	}
 	if !verifyEmail(data.Email) {
 		sendErr(ws, "Invalid email")
+		return
+	}
+	if !limiter.Allow() {
+		sendErr(ws, "You're registering too fast. Try again in a few minutes")
 		return
 	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)

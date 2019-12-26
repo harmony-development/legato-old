@@ -11,12 +11,10 @@ import (
 
 // limit adds a ratelimit to an API path
 // event is the event handler, duration is the time between requests, and burst is the amount of requests allowed to be done in an instant
-func limit(event globals.Event, duration time.Duration, burst int) globals.Event {
+func limit(event func(ws *globals.Client, data map[string]interface{}, limiter *rate.Limiter), duration time.Duration, burst int) globals.Event {
 	limiter := rate.NewLimiter(rate.Every(duration), burst)
 	return func(ws *globals.Client, data map[string]interface{}) {
-		if limiter.Allow() {
-			event(ws, data)
-		}
+		event(ws, data, limiter)
 	}
 }
 

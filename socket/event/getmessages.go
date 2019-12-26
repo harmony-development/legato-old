@@ -3,6 +3,7 @@ package event
 import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
+	"golang.org/x/time/rate"
 	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
@@ -23,7 +24,7 @@ type Message struct {
 	Messageid string `json:"messageid"`
 }
 
-func OnGetMessages(ws *globals.Client, rawMap map[string]interface{}) {
+func OnGetMessages(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
 	var data GetMessagesData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		sendErr(ws, "")
