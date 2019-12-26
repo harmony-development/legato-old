@@ -1,5 +1,5 @@
 import { Actions, IMessage, IChannels } from '../types/redux';
-import { IGuildData } from '../types/socket';
+import { IGuildsList } from '../types/socket';
 
 /**
  * A function that sets the connected state to a value
@@ -59,7 +59,7 @@ export function SetChannels(payload: IChannels) {
     };
 }
 
-export function SetGuilds(payload: IGuildData[]) {
+export function SetGuilds(payload: IGuildsList) {
     return {
         type: Actions.SET_GUILDS,
         payload

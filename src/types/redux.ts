@@ -172,7 +172,7 @@ export interface IState {
     selectedGuild: string;
     messages: IMessage[];
     channels: {
-        [key: string]: string;
+        [channelid: string]: string;
     };
     selectedChannel: string | undefined;
     joinGuildDialog: boolean;
