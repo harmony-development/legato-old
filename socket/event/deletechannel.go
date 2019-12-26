@@ -3,6 +3,7 @@ package event
 import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
+	"golang.org/x/time/rate"
 	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
@@ -14,7 +15,7 @@ type deleteChannelData struct {
 	ChannelID   string `mapstructure:"channel"`
 }
 
-func OnDeleteChannel(ws *globals.Client, rawMap map[string]interface{}) {
+func OnDeleteChannel(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
 	var data deleteChannelData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -25,6 +26,10 @@ func OnDeleteChannel(ws *globals.Client, rawMap map[string]interface{}) {
 		return
 	}
 	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil || globals.Guilds[data.Guild].Owner != userid {
+		return
+	}
+	if !limiter.Allow() {
+		sendErr(ws, "You're deleting a lot of channels! Try again later!")
 		return
 	}
 	transaction, err := harmonydb.DBInst.Begin()

@@ -2,6 +2,7 @@ package event
 
 import (
 	"github.com/mitchellh/mapstructure"
+	"golang.org/x/time/rate"
 	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
@@ -12,7 +13,7 @@ type getUsernameData struct {
 	Userid string `mapstructure:"userid"`
 }
 
-func OnGetUser(ws *globals.Client, rawMap map[string]interface{}) {
+func OnGetUser(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
 	var data getUsernameData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		sendErr(ws, "Something's wrong with your request dude")

@@ -3,6 +3,7 @@ package event
 import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
+	"golang.org/x/time/rate"
 	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
@@ -15,7 +16,7 @@ type updateGuildPictureData struct {
 	Picture string `mapstructure:"picture"`
 }
 
-func OnUpdateGuildPicture(ws *globals.Client, rawMap map[string]interface{}) {
+func OnUpdateGuildPicture(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
 	var data updateGuildPictureData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -26,6 +27,10 @@ func OnUpdateGuildPicture(ws *globals.Client, rawMap map[string]interface{}) {
 		return
 	}
 	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil || globals.Guilds[data.Guild].Owner != userid {
+		return
+	}
+	if !limiter.Allow() {
+		sendErr(ws, "You're updating the picture a bit too fast... try again in a few seconds")
 		return
 	}
 	var oldPictureID string

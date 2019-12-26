@@ -4,6 +4,7 @@ import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
 	"github.com/thanhpk/randstr"
+	"golang.org/x/time/rate"
 	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
@@ -17,7 +18,7 @@ type messageData struct {
 	Message string `mapstructure:"message"`
 }
 
-func OnMessage(ws *globals.Client, rawMap map[string]interface{}) {
+func OnMessage(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
 	var data messageData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return

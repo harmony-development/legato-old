@@ -4,6 +4,7 @@ import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
 	"github.com/thanhpk/randstr"
+	"golang.org/x/time/rate"
 	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
@@ -14,7 +15,7 @@ type createInviteData struct {
 	Guild string `mapstructure:"guild"`
 }
 
-func OnCreateInvite(ws *globals.Client, rawMap map[string]interface{}) {
+func OnCreateInvite(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
 	var data createInviteData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -25,6 +26,10 @@ func OnCreateInvite(ws *globals.Client, rawMap map[string]interface{}) {
 		return
 	}
 	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil || globals.Guilds[data.Guild].Owner != userid {
+		return
+	}
+	if !limiter.Allow() {
+		sendErr(ws, "That's quite a lot of invites... Try again in a few secs")
 		return
 	}
 	var inviteID = randstr.Hex(5)

@@ -4,6 +4,7 @@ import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
 	"github.com/thanhpk/randstr"
+	"golang.org/x/time/rate"
 	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
@@ -15,7 +16,7 @@ type addChannelData struct {
 	Channel string `mapstructure:"channel"`
 }
 
-func OnAddChannel(ws *globals.Client, rawMap map[string]interface{}) {
+func OnAddChannel(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
 	var data addChannelData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -33,6 +34,10 @@ func OnAddChannel(ws *globals.Client, rawMap map[string]interface{}) {
 		return
 	}
 	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil || globals.Guilds[data.Guild].Owner != userid {
+		return
+	}
+	if !limiter.Allow() {
+		sendErr(ws, "Woah, you're doing that a bit too fast! Try to relax and try again later")
 		return
 	}
 	var channelID = randstr.Hex(16)

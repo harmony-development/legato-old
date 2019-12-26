@@ -3,6 +3,7 @@ package event
 import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
+	"golang.org/x/time/rate"
 	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
@@ -13,7 +14,7 @@ type joinGuildData struct {
 	Token      string `mapstructure:"token"`
 }
 
-func OnJoinGuild(ws *globals.Client, rawMap map[string]interface{}) {
+func OnJoinGuild(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
 	var data joinGuildData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return

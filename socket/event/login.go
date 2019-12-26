@@ -3,6 +3,7 @@ package event
 import (
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/time/rate"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 )
@@ -12,13 +13,17 @@ type loginData struct {
 	Password string `mapstructure:"password"`
 }
 
-func OnLogin(ws *globals.Client, rawMap map[string]interface{}) {
+func OnLogin(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
 	var data loginData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
 	if data.Email == "" || data.Password == "" {
 		sendErr(ws, "You need both an email and password to login")
+		return
+	}
+	if !limiter.Allow() {
+		sendErr(ws, "You're logging in too fast. Try again in a few minutes")
 		return
 	}
 	var passwd string

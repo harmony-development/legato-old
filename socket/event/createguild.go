@@ -4,6 +4,7 @@ import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
 	"github.com/thanhpk/randstr"
+	"golang.org/x/time/rate"
 	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
@@ -14,7 +15,7 @@ type createGuildData struct {
 	Guild string `mapstructure:"guild"`
 }
 
-func OnCreateGuild(ws *globals.Client, rawMap map[string]interface{}) {
+func OnCreateGuild(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
 	var data createGuildData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -22,6 +23,10 @@ func OnCreateGuild(ws *globals.Client, rawMap map[string]interface{}) {
 	userid, err := authentication.VerifyToken(data.Token)
 	if err != nil {
 		deauth(ws)
+		return
+	}
+	if !limiter.Allow() {
+		sendErr(ws, "That's a lot of guilds created! Please relax and try again later")
 		return
 	}
 	guildid := randstr.Hex(16)

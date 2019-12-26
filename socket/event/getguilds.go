@@ -3,6 +3,7 @@ package event
 import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
+	"golang.org/x/time/rate"
 	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
@@ -18,7 +19,7 @@ type guildsData struct {
 	IsOwner   bool   `json:"owner"`
 }
 
-func OnGetGuilds(ws *globals.Client, rawMap map[string]interface{}) {
+func OnGetGuilds(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
 	var data getGuildsData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -26,6 +27,10 @@ func OnGetGuilds(ws *globals.Client, rawMap map[string]interface{}) {
 	userid ,err := authentication.VerifyToken(data.Token)
 	if err != nil {
 		deauth(ws)
+		return
+	}
+	if !limiter.Allow() {
+		sendErr(ws, "You're getting the guilds list a lot, please try again in a sec")
 		return
 	}
 	res, err := harmonydb.DBInst.Query("SELECT guilds.guildid, guilds.guildname, guilds.owner, guilds.picture FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=$1", userid)
