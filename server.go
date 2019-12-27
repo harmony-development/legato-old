@@ -21,7 +21,7 @@ func limit(event func(ws *globals.Client, data map[string]interface{}, limiter *
 func handleSocket(w http.ResponseWriter, r *http.Request) {
 	ws := socket.NewSocket(w, r)
 	ws.Bind("login", limit(event.OnLogin, 10 * time.Second, 1))
-	ws.Bind("register", limit(event.OnRegister, 10 * time.Minute, 1))
+	ws.Bind("register", limit(event.OnRegister, 1 * time.Hour, 1))
 	ws.Bind("getguilds", limit(event.OnGetGuilds, 500 * time.Millisecond, 10))
 	ws.Bind("message", limit(event.OnMessage, 100 * time.Millisecond, 10))
 	ws.Bind("getmessages", limit(event.OnGetMessages, 100 * time.Millisecond, 5))

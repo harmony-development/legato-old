@@ -19,6 +19,8 @@ func deregister(ws *globals.Client) {
 			golog.Warnf("Error scanning guilds : %v", err)
 			return
 		}
-		delete(globals.Guilds[guildID].Clients, ws.Userid)
+		if globals.Guilds[guildID].Clients[ws.Userid] != nil {
+			delete(globals.Guilds[guildID].Clients, ws.Userid)
+		}
 	}
 }

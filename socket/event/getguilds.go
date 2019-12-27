@@ -20,6 +20,7 @@ type guildsData struct {
 }
 
 func OnGetGuilds(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
+	golog.Debugf("Getting Guilds")
 	var data getGuildsData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return

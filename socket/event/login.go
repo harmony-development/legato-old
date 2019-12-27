@@ -22,10 +22,6 @@ func OnLogin(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Li
 		sendErr(ws, "You need both an email and password to login")
 		return
 	}
-	if !limiter.Allow() {
-		sendErr(ws, "You're logging in too fast. Try again in a few minutes")
-		return
-	}
 	var passwd string
 	var userid string
 	err := harmonydb.DBInst.QueryRow("SELECT password, id from users WHERE email=$1", data.Email).Scan(&passwd, &userid)
@@ -35,7 +31,11 @@ func OnLogin(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Li
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(passwd), []byte(data.Password))
 	if err != nil {
-		sendErr(ws, "Something went wrong while logging in. Please try again")
+		sendErr(ws, "Invalid email or password")
+		return
+	}
+	if !limiter.Allow() {
+		sendErr(ws, "You're logging in too fast. Try again in a few seconds")
 		return
 	}
 	ws.Userid = userid
