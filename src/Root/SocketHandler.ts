@@ -149,18 +149,23 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
                 toast.error(raw['message']);
             }
         });
-        socket.events.addListener('open', () => {
-            toast.success('You have reconnected to the server');
-            socket.getGuilds();
-            firstDisconnect.current = true;
-        });
         socket.events.addListener('close', () => {
             if (firstDisconnect.current) {
                 firstDisconnect.current = false;
                 toast.error('You have lost connection to the server');
             }
         });
+        socket.events.addListener('open', () => {
+            if (!firstDisconnect.current) {
+                toast.success('You have reconnected to the server');
+            }
+            socket.getGuilds();
+            firstDisconnect.current = true;
+        });
         console.log('%cSocket Events Bound', 'font-size: x-large');
+        if (socket.conn.readyState === WebSocket.OPEN) {
+            socket.getGuilds();
+        }
         return () => {
             socket.events.removeAllListeners('getguilds');
             socket.events.removeAllListeners('getmessages');

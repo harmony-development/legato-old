@@ -6,8 +6,7 @@ import { ChatArea } from './ChatArea/ChatArea';
 import { harmonySocket } from '../Root';
 import { useHistory, useParams } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
-import { Actions, IState, IMessage } from '../../types/redux';
-import { toast } from 'react-toastify';
+import { IState } from '../../types/redux';
 import { JoinGuild } from './Dialog/JoinGuildDialog/JoinGuild';
 import { GuildSettings } from './Dialog/GuildSettingsDialog/GuildSettings';
 import { SetMessages, SetSelectedChannel, SetSelectedGuild } from '../../redux/Dispatches';
@@ -20,9 +19,7 @@ export const App = () => {
     const { selectedguildparam: selectedGuildParam, selectedchannelparam: selectedChannelParam } = useParams();
     const [
         connected,
-        guilds,
         channels,
-        invites,
         currentGuild,
         selectedChannel,
         themeDialogOpen,
@@ -31,9 +28,7 @@ export const App = () => {
         userSettingsDialogOpen
     ] = useSelector((state: IState) => [
         state.connected,
-        state.guildList,
         state.channels,
-        state.invites,
         state.selectedGuild,
         state.selectedChannel,
         state.themeDialog,
@@ -53,6 +48,12 @@ export const App = () => {
     useEffect(() => {
         if (selectedGuildParam) {
             dispatch(SetSelectedGuild(selectedGuildParam));
+            if (!selectedChannelParam) {
+                harmonySocket.events.addListener('open', () => {
+                    harmonySocket.getChannels(selectedGuildParam);
+                    harmonySocket.events.removeCurrentListener();
+                });
+            }
         }
     }, [selectedGuildParam]);
 
@@ -62,7 +63,6 @@ export const App = () => {
             if (connected) {
                 dispatch(SetMessages([]));
                 dispatch(SetSelectedChannel(undefined));
-                harmonySocket.getMessages(currentGuild);
                 harmonySocket.getChannels(currentGuild);
             }
         }
