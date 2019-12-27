@@ -11,7 +11,7 @@ const appState: IState = {
     guildList: {},
     themeDialog: false,
     connected: false,
-    selectedGuild: '',
+    currentGuild: '',
     messages: [],
     invites: {},
     channels: {},
@@ -70,10 +70,10 @@ export default function AppReducer(state = appState, action: Action): IState {
                 guildList: action.payload
             };
         }
-        case Actions.SET_SELECTED_GUILD: {
+        case Actions.SET_CURRENT_GUILD: {
             return {
                 ...state,
-                selectedGuild: action.payload
+                currentGuild: action.payload
             };
         }
         case Actions.ADD_MESSAGE: {

@@ -21,7 +21,7 @@ export const GuildIcon = (props: IProps) => {
 
     const onClick = () => {
         dispatch({
-            type: Actions.SET_SELECTED_GUILD,
+            type: Actions.SET_CURRENT_GUILD,
             payload: props.guildid
         });
     };

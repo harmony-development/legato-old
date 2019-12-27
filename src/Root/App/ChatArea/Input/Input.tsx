@@ -8,7 +8,7 @@ export const Input = () => {
     const [connected, inputStyle, guildID, channelID, focus] = useSelector((state: IState) => [
         state.connected,
         state.theme.inputStyle,
-        state.selectedGuild,
+        state.currentGuild,
         state.selectedChannel,
         state.chatInputFocus
     ]);

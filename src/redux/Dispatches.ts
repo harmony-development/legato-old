@@ -45,9 +45,9 @@ export function SetSelectedChannel(payload: string | undefined) {
  * A function that sets the selected guild. Used for the guild list
  * @param payload The guild ID to set the selection to
  */
-export function SetSelectedGuild(payload: string | undefined) {
+export function SetCurrentGuild(payload: string | undefined) {
     return {
-        type: Actions.SET_SELECTED_GUILD,
+        type: Actions.SET_CURRENT_GUILD,
         payload
     };
 }

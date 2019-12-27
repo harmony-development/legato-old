@@ -15,7 +15,7 @@ export enum Actions {
     SET_CONNECTED,
 
     SET_GUILDS,
-    SET_SELECTED_GUILD,
+    SET_CURRENT_GUILD,
     SET_CHANNELS,
     SET_SELECTED_CHANNEL,
     SET_GUILD_PICTURE,
@@ -88,8 +88,8 @@ export interface ISetGuilds {
     };
 }
 
-export interface ISetSelectedGuild {
-    type: Actions.SET_SELECTED_GUILD;
+export interface ISetCurrentGuild {
+    type: Actions.SET_CURRENT_GUILD;
     payload: string;
 }
 
@@ -169,7 +169,7 @@ export interface IState {
     guildList: {
         [key: string]: IGuild;
     };
-    selectedGuild: string;
+    currentGuild: string;
     messages: IMessage[];
     channels: {
         [channelid: string]: string;
@@ -197,7 +197,7 @@ export type Action =
     | IChangeSecondary
     | ISetConnected
     | ISetGuilds
-    | ISetSelectedGuild
+    | ISetCurrentGuild
     | IAddMessage
     | ISetMessages
     | ISetInputStyle

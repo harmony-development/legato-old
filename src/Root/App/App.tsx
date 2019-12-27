@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { IState } from '../../types/redux';
 import { JoinGuild } from './Dialog/JoinGuildDialog/JoinGuild';
 import { GuildSettings } from './Dialog/GuildSettingsDialog/GuildSettings';
-import { SetMessages, SetSelectedChannel, SetSelectedGuild } from '../../redux/Dispatches';
+import { SetMessages, SetSelectedChannel, SetCurrentGuild } from '../../redux/Dispatches';
 import { UserSettingsDialog } from './Dialog/UserSettingsDialog/UserSettingsDialog';
 import { useSocketHandler } from '../SocketHandler';
 
@@ -29,7 +29,7 @@ export const App = () => {
     ] = useSelector((state: IState) => [
         state.connected,
         state.channels,
-        state.selectedGuild,
+        state.currentGuild,
         state.selectedChannel,
         state.themeDialog,
         state.joinGuildDialog,
@@ -47,7 +47,7 @@ export const App = () => {
 
     useEffect(() => {
         if (selectedGuildParam) {
-            dispatch(SetSelectedGuild(selectedGuildParam));
+            dispatch(SetCurrentGuild(selectedGuildParam));
             if (!selectedChannelParam) {
                 harmonySocket.events.addListener('open', () => {
                     harmonySocket.getChannels(selectedGuildParam);

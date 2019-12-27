@@ -30,9 +30,9 @@ import { toast } from 'react-toastify';
 import { harmonySocket } from '../../../Root';
 
 export const GuildSettings = () => {
-    const [open, selectedGuild, inputStyle, guilds, invites] = useSelector((state: IState) => [
+    const [open, currentGuild, inputStyle, guilds, invites] = useSelector((state: IState) => [
         state.guildSettingsDialog,
-        state.selectedGuild,
+        state.currentGuild,
         state.theme.inputStyle,
         state.guildList,
         state.invites
@@ -40,25 +40,25 @@ export const GuildSettings = () => {
     const dispatch = useDispatch();
     const guildIconUpload = useRef<HTMLInputElement | null>(null);
     const [guildName, setGuildName] = useState<string | undefined>(
-        guilds[selectedGuild] ? guilds[selectedGuild].guildname : undefined
+        guilds[currentGuild] ? guilds[currentGuild].guildname : undefined
     );
     const [guildIconFile, setGuildIconFile] = useState<File | null>(null);
     const [guildIcon, setGuildIcon] = useState<string | undefined>(
-        guilds[selectedGuild] ? guilds[selectedGuild].picture : undefined
+        guilds[currentGuild] ? guilds[currentGuild].picture : undefined
     );
     const classes = useGuildSettingsStyle();
 
     const deleteInviteLink = (invite: string) => {
-        harmonySocket.sendDeleteInvite(invite, selectedGuild);
+        harmonySocket.sendDeleteInvite(invite, currentGuild);
     };
 
     const createInviteLink = () => {
-        harmonySocket.sendCreateInvite(selectedGuild);
+        harmonySocket.sendCreateInvite(currentGuild);
     };
 
     const onSaveChanges = () => {
-        if (guilds[selectedGuild]) {
-            if (guildIcon !== guilds[selectedGuild].picture && guildIconFile) {
+        if (guilds[currentGuild]) {
+            if (guildIcon !== guilds[currentGuild].picture && guildIconFile) {
                 const guildIconUpload = new FormData();
                 guildIconUpload.append('file', guildIconFile);
                 axios
@@ -71,7 +71,7 @@ export const GuildSettings = () => {
                         if (res.data) {
                             const uploadID = res.data;
                             harmonySocket.sendGuildPictureUpdate(
-                                selectedGuild,
+                                currentGuild,
                                 `http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${uploadID}`
                             );
                         }
@@ -80,8 +80,8 @@ export const GuildSettings = () => {
                         toast.error('Failed to update guild icon');
                     });
             }
-            if (guilds[selectedGuild].guildname !== guildName && guildName) {
-                harmonySocket.sendGuildNameUpdate(selectedGuild, guildName);
+            if (guilds[currentGuild].guildname !== guildName && guildName) {
+                harmonySocket.sendGuildNameUpdate(currentGuild, guildName);
             }
         }
     };

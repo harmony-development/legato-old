@@ -7,7 +7,7 @@ import { IGuildsList } from '../types/socket';
 import {
     SetMessages,
     SetSelectedChannel,
-    SetSelectedGuild,
+    SetCurrentGuild,
     SetChannels,
     SetGuilds,
     AddMessage,
@@ -20,7 +20,7 @@ import { IMessage, Actions, IState } from '../types/redux';
 
 export function useSocketHandler(socket: HarmonySocket, history: h.History<any>) {
     const dispatch = useDispatch();
-    const { selectedGuild, channels, invites } = useSelector((state: IState) => state);
+    const { currentGuild, channels, invites } = useSelector((state: IState) => state);
     let firstDisconnect = useRef(true);
 
     useEffect(() => {
@@ -31,7 +31,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
                 if (Object.keys(guildsList).length === 0) {
                     dispatch(SetMessages([]));
                     dispatch(SetSelectedChannel(undefined));
-                    dispatch(SetSelectedGuild(undefined));
+                    dispatch(SetCurrentGuild(undefined));
                     dispatch(SetChannels({}));
                 }
                 dispatch(SetGuilds(guildsList));
@@ -88,7 +88,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
                 typeof raw['guild'] === 'string' &&
                 typeof raw['channelname'] === 'string' &&
                 raw['channelid'] === 'string' &&
-                raw['guild'] === selectedGuild
+                raw['guild'] === currentGuild
             ) {
                 dispatch(
                     SetChannels({

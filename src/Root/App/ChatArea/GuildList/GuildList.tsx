@@ -8,7 +8,7 @@ import { ButtonBase, Tooltip } from '@material-ui/core';
 
 export const GuildList = () => {
     const classes = useGuildListStyle();
-    const [guildList, selectedGuild] = useSelector((state: IState) => [state.guildList, state.selectedGuild]);
+    const [guildList, selectedGuild] = useSelector((state: IState) => [state.guildList, state.currentGuild]);
     const dispatch = useDispatch();
 
     return (

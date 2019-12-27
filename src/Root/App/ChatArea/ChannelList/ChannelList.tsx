@@ -18,15 +18,15 @@ interface IChannelProps {
 }
 
 const Channel = (props: IChannelProps) => {
-    const [selectedGuild, selectedChannel, guildsList] = useSelector((state: IState) => [
-        state.selectedGuild,
+    const [currentGuild, selectedChannel, guildsList] = useSelector((state: IState) => [
+        state.currentGuild,
         state.selectedChannel,
         state.guildList
     ]);
     const classes = useChannelListStyle();
 
     const handleDelete = () => {
-        harmonySocket.sendDeleteChannel(selectedGuild, props.channelid);
+        harmonySocket.sendDeleteChannel(currentGuild, props.channelid);
     };
 
     return (
@@ -41,7 +41,7 @@ const Channel = (props: IChannelProps) => {
                     <ListItemText secondary={`#${props.channelname}`} />
                 </ListItem>
             </ContextMenuTrigger>
-            {guildsList[selectedGuild] && guildsList[selectedGuild].owner ? (
+            {guildsList[currentGuild] && guildsList[currentGuild].owner ? (
                 <ContextMenu id={props.channelid}>
                     <List>
                         <ListItem button onClick={handleDelete}>
@@ -57,9 +57,9 @@ const Channel = (props: IChannelProps) => {
 };
 
 export const ChannelList = () => {
-    const [channels, selectedGuild, guildsList] = useSelector((state: IState) => [
+    const [channels, currentGuild, guildsList] = useSelector((state: IState) => [
         state.channels,
-        state.selectedGuild,
+        state.currentGuild,
         state.guildList
     ]);
     const [actionsExpanded, setActionsExpanded] = useState<boolean>(false);
@@ -69,7 +69,7 @@ export const ChannelList = () => {
     const classes = useChannelListStyle();
 
     const leaveGuild = () => {
-        harmonySocket.leaveGuild(selectedGuild);
+        harmonySocket.leaveGuild(currentGuild);
     };
 
     const setSelectedChannel = (value: string) => {
@@ -77,7 +77,7 @@ export const ChannelList = () => {
     };
 
     const toggleGuildSettings = () => {
-        harmonySocket.sendGetInvites(selectedGuild);
+        harmonySocket.sendGetInvites(currentGuild);
         dispatch(ToggleGuildSettingsDialog());
     };
 
@@ -87,7 +87,7 @@ export const ChannelList = () => {
 
     const handleChannelNameFinish = (ev: React.KeyboardEvent<HTMLInputElement>) => {
         if (ev.key === 'Enter' && addChannelInput.current) {
-            harmonySocket.sendAddChannel(selectedGuild, addChannelInput.current.value);
+            harmonySocket.sendAddChannel(currentGuild, addChannelInput.current.value);
             setAddingChannel(false);
         }
     };
@@ -95,7 +95,7 @@ export const ChannelList = () => {
     return (
         <div>
             <List style={{ padding: 0 }}>
-                {selectedGuild ? (
+                {currentGuild ? (
                     <>
                         <ListItem button onClick={() => setActionsExpanded(!actionsExpanded)}>
                             <ListItemText primary='Guild Options' />
@@ -103,7 +103,7 @@ export const ChannelList = () => {
                         </ListItem>
                         <Collapse in={actionsExpanded} timeout='auto' unmountOnExit>
                             <List component='div' disablePadding>
-                                {guildsList[selectedGuild] && guildsList[selectedGuild].owner ? (
+                                {guildsList[currentGuild] && guildsList[currentGuild].owner ? (
                                     <>
                                         <ListItem button className={classes.nested} onClick={toggleGuildSettings}>
                                             <ListItemIcon>
@@ -153,7 +153,7 @@ export const ChannelList = () => {
                         undefined
                     )}
                 </div>
-                {selectedGuild && guildsList[selectedGuild] && guildsList[selectedGuild].owner ? (
+                {currentGuild && guildsList[currentGuild] && guildsList[currentGuild].owner ? (
                     <Tooltip title='Create Channel'>
                         <ListItem button onClick={addChannelButtonClicked}>
                             <ListItemText style={{ textAlign: 'center' }} primary='+' />
