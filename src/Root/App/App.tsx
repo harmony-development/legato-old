@@ -48,23 +48,15 @@ export const App = () => {
     useEffect(() => {
         if (selectedGuildParam) {
             dispatch(SetCurrentGuild(selectedGuildParam));
-            if (!selectedChannelParam) {
-                harmonySocket.events.addListener('open', () => {
-                    harmonySocket.getChannels(selectedGuildParam);
-                    harmonySocket.events.removeCurrentListener();
-                });
-            }
         }
     }, [selectedGuildParam]);
 
     useEffect(() => {
         if (currentGuild) {
             history.push(`/app/${currentGuild}/${selectedChannel || ''}`);
-            if (connected) {
-                dispatch(SetMessages([]));
-                dispatch(SetSelectedChannel(undefined));
-                harmonySocket.getChannels(currentGuild);
-            }
+            dispatch(SetMessages([]));
+            dispatch(SetSelectedChannel(undefined));
+            harmonySocket.exec(() => harmonySocket.getChannels(currentGuild));
         }
     }, [currentGuild]);
 

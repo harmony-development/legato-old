@@ -8,7 +8,7 @@ import { ButtonBase, Tooltip } from '@material-ui/core';
 
 export const GuildList = () => {
     const classes = useGuildListStyle();
-    const [guildList, selectedGuild] = useSelector((state: IState) => [state.guildList, state.currentGuild]);
+    const [guildList, currentGuild] = useSelector((state: IState) => [state.guildList, state.currentGuild]);
     const dispatch = useDispatch();
 
     return (
@@ -18,7 +18,7 @@ export const GuildList = () => {
                     <GuildIcon
                         guildid={key}
                         key={key}
-                        selected={selectedGuild === key}
+                        selected={currentGuild === key}
                         guildname={guildList[key].guildname}
                         picture={guildList[key].picture}
                     />

@@ -40,6 +40,17 @@ export default class HarmonySocket {
         };
     };
 
+    exec(fn: () => void) {
+        if (this.conn.readyState === WebSocket.OPEN) {
+            fn();
+        } else {
+            this.events.addListener('open', () => {
+                fn();
+                this.events.removeCurrentListener();
+            });
+        }
+    }
+
     emitEvent(type: string, data: unknown) {
         // choke all packets if connection is not working
         if (this.conn.readyState === WebSocket.OPEN) {
