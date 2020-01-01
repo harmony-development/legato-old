@@ -1,8 +1,8 @@
 import { Color } from '@material-ui/core';
 
 export interface ITheme {
-    type: 'light' | 'dark';
-    primary: Color;
-    secondary: Color;
-    inputStyle: 'standard' | 'filled' | 'outlined';
+	type: 'light' | 'dark';
+	primary: Color;
+	secondary: Color;
+	inputStyle: 'standard' | 'filled' | 'outlined';
 }

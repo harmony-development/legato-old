@@ -3,19 +3,14 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import './index.css';
 import './Root/ContextMenu.css';
-import { PersistGate } from 'redux-persist/integration/react';
 
 import Root from './Root/Root';
-import setupRedux from './redux/store';
-
-const { store, persistor } = setupRedux();
+import { store } from './redux/store';
 
 const ReduxRoot: React.FC = () => {
 	return (
 		<Provider store={store}>
-			<PersistGate loading={null} persistor={persistor}>
-				<Root />
-			</PersistGate>
+			<Root />
 		</Provider>
 	);
 };

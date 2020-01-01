@@ -6,10 +6,10 @@ import { IGuildsList } from '../types/socket';
  * @param payload The connection state to set it to
  */
 export function SetConnected(payload: boolean) {
-    return {
-        type: Actions.SET_CONNECTED,
-        payload
-    };
+	return {
+		type: Actions.SET_CONNECTED,
+		payload,
+	};
 }
 
 /**
@@ -17,17 +17,17 @@ export function SetConnected(payload: boolean) {
  * @param payload The messages to assign
  */
 export function SetMessages(payload: IMessage[]) {
-    return {
-        type: Actions.SET_MESSAGES,
-        payload
-    };
+	return {
+		type: Actions.SET_MESSAGES,
+		payload,
+	};
 }
 
 export function AddMessage(payload: IMessage) {
-    return {
-        type: Actions.ADD_MESSAGE,
-        payload
-    };
+	return {
+		type: Actions.ADD_MESSAGE,
+		payload,
+	};
 }
 
 /**
@@ -35,10 +35,10 @@ export function AddMessage(payload: IMessage) {
  * @param payload What to set the selected channel to
  */
 export function SetSelectedChannel(payload: string | undefined) {
-    return {
-        type: Actions.SET_SELECTED_CHANNEL,
-        payload
-    };
+	return {
+		type: Actions.SET_SELECTED_CHANNEL,
+		payload,
+	};
 }
 
 /**
@@ -46,88 +46,88 @@ export function SetSelectedChannel(payload: string | undefined) {
  * @param payload The guild ID to set the selection to
  */
 export function SetCurrentGuild(payload: string | undefined) {
-    return {
-        type: Actions.SET_CURRENT_GUILD,
-        payload
-    };
+	return {
+		type: Actions.SET_CURRENT_GUILD,
+		payload,
+	};
 }
 
 export function SetChannels(payload: IChannels) {
-    return {
-        type: Actions.SET_CHANNELS,
-        payload
-    };
+	return {
+		type: Actions.SET_CHANNELS,
+		payload,
+	};
 }
 
 export function SetGuilds(payload: IGuildsList) {
-    return {
-        type: Actions.SET_GUILDS,
-        payload
-    };
+	return {
+		type: Actions.SET_GUILDS,
+		payload,
+	};
 }
 
 export function ToggleThemeDialog() {
-    return {
-        type: Actions.TOGGLE_THEME_DIALOG
-    };
+	return {
+		type: Actions.TOGGLE_THEME_DIALOG,
+	};
 }
 
 export function ToggleGuildDialog() {
-    return {
-        type: Actions.TOGGLE_JOIN_GUILD_DIALOG
-    };
+	return {
+		type: Actions.TOGGLE_JOIN_GUILD_DIALOG,
+	};
 }
 
 export function ToggleGuildSettingsDialog() {
-    return {
-        type: Actions.TOGGLE_GUILD_SETTINGS_DIALOG
-    };
+	return {
+		type: Actions.TOGGLE_GUILD_SETTINGS_DIALOG,
+	};
 }
 
 export function SetGuildPicture(guild: string, picture: string) {
-    return {
-        type: Actions.SET_GUILD_PICTURE,
-        payload: {
-            guild,
-            picture
-        }
-    };
+	return {
+		type: Actions.SET_GUILD_PICTURE,
+		payload: {
+			guild,
+			picture,
+		},
+	};
 }
 
 export function SetGuildName(guild: string, name: string) {
-    return {
-        type: Actions.SET_GUILD_NAME,
-        payload: {
-            guild,
-            name
-        }
-    };
+	return {
+		type: Actions.SET_GUILD_NAME,
+		payload: {
+			guild,
+			name,
+		},
+	};
 }
 
 interface IInvites {
-    [key: string]: number;
+	[key: string]: number;
 }
 
 export function SetInvites(invites: IInvites) {
-    return {
-        type: Actions.SET_INVITES,
-        payload: invites
-    };
+	return {
+		type: Actions.SET_INVITES,
+		payload: invites,
+	};
 }
 
 export function SetUser(userid: string, username: string, avatar: string) {
-    return {
-        type: Actions.SET_USER,
-        payload: {
-            userid,
-            username,
-            avatar
-        }
-    };
+	return {
+		type: Actions.SET_USER,
+		payload: {
+			userid,
+			username,
+			avatar,
+		},
+	};
 }
 
 export function FocusChatInput() {
-    return {
-        type: Actions.FOCUS_CHAT_INPUT
-    };
+	return {
+		type: Actions.FOCUS_CHAT_INPUT,
+	};
 }
