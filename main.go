@@ -4,6 +4,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/kataras/golog"
+	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"harmony-server/rest"
 	"net/http"
@@ -22,6 +23,7 @@ func main() {
 	harmonydb.DBInst = harmonydb.OpenDB()
 	golog.SetLevel(os.Getenv("VERBOSITY_LEVEL"))
 	_ = os.Mkdir("./filestore", 0777)
+	globals.Bus = *makeEventBus()
 	golog.Infof("Started Harmony Server On Port %v", PORT)
 	router := mux.NewRouter()
 	router.HandleFunc("/api/socket", handleSocket)

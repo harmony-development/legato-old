@@ -8,6 +8,8 @@ import (
 type (
 	Event func(ws *Client, data map[string]interface{})
 
+	EventBus map[string]Event
+
 	Packet struct {
 		Type string `json:"type"`
 		Data map[string]interface{} `json:"data"`
@@ -26,8 +28,8 @@ type (
 	}
 )
 
-func (ws *Client) Bind(s string, event Event) {
-	ws.EventBus[s] = event
+func (bus EventBus) Bind(s string, event Event) {
+	bus[s] = event
 }
 
 func (ws *Client) Send(p *Packet) {
@@ -39,3 +41,4 @@ func (ws *Client) Send(p *Packet) {
 }
 
 var Guilds = make(map[string]*Guild)
+var Bus EventBus
