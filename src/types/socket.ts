@@ -3,14 +3,6 @@ export interface IPacket {
 	data: unknown;
 }
 
-export interface IGuildsList {
-	[guildid: string]: {
-		guildname: string;
-		picture: string;
-		owner: boolean;
-	};
-}
-
 export enum PacketTypes {
 	Token = 'token',
 	GetGuilds = 'getguilds',

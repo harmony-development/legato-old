@@ -15,10 +15,12 @@ import {
 	Select,
 	MenuItem,
 } from '@material-ui/core';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { orange, red } from '@material-ui/core/colors';
 
-import { IState, Actions } from '../../../types/redux';
+import { IState } from '../../../types/redux';
+import { store } from '../../../redux/store';
+import { SetInputStyle, SetPrimary, SetSecondary, ToggleThemeDialog, InvertTheme } from '../../../redux/AppReducer';
 
 import { ColorPicker } from './ColorPicker';
 
@@ -30,32 +32,27 @@ export const ThemeDialog = () => {
 	]);
 	const [primary, setPrimary] = useState<Color>(red);
 	const [secondary, setSecondary] = useState<Color>(orange);
-	const dispatch = useDispatch();
 
 	const changeInputStyle = (ev: React.ChangeEvent<{ value: unknown }>) => {
-		if (typeof ev.target.value === 'string') {
-			dispatch({ type: Actions.SET_INPUT_STYLE, payload: ev.target.value });
+		if (ev.target.value === 'standard' || ev.target.value === 'outlined' || ev.target.value === 'filled') {
+			store.dispatch(SetInputStyle(ev.target.value));
 		}
 	};
 
 	useEffect(() => {
-		dispatch({ type: Actions.CHANGE_PRIMARY, payload: primary });
-	}, [primary, dispatch]);
+		store.dispatch(SetPrimary(primary));
+	}, [primary]);
 	useEffect(() => {
-		dispatch({ type: Actions.CHANGE_SECONDARY, payload: secondary });
-	}, [secondary, dispatch]);
+		store.dispatch(SetSecondary(secondary));
+	}, [secondary]);
 
 	return (
-		<Dialog open={open} onClose={() => dispatch({ type: Actions.TOGGLE_THEME_DIALOG })}>
+		<Dialog open={open} onClose={() => store.dispatch(ToggleThemeDialog)}>
 			<DialogTitle>Customize Theme</DialogTitle>
 			<DialogContent>
 				<FormControl component="fieldset">
 					<FormLabel component="legend">Theme Type</FormLabel>
-					<RadioGroup
-						value={themeType}
-						row
-						onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: Actions.INVERT_THEME })}
-					>
+					<RadioGroup value={themeType} row onChange={() => store.dispatch(InvertTheme)}>
 						<FormControlLabel value="light" control={<Radio color="secondary" />} label="Light" labelPlacement="end" />
 						<FormControlLabel value="dark" control={<Radio color="secondary" />} label="Dark" labelPlacement="end" />
 					</RadioGroup>
@@ -70,7 +67,7 @@ export const ThemeDialog = () => {
 				</Select>
 			</DialogContent>
 			<DialogActions>
-				<Button color="primary" onClick={() => dispatch({ type: Actions.TOGGLE_THEME_DIALOG })}>
+				<Button color="primary" onClick={() => store.dispatch(ToggleThemeDialog)}>
 					Close
 				</Button>
 			</DialogActions>

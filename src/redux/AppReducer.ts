@@ -1,6 +1,8 @@
+import { createReducer, createAction } from '@reduxjs/toolkit';
+import { Color } from '@material-ui/core';
 import { red, orange } from '@material-ui/core/colors';
 
-import { IState, Action, Actions } from '../types/redux';
+import { IMessage, IChannels, IState, IGuild } from '../types/redux';
 
 const appState: IState = {
 	theme: {
@@ -16,165 +18,177 @@ const appState: IState = {
 	messages: [],
 	invites: {},
 	channels: {},
-	selectedChannel: undefined,
-	joinGuildDialog: false,
+	currentChannel: undefined,
+	guildDialog: false,
 	guildSettingsDialog: false,
 	users: {},
 	userSettingsDialog: false,
 	chatInputFocus: false,
 };
 
-export default function AppReducer(state = appState, action: Action): IState {
-	switch (action.type) {
-		case Actions.INVERT_THEME: {
-			return {
-				...state,
-				theme: {
-					...state.theme,
-					type: state.theme.type === 'dark' ? 'light' : 'dark',
-				},
-			};
-		}
-		case Actions.TOGGLE_THEME_DIALOG: {
-			return {
-				...state,
-				themeDialog: !state.themeDialog,
-			};
-		}
-		case Actions.CHANGE_PRIMARY: {
-			return {
-				...state,
-				theme: {
-					...state.theme,
-					primary: action.payload,
-				},
-			};
-		}
-		case Actions.CHANGE_SECONDARY: {
-			return {
-				...state,
-				theme: {
-					...state.theme,
-					secondary: action.payload,
-				},
-			};
-		}
-		case Actions.SET_CONNECTED: {
-			return {
-				...state,
-				connected: action.payload,
-			};
-		}
-		case Actions.SET_GUILDS: {
-			return {
-				...state,
-				guildList: action.payload,
-			};
-		}
-		case Actions.SET_CURRENT_GUILD: {
-			return {
-				...state,
-				currentGuild: action.payload,
-			};
-		}
-		case Actions.ADD_MESSAGE: {
-			return {
-				...state,
-				messages: [...state.messages, action.payload],
-			};
-		}
-		case Actions.SET_MESSAGES: {
-			return {
-				...state,
-				messages: action.payload,
-			};
-		}
-		case Actions.SET_INPUT_STYLE: {
-			return {
-				...state,
-				theme: {
-					...state.theme,
-					inputStyle: action.payload,
-				},
-			};
-		}
-		case Actions.SET_CHANNELS: {
-			return {
-				...state,
-				channels: action.payload,
-			};
-		}
-		case Actions.SET_SELECTED_CHANNEL: {
-			return {
-				...state,
-				selectedChannel: action.payload,
-			};
-		}
-		case Actions.TOGGLE_JOIN_GUILD_DIALOG: {
-			return {
-				...state,
-				joinGuildDialog: !state.joinGuildDialog,
-			};
-		}
-		case Actions.TOGGLE_GUILD_SETTINGS_DIALOG: {
-			return {
-				...state,
-				guildSettingsDialog: !state.guildSettingsDialog,
-			};
-		}
-		case Actions.SET_GUILD_PICTURE: {
-			return {
-				...state,
-				guildList: {
-					...state.guildList,
-					[action.payload.guild]: {
-						...state.guildList[action.payload.guild],
-						picture: action.payload.picture,
-					},
-				},
-			};
-		}
-		case Actions.SET_GUILD_NAME: {
-			return {
-				...state,
-				guildList: {
-					...state.guildList,
-					[action.payload.guild]: {
-						...state.guildList[action.payload.guild],
-						guildname: action.payload.name,
-					},
-				},
-			};
-		}
-		case Actions.SET_INVITES: {
-			return {
-				...state,
-				invites: action.payload,
-			};
-		}
-		case Actions.SET_USER: {
-			return {
-				...state,
-				users: {
-					...state.users,
-					[action.payload.userid]: action.payload,
-				},
-			};
-		}
-		case Actions.TOGGLE_USER_SETTINGS_DIALOG: {
-			return {
-				...state,
-				userSettingsDialog: !state.userSettingsDialog,
-			};
-		}
-		case Actions.FOCUS_CHAT_INPUT: {
-			return {
-				...state,
-				chatInputFocus: !state.chatInputFocus,
-			};
-		}
-		default: {
-			return state;
-		}
-	}
+function WithPayload<T>() {
+	return (t: T) => ({ payload: t });
 }
+
+export const SetConnected = createAction('SET_CONNECTED', WithPayload<boolean>());
+export const SetMessages = createAction('SET_MESSAGES', WithPayload<IMessage[]>());
+export const AddMessage = createAction('ADD_MESSAGE', WithPayload<IMessage>());
+export const SetCurrentChannel = createAction('SET_CURRENT_CHANNEl', WithPayload<string | undefined>());
+export const SetCurrentGuild = createAction('SET_CURRENT_GUILD', WithPayload<string | undefined>());
+export const SetChannels = createAction('SET_CHANNELS', WithPayload<IChannels>());
+export const SetGuilds = createAction(
+	'SET_GUILDS',
+	WithPayload<{
+		[key: string]: IGuild;
+	}>()
+);
+export const FocusChatInput = createAction('FOCUS_CHAT_INPUT');
+export const ToggleThemeDialog = createAction('TOGGLE_THEME_DIALOG');
+export const InvertTheme = createAction('INVERT_THEME');
+export const SetPrimary = createAction('SET_PRIMARY', WithPayload<Color>());
+export const SetSecondary = createAction('SET_SECONDARY', WithPayload<Color>());
+export const SetInputStyle = createAction('SET_INPUT_STYLE', WithPayload<'standard' | 'filled' | 'outlined'>());
+export const ToggleGuildDialog = createAction('TOGGLE_GUILD_DIALOG');
+export const ToggleGuildSettingsDialog = createAction('TOGGLE_GUILD_SETTINGS_DIALOG');
+export const ToggleUserSettingsDialog = createAction('TOGGLE_USER_SETTINGS_DIALOG');
+export const SetGuildPicture = createAction(
+	'SET_GUILD_PICTURE',
+	WithPayload<{
+		guild: string;
+		picture: string;
+	}>()
+);
+export const SetGuildName = createAction(
+	'SET_GUILD_NAME',
+	WithPayload<{
+		guild: string;
+		name: string;
+	}>()
+);
+export const SetInvites = createAction(
+	'SET_INVITES',
+	WithPayload<{
+		[key: string]: number;
+	}>()
+);
+export const SetUser = createAction(
+	'SET_USER',
+	WithPayload<{
+		userid: string;
+		username: string;
+		avatar: string;
+	}>()
+);
+
+export const AppReducer = createReducer(appState, builder =>
+	builder
+		.addCase(SetConnected, (state, action) => ({
+			...state,
+			connected: action.payload,
+		}))
+		.addCase(SetMessages, (state, action) => ({
+			...state,
+			messages: action.payload,
+		}))
+		.addCase(AddMessage, (state, action) => ({
+			...state,
+			messages: [...state.messages, action.payload],
+		}))
+		.addCase(SetCurrentChannel, (state, action) => ({
+			...state,
+			currentChannel: action.payload,
+		}))
+		.addCase(SetCurrentGuild, (state, action) => ({
+			...state,
+			currentGuild: action.payload,
+		}))
+		.addCase(SetChannels, (state, action) => ({
+			...state,
+			channels: action.payload,
+		}))
+		.addCase(SetGuilds, (state, action) => ({
+			...state,
+			guildList: action.payload,
+		}))
+		.addCase(FocusChatInput, state => ({
+			...state,
+			chatInputFocus: true,
+		}))
+		.addCase(ToggleThemeDialog, state => ({
+			...state,
+			themeDialog: !state.themeDialog,
+		}))
+		.addCase(InvertTheme, state => ({
+			...state,
+			theme: {
+				...state.theme,
+				type: state.theme.type === 'dark' ? 'light' : 'dark',
+			},
+		}))
+		.addCase(SetPrimary, (state, action) => ({
+			...state,
+			theme: {
+				...state.theme,
+				primary: action.payload,
+			},
+		}))
+		.addCase(SetSecondary, (state, action) => ({
+			...state,
+			theme: {
+				...state.theme,
+				secondary: action.payload,
+			},
+		}))
+		.addCase(SetInputStyle, (state, action) => ({
+			...state,
+			theme: {
+				...state.theme,
+				inputStyle: action.payload,
+			},
+		}))
+		.addCase(ToggleGuildDialog, state => ({
+			...state,
+			guildDialog: !state.guildDialog,
+		}))
+		.addCase(ToggleGuildSettingsDialog, state => ({
+			...state,
+			guildSettingsDialog: !state.guildSettingsDialog,
+		}))
+		.addCase(ToggleUserSettingsDialog, state => ({
+			...state,
+			userSettingsDialog: !state.userSettingsDialog,
+		}))
+		.addCase(SetGuildPicture, (state, action) => ({
+			...state,
+			guildList: {
+				...state.guildList,
+				[action.payload.guild]: {
+					...state.guildList[action.payload.guild],
+					picture: action.payload.picture,
+				},
+			},
+		}))
+		.addCase(SetGuildName, (state, action) => ({
+			...state,
+			guildList: {
+				[action.payload.guild]: {
+					...state.guildList[action.payload.guild],
+					name: action.payload.name,
+				},
+			},
+		}))
+		.addCase(SetInvites, (state, action) => ({
+			...state,
+			invites: action.payload,
+		}))
+		.addCase(SetUser, (state, action) => ({
+			...state,
+			users: {
+				...state.users,
+				[action.payload.userid]: {
+					avatar: action.payload.avatar,
+					username: action.payload.username,
+				},
+			},
+		}))
+);

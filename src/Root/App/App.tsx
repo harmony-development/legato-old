@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
 import { useHistory, useParams } from 'react-router';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import { harmonySocket } from '../Root';
 import { IState } from '../../types/redux';
-import { SetMessages, SetSelectedChannel, SetCurrentGuild } from '../../redux/Dispatches';
 import { useSocketHandler } from '../SocketHandler';
+import { store } from '../../redux/store';
+import { SetCurrentChannel, SetCurrentGuild, SetMessages } from '../../redux/AppReducer';
 
 import { HarmonyBar } from './HarmonyBar/HarmonyBar';
 import { ThemeDialog } from './Dialog/ThemeDialog';
@@ -17,7 +18,6 @@ import { UserSettingsDialog } from './Dialog/UserSettingsDialog/UserSettingsDial
 
 export const App = (): JSX.Element => {
 	const classes = useAppStyles();
-	const dispatch = useDispatch();
 	const { selectedguildparam: selectedGuildParam, selectedchannelparam: selectedChannelParam } = useParams();
 	const [
 		channels,
@@ -30,9 +30,9 @@ export const App = (): JSX.Element => {
 	] = useSelector((state: IState) => [
 		state.channels,
 		state.currentGuild,
-		state.selectedChannel,
+		state.currentChannel,
 		state.themeDialog,
-		state.joinGuildDialog,
+		state.guildDialog,
 		state.guildSettingsDialog,
 		state.userSettingsDialog,
 	]);
@@ -41,21 +41,21 @@ export const App = (): JSX.Element => {
 
 	useEffect(() => {
 		if (selectedChannelParam) {
-			dispatch(SetSelectedChannel(selectedChannelParam));
+			store.dispatch(SetCurrentChannel(selectedChannelParam));
 		}
 	}, [selectedChannelParam]);
 
 	useEffect(() => {
 		if (selectedGuildParam) {
-			dispatch(SetCurrentGuild(selectedGuildParam));
+			store.dispatch(SetCurrentGuild(selectedGuildParam));
 		}
 	}, [selectedGuildParam]);
 
 	useEffect(() => {
 		if (currentGuild) {
 			history.push(`/app/${currentGuild}/${selectedChannel || ''}`);
-			dispatch(SetMessages([]));
-			dispatch(SetSelectedChannel(undefined));
+			store.dispatch(SetMessages([]));
+			store.dispatch(SetCurrentChannel(undefined));
 			harmonySocket.exec(() => harmonySocket.getChannels(currentGuild));
 		}
 	}, [currentGuild]);

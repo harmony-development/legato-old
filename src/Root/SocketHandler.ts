@@ -1,26 +1,26 @@
 import { useEffect, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import h from 'history';
 import { toast } from 'react-toastify';
 
 import HarmonySocket from '../socket/socket';
-import { IGuildsList } from '../types/socket';
+import { store } from '../redux/store';
 import {
 	SetMessages,
-	SetSelectedChannel,
-	SetCurrentGuild,
+	SetCurrentChannel,
 	SetChannels,
+	SetCurrentGuild,
 	SetGuilds,
 	AddMessage,
+	ToggleGuildDialog,
 	SetGuildPicture,
-	SetGuildName,
 	SetInvites,
+	SetGuildName,
 	SetUser,
-} from '../redux/Dispatches';
-import { IMessage, Actions, IState } from '../types/redux';
+} from '../redux/AppReducer';
+import { IGuild, IMessage, IState } from '../types/redux';
 
 export function useSocketHandler(socket: HarmonySocket, history: h.History<any>): void {
-	const dispatch = useDispatch();
 	const { currentGuild, channels, invites } = useSelector((state: IState) => state);
 	const firstDisconnect = useRef(true);
 
@@ -28,24 +28,26 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		socket.events.addListener('getguilds', (raw: any) => {
 			console.log(raw);
 			if (typeof raw['guilds'] === 'object') {
-				const guildsList = raw['guilds'] as IGuildsList;
+				const guildsList = raw['guilds'] as {
+					[key: string]: IGuild;
+				};
 				if (Object.keys(guildsList).length === 0) {
-					dispatch(SetMessages([]));
-					dispatch(SetSelectedChannel(undefined));
-					dispatch(SetCurrentGuild(undefined));
-					dispatch(SetChannels({}));
+					store.dispatch(SetMessages([]));
+					store.dispatch(SetCurrentChannel(undefined));
+					store.dispatch(SetCurrentGuild(undefined));
+					store.dispatch(SetChannels({}));
 				}
-				dispatch(SetGuilds(guildsList));
+				store.dispatch(SetGuilds(guildsList));
 			}
 		});
 		socket.events.addListener('getmessages', (raw: any) => {
 			if (Array.isArray(raw['messages'])) {
-				dispatch(SetMessages((raw['messages'] as IMessage[]).reverse()));
+				store.dispatch(SetMessages((raw['messages'] as IMessage[]).reverse()));
 			}
 		});
 		socket.events.addListener('getchannels', (raw: any) => {
 			if (typeof raw === 'object') {
-				dispatch(SetChannels(raw['channels']));
+				store.dispatch(SetChannels(raw['channels']));
 			}
 		});
 		socket.events.addListener('message', (raw: any) => {
@@ -55,7 +57,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 				typeof raw['guild'] === 'string' &&
 				typeof raw['message'] === 'string'
 			) {
-				dispatch(AddMessage(raw as IMessage));
+				store.dispatch(AddMessage(raw as IMessage));
 			}
 		});
 		socket.events.addListener('leaveguild', () => {
@@ -63,25 +65,26 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		});
 		socket.events.addListener('joinguild', () => {
 			socket.getGuilds();
-			dispatch({ type: Actions.TOGGLE_JOIN_GUILD_DIALOG });
+			store.dispatch(ToggleGuildDialog);
 		});
 		socket.events.addListener('createguild', () => {
 			socket.getGuilds();
-			dispatch({ type: Actions.TOGGLE_JOIN_GUILD_DIALOG });
+			store.dispatch(ToggleGuildDialog);
 		});
 		socket.events.addListener('updateguildpicture', (raw: any) => {
 			if (typeof raw['picture'] === 'string' && typeof raw['guild'] === 'string') {
-				dispatch(SetGuildPicture(raw['guild'], raw['picture']));
+				store.dispatch(SetGuildPicture({ guild: raw['guild'], picture: raw['picture'] }));
 			}
 		});
 		socket.events.addListener('updateguildname', (raw: any) => {
 			if (typeof raw['name'] === 'string' && typeof raw['guild'] === 'string') {
-				dispatch(SetGuildName(raw['guild'], raw['name']));
+				store.dispatch(SetGuildName({ guild: raw['guild'], name: raw['name'] }));
 			}
 		});
 		socket.events.addListener('getinvites', (raw: any) => {
 			if (typeof raw['invites'] === 'object') {
-				dispatch(SetInvites(raw['invites']));
+				store.dispatch(SetInvites(raw['invites']));
+				store.dispatch(SetInvites(raw['invites']));
 			}
 		});
 		socket.events.addListener('addchannel', (raw: any) => {
@@ -91,7 +94,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 				raw['channelid'] === 'string' &&
 				raw['guild'] === currentGuild
 			) {
-				dispatch(
+				store.dispatch(
 					SetChannels({
 						...channels,
 						[raw['channelid']]: raw['name'],
@@ -105,12 +108,12 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 					...channels,
 				};
 				delete deletedChannels[raw['channelid']];
-				dispatch(SetChannels(deletedChannels));
+				store.dispatch(SetChannels(deletedChannels));
 			}
 		});
 		socket.events.addListener('createinvite', (raw: any) => {
 			if (typeof raw['invite'] === 'string') {
-				dispatch(
+				store.dispatch(
 					SetInvites({
 						...invites,
 						[raw['invite']]: 0,
@@ -124,7 +127,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 					...invites,
 				};
 				delete deletedInvites[raw['invite']];
-				dispatch(
+				store.dispatch(
 					SetInvites({
 						...deletedInvites,
 					})
@@ -137,7 +140,13 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 				typeof raw['username'] === 'string' &&
 				typeof raw['avatar'] === 'string'
 			) {
-				dispatch(SetUser(raw['userid'], raw['username'], raw['avatar']));
+				store.dispatch(
+					SetUser({
+						userid: raw['userid'],
+						username: raw['username'],
+						avatar: raw['avatar'],
+					})
+				);
 			}
 		});
 
