@@ -16,7 +16,6 @@ import {
 	MenuItem,
 } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
-import { orange, red } from '@material-ui/core/colors';
 
 import { IState } from '../../../types/redux';
 import { AppDispatch } from '../../../redux/store';
@@ -26,13 +25,15 @@ import { ColorPicker } from './ColorPicker';
 
 export const ThemeDialog = () => {
 	const dispatch = useDispatch<AppDispatch>();
-	const [open, themeType, inputStyle] = useSelector((state: IState) => [
+	const [open, themeType, globalPrimary, globalSecondary, inputStyle] = useSelector((state: IState) => [
 		state.themeDialog,
 		state.theme.type,
+		state.theme.primary,
+		state.theme.secondary,
 		state.theme.inputStyle,
 	]);
-	const [primary, setPrimary] = useState<Color>(red);
-	const [secondary, setSecondary] = useState<Color>(orange);
+	const [primary, setPrimary] = useState<Color>(globalPrimary);
+	const [secondary, setSecondary] = useState<Color>(globalSecondary);
 
 	const changeInputStyle = (ev: React.ChangeEvent<{ value: unknown }>) => {
 		if (ev.target.value === 'standard' || ev.target.value === 'outlined' || ev.target.value === 'filled') {
