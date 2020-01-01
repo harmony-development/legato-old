@@ -8,24 +8,11 @@ export default class HarmonySocket {
 
 	constructor() {
 		// eslint-disable-next-line no-undef
-		this.conn = new WebSocket(`ws://${process.env.REACT_APP_HARMONY_SERVER_HOST}/api/socket`);
 		this.events = new EventEmitter();
-		this.conn.addEventListener('open', () => this.events.emit('open'));
-		this.conn.addEventListener('close', () => this.events.emit('close'));
-		this.conn.addEventListener('error', () => this.events.emit('error'));
-		this.conn.onmessage = (e: MessageEvent) => {
-			const unprocessed = JSON.parse(e.data);
-			if (typeof unprocessed['type'] === 'string' && typeof unprocessed['data'] === 'object') {
-				const packet: IPacket = unprocessed;
-				this.events.emit(packet.type, packet.data);
-			} else {
-				console.warn(`Unsupported packet received`);
-				console.log(unprocessed);
-			}
-		};
+		this.connect();
 	}
 
-	connect = () => {
+	connect() {
 		// eslint-disable-next-line no-undef
 		this.conn = new WebSocket(`ws://${process.env.REACT_APP_HARMONY_SERVER_HOST}/api/socket`);
 		this.conn.addEventListener('open', () => this.events.emit('open'));
@@ -41,7 +28,7 @@ export default class HarmonySocket {
 				console.log(unprocessed);
 			}
 		};
-	};
+	}
 
 	exec(fn: () => void) {
 		if (this.conn.readyState === WebSocket.OPEN) {
