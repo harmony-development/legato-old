@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import {
 	Dialog,
@@ -28,12 +28,13 @@ import { toast } from 'react-toastify';
 
 import { IState } from '../../../../types/redux';
 import { harmonySocket } from '../../../Root';
-import { store } from '../../../../redux/store';
+import { AppDispatch } from '../../../../redux/store';
 import { ToggleGuildSettingsDialog } from '../../../../redux/AppReducer';
 
 import { useGuildSettingsStyle } from './GuildSettingsStyle';
 
 export const GuildSettings = () => {
+	const dispatch = useDispatch<AppDispatch>();
 	const [open, currentGuild, inputStyle, guilds, invites] = useSelector((state: IState) => [
 		state.guildSettingsDialog,
 		state.currentGuild,
@@ -106,10 +107,10 @@ export const GuildSettings = () => {
 	};
 
 	return (
-		<Dialog open={open} onClose={() => store.dispatch(ToggleGuildSettingsDialog)} fullScreen>
+		<Dialog open={open} onClose={() => dispatch(ToggleGuildSettingsDialog())} fullScreen>
 			<AppBar style={{ position: 'relative' }}>
 				<Toolbar>
-					<IconButton edge="start" color="inherit" onClick={() => store.dispatch(ToggleGuildSettingsDialog)}>
+					<IconButton edge="start" color="inherit" onClick={() => dispatch(ToggleGuildSettingsDialog())}>
 						<CloseIcon />
 					</IconButton>
 					<Typography variant="h6">Guild Settings</Typography>

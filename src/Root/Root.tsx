@@ -5,10 +5,12 @@ import { CssBaseline, createMuiTheme, Button } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer, toast } from 'react-toastify';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { IState } from '../types/redux';
 import HarmonySocket from '../socket/socket';
+import { AppDispatch } from '../redux/store';
+import { SetConnected } from '../redux/AppReducer';
 
 import { App } from './App/App';
 import { Entry } from './Entry/Entry';
@@ -16,13 +18,11 @@ import { useRootStyles } from './RootStyle';
 import './Root.css';
 import { InviteHandler } from './InviteHandler/HandleInvite';
 
-import { store } from '../redux/store';
-import { SetConnected } from '../redux/AppReducer';
-
 export const harmonySocket = new HarmonySocket();
 export let previouslyDisconnected = false;
 
 const Root = (): JSX.Element => {
+	const dispatch = useDispatch<AppDispatch>();
 	useRootStyles();
 
 	useEffect(() => {
@@ -30,14 +30,14 @@ const Root = (): JSX.Element => {
 			// lol plz no spahm
 			if (!previouslyDisconnected) {
 				toast.error('You have lost connection to the server');
-				store.dispatch(SetConnected(true));
+				dispatch(SetConnected(true));
 				previouslyDisconnected = true;
 			}
 			setTimeout(harmonySocket.connect, 3000);
 		});
 		harmonySocket.events.addListener('open', () => {
 			if (previouslyDisconnected) toast.success('You have reconnected to the server');
-			store.dispatch(SetConnected(true));
+			dispatch(SetConnected(true));
 		});
 		return (): void => {
 			harmonySocket.events.removeAllListeners('close'); // cleanup all socket events registered here

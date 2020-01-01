@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 import { useHistory, useParams } from 'react-router';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { harmonySocket } from '../Root';
 import { IState } from '../../types/redux';
 import { useSocketHandler } from '../SocketHandler';
-import { store } from '../../redux/store';
+import { AppDispatch } from '../../redux/store';
 import { SetCurrentChannel, SetCurrentGuild, SetMessages } from '../../redux/AppReducer';
 
 import { HarmonyBar } from './HarmonyBar/HarmonyBar';
@@ -18,6 +18,7 @@ import { UserSettingsDialog } from './Dialog/UserSettingsDialog/UserSettingsDial
 
 export const App = (): JSX.Element => {
 	const classes = useAppStyles();
+	const dispatch = useDispatch<AppDispatch>();
 	const { selectedguildparam: selectedGuildParam, selectedchannelparam: selectedChannelParam } = useParams();
 	const [
 		channels,
@@ -41,21 +42,21 @@ export const App = (): JSX.Element => {
 
 	useEffect(() => {
 		if (selectedChannelParam) {
-			store.dispatch(SetCurrentChannel(selectedChannelParam));
+			dispatch(SetCurrentChannel(selectedChannelParam));
 		}
 	}, [selectedChannelParam]);
 
 	useEffect(() => {
 		if (selectedGuildParam) {
-			store.dispatch(SetCurrentGuild(selectedGuildParam));
+			dispatch(SetCurrentGuild(selectedGuildParam));
 		}
 	}, [selectedGuildParam]);
 
 	useEffect(() => {
 		if (currentGuild) {
 			history.push(`/app/${currentGuild}/${selectedChannel || ''}`);
-			store.dispatch(SetMessages([]));
-			store.dispatch(SetCurrentChannel(undefined));
+			dispatch(SetMessages([]));
+			dispatch(SetCurrentChannel(undefined));
 			harmonySocket.exec(() => harmonySocket.getChannels(currentGuild));
 		}
 	}, [currentGuild]);

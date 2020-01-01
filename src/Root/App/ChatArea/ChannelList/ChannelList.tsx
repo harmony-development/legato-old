@@ -5,11 +5,11 @@ import ExpandMore from '@material-ui/icons/ExpandMore';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import LeaveIcon from '@material-ui/icons/ExitToApp';
 import { ContextMenu, ContextMenuTrigger } from 'react-contextmenu';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { IState } from '../../../../types/redux';
 import { harmonySocket } from '../../../Root';
-import { store } from '../../../../redux/store';
+import { AppDispatch } from '../../../../redux/store';
 import { SetCurrentChannel, ToggleGuildSettingsDialog } from '../../../../redux/AppReducer';
 
 import { useChannelListStyle } from './ChannelListStyle';
@@ -43,25 +43,24 @@ const Channel = (props: IChannelProps) => {
 					className={props.channelid === selectedChannel ? classes.selectedChannel : undefined}
 					onClick={() => props.setSelectedChannel(props.channelid)}
 				>
-					<ListItemText secondary={`#${props.channelname}`} />
+					<ListItemText secondary={`#${props.channelname}`}/>
 				</ListItem>
 			</ContextMenuTrigger>
 			{currentGuild && guildsList[currentGuild] && guildsList[currentGuild].owner ? (
 				<ContextMenu id={props.channelid}>
 					<List>
 						<ListItem button onClick={handleDelete}>
-							<ListItemText primary="Delete Channel" />
+							<ListItemText primary="Delete Channel"/>
 						</ListItem>
 					</List>
 				</ContextMenu>
-			) : (
-				undefined
-			)}
+			) : undefined}
 		</>
 	);
 };
 
 export const ChannelList = () => {
+	const dispatch = useDispatch<AppDispatch>();
 	const [channels, currentGuild, guildsList] = useSelector((state: IState) => [
 		state.channels,
 		state.currentGuild,
@@ -79,13 +78,13 @@ export const ChannelList = () => {
 	};
 
 	const setSelectedChannel = (value: string) => {
-		store.dispatch(SetCurrentChannel(value));
+		dispatch(SetCurrentChannel(value));
 	};
 
 	const toggleGuildSettings = () => {
 		if (currentGuild) {
 			harmonySocket.sendGetInvites(currentGuild);
-			store.dispatch(ToggleGuildSettingsDialog);
+			dispatch(ToggleGuildSettingsDialog());
 		}
 	};
 
@@ -106,8 +105,8 @@ export const ChannelList = () => {
 				{currentGuild ? (
 					<>
 						<ListItem button onClick={() => setActionsExpanded(!actionsExpanded)}>
-							<ListItemText primary="Guild Options" />
-							{actionsExpanded ? <ExpandLess /> : <ExpandMore />}
+							<ListItemText primary="Guild Options"/>
+							{actionsExpanded ? <ExpandLess/> : <ExpandMore/>}
 						</ListItem>
 						<Collapse in={actionsExpanded} timeout="auto" unmountOnExit>
 							<List component="div" disablePadding>
@@ -115,9 +114,9 @@ export const ChannelList = () => {
 									<>
 										<ListItem button className={classes.nested} onClick={toggleGuildSettings}>
 											<ListItemIcon>
-												<SettingsIcon />
+												<SettingsIcon/>
 											</ListItemIcon>
-											<ListItemText primary="Guild Settings" />
+											<ListItemText primary="Guild Settings"/>
 										</ListItem>
 									</>
 								) : (
@@ -125,9 +124,9 @@ export const ChannelList = () => {
 								)}
 								<ListItem button className={classes.nested} onClick={leaveGuild}>
 									<ListItemIcon>
-										<LeaveIcon />
+										<LeaveIcon/>
 									</ListItemIcon>
-									<ListItemText primary="Leave Guild" />
+									<ListItemText primary="Leave Guild"/>
 								</ListItem>
 							</List>
 						</Collapse>
@@ -137,15 +136,15 @@ export const ChannelList = () => {
 				)}
 				{channels
 					? Object.keys(channels).map(key => {
-							return (
-								<Channel
-									key={key}
-									channelid={key}
-									channelname={channels[key]}
-									setSelectedChannel={setSelectedChannel}
-								/>
-							);
-					  })
+						return (
+							<Channel
+								key={key}
+								channelid={key}
+								channelname={channels[key]}
+								setSelectedChannel={setSelectedChannel}
+							/>
+						);
+					})
 					: undefined}
 				<div className={classes.newChannelInput}>
 					{addingChannel ? (
@@ -164,7 +163,7 @@ export const ChannelList = () => {
 				{currentGuild && guildsList[currentGuild] && guildsList[currentGuild].owner ? (
 					<Tooltip title="Create Channel">
 						<ListItem button onClick={addChannelButtonClicked}>
-							<ListItemText style={{ textAlign: 'center' }} primary="+" />
+							<ListItemText style={{ textAlign: 'center' }} primary="+"/>
 						</ListItem>
 					</Tooltip>
 				) : (

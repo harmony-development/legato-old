@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { IState } from '../../../types/redux';
-import { store } from '../../../redux/store';
+import { AppDispatch } from '../../../redux/store';
 import { FocusChatInput } from '../../../redux/AppReducer';
 
 import { useChatAreaStyles } from './ChatAreaStyle';
@@ -13,6 +13,7 @@ import { ChannelList } from './ChannelList/ChannelList';
 
 export const ChatArea = () => {
 	const classes = useChatAreaStyles();
+	const dispatch = useDispatch<AppDispatch>();
 	const [messages] = useSelector((state: IState) => [state.messages]);
 	const messagesRef = useRef<HTMLDivElement | null>(null);
 
@@ -24,7 +25,7 @@ export const ChatArea = () => {
 
 	const onKeyDown = (ev: React.KeyboardEvent<HTMLDivElement>) => {
 		if (ev.key !== 'Tab') {
-			store.dispatch(FocusChatInput);
+			dispatch(FocusChatInput());
 		}
 	};
 

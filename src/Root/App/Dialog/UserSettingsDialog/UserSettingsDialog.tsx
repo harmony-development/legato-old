@@ -12,25 +12,26 @@ import {
 	Button,
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { IState } from '../../../../types/redux';
-import { store } from '../../../../redux/store';
+import { AppDispatch } from '../../../../redux/store';
 import { ToggleUserSettingsDialog } from '../../../../redux/AppReducer';
 
 import { useUserSettingsStyle } from './UserSettingsStyle';
 
 export const UserSettingsDialog = () => {
+	const dispatch = useDispatch<AppDispatch>();
 	const [open, inputStyle] = useSelector((state: IState) => [state.userSettingsDialog, state.userSettingsDialog]);
 	const userAvatarUpload = useRef<HTMLInputElement | null>(null);
 	const [username, setUsername] = useState<string>('');
 	const classes = useUserSettingsStyle();
 
 	return (
-		<Dialog open={open} onClose={() => store.dispatch(ToggleUserSettingsDialog)} fullScreen>
+		<Dialog open={open} onClose={() => dispatch(ToggleUserSettingsDialog())} fullScreen>
 			<AppBar style={{ position: 'relative' }}>
 				<Toolbar>
-					<IconButton edge="start" onClick={() => store.dispatch(ToggleUserSettingsDialog)}>
+					<IconButton edge="start" onClick={() => dispatch(ToggleUserSettingsDialog())}>
 						<CloseIcon />
 					</IconButton>
 					<Typography variant="h6">User Settings</Typography>
@@ -47,7 +48,7 @@ export const UserSettingsDialog = () => {
 							}
 						}}
 					>
-						<Avatar className={classes.guildIcon}></Avatar>
+						<Avatar className={classes.guildIcon} />
 					</ButtonBase>
 					<TextField
 						label="Username"

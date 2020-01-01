@@ -15,16 +15,17 @@ import {
 	Select,
 	MenuItem,
 } from '@material-ui/core';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { orange, red } from '@material-ui/core/colors';
 
 import { IState } from '../../../types/redux';
-import { store } from '../../../redux/store';
+import { AppDispatch } from '../../../redux/store';
 import { SetInputStyle, SetPrimary, SetSecondary, ToggleThemeDialog, InvertTheme } from '../../../redux/AppReducer';
 
 import { ColorPicker } from './ColorPicker';
 
 export const ThemeDialog = () => {
+	const dispatch = useDispatch<AppDispatch>();
 	const [open, themeType, inputStyle] = useSelector((state: IState) => [
 		state.themeDialog,
 		state.theme.type,
@@ -35,24 +36,24 @@ export const ThemeDialog = () => {
 
 	const changeInputStyle = (ev: React.ChangeEvent<{ value: unknown }>) => {
 		if (ev.target.value === 'standard' || ev.target.value === 'outlined' || ev.target.value === 'filled') {
-			store.dispatch(SetInputStyle(ev.target.value));
+			dispatch(SetInputStyle(ev.target.value));
 		}
 	};
 
 	useEffect(() => {
-		store.dispatch(SetPrimary(primary));
+		dispatch(SetPrimary(primary));
 	}, [primary]);
 	useEffect(() => {
-		store.dispatch(SetSecondary(secondary));
+		dispatch(SetSecondary(secondary));
 	}, [secondary]);
 
 	return (
-		<Dialog open={open} onClose={() => store.dispatch(ToggleThemeDialog)}>
+		<Dialog open={open} onClose={() => dispatch(ToggleThemeDialog())}>
 			<DialogTitle>Customize Theme</DialogTitle>
 			<DialogContent>
 				<FormControl component="fieldset">
 					<FormLabel component="legend">Theme Type</FormLabel>
-					<RadioGroup value={themeType} row onChange={() => store.dispatch(InvertTheme)}>
+					<RadioGroup value={themeType} row onChange={() => dispatch(InvertTheme())}>
 						<FormControlLabel value="light" control={<Radio color="secondary" />} label="Light" labelPlacement="end" />
 						<FormControlLabel value="dark" control={<Radio color="secondary" />} label="Dark" labelPlacement="end" />
 					</RadioGroup>
@@ -67,7 +68,7 @@ export const ThemeDialog = () => {
 				</Select>
 			</DialogContent>
 			<DialogActions>
-				<Button color="primary" onClick={() => store.dispatch(ToggleThemeDialog)}>
+				<Button color="primary" onClick={() => dispatch(ToggleThemeDialog())}>
 					Close
 				</Button>
 			</DialogActions>

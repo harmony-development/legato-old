@@ -1,17 +1,18 @@
 import React from 'react';
 import GroupAdd from '@material-ui/icons/GroupAdd';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { ButtonBase, Tooltip } from '@material-ui/core';
 
 import { IState } from '../../../../types/redux';
 import { ToggleGuildDialog } from '../../../../redux/AppReducer';
-import { store } from '../../../../redux/store';
+import { AppDispatch } from '../../../../redux/store';
 
 import { useGuildListStyle } from './GuildListStyle';
 import { GuildIcon } from './GuildIcon';
 
 export const GuildList = () => {
 	const classes = useGuildListStyle();
+	const dispatch = useDispatch<AppDispatch>();
 	const [guildList, currentGuild] = useSelector((state: IState) => [state.guildList, state.currentGuild]);
 
 	return (
@@ -27,7 +28,7 @@ export const GuildList = () => {
 					/>
 				);
 			})}
-			<ButtonBase className={classes.joinGuild} onClick={() => store.dispatch(ToggleGuildDialog)}>
+			<ButtonBase className={classes.joinGuild} onClick={() => dispatch(ToggleGuildDialog())}>
 				<Tooltip title={'Join Or Create Guild'} placement="right">
 					<GroupAdd />
 				</Tooltip>

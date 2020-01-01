@@ -1,10 +1,10 @@
 import React from 'react';
 import { ButtonBase, Tooltip, List, ListItem, ListItemText } from '@material-ui/core';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { ContextMenuTrigger, ContextMenu, MenuItem } from 'react-contextmenu';
 
 import { harmonySocket } from '../../../Root';
-import { store } from '../../../../redux/store';
+import { AppDispatch } from '../../../../redux/store';
 import { SetCurrentGuild, ToggleGuildSettingsDialog } from '../../../../redux/AppReducer';
 import { IState } from '../../../../types/redux';
 
@@ -18,11 +18,12 @@ interface IProps {
 }
 
 export const GuildIcon = (props: IProps) => {
+	const dispatch = useDispatch<AppDispatch>();
 	const [guildsList] = useSelector((state: IState) => [state.guildList]);
 	const classes = useGuildListStyle();
 
 	const onClick = () => {
-		store.dispatch(SetCurrentGuild(props.guildid));
+		dispatch(SetCurrentGuild(props.guildid));
 	};
 
 	const handleLeave = () => {
@@ -52,14 +53,12 @@ export const GuildIcon = (props: IProps) => {
 					{guildsList && guildsList[props.guildid].owner ? (
 						<>
 							<MenuItem>
-								<ListItem button onClick={() => store.dispatch(ToggleGuildSettingsDialog)}>
+								<ListItem button onClick={() => dispatch(ToggleGuildSettingsDialog())}>
 									<ListItemText primary="Guild Settings" />
 								</ListItem>
 							</MenuItem>
 						</>
-					) : (
-						undefined
-					)}
+					) : undefined}
 				</List>
 			</ContextMenu>
 		</>
