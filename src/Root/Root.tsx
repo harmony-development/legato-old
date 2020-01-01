@@ -17,6 +17,7 @@ import { Entry } from './Entry/Entry';
 import { useRootStyles } from './RootStyle';
 import './Root.css';
 import { InviteHandler } from './InviteHandler/HandleInvite';
+import { HarmonyDark } from './App/HarmonyColor';
 
 export const harmonySocket = new HarmonySocket();
 export let previouslyDisconnected = false;
@@ -47,18 +48,18 @@ const Root = (): JSX.Element => {
 
 	return (
 		<>
-			<CssBaseline />
-			<ToastContainer />
+			<CssBaseline/>
+			<ToastContainer/>
 			<BrowserRouter>
 				<Switch>
 					<Route exact path="/">
-						<Entry />
+						<Entry/>
 					</Route>
 					<Route exact path="/app/:selectedguildparam?/:selectedchannelparam?">
-						<App />
+						<App/>
 					</Route>
 					<Route exact path="/invite/:invitecode">
-						<InviteHandler />
+						<InviteHandler/>
 					</Route>
 					<Route exact path="/bruh">
 						<Button
@@ -82,13 +83,17 @@ const ThemedRoot = (): JSX.Element => {
 			primary: themeState.primary,
 			secondary: themeState.secondary,
 			type: themeState.type,
+			background: {
+				default: themeState.type === 'dark' ? HarmonyDark[500] : '#FFF',
+				paper: themeState.type === 'dark' ? HarmonyDark[600] : '#FFF',
+			},
 		},
 	});
 
 	return (
 		<div className="root">
 			<ThemeProvider theme={theme}>
-				<Root />
+				<Root/>
 			</ThemeProvider>
 		</div>
 	);

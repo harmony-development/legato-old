@@ -10,6 +10,7 @@ import { Messages } from './Messages/Messages';
 import { Input } from './Input/Input';
 import { GuildList } from './GuildList/GuildList';
 import { ChannelList } from './ChannelList/ChannelList';
+import { Paper } from '@material-ui/core';
 
 export const ChatArea = () => {
 	const classes = useChatAreaStyles();
@@ -31,12 +32,14 @@ export const ChatArea = () => {
 
 	return (
 		<div className={classes.root}>
-			<div className={classes.guildlist}>
-				<GuildList />
-			</div>
-			<div className={classes.channellist}>
+			<Paper elevation={2} className={classes.guildlist} square>
+				<div>
+					<GuildList />
+				</div>
+			</Paper>
+			<Paper elevation={2} className={classes.channellist} square>
 				<ChannelList />
-			</div>
+			</Paper>
 			<div className={classes.chatArea}>
 				<div className={classes.messages} ref={messagesRef} onKeyDown={onKeyDown} tabIndex={-1}>
 					<Messages />
