@@ -18,23 +18,30 @@ func limit(event func(ws *globals.Client, data map[string]interface{}, limiter *
 	}
 }
 
+func makeEventBus() *globals.EventBus {
+	bus := &globals.EventBus{}
+	bus.Bind("login", limit(event.OnLogin, 10 * time.Second, 1))
+	bus.Bind("register", limit(event.OnRegister, 1 * time.Hour, 1))
+	bus.Bind("getguilds", limit(event.OnGetGuilds, 500 * time.Millisecond, 10))
+	bus.Bind("message", limit(event.OnMessage, 100 * time.Millisecond, 10))
+	bus.Bind("getmessages", limit(event.OnGetMessages, 100 * time.Millisecond, 5))
+	bus.Bind("getchannels", limit(event.OnGetChannels, 100 * time.Millisecond, 5))
+	bus.Bind("joinguild", limit(event.OnJoinGuild, 3 * time.Second, 1))
+	bus.Bind("createguild", limit(event.OnCreateGuild, 20 * time.Second, 1))
+	bus.Bind("leaveguild", limit(event.OnLeaveGuild, 3 * time.Second, 1))
+	bus.Bind("updateguildpicture", limit(event.OnUpdateGuildPicture, 3 * time.Second, 1))
+	bus.Bind("updateguildname", limit(event.OnUpdateGuildName, 3 * time.Second, 1))
+	bus.Bind("getinvites", limit(event.OnGetInvites, 500 * time.Millisecond, 1))
+	bus.Bind("addchannel", limit(event.OnAddChannel, 1 * time.Second, 5))
+	bus.Bind("deletechannel", limit(event.OnDeleteChannel, 1 * time.Second, 5))
+	bus.Bind("deleteinvite", limit(event.OnDeleteInvite, 200 * time.Millisecond, 5))
+	bus.Bind("createinvite", limit(event.OnCreateInvite, 200 * time.Millisecond, 5))
+	bus.Bind("getuser", limit(event.OnGetUser, 500 * time.Millisecond, 50))
+	return bus
+}
+
+
 func handleSocket(w http.ResponseWriter, r *http.Request) {
 	ws := socket.NewSocket(w, r)
-	ws.Bind("login", limit(event.OnLogin, 10 * time.Second, 1))
-	ws.Bind("register", limit(event.OnRegister, 1 * time.Hour, 1))
-	ws.Bind("getguilds", limit(event.OnGetGuilds, 500 * time.Millisecond, 10))
-	ws.Bind("message", limit(event.OnMessage, 100 * time.Millisecond, 10))
-	ws.Bind("getmessages", limit(event.OnGetMessages, 100 * time.Millisecond, 5))
-	ws.Bind("getchannels", limit(event.OnGetChannels, 100 * time.Millisecond, 5))
-	ws.Bind("joinguild", limit(event.OnJoinGuild, 3 * time.Second, 1))
-	ws.Bind("createguild", limit(event.OnCreateGuild, 20 * time.Second, 1))
-	ws.Bind("leaveguild", limit(event.OnLeaveGuild, 3 * time.Second, 1))
-	ws.Bind("updateguildpicture", limit(event.OnUpdateGuildPicture, 3 * time.Second, 1))
-	ws.Bind("updateguildname", limit(event.OnUpdateGuildName, 3 * time.Second, 1))
-	ws.Bind("getinvites", limit(event.OnGetInvites, 500 * time.Millisecond, 1))
-	ws.Bind("addchannel", limit(event.OnAddChannel, 1 * time.Second, 5))
-	ws.Bind("deletechannel", limit(event.OnDeleteChannel, 1 * time.Second, 5))
-	ws.Bind("deleteinvite", limit(event.OnDeleteInvite, 200 * time.Millisecond, 5))
-	ws.Bind("createinvite", limit(event.OnCreateInvite, 200 * time.Millisecond, 5))
-	ws.Bind("getuser", limit(event.OnGetUser, 500 * time.Millisecond, 50))
+	ws.EventBus = globals.Bus
 }
