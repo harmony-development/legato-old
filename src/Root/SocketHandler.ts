@@ -16,13 +16,13 @@ import {
 	SetGuildPicture,
 	SetInvites,
 	SetGuildName,
-	SetUser,
+	SetUser, SetConnected,
 } from '../redux/AppReducer';
 import { IGuild, IMessage, IState } from '../types/redux';
 
 export function useSocketHandler(socket: HarmonySocket, history: h.History<any>): void {
 	const dispatch = useDispatch<AppDispatch>();
-	const { currentGuild, channels, invites } = useSelector((state: IState) => state);
+	const { currentGuild, currentChannel, channels, invites } = useSelector((state: IState) => state);
 	const firstDisconnect = useRef(true);
 
 	useEffect(() => {
@@ -99,7 +99,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 					SetChannels({
 						...channels,
 						[raw['channelid']]: raw['name'],
-					})
+					}),
 				);
 			}
 		});
@@ -118,7 +118,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 					SetInvites({
 						...invites,
 						[raw['invite']]: 0,
-					})
+					}),
 				);
 			}
 		});
@@ -131,7 +131,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 				dispatch(
 					SetInvites({
 						...deletedInvites,
-					})
+					}),
 				);
 			}
 		});
@@ -146,7 +146,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 						userid: raw['userid'],
 						username: raw['username'],
 						avatar: raw['avatar'],
-					})
+					}),
 				);
 			}
 		});
@@ -163,14 +163,17 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		socket.events.addListener('close', () => {
 			if (firstDisconnect.current) {
 				firstDisconnect.current = false;
+				dispatch(SetConnected(false));
 				toast.error('You have lost connection to the server');
 			}
+			setTimeout(socket.connect, 3000);
 		});
 		socket.events.addListener('open', () => {
 			if (!firstDisconnect.current) {
 				toast.success('You have reconnected to the server');
 			}
 			socket.getGuilds();
+			dispatch(SetConnected(true));
 			firstDisconnect.current = true;
 		});
 		console.log('%cSocket Events Bound', 'font-size: x-large');
@@ -197,4 +200,10 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 			socket.events.removeAllListeners('close');
 		};
 	}, []);
+
+	useEffect(() => {
+		if(currentGuild && currentChannel) {
+			socket.getMessages(currentGuild, currentChannel);
+		}
+	}, [currentChannel]);
 }

@@ -8,9 +8,8 @@ import { harmonySocket } from '../../../Root';
 import { Message } from './Message';
 
 export const Messages = () => {
-	const [messages, selectedChannel, users] = useSelector((state: IState) => [
+	const [messages, users] = useSelector((state: IState) => [
 		state.messages,
-		state.currentChannel,
 		state.users,
 	]);
 	const messageList = useRef<HTMLUListElement | undefined>(undefined);
@@ -26,7 +25,6 @@ export const Messages = () => {
 		const userIDs = [...new Set(messages.map(val => val.userid))];
 		userIDs.forEach(val => {
 			if (!users[val]) {
-				console.log(val);
 				harmonySocket.sendGetUser(val);
 			}
 		});
@@ -36,21 +34,16 @@ export const Messages = () => {
 		<List innerRef={messageList}>
 			{messages
 				? messages.map(val => {
-						if (val.channel === selectedChannel) {
-							return (
-								<Message
-									key={val.messageid}
-									guild={val.guild}
-									userid={val.userid}
-									username={users[val.userid] ? users[val.userid].username : ''}
-									createdat={val.createdat}
-									avatar={users[val.userid] ? users[val.userid].avatar : undefined}
-									message={val.message}
-								/>
-							);
-						} else {
-							return undefined;
-						}
+						return (
+							<Message
+								key={val.messageid}
+								userid={val.userid}
+								username={users[val.userid] ? users[val.userid].username : ''}
+								createdat={val.createdat}
+								avatar={users[val.userid] ? users[val.userid].avatar : undefined}
+								message={val.message}
+							/>
+						);
 				  })
 				: undefined}
 		</List>

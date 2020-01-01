@@ -8,13 +8,20 @@ export default class HarmonySocket {
 
 	constructor() {
 		// eslint-disable-next-line no-undef
+		this.conn = new WebSocket(`ws://${process.env.REACT_APP_HARMONY_SERVER_HOST}/api/socket`);
+		// eslint-disable-next-line no-undef
 		this.events = new EventEmitter();
-		this.connect();
+		this.bindConnect();
 	}
 
-	connect() {
+	connect = () => {
 		// eslint-disable-next-line no-undef
 		this.conn = new WebSocket(`ws://${process.env.REACT_APP_HARMONY_SERVER_HOST}/api/socket`);
+		console.log(this);
+		this.bindConnect();
+	};
+
+	bindConnect = () => {
 		this.conn.addEventListener('open', () => this.events.emit('open'));
 		this.conn.addEventListener('close', () => this.events.emit('close'));
 		this.conn.addEventListener('error', () => this.events.emit('error'));
@@ -28,7 +35,7 @@ export default class HarmonySocket {
 				console.log(unprocessed);
 			}
 		};
-	}
+	};
 
 	exec(fn: () => void) {
 		if (this.conn.readyState === WebSocket.OPEN) {
@@ -69,10 +76,11 @@ export default class HarmonySocket {
 		});
 	}
 
-	getMessages(guildID: string) {
+	getMessages(guildID: string, channelID: string) {
 		this.emitEvent('getmessages', {
 			token: localStorage.getItem('token'),
 			guild: guildID,
+			channel: channelID
 		});
 	}
 

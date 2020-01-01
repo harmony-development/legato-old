@@ -1,5 +1,6 @@
 import { makeStyles } from '@material-ui/styles';
 import { Theme } from '@material-ui/core';
+
 import { HarmonyDark } from '../../HarmonyColor';
 
 export const useChannelListStyle = makeStyles((theme: Theme) => ({
