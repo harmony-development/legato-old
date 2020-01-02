@@ -27,7 +27,6 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 
 	useEffect(() => {
 		socket.events.addListener('getguilds', (raw: any) => {
-			console.log(raw);
 			if (typeof raw['guilds'] === 'object') {
 				const guildsList = raw['guilds'] as {
 					[key: string]: IGuild;
@@ -166,7 +165,6 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 				dispatch(SetConnected(false));
 				toast.error('You have lost connection to the server');
 			}
-			setTimeout(socket.connect, 3000);
 		});
 		socket.events.addListener('open', () => {
 			if (!firstDisconnect.current) {
@@ -202,7 +200,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 	}, []);
 
 	useEffect(() => {
-		if(currentGuild && currentChannel) {
+		if (currentGuild && currentChannel) {
 			socket.getMessages(currentGuild, currentChannel);
 		}
 	}, [currentChannel]);

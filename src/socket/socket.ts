@@ -17,13 +17,15 @@ export default class HarmonySocket {
 	connect = () => {
 		// eslint-disable-next-line no-undef
 		this.conn = new WebSocket(`ws://${process.env.REACT_APP_HARMONY_SERVER_HOST}/api/socket`);
-		console.log(this);
 		this.bindConnect();
-	};
+	}
 
 	bindConnect = () => {
 		this.conn.addEventListener('open', () => this.events.emit('open'));
-		this.conn.addEventListener('close', () => this.events.emit('close'));
+		this.conn.addEventListener('close', () => {
+			setTimeout(this.connect, 3000);
+			this.events.emit('close');
+		});
 		this.conn.addEventListener('error', () => this.events.emit('error'));
 		this.conn.onmessage = (e: MessageEvent) => {
 			const unprocessed = JSON.parse(e.data);
