@@ -16,7 +16,8 @@ import {
 	SetGuildPicture,
 	SetInvites,
 	SetGuildName,
-	SetUser, SetConnected,
+	SetUser,
+	SetConnected,
 } from '../redux/AppReducer';
 import { IGuild, IMessage, IState } from '../types/redux';
 
@@ -43,6 +44,8 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		socket.events.addListener('getmessages', (raw: any) => {
 			if (Array.isArray(raw['messages'])) {
 				dispatch(SetMessages((raw['messages'] as IMessage[]).reverse()));
+			} else if (raw['messages'] === null) {
+				dispatch(SetMessages([]));
 			}
 		});
 		socket.events.addListener('getchannels', (raw: any) => {
@@ -98,7 +101,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 					SetChannels({
 						...channels,
 						[raw['channelid']]: raw['name'],
-					}),
+					})
 				);
 			}
 		});
@@ -117,7 +120,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 					SetInvites({
 						...invites,
 						[raw['invite']]: 0,
-					}),
+					})
 				);
 			}
 		});
@@ -130,7 +133,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 				dispatch(
 					SetInvites({
 						...deletedInvites,
-					}),
+					})
 				);
 			}
 		});
@@ -145,7 +148,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 						userid: raw['userid'],
 						username: raw['username'],
 						avatar: raw['avatar'],
-					}),
+					})
 				);
 			}
 		});
@@ -200,8 +203,26 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 	}, []);
 
 	useEffect(() => {
+		if (currentGuild) {
+			if (socket.conn.readyState === WebSocket.OPEN) {
+				socket.getChannels(currentGuild);
+			} else {
+				socket.events.addListener('open', () => {
+					socket.getChannels(currentGuild);
+				});
+			}
+		}
+	}, [currentGuild]);
+
+	useEffect(() => {
 		if (currentGuild && currentChannel) {
-			socket.getMessages(currentGuild, currentChannel);
+			if (socket.conn.readyState === WebSocket.OPEN) {
+				socket.getMessages(currentGuild, currentChannel);
+			} else {
+				socket.events.addListener('open', () => {
+					socket.getMessages(currentGuild, currentChannel);
+				});
+			}
 		}
 	}, [currentChannel]);
 }

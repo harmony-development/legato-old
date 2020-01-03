@@ -8,10 +8,7 @@ import { harmonySocket } from '../../../Root';
 import { Message } from './Message';
 
 export const Messages = () => {
-	const [messages, users] = useSelector((state: IState) => [
-		state.messages,
-		state.users,
-	]);
+	const [messages, users] = useSelector((state: IState) => [state.messages, state.users]);
 	const messageList = useRef<HTMLUListElement | undefined>(undefined);
 
 	useEffect(() => {

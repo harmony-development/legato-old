@@ -1,5 +1,5 @@
 import React from 'react';
-import { Switch, Route } from 'react-router';
+import { Switch, Route, useHistory } from 'react-router';
 import { BrowserRouter } from 'react-router-dom';
 import { CssBaseline, createMuiTheme, Button } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
@@ -16,37 +16,46 @@ import { useRootStyles } from './RootStyle';
 import './Root.css';
 import { InviteHandler } from './InviteHandler/HandleInvite';
 import { HarmonyDark } from './App/HarmonyColor';
+import { useSocketHandler } from './SocketHandler';
 
 export const harmonySocket = new HarmonySocket();
+
+const RootWithRouter = (): JSX.Element => {
+	useSocketHandler(harmonySocket, useHistory());
+
+	return (
+		<Switch>
+			<Route exact path="/">
+				<Entry />
+			</Route>
+			<Route exact path="/app/:selectedguildparam?/:selectedchannelparam?">
+				<App />
+			</Route>
+			<Route exact path="/invite/:invitecode">
+				<InviteHandler />
+			</Route>
+			<Route exact path="/bruh">
+				<Button
+					onClick={(): void => {
+						toast.info('GET BRUHED ON KID');
+					}}
+				>
+					Bruh Button
+				</Button>
+			</Route>
+		</Switch>
+	);
+};
 
 const Root = (): JSX.Element => {
 	useRootStyles();
 
 	return (
 		<>
-			<CssBaseline/>
-			<ToastContainer/>
+			<CssBaseline />
+			<ToastContainer />
 			<BrowserRouter>
-				<Switch>
-					<Route exact path="/">
-						<Entry/>
-					</Route>
-					<Route exact path="/app/:selectedguildparam?/:selectedchannelparam?">
-						<App/>
-					</Route>
-					<Route exact path="/invite/:invitecode">
-						<InviteHandler/>
-					</Route>
-					<Route exact path="/bruh">
-						<Button
-							onClick={(): void => {
-								toast.info('GET BRUHED ON KID');
-							}}
-						>
-							Bruh Button
-						</Button>
-					</Route>
-				</Switch>
+				<RootWithRouter />
 			</BrowserRouter>
 		</>
 	);
@@ -60,8 +69,8 @@ const ThemedRoot = (): JSX.Element => {
 			secondary: themeState.secondary,
 			type: themeState.type,
 			background: {
-				default: themeState.type === 'dark' ? HarmonyDark[500] : '#FFF',
-				paper: themeState.type === 'dark' ? HarmonyDark[600] : '#FFF',
+				default: themeState.type === 'dark' ? HarmonyDark[600] : '#FFF',
+				paper: themeState.type === 'dark' ? HarmonyDark[500] : '#FFF',
 			},
 		},
 	});

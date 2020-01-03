@@ -1,12 +1,9 @@
 import React, { useEffect } from 'react';
 import { useHistory, useParams } from 'react-router';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
-import { harmonySocket } from '../Root';
 import { IState } from '../../types/redux';
-import { useSocketHandler } from '../SocketHandler';
-import { AppDispatch } from '../../redux/store';
-import { SetCurrentChannel, SetCurrentGuild, SetMessages } from '../../redux/AppReducer';
+import { SetCurrentGuild, SetCurrentChannel } from '../../redux/AppReducer';
 
 import { HarmonyBar } from './HarmonyBar/HarmonyBar';
 import { ThemeDialog } from './Dialog/ThemeDialog';
@@ -18,30 +15,21 @@ import { UserSettingsDialog } from './Dialog/UserSettingsDialog/UserSettingsDial
 
 export const App = (): JSX.Element => {
 	const classes = useAppStyles();
-	const dispatch = useDispatch<AppDispatch>();
-	const { selectedguildparam: selectedGuildParam, selectedchannelparam: selectedChannelParam } = useParams();
-	const [
+	const dispatch = useDispatch();
+	const {
 		channels,
 		currentGuild,
-		selectedChannel,
-		themeDialogOpen,
-		joinDialogOpen,
-		guildSettingsDialogOpen,
-		userSettingsDialogOpen,
-	] = useSelector((state: IState) => [
-		state.channels,
-		state.currentGuild,
-		state.currentChannel,
-		state.themeDialog,
-		state.guildDialog,
-		state.guildSettingsDialog,
-		state.userSettingsDialog,
-	]);
+		currentChannel,
+		themeDialog,
+		guildDialog,
+		guildSettingsDialog,
+		userSettingsDialog,
+	} = useSelector((state: IState) => state);
 	const history = useHistory();
-	useSocketHandler(harmonySocket, history);
+	const { selectedguildparam: selectedGuildParam, selectedchannelparam: selectedChannelParam } = useParams();
 
 	useEffect(() => {
-		if (selectedChannelParam) {
+		if (selectedGuildParam) {
 			dispatch(SetCurrentChannel(selectedChannelParam));
 		}
 	}, [selectedChannelParam]);
@@ -53,27 +41,18 @@ export const App = (): JSX.Element => {
 	}, [selectedGuildParam]);
 
 	useEffect(() => {
-		if (currentGuild) {
-			history.push(`/app/${currentGuild}/${selectedChannel || ''}`);
-			dispatch(SetMessages([]));
-			dispatch(SetCurrentChannel(undefined));
-			harmonySocket.exec(() => harmonySocket.getChannels(currentGuild));
+		if (currentGuild && currentChannel) {
+			document.title = `Harmony - ${channels[currentChannel] || 'FOSS Chat Client'}`;
+			history.push(`/app/${currentGuild}/${currentChannel}`);
 		}
-	}, [currentGuild]);
-
-	useEffect(() => {
-		if (currentGuild && selectedChannel) {
-			document.title = `Harmony - ${channels[selectedChannel] || 'FOSS Chat Client'}`;
-			history.push(`/app/${currentGuild}/${selectedChannel}`);
-		}
-	}, [selectedChannel, history, channels, currentGuild]);
+	}, [currentChannel, history, channels, currentGuild]);
 
 	return (
 		<div className={classes.root}>
-			{themeDialogOpen ? <ThemeDialog /> : undefined}
-			{joinDialogOpen ? <JoinGuild /> : undefined}
-			{guildSettingsDialogOpen ? <GuildSettings /> : undefined}
-			{userSettingsDialogOpen ? <UserSettingsDialog /> : undefined}
+			{themeDialog ? <ThemeDialog /> : undefined}
+			{guildDialog ? <JoinGuild /> : undefined}
+			{guildSettingsDialog ? <GuildSettings /> : undefined}
+			{userSettingsDialog ? <UserSettingsDialog /> : undefined}
 			<HarmonyBar />
 			<div className={classes.navFill} /> {/* this fills the area where the navbar is*/}
 			<ChatArea />

@@ -18,7 +18,7 @@ export default class HarmonySocket {
 		// eslint-disable-next-line no-undef
 		this.conn = new WebSocket(`ws://${process.env.REACT_APP_HARMONY_SERVER_HOST}/api/socket`);
 		this.bindConnect();
-	}
+	};
 
 	bindConnect = () => {
 		this.conn.addEventListener('open', () => this.events.emit('open'));
@@ -82,7 +82,7 @@ export default class HarmonySocket {
 		this.emitEvent('getmessages', {
 			token: localStorage.getItem('token'),
 			guild: guildID,
-			channel: channelID
+			channel: channelID,
 		});
 	}
 
