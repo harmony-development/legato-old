@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import h from 'history';
 import { toast } from 'react-toastify';
@@ -26,8 +26,8 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 	const { currentGuild, currentChannel, channels, invites } = useSelector((state: IState) => state);
 	const firstDisconnect = useRef(true);
 
-	useEffect(() => {
-		socket.events.addListener('getguilds', (raw: any) => {
+	const getGuildsCallback = useCallback(
+		(raw: any) => {
 			if (typeof raw['guilds'] === 'object') {
 				const guildsList = raw['guilds'] as {
 					[key: string]: IGuild;
@@ -40,20 +40,32 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 				}
 				dispatch(SetGuilds(guildsList));
 			}
-		});
-		socket.events.addListener('getmessages', (raw: any) => {
+		},
+		[dispatch]
+	);
+
+	const getMessagesCallback = useCallback(
+		(raw: any) => {
 			if (Array.isArray(raw['messages'])) {
 				dispatch(SetMessages((raw['messages'] as IMessage[]).reverse()));
 			} else if (raw['messages'] === null) {
 				dispatch(SetMessages([]));
 			}
-		});
-		socket.events.addListener('getchannels', (raw: any) => {
+		},
+		[dispatch]
+	);
+
+	const getChannelsCallback = useCallback(
+		(raw: any) => {
 			if (typeof raw === 'object') {
 				dispatch(SetChannels(raw['channels']));
 			}
-		});
-		socket.events.addListener('message', (raw: any) => {
+		},
+		[dispatch]
+	);
+
+	const messageCallback = useCallback(
+		(raw: any) => {
 			if (
 				typeof raw['userid'] === 'string' &&
 				typeof raw['createdat'] === 'number' &&
@@ -62,50 +74,72 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 			) {
 				dispatch(AddMessage(raw as IMessage));
 			}
-		});
-		socket.events.addListener('leaveguild', () => {
-			socket.getGuilds();
-		});
-		socket.events.addListener('joinguild', () => {
-			socket.getGuilds();
-			dispatch(ToggleGuildDialog());
-		});
-		socket.events.addListener('createguild', () => {
-			socket.getGuilds();
-			dispatch(ToggleGuildDialog());
-		});
-		socket.events.addListener('updateguildpicture', (raw: any) => {
+		},
+		[dispatch]
+	);
+
+	const leaveGuildCallback = useCallback(() => {
+		socket.getGuilds();
+	}, [socket]);
+
+	const joinGuildCallback = useCallback(() => {
+		socket.getGuilds();
+		dispatch(ToggleGuildDialog());
+	}, [dispatch, socket]);
+
+	const createGuildCallback = useCallback(() => {
+		socket.getGuilds();
+		dispatch(ToggleGuildDialog());
+	}, [dispatch, socket]);
+
+	const updateGuildPictureCallback = useCallback(
+		(raw: any) => {
 			if (typeof raw['picture'] === 'string' && typeof raw['guild'] === 'string') {
 				dispatch(SetGuildPicture({ guild: raw['guild'], picture: raw['picture'] }));
 			}
-		});
-		socket.events.addListener('updateguildname', (raw: any) => {
+		},
+		[dispatch]
+	);
+
+	const updateGuildNameCallback = useCallback(
+		(raw: any) => {
 			if (typeof raw['name'] === 'string' && typeof raw['guild'] === 'string') {
 				dispatch(SetGuildName({ guild: raw['guild'], name: raw['name'] }));
 			}
-		});
-		socket.events.addListener('getinvites', (raw: any) => {
+		},
+		[dispatch]
+	);
+
+	const getInvitesCallback = useCallback(
+		(raw: any) => {
 			if (typeof raw['invites'] === 'object') {
 				dispatch(SetInvites(raw['invites']));
 				dispatch(SetInvites(raw['invites']));
 			}
-		});
-		socket.events.addListener('addchannel', (raw: any) => {
+		},
+		[dispatch]
+	);
+
+	const addChannelCallback = useCallback(
+		(raw: any) => {
 			if (
-				typeof raw['guild'] === 'string' &&
 				typeof raw['channelname'] === 'string' &&
-				raw['channelid'] === 'string' &&
+				typeof raw['channelid'] === 'string' &&
 				raw['guild'] === currentGuild
 			) {
 				dispatch(
 					SetChannels({
 						...channels,
-						[raw['channelid']]: raw['name'],
+						[raw['channelid']]: raw['channelname'],
 					})
 				);
 			}
-		});
-		socket.events.addListener('deletechannel', (raw: any) => {
+		},
+		[dispatch, channels, currentGuild]
+	);
+
+	const deleteChannelCallback = useCallback(
+		(raw: any) => {
 			if (typeof raw['guild'] === 'string' && typeof raw['channelid'] === 'string') {
 				const deletedChannels = {
 					...channels,
@@ -113,8 +147,12 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 				delete deletedChannels[raw['channelid']];
 				dispatch(SetChannels(deletedChannels));
 			}
-		});
-		socket.events.addListener('createinvite', (raw: any) => {
+		},
+		[dispatch, channels]
+	);
+
+	const createInviteCallback = useCallback(
+		(raw: any) => {
 			if (typeof raw['invite'] === 'string') {
 				dispatch(
 					SetInvites({
@@ -123,8 +161,12 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 					})
 				);
 			}
-		});
-		socket.events.addListener('deleteinvite', (raw: any) => {
+		},
+		[dispatch, invites]
+	);
+
+	const deleteInviteCallback = useCallback(
+		(raw: any) => {
 			if (typeof raw['invite'] === 'string') {
 				const deletedInvites = {
 					...invites,
@@ -136,8 +178,12 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 					})
 				);
 			}
-		});
-		socket.events.addListener('getuser', (raw: any) => {
+		},
+		[dispatch, invites]
+	);
+
+	const getUserCallback = useCallback(
+		(raw: any) => {
 			if (
 				typeof raw['userid'] === 'string' &&
 				typeof raw['username'] === 'string' &&
@@ -151,36 +197,64 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 					})
 				);
 			}
-		});
+		},
+		[dispatch]
+	);
 
-		socket.events.addListener('deauth', () => {
-			toast.warn('Your session expired, please login again');
-			history.push('/');
-		});
-		socket.events.addListener('error', (raw: any) => {
-			if (typeof raw === 'object' && typeof raw['message'] === 'string') {
-				toast.error(raw['message']);
-			}
-		});
-		socket.events.addListener('close', () => {
-			if (firstDisconnect.current) {
-				firstDisconnect.current = false;
-				dispatch(SetConnected(false));
-				toast.error('You have lost connection to the server');
-			}
-		});
-		socket.events.addListener('open', () => {
-			if (!firstDisconnect.current) {
-				toast.success('You have reconnected to the server');
-			}
-			socket.getGuilds();
-			dispatch(SetConnected(true));
-			firstDisconnect.current = true;
-		});
-		console.log('%cSocket Events Bound', 'font-size: x-large');
+	const deauthCallback = useCallback(() => {
+		toast.warn('Your session expired, please login again');
+		history.push('/');
+	}, [history]);
+
+	const errorCallback = useCallback((raw: any) => {
+		if (typeof raw === 'object' && typeof raw['message'] === 'string') {
+			toast.error(raw['message']);
+		}
+	}, []);
+
+	const closeCallback = useCallback(() => {
+		if (firstDisconnect.current) {
+			firstDisconnect.current = false;
+			dispatch(SetConnected(false));
+			toast.error('You have lost connection to the server');
+		}
+	}, [dispatch]);
+
+	const openCallback = useCallback(() => {
+		if (!firstDisconnect.current) {
+			toast.success('You have reconnected to the server');
+		}
+		socket.getGuilds();
+		dispatch(SetConnected(true));
+		firstDisconnect.current = true;
+	}, [dispatch, socket]);
+
+	useEffect(() => {
 		if (socket.conn.readyState === WebSocket.OPEN) {
 			socket.getGuilds();
 		}
+	}, [socket]);
+
+	useEffect(() => {
+		socket.events.addListener('getguilds', getGuildsCallback);
+		socket.events.addListener('getmessages', getMessagesCallback);
+		socket.events.addListener('getchannels', getChannelsCallback);
+		socket.events.addListener('message', messageCallback);
+		socket.events.addListener('leaveguild', leaveGuildCallback);
+		socket.events.addListener('joinguild', joinGuildCallback);
+		socket.events.addListener('createguild', createGuildCallback);
+		socket.events.addListener('updateguildpicture', updateGuildPictureCallback);
+		socket.events.addListener('updateguildname', updateGuildNameCallback);
+		socket.events.addListener('getinvites', getInvitesCallback);
+		socket.events.addListener('addchannel', addChannelCallback);
+		socket.events.addListener('deletechannel', deleteChannelCallback);
+		socket.events.addListener('createinvite', createInviteCallback);
+		socket.events.addListener('deleteinvite', deleteInviteCallback);
+		socket.events.addListener('getuser', getUserCallback);
+		socket.events.addListener('deauth', deauthCallback);
+		socket.events.addListener('error', errorCallback);
+		socket.events.addListener('close', closeCallback);
+		socket.events.addListener('open', openCallback);
 		return (): void => {
 			socket.events.removeAllListeners('getguilds');
 			socket.events.removeAllListeners('getmessages');
@@ -192,6 +266,8 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 			socket.events.removeAllListeners('updateguildpicture');
 			socket.events.removeAllListeners('updateguildname');
 			socket.events.removeAllListeners('getinvites');
+			socket.events.removeAllListeners('addchannel');
+			socket.events.removeAllListeners('deletechannel');
 			socket.events.removeAllListeners('createinvite');
 			socket.events.removeAllListeners('deleteinvite');
 			socket.events.removeAllListeners('getuser');
@@ -200,7 +276,28 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 			socket.events.removeAllListeners('open');
 			socket.events.removeAllListeners('close');
 		};
-	}, []);
+	}, [
+		getGuildsCallback,
+		getMessagesCallback,
+		getChannelsCallback,
+		messageCallback,
+		leaveGuildCallback,
+		joinGuildCallback,
+		createGuildCallback,
+		updateGuildPictureCallback,
+		updateGuildNameCallback,
+		getInvitesCallback,
+		addChannelCallback,
+		deleteChannelCallback,
+		createInviteCallback,
+		deleteInviteCallback,
+		getUserCallback,
+		deauthCallback,
+		errorCallback,
+		closeCallback,
+		openCallback,
+		socket.events,
+	]);
 
 	useEffect(() => {
 		if (currentGuild) {
@@ -212,7 +309,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 				});
 			}
 		}
-	}, [currentGuild]);
+	}, [currentGuild, socket]);
 
 	useEffect(() => {
 		if (currentGuild && currentChannel) {
@@ -224,5 +321,5 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 				});
 			}
 		}
-	}, [currentChannel]);
+	}, [currentChannel, currentGuild, socket]);
 }

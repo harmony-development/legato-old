@@ -147,6 +147,11 @@ export default class HarmonySocket {
 	}
 
 	sendAddChannel(guildID: string, channelname: string) {
+		console.log({
+			token: localStorage.getItem('token'),
+			guild: guildID,
+			channel: channelname,
+		});
 		this.emitEvent('addchannel', {
 			token: localStorage.getItem('token'),
 			guild: guildID,

@@ -9,6 +9,7 @@
 		"@reduxjs/toolkit": "latest",
 		"axios": "latest",
 		"copy-to-clipboard": "latest",
+		"eslint-plugin-react-hooks": "^0.0.0-b53ea6ca0",
 		"fbemitter": "latest",
 		"react": "latest",
 		"react-contextmenu": "latest",
