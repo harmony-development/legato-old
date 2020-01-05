@@ -95,6 +95,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 	const updateGuildPictureCallback = useCallback(
 		(raw: any) => {
 			if (typeof raw['picture'] === 'string' && typeof raw['guild'] === 'string') {
+				toast.success('Successfully set guild picture');
 				dispatch(SetGuildPicture({ guild: raw['guild'], picture: raw['picture'] }));
 			}
 		},
@@ -104,6 +105,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 	const updateGuildNameCallback = useCallback(
 		(raw: any) => {
 			if (typeof raw['name'] === 'string' && typeof raw['guild'] === 'string') {
+				toast.success('Successfully set guild name');
 				dispatch(SetGuildName({ guild: raw['guild'], name: raw['name'] }));
 			}
 		},

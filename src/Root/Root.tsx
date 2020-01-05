@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { CssBaseline, createMuiTheme, Button } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
 import 'react-toastify/dist/ReactToastify.css';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast, cssTransition } from 'react-toastify';
 import { useSelector } from 'react-redux';
 
 import { IState } from '../types/redux';
@@ -19,6 +19,12 @@ import { HarmonyDark } from './App/HarmonyColor';
 import { useSocketHandler } from './SocketHandler';
 
 export const harmonySocket = new HarmonySocket();
+
+const Zoom = cssTransition({
+	enter: 'zoomIn',
+	exit: 'slideOut',
+	duration: 200,
+});
 
 const RootWithRouter = (): JSX.Element => {
 	useSocketHandler(harmonySocket, useHistory());
@@ -53,7 +59,7 @@ const Root = (): JSX.Element => {
 	return (
 		<>
 			<CssBaseline />
-			<ToastContainer />
+			<ToastContainer position="bottom-left" pauseOnFocusLoss={false} transition={Zoom} />
 			<BrowserRouter>
 				<RootWithRouter />
 			</BrowserRouter>

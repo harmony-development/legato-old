@@ -11,6 +11,7 @@
 		"copy-to-clipboard": "latest",
 		"eslint-plugin-react-hooks": "^0.0.0-b53ea6ca0",
 		"fbemitter": "latest",
+		"glamor": "^2.20.40",
 		"react": "latest",
 		"react-contextmenu": "latest",
 		"react-dom": "latest",
