@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useHistory } from 'react-router';
-import { harmonySocket } from '../Root';
 import { Typography, Button } from '@material-ui/core';
+
+import { harmonySocket } from '../Root';
+
 import { useInviteHandlerStyle } from './InviteHandlerStyle';
 
 export const InviteHandler = () => {
@@ -10,32 +12,52 @@ export const InviteHandler = () => {
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const classes = useInviteHandlerStyle();
 
-	useEffect(() => {
-		harmonySocket.events.addListener('joinguild', (raw: any) => {
+	const handleJoinGuild = useCallback(
+		(raw: any) => {
 			if (!raw['message']) {
 				setErrorMessage(null);
 				history.push('/app');
 			} else {
 				setErrorMessage(raw['message']);
 			}
+			harmonySocket.events.removeCurrentListener();
+		},
+		[history]
+	);
+
+	useEffect(() => {
+		harmonySocket.events.addListener('joinguild', handleJoinGuild);
+	}, [handleJoinGuild]);
+
+	useEffect(() => {
+		harmonySocket.events.addListener('error', (raw: any) => {
+			console.log('error');
+			setErrorMessage(raw['message']);
 		});
-		harmonySocket.events.addListener('open', () => {
-			if (invitecode) {
+	}, []);
+
+	useEffect(() => {
+		if (invitecode) {
+			if (harmonySocket.conn.readyState === WebSocket.OPEN) {
 				harmonySocket.joinGuild(invitecode);
+			} else {
+				harmonySocket.events.addListener('open', () => {
+					harmonySocket.joinGuild(invitecode);
+				});
 			}
-		});
-	}, [history, invitecode]);
+		}
+	}, [invitecode]);
 
 	return (
 		<div>
 			{errorMessage ? (
 				<div className={classes.errorRoot}>
-					<Typography variant='h1' align='center' className={classes.errorMsg}>
+					<Typography variant="h1" align="center" className={classes.errorMsg}>
 						404
-						<br/>
+						<br />
 						{errorMessage}
 					</Typography>
-					<Button variant='contained' color='secondary' className={classes.errorBtn} onClick={() => history.push('/')}>
+					<Button variant="contained" color="secondary" className={classes.errorBtn} onClick={() => history.push('/')}>
 						Return To Login
 					</Button>
 				</div>

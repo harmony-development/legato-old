@@ -175,7 +175,7 @@ export const GuildSettings = () => {
 											<Tooltip title="Copy Invite Link">
 												<IconButton
 													onClick={() => {
-														copy(`http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/invite/${key}`);
+														copy(`${window.location.origin}/invite/${key}`);
 														toast.info('Successfully copied to clipboard!');
 													}}
 												>

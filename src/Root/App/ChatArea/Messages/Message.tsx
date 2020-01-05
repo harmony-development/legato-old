@@ -17,14 +17,12 @@ const UtcEpochToLocalDate = (time: number) => {
 
 export const Message = (props: IProps) => {
 	return (
-		<ListItem alignItems='flex-start'>
+		<ListItem alignItems="flex-start">
 			<ListItemAvatar>
 				<Avatar
 					alt={props.userid}
 					src={
-						props.avatar
-							? `http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${props.avatar}`
-							: undefined
+						props.avatar ? `http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${props.avatar}` : undefined
 					}
 				/>
 			</ListItemAvatar>
@@ -32,7 +30,7 @@ export const Message = (props: IProps) => {
 				primary={
 					<>
 						{props.username || props.userid}
-						<Typography component='span' variant='body1' color='textSecondary'>
+						<Typography component="span" variant="body1" color="textSecondary">
 							{UtcEpochToLocalDate(props.createdat)}
 						</Typography>
 					</>
