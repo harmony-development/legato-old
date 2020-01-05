@@ -12,6 +12,7 @@ import (
 
 // FileUpload handles all file upload requests sent to the server
 func FileUpload(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	err := r.ParseMultipartForm(1 << 20)
 	if err != nil {
 		return
