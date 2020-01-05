@@ -49,12 +49,11 @@ func OnAddChannel(ws *globals.Client, rawMap map[string]interface{}, limiter *ra
 	}
 	for _, client := range globals.Guilds[data.Guild].Clients {
 		client.Send(&globals.Packet{
-			Type: "addguildchannel",
+			Type: "addchannel",
 			Data: map[string]interface{}{
 				"guild":       data.Guild,
 				"channelname": data.Channel,
 				"channelid":   channelID,
-				"success":     true,
 			},
 		})
 	}
