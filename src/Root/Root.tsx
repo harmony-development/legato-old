@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Switch, Route, useHistory } from 'react-router';
+import { useDispatch, useSelector } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import { CssBaseline, createMuiTheme, Button } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer, toast, cssTransition } from 'react-toastify';
-import { useSelector } from 'react-redux';
 
 import { IState } from '../types/redux';
 import HarmonySocket from '../socket/socket';
+import { AppDispatch } from '../redux/store';
+import { SetPrimary, SetSecondary, InvertTheme, SetInputStyle } from '../redux/AppReducer';
 
 import { App } from './App/App';
 import { Entry } from './Entry/Entry';
@@ -27,7 +29,27 @@ const Zoom = cssTransition({
 });
 
 const RootWithRouter = (): JSX.Element => {
+	const dispatch = useDispatch<AppDispatch>();
+	const { theme } = useSelector((state: IState) => state);
 	useSocketHandler(harmonySocket, useHistory());
+	useEffect(() => {
+		const localPrimary = localStorage.getItem('primary');
+		const localSecondary = localStorage.getItem('secondary');
+		const localType = localStorage.getItem('themetype');
+		const inputStyle = localStorage.getItem('inputstyle');
+		if (localPrimary) {
+			dispatch(SetPrimary(JSON.parse(localPrimary)));
+		}
+		if (localSecondary) {
+			dispatch(SetSecondary(JSON.parse(localSecondary)));
+		}
+		if (localType !== theme.type) {
+			dispatch(InvertTheme());
+		}
+		if (inputStyle === 'standard' || inputStyle === 'filled' || inputStyle === 'outlined') {
+			dispatch(SetInputStyle(inputStyle));
+		}
+	}, []);
 
 	return (
 		<Switch>

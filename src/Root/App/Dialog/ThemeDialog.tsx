@@ -41,11 +41,23 @@ export const ThemeDialog = () => {
 		}
 	};
 
+	const handleInvertTheme = () => {
+		dispatch(InvertTheme());
+	};
+
+	useEffect(() => {
+		localStorage.setItem('inputstyle', inputStyle);
+	}, [inputStyle]);
+	useEffect(() => {
+		localStorage.setItem('themetype', themeType);
+	}, [themeType]);
 	useEffect(() => {
 		dispatch(SetPrimary(primary));
+		localStorage.setItem('primary', JSON.stringify(primary));
 	}, [primary]);
 	useEffect(() => {
 		dispatch(SetSecondary(secondary));
+		localStorage.setItem('secondary', JSON.stringify(secondary));
 	}, [secondary]);
 
 	return (
@@ -54,7 +66,7 @@ export const ThemeDialog = () => {
 			<DialogContent>
 				<FormControl component="fieldset">
 					<FormLabel component="legend">Theme Type</FormLabel>
-					<RadioGroup value={themeType} row onChange={() => dispatch(InvertTheme())}>
+					<RadioGroup value={themeType} row onChange={handleInvertTheme}>
 						<FormControlLabel value="light" control={<Radio color="secondary" />} label="Light" labelPlacement="end" />
 						<FormControlLabel value="dark" control={<Radio color="secondary" />} label="Dark" labelPlacement="end" />
 					</RadioGroup>
