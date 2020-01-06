@@ -25,7 +25,6 @@ type Message struct {
 func OnGetMessages(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
 	var data GetMessagesData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
-		sendErr(ws, "")
 		sendErr(ws, "Something was wrong with your request. Please try again")
 		return
 	}

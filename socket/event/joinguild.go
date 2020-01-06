@@ -17,6 +17,7 @@ type joinGuildData struct {
 func OnJoinGuild(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
 	var data joinGuildData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
+		sendErr(ws, "Bad invite code or token")
 		return
 	}
 	userid ,err := authentication.VerifyToken(data.Token)
@@ -40,7 +41,7 @@ func OnJoinGuild(ws *globals.Client, rawMap map[string]interface{}, limiter *rat
 	}
 	_, err = joinGuildTransaction.Exec("INSERT INTO guildmembers(userid, guildid) VALUES($1, $2)", userid, guildid)
 	if err != nil {
-		sendErr(ws, "We couldn't get you to join that guild. Please try again")
+		sendErr(ws, "You are already part of this guild.")
 		golog.Warn(err)
 		return
 	}

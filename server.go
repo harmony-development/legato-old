@@ -37,6 +37,7 @@ func makeEventBus() *globals.EventBus {
 	bus.Bind("deleteinvite", limit(event.OnDeleteInvite, 200 * time.Millisecond, 5))
 	bus.Bind("createinvite", limit(event.OnCreateInvite, 200 * time.Millisecond, 5))
 	bus.Bind("getuser", limit(event.OnGetUser, 500 * time.Millisecond, 50))
+	bus.Bind("getself", limit(event.OnGetSelf, 500 * time.Millisecond, 20))
 	return bus
 }
 
