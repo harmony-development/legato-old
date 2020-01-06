@@ -1,35 +1,50 @@
-import React, { useState, useRef } from 'react';
-import {
-	Dialog,
-	AppBar,
-	Toolbar,
-	IconButton,
-	Typography,
-	DialogContent,
-	TextField,
-	ButtonBase,
-	Avatar,
-	Button,
-} from '@material-ui/core';
+import React, { useState } from 'react';
+import { Dialog, AppBar, Toolbar, IconButton, Typography, DialogContent, TextField, Button } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
+import axios from 'axios';
 
 import { IState } from '../../../../types/redux';
 import { AppDispatch } from '../../../../redux/store';
 import { ToggleUserSettingsDialog } from '../../../../redux/AppReducer';
+import { ImagePicker } from '../ImagePicker';
+import { harmonySocket } from '../../../Root';
 
 import { useUserSettingsStyle } from './UserSettingsStyle';
 
 export const UserSettingsDialog = () => {
 	const dispatch = useDispatch<AppDispatch>();
-	const [open, globalUsername, inputStyle] = useSelector((state: IState) => [
+	const [open, globalUsername, globalAvatar, inputStyle] = useSelector((state: IState) => [
 		state.userSettingsDialog,
 		state.self.username || undefined,
+		state.self.avatar || undefined,
 		state.theme.inputStyle,
 	]);
-	const userAvatarUpload = useRef<HTMLInputElement | null>(null);
-	const [username, setUsername] = useState<string>(globalUsername || "");
+	const [username, setUsername] = useState<string>(globalUsername || '');
+	const [avatar, setAvatar] = useState<string | undefined>(globalAvatar);
+	const [avatarFile, setAvatarFile] = useState<File | null>(null);
 	const classes = useUserSettingsStyle();
+
+	const onSaveChanges = () => {
+		if (avatarFile && username) {
+			const avatarFileUpload = new FormData();
+			avatarFileUpload.append('token', localStorage.getItem('token') || 'none');
+			avatarFileUpload.append('file', avatarFile);
+			axios
+				.post(`http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/api/rest/fileupload`, avatarFileUpload, {})
+				.then(res => {
+					if (res.data) {
+						const uploadID = res.data;
+						harmonySocket.sendAvatarUpdate(`http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${uploadID}`);
+					}
+				})
+				.catch(err => {
+					console.log(err);
+					toast.error('Failed to update avatar');
+				});
+		}
+	};
 
 	return (
 		<Dialog open={open} onClose={() => dispatch(ToggleUserSettingsDialog())} fullScreen>
@@ -43,17 +58,7 @@ export const UserSettingsDialog = () => {
 			</AppBar>
 			<DialogContent>
 				<div style={{ width: '33%' }}>
-					<input type="file" id="file" multiple ref={userAvatarUpload} style={{ display: 'none' }} />
-					<ButtonBase
-						style={{ borderRadius: '50%' }}
-						onClick={() => {
-							if (userAvatarUpload.current) {
-								userAvatarUpload.current.click();
-							}
-						}}
-					>
-						<Avatar className={classes.guildIcon} />
-					</ButtonBase>
+					<ImagePicker setImageFile={setAvatarFile} setImage={setAvatar} image={avatar} />
 					<TextField
 						label="Username"
 						fullWidth
@@ -62,7 +67,7 @@ export const UserSettingsDialog = () => {
 						value={username}
 						onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.currentTarget.value)}
 					/>
-					<Button variant="contained" color="secondary" className={classes.menuEntry}>
+					<Button variant="contained" color="secondary" className={classes.menuEntry} onClick={onSaveChanges}>
 						Save Changes
 					</Button>
 				</div>

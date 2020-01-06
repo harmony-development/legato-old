@@ -28,7 +28,7 @@
 			"warn",
 			{
 				"groups": ["builtin", "external", "parent", "sibling", "index"],
-				"newlines-between": "always",
+				"newlines-between": "always"
 			}
 		],
 

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import {
@@ -10,8 +10,6 @@ import {
 	Typography,
 	Button,
 	TextField,
-	Avatar,
-	ButtonBase,
 	Table,
 	TableHead,
 	TableRow,
@@ -30,6 +28,7 @@ import { IState } from '../../../../types/redux';
 import { harmonySocket } from '../../../Root';
 import { AppDispatch } from '../../../../redux/store';
 import { ToggleGuildSettingsDialog } from '../../../../redux/AppReducer';
+import { ImagePicker } from '../ImagePicker';
 
 import { useGuildSettingsStyle } from './GuildSettingsStyle';
 
@@ -42,7 +41,6 @@ export const GuildSettings = () => {
 		state.guildList,
 		state.invites,
 	]);
-	const guildIconUpload = useRef<HTMLInputElement | null>(null);
 	const [guildName, setGuildName] = useState<string | undefined>(
 		currentGuild ? (guilds[currentGuild] ? guilds[currentGuild].guildname : undefined) : undefined
 	);
@@ -86,25 +84,8 @@ export const GuildSettings = () => {
 						toast.error('Failed to update guild icon');
 					});
 			}
-			console.log(guilds[currentGuild].guildname === guildName);
 			if (guilds[currentGuild].guildname !== guildName && guildName) {
 				harmonySocket.sendGuildNameUpdate(currentGuild, guildName);
-			}
-		}
-	};
-
-	const onGuildIconSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
-		if (event.currentTarget.files && event.currentTarget.files.length > 0) {
-			const file = event.currentTarget.files[0];
-			setGuildIconFile(file);
-			if (file.type.startsWith('image/') && file.size < 33554432) {
-				const fileReader = new FileReader();
-				fileReader.readAsDataURL(file);
-				fileReader.addEventListener('load', () => {
-					if (typeof fileReader.result === 'string') {
-						setGuildIcon(fileReader.result);
-					}
-				});
 			}
 		}
 	};
@@ -127,24 +108,7 @@ export const GuildSettings = () => {
 			</AppBar>
 			<DialogContent>
 				<div style={{ width: '33%' }}>
-					<input
-						type="file"
-						id="file"
-						multiple
-						ref={guildIconUpload}
-						style={{ display: 'none' }}
-						onChange={onGuildIconSelected}
-					/>
-					<ButtonBase
-						style={{ borderRadius: '50%' }}
-						onClick={() => {
-							if (guildIconUpload.current) {
-								guildIconUpload.current.click();
-							}
-						}}
-					>
-						<Avatar className={classes.guildIcon} src={guildIcon}></Avatar>
-					</ButtonBase>
+					<ImagePicker setImageFile={setGuildIconFile} setImage={setGuildIcon} image={guildIcon} />
 					<TextField
 						label="Guild Name"
 						fullWidth

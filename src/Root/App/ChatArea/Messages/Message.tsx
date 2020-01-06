@@ -19,12 +19,7 @@ export const Message = (props: IProps) => {
 	return (
 		<ListItem alignItems="flex-start">
 			<ListItemAvatar>
-				<Avatar
-					alt={props.userid}
-					src={
-						props.avatar ? `http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${props.avatar}` : undefined
-					}
-				/>
+				<Avatar alt={props.userid} src={props.avatar ? `${props.avatar}` : undefined} />
 			</ListItemAvatar>
 			<ListItemText
 				primary={
