@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import {
@@ -108,6 +108,12 @@ export const GuildSettings = () => {
 			}
 		}
 	};
+
+	useEffect(() => {
+		if (currentGuild) {
+			harmonySocket.sendGetInvites(currentGuild);
+		}
+	}, [currentGuild]);
 
 	return (
 		<Dialog open={open} onClose={() => dispatch(ToggleGuildSettingsDialog())} fullScreen>

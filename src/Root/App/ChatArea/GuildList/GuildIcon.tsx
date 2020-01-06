@@ -5,7 +5,7 @@ import { ContextMenuTrigger, ContextMenu, MenuItem } from 'react-contextmenu';
 
 import { harmonySocket } from '../../../Root';
 import { AppDispatch } from '../../../../redux/store';
-import { SetCurrentGuild, ToggleGuildSettingsDialog } from '../../../../redux/AppReducer';
+import { SetCurrentGuild, ToggleGuildSettingsDialog, SetCurrentChannel } from '../../../../redux/AppReducer';
 import { IState } from '../../../../types/redux';
 
 import { useGuildListStyle } from './GuildListStyle';
@@ -28,6 +28,12 @@ export const GuildIcon = (props: IProps) => {
 
 	const handleLeave = () => {
 		harmonySocket.leaveGuild(props.guildid);
+	};
+
+	const handleGuildSettings = () => {
+		dispatch(SetCurrentGuild(props.guildid));
+		dispatch(SetCurrentChannel(undefined));
+		dispatch(ToggleGuildSettingsDialog());
 	};
 
 	return (
@@ -53,12 +59,14 @@ export const GuildIcon = (props: IProps) => {
 					{guildsList && guildsList[props.guildid].owner ? (
 						<>
 							<MenuItem>
-								<ListItem button onClick={() => dispatch(ToggleGuildSettingsDialog())}>
+								<ListItem button onClick={handleGuildSettings}>
 									<ListItemText primary="Guild Settings" />
 								</ListItem>
 							</MenuItem>
 						</>
-					) : undefined}
+					) : (
+						undefined
+					)}
 				</List>
 			</ContextMenu>
 		</>

@@ -85,7 +85,6 @@ export const ChannelList = () => {
 
 	const toggleGuildSettings = () => {
 		if (currentGuild) {
-			harmonySocket.sendGetInvites(currentGuild);
 			dispatch(ToggleGuildSettingsDialog());
 		}
 	};

@@ -23,7 +23,7 @@ import { IGuild, IMessage, IState } from '../types/redux';
 
 export function useSocketHandler(socket: HarmonySocket, history: h.History<any>): void {
 	const dispatch = useDispatch<AppDispatch>();
-	const { currentGuild, currentChannel, channels, invites } = useSelector((state: IState) => state);
+	const { currentGuild, currentChannel, channels, invites, guildDialog } = useSelector((state: IState) => state);
 	const firstDisconnect = useRef(true);
 
 	const getGuildsCallback = useCallback(
@@ -84,8 +84,10 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 
 	const joinGuildCallback = useCallback(() => {
 		socket.getGuilds();
-		dispatch(ToggleGuildDialog());
-	}, [dispatch, socket]);
+		if (guildDialog === true) {
+			dispatch(ToggleGuildDialog());
+		}
+	}, [dispatch, socket, guildDialog]);
 
 	const createGuildCallback = useCallback(() => {
 		socket.getGuilds();
@@ -115,7 +117,6 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 	const getInvitesCallback = useCallback(
 		(raw: any) => {
 			if (typeof raw['invites'] === 'object') {
-				dispatch(SetInvites(raw['invites']));
 				dispatch(SetInvites(raw['invites']));
 			}
 		},
