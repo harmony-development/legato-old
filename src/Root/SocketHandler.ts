@@ -18,6 +18,7 @@ import {
 	SetGuildName,
 	SetUser,
 	SetConnected,
+	SetSelf,
 } from '../redux/AppReducer';
 import { IGuild, IMessage, IState } from '../types/redux';
 
@@ -203,7 +204,15 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		},
 		[dispatch]
 	);
-
+	const getSelfCallback = useCallback((raw: any) => {
+		if (typeof raw['username'] === 'string' && typeof raw['avatar'] === 'string') {
+			console.log(raw);
+			dispatch(SetSelf({
+				username: raw['username'],
+				avatar: raw['avatar']
+			}))
+		}
+	}, [dispatch]);
 	const deauthCallback = useCallback(() => {
 		toast.warn('Your session expired, please login again');
 		history.push('/');
@@ -228,6 +237,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 			toast.success('You have reconnected to the server');
 		}
 		socket.getGuilds();
+		socket.getSelf();
 		dispatch(SetConnected(true));
 		firstDisconnect.current = true;
 	}, [dispatch, socket]);
@@ -254,6 +264,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		socket.events.addListener('createinvite', createInviteCallback);
 		socket.events.addListener('deleteinvite', deleteInviteCallback);
 		socket.events.addListener('getuser', getUserCallback);
+		socket.events.addListener('getself', getSelfCallback);
 		socket.events.addListener('deauth', deauthCallback);
 		socket.events.addListener('error', errorCallback);
 		socket.events.addListener('close', closeCallback);
@@ -274,6 +285,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 			socket.events.removeAllListeners('createinvite');
 			socket.events.removeAllListeners('deleteinvite');
 			socket.events.removeAllListeners('getuser');
+			socket.events.removeAllListeners('getself');
 			socket.events.removeAllListeners('deauth');
 			socket.events.removeAllListeners('error');
 			socket.events.removeAllListeners('open');
@@ -295,6 +307,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		createInviteCallback,
 		deleteInviteCallback,
 		getUserCallback,
+		getSelfCallback,
 		deauthCallback,
 		errorCallback,
 		closeCallback,

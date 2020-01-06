@@ -102,6 +102,12 @@ export default class HarmonySocket {
 		});
 	}
 
+	getSelf() {
+		this.emitEvent('getself', {
+			token: localStorage.getItem('token')
+		})
+	}
+
 	joinGuild(inviteCode: string) {
 		this.emitEvent('joinguild', {
 			token: localStorage.getItem('token'),

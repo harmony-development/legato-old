@@ -44,6 +44,10 @@ export interface IState {
 			avatar: string;
 		};
 	};
+	self: {
+		username?: string;
+		avatar?: string;
+	};
 	userSettingsDialog: boolean;
 	chatInputFocus: boolean;
 }

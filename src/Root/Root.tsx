@@ -10,7 +10,7 @@ import { ToastContainer, toast, cssTransition } from 'react-toastify';
 import { IState } from '../types/redux';
 import HarmonySocket from '../socket/socket';
 import { AppDispatch } from '../redux/store';
-import { SetPrimary, SetSecondary, InvertTheme, SetInputStyle } from '../redux/AppReducer';
+import { SetPrimary, SetSecondary, InvertTheme, SetInputStyle, SetSelf } from '../redux/AppReducer';
 
 import { App } from './App/App';
 import { Entry } from './Entry/Entry';
@@ -36,7 +36,8 @@ const RootWithRouter = (): JSX.Element => {
 		const localPrimary = localStorage.getItem('primary');
 		const localSecondary = localStorage.getItem('secondary');
 		const localType = localStorage.getItem('themetype');
-		const inputStyle = localStorage.getItem('inputstyle');
+		const localInputStyle = localStorage.getItem('inputstyle');
+		const localSelf = localStorage.getItem('self');
 		if (localPrimary) {
 			dispatch(SetPrimary(JSON.parse(localPrimary)));
 		}
@@ -46,8 +47,11 @@ const RootWithRouter = (): JSX.Element => {
 		if (localType !== theme.type) {
 			dispatch(InvertTheme());
 		}
-		if (inputStyle === 'standard' || inputStyle === 'filled' || inputStyle === 'outlined') {
-			dispatch(SetInputStyle(inputStyle));
+		if (localInputStyle === 'standard' || localInputStyle === 'filled' || localInputStyle === 'outlined') {
+			dispatch(SetInputStyle(localInputStyle));
+		}
+		if (localSelf) {
+			dispatch(SetSelf(JSON.parse(localSelf)));
 		}
 	}, []);
 

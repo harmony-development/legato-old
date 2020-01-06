@@ -22,9 +22,13 @@ import { useUserSettingsStyle } from './UserSettingsStyle';
 
 export const UserSettingsDialog = () => {
 	const dispatch = useDispatch<AppDispatch>();
-	const [open, inputStyle] = useSelector((state: IState) => [state.userSettingsDialog, state.userSettingsDialog]);
+	const [open, globalUsername, inputStyle] = useSelector((state: IState) => [
+		state.userSettingsDialog,
+		state.self.username || undefined,
+		state.theme.inputStyle,
+	]);
 	const userAvatarUpload = useRef<HTMLInputElement | null>(null);
-	const [username, setUsername] = useState<string>('');
+	const [username, setUsername] = useState<string>(globalUsername || "");
 	const classes = useUserSettingsStyle();
 
 	return (

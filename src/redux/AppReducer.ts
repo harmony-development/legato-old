@@ -22,6 +22,7 @@ const appState: IState = {
 	guildDialog: false,
 	guildSettingsDialog: false,
 	users: {},
+	self: {},
 	userSettingsDialog: false,
 	chatInputFocus: false,
 };
@@ -79,7 +80,13 @@ export const SetUser = createAction(
 		avatar: string;
 	}>()
 );
-
+export const SetSelf = createAction(
+	'SET_SELF',
+	WithPayload<{
+		username: string;
+		avatar: string;
+	}>()
+);
 export const AppReducer = createReducer(appState, builder =>
 	builder
 		.addCase(SetConnected, (state, action) => ({
@@ -190,5 +197,9 @@ export const AppReducer = createReducer(appState, builder =>
 					username: action.payload.username,
 				},
 			},
+		}))
+		.addCase(SetSelf, (state, action) => ({
+			...state,
+			self: action.payload,
 		}))
 );
