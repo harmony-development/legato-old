@@ -38,6 +38,8 @@ func makeEventBus() *globals.EventBus {
 	bus.Bind("createinvite", limit(event.OnCreateInvite, 200 * time.Millisecond, 5))
 	bus.Bind("getuser", limit(event.OnGetUser, 500 * time.Millisecond, 50))
 	bus.Bind("getself", limit(event.OnGetSelf, 500 * time.Millisecond, 20))
+	bus.Bind("avatarupdate", limit(event.OnAvatarUpdate, 10 * time.Second, 1))
+	bus.Bind("usernameupdate", limit(event.OnUsernameUpdate, 10 * time.Second, 1))
 	return bus
 }
 
