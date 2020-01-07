@@ -1,6 +1,7 @@
 package event
 
 import (
+	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
 	"harmony-server/authentication"
@@ -40,10 +41,28 @@ func OnAvatarUpdate(ws *globals.Client, rawMap map[string]interface{}, limiter *
 		sendErr(ws, "Something weird happened on our end and we weren't able to set your avatar. Please try again in a few moments")
 		return
 	}
-	ws.Send(&globals.Packet{
-		Type: "avatarupdate",
-		Data: map[string]interface{}{
-			"success": "true",
-		},
-	})
+	res, err := harmonydb.DBInst.Query("SELECT guildid FROM guildmembers WHERE userid=$1", userid)
+	if err != nil {
+		golog.Warnf("Error selecting guilds for avatarupdate : %v", err)
+		return
+	}
+	for res.Next() {
+		var guildid string
+		err = res.Scan(&guildid)
+		if err != nil {
+			golog.Warnf("Error getting guildid from result on avatarupdate : %v", err)
+			return
+		}
+		if globals.Guilds[guildid] != nil {
+			for _, client := range globals.Guilds[guildid].Clients  {
+				client.Send(&globals.Packet{
+					Type: "avatarupdate",
+					Data: map[string]interface{}{
+						"userid": userid,
+						"avatar": data.Avatar,
+					},
+				})
+			}
+		}
+	}
 }
