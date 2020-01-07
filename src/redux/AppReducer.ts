@@ -80,6 +80,13 @@ export const SetUser = createAction(
 		avatar: string;
 	}>()
 );
+export const SetAvatar = createAction(
+	'SET_AVATAR',
+	WithPayload<{
+		userid: string;
+		avatar: string;
+	}>()
+);
 export const SetSelf = createAction(
 	'SET_SELF',
 	WithPayload<{
@@ -195,6 +202,16 @@ export const AppReducer = createReducer(appState, builder =>
 				[action.payload.userid]: {
 					avatar: action.payload.avatar,
 					username: action.payload.username,
+				},
+			},
+		}))
+		.addCase(SetAvatar, (state, action) => ({
+			...state,
+			users: {
+				...state.users,
+				[action.payload.userid]: {
+					...state.users[action.payload.userid],
+					avatar: action.payload.avatar,
 				},
 			},
 		}))

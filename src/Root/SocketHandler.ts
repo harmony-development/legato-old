@@ -19,6 +19,7 @@ import {
 	SetUser,
 	SetConnected,
 	SetSelf,
+	SetAvatar,
 } from '../redux/AppReducer';
 import { IGuild, IMessage, IState } from '../types/redux';
 
@@ -204,15 +205,32 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		},
 		[dispatch]
 	);
-	const getSelfCallback = useCallback((raw: any) => {
-		if (typeof raw['username'] === 'string' && typeof raw['avatar'] === 'string') {
-			console.log(raw);
-			dispatch(SetSelf({
-				username: raw['username'],
-				avatar: raw['avatar']
-			}))
-		}
-	}, [dispatch]);
+	const getSelfCallback = useCallback(
+		(raw: any) => {
+			if (typeof raw['username'] === 'string' && typeof raw['avatar'] === 'string') {
+				dispatch(
+					SetSelf({
+						username: raw['username'],
+						avatar: raw['avatar'],
+					})
+				);
+			}
+		},
+		[dispatch]
+	);
+	const avatarUpdateCallback = useCallback(
+		(raw: any) => {
+			if (typeof raw['avatar'] === 'string' && typeof raw['userid'] === 'string') {
+				dispatch(
+					SetAvatar({
+						userid: raw['userid'],
+						avatar: raw['avatar'],
+					})
+				);
+			}
+		},
+		[dispatch]
+	);
 	const deauthCallback = useCallback(() => {
 		toast.warn('Your session expired, please login again');
 		history.push('/');
@@ -265,6 +283,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		socket.events.addListener('deleteinvite', deleteInviteCallback);
 		socket.events.addListener('getuser', getUserCallback);
 		socket.events.addListener('getself', getSelfCallback);
+		socket.events.addListener('avatarupdate', avatarUpdateCallback);
 		socket.events.addListener('deauth', deauthCallback);
 		socket.events.addListener('error', errorCallback);
 		socket.events.addListener('close', closeCallback);
@@ -286,6 +305,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 			socket.events.removeAllListeners('deleteinvite');
 			socket.events.removeAllListeners('getuser');
 			socket.events.removeAllListeners('getself');
+			socket.events.removeAllListeners('avatarupdate');
 			socket.events.removeAllListeners('deauth');
 			socket.events.removeAllListeners('error');
 			socket.events.removeAllListeners('open');
@@ -313,6 +333,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		closeCallback,
 		openCallback,
 		socket.events,
+		avatarUpdateCallback,
 	]);
 
 	useEffect(() => {
