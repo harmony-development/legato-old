@@ -228,7 +228,7 @@ export const AppReducer = createReducer(appState, builder =>
 				...state.users,
 				[action.payload.userid]: {
 					...state.users[action.payload.userid],
-					avatar: action.payload.username,
+					username: action.payload.username,
 				},
 			},
 		}))

@@ -36,6 +36,7 @@ export const Login: React.FC = () => {
 				localStorage.setItem('token', raw['token']);
 				localStorage.setItem('userid', raw['userid']);
 				harmonySocket.getGuilds();
+				harmonySocket.getSelf();
 				history.push('/app');
 			}
 		});
