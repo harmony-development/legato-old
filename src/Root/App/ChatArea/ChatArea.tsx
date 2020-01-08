@@ -5,13 +5,13 @@ import { Paper } from '@material-ui/core';
 import { IState } from '../../../types/redux';
 import { AppDispatch } from '../../../redux/store';
 import { FocusChatInput } from '../../../redux/AppReducer';
+import { DisconnectedStatus } from '../DisconnectedStatus';
 
 import { useChatAreaStyles } from './ChatAreaStyle';
 import { Messages } from './Messages/Messages';
 import { Input } from './Input/Input';
 import { GuildList } from './GuildList/GuildList';
 import { ChannelList } from './ChannelList/ChannelList';
-import { DisconnectedStatus } from '../DisconnectedStatus';
 
 export const ChatArea = () => {
 	const classes = useChatAreaStyles();
@@ -43,9 +43,7 @@ export const ChatArea = () => {
 			</Paper>
 			<div className={classes.chatArea}>
 				<div className={classes.messages} ref={messagesRef} onKeyDown={onKeyDown} tabIndex={-1}>
-					{!connected ? (
-						<DisconnectedStatus />
-					) : undefined}
+					{!connected ? <DisconnectedStatus /> : undefined}
 					<Messages />
 				</div>
 				<div className={classes.input}>

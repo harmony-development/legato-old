@@ -27,7 +27,7 @@ export const UserSettingsDialog = () => {
 	const classes = useUserSettingsStyle();
 
 	const onSaveChanges = () => {
-		if (avatarFile && username) {
+		if (avatarFile && avatar !== globalAvatar) {
 			const avatarFileUpload = new FormData();
 			avatarFileUpload.append('token', localStorage.getItem('token') || 'none');
 			avatarFileUpload.append('file', avatarFile);
@@ -43,6 +43,9 @@ export const UserSettingsDialog = () => {
 					console.log(err);
 					toast.error('Failed to update avatar');
 				});
+		}
+		if (username !== globalUsername) {
+			harmonySocket.sendUsernameUpdate(username);
 		}
 	};
 

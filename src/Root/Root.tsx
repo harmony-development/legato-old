@@ -44,7 +44,7 @@ const RootWithRouter = (): JSX.Element => {
 		if (localSecondary) {
 			dispatch(SetSecondary(JSON.parse(localSecondary)));
 		}
-		if (localType !== theme.type) {
+		if (localType !== theme.type && localType) {
 			dispatch(InvertTheme());
 		}
 		if (localInputStyle === 'standard' || localInputStyle === 'filled' || localInputStyle === 'outlined') {
@@ -102,7 +102,7 @@ const ThemedRoot = (): JSX.Element => {
 			type: themeState.type,
 			background: {
 				default: themeState.type === 'dark' ? HarmonyDark[600] : '#FFF',
-				paper: themeState.type === 'dark' ? HarmonyDark[500] : '#FFF',
+				paper: themeState.type === 'dark' ? HarmonyDark[500] : '#f7f7f7',
 			},
 		},
 	});

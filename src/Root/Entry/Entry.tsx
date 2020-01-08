@@ -11,7 +11,7 @@ export const Entry = () => {
 
 	return (
 		<div className={classes.root}>
-			<Paper className={classes.form}>
+			<Paper className={classes.form} elevation={5}>
 				<Tabs
 					value={tabIDX}
 					onChange={(_event: any, newValue: number): void => setTabIDX(newValue)}

@@ -20,6 +20,7 @@ import {
 	SetConnected,
 	SetSelf,
 	SetAvatar,
+	SetUsername,
 } from '../redux/AppReducer';
 import { IGuild, IMessage, IState } from '../types/redux';
 
@@ -231,6 +232,19 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		},
 		[dispatch]
 	);
+	const usernameUpdateCallback = useCallback(
+		(raw: any) => {
+			if (typeof raw['username'] === 'string' && typeof raw['userid'] === 'string') {
+				dispatch(
+					SetUsername({
+						userid: raw['userid'],
+						username: raw['username'],
+					})
+				);
+			}
+		},
+		[dispatch]
+	);
 	const deauthCallback = useCallback(() => {
 		toast.warn('Your session expired, please login again');
 		history.push('/');
@@ -254,8 +268,10 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		if (!firstDisconnect.current) {
 			toast.success('You have reconnected to the server');
 		}
-		socket.getGuilds();
-		socket.getSelf();
+		if (localStorage.getItem('token')) {
+			socket.getGuilds();
+			socket.getSelf();
+		}
 		dispatch(SetConnected(true));
 		firstDisconnect.current = true;
 	}, [dispatch, socket]);
@@ -284,6 +300,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		socket.events.addListener('getuser', getUserCallback);
 		socket.events.addListener('getself', getSelfCallback);
 		socket.events.addListener('avatarupdate', avatarUpdateCallback);
+		socket.events.addListener('usernameupdate', usernameUpdateCallback);
 		socket.events.addListener('deauth', deauthCallback);
 		socket.events.addListener('error', errorCallback);
 		socket.events.addListener('close', closeCallback);
@@ -306,6 +323,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 			socket.events.removeAllListeners('getuser');
 			socket.events.removeAllListeners('getself');
 			socket.events.removeAllListeners('avatarupdate');
+			socket.events.removeAllListeners('usernameupdate');
 			socket.events.removeAllListeners('deauth');
 			socket.events.removeAllListeners('error');
 			socket.events.removeAllListeners('open');
@@ -334,6 +352,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		openCallback,
 		socket.events,
 		avatarUpdateCallback,
+		usernameUpdateCallback,
 	]);
 
 	useEffect(() => {
@@ -343,6 +362,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 			} else {
 				socket.events.addListener('open', () => {
 					socket.getChannels(currentGuild);
+					socket.events.removeCurrentListener();
 				});
 			}
 		}
@@ -355,6 +375,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 			} else {
 				socket.events.addListener('open', () => {
 					socket.getMessages(currentGuild, currentChannel);
+					socket.events.removeCurrentListener();
 				});
 			}
 		}

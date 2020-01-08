@@ -14,10 +14,10 @@ const appState: IState = {
 	guildList: {},
 	themeDialog: false,
 	connected: false,
-	currentGuild: '',
 	messages: [],
 	invites: {},
 	channels: {},
+	currentGuild: undefined,
 	currentChannel: undefined,
 	guildDialog: false,
 	guildSettingsDialog: false,
@@ -85,6 +85,13 @@ export const SetAvatar = createAction(
 	WithPayload<{
 		userid: string;
 		avatar: string;
+	}>()
+);
+export const SetUsername = createAction(
+	'SET_USERNAME',
+	WithPayload<{
+		userid: string;
+		username: string;
 	}>()
 );
 export const SetSelf = createAction(
@@ -212,6 +219,16 @@ export const AppReducer = createReducer(appState, builder =>
 				[action.payload.userid]: {
 					...state.users[action.payload.userid],
 					avatar: action.payload.avatar,
+				},
+			},
+		}))
+		.addCase(SetUsername, (state, action) => ({
+			...state,
+			users: {
+				...state.users,
+				[action.payload.userid]: {
+					...state.users[action.payload.userid],
+					avatar: action.payload.username,
 				},
 			},
 		}))

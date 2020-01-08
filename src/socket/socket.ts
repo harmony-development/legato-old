@@ -201,4 +201,11 @@ export default class HarmonySocket {
 			avatar,
 		});
 	}
+
+	sendUsernameUpdate(username: string) {
+		this.emitEvent('usernameupdate', {
+			token: localStorage.getItem('token'),
+			username,
+		});
+	}
 }

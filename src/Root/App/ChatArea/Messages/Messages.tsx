@@ -21,11 +21,11 @@ export const Messages = () => {
 	useEffect(() => {
 		const userIDs = [...new Set(messages.map(val => val.userid))];
 		userIDs.forEach(val => {
-			if (!users[val]) {
+			if (!users[val] || !users[val].avatar || !users[val].username) {
 				harmonySocket.sendGetUser(val);
 			}
 		});
-	}, [messages]);
+	}, [messages, users]);
 
 	return (
 		<List innerRef={messageList}>

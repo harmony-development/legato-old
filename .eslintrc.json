@@ -34,7 +34,7 @@
 
 		// Rules
 		"react-hooks/rules-of-hooks": "error",
-		"react-hooks/exhaustive-deps": "warn",
+		"react-hooks/exhaustive-deps": "off",
 		"@typescript-eslint/no-non-null-assertion": "off",
 		"@typescript-eslint/interface-name-prefix": "off",
 		"@typescript-eslint/explicit-function-return-type": "off"
