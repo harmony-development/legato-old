@@ -194,7 +194,7 @@ export const AppReducer = createReducer(appState, builder =>
 			guildList: {
 				[action.payload.guild]: {
 					...state.guildList[action.payload.guild],
-					name: action.payload.name,
+					guildname: action.payload.name,
 				},
 			},
 		}))
