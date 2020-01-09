@@ -49,7 +49,6 @@ func OnUpdateGuildName(ws *globals.Client, rawMap map[string]interface{}, limite
 			Data: map[string]interface{}{
 				"guild": data.Guild,
 				"name": data.Name,
-				"success": true,
 			},
 		})
 	}
