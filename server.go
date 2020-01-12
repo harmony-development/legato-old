@@ -22,6 +22,7 @@ func makeEventBus() *globals.EventBus {
 	bus := &globals.EventBus{}
 	bus.Bind("login", limit(event.OnLogin, 10 * time.Second, 1))
 	bus.Bind("register", limit(event.OnRegister, 1 * time.Hour, 1))
+	bus.Bind("ping", limit(event.OnPing, 500 * time.Millisecond, 5))
 	bus.Bind("getguilds", limit(event.OnGetGuilds, 500 * time.Millisecond, 10))
 	bus.Bind("message", limit(event.OnMessage, 100 * time.Millisecond, 10))
 	bus.Bind("getmessages", limit(event.OnGetMessages, 100 * time.Millisecond, 5))
