@@ -6,6 +6,7 @@ import (
 	"github.com/kataras/golog"
 	"harmony-server/globals"
 	"net/http"
+	"time"
 )
 
 var (
@@ -31,7 +32,23 @@ func NewSocket(w http.ResponseWriter, r *http.Request) *globals.Client {
 	}
 	go reader(ws)
 	go writer(ws)
+	go pinger(ws)
 	return ws
+}
+
+func pinger(ws *globals.Client) {
+	ws.Send(&globals.Packet{
+		Type: "ping",
+		Data: nil,
+	})
+	time.Sleep(20 * time.Second)
+	if time.Since(ws.LastPong) > 20 * time.Second {
+		deregister(ws)
+		err := ws.Connection.Close()
+		if err != nil {
+			golog.Warnf("Error closing websocket connection : %v", err)
+		}
+	}
 }
 
 // reader eternally waits for things to read from the event

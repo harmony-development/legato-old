@@ -3,6 +3,7 @@ package globals
 import (
 	"encoding/json"
 	"github.com/gorilla/websocket"
+	"time"
 )
 
 type (
@@ -24,6 +25,7 @@ type (
 		Connection *websocket.Conn
 		EventBus map[string]Event
 		Userid string
+		LastPong time.Time
 		Out chan []byte
 	}
 )
