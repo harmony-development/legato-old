@@ -1,27 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
-import {
-	Dialog,
-	DialogContent,
-	AppBar,
-	Toolbar,
-	IconButton,
-	Typography,
-	Button,
-	TextField,
-	Table,
-	TableHead,
-	TableRow,
-	TableCell,
-	TableBody,
-	Tooltip,
-} from '@material-ui/core';
-import copy from 'copy-to-clipboard';
-import AddIcon from '@material-ui/icons/Add';
+import { Dialog, DialogContent, AppBar, Toolbar, IconButton, Typography, Button, TextField } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
-import DeleteIcon from '@material-ui/icons/Delete';
-import ShareIcon from '@material-ui/icons/Share';
 import { toast } from 'react-toastify';
 
 import { IState } from '../../../../types/redux';
@@ -31,15 +12,15 @@ import { ToggleGuildSettingsDialog } from '../../../../redux/AppReducer';
 import { ImagePicker } from '../ImagePicker';
 
 import { useGuildSettingsStyle } from './GuildSettingsStyle';
+import { GuildInvites } from './GuildInvites';
 
 export const GuildSettings = () => {
 	const dispatch = useDispatch<AppDispatch>();
-	const [open, currentGuild, inputStyle, guilds, invites] = useSelector((state: IState) => [
+	const [open, currentGuild, inputStyle, guilds] = useSelector((state: IState) => [
 		state.guildSettingsDialog,
 		state.currentGuild,
 		state.theme.inputStyle,
 		state.guildList,
-		state.invites,
 	]);
 	const [guildName, setGuildName] = useState<string | undefined>(
 		currentGuild ? (guilds[currentGuild] ? guilds[currentGuild].guildname : undefined) : undefined
@@ -49,18 +30,6 @@ export const GuildSettings = () => {
 		currentGuild ? (guilds[currentGuild] ? guilds[currentGuild].picture : undefined) : undefined
 	);
 	const classes = useGuildSettingsStyle();
-
-	const deleteInviteLink = (invite: string) => {
-		if (currentGuild) {
-			harmonySocket.sendDeleteInvite(invite, currentGuild);
-		}
-	};
-
-	const createInviteLink = () => {
-		if (currentGuild) {
-			harmonySocket.sendCreateInvite(currentGuild);
-		}
-	};
 
 	const onSaveChanges = () => {
 		if (currentGuild && guilds[currentGuild]) {
@@ -123,49 +92,7 @@ export const GuildSettings = () => {
 					<Typography variant="h4" className={classes.menuEntry}>
 						Join Codes
 					</Typography>
-					<Table>
-						<TableHead>
-							<TableRow>
-								<TableCell>Join Code</TableCell>
-								<TableCell>Amount Used</TableCell>
-								<TableCell>Actions</TableCell>
-							</TableRow>
-						</TableHead>
-						<TableBody>
-							{Object.keys(invites).map(key => {
-								return (
-									<TableRow key={key}>
-										<TableCell component="th" scope="row">
-											{key}
-										</TableCell>
-										<TableCell component="th" scope="row">
-											{invites[key]}
-										</TableCell>
-										<TableCell component="td" scope="row">
-											<Tooltip title="Copy Invite Link">
-												<IconButton
-													onClick={() => {
-														copy(`${window.location.origin}/invite/${key}`);
-														toast.info('Successfully copied to clipboard!');
-													}}
-												>
-													<ShareIcon />
-												</IconButton>
-											</Tooltip>
-											<Tooltip title="Delete Invite Link">
-												<IconButton onClick={() => deleteInviteLink(key)}>
-													<DeleteIcon />
-												</IconButton>
-											</Tooltip>
-										</TableCell>
-									</TableRow>
-								);
-							})}
-						</TableBody>
-					</Table>
-					<Button fullWidth onClick={createInviteLink}>
-						<AddIcon />
-					</Button>
+					<GuildInvites />
 				</div>
 			</DialogContent>
 		</Dialog>
