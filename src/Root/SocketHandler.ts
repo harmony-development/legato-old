@@ -106,7 +106,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		if (guildSettingsDialog === true) {
 			dispatch(ToggleGuildSettingsDialog());
 		}
-	}, [dispatch, socket, guildList]);
+	}, [dispatch, socket, guildList, guildSettingsDialog]);
 
 	const updateGuildPictureCallback = useCallback(
 		(raw: any) => {
