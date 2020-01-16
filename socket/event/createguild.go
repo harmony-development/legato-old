@@ -12,7 +12,7 @@ import (
 
 type createGuildData struct {
 	Token string `mapstructure:"token"`
-	Guild string `mapstructure:"guild"`
+	Guild string `mapstructure:"guildname"`
 }
 
 func OnCreateGuild(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
