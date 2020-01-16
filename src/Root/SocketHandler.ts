@@ -21,12 +21,15 @@ import {
 	SetSelf,
 	SetAvatar,
 	SetUsername,
+	ToggleGuildSettingsDialog,
 } from '../redux/AppReducer';
 import { IGuild, IMessage, IState } from '../types/redux';
 
 export function useSocketHandler(socket: HarmonySocket, history: h.History<any>): void {
 	const dispatch = useDispatch<AppDispatch>();
-	const { currentGuild, currentChannel, channels, invites, guildDialog } = useSelector((state: IState) => state);
+	const { currentGuild, currentChannel, channels, invites, guildDialog, guildList } = useSelector(
+		(state: IState) => state
+	);
 	const firstDisconnect = useRef(true);
 
 	const getGuildsCallback = useCallback(
@@ -96,6 +99,12 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		socket.getGuilds();
 		dispatch(ToggleGuildDialog());
 	}, [dispatch, socket]);
+
+	const deleteGuildCallback = useCallback(() => {
+		socket.getGuilds();
+		dispatch(SetCurrentGuild(Object.keys(guildList)[0]));
+		dispatch(ToggleGuildSettingsDialog());
+	}, [dispatch, socket, guildList]);
 
 	const updateGuildPictureCallback = useCallback(
 		(raw: any) => {
@@ -293,6 +302,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		socket.events.addListener('leaveguild', leaveGuildCallback);
 		socket.events.addListener('joinguild', joinGuildCallback);
 		socket.events.addListener('createguild', createGuildCallback);
+		socket.events.addListener('deleteguild', deleteGuildCallback);
 		socket.events.addListener('updateguildpicture', updateGuildPictureCallback);
 		socket.events.addListener('updateguildname', updateGuildNameCallback);
 		socket.events.addListener('getinvites', getInvitesCallback);
@@ -317,6 +327,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 			socket.events.removeAllListeners('leaveguild');
 			socket.events.removeAllListeners('joinguild');
 			socket.events.removeAllListeners('createguild');
+			socket.events.removeAllListeners('deleteguild');
 			socket.events.removeAllListeners('updateguildpicture');
 			socket.events.removeAllListeners('updateguildname');
 			socket.events.removeAllListeners('getinvites');
