@@ -192,6 +192,7 @@ export const AppReducer = createReducer(appState, builder =>
 		.addCase(SetGuildName, (state, action) => ({
 			...state,
 			guildList: {
+				...state.guildList,
 				[action.payload.guild]: {
 					...state.guildList[action.payload.guild],
 					guildname: action.payload.name,

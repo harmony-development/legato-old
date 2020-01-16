@@ -108,7 +108,6 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 
 	const updateGuildNameCallback = useCallback(
 		(raw: any) => {
-			console.log({ guild: raw['guild'], name: raw['name'] });
 			if (typeof raw['name'] === 'string' && typeof raw['guild'] === 'string') {
 				dispatch(SetGuildName({ guild: raw['guild'], name: raw['name'] }));
 			}
