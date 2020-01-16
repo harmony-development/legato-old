@@ -209,6 +209,13 @@ export default class HarmonySocket {
 		});
 	}
 
+	sendDeleteGuild(guildid: string) {
+		this.emitEvent('deleteguild', {
+			token: localStorage.getItem('token'),
+			guild: guildid,
+		});
+	}
+
 	sendPong() {
 		this.emitEvent('ping', null);
 	}

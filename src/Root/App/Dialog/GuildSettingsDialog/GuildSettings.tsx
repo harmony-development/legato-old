@@ -65,13 +65,11 @@ export const GuildSettings = () => {
 		confirm({
 			title: 'Are you sure you would like to delete this guild?',
 			description: 'This cannot be undone!',
-		})
-			.then(() => {
-				console.log('bruh');
-			})
-			.catch(() => {
-				console.log('bruh2');
-			});
+		}).then(() => {
+			if (currentGuild) {
+				harmonySocket.sendDeleteGuild(currentGuild);
+			}
+		});
 	};
 
 	useEffect(() => {
