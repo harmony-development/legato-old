@@ -27,7 +27,7 @@ import { IGuild, IMessage, IState } from '../types/redux';
 
 export function useSocketHandler(socket: HarmonySocket, history: h.History<any>): void {
 	const dispatch = useDispatch<AppDispatch>();
-	const { currentGuild, currentChannel, channels, invites, guildDialog, guildList } = useSelector(
+	const { currentGuild, currentChannel, channels, invites, guildDialog, guildList, guildSettingsDialog } = useSelector(
 		(state: IState) => state
 	);
 	const firstDisconnect = useRef(true);
@@ -103,7 +103,9 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 	const deleteGuildCallback = useCallback(() => {
 		socket.getGuilds();
 		dispatch(SetCurrentGuild(Object.keys(guildList)[0]));
-		dispatch(ToggleGuildSettingsDialog());
+		if (guildSettingsDialog === true) {
+			dispatch(ToggleGuildSettingsDialog());
+		}
 	}, [dispatch, socket, guildList]);
 
 	const updateGuildPictureCallback = useCallback(
