@@ -10,12 +10,14 @@ import { harmonySocket } from '../../../Root';
 import { AppDispatch } from '../../../../redux/store';
 import { ToggleGuildSettingsDialog } from '../../../../redux/AppReducer';
 import { ImagePicker } from '../ImagePicker';
+import { useConfirmationContext } from '../../ConfirmationContext';
 
 import { useGuildSettingsStyle } from './GuildSettingsStyle';
 import { GuildInvites } from './GuildInvites';
 
 export const GuildSettings = () => {
 	const dispatch = useDispatch<AppDispatch>();
+	const confirm = useConfirmationContext();
 	const [open, currentGuild, inputStyle, guilds] = useSelector((state: IState) => [
 		state.guildSettingsDialog,
 		state.currentGuild,
@@ -59,6 +61,19 @@ export const GuildSettings = () => {
 		}
 	};
 
+	const handleDeleteGuild = () => {
+		confirm({
+			title: 'Are you sure you would like to delete this guild?',
+			description: 'This cannot be undone!',
+		})
+			.then(() => {
+				console.log('bruh');
+			})
+			.catch(() => {
+				console.log('bruh2');
+			});
+	};
+
 	useEffect(() => {
 		if (currentGuild) {
 			harmonySocket.sendGetInvites(currentGuild);
@@ -93,6 +108,9 @@ export const GuildSettings = () => {
 						Join Codes
 					</Typography>
 					<GuildInvites />
+					<Button variant="outlined" color="secondary" className={classes.menuEntry} onClick={handleDeleteGuild}>
+						Delete Guild
+					</Button>
 				</div>
 			</DialogContent>
 		</Dialog>

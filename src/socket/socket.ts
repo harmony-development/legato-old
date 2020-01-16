@@ -208,4 +208,8 @@ export default class HarmonySocket {
 			username,
 		});
 	}
+
+	sendPong() {
+		this.emitEvent('ping', null);
+	}
 }

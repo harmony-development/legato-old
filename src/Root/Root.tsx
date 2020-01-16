@@ -19,6 +19,7 @@ import './Root.css';
 import { InviteHandler } from './InviteHandler/HandleInvite';
 import { HarmonyDark } from './App/HarmonyColor';
 import { useSocketHandler } from './SocketHandler';
+import { ConfirmationContextProvider } from './App/ConfirmationContext';
 
 export const harmonySocket = new HarmonySocket();
 
@@ -87,7 +88,9 @@ const Root = (): JSX.Element => {
 			<CssBaseline />
 			<ToastContainer position="bottom-left" pauseOnFocusLoss={false} transition={Zoom} />
 			<BrowserRouter>
-				<RootWithRouter />
+				<ConfirmationContextProvider>
+					<RootWithRouter />
+				</ConfirmationContextProvider>
 			</BrowserRouter>
 		</>
 	);

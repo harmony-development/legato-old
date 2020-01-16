@@ -276,6 +276,10 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		firstDisconnect.current = true;
 	}, [dispatch, socket]);
 
+	const pingCallback = useCallback(() => {
+		socket.sendPong();
+	}, [socket]);
+
 	useEffect(() => {
 		if (socket.conn.readyState === WebSocket.OPEN) {
 			socket.getGuilds();
@@ -305,6 +309,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		socket.events.addListener('error', errorCallback);
 		socket.events.addListener('close', closeCallback);
 		socket.events.addListener('open', openCallback);
+		socket.events.addListener('ping', pingCallback);
 		return (): void => {
 			socket.events.removeAllListeners('getguilds');
 			socket.events.removeAllListeners('getmessages');
@@ -327,6 +332,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 			socket.events.removeAllListeners('deauth');
 			socket.events.removeAllListeners('error');
 			socket.events.removeAllListeners('open');
+			socket.events.removeAllListeners('ping');
 			socket.events.removeAllListeners('close');
 		};
 	}, [
