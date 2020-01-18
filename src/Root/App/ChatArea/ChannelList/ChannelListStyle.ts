@@ -5,7 +5,7 @@ import { HarmonyDark } from '../../HarmonyColor';
 
 export const useChannelListStyle = makeStyles((theme: Theme) => ({
 	selectedChannel: {
-		backgroundColor: theme.palette.type === 'dark' ? HarmonyDark[400] : undefined,
+		backgroundColor: theme.palette.type === 'dark' ? HarmonyDark[400] : '#cfcfcf',
 	},
 	nested: {
 		paddingLeft: theme.spacing(4),
