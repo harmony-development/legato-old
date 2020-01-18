@@ -43,6 +43,12 @@ export const SetGuilds = createAction(
 		[key: string]: IGuild;
 	}>()
 );
+export const RemoveGuild = createAction(
+	'REMOVE_GUILD',
+	WithPayload<{
+		guild: string;
+	}>()
+);
 export const FocusChatInput = createAction('FOCUS_CHAT_INPUT');
 export const ToggleThemeDialog = createAction('TOGGLE_THEME_DIALOG');
 export const InvertTheme = createAction('INVERT_THEME');
@@ -131,6 +137,12 @@ export const AppReducer = createReducer(appState, builder =>
 			...state,
 			guildList: action.payload,
 		}))
+		.addCase(RemoveGuild, (state, action) => {
+			const newGuildList = state.guildList;
+			const deleteID = action.payload.guild;
+			console.log(action.payload);
+			delete newGuildList[deleteID];
+		})
 		.addCase(FocusChatInput, state => ({
 			...state,
 			chatInputFocus: true,

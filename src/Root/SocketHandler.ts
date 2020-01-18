@@ -22,6 +22,7 @@ import {
 	SetAvatar,
 	SetUsername,
 	ToggleGuildSettingsDialog,
+	RemoveGuild,
 } from '../redux/AppReducer';
 import { IGuild, IMessage, IState } from '../types/redux';
 
@@ -100,13 +101,16 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		dispatch(ToggleGuildDialog());
 	}, [dispatch, socket]);
 
-	const deleteGuildCallback = useCallback(() => {
-		socket.getGuilds();
-		dispatch(SetCurrentGuild(Object.keys(guildList)[0]));
-		if (guildSettingsDialog === true) {
-			dispatch(ToggleGuildSettingsDialog());
-		}
-	}, [dispatch, socket, guildList, guildSettingsDialog]);
+	const deleteGuildCallback = useCallback(
+		data => {
+			console.log(data);
+			dispatch(RemoveGuild({ guild: data['guild'] }));
+			if (guildSettingsDialog === true) {
+				dispatch(ToggleGuildSettingsDialog());
+			}
+		},
+		[dispatch, socket, guildList, guildSettingsDialog]
+	);
 
 	const updateGuildPictureCallback = useCallback(
 		(raw: any) => {
