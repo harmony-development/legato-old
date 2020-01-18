@@ -89,8 +89,8 @@ func OpenDB() *sql.DB {
 	database, err := sql.Open("postgres", fmt.Sprintf("user=%v password=%v host=%v port=%v sslmode=%v",
 		os.Getenv("HARMONY_DB_USER"),
 		os.Getenv("HARMONY_DB_PASSWORD"),
-		"localhost",
-		"5432",
+		os.Getenv("HARMONY_DB_HOST"),
+		os.Getenv("HARMONY_DB_PORT"),
 		"disable", ))
 	if err != nil {
 		golog.Fatalf("Harmony was unable to open the database! Reason : %v", err)
