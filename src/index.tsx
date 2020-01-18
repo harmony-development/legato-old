@@ -6,6 +6,7 @@ import './Root/ContextMenu.css';
 
 import Root from './Root/Root';
 import { store } from './redux/store';
+import * as serviceWorker from './serviceWorker';
 
 const ReduxRoot: React.FC = () => {
 	return (
@@ -16,3 +17,5 @@ const ReduxRoot: React.FC = () => {
 };
 
 ReactDOM.render(<ReduxRoot />, document.getElementById('root'));
+
+serviceWorker.register();

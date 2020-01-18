@@ -12,6 +12,7 @@ import { Messages } from './Messages/Messages';
 import { Input } from './Input/Input';
 import { GuildList } from './GuildList/GuildList';
 import { ChannelList } from './ChannelList/ChannelList';
+import { MemberList } from './MemberList/MemberList';
 
 export const ChatArea = () => {
 	const classes = useChatAreaStyles();
@@ -50,6 +51,9 @@ export const ChatArea = () => {
 					<Input />
 				</div>
 			</div>
+			<Paper elevation={2} className={classes.channellist} square>
+				<MemberList />
+			</Paper>
 		</div>
 	);
 };
