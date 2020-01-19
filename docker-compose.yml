@@ -1,0 +1,37 @@
+version: '3'
+services:
+  app:
+    container_name: harmony-server
+    build: .
+    ports:
+      - "2288:2288"
+    restart: unless-stopped
+    volumes:
+      - api:/usr/src/app/
+    depends_on:
+      - fullstack-postgres
+    networks:
+      - fullstack
+    links:
+      - fullstack-postgres
+  fullstack-postgres:
+    image: postgres:latest
+    container_name: full_db_postgres
+    environment:
+      - POSTGRES_USER=${HARMONY_DB_USER}
+      - POSTGRES_PASSWORD=${HARMONY_DB_PASSWORD}
+      - POSTGRES_DB=harmony
+    ports:
+      - "5432:5432"
+    volumes:
+      - database_postgres:/var/lib/postgresql/data
+    networks:
+      - fullstack
+volumes:
+  api:
+  database_postgres:
+
+# Networks to be created to facilitate communication between containers
+networks:
+  fullstack:
+    driver: bridge

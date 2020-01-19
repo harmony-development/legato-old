@@ -86,9 +86,10 @@ var queries = []string{
 }
 
 func OpenDB() *sql.DB {
-	database, err := sql.Open("postgres", fmt.Sprintf("user=%v password=%v host=%v port=%v sslmode=%v",
+	database, err := sql.Open("postgres", fmt.Sprintf("user=%v password=%v dbname=%v host=%v port=%v sslmode=%v",
 		os.Getenv("HARMONY_DB_USER"),
 		os.Getenv("HARMONY_DB_PASSWORD"),
+		"harmony",
 		os.Getenv("HARMONY_DB_HOST"),
 		os.Getenv("HARMONY_DB_PORT"),
 		"disable", ))
