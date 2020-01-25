@@ -9,7 +9,7 @@ import (
 func deregister(ws *globals.Client) {
 	guildsQuery, err := harmonydb.DBInst.Query("SELECT guildid FROM guildmembers WHERE userid=$1", ws.Userid)
 	if err != nil {
-		golog.Warnf("ERROR deregistering socket! POTENTIAL MEMORY LEAK! %v", err)
+		golog.Warnf("error deregistering client, potential memory leak : %v", err)
 		return
 	}
 	for guildsQuery.Next() {
