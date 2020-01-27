@@ -17,9 +17,10 @@ type getChannelsData struct {
 func OnGetChannels(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
 	var data getChannelsData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
+		golog.Warnf("Error decoding data for getting channels")
 		return
 	}
-	userid ,err := authentication.VerifyToken(data.Token)
+	userid, err := authentication.VerifyToken(data.Token)
 	if err != nil {
 		deauth(ws)
 		return

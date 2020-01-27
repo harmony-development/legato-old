@@ -23,23 +23,33 @@ func makeEventBus() *globals.EventBus {
 	bus.Bind("login", limit(event.OnLogin, 10 * time.Second, 1))
 	bus.Bind("register", limit(event.OnRegister, 1 * time.Hour, 1))
 	bus.Bind("ping", limit(event.OnPing, 500 * time.Millisecond, 5))
+
 	bus.Bind("getguilds", limit(event.OnGetGuilds, 500 * time.Millisecond, 10))
-	bus.Bind("message", limit(event.OnMessage, 100 * time.Millisecond, 10))
-	bus.Bind("getmessages", limit(event.OnGetMessages, 100 * time.Millisecond, 5))
 	bus.Bind("getchannels", limit(event.OnGetChannels, 100 * time.Millisecond, 5))
+	bus.Bind("getmembers", limit(event.OnGetMembers, 5 * time.Second, 3))
+	bus.Bind("getmessages", limit(event.OnGetMessages, 100 * time.Millisecond, 5))
+	bus.Bind("getinvites", limit(event.OnGetInvites, 500 * time.Millisecond, 1))
+
+	bus.Bind("message", limit(event.OnMessage, 100 * time.Millisecond, 10))
+
 	bus.Bind("joinguild", limit(event.OnJoinGuild, 3 * time.Second, 1))
+	bus.Bind("leaveguild", limit(event.OnLeaveGuild, 3 * time.Second, 1))
+
 	bus.Bind("createguild", limit(event.OnCreateGuild, 20 * time.Second, 1))
 	bus.Bind("deleteguild", limit(event.OnDeleteGuild, 10 * time.Second, 1))
-	bus.Bind("leaveguild", limit(event.OnLeaveGuild, 3 * time.Second, 1))
+
 	bus.Bind("updateguildpicture", limit(event.OnUpdateGuildPicture, 3 * time.Second, 1))
 	bus.Bind("updateguildname", limit(event.OnUpdateGuildName, 3 * time.Second, 1))
-	bus.Bind("getinvites", limit(event.OnGetInvites, 500 * time.Millisecond, 1))
+
 	bus.Bind("addchannel", limit(event.OnAddChannel, 1 * time.Second, 5))
+	bus.Bind("createinvite", limit(event.OnCreateInvite, 200 * time.Millisecond, 5))
+
 	bus.Bind("deletechannel", limit(event.OnDeleteChannel, 1 * time.Second, 5))
 	bus.Bind("deleteinvite", limit(event.OnDeleteInvite, 200 * time.Millisecond, 5))
-	bus.Bind("createinvite", limit(event.OnCreateInvite, 200 * time.Millisecond, 5))
+
 	bus.Bind("getuser", limit(event.OnGetUser, 500 * time.Millisecond, 50))
 	bus.Bind("getself", limit(event.OnGetSelf, 500 * time.Millisecond, 20))
+
 	bus.Bind("avatarupdate", limit(event.OnAvatarUpdate, 10 * time.Second, 1))
 	bus.Bind("usernameupdate", limit(event.OnUsernameUpdate, 10 * time.Second, 1))
 	return bus
