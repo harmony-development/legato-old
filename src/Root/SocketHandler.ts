@@ -23,6 +23,7 @@ import {
 	SetUsername,
 	ToggleGuildSettingsDialog,
 	RemoveGuild,
+	SetGuildMembers,
 } from '../redux/AppReducer';
 import { IGuild, IMessage, IState } from '../types/redux';
 
@@ -66,6 +67,17 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		(raw: any) => {
 			if (typeof raw === 'object') {
 				dispatch(SetChannels(raw['channels']));
+			}
+		},
+		[dispatch]
+	);
+
+	const getMembersCallback = useCallback(
+		(raw: any) => {
+			if (typeof raw === 'object') {
+				if (Array.isArray(raw['members']) && typeof raw['guild'] === 'string') {
+					dispatch(SetGuildMembers({ guild: raw['guild'], members: raw['members'] }));
+				}
 			}
 		},
 		[dispatch]
@@ -303,6 +315,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 	useEffect(() => {
 		socket.events.addListener('getguilds', getGuildsCallback);
 		socket.events.addListener('getmessages', getMessagesCallback);
+		socket.events.addListener('getmembers', getMembersCallback);
 		socket.events.addListener('getchannels', getChannelsCallback);
 		socket.events.addListener('message', messageCallback);
 		socket.events.addListener('leaveguild', leaveGuildCallback);
@@ -329,6 +342,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 			socket.events.removeAllListeners('getguilds');
 			socket.events.removeAllListeners('getmessages');
 			socket.events.removeAllListeners('getchannels');
+			socket.events.removeAllListeners('getmembers');
 			socket.events.removeAllListeners('message');
 			socket.events.removeAllListeners('leaveguild');
 			socket.events.removeAllListeners('joinguild');
@@ -362,6 +376,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		updateGuildPictureCallback,
 		updateGuildNameCallback,
 		getInvitesCallback,
+		getMembersCallback,
 		addChannelCallback,
 		deleteChannelCallback,
 		createInviteCallback,
@@ -380,15 +395,19 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 	useEffect(() => {
 		if (currentGuild) {
 			if (socket.conn.readyState === WebSocket.OPEN) {
+				console.log('bruh0');
 				socket.getChannels(currentGuild);
+				socket.getMembers(currentGuild);
 			} else {
 				socket.events.addListener('open', () => {
+					console.log('bruh');
 					socket.getChannels(currentGuild);
+					socket.getMembers(currentGuild);
 					socket.events.removeCurrentListener();
 				});
 			}
 		}
-	}, [currentGuild, socket]);
+	}, [currentGuild]);
 
 	useEffect(() => {
 		if (currentGuild && currentChannel) {

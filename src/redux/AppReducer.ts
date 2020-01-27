@@ -12,6 +12,7 @@ const appState: IState = {
 		inputStyle: 'filled',
 	},
 	guildList: {},
+	guildMembers: {},
 	themeDialog: false,
 	connected: false,
 	messages: [],
@@ -49,10 +50,11 @@ export const RemoveGuild = createAction(
 		guild: string;
 	}>()
 );
-export const AddGuild = createAction(
-	'ADD_GUILD',
+export const SetGuildMembers = createAction(
+	'SET_GUILD_MEMBERS',
 	WithPayload<{
 		guild: string;
+		members: string[];
 	}>()
 );
 export const FocusChatInput = createAction('FOCUS_CHAT_INPUT');
@@ -148,7 +150,13 @@ export const AppReducer = createReducer(appState, builder =>
 			const deleteID = action.payload.guild;
 			delete newGuildList[deleteID];
 		})
-		.addCase(AddGuild, (state, action) => {})
+		.addCase(SetGuildMembers, (state, action) => ({
+			...state,
+			guildMembers: {
+				...state.guildMembers,
+				[action.payload.guild]: action.payload.members,
+			},
+		}))
 		.addCase(FocusChatInput, state => ({
 			...state,
 			chatInputFocus: true,

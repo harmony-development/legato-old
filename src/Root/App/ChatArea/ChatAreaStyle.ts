@@ -19,6 +19,11 @@ export const useChatAreaStyles = makeStyles((theme: Theme) => ({
 		width: '300px',
 		overflowY: 'auto',
 	},
+	memberlist: {
+		padding: 0,
+		width: '400px',
+		overflowY: 'auto',
+	},
 	guildiconroot: {
 		borderRadius: '64px',
 	},

@@ -102,6 +102,14 @@ export default class HarmonySocket {
 		});
 	}
 
+	getMembers(guildID: string) {
+		console.log('hmm');
+		this.emitEvent('getmembers', {
+			token: localStorage.getItem('token'),
+			guild: guildID,
+		});
+	}
+
 	getSelf() {
 		this.emitEvent('getself', {
 			token: localStorage.getItem('token'),

@@ -51,7 +51,7 @@ export const ChatArea = () => {
 					<Input />
 				</div>
 			</div>
-			<Paper elevation={2} className={classes.channellist} square>
+			<Paper elevation={2} className={classes.memberlist} square>
 				<MemberList />
 			</Paper>
 		</div>

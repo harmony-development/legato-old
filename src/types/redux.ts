@@ -27,6 +27,9 @@ export interface IState {
 	guildList: {
 		[key: string]: IGuild;
 	};
+	guildMembers: {
+		[guildid: string]: string[];
+	};
 	currentGuild: string | undefined;
 	currentChannel: string | undefined;
 	messages: IMessage[];
