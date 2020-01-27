@@ -5,18 +5,23 @@ import { IPacket } from '../types/socket';
 export default class HarmonySocket {
 	conn: WebSocket;
 	events: EventEmitter;
+	userFetchQueue: {
+		[key: string]: boolean;
+	};
 
 	constructor() {
 		// eslint-disable-next-line no-undef
 		this.conn = new WebSocket(`ws://${process.env.REACT_APP_HARMONY_SERVER_HOST}/api/socket`);
 		// eslint-disable-next-line no-undef
 		this.events = new EventEmitter();
+		this.userFetchQueue = {};
 		this.bindConnect();
 	}
 
 	connect = () => {
 		// eslint-disable-next-line no-undef
 		this.conn = new WebSocket(`ws://${process.env.REACT_APP_HARMONY_SERVER_HOST}/api/socket`);
+		this.userFetchQueue = {};
 		this.bindConnect();
 	};
 
@@ -197,10 +202,13 @@ export default class HarmonySocket {
 	}
 
 	sendGetUser(userid: string) {
-		this.emitEvent('getuser', {
-			token: localStorage.getItem('token'),
-			userid,
-		});
+		if (!this.userFetchQueue[userid]) {
+			this.userFetchQueue[userid] = true;
+			this.emitEvent('getuser', {
+				token: localStorage.getItem('token'),
+				userid,
+			});
+		}
 	}
 
 	sendAvatarUpdate(avatar: string) {

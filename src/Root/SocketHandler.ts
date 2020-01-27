@@ -29,9 +29,16 @@ import { IGuild, IMessage, IState } from '../types/redux';
 
 export function useSocketHandler(socket: HarmonySocket, history: h.History<any>): void {
 	const dispatch = useDispatch<AppDispatch>();
-	const { currentGuild, currentChannel, channels, invites, guildDialog, guildList, guildSettingsDialog } = useSelector(
-		(state: IState) => state
-	);
+	const {
+		currentGuild,
+		currentChannel,
+		guildMembers,
+		channels,
+		invites,
+		guildDialog,
+		guildList,
+		guildSettingsDialog,
+	} = useSelector((state: IState) => state);
 	const firstDisconnect = useRef(true);
 
 	const getGuildsCallback = useCallback(
@@ -220,6 +227,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 				typeof raw['username'] === 'string' &&
 				typeof raw['avatar'] === 'string'
 			) {
+				delete socket.userFetchQueue[raw['userid']];
 				dispatch(
 					SetUser({
 						userid: raw['userid'],
@@ -392,17 +400,21 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		usernameUpdateCallback,
 	]);
 
+	const getMembersWithoutDupes = useCallback(() => {
+		if (currentGuild && !guildMembers[currentGuild]) {
+			socket.getMembers(currentGuild);
+		}
+	}, [guildMembers, currentGuild]);
+
 	useEffect(() => {
 		if (currentGuild) {
 			if (socket.conn.readyState === WebSocket.OPEN) {
-				console.log('bruh0');
 				socket.getChannels(currentGuild);
-				socket.getMembers(currentGuild);
+				getMembersWithoutDupes();
 			} else {
 				socket.events.addListener('open', () => {
-					console.log('bruh');
 					socket.getChannels(currentGuild);
-					socket.getMembers(currentGuild);
+					getMembersWithoutDupes();
 					socket.events.removeCurrentListener();
 				});
 			}
