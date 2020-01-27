@@ -31,7 +31,6 @@ export const InviteHandler = () => {
 
 	useEffect(() => {
 		harmonySocket.events.addListener('error', (raw: any) => {
-			console.log('error');
 			setErrorMessage(raw['message']);
 		});
 	}, []);
