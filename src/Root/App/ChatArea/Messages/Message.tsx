@@ -1,5 +1,14 @@
-import React from 'react';
-import { ListItem, ListItemAvatar, Avatar, ListItemText, Typography } from '@material-ui/core';
+import React, { useState, useEffect } from 'react';
+import {
+	ListItem,
+	ListItemAvatar,
+	Avatar,
+	ListItemText,
+	Typography,
+	ListItemSecondaryAction,
+	IconButton,
+} from '@material-ui/core';
+import { MoreVert } from '@material-ui/icons';
 
 interface IProps {
 	userid: string;
@@ -16,8 +25,14 @@ const UtcEpochToLocalDate = (time: number) => {
 };
 
 export const Message = (props: IProps) => {
+	const [dropdownVisible, setDropdownVisible] = useState(false);
+
 	return (
-		<ListItem alignItems="flex-start">
+		<ListItem
+			alignItems="flex-start"
+			onMouseOver={() => setDropdownVisible(true)}
+			onMouseLeave={() => setDropdownVisible(false)}
+		>
 			<ListItemAvatar>
 				<Avatar alt={props.userid} src={props.avatar ? `${props.avatar}` : undefined} />
 			</ListItemAvatar>
@@ -32,6 +47,14 @@ export const Message = (props: IProps) => {
 				}
 				secondary={props.message}
 			/>
+
+			{dropdownVisible ? (
+				<IconButton edge="end" size="small" aria-label="message-options">
+					<MoreVert />
+				</IconButton>
+			) : (
+				undefined
+			)}
 		</ListItem>
 	);
 };
