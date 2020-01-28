@@ -10,9 +10,14 @@ import {
 	MenuItem,
 } from '@material-ui/core';
 import { MoreVert } from '@material-ui/icons';
+import { useSelector } from 'react-redux';
+
+import { harmonySocket } from '../../../Root';
+import { IState } from '../../../../types/redux';
 
 interface IProps {
 	userid: string;
+	messageid: string;
 	username: string;
 	createdat: number;
 	message: string;
@@ -28,6 +33,7 @@ const UtcEpochToLocalDate = (time: number) => {
 export const Message = (props: IProps) => {
 	const [dropdownBtnVisible, setDropdownBtnVisible] = useState(false);
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+	const { currentGuild, currentChannel } = useSelector((state: IState) => state);
 
 	const handleDropdownBtnClick = (event: React.MouseEvent<HTMLButtonElement>) => {
 		setAnchorEl(event.currentTarget);
@@ -35,6 +41,12 @@ export const Message = (props: IProps) => {
 
 	const handleClose = () => {
 		setAnchorEl(null);
+	};
+
+	const handleDelete = () => {
+		if (currentChannel && currentGuild) {
+			harmonySocket.sendDeleteMessage(currentGuild, currentChannel, props.messageid);
+		}
 	};
 
 	return (
@@ -65,7 +77,7 @@ export const Message = (props: IProps) => {
 					</IconButton>
 					<Menu open={Boolean(anchorEl)} onClose={handleClose} anchorEl={anchorEl}>
 						<MenuItem onClick={handleClose}>Edit</MenuItem>
-						<MenuItem onClick={handleClose}>Delete</MenuItem>
+						<MenuItem onClick={handleDelete}>Delete</MenuItem>
 					</Menu>
 				</>
 			) : (

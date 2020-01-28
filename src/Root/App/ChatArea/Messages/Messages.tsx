@@ -35,6 +35,7 @@ export const Messages = () => {
 							<Message
 								key={val.messageid}
 								userid={val.userid}
+								messageid={val.messageid}
 								username={users[val.userid] ? users[val.userid].username : ''}
 								createdat={val.createdat}
 								avatar={users[val.userid] ? users[val.userid].avatar : undefined}

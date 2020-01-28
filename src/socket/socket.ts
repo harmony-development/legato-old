@@ -100,6 +100,15 @@ export default class HarmonySocket {
 		});
 	}
 
+	sendDeleteMessage(guildID: string, channelID: string, messageID: string) {
+		this.emitEvent('deletemessage', {
+			token: localStorage.getItem('token'),
+			guild: guildID,
+			channel: channelID,
+			message: messageID,
+		});
+	}
+
 	getChannels(guildID: string) {
 		this.emitEvent('getchannels', {
 			token: localStorage.getItem('token'),
