@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
 	ListItem,
 	ListItemAvatar,
 	Avatar,
 	ListItemText,
 	Typography,
-	ListItemSecondaryAction,
 	IconButton,
+	Menu,
+	MenuItem,
 } from '@material-ui/core';
 import { MoreVert } from '@material-ui/icons';
 
@@ -25,13 +26,22 @@ const UtcEpochToLocalDate = (time: number) => {
 };
 
 export const Message = (props: IProps) => {
-	const [dropdownVisible, setDropdownVisible] = useState(false);
+	const [dropdownBtnVisible, setDropdownBtnVisible] = useState(false);
+	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+
+	const handleDropdownBtnClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+		setAnchorEl(event.currentTarget);
+	};
+
+	const handleClose = () => {
+		setAnchorEl(null);
+	};
 
 	return (
 		<ListItem
 			alignItems="flex-start"
-			onMouseOver={() => setDropdownVisible(true)}
-			onMouseLeave={() => setDropdownVisible(false)}
+			onMouseOver={() => setDropdownBtnVisible(true)}
+			onMouseLeave={() => setDropdownBtnVisible(false)}
 		>
 			<ListItemAvatar>
 				<Avatar alt={props.userid} src={props.avatar ? `${props.avatar}` : undefined} />
@@ -48,10 +58,16 @@ export const Message = (props: IProps) => {
 				secondary={props.message}
 			/>
 
-			{dropdownVisible ? (
-				<IconButton edge="end" size="small" aria-label="message-options">
-					<MoreVert />
-				</IconButton>
+			{dropdownBtnVisible ? (
+				<>
+					<IconButton edge="end" size="small" aria-label="message-options" onClick={handleDropdownBtnClick}>
+						<MoreVert />
+					</IconButton>
+					<Menu open={Boolean(anchorEl)} onClose={handleClose} anchorEl={anchorEl}>
+						<MenuItem onClick={handleClose}>Edit</MenuItem>
+						<MenuItem onClick={handleClose}>Delete</MenuItem>
+					</Menu>
+				</>
 			) : (
 				undefined
 			)}
