@@ -33,6 +33,7 @@ func OnGetSelf(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.
 	ws.Send(&globals.Packet{
 		Type: "getself",
 		Data: map[string]interface{}{
+			"userid": userid,
 			"username": username,
 			"avatar": avatar,
 		},
