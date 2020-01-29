@@ -54,7 +54,6 @@
 		"@types/react-redux": "latest",
 		"@types/react-router": "latest",
 		"@types/react-router-dom": "latest",
-		"@types/react-toastify": "latest",
 		"@types/ws": "latest",
 		"@typescript-eslint/eslint-plugin": "latest",
 		"@typescript-eslint/parser": "latest",

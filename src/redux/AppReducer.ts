@@ -111,6 +111,7 @@ export const SetUsername = createAction(
 export const SetSelf = createAction(
 	'SET_SELF',
 	WithPayload<{
+		userid: string;
 		username: string;
 		avatar: string;
 	}>()

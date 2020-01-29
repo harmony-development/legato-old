@@ -48,6 +48,7 @@ export interface IState {
 		};
 	};
 	self: {
+		userid?: string;
 		username?: string;
 		avatar?: string;
 	};

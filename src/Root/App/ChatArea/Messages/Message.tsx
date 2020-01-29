@@ -33,7 +33,7 @@ const UtcEpochToLocalDate = (time: number) => {
 export const Message = (props: IProps) => {
 	const [dropdownBtnVisible, setDropdownBtnVisible] = useState(false);
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-	const { currentGuild, currentChannel } = useSelector((state: IState) => state);
+	const { currentGuild, currentChannel, self } = useSelector((state: IState) => state);
 
 	const handleDropdownBtnClick = (event: React.MouseEvent<HTMLButtonElement>) => {
 		setAnchorEl(event.currentTarget);
@@ -70,7 +70,7 @@ export const Message = (props: IProps) => {
 				secondary={props.message}
 			/>
 
-			{dropdownBtnVisible ? (
+			{dropdownBtnVisible && self.userid === props.userid ? (
 				<>
 					<IconButton edge="end" size="small" aria-label="message-options" onClick={handleDropdownBtnClick}>
 						<MoreVert />

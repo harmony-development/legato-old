@@ -241,9 +241,14 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 	);
 	const getSelfCallback = useCallback(
 		(raw: any) => {
-			if (typeof raw['username'] === 'string' && typeof raw['avatar'] === 'string') {
+			if (
+				typeof raw['username'] === 'string' &&
+				typeof raw['avatar'] === 'string' &&
+				typeof raw['userid'] === 'string'
+			) {
 				dispatch(
 					SetSelf({
+						userid: raw['userid'],
 						username: raw['username'],
 						avatar: raw['avatar'],
 					})
