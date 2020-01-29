@@ -400,21 +400,19 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		usernameUpdateCallback,
 	]);
 
-	const getMembersWithoutDupes = useCallback(() => {
-		if (currentGuild && !guildMembers[currentGuild]) {
-			socket.getMembers(currentGuild);
-		}
-	}, [guildMembers, currentGuild]);
-
 	useEffect(() => {
 		if (currentGuild) {
 			if (socket.conn.readyState === WebSocket.OPEN) {
 				socket.getChannels(currentGuild);
-				getMembersWithoutDupes();
+				if (currentGuild && !guildMembers[currentGuild]) {
+					socket.getMembers(currentGuild);
+				}
 			} else {
 				socket.events.addListener('open', () => {
 					socket.getChannels(currentGuild);
-					getMembersWithoutDupes();
+					if (currentGuild && !guildMembers[currentGuild]) {
+						socket.getMembers(currentGuild);
+					}
 					socket.events.removeCurrentListener();
 				});
 			}
