@@ -48,13 +48,15 @@ func OnUpdateGuildPicture(ws *globals.Client, rawMap map[string]interface{}, lim
 	}
 	go DeleteFromFilestore(path.Base(oldPictureID))
 	for _, client := range globals.Guilds[data.Guild].Clients {
-		client.Send(&globals.Packet{
-			Type: "updateguildpicture",
-			Data: map[string]interface{}{
-				"guild":   data.Guild,
-				"picture": data.Picture,
-				"success": true,
-			},
-		})
+		for _, conn := range client {
+			conn.Send(&globals.Packet{
+				Type: "updateguildpicture",
+				Data: map[string]interface{}{
+					"guild":   data.Guild,
+					"picture": data.Picture,
+					"success": true,
+				},
+			})
+		}
 	}
 }

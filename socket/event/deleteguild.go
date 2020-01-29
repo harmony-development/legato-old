@@ -73,12 +73,14 @@ func OnDeleteGuild(ws *globals.Client, rawMap map[string]interface{}, limiter *r
 		return
 	}
 	for _, client := range globals.Guilds[data.Guild].Clients {
-		client.Send(&globals.Packet{
-			Type: "deleteguild",
-			Data: map[string]interface{}{
-				"guild":   data.Guild,
-			},
-		})
+		for _, conn := range client {
+			conn.Send(&globals.Packet{
+				Type: "deleteguild",
+				Data: map[string]interface{}{
+					"guild": data.Guild,
+				},
+			})
+		}
 	}
 	delete(globals.Guilds, data.Guild)
 	return

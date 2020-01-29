@@ -36,17 +36,19 @@ func OnMessage(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.
 
 	// unfortunately O(n) is the only way to do this, we just need to make n really smol (︶︹︶)
 	for _, client := range globals.Guilds[data.Guild].Clients {
-		client.Send(&globals.Packet{
-			Type: "message",
-			Data: map[string]interface{}{
-				"guild":     data.Guild,
-				"channel":   data.Channel,
-				"userid":    userid,
-				"createdat": time.Now().UTC().Unix(),
-				"message":   data.Message,
-				"messageid": messageID,
-			},
-		})
+		for _, conn := range client {
+			conn.Send(&globals.Packet{
+				Type: "message",
+				Data: map[string]interface{}{
+					"guild":     data.Guild,
+					"channel":   data.Channel,
+					"userid":    userid,
+					"createdat": time.Now().UTC().Unix(),
+					"message":   data.Message,
+					"messageid": messageID,
+				},
+			})
+		}
 	}
 	_, err = harmonydb.DBInst.Exec("INSERT INTO messages(messageid, guildid, channelid, createdat, author, message) VALUES($1, $2, $3, $4, $5, $6)", messageID, data.Guild, data.Channel, time.Now().UTC().Unix(), userid, data.Message)
 	if err != nil {

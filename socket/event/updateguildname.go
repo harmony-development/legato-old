@@ -44,12 +44,14 @@ func OnUpdateGuildName(ws *globals.Client, rawMap map[string]interface{}, limite
 		return
 	}
 	for _, client := range globals.Guilds[data.Guild].Clients {
-		client.Send(&globals.Packet{
-			Type: "updateguildname",
-			Data: map[string]interface{}{
-				"guild": data.Guild,
-				"name": data.Name,
-			},
-		})
+		for _, conn := range client {
+			conn.Send(&globals.Packet{
+				Type: "updateguildname",
+				Data: map[string]interface{}{
+					"guild": data.Guild,
+					"name":  data.Name,
+				},
+			})
+		}
 	}
 }

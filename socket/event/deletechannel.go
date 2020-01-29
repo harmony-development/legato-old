@@ -56,12 +56,14 @@ func OnDeleteChannel(ws *globals.Client, rawMap map[string]interface{}, limiter 
 		return
 	}
 	for _, client := range globals.Guilds[data.Guild].Clients {
-		client.Send(&globals.Packet{
-			Type: "deletechannel",
-			Data: map[string]interface{}{
-				"guild":   data.Guild,
-				"channelid": data.ChannelID,
-			},
-		})
+		for _, conn := range client {
+			conn.Send(&globals.Packet{
+				Type: "deletechannel",
+				Data: map[string]interface{}{
+					"guild":     data.Guild,
+					"channelid": data.ChannelID,
+				},
+			})
+		}
 	}
 }

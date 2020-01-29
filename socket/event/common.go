@@ -51,11 +51,15 @@ func sendToken(ws *globals.Client, id string) {
 
 func registerSocket(guildid string, ws *globals.Client, userid string) {
 	if globals.Guilds[guildid] != nil {
-		globals.Guilds[guildid].Clients[userid] = ws
+		if globals.Guilds[guildid].Clients[userid] == nil {
+			globals.Guilds[guildid].Clients[userid] = []*globals.Client{ws}
+		} else {
+			globals.Guilds[guildid].Clients[userid] = append(globals.Guilds[guildid].Clients[userid], ws)
+		}
 	} else {
 		globals.Guilds[guildid] = &globals.Guild{
-			Clients: map[string]*globals.Client{
-				userid: ws,
+			Clients: map[string][]*globals.Client{
+				userid: {ws},
 			},
 		}
 	}

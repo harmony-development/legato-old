@@ -56,13 +56,15 @@ func OnUsernameUpdate(ws *globals.Client, rawMap map[string]interface{}, limiter
 		}
 		if globals.Guilds[guildid] != nil {
 			for _, client := range globals.Guilds[guildid].Clients  {
-				client.Send(&globals.Packet{
-					Type: "usernameupdate",
-					Data: map[string]interface{}{
-						"userid": userid,
-						"username": data.Username,
-					},
-				})
+				for _, conn := range client {
+					conn.Send(&globals.Packet{
+						Type: "usernameupdate",
+						Data: map[string]interface{}{
+							"userid":   userid,
+							"username": data.Username,
+						},
+					})
+				}
 			}
 		}
 	}

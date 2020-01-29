@@ -17,7 +17,7 @@ type (
 	}
 
 	Guild struct {
-		Clients map[string]*Client
+		Clients map[string][]*Client
 		Owner string
 	}
 

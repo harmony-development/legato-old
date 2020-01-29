@@ -55,13 +55,15 @@ func OnAvatarUpdate(ws *globals.Client, rawMap map[string]interface{}, limiter *
 		}
 		if globals.Guilds[guildid] != nil {
 			for _, client := range globals.Guilds[guildid].Clients  {
-				client.Send(&globals.Packet{
-					Type: "avatarupdate",
-					Data: map[string]interface{}{
-						"userid": userid,
-						"avatar": data.Avatar,
-					},
-				})
+				for _, conn := range client {
+					conn.Send(&globals.Packet{
+						Type: "avatarupdate",
+						Data: map[string]interface{}{
+							"userid": userid,
+							"avatar": data.Avatar,
+						},
+					})
+				}
 			}
 		}
 	}
