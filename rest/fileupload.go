@@ -2,6 +2,7 @@ package rest
 
 import (
 	"fmt"
+	"gopkg.in/h2non/bimg.v1"
 	"harmony-server/authentication"
 	"io/ioutil"
 	"net/http"
@@ -9,6 +10,12 @@ import (
 	"github.com/kataras/golog"
 	"github.com/thanhpk/randstr"
 )
+
+func sendVibeCheck(w http.ResponseWriter) {
+	sendResp(w, map[string]string{
+		"error": "Your file failed the vibe check, please try again later",
+	})
+}
 
 // FileUpload handles all file upload requests sent to the server
 func FileUpload(w http.ResponseWriter, r *http.Request) {
@@ -34,9 +41,7 @@ func FileUpload(w http.ResponseWriter, r *http.Request) {
 	file, _, err := r.FormFile("file")
 	if err != nil {
 		golog.Warnf("Error reading client file : %v", err)
-		sendResp(w, map[string]string{
-			"error": "Your file failed the vibe check, please try again later",
-		})
+		sendVibeCheck(w)
 		return
 	}
 
@@ -44,12 +49,26 @@ func FileUpload(w http.ResponseWriter, r *http.Request) {
 	fileBytes, err := ioutil.ReadAll(file)
 	if err != nil {
 		golog.Warnf("Error reading uploaded file : %v", err)
+		sendVibeCheck(w)
 		return
 	}
+	scaled, err := bimg.NewImage(fileBytes).Process(bimg.Options{
+		Height: 128,
+		Width: 128,
+		Quality: 60,
+		Crop: true,
+	})
+	if err != nil {
+		golog.Warnf("Error scaling image : %v", err)
+		sendVibeCheck(w)
+		return
+	}
+
 	fname := randstr.Hex(16)
-	err = ioutil.WriteFile(fmt.Sprintf("./filestore/%v", fname), fileBytes, 0666)
+	err = ioutil.WriteFile(fmt.Sprintf("./filestore/%v", fname), scaled, 0666)
 	if err != nil {
 		golog.Warnf("Error saving file upload : %v", err)
+		sendVibeCheck(w)
 		return
 	}
 	_, _ = w.Write([]byte(fname))

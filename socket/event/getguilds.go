@@ -54,6 +54,7 @@ func OnGetGuilds(ws *globals.Client, rawMap map[string]interface{}, limiter *rat
 			return
 		}
 		// Now subscribe to all guilds that the client is a member of!
+		ws.Userid = userid
 		registerSocket(guildID, ws, userid)
 		returnGuilds[guildID] = fetchedGuild
 	}

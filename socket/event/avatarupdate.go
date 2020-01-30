@@ -7,6 +7,7 @@ import (
 	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
+	"path"
 )
 
 type avatarUpdateData struct {
@@ -36,11 +37,14 @@ func OnAvatarUpdate(ws *globals.Client, rawMap map[string]interface{}, limiter *
 		deauth(ws)
 		return
 	}
+	var oldAvatarID string
+	err = harmonydb.DBInst.QueryRow("SELECT avatar FROM users WHERE id=$1", userid).Scan(&oldAvatarID)
 	_, err = harmonydb.DBInst.Exec("UPDATE users SET avatar=$1 WHERE id=$2", data.Avatar, userid)
 	if err != nil {
 		sendErr(ws, "Something weird happened on our end and we weren't able to set your avatar. Please try again in a few moments")
 		return
 	}
+	go DeleteFromFilestore(path.Base(oldAvatarID))
 	res, err := harmonydb.DBInst.Query("SELECT guildid FROM guildmembers WHERE userid=$1", userid)
 	if err != nil {
 		golog.Warnf("Error selecting guilds for avatarupdate : %v", err)
@@ -55,6 +59,7 @@ func OnAvatarUpdate(ws *globals.Client, rawMap map[string]interface{}, limiter *
 		}
 		if globals.Guilds[guildid] != nil {
 			for _, client := range globals.Guilds[guildid].Clients  {
+				golog.Debugf("Client conns : %v", client)
 				for _, conn := range client {
 					conn.Send(&globals.Packet{
 						Type: "avatarupdate",
