@@ -1,7 +1,6 @@
 package event
 
 import (
-	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/kataras/golog"
 	"harmony-server/globals"
@@ -62,14 +61,5 @@ func registerSocket(guildid string, ws *globals.Client, userid string) {
 				userid: {ws},
 			},
 		}
-	}
-}
-
-// DeleteFromFilestore deletes a file from the storage
-func DeleteFromFilestore(fileid string) {
-	golog.Debugf(fileid)
-	err := os.Remove(fmt.Sprintf("./filestore/%v", fileid))
-	if err != nil {
-		golog.Warnf("Error deleting from filestore : %v", err)
 	}
 }

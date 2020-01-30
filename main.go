@@ -27,11 +27,13 @@ func main() {
 	golog.Infof("Started Harmony Server On Port %v", PORT)
 	router := mux.NewRouter()
 	router.HandleFunc("/api/socket", handleSocket)
-	router.HandleFunc("/api/rest/fileupload", rest.FileUpload)
+	router.HandleFunc("/api/rest/avatarupdate", rest.AvatarUpdate)
+	router.HandleFunc("/api/rest/updateguildpicture", rest.UpdateGuildPicture)
 	router.PathPrefix("/filestore/").Handler(http.StripPrefix("/filestore/", http.FileServer(http.Dir("./filestore"))))
 	router.PathPrefix("/static").Handler(http.FileServer(http.Dir("./static")))
 	router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./static/index.html")
 	})
+	go globals.RateLimitCleanup()
 	golog.Fatalf("Fatal error caused server to crash! %v", http.ListenAndServe(PORT, router))
 }
