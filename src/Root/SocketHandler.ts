@@ -32,6 +32,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 	const {
 		currentGuild,
 		currentChannel,
+		self,
 		guildMembers,
 		channels,
 		invites,
@@ -98,6 +99,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 				typeof raw['guild'] === 'string' &&
 				typeof raw['message'] === 'string'
 			) {
+				console.log('adding message');
 				dispatch(AddMessage(raw as IMessage));
 			}
 		},
@@ -232,7 +234,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 					SetUser({
 						userid: raw['userid'],
 						username: raw['username'],
-						avatar: raw['avatar'],
+						avatar: `http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${raw['avatar']}`,
 					})
 				);
 			}
@@ -250,7 +252,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 					SetSelf({
 						userid: raw['userid'],
 						username: raw['username'],
-						avatar: raw['avatar'],
+						avatar: `http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${raw['avatar']}`,
 					})
 				);
 			}
@@ -259,16 +261,26 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 	);
 	const avatarUpdateCallback = useCallback(
 		(raw: any) => {
+			console.log(raw);
 			if (typeof raw['avatar'] === 'string' && typeof raw['userid'] === 'string') {
 				dispatch(
 					SetAvatar({
 						userid: raw['userid'],
-						avatar: raw['avatar'],
+						avatar: `http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${raw['avatar']}`,
 					})
 				);
+				if (raw['userid'] === self.userid && self.username) {
+					dispatch(
+						SetSelf({
+							userid: raw['userid'],
+							username: self.username,
+							avatar: `http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${raw['avatar']}`,
+						})
+					);
+				}
 			}
 		},
-		[dispatch]
+		[dispatch, self]
 	);
 	const usernameUpdateCallback = useCallback(
 		(raw: any) => {

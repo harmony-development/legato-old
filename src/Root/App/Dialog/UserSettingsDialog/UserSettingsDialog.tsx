@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, AppBar, Toolbar, IconButton, Typography, DialogContent, TextField, Button } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import { useDispatch, useSelector } from 'react-redux';
@@ -32,13 +32,7 @@ export const UserSettingsDialog = () => {
 			avatarFileUpload.append('token', localStorage.getItem('token') || 'none');
 			avatarFileUpload.append('file', avatarFile);
 			axios
-				.post(`http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/api/rest/fileupload`, avatarFileUpload, {})
-				.then(res => {
-					if (res.data) {
-						const uploadID = res.data;
-						harmonySocket.sendAvatarUpdate(`http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${uploadID}`);
-					}
-				})
+				.post(`http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/api/rest/avatarupdate`, avatarFileUpload, {})
 				.catch(err => {
 					console.log(err);
 					toast.error('Failed to update avatar');
