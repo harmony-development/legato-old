@@ -37,8 +37,7 @@ func makeEventBus() *globals.EventBus {
 
 	bus.Bind("createguild", limit(event.OnCreateGuild, 20 * time.Second, 1))
 	bus.Bind("deleteguild", limit(event.OnDeleteGuild, 10 * time.Second, 1))
-
-	bus.Bind("updateguildpicture", limit(event.OnUpdateGuildPicture, 3 * time.Second, 1))
+	
 	bus.Bind("updateguildname", limit(event.OnUpdateGuildName, 3 * time.Second, 1))
 
 	bus.Bind("addchannel", limit(event.OnAddChannel, 1 * time.Second, 5))
@@ -50,7 +49,6 @@ func makeEventBus() *globals.EventBus {
 	bus.Bind("getuser", limit(event.OnGetUser, 500 * time.Millisecond, 50))
 	bus.Bind("getself", limit(event.OnGetSelf, 500 * time.Millisecond, 20))
 
-	bus.Bind("avatarupdate", limit(event.OnAvatarUpdate, 10 * time.Second, 1))
 	bus.Bind("usernameupdate", limit(event.OnUsernameUpdate, 10 * time.Second, 1))
 	return bus
 }
