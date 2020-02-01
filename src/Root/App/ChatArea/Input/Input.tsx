@@ -1,9 +1,12 @@
 import React, { useRef, useEffect } from 'react';
-import { TextField } from '@material-ui/core';
+import { TextField, Button } from '@material-ui/core';
 import { useSelector } from 'react-redux';
+import { Add as AddIcon } from '@material-ui/icons';
 
 import { IState } from '../../../../types/redux';
 import { harmonySocket } from '../../../Root';
+
+import { useInputStyles } from './InputStyle';
 
 export const Input = () => {
 	const [connected, inputStyle, guildID, channelID, focus] = useSelector((state: IState) => [
@@ -14,6 +17,7 @@ export const Input = () => {
 		state.chatInputFocus,
 	]);
 	const inputField = useRef<HTMLInputElement | undefined>();
+	const classes = useInputStyles();
 
 	const onKeyPress = (e: React.KeyboardEvent) => {
 		if (e.key === 'Enter' && !e.shiftKey) {
@@ -33,7 +37,10 @@ export const Input = () => {
 	}, [focus]);
 
 	return (
-		<div>
+		<div className={classes.inputRoot}>
+			<Button>
+				<AddIcon />
+			</Button>
 			<TextField
 				label={connected ? 'Message' : 'Currently Offline'}
 				variant={inputStyle as any}

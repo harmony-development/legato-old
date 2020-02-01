@@ -82,7 +82,15 @@ export const GuildSettings = () => {
 			</AppBar>
 			<DialogContent>
 				<div style={{ width: '33%' }}>
-					<ImagePicker setImageFile={setGuildIconFile} setImage={setGuildIcon} image={guildIcon} />
+					<ImagePicker
+						setImageFile={setGuildIconFile}
+						setImage={setGuildIcon}
+						image={
+							guildIcon?.startsWith('data:image')
+								? guildIcon
+								: `http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${guildIcon}`
+						}
+					/>
 					<TextField
 						label="Guild Name"
 						fullWidth
