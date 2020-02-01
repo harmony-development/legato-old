@@ -20,7 +20,11 @@ func deregister(ws *globals.Client) {
 			return
 		}
 		if globals.Guilds[guildID].Clients[ws.Userid] != nil {
-			delete(globals.Guilds[guildID].Clients, ws.Userid)
+			for i, client := range globals.Guilds[guildID].Clients[ws.Userid] {
+				if client == ws {
+					globals.Guilds[guildID].Clients[ws.Userid] = append(globals.Guilds[guildID].Clients[ws.Userid][:i], globals.Guilds[guildID].Clients[ws.Userid][i:]...)
+				}
+			}
 		}
 	}
 }
