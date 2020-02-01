@@ -20,7 +20,6 @@ func sendResp(w http.ResponseWriter, data interface{}) {
 }
 
 func deleteFromFilestore(fileid string) {
-	golog.Debugf(fileid)
 	err := os.Remove(fmt.Sprintf("./filestore/%v", fileid))
 	if err != nil {
 		golog.Warnf("Error deleting from filestore : %v", err)
