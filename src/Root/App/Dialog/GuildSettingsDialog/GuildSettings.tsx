@@ -9,7 +9,7 @@ import { IState } from '../../../../types/redux';
 import { harmonySocket } from '../../../Root';
 import { AppDispatch } from '../../../../redux/store';
 import { ToggleGuildSettingsDialog } from '../../../../redux/AppReducer';
-import { ImagePicker } from '../ImagePicker';
+import { ImagePicker } from '../../../../component/ImagePicker';
 import { useConfirmationContext } from '../../ConfirmationContext';
 
 import { useGuildSettingsStyle } from './GuildSettingsStyle';

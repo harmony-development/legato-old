@@ -35,6 +35,12 @@ function WithPayload<T>() {
 export const SetConnected = createAction('SET_CONNECTED', WithPayload<boolean>());
 export const SetMessages = createAction('SET_MESSAGES', WithPayload<IMessage[]>());
 export const AddMessage = createAction('ADD_MESSAGE', WithPayload<IMessage>());
+export const DeleteMessage = createAction(
+	'DELETE_MESSAGE',
+	WithPayload<{
+		messageID: string;
+	}>()
+);
 export const SetCurrentChannel = createAction('SET_CURRENT_CHANNEl', WithPayload<string | undefined>());
 export const SetCurrentGuild = createAction('SET_CURRENT_GUILD', WithPayload<string | undefined>());
 export const SetChannels = createAction('SET_CHANNELS', WithPayload<IChannels>());
@@ -130,6 +136,11 @@ export const AppReducer = createReducer(appState, builder =>
 			...state,
 			messages: [...state.messages, action.payload],
 		}))
+		.addCase(DeleteMessage, (state, action) => {
+			state.messages = state.messages.filter(val => {
+				return val.messageid !== action.payload.messageID;
+			});
+		})
 		.addCase(SetCurrentChannel, (state, action) => ({
 			...state,
 			currentChannel: action.payload,

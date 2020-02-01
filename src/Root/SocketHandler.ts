@@ -24,6 +24,7 @@ import {
 	ToggleGuildSettingsDialog,
 	RemoveGuild,
 	SetGuildMembers,
+	DeleteMessage,
 } from '../redux/AppReducer';
 import { IGuild, IMessage, IState } from '../types/redux';
 
@@ -105,6 +106,12 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		},
 		[dispatch]
 	);
+
+	const deleteMessageCallback = useCallback((raw: any) => {
+		if (typeof raw['message'] === 'string' && typeof raw['guild'] === 'string' && typeof raw['channel'] === 'string') {
+			dispatch(DeleteMessage({ messageID: raw['message'] }));
+		}
+	}, []);
 
 	const leaveGuildCallback = useCallback(() => {
 		socket.getGuilds();
@@ -348,6 +355,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		socket.events.addListener('getmembers', getMembersCallback);
 		socket.events.addListener('getchannels', getChannelsCallback);
 		socket.events.addListener('message', messageCallback);
+		socket.events.addListener('deletemessage', deleteMessageCallback);
 		socket.events.addListener('leaveguild', leaveGuildCallback);
 		socket.events.addListener('joinguild', joinGuildCallback);
 		socket.events.addListener('createguild', createGuildCallback);
@@ -374,6 +382,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 			socket.events.removeAllListeners('getchannels');
 			socket.events.removeAllListeners('getmembers');
 			socket.events.removeAllListeners('message');
+			socket.events.removeAllListeners('deletemessage');
 			socket.events.removeAllListeners('leaveguild');
 			socket.events.removeAllListeners('joinguild');
 			socket.events.removeAllListeners('createguild');

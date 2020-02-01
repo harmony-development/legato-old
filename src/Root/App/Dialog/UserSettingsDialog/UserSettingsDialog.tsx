@@ -8,7 +8,7 @@ import axios from 'axios';
 import { IState } from '../../../../types/redux';
 import { AppDispatch } from '../../../../redux/store';
 import { ToggleUserSettingsDialog } from '../../../../redux/AppReducer';
-import { ImagePicker } from '../ImagePicker';
+import { ImagePicker } from '../../../../component/ImagePicker';
 import { harmonySocket } from '../../../Root';
 
 import { useUserSettingsStyle } from './UserSettingsStyle';
