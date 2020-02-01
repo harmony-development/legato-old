@@ -53,7 +53,7 @@ func OnDeleteMessage(ws *globals.Client, rawMap map[string]interface{}, limiter 
 	for _, client := range globals.Guilds[data.Guild].Clients {
 		for _, conn := range client {
 			conn.Send(&globals.Packet{
-				Type: "message",
+				Type: "deletemessage",
 				Data: map[string]interface{}{
 					"guild":     data.Guild,
 					"channel":   data.Channel,
