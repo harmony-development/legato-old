@@ -45,7 +45,16 @@ export const GuildIcon = (props: IProps) => {
 					onClick={onClick}
 				>
 					<Tooltip title={props.guildname} placement="right">
-						<img className={classes.guildicon} alt="" src={props.picture} draggable={false} />
+						<img
+							className={classes.guildicon}
+							alt=""
+							src={
+								props.picture.startsWith('http')
+									? props.picture
+									: `http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${props.picture}`
+							}
+							draggable={false}
+						/>
 					</Tooltip>
 				</ButtonBase>
 			</ContextMenuTrigger>

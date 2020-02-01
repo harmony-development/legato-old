@@ -21,10 +21,7 @@ export const Member = (props: Props) => {
 	return (
 		<ListItem>
 			<ListItemAvatar>
-				<Avatar
-					alt={props.userid}
-					src={props.userid && users[props.userid] ? `${users[props.userid].avatar}` : undefined}
-				/>
+				<Avatar alt={props.userid} src={props.userid && users[props.userid] ? users[props.userid].avatar : undefined} />
 			</ListItemAvatar>
 			<ListItemText
 				primary={<>{props.userid && users[props.userid] ? users[props.userid].username : props.userid}</>}

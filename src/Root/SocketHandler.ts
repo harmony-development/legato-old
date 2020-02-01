@@ -136,7 +136,12 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 	const updateGuildPictureCallback = useCallback(
 		(raw: any) => {
 			if (typeof raw['picture'] === 'string' && typeof raw['guild'] === 'string') {
-				dispatch(SetGuildPicture({ guild: raw['guild'], picture: raw['picture'] }));
+				dispatch(
+					SetGuildPicture({
+						guild: raw['guild'],
+						picture: `http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${raw['picture']}`,
+					})
+				);
 			}
 		},
 		[dispatch]

@@ -38,18 +38,10 @@ export const GuildSettings = () => {
 			if (guildIcon !== guilds[currentGuild].picture && guildIconFile) {
 				const guildIconUpload = new FormData();
 				guildIconUpload.append('token', localStorage.getItem('token') || 'none');
+				guildIconUpload.append('guild', currentGuild);
 				guildIconUpload.append('file', guildIconFile);
 				axios
-					.post(`http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/api/rest/fileupload`, guildIconUpload, {})
-					.then(res => {
-						if (res.data) {
-							const uploadID = res.data;
-							harmonySocket.sendGuildPictureUpdate(
-								currentGuild,
-								`http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${uploadID}`
-							);
-						}
-					})
+					.post(`http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/api/rest/updateguildpicture`, guildIconUpload, {})
 					.catch(err => {
 						console.log(err);
 						toast.error('Failed to update guild icon');

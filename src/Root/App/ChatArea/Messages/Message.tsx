@@ -56,7 +56,7 @@ export const Message = (props: IProps) => {
 			onMouseLeave={() => setDropdownBtnVisible(false)}
 		>
 			<ListItemAvatar>
-				<Avatar alt={props.userid} src={props.avatar ? `${props.avatar}` : undefined} />
+				<Avatar alt={props.userid} src={props.avatar ? props.avatar : undefined} />
 			</ListItemAvatar>
 			<ListItemText
 				primary={
