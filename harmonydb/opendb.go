@@ -43,7 +43,8 @@ var queries = []string{
 		channelid TEXT REFERENCES channels(channelid), 
 		author TEXT REFERENCES users(id), 
 		createdat INTEGER NOT NULL, 
-		message TEXT NOT NULL
+		message TEXT NOT NULL,
+		attachment TEXT
 	);`,
 	`INSERT INTO users(id, email, username, avatar, password) VALUES(
 		'82ee9c8dc9e165205548b7c3833e7372', 

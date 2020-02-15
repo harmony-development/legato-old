@@ -29,6 +29,7 @@ func main() {
 	router.HandleFunc("/api/socket", handleSocket)
 	router.HandleFunc("/api/rest/avatarupdate", rest.AvatarUpdate)
 	router.HandleFunc("/api/rest/updateguildpicture", rest.UpdateGuildPicture)
+	router.HandleFunc("/api/rest/message", rest.Message)
 	router.PathPrefix("/filestore/").Handler(http.StripPrefix("/filestore/", http.FileServer(http.Dir("./filestore"))))
 	router.PathPrefix("/static").Handler(http.FileServer(http.Dir("./static")))
 	router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

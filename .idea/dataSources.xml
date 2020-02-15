@@ -1,17 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="@localhost" uuid="0bf893a2-0a2c-4eae-8da0-0c6a57808be5">
+    <data-source source="LOCAL" name="amadeus@127.0.0.1" uuid="9e988fd6-b489-4b81-a57c-f7372d1c48ba">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/</jdbc-url>
-    </data-source>
-    <data-source source="LOCAL" name="amadeus@127.0.0.1" uuid="58d217cb-3f92-4811-b3a2-a9e49fc6226e">
-      <driver-ref>postgresql</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://127.0.0.1:5432/harmony</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:5432/harmony</jdbc-url>
     </data-source>
   </component>
 </project>

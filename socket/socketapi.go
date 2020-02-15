@@ -52,7 +52,7 @@ func pinger(ws *globals.Client) {
 	}
 }
 
-// reader eternally waits for things to read from the event
+// reader eternally waits for things to read from the client
 func reader(ws *globals.Client) {
 	for {
 		_, msg, err := ws.Connection.ReadMessage()
