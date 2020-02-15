@@ -3,6 +3,7 @@ import { EventEmitter } from 'fbemitter';
 import { IPacket } from '../types/socket';
 
 export default class HarmonySocket {
+	token: string;
 	conn: WebSocket;
 	events: EventEmitter;
 	userFetchQueue: {
@@ -10,6 +11,7 @@ export default class HarmonySocket {
 	};
 
 	constructor() {
+		this.token = 'NONE';
 		// eslint-disable-next-line no-undef
 		this.conn = new WebSocket(`ws://${process.env.REACT_APP_HARMONY_SERVER_HOST}/api/socket`);
 		// eslint-disable-next-line no-undef
@@ -62,6 +64,10 @@ export default class HarmonySocket {
 		}
 	}
 
+	refreshToken() {
+		this.token = localStorage.getItem('token') || 'NONE';
+	}
+
 	login(email: string, password: string) {
 		this.emitEvent('login', {
 			email,
@@ -79,13 +85,13 @@ export default class HarmonySocket {
 
 	getGuilds() {
 		this.emitEvent('getguilds', {
-			token: localStorage.getItem('token'),
+			token: this.token,
 		});
 	}
 
 	getMessages(guildID: string, channelID: string) {
 		this.emitEvent('getmessages', {
-			token: localStorage.getItem('token'),
+			token: this.token,
 			guild: guildID,
 			channel: channelID,
 		});
@@ -93,7 +99,7 @@ export default class HarmonySocket {
 
 	sendMessage(guildID: string, channelID: string, text: string) {
 		this.emitEvent('message', {
-			token: localStorage.getItem('token'),
+			token: this.token,
 			guild: guildID,
 			channel: channelID,
 			message: text,
@@ -102,7 +108,7 @@ export default class HarmonySocket {
 
 	sendDeleteMessage(guildID: string, channelID: string, messageID: string) {
 		this.emitEvent('deletemessage', {
-			token: localStorage.getItem('token'),
+			token: this.token,
 			guild: guildID,
 			channel: channelID,
 			message: messageID,
@@ -111,48 +117,48 @@ export default class HarmonySocket {
 
 	getChannels(guildID: string) {
 		this.emitEvent('getchannels', {
-			token: localStorage.getItem('token'),
+			token: this.token,
 			guild: guildID,
 		});
 	}
 
 	getMembers(guildID: string) {
 		this.emitEvent('getmembers', {
-			token: localStorage.getItem('token'),
+			token: this.token,
 			guild: guildID,
 		});
 	}
 
 	getSelf() {
 		this.emitEvent('getself', {
-			token: localStorage.getItem('token'),
+			token: this.token,
 		});
 	}
 
 	joinGuild(inviteCode: string) {
 		this.emitEvent('joinguild', {
-			token: localStorage.getItem('token'),
+			token: this.token,
 			invite: inviteCode,
 		});
 	}
 
 	createGuild(guildName: string) {
 		this.emitEvent('createguild', {
-			token: localStorage.getItem('token'),
+			token: this.token,
 			guildname: guildName,
 		});
 	}
 
 	leaveGuild(guildID: string) {
 		this.emitEvent('leaveguild', {
-			token: localStorage.getItem('token'),
+			token: this.token,
 			guild: guildID,
 		});
 	}
 
 	sendGuildNameUpdate(guildID: string, newname: string) {
 		this.emitEvent('updateguildname', {
-			token: localStorage.getItem('token'),
+			token: this.token,
 			guild: guildID,
 			name: newname,
 		});
@@ -160,7 +166,7 @@ export default class HarmonySocket {
 
 	sendGuildPictureUpdate(guildID: string, newpicture: string) {
 		this.emitEvent('updateguildpicture', {
-			token: localStorage.getItem('token'),
+			token: this.token,
 			guild: guildID,
 			picture: newpicture,
 		});
@@ -168,14 +174,14 @@ export default class HarmonySocket {
 
 	sendGetInvites(guildID: string) {
 		this.emitEvent('getinvites', {
-			token: localStorage.getItem('token'),
+			token: this.token,
 			guild: guildID,
 		});
 	}
 
 	sendAddChannel(guildID: string, channelname: string) {
 		this.emitEvent('addchannel', {
-			token: localStorage.getItem('token'),
+			token: this.token,
 			guild: guildID,
 			channel: channelname,
 		});
@@ -183,7 +189,7 @@ export default class HarmonySocket {
 
 	sendDeleteChannel(guildID: string, channelID: string) {
 		this.emitEvent('deletechannel', {
-			token: localStorage.getItem('token'),
+			token: this.token,
 			guild: guildID,
 			channel: channelID,
 		});
@@ -191,7 +197,7 @@ export default class HarmonySocket {
 
 	sendDeleteInvite(invite: string, guild: string) {
 		this.emitEvent('deleteinvite', {
-			token: localStorage.getItem('token'),
+			token: this.token,
 			invite,
 			guild,
 		});
@@ -199,7 +205,7 @@ export default class HarmonySocket {
 
 	sendCreateInvite(guild: string) {
 		this.emitEvent('createinvite', {
-			token: localStorage.getItem('token'),
+			token: this.token,
 			guild,
 		});
 	}
@@ -208,7 +214,7 @@ export default class HarmonySocket {
 		if (!this.userFetchQueue[userid]) {
 			this.userFetchQueue[userid] = true;
 			this.emitEvent('getuser', {
-				token: localStorage.getItem('token'),
+				token: this.token,
 				userid,
 			});
 		}
@@ -216,21 +222,21 @@ export default class HarmonySocket {
 
 	sendAvatarUpdate(avatar: string) {
 		this.emitEvent('avatarupdate', {
-			token: localStorage.getItem('token'),
+			token: this.token,
 			avatar,
 		});
 	}
 
 	sendUsernameUpdate(username: string) {
 		this.emitEvent('usernameupdate', {
-			token: localStorage.getItem('token'),
+			token: this.token,
 			username,
 		});
 	}
 
 	sendDeleteGuild(guildid: string) {
 		this.emitEvent('deleteguild', {
-			token: localStorage.getItem('token'),
+			token: this.token,
 			guild: guildid,
 		});
 	}

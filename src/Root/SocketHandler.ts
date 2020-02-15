@@ -28,6 +28,8 @@ import {
 } from '../redux/AppReducer';
 import { IGuild, IMessage, IState } from '../types/redux';
 
+import { harmonySocket } from './Root';
+
 export function useSocketHandler(socket: HarmonySocket, history: h.History<any>): void {
 	const dispatch = useDispatch<AppDispatch>();
 	const {
@@ -332,6 +334,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 			toast.success('You have reconnected to the server');
 		}
 		if (localStorage.getItem('token')) {
+			socket.refreshToken();
 			socket.getGuilds();
 			socket.getSelf();
 		}
@@ -340,11 +343,13 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 	}, [dispatch, socket]);
 
 	const pingCallback = useCallback(() => {
+		console.log('PONG');
 		socket.sendPong();
 	}, [socket]);
 
 	useEffect(() => {
 		if (socket.conn.readyState === WebSocket.OPEN) {
+			socket.refreshToken();
 			socket.getGuilds();
 		}
 	}, [socket]);

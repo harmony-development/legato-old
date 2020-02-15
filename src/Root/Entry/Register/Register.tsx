@@ -42,6 +42,7 @@ export const Register = () => {
 			if (typeof raw['token'] === 'string' && typeof raw['userid'] === 'string') {
 				localStorage.setItem('token', raw['token']);
 				localStorage.setItem('userid', raw['userid']);
+				harmonySocket.refreshToken();
 				harmonySocket.getGuilds();
 				harmonySocket.getSelf();
 				history.push('/app');
