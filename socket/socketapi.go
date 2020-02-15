@@ -44,6 +44,7 @@ func pinger(ws *globals.Client) {
 	time.Sleep(20 * time.Second)
 	if time.Since(ws.LastPong) > 20 * time.Second {
 		deregister(ws)
+		golog.Debugf("Closing Socket : Ping Timeout")
 		err := ws.Connection.Close()
 		if err != nil {
 			golog.Warnf("Error closing websocket connection : %v", err)
@@ -66,10 +67,11 @@ func reader(ws *globals.Client) {
 			}
 		} else {
 			golog.Warnf("Error reading data from event : %v", err)
-			_ = ws.Connection.Close()
+			golog.Debugf("Closing Socket : Data read error")
 			if ws.Userid != "" {
 				deregister(ws)
 			}
+			_ = ws.Connection.Close()
 			return
 		}
 	}
@@ -82,6 +84,7 @@ func writer(ws *globals.Client) {
 		err := ws.Connection.WriteMessage(websocket.TextMessage, msg)
 		if err != nil {
 			golog.Warnf("Error writing data to event : %v", err)
+			golog.Debugf("Closing Socket : Data write error")
 			_ = ws.Connection.Close()
 			if ws.Userid != "" {
 				deregister(ws)

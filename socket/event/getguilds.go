@@ -20,6 +20,7 @@ type guildsData struct {
 }
 
 func OnGetGuilds(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
+	golog.Debugf("GetGuilds Request Sent")
 	var data getGuildsData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -33,6 +34,7 @@ func OnGetGuilds(ws *globals.Client, rawMap map[string]interface{}, limiter *rat
 		sendErr(ws, "You're getting the guilds list a lot, please try again in a sec")
 		return
 	}
+	ws.Userid = userid
 	res, err := harmonydb.DBInst.Query("SELECT guilds.guildid, guilds.guildname, guilds.owner, guilds.picture FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=$1", userid)
 	if err != nil {
 		sendErr(ws, "We weren't able to get a list of guilds for you. Try reloading the page / logging back in")
@@ -54,7 +56,6 @@ func OnGetGuilds(ws *globals.Client, rawMap map[string]interface{}, limiter *rat
 			return
 		}
 		// Now subscribe to all guilds that the client is a member of!
-		ws.Userid = userid
 		registerSocket(guildID, ws, userid)
 
 		if globals.Guilds[guildID] != nil {

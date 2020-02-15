@@ -8,7 +8,7 @@ import (
 
 func deregister(ws *globals.Client) {
 	guildsQuery, err := harmonydb.DBInst.Query("SELECT guildid FROM guildmembers WHERE userid=$1", ws.Userid)
-	if err != nil {
+		if err != nil {
 		golog.Warnf("error deregistering client, potential memory leak : %v", err)
 		return
 	}
@@ -19,17 +19,17 @@ func deregister(ws *globals.Client) {
 			golog.Warnf("Error scanning guilds : %v", err)
 			return
 		}
-		if globals.Guilds[guildID].Clients[ws.Userid] != nil {
+		if globals.Guilds[guildID] != nil && globals.Guilds[guildID].Clients[ws.Userid] != nil {
 			if len(globals.Guilds[guildID].Clients[ws.Userid]) == 1 {
 				globals.Guilds[guildID].Clients[ws.Userid] = nil
-				return
-			}
-			for i, client := range globals.Guilds[guildID].Clients[ws.Userid] {
-				if client == ws {
-					var c = globals.Guilds[guildID].Clients[ws.Userid]
-					c[i] = c[len(c)-1]
-					globals.Guilds[guildID].Clients[ws.Userid] = c[:len(c)-1]
-					return
+			} else {
+				for i, client := range globals.Guilds[guildID].Clients[ws.Userid] {
+					if client == ws {
+						var c = globals.Guilds[guildID].Clients[ws.Userid]
+						c[i] = c[len(c)-1]
+						globals.Guilds[guildID].Clients[ws.Userid] = c[:len(c)-1]
+						return
+					}
 				}
 			}
 		}
