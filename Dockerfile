@@ -5,6 +5,7 @@ FROM golang:alpine as builder
 LABEL maintainer="Danil Korennykh <bluskript@gmail.com>"
 
 RUN apk update && apk add --no-cache git
+RUN apk --no-cache add vips-dev fftw-dev build-base
 
 WORKDIR /harmonyserver
 
@@ -14,7 +15,7 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o harmony-server .
+RUN GOOS=linux go build -a -installsuffix cgo -o harmony-server .
 
 FROM node:12.2.0-alpine as harmonyclientbuilder
 WORKDIR /app
@@ -26,6 +27,7 @@ RUN npm run build
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
+RUN apk --no-cache add vips-dev
 
 WORKDIR /root/
 
