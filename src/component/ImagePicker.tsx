@@ -28,14 +28,7 @@ export const ImagePicker = (props: Props) => {
 
 	return (
 		<>
-			<input
-				type="file"
-				id="file"
-				multiple
-				ref={imageUploadRef}
-				style={{ display: 'none' }}
-				onChange={onImageSelected}
-			/>
+			<input type="file" id="file" ref={imageUploadRef} style={{ display: 'none' }} onChange={onImageSelected} />
 			<ButtonBase
 				style={{ borderRadius: '50%' }}
 				onClick={() => {
