@@ -11,8 +11,8 @@ export const ImagePicker = (props: Props) => {
 	const imageUploadRef = useRef<HTMLInputElement | null>(null);
 
 	const onImageSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
-		if (event.currentTarget.files && event.currentTarget.files.length > 0) {
-			const file = event.currentTarget.files[0];
+		const file = event.currentTarget.files?.[0];
+		if (file) {
 			props.setImageFile(file);
 			if (file.type.startsWith('image/') && file.size < 33554432) {
 				const fileReader = new FileReader();
@@ -29,14 +29,7 @@ export const ImagePicker = (props: Props) => {
 	return (
 		<>
 			<input type="file" id="file" ref={imageUploadRef} style={{ display: 'none' }} onChange={onImageSelected} />
-			<ButtonBase
-				style={{ borderRadius: '50%' }}
-				onClick={() => {
-					if (imageUploadRef.current) {
-						imageUploadRef.current.click();
-					}
-				}}
-			>
+			<ButtonBase style={{ borderRadius: '50%' }} onClick={() => imageUploadRef.current?.click()}>
 				<Avatar style={{ width: '100px', height: '100px' }} src={props.image}></Avatar>
 			</ButtonBase>
 		</>

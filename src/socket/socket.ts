@@ -1,4 +1,5 @@
 import { EventEmitter } from 'fbemitter';
+import axios from 'axios';
 
 import { IPacket } from '../types/socket';
 
@@ -104,6 +105,16 @@ export default class HarmonySocket {
 			channel: channelID,
 			message: text,
 		});
+	}
+
+	sendMessageRest(guildID: string, channelID: string, text: string, attachment: File) {
+		const uploadData = new FormData();
+		uploadData.append('file', attachment);
+		uploadData.append('token', this.token);
+		uploadData.append('guild', guildID);
+		uploadData.append('channel', channelID);
+		uploadData.append('message', text);
+		return axios.post(`http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/api/rest/message`, uploadData, {});
 	}
 
 	sendDeleteMessage(guildID: string, channelID: string, messageID: string) {
