@@ -22,6 +22,7 @@ interface IProps {
 	createdat: number;
 	message: string;
 	avatar?: string;
+	attachment?: string;
 }
 
 const UtcEpochToLocalDate = (time: number) => {
@@ -50,39 +51,49 @@ export const Message = (props: IProps) => {
 	};
 
 	return (
-		<ListItem
-			alignItems="flex-start"
-			onMouseOver={() => setDropdownBtnVisible(true)}
-			onMouseLeave={() => setDropdownBtnVisible(false)}
-		>
-			<ListItemAvatar>
-				<Avatar alt={props.userid} src={props.avatar ? props.avatar : undefined} />
-			</ListItemAvatar>
-			<ListItemText
-				primary={
-					<>
-						{props.username || props.userid}
-						<Typography component="span" variant="body1" color="textSecondary">
-							{UtcEpochToLocalDate(props.createdat)}
-						</Typography>
-					</>
-				}
-				secondary={props.message}
-			/>
+		<>
+			<ListItem
+				alignItems="flex-start"
+				onMouseOver={() => setDropdownBtnVisible(true)}
+				onMouseLeave={() => setDropdownBtnVisible(false)}
+			>
+				<ListItemAvatar>
+					<Avatar alt={props.userid} src={props.avatar ? props.avatar : undefined} />
+				</ListItemAvatar>
+				<ListItemText
+					primary={
+						<>
+							{props.username || props.userid}
+							<Typography component="span" variant="body1" color="textSecondary">
+								{UtcEpochToLocalDate(props.createdat)}
+							</Typography>
+						</>
+					}
+					secondary={props.message}
+				/>
 
-			{dropdownBtnVisible && self.userid === props.userid ? (
-				<>
-					<IconButton edge="end" size="small" aria-label="message-options" onClick={handleDropdownBtnClick}>
-						<MoreVert />
-					</IconButton>
-					<Menu open={Boolean(anchorEl)} onClose={handleClose} anchorEl={anchorEl}>
-						<MenuItem onClick={handleClose}>Edit</MenuItem>
-						<MenuItem onClick={handleDelete}>Delete</MenuItem>
-					</Menu>
-				</>
+				{dropdownBtnVisible && self.userid === props.userid ? (
+					<>
+						<IconButton edge="end" size="small" aria-label="message-options" onClick={handleDropdownBtnClick}>
+							<MoreVert />
+						</IconButton>
+						<Menu open={Boolean(anchorEl)} onClose={handleClose} anchorEl={anchorEl}>
+							<MenuItem onClick={handleClose}>Edit</MenuItem>
+							<MenuItem onClick={handleDelete}>Delete</MenuItem>
+						</Menu>
+					</>
+				) : (
+					undefined
+				)}
+			</ListItem>
+			{'TODO move this to a class with theme.spacing support'}
+			{props.attachment ? (
+				<div style={{ display: 'flex', width: '100%', flex: '0 0 100%', marginLeft: '16px' }}>
+					<img src={`http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${props.attachment}`} />
+				</div>
 			) : (
 				undefined
 			)}
-		</ListItem>
+		</>
 	);
 };
