@@ -1,7 +1,11 @@
 # Harmony Server
 ## A Free And Open Source Server For A Communications Platform With Guilds
+## For the frontend, please visit [harmony-app](https://github.com/harmony-development/harmony-app)
+### **[!] This is under **very** heavy development, most things are NOT working!**
 
 ![Harmony Logo](https://avatars3.githubusercontent.com/u/58618825?s=200)
+
+![App Preview](https://i.imgur.com/GHZN7BD.png)
 
 ## Setup
 
