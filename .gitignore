@@ -4,3 +4,4 @@ vendor
 filestore
 harmony.db
 static
+harmony-server

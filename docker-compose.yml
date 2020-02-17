@@ -3,6 +3,8 @@ services:
   app:
     container_name: harmony-server
     build: .
+    tty: true
+    stdin_open: true
     ports:
       - "2288:2288"
     restart: unless-stopped
