@@ -1,6 +1,7 @@
 package event
 
 import (
+	"database/sql"
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
@@ -13,6 +14,7 @@ type GetMessagesData struct {
 	Token string `mapstructure:"token"`
 	Guild string `mapstructure:"guild"`
 	Channel string `mapstructure:"channel"`
+	LastMessage string `mapstructure:"lastmessage"`
 }
 
 type Message struct {
@@ -42,7 +44,12 @@ func OnGetMessages(ws *globals.Client, rawMap map[string]interface{}, limiter *r
 	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil {
 		return
 	}
-	res, err := harmonydb.DBInst.Query("SELECT messageid, author, createdat, message, attachment FROM messages WHERE guildid=$1 AND channelid=$2 ORDER BY createdat DESC LIMIT 30", data.Guild, data.Channel)
+	var res *sql.Rows
+	if data.LastMessage == "" {
+		res, err = harmonydb.DBInst.Query("SELECT messageid, author, createdat, message, attachment FROM messages WHERE guildid=$1 AND channelid=$2 ORDER BY createdat DESC LIMIT 30", data.Guild, data.Channel)
+	} else {
+		res, err = harmonydb.DBInst.Query("SELECT messageid, author, createdat, message, attachment FROM messages WHERE guildid=$1 AND channelid=$2 AND createdat < (SELECT createdat FROM messages WHERE messageid=$3) ORDER BY createdat DESC LIMIT 30", data.Guild, data.Channel, data.LastMessage)
+	}
 	if err != nil {
 		sendErr(ws, "We weren't able to get a list of messages. Please try again")
 		golog.Warnf("Error getting recent messages : %v", err)
