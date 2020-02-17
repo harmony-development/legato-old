@@ -86,7 +86,7 @@ export const Message = (props: IProps) => {
 					undefined
 				)}
 			</ListItem>
-			{'TODO move this to a class with theme.spacing support'}
+			{/*TODO move this to a class with theme.spacing support*/}
 			{props.attachment ? (
 				<div style={{ display: 'flex', width: '100%', flex: '0 0 100%', marginLeft: '16px' }}>
 					<img src={`http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${props.attachment}`} />
