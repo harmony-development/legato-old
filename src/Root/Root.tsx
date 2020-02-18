@@ -39,6 +39,9 @@ const RootWithRouter = (): JSX.Element => {
 		const localType = localStorage.getItem('themetype');
 		const localInputStyle = localStorage.getItem('inputstyle');
 		const localSelf = localStorage.getItem('self');
+		if (!localStorage.getItem('developerCodeExecution')) {
+			localStorage.setItem('developerCodeExecution', 'WARNING : SETTING THIS VALUE TO TRUE MAY CAUSE HARM TO YOUR PC');
+		}
 		if (localPrimary) {
 			dispatch(SetPrimary(JSON.parse(localPrimary)));
 		}

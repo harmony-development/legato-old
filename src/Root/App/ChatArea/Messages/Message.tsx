@@ -8,8 +8,10 @@ import {
 	IconButton,
 	Menu,
 	MenuItem,
+	Divider,
+	Tooltip,
 } from '@material-ui/core';
-import { MoreVert } from '@material-ui/icons';
+import { MoreVert, PlayArrow } from '@material-ui/icons';
 import { useSelector } from 'react-redux';
 
 import { harmonySocket } from '../../../Root';
@@ -62,14 +64,54 @@ export const Message = (props: IProps) => {
 				</ListItemAvatar>
 				<ListItemText
 					primary={
-						<>
-							{props.username || props.userid}
+						<Typography>
+							{props.username || props.userid}{' '}
 							<Typography component="span" variant="body1" color="textSecondary">
 								{UtcEpochToLocalDate(props.createdat)}
 							</Typography>
+						</Typography>
+					}
+					disableTypography
+					secondary={
+						<>
+							{props.message.startsWith('```') && props.message.endsWith('```') ? (
+								<div style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
+									<Typography style={{ fontFamily: 'monospace', whiteSpace: 'break-spaces' }} display="inline">
+										{props.message.substring(3, props.message.length - 3)}
+									</Typography>
+									{localStorage.getItem('developerCodeExecution') === 'true' ? (
+										<Tooltip title="Run Code Clientside">
+											<IconButton
+												size="small"
+												onClick={() => {
+													try {
+														eval(props.message.substring(3, props.message.length - 3));
+													} catch (e) {
+														if (e instanceof Error) {
+															console.error(e.message);
+														}
+													}
+												}}
+											>
+												<PlayArrow />
+											</IconButton>
+										</Tooltip>
+									) : (
+										undefined
+									)}
+								</div>
+							) : (
+								<Typography>{props.message}</Typography>
+							)}
+							{props.attachment ? (
+								<div style={{ display: 'flex', width: '100%', flex: '0 0 100%' }}>
+									<img src={`http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${props.attachment}`} />
+								</div>
+							) : (
+								undefined
+							)}
 						</>
 					}
-					secondary={props.message}
 				/>
 
 				{dropdownBtnVisible && self.userid === props.userid ? (
@@ -86,14 +128,6 @@ export const Message = (props: IProps) => {
 					undefined
 				)}
 			</ListItem>
-			{/*TODO move this to a class with theme.spacing support*/}
-			{props.attachment ? (
-				<div style={{ display: 'flex', width: '100%', flex: '0 0 100%', marginLeft: '16px' }}>
-					<img src={`http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${props.attachment}`} />
-				</div>
-			) : (
-				undefined
-			)}
 		</>
 	);
 };
