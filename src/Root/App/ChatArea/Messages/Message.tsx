@@ -105,7 +105,10 @@ export const Message = (props: IProps) => {
 							)}
 							{props.attachment ? (
 								<div style={{ display: 'flex', width: '100%', flex: '0 0 100%' }}>
-									<img src={`http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${props.attachment}`} />
+									<img
+										src={`http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${props.attachment}`}
+										style={{ maxHeight: '300px', maxWidth: '500px' }}
+									/>
 								</div>
 							) : (
 								undefined
