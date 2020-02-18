@@ -98,6 +98,15 @@ export default class HarmonySocket {
 		});
 	}
 
+	getOldMessages(guildID: string, channelID: string, lastMessageID: string) {
+		this.emitEvent('getmessages', {
+			token: this.token,
+			guild: guildID,
+			channel: channelID,
+			lastmessage: lastMessageID,
+		});
+	}
+
 	sendMessage(guildID: string, channelID: string, text: string) {
 		this.emitEvent('message', {
 			token: this.token,

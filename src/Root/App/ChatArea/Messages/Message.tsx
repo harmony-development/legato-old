@@ -8,7 +8,6 @@ import {
 	IconButton,
 	Menu,
 	MenuItem,
-	Divider,
 	Tooltip,
 } from '@material-ui/core';
 import { MoreVert, PlayArrow } from '@material-ui/icons';
@@ -35,6 +34,7 @@ const UtcEpochToLocalDate = (time: number) => {
 
 export const Message = (props: IProps) => {
 	const [dropdownBtnVisible, setDropdownBtnVisible] = useState(false);
+	const [output, setOutput] = useState('');
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const { currentGuild, currentChannel, self } = useSelector((state: IState) => state);
 
@@ -75,31 +75,46 @@ export const Message = (props: IProps) => {
 					secondary={
 						<>
 							{props.message.startsWith('```') && props.message.endsWith('```') ? (
-								<div style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
-									<Typography style={{ fontFamily: 'monospace', whiteSpace: 'break-spaces' }} display="inline">
-										{props.message.substring(3, props.message.length - 3)}
-									</Typography>
+								<>
+									<div style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)', paddingLeft: '8px' }}>
+										<Typography style={{ fontFamily: 'monospace', whiteSpace: 'break-spaces' }} display="inline">
+											{props.message.substring(3, props.message.length - 3)}
+										</Typography>
+									</div>
 									{localStorage.getItem('developerCodeExecution') === 'true' ? (
-										<Tooltip title="Run Code Clientside">
-											<IconButton
-												size="small"
-												onClick={() => {
-													try {
-														eval(props.message.substring(3, props.message.length - 3));
-													} catch (e) {
-														if (e instanceof Error) {
-															console.error(e.message);
+										<>
+											<Tooltip title="Run Code Clientside">
+												<IconButton
+													size="small"
+													onClick={() => {
+														try {
+															setOutput(eval(props.message.substring(3, props.message.length - 3)));
+														} catch (e) {
+															if (e instanceof Error) {
+																setOutput(`ERROR : ${e.message}`);
+															}
 														}
-													}
-												}}
-											>
-												<PlayArrow />
-											</IconButton>
-										</Tooltip>
+													}}
+												>
+													<PlayArrow />
+												</IconButton>
+											</Tooltip>
+											{output ? (
+												<div style={{ backgroundColor: 'rgba(0, 0, 0, 0.1)', paddingLeft: '8px' }}>
+													<Typography style={{ fontFamily: 'monospace', whiteSpace: 'break-spaces' }} display="inline">
+														{'Output Console'}
+														<br />
+														{output}
+													</Typography>
+												</div>
+											) : (
+												undefined
+											)}
+										</>
 									) : (
 										undefined
 									)}
-								</div>
+								</>
 							) : (
 								<Typography>{props.message}</Typography>
 							)}

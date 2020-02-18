@@ -6,6 +6,7 @@ import { IState } from '../../../types/redux';
 import { AppDispatch } from '../../../redux/store';
 import { FocusChatInput } from '../../../redux/AppReducer';
 import { DisconnectedStatus } from '../DisconnectedStatus';
+import { harmonySocket } from '../../Root';
 
 import { useChatAreaStyles } from './ChatAreaStyle';
 import { Messages } from './Messages/Messages';
@@ -14,21 +15,39 @@ import { GuildList } from './GuildList/GuildList';
 import { ChannelList } from './ChannelList/ChannelList';
 import { MemberList } from './MemberList/MemberList';
 
+let preScrollHeight = 0;
+let preScrollTop = 0;
+let scrollTrigger = false;
+
 export const ChatArea = () => {
 	const classes = useChatAreaStyles();
 	const dispatch = useDispatch<AppDispatch>();
-	const [messages, connected] = useSelector((state: IState) => [state.messages, state.connected]);
+	const { messages, connected, currentGuild, currentChannel } = useSelector((state: IState) => state);
 	const messagesRef = useRef<HTMLDivElement | null>(null);
 
 	useEffect(() => {
 		if (messagesRef.current) {
-			messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+			if (!scrollTrigger) {
+				messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+			} else {
+				messagesRef.current.scrollTop = messagesRef.current.scrollHeight - preScrollHeight + preScrollTop;
+				scrollTrigger = false;
+			}
 		}
 	}, [messages]);
 
 	const onKeyDown = (ev: React.KeyboardEvent<HTMLDivElement>) => {
 		if (ev.key !== 'Tab') {
 			dispatch(FocusChatInput());
+		}
+	};
+
+	const onScroll = (event: React.UIEvent<HTMLDivElement>) => {
+		if (event.currentTarget.scrollTop === 0 && currentGuild && currentChannel) {
+			scrollTrigger = true;
+			preScrollHeight = event.currentTarget.scrollHeight;
+			preScrollTop = event.currentTarget.scrollTop;
+			harmonySocket.getOldMessages(currentGuild, currentChannel, messages[0].messageid);
 		}
 	};
 
@@ -43,7 +62,7 @@ export const ChatArea = () => {
 				<ChannelList />
 			</Paper>
 			<div className={classes.chatArea}>
-				<div className={classes.messages} ref={messagesRef} onKeyDown={onKeyDown} tabIndex={-1}>
+				<div className={classes.messages} ref={messagesRef} onKeyDown={onKeyDown} tabIndex={-1} onScroll={onScroll}>
 					{!connected ? <DisconnectedStatus /> : undefined}
 					<Messages />
 				</div>

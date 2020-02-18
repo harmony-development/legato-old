@@ -37,6 +37,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		currentChannel,
 		self,
 		guildMembers,
+		messages,
 		channels,
 		invites,
 		guildDialog,
@@ -72,6 +73,15 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 			}
 		},
 		[dispatch]
+	);
+
+	const getOldMessagesCallback = useCallback(
+		(raw: any) => {
+			if (Array.isArray(raw['messages'])) {
+				dispatch(SetMessages([...(raw['messages'] as IMessage[]).reverse(), ...messages]));
+			}
+		},
+		[messages, dispatch]
 	);
 
 	const getChannelsCallback = useCallback(
@@ -360,6 +370,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		socket.events.addListener('getmembers', getMembersCallback);
 		socket.events.addListener('getchannels', getChannelsCallback);
 		socket.events.addListener('message', messageCallback);
+		socket.events.addListener('getmessages-old', getOldMessagesCallback);
 		socket.events.addListener('deletemessage', deleteMessageCallback);
 		socket.events.addListener('leaveguild', leaveGuildCallback);
 		socket.events.addListener('joinguild', joinGuildCallback);
@@ -387,6 +398,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 			socket.events.removeAllListeners('getchannels');
 			socket.events.removeAllListeners('getmembers');
 			socket.events.removeAllListeners('message');
+			socket.events.removeAllListeners('getmessages-old');
 			socket.events.removeAllListeners('deletemessage');
 			socket.events.removeAllListeners('leaveguild');
 			socket.events.removeAllListeners('joinguild');
@@ -414,6 +426,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		getMessagesCallback,
 		getChannelsCallback,
 		messageCallback,
+		getOldMessagesCallback,
 		leaveGuildCallback,
 		joinGuildCallback,
 		createGuildCallback,
