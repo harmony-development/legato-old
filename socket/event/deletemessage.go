@@ -34,7 +34,7 @@ func OnDeleteMessage(ws *globals.Client, rawMap map[string]interface{}, limiter 
 		sendErr(ws, "You're deleting messages too fast, try again in a few moments")
 		return
 	}
-	res, err := harmonydb.DBInst.Exec("DELETE FROM messages WHERE guildid=$1 AND channelid=$2 AND messageid=$3 AND author=$4", data.Guild, data.Channel, data.Message, userid)
+	res, err := harmonydb.DBInst.Exec("DELETE FROM messages WHERE guildid=$1 AND channelid=$2 AND messageid=$3 AND (author=$4 OR (SELECT owner FROM guilds WHERE guildid=$5)=$6)", data.Guild, data.Channel, data.Message, userid, data.Guild, userid)
 	if err != nil {
 		sendErr(ws, "An error occured while deleting that message")
 		return
