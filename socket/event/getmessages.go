@@ -66,10 +66,19 @@ func OnGetMessages(ws *globals.Client, rawMap map[string]interface{}, limiter *r
 		}
 		returnMsgs = append(returnMsgs, msg)
 	}
-	ws.Send(&globals.Packet{
-		Type: "getmessages",
-		Data: map[string]interface{}{
-			"messages": returnMsgs,
-		},
-	})
+	if data.LastMessage == "" {
+		ws.Send(&globals.Packet{
+			Type: "getmessages",
+			Data: map[string]interface{}{
+				"messages": returnMsgs,
+			},
+		})
+	} else {
+		ws.Send(&globals.Packet{
+			Type: "getmessages-old",
+			Data: map[string]interface{}{
+				"messages": returnMsgs,
+			},
+		})
+	}
 }

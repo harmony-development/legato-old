@@ -22,6 +22,8 @@ WORKDIR /app
 RUN apk update && apk add --no-cache git
 RUN git clone https://github.com/harmony-development/harmony-app
 WORKDIR /app/harmony-app
+RUN rm .env
+COPY .env-client .env
 RUN npm install
 RUN npm run build
 
