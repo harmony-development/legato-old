@@ -35,7 +35,7 @@ var queries = []string{
 	`CREATE TABLE IF NOT EXISTS channels(
 		channelid TEXT PRIMARY KEY UNIQUE, 
 		guildid TEXT REFERENCES guilds(guildid), 
-		channelname TEXT
+		channelname TEXT NOT NULL
 	);`,
 	`CREATE TABLE IF NOT EXISTS messages(
 		messageid TEXT PRIMARY KEY, 
@@ -44,8 +44,12 @@ var queries = []string{
 		author TEXT REFERENCES users(id), 
 		createdat INTEGER NOT NULL, 
 		message TEXT NOT NULL,
-		attachment TEXT
+		attachment TEXT NOT NULL
 	);`,
+	`CREATE TABLE IF NOT EXISTS attachments(
+		messageid TEXT NOT NULL REFERENCES messages(messageid),
+		attachment TEXT NOT NULL
+	`,
 	`INSERT INTO users(id, email, username, avatar, password) VALUES(
 		'82ee9c8dc9e165205548b7c3833e7372', 
 		'developer@harmonyapp.io', 
