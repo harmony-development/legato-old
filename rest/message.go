@@ -45,7 +45,7 @@ func Message(w http.ResponseWriter, r *http.Request) {
 	}
 	fileTransaction, err := harmonydb.DBInst.Begin()
 	if err != nil {
-		golog.Warnf("error making file transaction : ", err)
+		golog.Warnf("error making file transaction : %v", err)
 		sendVibeCheck(w)
 		return
 	}
