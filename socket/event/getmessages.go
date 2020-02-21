@@ -11,18 +11,18 @@ import (
 )
 
 type GetMessagesData struct {
-	Token string `mapstructure:"token"`
-	Guild string `mapstructure:"guild"`
-	Channel string `mapstructure:"channel"`
+	Token       string `mapstructure:"token"`
+	Guild       string `mapstructure:"guild"`
+	Channel     string `mapstructure:"channel"`
 	LastMessage string `mapstructure:"lastmessage"`
 }
 
 type Message struct {
-	Userid    string `json:"userid"`
-	Createdat int    `json:"createdat"`
-	Message   string `json:"message"`
+	Userid     string  `json:"userid"`
+	Createdat  int     `json:"createdat"`
+	Message    string  `json:"message"`
 	Attachment *string `json:"attachment"`
-	Messageid string `json:"messageid"`
+	Messageid  string  `json:"messageid"`
 }
 
 func OnGetMessages(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
@@ -36,7 +36,7 @@ func OnGetMessages(ws *globals.Client, rawMap map[string]interface{}, limiter *r
 		golog.Warnf("Error decoding getmessages request")
 		return
 	}
-	userid ,err := authentication.VerifyToken(data.Token)
+	userid, err := authentication.VerifyToken(data.Token)
 	if err != nil { // token is invalid! Get outta here!
 		deauth(ws)
 		return
@@ -55,7 +55,7 @@ func OnGetMessages(ws *globals.Client, rawMap map[string]interface{}, limiter *r
 		golog.Warnf("Error getting recent messages : %v", err)
 		return
 	}
-	var returnMsgs [] Message
+	var returnMsgs []Message
 	for res.Next() {
 		var msg Message
 		err := res.Scan(&msg.Messageid, &msg.Userid, &msg.Createdat, &msg.Message, &msg.Attachment)

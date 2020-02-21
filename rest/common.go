@@ -26,7 +26,7 @@ func deleteFromFilestore(fileid string) {
 	}
 }
 
-func parseFileUpload(r *http.Request) (error, *string, *multipart.File) {
+func parseFileUpload(r *http.Request) (error, *string, []*multipart.FileHeader) {
 	err := r.ParseMultipartForm(1 << 20)
 	if err != nil {
 		return fmt.Errorf("error parsing form"), nil, nil
@@ -41,11 +41,7 @@ func parseFileUpload(r *http.Request) (error, *string, *multipart.File) {
 		return fmt.Errorf("invalid token"), nil, nil
 	}
 
-	file, _, err := r.FormFile("file")
-	if err != nil {
-		golog.Warnf("Error reading client file : %v", err)
-		return fmt.Errorf("your file failed the vibe check, try again in a few moments"), nil, nil
-	}
+	files := r.MultipartForm.File["files"]
 
-	return nil, &userid, &file
+	return nil, &userid, files
 }

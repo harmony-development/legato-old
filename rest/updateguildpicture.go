@@ -14,12 +14,21 @@ import (
 
 func UpdateGuildPicture(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	err, userid, file := parseFileUpload(r)
+	err, userid, files := parseFileUpload(r)
 	var guild = r.FormValue("guild")
-	if err != nil {
+	if err != nil || len(files) == 0 {
 		golog.Debugf("Error updating avatar : %v", err)
 		sendResp(w, map[string]string{
 			"error": err.Error(),
+		})
+		return
+	}
+
+	file, err := files[0].Open()
+	if err != nil {
+		golog.Debugf("Error opening file : %v", err)
+		sendResp(w, map[string]string{
+			"error": "we were unable to read your file",
 		})
 		return
 	}
@@ -31,8 +40,13 @@ func UpdateGuildPicture(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	defer (*file).Close()
-	fileBytes, err := ioutil.ReadAll(*file)
+	defer func() {
+		err = file.Close()
+		if err != nil {
+			golog.Warnf("Error closing file : %v", err)
+		}
+	}()
+	fileBytes, err := ioutil.ReadAll(file)
 	if err != nil {
 		golog.Warnf("Error reading uploaded file : %v", err)
 		sendVibeCheck(w)
