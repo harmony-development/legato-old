@@ -21,7 +21,7 @@ type Message struct {
 	Userid     string  `json:"userid"`
 	Createdat  int     `json:"createdat"`
 	Message    string  `json:"message"`
-	Attachment *string `json:"attachment"`
+	Attachments []string `json:"attachment"`
 	Messageid  string  `json:"messageid"`
 }
 
@@ -46,9 +46,9 @@ func OnGetMessages(ws *globals.Client, rawMap map[string]interface{}, limiter *r
 	}
 	var res *sql.Rows
 	if data.LastMessage == "" {
-		res, err = harmonydb.DBInst.Query("SELECT messageid, author, createdat, message, attachment FROM messages WHERE guildid=$1 AND channelid=$2 ORDER BY createdat DESC LIMIT 30", data.Guild, data.Channel)
+		res, err = harmonydb.DBInst.Query("SELECT messageid, author, createdat, message FROM messages WHERE guildid=$1 AND channelid=$2 ORDER BY createdat DESC LIMIT 30", data.Guild, data.Channel)
 	} else {
-		res, err = harmonydb.DBInst.Query("SELECT messageid, author, createdat, message, attachment FROM messages WHERE guildid=$1 AND channelid=$2 AND createdat < (SELECT createdat FROM messages WHERE messageid=$3) ORDER BY createdat DESC LIMIT 30", data.Guild, data.Channel, data.LastMessage)
+		res, err = harmonydb.DBInst.Query("SELECT messageid, author, createdat, message FROM messages WHERE guildid=$1 AND channelid=$2 AND createdat < (SELECT createdat FROM messages WHERE messageid=$3) ORDER BY createdat DESC LIMIT 30", data.Guild, data.Channel, data.LastMessage)
 	}
 	if err != nil {
 		sendErr(ws, "We weren't able to get a list of messages. Please try again")
@@ -58,12 +58,28 @@ func OnGetMessages(ws *globals.Client, rawMap map[string]interface{}, limiter *r
 	var returnMsgs []Message
 	for res.Next() {
 		var msg Message
-		err := res.Scan(&msg.Messageid, &msg.Userid, &msg.Createdat, &msg.Message, &msg.Attachment)
+		err := res.Scan(&msg.Messageid, &msg.Userid, &msg.Createdat, &msg.Message)
 		if err != nil {
 			sendErr(ws, "We weren't able to get a list of messages. Please try again")
 			golog.Warnf("Error scanning next row getting messages. Reason: %v", err)
 			return
 		}
+
+		attachments, err := harmonydb.DBInst.Query("SELECT attachment FROM attachments WHERE messageid=$1", msg.Messageid)
+		if err != nil {
+			golog.Warnf("Error scanning for attachments : %v", err)
+			return
+		}
+
+		for attachments.Next() {
+			var attachment string
+			err := attachments.Scan(&attachment)
+			if err != nil {
+				golog.Warnf("Error scanning attachment : %v", err)
+			}
+			msg.Attachments = append(msg.Attachments, attachment)
+		}
+		
 		returnMsgs = append(returnMsgs, msg)
 	}
 	if data.LastMessage == "" {
