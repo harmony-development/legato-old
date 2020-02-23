@@ -4,7 +4,6 @@ import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
-	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 )
@@ -20,12 +19,7 @@ func OnGetChannels(ws *globals.Client, rawMap map[string]interface{}, limiter *r
 		golog.Warnf("Error decoding data for getting channels")
 		return
 	}
-	userid, err := authentication.VerifyToken(data.Token)
-	if err != nil {
-		deauth(ws)
-		return
-	}
-	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil {
+	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[ws.Userid] == nil {
 		return
 	}
 	if !limiter.Allow() {

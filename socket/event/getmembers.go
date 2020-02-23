@@ -1,12 +1,11 @@
 package event
 
 import (
-	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 
-	"github.com/mitchellh/mapstructure"
 	"github.com/kataras/golog"
+	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
 )
 
@@ -21,12 +20,7 @@ func OnGetMembers(ws *globals.Client, rawMap map[string]interface{}, limiter *ra
 		golog.Warnf("Error decoding data while getting members")
 		return
 	}
-	userid, err := authentication.VerifyToken(data.Token)
-	if err != nil {
-		deauth(ws)
-		return
-	}
-	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil {
+	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[ws.Userid] == nil {
 		golog.Warnf("Client tried to list members without being registered")
 		return
 	}

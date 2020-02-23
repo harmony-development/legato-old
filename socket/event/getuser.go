@@ -3,7 +3,6 @@ package event
 import (
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
-	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 )
@@ -19,14 +18,9 @@ func OnGetUser(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.
 		sendErr(ws, "Something's wrong with your request dude")
 		return
 	}
-	_, err := authentication.VerifyToken(data.Token)
-	if err != nil {
-		deauth(ws)
-		return
-	}
 	var username string
 	var avatar string
-	err = harmonydb.DBInst.QueryRow("SELECT username, avatar FROM users WHERE id=$1", data.Userid).Scan(&username, &avatar)
+	err := harmonydb.DBInst.QueryRow("SELECT username, avatar FROM users WHERE id=$1", data.Userid).Scan(&username, &avatar)
 	if err != nil {
 		return
 	}

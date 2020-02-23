@@ -5,7 +5,6 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/thanhpk/randstr"
 	"golang.org/x/time/rate"
-	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 )
@@ -20,11 +19,6 @@ func OnCreateGuild(ws *globals.Client, rawMap map[string]interface{}, limiter *r
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
-	userid, err := authentication.VerifyToken(data.Token)
-	if err != nil {
-		deauth(ws)
-		return
-	}
 	if !limiter.Allow() {
 		sendErr(ws, "That's a lot of guilds created! Please relax and try again later")
 		return
@@ -36,13 +30,13 @@ func OnCreateGuild(ws *globals.Client, rawMap map[string]interface{}, limiter *r
 		golog.Warnf("Error beginning createGuildTransaction : %v", err)
 		return
 	}
-	_, err = createGuildTransaction.Exec(`INSERT INTO guilds(guildid, guildname, picture, owner) VALUES($1, $2, $3, $4);`, guildid, data.Guild, "", userid)
+	_, err = createGuildTransaction.Exec(`INSERT INTO guilds(guildid, guildname, picture, owner) VALUES($1, $2, $3, $4);`, guildid, data.Guild, "", ws.Userid)
 	if err != nil {
 		createGuildError(ws)
 		golog.Warnf("Error inserting guild : %v", err)
 		return
 	}
-	_, err = createGuildTransaction.Exec(`INSERT INTO guildmembers(userid, guildid) VALUES($1, $2);`, userid, guildid)
+	_, err = createGuildTransaction.Exec(`INSERT INTO guildmembers(userid, guildid) VALUES($1, $2);`, ws.Userid, guildid)
 	if err != nil {
 		createGuildError(ws)
 		golog.Warnf("Error inserting guild member on guild create : %v", err)

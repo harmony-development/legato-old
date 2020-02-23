@@ -4,7 +4,6 @@ import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
-	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 )
@@ -20,9 +19,8 @@ func OnJoinGuild(ws *globals.Client, rawMap map[string]interface{}, limiter *rat
 		sendErr(ws, "Bad invite code or token")
 		return
 	}
-	userid ,err := authentication.VerifyToken(data.Token)
 	var guildid string
-	err = harmonydb.DBInst.QueryRow("SELECT guildid FROM invites WHERE inviteid=$1", data.InviteCode).Scan(&guildid)
+	err := harmonydb.DBInst.QueryRow("SELECT guildid FROM invites WHERE inviteid=$1", data.InviteCode).Scan(&guildid)
 	if err != nil {
 		ws.Send(&globals.Packet{
 			Type: "joinguild",
@@ -39,7 +37,7 @@ func OnJoinGuild(ws *globals.Client, rawMap map[string]interface{}, limiter *rat
 		golog.Warnf("Error creating joinGuildTransaction : %v", err)
 		return
 	}
-	_, err = joinGuildTransaction.Exec("INSERT INTO guildmembers(userid, guildid) VALUES($1, $2)", userid, guildid)
+	_, err = joinGuildTransaction.Exec("INSERT INTO guildmembers(userid, guildid) VALUES($1, $2)", ws.Userid, guildid)
 	if err != nil {
 		sendErr(ws, "You are already part of this guild.")
 		golog.Warn(err)
@@ -63,5 +61,5 @@ func OnJoinGuild(ws *globals.Client, rawMap map[string]interface{}, limiter *rat
 			"guild": guildid,
 		},
 	})
-	registerSocket(guildid, ws, userid)
+	registerSocket(guildid, ws, ws.Userid)
 }

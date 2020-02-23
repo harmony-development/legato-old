@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/kataras/golog"
 	"harmony-server/globals"
+	"harmony-server/socket/event"
 	"net/http"
 	"time"
 )
@@ -29,6 +30,7 @@ func NewSocket(w http.ResponseWriter, r *http.Request) *globals.Client {
 		Connection: rawsocket,
 		EventBus: make(map[string]globals.Event),
 		Out: make(chan []byte),
+		Authed: false,
 	}
 	go reader(ws)
 	go writer(ws)
@@ -60,7 +62,12 @@ func reader(ws *globals.Client) {
 			var p globals.Packet
 			if err = json.Unmarshal(msg, &p); err == nil {
 				if ws.EventBus[p.Type] != nil {
-					ws.EventBus[p.Type](ws, p.Data) // call an event from the eventbus if it exists
+					// login/register/auth/ping do not require authentication, everything else does
+					if ws.Authed || p.Type == "login" || p.Type == "register" || p.Type == "auth" || p.Type == "ping" {
+						ws.EventBus[p.Type](ws, p.Data) // call an event from the eventbus if it exists
+					} else {
+						event.Deauth(ws)
+					}
 				} else {
 					golog.Warnf("Unrecognized API Query Detected : %v", p.Type)
 				}

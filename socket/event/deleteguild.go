@@ -4,7 +4,6 @@ import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
-	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 )
@@ -19,12 +18,7 @@ func OnDeleteGuild(ws *globals.Client, rawMap map[string]interface{}, limiter *r
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
-	userid, err := authentication.VerifyToken(data.Token)
-	if err != nil {
-		deauth(ws)
-		return
-	}
-	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil || globals.Guilds[data.Guild].Owner != userid {
+	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[ws.Userid] == nil || globals.Guilds[data.Guild].Owner != ws.Userid {
 		sendErr(ws, "You can't delete this guild since you don't own it!")
 		return
 	}

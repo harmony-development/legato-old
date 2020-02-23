@@ -5,7 +5,6 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/thanhpk/randstr"
 	"golang.org/x/time/rate"
-	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 )
@@ -21,19 +20,10 @@ func OnAddChannel(ws *globals.Client, rawMap map[string]interface{}, limiter *ra
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
-	if data.Token == "" {
-		deauth(ws)
-		return
-	}
 	if data.Guild == "" || data.Channel == "" {
 		return
 	}
-	userid, err := authentication.VerifyToken(data.Token)
-	if err != nil {
-		deauth(ws)
-		return
-	}
-	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil || globals.Guilds[data.Guild].Owner != userid {
+	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[ws.Userid] == nil || globals.Guilds[data.Guild].Owner != ws.Userid {
 		return
 	}
 	if !limiter.Allow() {
@@ -41,10 +31,10 @@ func OnAddChannel(ws *globals.Client, rawMap map[string]interface{}, limiter *ra
 		return
 	}
 	var channelID = randstr.Hex(16)
-	_, err = harmonydb.DBInst.Exec("INSERT INTO channels(channelid, guildid, channelname) VALUES($1, $2, $3)", channelID, data.Guild, data.Channel)
+	_, err := harmonydb.DBInst.Exec("INSERT INTO channels(channelid, guildid, channelname) VALUES($1, $2, $3)", channelID, data.Guild, data.Channel)
 	if err != nil {
 		sendErr(ws, "Hmm the channel couldn't be created. You should try again.")
-		golog.Warnf("Error creating channel : %v", err)
+		golog.Warnf("Error creating channel : %v", ws.Userid)
 		return
 	}
 	for _, client := range globals.Guilds[data.Guild].Clients {

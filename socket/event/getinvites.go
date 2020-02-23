@@ -4,7 +4,6 @@ import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
-	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 )
@@ -19,12 +18,7 @@ func OnGetInvites(ws *globals.Client, rawMap map[string]interface{}, limiter *ra
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
-	userid ,err := authentication.VerifyToken(data.Token)
-	if err != nil { // token is invalid! Get outta here!
-		deauth(ws)
-		return
-	}
-	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil || globals.Guilds[data.Guild].Owner != userid {
+	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[ws.Userid] == nil || globals.Guilds[data.Guild].Owner != ws.Userid {
 		return
 	}
 	if !limiter.Allow() {

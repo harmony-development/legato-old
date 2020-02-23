@@ -4,7 +4,6 @@ import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
-	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 )
@@ -22,19 +21,14 @@ func OnDeleteMessage(ws *globals.Client, rawMap map[string]interface{}, limiter 
 		golog.Warnf("Error decoding data for getting channels")
 		return
 	}
-	userid, err := authentication.VerifyToken(data.Token)
-	if err != nil {
-		deauth(ws)
-		return
-	}
-	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil {
+	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[ws.Userid] == nil {
 		return
 	}
 	if !limiter.Allow() {
 		sendErr(ws, "You're deleting messages too fast, try again in a few moments")
 		return
 	}
-	res, err := harmonydb.DBInst.Exec("DELETE FROM messages WHERE guildid=$1 AND channelid=$2 AND messageid=$3 AND (author=$4 OR (SELECT owner FROM guilds WHERE guildid=$5)=$6)", data.Guild, data.Channel, data.Message, userid, data.Guild, userid)
+	res, err := harmonydb.DBInst.Exec("DELETE FROM messages WHERE guildid=$1 AND channelid=$2 AND messageid=$3 AND (author=$4 OR (SELECT owner FROM guilds WHERE guildid=$5)=$6)", data.Guild, data.Channel, data.Message, ws.Userid, data.Guild, ws.Userid)
 	if err != nil {
 		sendErr(ws, "An error occured while deleting that message")
 		return

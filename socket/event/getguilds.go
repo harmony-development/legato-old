@@ -4,7 +4,6 @@ import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
-	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 )
@@ -25,17 +24,11 @@ func OnGetGuilds(ws *globals.Client, rawMap map[string]interface{}, limiter *rat
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
-	userid ,err := authentication.VerifyToken(data.Token)
-	if err != nil {
-		deauth(ws)
-		return
-	}
 	if !limiter.Allow() {
 		sendErr(ws, "You're getting the guilds list a lot, please try again in a sec")
 		return
 	}
-	ws.Userid = userid
-	res, err := harmonydb.DBInst.Query("SELECT guilds.guildid, guilds.guildname, guilds.owner, guilds.picture FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=$1", userid)
+	res, err := harmonydb.DBInst.Query("SELECT guilds.guildid, guilds.guildname, guilds.owner, guilds.picture FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=$1", ws.Userid)
 	if err != nil {
 		sendErr(ws, "We weren't able to get a list of guilds for you. Try reloading the page / logging back in")
 		golog.Warnf("Error selecting guilds. Reason : %v", err)
@@ -47,7 +40,7 @@ func OnGetGuilds(ws *globals.Client, rawMap map[string]interface{}, limiter *rat
 		var fetchedGuild guildsData
 		var guildOwner string
 		err := res.Scan(&guildID, &fetchedGuild.Guildname, &guildOwner, &fetchedGuild.Picture)
-		if guildOwner == userid {
+		if guildOwner == ws.Userid {
 			fetchedGuild.IsOwner = true
 		}
 		if err != nil {
@@ -56,7 +49,7 @@ func OnGetGuilds(ws *globals.Client, rawMap map[string]interface{}, limiter *rat
 			return
 		}
 		// Now subscribe to all guilds that the client is a member of!
-		registerSocket(guildID, ws, userid)
+		registerSocket(guildID, ws, ws.Userid)
 
 		if globals.Guilds[guildID] != nil {
 			globals.Guilds[guildID].Owner = guildOwner

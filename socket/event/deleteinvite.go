@@ -4,7 +4,6 @@ import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
-	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 )
@@ -20,19 +19,14 @@ func OnDeleteInvite(ws *globals.Client, rawMap map[string]interface{}, limiter *
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
-	userid, err := authentication.VerifyToken(data.Token)
-	if err != nil {
-		deauth(ws)
-		return
-	}
-	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil || globals.Guilds[data.Guild].Owner != userid {
+	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[ws.Userid] == nil || globals.Guilds[data.Guild].Owner != ws.Userid {
 		return
 	}
 	if !limiter.Allow() {
 		sendErr(ws, "You're deleting a lot of invites, wait a sec and try again")
 		return
 	}
-	_, err = harmonydb.DBInst.Exec("DELETE FROM invites WHERE inviteid=$1 AND guildid=$2", data.Invite, data.Guild)
+	_, err := harmonydb.DBInst.Exec("DELETE FROM invites WHERE inviteid=$1 AND guildid=$2", data.Invite, data.Guild)
 	if err != nil {
 		sendErr(ws, "We weren't able to delete that invite for some reason. You should try again")
 		golog.Warnf("Error deleting invite : %v", err)

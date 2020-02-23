@@ -5,7 +5,6 @@ import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
-	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 )
@@ -36,15 +35,11 @@ func OnGetMessages(ws *globals.Client, rawMap map[string]interface{}, limiter *r
 		golog.Warnf("Error decoding getmessages request")
 		return
 	}
-	userid, err := authentication.VerifyToken(data.Token)
-	if err != nil { // token is invalid! Get outta here!
-		deauth(ws)
-		return
-	}
-	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[userid] == nil {
+	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[ws.Userid] == nil {
 		return
 	}
 	var res *sql.Rows
+	var err error
 	if data.LastMessage == "" {
 		res, err = harmonydb.DBInst.Query("SELECT messageid, author, createdat, message FROM messages WHERE guildid=$1 AND channelid=$2 ORDER BY createdat DESC LIMIT 30", data.Guild, data.Channel)
 	} else {
@@ -52,7 +47,7 @@ func OnGetMessages(ws *globals.Client, rawMap map[string]interface{}, limiter *r
 	}
 	if err != nil {
 		sendErr(ws, "We weren't able to get a list of messages. Please try again")
-		golog.Warnf("Error getting recent messages : %v", err)
+		golog.Warnf("Error getting recent messages : %v", ws.Userid)
 		return
 	}
 	var returnMsgs []Message

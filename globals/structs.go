@@ -26,6 +26,7 @@ type (
 		Connection *websocket.Conn
 		EventBus map[string]Event
 		Userid string
+		Authed bool
 		LastPong time.Time
 		Out chan []byte
 	}

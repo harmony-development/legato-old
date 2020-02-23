@@ -19,7 +19,7 @@ func sendErr(ws *globals.Client, msg string) {
 	})
 }
 
-func deauth(ws *globals.Client) {
+func Deauth(ws *globals.Client) {
 	ws.Send(&globals.Packet{
 		Type: "deauth",
 		Data: map[string]interface{}{
