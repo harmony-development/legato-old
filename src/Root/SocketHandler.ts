@@ -2,7 +2,6 @@ import { useEffect, useRef, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import h from 'history';
 import { toast } from 'react-toastify';
-import { useHistory } from 'react-router';
 
 import HarmonySocket from '../socket/socket';
 import { AppDispatch } from '../redux/store';
@@ -28,6 +27,8 @@ import {
 	DeleteMessage,
 } from '../redux/AppReducer';
 import { IGuild, IMessage, IState } from '../types/redux';
+
+import { harmonySocket } from './Root';
 
 export function useSocketHandler(socket: HarmonySocket, history: h.History<any>): void {
 	const dispatch = useDispatch<AppDispatch>();
@@ -342,9 +343,8 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		if (!firstDisconnect.current) {
 			toast.success('You have reconnected to the server');
 		}
-		if (localStorage.getItem('token') && history.location.pathname === 'app') {
-			socket.reloadToken();
-			socket.auth();
+		if (localStorage.getItem('token')) {
+			socket.refreshToken();
 			socket.getGuilds();
 			socket.getSelf();
 		}
@@ -359,7 +359,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 
 	useEffect(() => {
 		if (socket.conn.readyState === WebSocket.OPEN) {
-			socket.reloadToken();
+			socket.refreshToken();
 			socket.getGuilds();
 		}
 	}, [socket]);

@@ -40,7 +40,7 @@ export const Messages = () => {
 								createdat={val.createdat}
 								avatar={users[val.userid] ? users[val.userid].avatar : undefined}
 								message={val.message}
-								attachments={val.attachments}
+								attachment={val.attachment}
 							/>
 						);
 				  })

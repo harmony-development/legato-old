@@ -17,7 +17,7 @@ export interface IMessage {
 	guild: string;
 	channel: string;
 	message: string;
-	attachments?: string[];
+	attachment?: string;
 	messageid: string;
 }
 
