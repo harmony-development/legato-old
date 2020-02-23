@@ -1,0 +1,26 @@
+{
+	// An array of language ids which should be validated by ESLint
+	"eslint.validate": [
+		"javascript",
+		"javascriptreact",
+		"typescript",
+		"typescriptreact"
+	],
+
+	// When enabled, will trim trailing whitespace when saving a file.
+	"files.trimTrailingWhitespace": true,
+
+	// typescript auto-format settings
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"javascript.preferences.importModuleSpecifier": "auto",
+	"typescript.preferences.importModuleSpecifier": "auto",
+	"javascript.preferences.quoteStyle": "single",
+	"typescript.preferences.quoteStyle": "single",
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+
+	// Don't use prettier directly, instead use eslint (which itself uses prettier)
+	"editor.formatOnSave": false,
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": true
+	}
+}

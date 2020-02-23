@@ -1,0 +1,69 @@
+{
+	"name": "harmony-app",
+	"version": "0.1.0",
+	"private": true,
+	"dependencies": {
+		"@material-ui/core": "latest",
+		"@material-ui/icons": "latest",
+		"@material-ui/styles": "latest",
+		"@reduxjs/toolkit": "latest",
+		"axios": "latest",
+		"copy-to-clipboard": "latest",
+		"eslint-plugin-react-hooks": "^0.0.0-b53ea6ca0",
+		"fbemitter": "latest",
+		"glamor": "^2.20.40",
+		"react": "latest",
+		"react-confirm": "^0.1.18",
+		"react-contextmenu": "latest",
+		"react-dom": "latest",
+		"react-redux": "latest",
+		"react-router": "latest",
+		"react-router-dom": "latest",
+		"react-scripts": "latest",
+		"react-toastify": "latest",
+		"redux": "latest"
+	},
+	"scripts": {
+		"start": "react-scripts start",
+		"build": "react-scripts build",
+		"test": "react-scripts test",
+		"eject": "react-scripts eject"
+	},
+	"eslintConfig": {
+		"extends": "react-app"
+	},
+	"browserslist": {
+		"production": [
+			">0.2%",
+			"not dead",
+			"not op_mini all"
+		],
+		"development": [
+			"last 1 chrome version",
+			"last 1 firefox version",
+			"last 1 safari version"
+		]
+	},
+	"devDependencies": {
+		"@types/fbemitter": "latest",
+		"@types/jest": "latest",
+		"@types/node": "latest",
+		"@types/react": "latest",
+		"@types/react-confirm": "^0.1.4",
+		"@types/react-dom": "latest",
+		"@types/react-redux": "latest",
+		"@types/react-router": "latest",
+		"@types/react-router-dom": "latest",
+		"@types/ws": "latest",
+		"@typescript-eslint/eslint-plugin": "latest",
+		"@typescript-eslint/parser": "latest",
+		"eslint": "latest",
+		"eslint-config-prettier": "latest",
+		"eslint-config-react": "latest",
+		"eslint-plugin-import": "latest",
+		"eslint-plugin-prettier": "latest",
+		"eslint-plugin-react": "latest",
+		"prettier": "^1.19.1",
+		"typescript": "latest"
+	}
+}
