@@ -35,7 +35,8 @@ export const Login: React.FC = () => {
 			if (typeof raw['token'] === 'string' && typeof raw['userid'] === 'string') {
 				localStorage.setItem('token', raw['token']);
 				localStorage.setItem('userid', raw['userid']);
-				harmonySocket.refreshToken();
+				harmonySocket.reloadToken();
+				harmonySocket.auth();
 				harmonySocket.getGuilds();
 				harmonySocket.getSelf();
 				history.push('/app');

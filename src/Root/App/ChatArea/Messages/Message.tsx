@@ -23,7 +23,7 @@ interface IProps {
 	createdat: number;
 	message: string;
 	avatar?: string;
-	attachment?: string;
+	attachments?: string[];
 }
 
 const UtcEpochToLocalDate = (time: number) => {
@@ -118,16 +118,18 @@ export const Message = (props: IProps) => {
 							) : (
 								<Typography>{props.message}</Typography>
 							)}
-							{props.attachment ? (
-								<div style={{ display: 'flex', width: '100%', flex: '0 0 100%' }}>
-									<img
-										src={`http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${props.attachment}`}
-										style={{ maxHeight: '300px', maxWidth: '500px' }}
-									/>
-								</div>
-							) : (
-								undefined
-							)}
+							{props.attachments
+								? props.attachments.map(val => {
+										return (
+											<div style={{ display: 'flex', width: '100%', flex: '0 0 100%' }} key={val}>
+												<img
+													src={`http://${process.env.REACT_APP_HARMONY_SERVER_HOST}/filestore/${val}`}
+													style={{ maxHeight: '300px', maxWidth: '500px' }}
+												/>
+											</div>
+										);
+								  })
+								: undefined}
 						</>
 					}
 				/>

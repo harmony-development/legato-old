@@ -65,7 +65,7 @@ export default class HarmonySocket {
 		}
 	}
 
-	refreshToken() {
+	reloadToken() {
 		this.token = localStorage.getItem('token') || 'NONE';
 	}
 
@@ -81,6 +81,12 @@ export default class HarmonySocket {
 			email,
 			username,
 			password,
+		});
+	}
+
+	auth() {
+		this.emitEvent('auth', {
+			token: this.token,
 		});
 	}
 
