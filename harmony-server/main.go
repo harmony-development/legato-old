@@ -35,6 +35,6 @@ func main() {
 	router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./static/index.html")
 	})
-	go globals.RateLimitCleanup()
+	go rest.CleanupRoutine()
 	golog.Fatalf("Fatal error caused server to crash! %v", http.ListenAndServe(PORT, router))
 }

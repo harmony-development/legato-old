@@ -32,7 +32,7 @@ func AvatarUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !globals.GetRESTClient(*userid).Allow() {
+	if !getVisitor(getIP(r)).Allow() {
 		sendResp(w, map[string]string{
 			"error": "You're sending too many files! Wait a bit and try again",
 		})

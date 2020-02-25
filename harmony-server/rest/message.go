@@ -37,7 +37,7 @@ func Message(w http.ResponseWriter, r *http.Request) {
 	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[*userid] == nil {
 		return
 	}
-	if !globals.GetRESTClient(*userid).Allow() {
+	if rateLimits[getIP(r)] != nil && !rateLimits[getIP(r)].limiter.Allow() {
 		sendResp(w, map[string]string{
 			"error": "You're sending too many messages with attachments! Please try again later",
 		})
