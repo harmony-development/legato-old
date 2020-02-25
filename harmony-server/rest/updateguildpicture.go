@@ -14,7 +14,7 @@ import (
 
 func UpdateGuildPicture(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	err, userid, files := parseFileUpload(r)
+	err, _, files := parseFileUpload(r)
 	var guild = r.FormValue("guild")
 	if err != nil || len(files) == 0 {
 		golog.Debugf("Error updating avatar : %v", err)
