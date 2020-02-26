@@ -2,6 +2,7 @@ package rest
 
 import (
 	"fmt"
+	"github.com/gorilla/mux"
 	"github.com/kataras/golog"
 	"github.com/thanhpk/randstr"
 	"harmony-server/globals"
@@ -18,18 +19,17 @@ const (
 func Message(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	err, userid, files := parseFileUpload(r)
-
-	message, channel, guild := r.FormValue("message"), r.FormValue("channel"), r.FormValue("guild")
+	message := r.FormValue("message")
+	vars := mux.Vars(r)
+	channel, guild := vars["guildid"], vars["channelid"]
 	if err != nil || message == "" || channel == "" || guild == "" {
 		golog.Debugf("Error receiving message : %v", err)
-		sendResp(w, map[string]string{
-			"error": err.Error(),
-		})
+		http.Error(w, "invalid parameters", http.StatusBadRequest)
 		return
 	}
 
 	if len(files) > maxFiles {
-		sendResp(w, "you uploaded more files than you're allowed to upload")
+		http.Error(w, "too many files uploaded", http.StatusBadRequest)
 		return
 	}
 
@@ -38,15 +38,13 @@ func Message(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !getVisitor("message", getIP(r)).Allow() {
-		sendResp(w, map[string]string{
-			"error": "You're sending too many messages with attachments! Please try again later",
-		})
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
 		return
 	}
 	fileTransaction, err := harmonydb.DBInst.Begin()
 	if err != nil {
 		golog.Warnf("error making file transaction : %v", err)
-		sendVibeCheck(w)
+		http.Error(w, "error beginning file transaction", http.StatusInternalServerError)
 		return
 	}
 	var messageID = randstr.Hex(16)
@@ -55,37 +53,38 @@ func Message(w http.ResponseWriter, r *http.Request) {
 		file, err := v.Open()
 		if err != nil {
 			golog.Warnf("Failed to parse file : %v", err)
+			http.Error(w, "error opening file", http.StatusInternalServerError)
 			return
 		}
 		fileBytes, err := ioutil.ReadAll(file)
 		if err != nil {
 			golog.Warnf("Error reading uploaded file : %v", err)
-			return
+			http.Error(w, "error reading file", http.StatusInternalServerError)
 		}
 		err = file.Close()
 		if err != nil {
 			golog.Warnf("Failed to close file : %v", err)
-			return
+			http.Error(w, "error closing file", http.StatusInternalServerError)
 		}
 		fname := randstr.Hex(16)
 		err = ioutil.WriteFile(fmt.Sprintf("./filestore/%v", fname), fileBytes, 0666)
 		if err != nil {
 			golog.Warnf("Error saving file upload : %v", err)
-			sendVibeCheck(w)
-			return
+			http.Error(w, "error saving file", http.StatusInternalServerError)
 		}
 		_, err = fileTransaction.Exec("INSERT INTO attachments(messageid, attachment) VALUES($1, $2)", messageID, fname)
 		if err != nil {
 			golog.Warnf("Error inserting into attachments : %v", err)
-			sendVibeCheck(w)
-			return
+			http.Error(w, "error linking file to message", http.StatusInternalServerError)
+			go deleteFromFilestore(fname)
+		} else {
+			attachments[i] = fname
 		}
-		attachments[i] = fname
 	}
 	err = fileTransaction.Commit()
 	if err != nil {
 		golog.Warnf("Error committing attachment transaction  : %v", err)
-		sendVibeCheck(w)
+		http.Error(w, "error committing attachment transaction", http.StatusInternalServerError)
 		return
 	}
 

@@ -2,6 +2,7 @@ package rest
 
 import (
 	"fmt"
+	"github.com/gorilla/mux"
 	"github.com/kataras/golog"
 	"github.com/thanhpk/randstr"
 	"gopkg.in/h2non/bimg.v1"
@@ -15,31 +16,24 @@ import (
 func UpdateGuildPicture(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	err, _, files := parseFileUpload(r)
-	var guild = r.FormValue("guild")
-	if err != nil || len(files) == 0 {
-		golog.Debugf("Error updating avatar : %v", err)
-		sendResp(w, map[string]string{
-			"error": err.Error(),
-		})
+	var guild = mux.Vars(r)["guildid"]
+	if err != nil || len(files) == 0 || guild == "" {
+		golog.Debugf("Error updating guild picture : %v", err)
+		http.Error(w, "invalid parameters", http.StatusBadRequest)
 		return
 	}
 
 	file, err := files[0].Open()
 	if err != nil {
 		golog.Debugf("Error opening file : %v", err)
-		sendResp(w, map[string]string{
-			"error": "we were unable to read your file",
-		})
+		http.Error(w, "error opening file", http.StatusInternalServerError)
 		return
 	}
 
 	if !getVisitor("updateguildpicture", getIP(r)).Allow() {
-		sendResp(w, map[string]string{
-			"error": "You're sending too many files! Wait a bit and try again",
-		})
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
 		return
 	}
-
 	defer func() {
 		err = file.Close()
 		if err != nil {
@@ -49,7 +43,7 @@ func UpdateGuildPicture(w http.ResponseWriter, r *http.Request) {
 	fileBytes, err := ioutil.ReadAll(file)
 	if err != nil {
 		golog.Warnf("Error reading uploaded file : %v", err)
-		sendVibeCheck(w)
+		http.Error(w, "error reading file", http.StatusInternalServerError)
 		return
 	}
 	scaled, err := bimg.NewImage(fileBytes).Process(bimg.Options{
@@ -60,14 +54,14 @@ func UpdateGuildPicture(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		golog.Warnf("Error scaling image : %v", err)
-		sendVibeCheck(w)
+		http.Error(w, "error resizing image", http.StatusInternalServerError)
 		return
 	}
 	fname := randstr.Hex(16)
 	err = ioutil.WriteFile(fmt.Sprintf("./filestore/%v", fname), scaled, 0666)
 	if err != nil {
 		golog.Warnf("Error saving file upload : %v", err)
-		sendVibeCheck(w)
+		http.Error(w, "error saving image", http.StatusInternalServerError)
 		return
 	}
 
@@ -76,7 +70,8 @@ func UpdateGuildPicture(w http.ResponseWriter, r *http.Request) {
 	_, err = harmonydb.DBInst.Exec("UPDATE guilds SET picture=$1 WHERE guildid=$2", fname, guild)
 	if err != nil {
 		golog.Warnf("Error updating picture. %v", err)
-		sendVibeCheck(w)
+		http.Error(w, "error linking picture to guild", http.StatusInternalServerError)
+		go deleteFromFilestore(fname)
 		return
 	}
 	go deleteFromFilestore(path.Base(oldPictureID))
