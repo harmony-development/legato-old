@@ -1,8 +1,10 @@
 package main
 
 import (
+	"github.com/gorilla/mux"
 	"golang.org/x/time/rate"
 	"harmony-server/globals"
+	"harmony-server/rest"
 	"harmony-server/socket"
 	"harmony-server/socket/event"
 	"net/http"
@@ -16,6 +18,13 @@ func limit(event func(ws *globals.Client, data map[string]interface{}, limiter *
 	return func(ws *globals.Client, data map[string]interface{}) {
 		event(ws, data, limiter)
 	}
+}
+
+func apiV1(r *mux.Router) {
+	v1 := r.PathPrefix("/v1").Subrouter()
+	v1.HandleFunc("/restavatarupdate", rest.AvatarUpdate)
+	v1.HandleFunc("/updateguildpicture", rest.UpdateGuildPicture)
+	v1.HandleFunc("/message", rest.Message)
 }
 
 func makeEventBus() *globals.EventBus {
