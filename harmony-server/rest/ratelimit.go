@@ -13,7 +13,7 @@ type visitor struct {
 	lastSeen time.Time
 }
 
-var rateLimits = make(map[string]*visitor)
+var rateLimits = make(map[string]map[string]*visitor)
 var rateLock sync.RWMutex
 
 func CleanupRoutine() {
@@ -21,22 +21,37 @@ func CleanupRoutine() {
 		time.Sleep(3 * time.Minute)
 		rateLock.Lock()
 		defer rateLock.Unlock()
-		for ip, v := range rateLimits {
-			if time.Now().Sub(v.lastSeen) > 3*time.Minute {
-				delete(rateLimits, ip)
+		for _, path := range rateLimits {
+			for ip, v := range path {
+				if time.Now().Sub(v.lastSeen) > 3*time.Minute {
+					delete(path, ip)
+				}
 			}
 		}
 	}
 }
 
-func getVisitor(ip string) *rate.Limiter {
+func AddRateLimit(path string) {
+	rateLimits[path] = make(map[string]*visitor)
+}
+
+func getVisitor(path string, ip string) *rate.Limiter {
 	rateLock.RLock()
 	defer rateLock.RUnlock()
-	if v, exists := rateLimits[ip]; exists {
+	if _, exists := rateLimits[path]; !exists {
+		limiter := rate.NewLimiter(3, 3)
+		rateLimits[path] = make(map[string]*visitor)
+		rateLimits[path][ip] = &visitor{
+			limiter:  *limiter,
+			lastSeen: time.Now(),
+		}
+		return limiter
+	}
+	if v, exists := rateLimits[path][ip]; exists {
 		return &v.limiter
 	} else {
 		limiter := rate.NewLimiter(3, 3)
-		rateLimits[ip] = &visitor{
+		rateLimits[path][ip] = &visitor{
 			limiter:  *limiter,
 			lastSeen: time.Now(),
 		}

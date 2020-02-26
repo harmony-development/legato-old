@@ -33,7 +33,7 @@ func UpdateGuildPicture(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !getVisitor(getIP(r)).Allow() {
+	if !getVisitor("updateguildpicture", getIP(r)).Allow() {
 		sendResp(w, map[string]string{
 			"error": "You're sending too many files! Wait a bit and try again",
 		})

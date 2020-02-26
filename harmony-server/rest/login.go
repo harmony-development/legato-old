@@ -32,7 +32,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid email or password", http.StatusUnauthorized)
 		return
 	}
-	if !getVisitor(getIP(r)).Allow() {
+	if !getVisitor("login", getIP(r)).Allow() {
 		http.Error(w, "you're sending too many login requests", http.StatusTooManyRequests)
 	}
 	token, err := makeToken(userid)
