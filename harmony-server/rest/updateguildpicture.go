@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/kataras/golog"
 	"github.com/thanhpk/randstr"
+	"golang.org/x/time/rate"
 	"gopkg.in/h2non/bimg.v1"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
@@ -13,7 +14,7 @@ import (
 	"path"
 )
 
-func UpdateGuildPicture(w http.ResponseWriter, r *http.Request) {
+func UpdateGuildPicture(limiter *rate.Limiter, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	err, _, files := parseFileUpload(r)
 	var guild = mux.Vars(r)["guildid"]
@@ -30,7 +31,7 @@ func UpdateGuildPicture(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !getVisitor("updateguildpicture", getIP(r)).Allow() {
+	if !limiter.Allow() {
 		http.Error(w, "too many requests", http.StatusTooManyRequests)
 		return
 	}

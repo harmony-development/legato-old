@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/kataras/golog"
 	"github.com/thanhpk/randstr"
+	"golang.org/x/time/rate"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"io/ioutil"
@@ -16,8 +17,8 @@ const (
 	maxFiles = 3
 )
 
-func Message(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+func Message(limiter *rate.Limiter, w http.ResponseWriter, r *http.Request) {
+	WithCors(w)
 	err, userid, files := parseFileUpload(r)
 	message := r.FormValue("message")
 	vars := mux.Vars(r)
@@ -37,7 +38,7 @@ func Message(w http.ResponseWriter, r *http.Request) {
 	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[*userid] == nil {
 		return
 	}
-	if !getVisitor("message", getIP(r)).Allow() {
+	if !limiter.Allow() {
 		http.Error(w, "too many requests", http.StatusTooManyRequests)
 		return
 	}

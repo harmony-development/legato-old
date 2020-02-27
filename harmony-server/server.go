@@ -22,12 +22,10 @@ func limit(event func(ws *globals.Client, data map[string]interface{}, limiter *
 
 func apiV1(r *mux.Router) {
 	v1 := r.PathPrefix("/v1").Subrouter()
-	rest.AddRateLimit("avatarupdate")
-	v1.HandleFunc("/avatarupdate/*", rest.AvatarUpdate)
-	rest.AddRateLimit("updateguildpicture")
-	v1.HandleFunc("/updateguildpicture/{guildid}/*", rest.UpdateGuildPicture)
-	rest.AddRateLimit("message")
-	v1.HandleFunc("/message/{guildid}/{channelid}/*", rest.Message)
+
+	v1.HandleFunc("/avatarupdate/*", rest.WithRateLimit(rest.AvatarUpdate, 3 * time.Second, 1))
+	v1.HandleFunc("/updateguildpicture/{guildid}/*", rest.WithRateLimit(rest.UpdateGuildPicture, 3 * time.Second, 1))
+	v1.HandleFunc("/message/{guildid}/{channelid}/*", rest.WithRateLimit(rest.Message, 500 * time.Millisecond, 20))
 }
 
 func makeEventBus() *globals.EventBus {

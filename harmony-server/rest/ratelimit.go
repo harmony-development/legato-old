@@ -1,7 +1,9 @@
 package rest
 
 import (
+	"github.com/gorilla/mux"
 	"golang.org/x/time/rate"
+	"net/http"
 	"sync"
 	"time"
 )
@@ -31,15 +33,21 @@ func CleanupRoutine() {
 	}
 }
 
-func AddRateLimit(path string) {
-	rateLimits[path] = make(map[string]*visitor)
+type ratedHandler func(limiter *rate.Limiter, w http.ResponseWriter, r *http.Request)
+
+func WithRateLimit(handler ratedHandler, duration time.Duration, burst int) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		path := mux.CurrentRoute(r).GetName()
+
+		handler(getVisitor(path, getIP(r), duration, burst), w, r)
+	}
 }
 
-func getVisitor(path string, ip string) *rate.Limiter {
+func getVisitor(path string, ip string, duration time.Duration, burst int) *rate.Limiter {
 	rateLock.RLock()
 	defer rateLock.RUnlock()
 	if _, exists := rateLimits[path]; !exists {
-		limiter := rate.NewLimiter(3, 3)
+		limiter := rate.NewLimiter(rate.Every(duration), burst)
 		rateLimits[path] = make(map[string]*visitor)
 		rateLimits[path][ip] = &visitor{
 			limiter:  *limiter,
@@ -50,7 +58,7 @@ func getVisitor(path string, ip string) *rate.Limiter {
 	if v, exists := rateLimits[path][ip]; exists {
 		return &v.limiter
 	} else {
-		limiter := rate.NewLimiter(3, 3)
+		limiter := rate.NewLimiter(rate.Every(duration), burst)
 		rateLimits[path][ip] = &visitor{
 			limiter:  *limiter,
 			lastSeen: time.Now(),

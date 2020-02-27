@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/kataras/golog"
 	"github.com/thanhpk/randstr"
+	"golang.org/x/time/rate"
 	"gopkg.in/h2non/bimg.v1"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
@@ -12,7 +13,7 @@ import (
 	"path"
 )
 
-func AvatarUpdate(w http.ResponseWriter, r *http.Request) {
+func AvatarUpdate(limiter *rate.Limiter, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	err, userid, files := parseFileUpload(r)
 	if err != nil || len(files) == 0 {
@@ -31,12 +32,8 @@ func AvatarUpdate(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-
-	if !getVisitor("avatarupdate", getIP(r)).Allow() {
-		sendResp(w, map[string]string{
-			"error": "You're sending too many files! Wait a bit and try again",
-		})
-		return
+	if !limiter.Allow() {
+		http.Error(w, "too many avatar updates", http.StatusTooManyRequests)
 	}
 	defer func() {
 		err = file.Close()
