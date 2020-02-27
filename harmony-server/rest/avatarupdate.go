@@ -14,22 +14,18 @@ import (
 )
 
 func AvatarUpdate(limiter *rate.Limiter, w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	WithCors(w)
 	err, userid, files := parseFileUpload(r)
 	if err != nil || len(files) == 0 {
 		golog.Debugf("Error updating avatar : %v", err)
-		sendResp(w, map[string]string{
-			"error": err.Error(),
-		})
+		http.Error(w, "invalid parameters", http.StatusBadRequest)
 		return
 	}
 
 	file, err := files[0].Open()
 	if err != nil {
 		golog.Debugf("Error opening file : %v", err)
-		sendResp(w, map[string]string{
-			"error": err.Error(),
-		})
+		http.Error(w, "error opening file", http.StatusInternalServerError)
 		return
 	}
 	if !limiter.Allow() {
@@ -44,7 +40,7 @@ func AvatarUpdate(limiter *rate.Limiter, w http.ResponseWriter, r *http.Request)
 	fileBytes, err := ioutil.ReadAll(file)
 	if err != nil {
 		golog.Warnf("Error reading uploaded file : %v", err)
-		sendVibeCheck(w)
+		http.Error(w, "error reading file", http.StatusInternalServerError)
 		return
 	}
 	scaled, err := bimg.NewImage(fileBytes).Process(bimg.Options{
@@ -55,7 +51,7 @@ func AvatarUpdate(limiter *rate.Limiter, w http.ResponseWriter, r *http.Request)
 	})
 	if err != nil {
 		golog.Warnf("Error scaling image : %v", err)
-		sendVibeCheck(w)
+		http.Error(w, "error resizing image", http.StatusInternalServerError)
 		return
 	}
 
@@ -63,22 +59,22 @@ func AvatarUpdate(limiter *rate.Limiter, w http.ResponseWriter, r *http.Request)
 	err = ioutil.WriteFile(fmt.Sprintf("./filestore/%v", fname), scaled, 0666)
 	if err != nil {
 		golog.Warnf("Error saving file upload : %v", err)
-		sendVibeCheck(w)
+		http.Error(w, "error saving file", http.StatusInternalServerError)
 		return
 	}
 	var oldAvatarID string
 	err = harmonydb.DBInst.QueryRow("SELECT avatar FROM users WHERE id=$1", userid).Scan(&oldAvatarID)
 	_, err = harmonydb.DBInst.Exec("UPDATE users SET avatar=$1 WHERE id=$2", fname, userid)
 	if err != nil {
-		sendResp(w, map[string]string{
-			"error": "Something weird happened on our end and we weren't able to set your avatar. Please try again in a few moments",
-		})
+		http.Error(w, "error linking avatar to profile", http.StatusInternalServerError)
+		go deleteFromFilestore(fname)
 		return
 	}
 	go deleteFromFilestore(path.Base(oldAvatarID))
 	res, err := harmonydb.DBInst.Query("SELECT guildid FROM guildmembers WHERE userid=$1", userid)
 	if err != nil {
 		golog.Warnf("Error selecting guilds for avatarupdate : %v", err)
+		http.Error(w, "error propagating avatar update", http.StatusInternalServerError)
 		return
 	}
 	for res.Next() {
@@ -86,11 +82,11 @@ func AvatarUpdate(limiter *rate.Limiter, w http.ResponseWriter, r *http.Request)
 		err = res.Scan(&guildid)
 		if err != nil {
 			golog.Warnf("Error getting guildid from result on avatarupdate : %v", err)
+			http.Error(w, "error propagating avatar update", http.StatusInternalServerError)
 			return
 		}
 		if globals.Guilds[guildid] != nil {
 			for _, client := range globals.Guilds[guildid].Clients  {
-				golog.Debugf("Client conns : %v", client)
 				for _, conn := range client {
 					conn.Send(&globals.Packet{
 						Type: "avatarupdate",
