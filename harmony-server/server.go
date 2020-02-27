@@ -22,7 +22,7 @@ func limit(event func(ws *globals.Client, data map[string]interface{}, limiter *
 
 func apiV1(r *mux.Router) {
 	v1 := r.PathPrefix("/v1").Subrouter()
-
+	v1.HandleFunc("/login/*", rest.WithRateLimit(rest.Login, 10 * time.Second, 1))
 	v1.HandleFunc("/avatarupdate/*", rest.WithRateLimit(rest.AvatarUpdate, 3 * time.Second, 1))
 	v1.HandleFunc("/updateguildpicture/{guildid}/*", rest.WithRateLimit(rest.UpdateGuildPicture, 3 * time.Second, 1))
 	v1.HandleFunc("/message/{guildid}/{channelid}/*", rest.WithRateLimit(rest.Message, 500 * time.Millisecond, 20))

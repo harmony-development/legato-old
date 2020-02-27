@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/kataras/golog"
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/time/rate"
 	"harmony-server/harmonydb"
 	"net/http"
 )
@@ -13,7 +14,7 @@ type LoginData struct {
 	Password *string `json:"password,omitempty"`
 }
 
-func Login(w http.ResponseWriter, r *http.Request) {
+func Login(limiter *rate.Limiter, w http.ResponseWriter, r *http.Request) {
 	WithCors(w)
 	var data LoginData
 	err := json.NewDecoder(r.Body).Decode(&data)
@@ -32,7 +33,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid email or password", http.StatusUnauthorized)
 		return
 	}
-	if !getVisitor("login", getIP(r)).Allow() {
+	if !limiter.Allow() {
 		http.Error(w, "you're sending too many login requests", http.StatusTooManyRequests)
 	}
 	token, err := makeToken(userid)
