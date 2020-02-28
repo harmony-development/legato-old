@@ -15,7 +15,7 @@ type visitor struct {
 }
 
 var rateLimits = make(map[string]map[string]*visitor)
-var rateLock sync.RWMutex
+var rateLock = sync.RWMutex{}
 
 func CleanupRoutine() {
 	for {
@@ -41,8 +41,8 @@ func WithRateLimit(handler ratedHandler, duration time.Duration, burst int) echo
 }
 
 func getVisitor(path string, ip string, duration time.Duration, burst int) *rate.Limiter {
-	rateLock.RLock()
-	defer rateLock.RUnlock()
+	rateLock.Lock()
+	defer rateLock.Unlock()
 	if _, exists := rateLimits[path]; !exists {
 		limiter := rate.NewLimiter(rate.Every(duration), burst)
 		rateLimits[path] = make(map[string]*visitor)
@@ -50,16 +50,17 @@ func getVisitor(path string, ip string, duration time.Duration, burst int) *rate
 			limiter:  *limiter,
 			lastSeen: time.Now(),
 		}
+		rateLock.Unlock()
 		return limiter
 	}
-	if v, exists := rateLimits[path][ip]; exists {
-		return &v.limiter
-	} else {
+	if v, exists := rateLimits[path][ip]; !exists {
 		limiter := rate.NewLimiter(rate.Every(duration), burst)
 		rateLimits[path][ip] = &visitor{
 			limiter:  *limiter,
 			lastSeen: time.Now(),
 		}
 		return limiter
+	} else {
+		return &v.limiter
 	}
 }
