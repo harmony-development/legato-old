@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/kataras/golog"
-	"harmony-server/authentication"
-	"mime/multipart"
 	"net/http"
 	"os"
 	"time"
@@ -50,24 +48,4 @@ func deleteFromFilestore(fileid string) {
 	if err != nil {
 		golog.Warnf("Error deleting from filestore : %v", err)
 	}
-}
-
-func parseFileUpload(r *http.Request) (error, *string, []*multipart.FileHeader) {
-	err := r.ParseMultipartForm(1 << 20)
-	if err != nil {
-		return fmt.Errorf("error parsing form"), nil, nil
-	}
-	token := r.FormValue("token")
-	if token == "" {
-		golog.Debugf("Invalid token received during file upload : %v", token)
-		return fmt.Errorf("invalid token"), nil, nil
-	}
-	var userid string
-	if userid, err = authentication.VerifyToken(token); err != nil {
-		return fmt.Errorf("invalid token"), nil, nil
-	}
-
-	files := r.MultipartForm.File["files"]
-
-	return nil, &userid, files
 }

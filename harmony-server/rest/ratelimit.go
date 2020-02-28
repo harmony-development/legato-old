@@ -1,9 +1,8 @@
 package rest
 
 import (
-	"github.com/gorilla/mux"
+	"github.com/labstack/echo/v4"
 	"golang.org/x/time/rate"
-	"net/http"
 	"sync"
 	"time"
 )
@@ -33,13 +32,11 @@ func CleanupRoutine() {
 	}
 }
 
-type ratedHandler func(limiter *rate.Limiter, w http.ResponseWriter, r *http.Request)
+type ratedHandler func(limiter *rate.Limiter, ctx echo.Context) error
 
-func WithRateLimit(handler ratedHandler, duration time.Duration, burst int) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		path := mux.CurrentRoute(r).GetName()
-
-		handler(getVisitor(path, getIP(r), duration, burst), w, r)
+func WithRateLimit(handler ratedHandler, duration time.Duration, burst int) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+		return handler(getVisitor(ctx.Path(), ctx.RealIP(), duration, burst), ctx)
 	}
 }
 

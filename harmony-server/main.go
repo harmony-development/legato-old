@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/gorilla/mux"
+	"github.com/labstack/echo/v4"
 	"github.com/joho/godotenv"
 	"github.com/kataras/golog"
+	"github.com/labstack/echo/v4/middleware"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"harmony-server/rest"
@@ -25,10 +26,11 @@ func main() {
 	_ = os.Mkdir("./filestore", 0777)
 	globals.Bus = *makeEventBus()
 	golog.Infof("Started Harmony Server On Port %v", PORT)
-	router := mux.NewRouter()
-	apiRouter := router.PathPrefix("/api").Subrouter()
-	apiV1(apiRouter)
-	router.HandleFunc("/api/socket", handleSocket)
+	r := echo.New()
+	r.Use(middleware.Recover())
+	api := r.Group("/api")
+	apiV1(api)
+	api.Any("/api/socket", handleSocket)
 	router.PathPrefix("/filestore/").Handler(http.StripPrefix("/filestore/", http.FileServer(http.Dir("./filestore"))))
 	router.PathPrefix("/static").Handler(http.FileServer(http.Dir("./static")))
 	router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

@@ -2,10 +2,11 @@ package rest
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
 	"github.com/kataras/golog"
+	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
 	"golang.org/x/time/rate"
+	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"io/ioutil"
@@ -17,36 +18,34 @@ const (
 	maxFiles = 3
 )
 
-func Message(limiter *rate.Limiter, w http.ResponseWriter, r *http.Request) {
-	WithCors(w)
-	err, userid, files := parseFileUpload(r)
-	message := r.FormValue("message")
-	vars := mux.Vars(r)
-	channel, guild := vars["guildid"], vars["channelid"]
-	if err != nil || message == "" || channel == "" || guild == "" {
-		golog.Debugf("Error receiving message : %v", err)
-		http.Error(w, "invalid parameters", http.StatusBadRequest)
-		return
+func Message(limiter *rate.Limiter, ctx echo.Context) error {
+	form, err := ctx.MultipartForm()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Valid form required")
 	}
-
+	files := form.File["files"]
+	message, channel, guild :=  ctx.FormValue("message"), ctx.FormValue("guildid"), ctx.FormValue("channelid")
+	if message == "" || channel == "" || guild == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Valid form required")
+	}
 	if len(files) > maxFiles {
-		http.Error(w, "too many files uploaded", http.StatusBadRequest)
-		return
+		return echo.NewHTTPError(http.StatusBadRequest, "too many files uploaded")
 	}
-
+	userid, err := authentication.VerifyToken(ctx.FormValue("token"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusForbidden, "invalid token")
+	}
 	// either the guild doesn't exist or the client isn't subbed to it - it doesn't matter.
-	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[*userid] == nil {
-		return
+	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[userid] == nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "not permitted to send messages in this guild/channel")
 	}
 	if !limiter.Allow() {
-		http.Error(w, "too many requests", http.StatusTooManyRequests)
-		return
+		return echo.NewHTTPError(http.StatusTooManyRequests, "Too many requests, please try again later")
 	}
 	fileTransaction, err := harmonydb.DBInst.Begin()
 	if err != nil {
 		golog.Warnf("error making file transaction : %v", err)
-		http.Error(w, "error beginning file transaction", http.StatusInternalServerError)
-		return
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error saving files")
 	}
 	var messageID = randstr.Hex(16)
 	var attachments = make([]string, len(files))
@@ -54,30 +53,29 @@ func Message(limiter *rate.Limiter, w http.ResponseWriter, r *http.Request) {
 		file, err := v.Open()
 		if err != nil {
 			golog.Warnf("Failed to parse file : %v", err)
-			http.Error(w, "error opening file", http.StatusInternalServerError)
-			return
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error opening file")
 		}
 		fileBytes, err := ioutil.ReadAll(file)
 		if err != nil {
 			golog.Warnf("Error reading uploaded file : %v", err)
-			http.Error(w, "error reading file", http.StatusInternalServerError)
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error reading file")
 		}
 		err = file.Close()
 		if err != nil {
 			golog.Warnf("Failed to close file : %v", err)
-			http.Error(w, "error closing file", http.StatusInternalServerError)
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error closing files")
 		}
 		fname := randstr.Hex(16)
 		err = ioutil.WriteFile(fmt.Sprintf("./filestore/%v", fname), fileBytes, 0666)
 		if err != nil {
 			golog.Warnf("Error saving file upload : %v", err)
-			http.Error(w, "error saving file", http.StatusInternalServerError)
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error writing file")
 		}
 		_, err = fileTransaction.Exec("INSERT INTO attachments(messageid, attachment) VALUES($1, $2)", messageID, fname)
 		if err != nil {
 			golog.Warnf("Error inserting into attachments : %v", err)
-			http.Error(w, "error linking file to message", http.StatusInternalServerError)
 			go deleteFromFilestore(fname)
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error linking file to message")
 		} else {
 			attachments[i] = fname
 		}
@@ -85,8 +83,7 @@ func Message(limiter *rate.Limiter, w http.ResponseWriter, r *http.Request) {
 	err = fileTransaction.Commit()
 	if err != nil {
 		golog.Warnf("Error committing attachment transaction  : %v", err)
-		http.Error(w, "error committing attachment transaction", http.StatusInternalServerError)
-		return
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error committing attachment transaction")
 	}
 
 	for _, client := range globals.Guilds[guild].Clients {
@@ -105,4 +102,8 @@ func Message(limiter *rate.Limiter, w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	_, err = harmonydb.DBInst.Exec("INSERT INTO messages(messageid, guildid, channelid, author, createdat, message) VALUES($1, $2, $3, $4, $5, $6)", messageID, guild, channel, userid, time.Now().UTC().Unix(), message)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error saving message")
+	}
+	return nil
 }

@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/gorilla/mux"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"golang.org/x/time/rate"
 	"harmony-server/globals"
 	"harmony-server/rest"
 	"harmony-server/socket"
 	"harmony-server/socket/event"
-	"net/http"
 	"time"
 )
 
@@ -20,12 +20,13 @@ func limit(event func(ws *globals.Client, data map[string]interface{}, limiter *
 	}
 }
 
-func apiV1(r *mux.Router) {
-	v1 := r.PathPrefix("/v1").Subrouter()
-	v1.HandleFunc("/login/*", rest.WithRateLimit(rest.Login, 10 * time.Second, 1))
-	v1.HandleFunc("/avatarupdate/*", rest.WithRateLimit(rest.AvatarUpdate, 3 * time.Second, 1))
-	v1.HandleFunc("/updateguildpicture/{guildid}/*", rest.WithRateLimit(rest.UpdateGuildPicture, 3 * time.Second, 1))
-	v1.HandleFunc("/message/{guildid}/{channelid}/*", rest.WithRateLimit(rest.Message, 500 * time.Millisecond, 20))
+func apiV1(g echo.Group) {
+	v1 := g.Group("/v1")
+	v1.Use(middleware.CORS())
+	v1.POST("/login/*", rest.WithRateLimit(rest.Login, 10 * time.Second, 1))
+	v1.POST("/avatarupdate/*", rest.WithRateLimit(rest.AvatarUpdate, 3 * time.Second, 1))
+	v1.POST("/updateguildpicture/{guildid}/*", rest.WithRateLimit(rest.UpdateGuildPicture, 3 * time.Second, 1))
+	v1.POST("/message/{guildid}/{channelid}/*", rest.WithRateLimit(rest.Message, 500 * time.Millisecond, 20))
 }
 
 func makeEventBus() *globals.EventBus {
@@ -65,7 +66,8 @@ func makeEventBus() *globals.EventBus {
 }
 
 
-func handleSocket(w http.ResponseWriter, r *http.Request) {
-	ws := socket.NewSocket(w, r)
+func handleSocket(ctx echo.Context) error {
+	ws := socket.NewSocket(ctx.Response(), ctx.Request())
 	ws.EventBus = globals.Bus
+	return nil
 }

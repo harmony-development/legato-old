@@ -2,11 +2,12 @@ package rest
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
 	"github.com/kataras/golog"
+	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
 	"golang.org/x/time/rate"
 	"gopkg.in/h2non/bimg.v1"
+	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"io/ioutil"
@@ -14,26 +15,24 @@ import (
 	"path"
 )
 
-func UpdateGuildPicture(limiter *rate.Limiter, w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	err, _, files := parseFileUpload(r)
-	var guild = mux.Vars(r)["guildid"]
-	if err != nil || len(files) == 0 || guild == "" {
-		golog.Debugf("Error updating guild picture : %v", err)
-		http.Error(w, "invalid parameters", http.StatusBadRequest)
-		return
+func UpdateGuildPicture(limiter *rate.Limiter, ctx echo.Context) error {
+	form, err := ctx.MultipartForm()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Form required")
 	}
-
+	files := form.File["files"]
+	guild := ctx.FormValue("guild")
+	userid, err := authentication.VerifyToken(ctx.FormValue("token"))
+	if err != nil || len(files) == 0 || guild == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Valid form required")
+	}
 	file, err := files[0].Open()
 	if err != nil {
 		golog.Debugf("Error opening file : %v", err)
-		http.Error(w, "error opening file", http.StatusInternalServerError)
-		return
+		return echo.NewHTTPError(http.StatusInternalServerError, "Form required")
 	}
-
 	if !limiter.Allow() {
-		http.Error(w, "too many requests", http.StatusTooManyRequests)
-		return
+		return echo.NewHTTPError(http.StatusTooManyRequests, "Too many requests, please try again later")
 	}
 	defer func() {
 		err = file.Close()
@@ -44,8 +43,7 @@ func UpdateGuildPicture(limiter *rate.Limiter, w http.ResponseWriter, r *http.Re
 	fileBytes, err := ioutil.ReadAll(file)
 	if err != nil {
 		golog.Warnf("Error reading uploaded file : %v", err)
-		http.Error(w, "error reading file", http.StatusInternalServerError)
-		return
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error reading uploaded file")
 	}
 	scaled, err := bimg.NewImage(fileBytes).Process(bimg.Options{
 		Height: 128,
@@ -54,26 +52,22 @@ func UpdateGuildPicture(limiter *rate.Limiter, w http.ResponseWriter, r *http.Re
 		Crop: true,
 	})
 	if err != nil {
-		golog.Warnf("Error scaling image : %v", err)
-		http.Error(w, "error resizing image", http.StatusInternalServerError)
-		return
+		golog.Warnf("Error reading uploaded file : %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error reading uploaded file")
 	}
 	fname := randstr.Hex(16)
 	err = ioutil.WriteFile(fmt.Sprintf("./filestore/%v", fname), scaled, 0666)
 	if err != nil {
 		golog.Warnf("Error saving file upload : %v", err)
-		http.Error(w, "error saving image", http.StatusInternalServerError)
-		return
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error saving file upload")
 	}
-
 	var oldPictureID string
 	err = harmonydb.DBInst.QueryRow("SELECT picture FROM guilds WHERE guildid=$1", guild).Scan(&oldPictureID)
-	_, err = harmonydb.DBInst.Exec("UPDATE guilds SET picture=$1 WHERE guildid=$2", fname, guild)
+	_, err = harmonydb.DBInst.Exec("UPDATE guilds SET picture=$1 WHERE guildid=$2 AND owner=$3", fname, guild, userid)
 	if err != nil {
 		golog.Warnf("Error updating picture. %v", err)
-		http.Error(w, "error linking picture to guild", http.StatusInternalServerError)
 		go deleteFromFilestore(fname)
-		return
+		return echo.NewHTTPError(http.StatusInternalServerError, "error linking picture to guild")
 	}
 	go deleteFromFilestore(path.Base(oldPictureID))
 	for _, client := range globals.Guilds[guild].Clients {
@@ -88,4 +82,5 @@ func UpdateGuildPicture(limiter *rate.Limiter, w http.ResponseWriter, r *http.Re
 			})
 		}
 	}
+	return nil
 }
