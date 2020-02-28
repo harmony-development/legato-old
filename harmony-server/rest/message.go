@@ -24,7 +24,7 @@ func Message(limiter *rate.Limiter, ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Valid form required")
 	}
 	files := form.File["files"]
-	message, channel, guild :=  ctx.FormValue("message"), ctx.FormValue("guildid"), ctx.FormValue("channelid")
+	message, guild, channel :=  ctx.FormValue("message"), ctx.QueryParam("guildid"), ctx.QueryParam("channelid")
 	if message == "" || channel == "" || guild == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "Valid form required")
 	}

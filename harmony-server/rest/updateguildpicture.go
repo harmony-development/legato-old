@@ -21,7 +21,7 @@ func UpdateGuildPicture(limiter *rate.Limiter, ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Form required")
 	}
 	files := form.File["files"]
-	guild := ctx.FormValue("guild")
+	guild := ctx.Param("guildid")
 	userid, err := authentication.VerifyToken(ctx.FormValue("token"))
 	if err != nil || len(files) == 0 || guild == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "Valid form required")

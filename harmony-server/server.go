@@ -23,10 +23,10 @@ func limit(event func(ws *globals.Client, data map[string]interface{}, limiter *
 func apiV1(g echo.Group) {
 	v1 := g.Group("/v1")
 	v1.Use(middleware.CORS())
-	v1.POST("/login/*", rest.WithRateLimit(rest.Login, 10 * time.Second, 1))
-	v1.POST("/avatarupdate/*", rest.WithRateLimit(rest.AvatarUpdate, 3 * time.Second, 1))
-	v1.POST("/updateguildpicture/{guildid}/*", rest.WithRateLimit(rest.UpdateGuildPicture, 3 * time.Second, 1))
-	v1.POST("/message/{guildid}/{channelid}/*", rest.WithRateLimit(rest.Message, 500 * time.Millisecond, 20))
+	v1.POST("/login/", rest.WithRateLimit(rest.Login, 10 * time.Second, 1))
+	v1.POST("/avatarupdate/", rest.WithRateLimit(rest.AvatarUpdate, 3 * time.Second, 1))
+	v1.POST("/updateguildpicture/:guildid/", rest.WithRateLimit(rest.UpdateGuildPicture, 3 * time.Second, 1))
+	v1.POST("/message/:guildid/:channelid/*", rest.WithRateLimit(rest.Message, 500 * time.Millisecond, 20))
 }
 
 func makeEventBus() *globals.EventBus {
