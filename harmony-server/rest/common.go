@@ -3,11 +3,9 @@ package rest
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/kataras/golog"
 	"net/http"
 	"os"
-	"time"
 )
 
 var jwtSecret = os.Getenv("JWT_SECRET")
@@ -28,19 +26,6 @@ func getIP(r *http.Request) string {
 		return forwarded
 	}
 	return r.RemoteAddr
-}
-
-func makeToken(contents string) (*string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":  contents,
-		"exp": time.Now().UTC().Add(7 * 24 * time.Hour).Unix(),
-	})
-	tokenString, err := token.SignedString([]byte(jwtSecret))
-	if err != nil {
-		golog.Warnf("Error signing token. Reason : %v", err) // pray to god this never happens
-		return nil, err
-	}
-	return &tokenString, nil
 }
 
 func deleteFromFilestore(fileid string) {
