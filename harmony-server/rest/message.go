@@ -42,48 +42,50 @@ func Message(limiter *rate.Limiter, ctx echo.Context) error {
 	if !limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "Too many requests, please try again later")
 	}
-	fileTransaction, err := harmonydb.DBInst.Begin()
-	if err != nil {
-		golog.Warnf("error making file transaction : %v", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error saving files")
-	}
 	var messageID = randstr.Hex(16)
 	var attachments = make([]string, len(files))
-	for i, v := range files {
-		file, err := v.Open()
+	if len(files) > 0 {
+		fileTransaction, err := harmonydb.DBInst.Begin()
 		if err != nil {
-			golog.Warnf("Failed to parse file : %v", err)
-			return echo.NewHTTPError(http.StatusInternalServerError, "Error opening file")
+			golog.Warnf("error making file transaction : %v", err)
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error saving files")
 		}
-		fileBytes, err := ioutil.ReadAll(file)
+		for i, v := range files {
+			file, err := v.Open()
+			if err != nil {
+				golog.Warnf("Failed to parse file : %v", err)
+				return echo.NewHTTPError(http.StatusInternalServerError, "Error opening file")
+			}
+			fileBytes, err := ioutil.ReadAll(file)
+			if err != nil {
+				golog.Warnf("Error reading uploaded file : %v", err)
+				return echo.NewHTTPError(http.StatusInternalServerError, "Error reading file")
+			}
+			err = file.Close()
+			if err != nil {
+				golog.Warnf("Failed to close file : %v", err)
+				return echo.NewHTTPError(http.StatusInternalServerError, "Error closing files")
+			}
+			fname := randstr.Hex(16)
+			err = ioutil.WriteFile(fmt.Sprintf("./filestore/%v", fname), fileBytes, 0666)
+			if err != nil {
+				golog.Warnf("Error saving file upload : %v", err)
+				return echo.NewHTTPError(http.StatusInternalServerError, "Error writing file")
+			}
+			_, err = fileTransaction.Exec("INSERT INTO attachments(messageid, attachment) VALUES($1, $2)", messageID, fname)
+			if err != nil {
+				golog.Warnf("Error inserting into attachments : %v", err)
+				go deleteFromFilestore(fname)
+				return echo.NewHTTPError(http.StatusInternalServerError, "Error linking file to message")
+			} else {
+				attachments[i] = fname
+			}
+		}
+		err = fileTransaction.Commit()
 		if err != nil {
-			golog.Warnf("Error reading uploaded file : %v", err)
-			return echo.NewHTTPError(http.StatusInternalServerError, "Error reading file")
+			golog.Warnf("Error committing attachment transaction  : %v", err)
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error committing attachment transaction")
 		}
-		err = file.Close()
-		if err != nil {
-			golog.Warnf("Failed to close file : %v", err)
-			return echo.NewHTTPError(http.StatusInternalServerError, "Error closing files")
-		}
-		fname := randstr.Hex(16)
-		err = ioutil.WriteFile(fmt.Sprintf("./filestore/%v", fname), fileBytes, 0666)
-		if err != nil {
-			golog.Warnf("Error saving file upload : %v", err)
-			return echo.NewHTTPError(http.StatusInternalServerError, "Error writing file")
-		}
-		_, err = fileTransaction.Exec("INSERT INTO attachments(messageid, attachment) VALUES($1, $2)", messageID, fname)
-		if err != nil {
-			golog.Warnf("Error inserting into attachments : %v", err)
-			go deleteFromFilestore(fname)
-			return echo.NewHTTPError(http.StatusInternalServerError, "Error linking file to message")
-		} else {
-			attachments[i] = fname
-		}
-	}
-	err = fileTransaction.Commit()
-	if err != nil {
-		golog.Warnf("Error committing attachment transaction  : %v", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error committing attachment transaction")
 	}
 
 	for _, client := range globals.Guilds[guild].Clients {
@@ -96,6 +98,7 @@ func Message(limiter *rate.Limiter, ctx echo.Context) error {
 					"userid":    userid,
 					"createdat": time.Now().UTC().Unix(),
 					"message":   message,
+					"attachments": attachments,
 					"messageid": messageID,
 				},
 			})
