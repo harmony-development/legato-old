@@ -6,6 +6,7 @@ import (
 	"github.com/thanhpk/randstr"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/time/rate"
+	"harmony-server/authentication"
 	"harmony-server/harmonydb"
 	"net/http"
 	"regexp"
@@ -52,7 +53,7 @@ func Register(limiter *rate.Limiter, ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "error creating account, the email/username may already be registered")
 	}
-	token, err := makeToken(userid)
+	token, err := authentication.MakeToken(userid)
 	if err != nil || token == nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "error creating token")
 	}

@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/time/rate"
+	"harmony-server/authentication"
 	"harmony-server/harmonydb"
 	"net/http"
 )
@@ -23,7 +24,7 @@ func Login(limiter *rate.Limiter, ctx echo.Context) error {
 	if !limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many requests, please try again later")
 	}
-	token, err := makeToken(userid)
+	token, err := authentication.MakeToken(userid)
 	if err != nil || token == nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "error creating token")
 	}
