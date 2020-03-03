@@ -15,7 +15,6 @@ type guildData struct {
 }
 
 type returnGuild struct {
-	GuildID   string `json:"guildid"`
 	Guildname string `json:"guildname"`
 	Picture   string `json:"picture"`
 	Owner     string `json:"owner"`
@@ -36,12 +35,13 @@ func GetGuilds(limiter *rate.Limiter, ctx echo.Context) error {
 	}
 	var returnGuilds = make(map[string]returnGuild)
 	for res.Next() {
+		var guildID string
 		var fetchedGuild returnGuild
-		err := res.Scan(&fetchedGuild.GuildID, &fetchedGuild.Guildname, &fetchedGuild.Owner, &fetchedGuild.Picture)
+		err := res.Scan(&guildID, &fetchedGuild.Guildname, &fetchedGuild.Owner, &fetchedGuild.Picture)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, "we were unable to list one of the guilds, please try again later")
 		}
-		returnGuilds[fetchedGuild.GuildID] = fetchedGuild
+		returnGuilds[guildID] = fetchedGuild
 	}
 	return ctx.JSON(http.StatusOK, returnGuilds)
 }
