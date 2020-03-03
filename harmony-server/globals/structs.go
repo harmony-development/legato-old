@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/websocket"
 	"golang.org/x/time/rate"
+	"sync"
 	"time"
 )
 
@@ -19,6 +20,7 @@ type (
 
 	Guild struct {
 		Clients map[string][]*Client
+		Lock sync.Mutex
 		Owner string
 	}
 
@@ -50,4 +52,5 @@ func (ws *Client) Send(p *Packet) {
 }
 
 var Guilds = make(map[string]*Guild)
+var GuildsLock = sync.Mutex{}
 var Bus EventBus

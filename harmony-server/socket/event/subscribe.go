@@ -24,41 +24,24 @@ func OnSubscribe(ws *globals.Client, rawMap map[string]interface{}, limiter *rat
 		return
 	}
 	if !limiter.Allow() {
-		sendErr(ws, "You're getting the guilds list a lot, please try again in a sec")
+		sendErr(ws, "You're subscribing too often, please try again later")
 		return
 	}
-	res, err := harmonydb.DBInst.Query("SELECT guilds.guildid, guilds.guildname, guilds.owner, guilds.picture FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=$1", ws.Userid)
+	res, err := harmonydb.DBInst.Query("SELECT guilds.guildid FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=$1", ws.Userid)
 	if err != nil {
 		sendErr(ws, "We weren't able to get a list of guilds for you. Try reloading the page / logging back in")
 		golog.Warnf("Error selecting guilds. Reason : %v", err)
 		return
 	}
-	var returnGuilds = make(map[string]guildsData)
 	for res.Next() {
 		var guildID string
-		var fetchedGuild guildsData
-		var guildOwner string
-		err := res.Scan(&guildID, &fetchedGuild.Guildname, &guildOwner, &fetchedGuild.Picture)
-		if guildOwner == ws.Userid {
-			fetchedGuild.IsOwner = true
-		}
+		err := res.Scan(&guildID)
 		if err != nil {
-			sendErr(ws, "We weren't able to get a list of guilds for you. Try reloading the page / logging back in")
+			sendErr(ws, "Unable to subscribe to all guilds. Please try again later")
 			golog.Warnf("Error scanning next row. Reason: %v", err)
 			return
 		}
 		// Now subscribe to all guilds that the client is a member of!
 		registerSocket(guildID, ws, ws.Userid)
-
-		if globals.Guilds[guildID] != nil {
-			globals.Guilds[guildID].Owner = guildOwner
-		}
-		returnGuilds[guildID] = fetchedGuild
 	}
-	ws.Send(&globals.Packet{
-		Type: "getguilds",
-		Data: map[string]interface{}{
-			"guilds": returnGuilds,
-		},
-	})
 }
