@@ -8,7 +8,7 @@ import (
 	"harmony-server/harmonydb"
 )
 
-type getGuildsData struct {
+type subscribeData struct {
 	Token string `mapstructure:"token"`
 }
 
@@ -18,9 +18,8 @@ type guildsData struct {
 	IsOwner   bool   `json:"owner"`
 }
 
-func OnGetGuilds(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
-	golog.Debugf("GetGuilds Request Sent")
-	var data getGuildsData
+func OnSubscribe(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
+	var data subscribeData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}

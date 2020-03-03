@@ -24,7 +24,8 @@ func apiV1(g echo.Group) {
 	v1 := g.Group("/v1")
 	v1.Use(middleware.CORS())
 	v1.POST("/login/", rest.WithRateLimit(rest.Login, 5 * time.Second, 1))
-	v1.POST("/register/", rest.WithRateLimit(rest.Login, 10 * time.Minute, 10))
+	v1.POST("/register/", rest.WithRateLimit(rest.Register, 10 * time.Minute, 10))
+	v1.POST("/getguilds/", rest.WithRateLimit(rest.GetGuilds, 5 * time.Second, 3))
 	v1.POST("/avatarupdate/", rest.WithRateLimit(rest.AvatarUpdate, 3 * time.Second, 1))
 	v1.POST("/updateguildpicture/:guildid/", rest.WithRateLimit(rest.UpdateGuildPicture, 3 * time.Second, 1))
 	v1.POST("/message/:guildid/:channelid/*", rest.WithRateLimit(rest.Message, 500 * time.Millisecond, 20))
@@ -33,8 +34,7 @@ func apiV1(g echo.Group) {
 func makeEventBus() *globals.EventBus {
 	bus := &globals.EventBus{}
 	bus.Bind("ping", limit(event.OnPing, 500 * time.Millisecond, 5))
-
-	bus.Bind("getguilds", limit(event.OnGetGuilds, 500 * time.Millisecond, 10))
+	bus.Bind("subscribe", limit(event.OnSubscribe, 500 * time.Millisecond, 10))
 	bus.Bind("getchannels", limit(event.OnGetChannels, 100 * time.Millisecond, 5))
 	bus.Bind("getmembers", limit(event.OnGetMembers, 5 * time.Second, 3))
 	bus.Bind("getmessages", limit(event.OnGetMessages, 100 * time.Millisecond, 5))
