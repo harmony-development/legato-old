@@ -36,8 +36,6 @@ func makeEventBus() *globals.EventBus {
 	bus.Bind("deleteguild", limit(event.OnDeleteGuild, 10 * time.Second, 1))
 	
 	bus.Bind("updateguildname", limit(event.OnUpdateGuildName, 3 * time.Second, 1))
-
-	bus.Bind("addchannel", limit(event.OnAddChannel, 1 * time.Second, 5))
 	bus.Bind("createinvite", limit(event.OnCreateInvite, 200 * time.Millisecond, 5))
 
 	bus.Bind("deletechannel", limit(event.OnDeleteChannel, 1 * time.Second, 5))
