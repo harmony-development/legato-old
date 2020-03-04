@@ -5,7 +5,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"golang.org/x/time/rate"
 	"harmony-server/globals"
-	"harmony-server/rest"
+	"harmony-server/rest/v1"
 	"harmony-server/socket"
 	"harmony-server/socket/event"
 	"time"
@@ -21,15 +21,15 @@ func limit(event func(ws *globals.Client, data map[string]interface{}, limiter *
 }
 
 func apiV1(g echo.Group) {
-	v1 := g.Group("/v1")
-	v1.Use(middleware.CORS())
-	v1.POST("/login/", rest.WithRateLimit(rest.Login, 5 * time.Second, 1))
-	v1.POST("/register/", rest.WithRateLimit(rest.Register, 10 * time.Minute, 10))
-	v1.POST("/getguilds/", rest.WithRateLimit(rest.GetGuilds, 5 * time.Second, 3))
-	v1.POST("/getchannels/:guildid", rest.WithRateLimit(rest.GetChannels, 500 * time.Second, 5))
-	v1.POST("/avatarupdate/", rest.WithRateLimit(rest.AvatarUpdate, 3 * time.Second, 1))
-	v1.POST("/updateguildpicture/:guildid/", rest.WithRateLimit(rest.UpdateGuildPicture, 3 * time.Second, 1))
-	v1.POST("/message/:guildid/:channelid/*", rest.WithRateLimit(rest.Message, 500 * time.Millisecond, 20))
+	r := g.Group("/v1")
+	r.Use(middleware.CORS())
+	r.POST("/login*", v1.WithRateLimit(v1.Login, 5 * time.Second, 1))
+	r.POST("/register*", v1.WithRateLimit(v1.Register, 10 * time.Minute, 10))
+	r.POST("/getguilds*", v1.WithRateLimit(v1.GetGuilds, 5 * time.Second, 3))
+	r.POST("/getchannels/:guildid", v1.WithRateLimit(v1.GetChannels, 500 * time.Second, 5))
+	r.POST("/avatarupdate*", v1.WithRateLimit(v1.AvatarUpdate, 3 * time.Second, 1))
+	r.POST("/updateguildpicture/:guildid/", v1.WithRateLimit(v1.UpdateGuildPicture, 3 * time.Second, 1))
+	r.POST("/message/:guildid/:channelid/*", v1.WithRateLimit(v1.Message, 500 * time.Millisecond, 20))
 }
 
 func makeEventBus() *globals.EventBus {

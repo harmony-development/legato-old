@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/labstack/echo/v4"
 	"github.com/joho/godotenv"
 	"github.com/kataras/golog"
+	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
-	"harmony-server/rest"
+	"harmony-server/rest/v1"
 	"net/http"
 	"os"
 )
@@ -34,6 +34,6 @@ func main() {
 	r.Static("/filestore", "filestore")
 	r.Static("/static", "static")
 	r.File("/", "static/index.html")
-	go rest.CleanupRoutine()
+	go v1.CleanupRoutine()
 	golog.Fatalf("Fatal error caused server to crash! %v", http.ListenAndServe(PORT, r))
 }
