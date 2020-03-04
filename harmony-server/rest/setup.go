@@ -22,5 +22,6 @@ func apiV1(g echo.Group) {
 	r.POST("/updateguildpicture/:guildid/", v1.WithRateLimit(v1.UpdateGuildPicture, 3 * time.Second, 1))
 
 	r.POST("/message/:guildid/:channelid/", v1.WithRateLimit(v1.Message, 500 * time.Millisecond, 20))
+	r.POST("/createguild*", v1.WithRateLimit(v1.CreateGuild, 20 * time.Second, 3))
 	r.POST("/addchannel/:guildid", v1.WithRateLimit(v1.AddChannel, 1 * time.Second, 3))
 }
