@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
+	"harmony-server/rest"
 	"harmony-server/rest/v1"
 	"net/http"
 	"os"
@@ -29,8 +30,8 @@ func main() {
 	r := echo.New()
 	r.Use(middleware.Recover())
 	api := r.Group("/api")
-	apiV1(*api)
-	r.Any("/api/socket", handleSocket)
+	rest.SetupREST(*api)
+	api.Any("/socket", handleSocket)
 	r.Static("/filestore", "filestore")
 	r.Static("/static", "static")
 	r.File("/", "static/index.html")
