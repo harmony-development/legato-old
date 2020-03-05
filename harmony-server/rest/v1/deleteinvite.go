@@ -1,44 +1,31 @@
 package v1
 
 import (
-	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
-	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
+	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
-	"harmony-server/socket/event"
+	"net/http"
 )
 
-type deleteInviteData struct {
-	Token  string `mapstructure:"token"`
-	Guild string `mapstructure:"guild"`
-	Invite string `mapstructure:"invite"`
-}
-
 func DeleteInvite(limiter *rate.Limiter, ctx echo.Context) error {
-	var data deleteInviteData
-	if err := mapstructure.Decode(rawMap, &data); err != nil {
-		return
+	token, guild, invite := ctx.FormValue("token"), ctx.FormValue("guild"), ctx.FormValue("invite")
+	userid, err := authentication.VerifyToken(token)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "invalid token")
 	}
-	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[ws.Userid] == nil || globals.Guilds[data.Guild].Owner != ws.Userid {
-		return
+	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[userid] == nil || globals.Guilds[guild].Owner != userid {
+		return echo.NewHTTPError(http.StatusForbidden, "insufficient permissions to delete invite")
 	}
 	if !limiter.Allow() {
-		event.sendErr(ws, "You're deleting a lot of invites, wait a sec and try again")
-		return
+		return echo.NewHTTPError(http.StatusTooManyRequests, "too many invite deletions, please wait a few moments")
 	}
-	_, err := harmonydb.DBInst.Exec("DELETE FROM invites WHERE inviteid=$1 AND guildid=$2", data.Invite, data.Guild)
+	_, err = harmonydb.DBInst.Exec("DELETE FROM invites WHERE inviteid=$1 AND guildid=$2", invite, guild)
 	if err != nil {
-		event.sendErr(ws, "We weren't able to delete that invite for some reason. You should try again")
-		golog.Warnf("Error deleting invite : %v", err)
-		return
+		return echo.NewHTTPError(http.StatusInternalServerError, "unable to delete invite, please try again later")
 	}
-	ws.Send(&globals.Packet{
-		Type: "deleteinvite",
-		Data: map[string]interface{}{
-			"success": true,
-			"invite": data.Invite,
-		},
+	return ctx.JSON(http.StatusOK, map[string]string{
+		"message": "successfully deleted invite",
 	})
 }

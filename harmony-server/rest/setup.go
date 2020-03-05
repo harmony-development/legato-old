@@ -26,5 +26,7 @@ func apiV1(g echo.Group) {
 	r.POST("/addchannel*", v1.WithRateLimit(v1.AddChannel, 1 * time.Second, 3))
 	r.POST("/deletechannel*", v1.WithRateLimit(v1.DeleteChannel, 1 * time.Second, 3))
 	r.POST("/deleteguild*", v1.WithRateLimit(v1.DeleteGuild, 5 * time.Second, 5))
+	r.POST("/deletemessage*", v1.WithRateLimit(v1.DeleteGuild, 1 * time.Second, 10))
+	r.POST("/deleteinvite*", v1.WithRateLimit(v1.DeleteInvite, 1 * time.Second, 5))
 	r.POST("/createinvite*", v1.WithRateLimit(v1.CreateInvite, 1 * time.Second, 5))
 }

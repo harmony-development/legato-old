@@ -1,7 +1,10 @@
 package harmonydb
 
 import (
+	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
+	"harmony-server/socket/event"
+	"net/http"
 )
 
 func DeleteChannelTransaction(guildid string, channelid string) error {
@@ -20,6 +23,7 @@ func DeleteChannelTransaction(guildid string, channelid string) error {
 	if err = transaction.Commit(); err != nil {
 		return err
 	}
+	return nil
 }
 
 func CreateGuildTransaction(guildname string, owner string) (*string, error) {
@@ -76,4 +80,32 @@ func DeleteGuildTransaction(guildid string) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func DeleteMessageTransaction(guild string, channel string, message string, userid string) error {
+	transaction, err := DBInst.Begin()
+	if err != nil {
+		return err
+	}
+	res, err := transaction.Exec("DELETE FROM messages WHERE guildid=$1 AND channelid=$2 AND messageid=$3 AND (author=$4 OR (SELECT owner FROM guilds WHERE guildid=$5)=$6)", guild, channel, message, userid, guild, userid)
+	if err != nil {
+		return err
+	}
+	rowCount, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowCount != 1 {
+		err := transaction.Rollback()
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	err = transaction.Commit()
+	if err != nil {
+		return err
+	}
+	return nil
 }

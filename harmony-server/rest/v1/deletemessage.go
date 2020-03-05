@@ -1,57 +1,38 @@
 package v1
 
 import (
-	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
-	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
+	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
-	"harmony-server/socket/event"
+	"net/http"
 )
 
-type deleteMessageData struct {
-	Token string `mapstructure:"token"`
-	Guild string `mapstructure:"guild"`
-	Channel string `mapstructure:"channel"`
-	Message string `mapstructure:"message"`
-}
-
 func DeleteMessage(limiter *rate.Limiter, ctx echo.Context) error {
-	var data deleteMessageData
-	if err := mapstructure.Decode(rawMap, &data); err != nil {
-		golog.Warnf("Error decoding data for getting channels")
-		return
+	token, guild, channel, message := ctx.FormValue("token"), ctx.FormValue("guild"), ctx.FormValue("channel"), ctx.FormValue("message")
+	userid, err := authentication.VerifyToken(token)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "")
 	}
-	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[ws.Userid] == nil {
-		return
+	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[guild] == nil {
+		return echo.NewHTTPError(http.StatusForbidden, "insufficient permissions to delete message")
 	}
 	if !limiter.Allow() {
-		event.sendErr(ws, "You're deleting messages too fast, try again in a few moments")
-		return
+		return echo.NewHTTPError(http.StatusTooManyRequests, "too many message deletions, please try again later")
 	}
-	res, err := harmonydb.DBInst.Exec("DELETE FROM messages WHERE guildid=$1 AND channelid=$2 AND messageid=$3 AND (author=$4 OR (SELECT owner FROM guilds WHERE guildid=$5)=$6)", data.Guild, data.Channel, data.Message, ws.Userid, data.Guild, ws.Userid)
+	err = harmonydb.DeleteMessageTransaction(guild, channel, message, userid)
 	if err != nil {
-		event.sendErr(ws, "An error occured while deleting that message")
-		return
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to delete message, please try again later")
 	}
-	rowCount, err := res.RowsAffected()
-	if err != nil {
-		event.sendErr(ws, "An error occured while deleting that message")
-		return
-	}
-	if rowCount != 1 {
-		event.sendErr(ws, "An error occured while deleting that message")
-		return
-	}
-	for _, client := range globals.Guilds[data.Guild].Clients {
+	for _, client := range globals.Guilds[guild].Clients {
 		for _, conn := range client {
 			conn.Send(&globals.Packet{
 				Type: "deletemessage",
 				Data: map[string]interface{}{
-					"guild":     data.Guild,
-					"channel":   data.Channel,
-					"message": data.Message,
+					"guild":     guild,
+					"channel":   channel,
+					"message": message,
 				},
 			})
 		}
