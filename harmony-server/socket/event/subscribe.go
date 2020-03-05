@@ -24,12 +24,12 @@ func OnSubscribe(ws *globals.Client, rawMap map[string]interface{}, limiter *rat
 		return
 	}
 	if !limiter.Allow() {
-		sendErr(ws, "You're subscribing too often, please try again later")
+		sendErr(ws, "Too many subscription attempts, please try later")
 		return
 	}
 	res, err := harmonydb.DBInst.Query("SELECT guilds.guildid FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=$1", ws.Userid)
 	if err != nil {
-		sendErr(ws, "We weren't able to get a list of guilds for you. Try reloading the page / logging back in")
+		sendErr(ws, "We weren't able to get a list of guilds. Try reloading the page / logging back in")
 		golog.Warnf("Error selecting guilds. Reason : %v", err)
 		return
 	}

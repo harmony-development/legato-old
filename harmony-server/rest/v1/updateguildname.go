@@ -1,11 +1,13 @@
-package event
+package v1
 
 import (
 	"github.com/kataras/golog"
+	"github.com/labstack/echo/v4"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
+	"harmony-server/socket/event"
 )
 
 type updateGuildName struct {
@@ -14,7 +16,7 @@ type updateGuildName struct {
 	Name string `mapstructure:"name"`
 }
 
-func OnUpdateGuildName(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
+func UpdateGuildName(limiter *rate.Limiter, ctx echo.Context) error {
 	var data updateGuildName
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -23,7 +25,7 @@ func OnUpdateGuildName(ws *globals.Client, rawMap map[string]interface{}, limite
 		return
 	}
 	if !limiter.Allow() {
-		sendErr(ws, "You're updating the guild name a bit too fast... try again in a few seconds")
+		event.sendErr(ws, "You're updating the guild name a bit too fast... try again in a few seconds")
 		return
 	}
 	_, err := harmonydb.DBInst.Exec("UPDATE guilds SET guildname=$1 WHERE guildid=$2", data.Name, data.Guild)

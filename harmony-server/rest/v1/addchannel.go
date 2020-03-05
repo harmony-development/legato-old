@@ -11,8 +11,7 @@ import (
 )
 
 func AddChannel(limiter *rate.Limiter, ctx echo.Context) error {
-	guild := ctx.QueryParam("guildid")
-	token, channelname := ctx.FormValue("token"), ctx.FormValue("channelname")
+	token, guild, channelname := ctx.FormValue("token"), ctx.FormValue("guildid"), ctx.FormValue("channelname")
 	userid, err := authentication.VerifyToken(token)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "invalid token")

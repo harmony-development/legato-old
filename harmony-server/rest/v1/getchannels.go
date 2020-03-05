@@ -14,7 +14,7 @@ type returnChannel struct {
 }
 
 func GetChannels(limiter *rate.Limiter, ctx echo.Context) error {
-	guildid := ctx.QueryParam("guildid")
+	guildid := ctx.FormValue("guildid")
 	token := ctx.FormValue("token")
 	userid, err := authentication.VerifyToken(token)
 	if err != nil || userid == "" {

@@ -1,10 +1,12 @@
-package event
+package v1
 
 import (
+	"github.com/labstack/echo/v4"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
+	"harmony-server/socket/event"
 )
 
 type getUsernameData struct {
@@ -12,10 +14,10 @@ type getUsernameData struct {
 	Userid string `mapstructure:"userid"`
 }
 
-func OnGetUser(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
+func GetUser(limiter *rate.Limiter, ctx echo.Context) error {
 	var data getUsernameData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
-		sendErr(ws, "Something's wrong with your request dude")
+		event.sendErr(ws, "Something's wrong with your request dude")
 		return
 	}
 	var username string

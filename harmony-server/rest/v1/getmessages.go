@@ -1,12 +1,14 @@
-package event
+package v1
 
 import (
 	"database/sql"
 	"github.com/kataras/golog"
+	"github.com/labstack/echo/v4"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
+	"harmony-server/socket/event"
 )
 
 type GetMessagesData struct {
@@ -24,14 +26,14 @@ type Message struct {
 	Messageid  string  `json:"messageid"`
 }
 
-func OnGetMessages(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
+func GetMessages(limiter *rate.Limiter, ctx echo.Context) error {
 	var data GetMessagesData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
-		sendErr(ws, "Something was wrong with your request. Please try again")
+		event.sendErr(ws, "Something was wrong with your request. Please try again")
 		return
 	}
 	if data.Guild == "" || data.Token == "" || data.Channel == "" {
-		sendErr(ws, "Something was wrong with your request. Please try again")
+		event.sendErr(ws, "Something was wrong with your request. Please try again")
 		golog.Warnf("Error decoding getmessages request")
 		return
 	}
@@ -46,7 +48,7 @@ func OnGetMessages(ws *globals.Client, rawMap map[string]interface{}, limiter *r
 		res, err = harmonydb.DBInst.Query("SELECT messageid, author, createdat, message FROM messages WHERE guildid=$1 AND channelid=$2 AND createdat < (SELECT createdat FROM messages WHERE messageid=$3) ORDER BY createdat DESC LIMIT 30", data.Guild, data.Channel, data.LastMessage)
 	}
 	if err != nil {
-		sendErr(ws, "We weren't able to get a list of messages. Please try again")
+		event.sendErr(ws, "We weren't able to get a list of messages. Please try again")
 		golog.Warnf("Error getting recent messages : %v", ws.Userid)
 		return
 	}
@@ -55,7 +57,7 @@ func OnGetMessages(ws *globals.Client, rawMap map[string]interface{}, limiter *r
 		var msg Message
 		err := res.Scan(&msg.Messageid, &msg.Userid, &msg.Createdat, &msg.Message)
 		if err != nil {
-			sendErr(ws, "We weren't able to get a list of messages. Please try again")
+			event.sendErr(ws, "We weren't able to get a list of messages. Please try again")
 			golog.Warnf("Error scanning next row getting messages. Reason: %v", err)
 			return
 		}

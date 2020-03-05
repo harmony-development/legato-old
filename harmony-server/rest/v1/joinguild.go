@@ -1,11 +1,13 @@
-package event
+package v1
 
 import (
 	"github.com/kataras/golog"
+	"github.com/labstack/echo/v4"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
+	"harmony-server/socket/event"
 )
 
 type joinGuildData struct {
@@ -13,10 +15,10 @@ type joinGuildData struct {
 	Token      string `mapstructure:"token"`
 }
 
-func OnJoinGuild(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
+func JoinGuild(limiter *rate.Limiter, ctx echo.Context) error {
 	var data joinGuildData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
-		sendErr(ws, "Bad invite code or token")
+		event.sendErr(ws, "Bad invite code or token")
 		return
 	}
 	var guildid string
@@ -33,25 +35,25 @@ func OnJoinGuild(ws *globals.Client, rawMap map[string]interface{}, limiter *rat
 	}
 	joinGuildTransaction, err := harmonydb.DBInst.Begin()
 	if err != nil {
-		sendErr(ws, "We couldn't get you to join that guild. Please try again")
+		event.sendErr(ws, "We couldn't get you to join that guild. Please try again")
 		golog.Warnf("Error creating joinGuildTransaction : %v", err)
 		return
 	}
 	_, err = joinGuildTransaction.Exec("INSERT INTO guildmembers(userid, guildid) VALUES($1, $2)", ws.Userid, guildid)
 	if err != nil {
-		sendErr(ws, "You are already part of this guild.")
+		event.sendErr(ws, "You are already part of this guild.")
 		golog.Warn(err)
 		return
 	}
 	_, err = joinGuildTransaction.Exec("UPDATE invites SET invitecount=invitecount+1 WHERE inviteid=$1", data.InviteCode)
 	if err != nil {
-		sendErr(ws, "We couldn't get you to join that guild. Please try again")
+		event.sendErr(ws, "We couldn't get you to join that guild. Please try again")
 		golog.Warn(err)
 		return
 	}
 	err = joinGuildTransaction.Commit()
 	if err != nil {
-		sendErr(ws, "We couldn't get you to join that guild. Please try again")
+		event.sendErr(ws, "We couldn't get you to join that guild. Please try again")
 		golog.Warnf("Error adding user to guildmembers : %v", err)
 		return
 	}
@@ -61,5 +63,5 @@ func OnJoinGuild(ws *globals.Client, rawMap map[string]interface{}, limiter *rat
 			"guild": guildid,
 		},
 	})
-	registerSocket(guildid, ws, ws.Userid)
+	event.registerSocket(guildid, ws, ws.Userid)
 }

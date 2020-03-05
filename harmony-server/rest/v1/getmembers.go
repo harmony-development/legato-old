@@ -1,8 +1,10 @@
-package event
+package v1
 
 import (
+	"github.com/labstack/echo/v4"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
+	"harmony-server/socket/event"
 
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
@@ -14,7 +16,7 @@ type getMembersData struct {
 	Guild string `mapstructure:"guild"`
 }
 
-func OnGetMembers(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
+func GetMembers(limiter *rate.Limiter, ctx echo.Context) error {
 	var data getMembersData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		golog.Warnf("Error decoding data while getting members")
@@ -25,7 +27,7 @@ func OnGetMembers(ws *globals.Client, rawMap map[string]interface{}, limiter *ra
 		return
 	}
 	if !limiter.Allow() {
-		sendErr(ws, "You're getting the guild member list too fast, try again soon")
+		event.sendErr(ws, "You're getting the guild member list too fast, try again soon")
 		return
 	}
 	res, err := harmonydb.DBInst.Query("SELECT userid FROM guildmembers WHERE guildid=$1", data.Guild)

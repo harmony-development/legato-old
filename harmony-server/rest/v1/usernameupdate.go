@@ -1,11 +1,13 @@
-package event
+package v1
 
 import (
 	"github.com/kataras/golog"
+	"github.com/labstack/echo/v4"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
+	"harmony-server/socket/event"
 )
 
 type usernameUpdateData struct {
@@ -13,22 +15,22 @@ type usernameUpdateData struct {
 	Username string `mapstructure:"username"`
 }
 
-func OnUsernameUpdate(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
+func UsernameUpdate(limiter *rate.Limiter, ctx echo.Context) error {
 	var data usernameUpdateData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
 	if data.Username == "" {
-		sendErr(ws, "Oops! We weren't able to set your username because of a weird bug")
+		event.sendErr(ws, "Oops! We weren't able to set your username because of a weird bug")
 		return
 	}
 	if !limiter.Allow() {
-		sendErr(ws, "You're updating your username too fast, try again in a few moments")
+		event.sendErr(ws, "You're updating your username too fast, try again in a few moments")
 		return
 	}
 	_, err := harmonydb.DBInst.Exec("UPDATE users SET username=$1 WHERE id=$2", data.Username, ws.Userid)
 	if err != nil {
-		sendErr(ws, "Something weird happened on our end and we weren't able to set your avatar. Please try again in a few moments")
+		event.sendErr(ws, "Something weird happened on our end and we weren't able to set your avatar. Please try again in a few moments")
 		return
 	}
 	res, err := harmonydb.DBInst.Query("SELECT guildid FROM guildmembers WHERE userid=$1", ws.Userid)

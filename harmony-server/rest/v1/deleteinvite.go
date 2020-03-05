@@ -1,11 +1,13 @@
-package event
+package v1
 
 import (
 	"github.com/kataras/golog"
+	"github.com/labstack/echo/v4"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
+	"harmony-server/socket/event"
 )
 
 type deleteInviteData struct {
@@ -14,7 +16,7 @@ type deleteInviteData struct {
 	Invite string `mapstructure:"invite"`
 }
 
-func OnDeleteInvite(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
+func DeleteInvite(limiter *rate.Limiter, ctx echo.Context) error {
 	var data deleteInviteData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -23,12 +25,12 @@ func OnDeleteInvite(ws *globals.Client, rawMap map[string]interface{}, limiter *
 		return
 	}
 	if !limiter.Allow() {
-		sendErr(ws, "You're deleting a lot of invites, wait a sec and try again")
+		event.sendErr(ws, "You're deleting a lot of invites, wait a sec and try again")
 		return
 	}
 	_, err := harmonydb.DBInst.Exec("DELETE FROM invites WHERE inviteid=$1 AND guildid=$2", data.Invite, data.Guild)
 	if err != nil {
-		sendErr(ws, "We weren't able to delete that invite for some reason. You should try again")
+		event.sendErr(ws, "We weren't able to delete that invite for some reason. You should try again")
 		golog.Warnf("Error deleting invite : %v", err)
 		return
 	}

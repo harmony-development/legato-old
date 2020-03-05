@@ -1,0 +1,79 @@
+package harmonydb
+
+import (
+	"github.com/thanhpk/randstr"
+)
+
+func DeleteChannelTransaction(guildid string, channelid string) error {
+	transaction, err := DBInst.Begin()
+	if err != nil {
+		return err
+	}
+	_, err = transaction.Exec("DELETE FROM messages WHERE channelid=$1 AND guildid=$2", channelid, guildid)
+	if err != nil {
+		return err
+	}
+	_, err = transaction.Exec("DELETE FROM channels WHERE channelid=$1 AND guildid=$2", channelid, guildid)
+	if err != nil {
+		return err
+	}
+	if err = transaction.Commit(); err != nil {
+		return err
+	}
+}
+
+func CreateGuildTransaction(guildname string, owner string) (*string, error) {
+	guildid := randstr.Hex(16)
+	createGuildTransaction, err := DBInst.Begin()
+	if err != nil {
+		return nil, err
+	}
+	_, err = createGuildTransaction.Exec(`INSERT INTO guilds(guildid, guildname, picture, owner) VALUES($1, $2, $3, $4);`, guildid, guildname, "", owner)
+	if err != nil {
+		return nil, err
+	}
+	_, err = createGuildTransaction.Exec(`INSERT INTO guildmembers(userid, guildid) VALUES($1, $2);`, userid, guildid)
+	if err != nil {
+		return nil, err
+	}
+	_, err = createGuildTransaction.Exec(`INSERT INTO channels(channelid, guildid, channelname) VALUES($1, $2, $3)`, randstr.Hex(16), guildid, "general")
+	if err != nil {
+		return nil, err
+	}
+	err = createGuildTransaction.Commit()
+	if err != nil {
+		return nil, err
+	}
+	return &guildid, nil
+}
+
+func DeleteGuildTransaction(guildid string) error {
+	transaction, err := DBInst.Begin()
+	if err != nil {
+		return err
+	}
+	_, err = transaction.Exec("DELETE FROM messages WHERE guildid=$1", guildid)
+	if err != nil {
+		return err
+	}
+	_, err = transaction.Exec("DELETE FROM channels WHERE guildid=$1", guildid)
+	if err != nil {
+		return err
+	}
+	_, err = transaction.Exec("DELETE FROM  invites WHERE guildid=$1", guildid)
+	if err != nil {
+		return err
+	}
+	_, err = transaction.Exec("DELETE FROM guildmembers WHERE guildid=$1", guildid)
+	if err != nil {
+		return err
+	}
+	_, err = transaction.Exec("DELETE FROM guilds WHERE guildid=$1", guildid)
+	if err != nil {
+		return err
+	}
+	err = transaction.Commit()
+	if err != nil {
+		return err
+	}
+}
