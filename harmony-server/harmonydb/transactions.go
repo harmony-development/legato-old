@@ -1,10 +1,7 @@
 package harmonydb
 
 import (
-	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
-	"harmony-server/socket/event"
-	"net/http"
 )
 
 func DeleteChannelTransaction(guildid string, channelid string) error {
@@ -36,7 +33,7 @@ func CreateGuildTransaction(guildname string, owner string) (*string, error) {
 	if err != nil {
 		return nil, err
 	}
-	_, err = createGuildTransaction.Exec(`INSERT INTO guildmembers(userid, guildid) VALUES($1, $2);`, userid, guildid)
+	_, err = createGuildTransaction.Exec(`INSERT INTO guildmembers(userid, guildid) VALUES($1, $2);`, owner, guildid)
 	if err != nil {
 		return nil, err
 	}

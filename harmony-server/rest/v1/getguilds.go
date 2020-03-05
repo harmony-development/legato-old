@@ -8,12 +8,6 @@ import (
 	"net/http"
 )
 
-type guildData struct {
-	Guildname string `json:"guildname"`
-	Picture   string `json:"picture"`
-	IsOwner   bool   `json:"owner"`
-}
-
 type returnGuild struct {
 	Guildname string `json:"guildname"`
 	Picture   string `json:"picture"`

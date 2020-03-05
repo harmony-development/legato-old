@@ -1,37 +1,29 @@
 package v1
 
 import (
-	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
-	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
+	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
-	"harmony-server/socket/event"
+	"net/http"
 )
 
-type getInvitesData struct {
-	Token string `mapstructure:"token"`
-	Guild string `mapstructure:"guild"`
-}
-
 func GetInvites(limiter *rate.Limiter, ctx echo.Context) error {
-	var data getInvitesData
-	if err := mapstructure.Decode(rawMap, &data); err != nil {
-		return
+	token, guild := ctx.FormValue("token"), ctx.FormValue("guild")
+	userid, err := authentication.VerifyToken(token)
+	if err != nil || userid == "" {
+		return echo.NewHTTPError(http.StatusUnauthorized, "invalid token")
 	}
-	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[ws.Userid] == nil || globals.Guilds[data.Guild].Owner != ws.Userid {
-		return
+	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[userid] == nil || globals.Guilds[guild].Owner != userid {
+		return echo.NewHTTPError(http.StatusForbidden, "insufficient permissions to list invites")
 	}
 	if !limiter.Allow() {
-		event.sendErr(ws, "You're listing invites too fast, slow down for a bit and try again")
-		return
+		return echo.NewHTTPError(http.StatusTooManyRequests, "too many invite listing requests, please try again later")
 	}
-	res, err := harmonydb.DBInst.Query("SElECT inviteid, invitecount FROM invites WHERE guildid=$1 ORDER BY invitecount", data.Guild)
+	res, err := harmonydb.DBInst.Query("SElECT inviteid, invitecount FROM invites WHERE guildid=$1 ORDER BY invitecount", guild)
 	if err != nil {
-		event.sendErr(ws, "We weren't able to get a list of invites for this guild. Please try again")
-		golog.Warnf("Error getting invites : %v", err)
-		return
+		return echo.NewHTTPError(http.StatusInternalServerError, "unable to list invites, please try again later")
 	}
 	returnInvites := make(map[string]int)
 	for res.Next() {
@@ -39,17 +31,11 @@ func GetInvites(limiter *rate.Limiter, ctx echo.Context) error {
 		var invitecount int
 		err = res.Scan(&invitecode, &invitecount)
 		if err != nil {
-			event.sendErr(ws, "We weren't able to get a list of invites for this guild. Please try again")
-			golog.Warnf("Error scanning invite codes : %v", err)
-			return
+			return echo.NewHTTPError(http.StatusForbidden, "unable to get invite, please try again later")
 		}
 		returnInvites[invitecode] = invitecount
 	}
-	ws.Send(&globals.Packet{
-		Type: "getinvites",
-		Data: map[string]interface{}{
-			"invites": returnInvites,
-			"guild":   data.Guild,
-		},
+	return ctx.JSON(http.StatusOK, map[string]map[string]int{
+		"invites": returnInvites,
 	})
 }
