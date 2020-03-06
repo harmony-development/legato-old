@@ -9,6 +9,7 @@ import (
 	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
+	"harmony-server/rest/hm"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -18,7 +19,8 @@ const (
 	maxFiles = 3
 )
 
-func Message(limiter *rate.Limiter, ctx echo.Context) error {
+func Message(c echo.Context) error {
+	ctx, _ := c.(*hm.HarmonyContext)
 	form, err := ctx.MultipartForm()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Valid form required")
@@ -39,7 +41,7 @@ func Message(limiter *rate.Limiter, ctx echo.Context) error {
 	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[userid] == nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "not permitted to send messages in this guild/channel")
 	}
-	if !limiter.Allow() {
+	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "Too many requests, please try again later")
 	}
 	var messageID = randstr.Hex(16)

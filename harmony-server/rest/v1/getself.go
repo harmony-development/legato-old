@@ -13,7 +13,7 @@ type getSelfData struct {
 	Token string `mapstructure:"token"`
 }
 
-func GetSelf(limiter *rate.Limiter, ctx echo.Context) error {
+func GetSelf(limiter *rate.Limiter, c echo.Context) error {
 	var data getSelfData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		event.sendErr(ws, "Somethings wrong with your request dude")

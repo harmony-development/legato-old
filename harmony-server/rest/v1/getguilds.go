@@ -2,9 +2,9 @@ package v1
 
 import (
 	"github.com/labstack/echo/v4"
-	"golang.org/x/time/rate"
 	"harmony-server/authentication"
 	"harmony-server/harmonydb"
+	"harmony-server/rest/hm"
 	"net/http"
 )
 
@@ -14,13 +14,14 @@ type returnGuild struct {
 	Owner     string `json:"owner"`
 }
 
-func GetGuilds(limiter *rate.Limiter, ctx echo.Context) error {
+func GetGuilds(c echo.Context) error {
+	ctx, _ := c.(*hm.HarmonyContext)
 	token := ctx.FormValue("token")
 	userid, err := authentication.VerifyToken(token)
 	if err != nil || userid == "" {
 		return echo.NewHTTPError(http.StatusUnauthorized, "invalid token")
 	}
-	if !limiter.Allow() {
+	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "you're getting guilds too fast, please wait a moment")
 	}
 	res, err := harmonydb.DBInst.Query("SELECT guilds.guildid, guilds.guildname, guilds.owner, guilds.picture FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=$1", userid)

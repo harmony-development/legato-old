@@ -23,7 +23,7 @@ func OnSubscribe(ws *globals.Client, rawMap map[string]interface{}, limiter *rat
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
-	if !limiter.Allow() {
+	if !ctx.Limiter.Allow() {
 		sendErr(ws, "Too many subscription attempts, please try later")
 		return
 	}

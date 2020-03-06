@@ -8,6 +8,8 @@ import (
 	"golang.org/x/time/rate"
 	"harmony-server/authentication"
 	"harmony-server/harmonydb"
+	"harmony-server/rest/harmonymiddleware"
+	"harmony-server/rest/hm"
 	"net/http"
 	"regexp"
 )
@@ -26,7 +28,8 @@ func verifyEmail(email string) bool {
 	return emailMatch.MatchString(email)
 }
 
-func Register(limiter *rate.Limiter, ctx echo.Context) error {
+func Register(c echo.Context) error {
+	ctx, _ := c.(*hm.HarmonyContext)
 	email, username, password := ctx.FormValue("email"), ctx.FormValue("username"), ctx.FormValue("password")
 	if len(username) < usernameMin || len(username) > usernameMax {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("username must be between %v and %v characters long", usernameMin, usernameMax))
@@ -37,7 +40,7 @@ func Register(limiter *rate.Limiter, ctx echo.Context) error {
 	if !verifyEmail(email) {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid email")
 	}
-	if !limiter.Allow() {
+	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many register requests, please try again in a few minutes")
 	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)

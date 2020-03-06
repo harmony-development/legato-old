@@ -5,9 +5,11 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
+	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"harmony-server/socket/event"
+	"net/http"
 )
 
 type usernameUpdateData struct {
@@ -15,16 +17,13 @@ type usernameUpdateData struct {
 	Username string `mapstructure:"username"`
 }
 
-func UsernameUpdate(limiter *rate.Limiter, ctx echo.Context) error {
-	var data usernameUpdateData
-	if err := mapstructure.Decode(rawMap, &data); err != nil {
-		return
+func UsernameUpdate(limiter *rate.Limiter, c echo.Context) error {
+	token, username := ctx.FormValue("token"), ctx.FormValue("username")
+	userid, err := authentication.VerifyToken(token)
+	if err != nil || userid == "" {
+		return echo.NewHTTPError(http.StatusUnauthorized, "invalid token")
 	}
-	if data.Username == "" {
-		event.sendErr(ws, "Oops! We weren't able to set your username because of a weird bug")
-		return
-	}
-	if !limiter.Allow() {
+	if !ctx.Limiter.Allow() {
 		event.sendErr(ws, "You're updating your username too fast, try again in a few moments")
 		return
 	}

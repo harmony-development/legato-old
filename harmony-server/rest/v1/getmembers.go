@@ -16,7 +16,7 @@ type getMembersData struct {
 	Guild string `mapstructure:"guild"`
 }
 
-func GetMembers(limiter *rate.Limiter, ctx echo.Context) error {
+func GetMembers(limiter *rate.Limiter, c echo.Context) error {
 	var data getMembersData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		golog.Warnf("Error decoding data while getting members")
@@ -26,7 +26,7 @@ func GetMembers(limiter *rate.Limiter, ctx echo.Context) error {
 		golog.Warnf("Client tried to list members without being registered")
 		return
 	}
-	if !limiter.Allow() {
+	if !ctx.Limiter.Allow() {
 		event.sendErr(ws, "You're getting the guild member list too fast, try again soon")
 		return
 	}

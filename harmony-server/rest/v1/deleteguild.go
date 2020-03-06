@@ -2,14 +2,15 @@ package v1
 
 import (
 	"github.com/labstack/echo/v4"
-	"golang.org/x/time/rate"
 	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
+	"harmony-server/rest/hm"
 	"net/http"
 )
 
-func DeleteGuild(limiter *rate.Limiter, ctx echo.Context) error {
+func DeleteGuild(c echo.Context) error {
+	ctx, _ := c.(*hm.HarmonyContext)
 	token, guild := ctx.FormValue("token"), ctx.FormValue("guild")
 	userid, err := authentication.VerifyToken(token)
 	if err != nil {
@@ -18,7 +19,7 @@ func DeleteGuild(limiter *rate.Limiter, ctx echo.Context) error {
 	if globals.Guilds[guild] == nil || globals.Guilds[guild].Owner != userid {
 		return echo.NewHTTPError(http.StatusForbidden, "insufficient permissions to delete guild")
 	}
-	if !limiter.Allow() {
+	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many guild deletions, please wait a few moments")
 	}
 	if harmonydb.DeleteGuildTransaction(guild) != nil {

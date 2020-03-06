@@ -6,10 +6,12 @@ import (
 	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
+	"harmony-server/rest/hm"
 	"net/http"
 )
 
-func DeleteChannel(limiter *rate.Limiter, ctx echo.Context) error {
+func DeleteChannel(c echo.Context) error {
+	ctx, _ := c.(*hm.HarmonyContext)
 	token, guild, channelid := ctx.FormValue("token"), ctx.FormValue("guild"), ctx.FormValue("channelid")
 	userid, err := authentication.VerifyToken(token)
 	if err != nil {
@@ -18,7 +20,7 @@ func DeleteChannel(limiter *rate.Limiter, ctx echo.Context) error {
 	if globals.Guilds[guild] == nil || globals.Guilds[guild].Owner != userid {
 		return echo.NewHTTPError(http.StatusForbidden, "insufficient permissions to delete channel")
 	}
-	if !limiter.Allow() {
+	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many channel deletions, please try again in a few seconds")
 	}
 	err = harmonydb.DeleteChannelTransaction(guild, channelid)

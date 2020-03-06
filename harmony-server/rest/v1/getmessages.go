@@ -26,7 +26,7 @@ type Message struct {
 	Messageid  string  `json:"messageid"`
 }
 
-func GetMessages(limiter *rate.Limiter, ctx echo.Context) error {
+func GetMessages(limiter *rate.Limiter, c echo.Context) error {
 	var data GetMessagesData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		event.sendErr(ws, "Something was wrong with your request. Please try again")

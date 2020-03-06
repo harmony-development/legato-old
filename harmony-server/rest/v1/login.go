@@ -3,13 +3,14 @@ package v1
 import (
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
-	"golang.org/x/time/rate"
 	"harmony-server/authentication"
 	"harmony-server/harmonydb"
+	"harmony-server/rest/hm"
 	"net/http"
 )
 
-func Login(limiter *rate.Limiter, ctx echo.Context) error {
+func Login(c echo.Context) error {
+	ctx, _ := c.(*hm.HarmonyContext)
 	email, password := ctx.FormValue("email"), ctx.FormValue("password")
 	if email == "" || password == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid form")
@@ -21,7 +22,7 @@ func Login(limiter *rate.Limiter, ctx echo.Context) error {
 	if err := bcrypt.CompareHashAndPassword([]byte(passwd), []byte(password)); err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "invalid email or password")
 	}
-	if !limiter.Allow() {
+	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many requests, please try again later")
 	}
 	token, err := authentication.MakeToken(userid)

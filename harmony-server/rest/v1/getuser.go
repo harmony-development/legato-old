@@ -14,7 +14,7 @@ type getUsernameData struct {
 	Userid string `mapstructure:"userid"`
 }
 
-func GetUser(limiter *rate.Limiter, ctx echo.Context) error {
+func GetUser(limiter *rate.Limiter, c echo.Context) error {
 	var data getUsernameData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		event.sendErr(ws, "Something's wrong with your request dude")

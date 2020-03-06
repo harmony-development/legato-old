@@ -1,4 +1,4 @@
-package v1
+package hm
 
 import (
 	"github.com/labstack/echo/v4"
@@ -32,11 +32,11 @@ func CleanupRoutine() {
 	}
 }
 
-type ratedHandler func(limiter *rate.Limiter, ctx echo.Context) error
-
-func WithRateLimit(handler ratedHandler, duration time.Duration, burst int) echo.HandlerFunc {
+func WithRateLimit(handler echo.HandlerFunc, duration time.Duration, burst int) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
-		return handler(getVisitor(ctx.Path(), ctx.RealIP(), duration, burst), ctx)
+
+		ctx.Limiter = getVisitor(ctx.Path(), ctx.RealIP(), duration, burst)
+		return handler(ctx)
 	}
 }
 

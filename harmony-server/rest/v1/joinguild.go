@@ -15,7 +15,7 @@ type joinGuildData struct {
 	Token      string `mapstructure:"token"`
 }
 
-func JoinGuild(limiter *rate.Limiter, ctx echo.Context) error {
+func JoinGuild(limiter *rate.Limiter, c echo.Context) error {
 	var data joinGuildData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		event.sendErr(ws, "Bad invite code or token")

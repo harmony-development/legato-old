@@ -7,7 +7,7 @@ import (
 )
 
 func OnPing(ws *globals.Client, _ map[string]interface{}, limiter *rate.Limiter) {
-	if !limiter.Allow() {
+	if !ctx.Limiter.Allow() {
 		return
 	}
 	ws.LastPong = time.Now()

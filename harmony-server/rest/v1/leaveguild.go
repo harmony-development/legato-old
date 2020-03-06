@@ -15,7 +15,7 @@ type leaveGuildData struct {
 	Guild string `mapstructure:"guild"`
 }
 
-func LeaveGuild(limiter *rate.Limiter, ctx echo.Context) error {
+func LeaveGuild(limiter *rate.Limiter, c echo.Context) error {
 	var data leaveGuildData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return

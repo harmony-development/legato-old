@@ -5,17 +5,18 @@ import (
 	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
-	"golang.org/x/time/rate"
 	"gopkg.in/h2non/bimg.v1"
 	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
+	"harmony-server/rest/hm"
 	"io/ioutil"
 	"net/http"
 	"path"
 )
 
-func UpdateGuildPicture(limiter *rate.Limiter, ctx echo.Context) error {
+func UpdateGuildPicture(c echo.Context) error {
+	ctx, _ := c.(*hm.HarmonyContext)
 	form, err := ctx.MultipartForm()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Form required")
@@ -31,7 +32,7 @@ func UpdateGuildPicture(limiter *rate.Limiter, ctx echo.Context) error {
 		golog.Debugf("Error opening file : %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Form required")
 	}
-	if !limiter.Allow() {
+	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "Too many requests, please try again later")
 	}
 	defer func() {

@@ -6,10 +6,12 @@ import (
 	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
+	"harmony-server/rest/hm"
 	"net/http"
 )
 
-func DeleteMessage(limiter *rate.Limiter, ctx echo.Context) error {
+func DeleteMessage(c echo.Context) error {
+	ctx, _ := c.(*hm.HarmonyContext)
 	token, guild, channel, message := ctx.FormValue("token"), ctx.FormValue("guild"), ctx.FormValue("channel"), ctx.FormValue("message")
 	userid, err := authentication.VerifyToken(token)
 	if err != nil {
@@ -18,7 +20,7 @@ func DeleteMessage(limiter *rate.Limiter, ctx echo.Context) error {
 	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[guild] == nil {
 		return echo.NewHTTPError(http.StatusForbidden, "insufficient permissions to delete message")
 	}
-	if !limiter.Allow() {
+	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many message deletions, please try again later")
 	}
 	err = harmonydb.DeleteMessageTransaction(guild, channel, message, userid)

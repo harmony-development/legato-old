@@ -16,7 +16,7 @@ type updateGuildName struct {
 	Name string `mapstructure:"name"`
 }
 
-func UpdateGuildName(limiter *rate.Limiter, ctx echo.Context) error {
+func UpdateGuildName(limiter *rate.Limiter, c echo.Context) error {
 	var data updateGuildName
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
@@ -24,7 +24,7 @@ func UpdateGuildName(limiter *rate.Limiter, ctx echo.Context) error {
 	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[ws.Userid] == nil || globals.Guilds[data.Guild].Owner != ws.Userid {
 		return
 	}
-	if !limiter.Allow() {
+	if !ctx.Limiter.Allow() {
 		event.sendErr(ws, "You're updating the guild name a bit too fast... try again in a few seconds")
 		return
 	}

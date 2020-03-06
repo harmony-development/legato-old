@@ -3,21 +3,22 @@ package v1
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
-	"golang.org/x/time/rate"
 	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
+	"harmony-server/rest/hm"
 	"net/http"
 )
 
-func CreateInvite(limiter *rate.Limiter, ctx echo.Context) error {
+func CreateInvite(c echo.Context) error {
+	ctx, _ := c.(*hm.HarmonyContext)
 	guild := ctx.FormValue("guildid")
 	token := ctx.FormValue("token")
 	userid, err := authentication.VerifyToken(token)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "invalid token")
 	}
-	if !limiter.Allow() {
+	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many invites created, try again in a few seconds")
 	}
 	var inviteID = randstr.Hex(5)

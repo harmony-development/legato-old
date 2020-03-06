@@ -3,14 +3,15 @@ package v1
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
-	"golang.org/x/time/rate"
 	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
+	"harmony-server/rest/hm"
 	"net/http"
 )
 
-func AddChannel(limiter *rate.Limiter, ctx echo.Context) error {
+func AddChannel(c echo.Context) error {
+	ctx, _ := c.(*hm.HarmonyContext)
 	token, guild, channelname := ctx.FormValue("token"), ctx.FormValue("guildid"), ctx.FormValue("channelname")
 	userid, err := authentication.VerifyToken(token)
 	if err != nil {
@@ -19,7 +20,7 @@ func AddChannel(limiter *rate.Limiter, ctx echo.Context) error {
 	if channelname == "" || guild == "" || userid == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid parameters")
 	}
-	if !limiter.Allow() {
+	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many channels being added, please wait a few seconds")
 	}
 	var channelID = randstr.Hex(16)
