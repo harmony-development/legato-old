@@ -6,7 +6,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
 	"gopkg.in/h2non/bimg.v1"
-	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"harmony-server/rest/hm"
@@ -23,8 +22,7 @@ func UpdateGuildPicture(c echo.Context) error {
 	}
 	files := form.File["files"]
 	guild := ctx.Param("guildid")
-	userid, err := authentication.VerifyToken(ctx.FormValue("token"))
-	if err != nil || len(files) == 0 || guild == "" {
+	if len(files) == 0 || guild == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "Valid form required")
 	}
 	file, err := files[0].Open()
@@ -64,7 +62,7 @@ func UpdateGuildPicture(c echo.Context) error {
 	}
 	var oldPictureID string
 	err = harmonydb.DBInst.QueryRow("SELECT picture FROM guilds WHERE guildid=$1", guild).Scan(&oldPictureID)
-	_, err = harmonydb.DBInst.Exec("UPDATE guilds SET picture=$1 WHERE guildid=$2 AND owner=$3", fname, guild, userid)
+	_, err = harmonydb.DBInst.Exec("UPDATE guilds SET picture=$1 WHERE guildid=$2 AND owner=$3", fname, guild, *ctx.UserID)
 	if err != nil {
 		golog.Warnf("Error updating picture. %v", err)
 		go deleteFromFilestore(fname)

@@ -2,7 +2,6 @@ package v1
 
 import (
 	"github.com/labstack/echo/v4"
-	"harmony-server/authentication"
 	"harmony-server/harmonydb"
 	"harmony-server/rest/hm"
 	"net/http"
@@ -10,15 +9,11 @@ import (
 
 func CreateGuild(c echo.Context) error {
 	ctx, _ := c.(*hm.HarmonyContext)
-	token, guildname := ctx.FormValue("token"), ctx.FormValue("guildname")
-	userid, err := authentication.VerifyToken(token)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "invalid token")
-	}
+	guildname := ctx.FormValue("guildname")
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "you're creating too many guilds, please try again in a minute or two")
 	}
-	guildid, err := harmonydb.CreateGuildTransaction(guildname, userid)
+	guildid, err := harmonydb.CreateGuildTransaction(guildname, *ctx.UserID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to create guild, please try again later")
 	}

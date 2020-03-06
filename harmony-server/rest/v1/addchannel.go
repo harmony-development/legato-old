@@ -3,7 +3,6 @@ package v1
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
-	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"harmony-server/rest/hm"
@@ -12,19 +11,15 @@ import (
 
 func AddChannel(c echo.Context) error {
 	ctx, _ := c.(*hm.HarmonyContext)
-	token, guild, channelname := ctx.FormValue("token"), ctx.FormValue("guildid"), ctx.FormValue("channelname")
-	userid, err := authentication.VerifyToken(token)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "invalid token")
-	}
-	if channelname == "" || guild == "" || userid == "" {
+	guild, channelname := ctx.FormValue("guildid"), ctx.FormValue("channelname")
+	if channelname == "" || guild == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid parameters")
 	}
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many channels being added, please wait a few seconds")
 	}
 	var channelID = randstr.Hex(16)
-	_, err = harmonydb.DBInst.Exec("INSERT INTO channels(channelid, guildid, channelname) VALUES($1, $2, $3) WHERE guilds.owner=$4", channelID, guild, channelname, userid)
+	_, err := harmonydb.DBInst.Exec("INSERT INTO channels(channelid, guildid, channelname) VALUES($1, $2, $3) WHERE guilds.owner=$4", channelID, guild, channelname, ctx.UserID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "an error occurred adding the guild. Do you have sufficient permission?")
 	}
@@ -44,9 +39,9 @@ func AddChannel(c echo.Context) error {
 					},
 				})
 			}
-			return ctx.JSON(http.StatusOK, map[string]string{
-				"message": "successfully added channel",
-			})
 		}
+		return ctx.JSON(http.StatusOK, map[string]string{
+			"message": "successfully added channel",
+		})
 	}
 }

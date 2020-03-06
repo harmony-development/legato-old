@@ -2,7 +2,6 @@ package v1
 
 import (
 	"github.com/labstack/echo/v4"
-	"harmony-server/authentication"
 	"harmony-server/harmonydb"
 	"harmony-server/rest/hm"
 	"net/http"
@@ -16,15 +15,10 @@ type returnGuild struct {
 
 func GetGuilds(c echo.Context) error {
 	ctx, _ := c.(*hm.HarmonyContext)
-	token := ctx.FormValue("token")
-	userid, err := authentication.VerifyToken(token)
-	if err != nil || userid == "" {
-		return echo.NewHTTPError(http.StatusUnauthorized, "invalid token")
-	}
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "you're getting guilds too fast, please wait a moment")
 	}
-	res, err := harmonydb.DBInst.Query("SELECT guilds.guildid, guilds.guildname, guilds.owner, guilds.picture FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=$1", userid)
+	res, err := harmonydb.DBInst.Query("SELECT guilds.guildid, guilds.guildname, guilds.owner, guilds.picture FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=$1", ctx.UserID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to get guilds at this time, please try again later")
 	}

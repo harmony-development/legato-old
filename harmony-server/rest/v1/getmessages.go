@@ -4,21 +4,13 @@ import (
 	"database/sql"
 	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
-	"github.com/mitchellh/mapstructure"
-	"golang.org/x/time/rate"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
-	"harmony-server/socket/event"
+	"harmony-server/rest/hm"
+	"net/http"
 )
 
-type GetMessagesData struct {
-	Token       string `mapstructure:"token"`
-	Guild       string `mapstructure:"guild"`
-	Channel     string `mapstructure:"channel"`
-	LastMessage string `mapstructure:"lastmessage"`
-}
-
-type Message struct {
+type MessageData struct {
 	Userid     string  `json:"userid"`
 	Createdat  int     `json:"createdat"`
 	Message    string  `json:"message"`
@@ -26,46 +18,36 @@ type Message struct {
 	Messageid  string  `json:"messageid"`
 }
 
-func GetMessages(limiter *rate.Limiter, c echo.Context) error {
-	var data GetMessagesData
-	if err := mapstructure.Decode(rawMap, &data); err != nil {
-		event.sendErr(ws, "Something was wrong with your request. Please try again")
-		return
+func GetMessages(c echo.Context) error {
+	ctx := c.(*hm.HarmonyContext)
+	guild, channel, lastmessage := ctx.FormValue("guild"), ctx.FormValue("channel"), ctx.FormValue("lastmessage")
+	if guild == "" || channel == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid parameters")
 	}
-	if data.Guild == "" || data.Token == "" || data.Channel == "" {
-		event.sendErr(ws, "Something was wrong with your request. Please try again")
-		golog.Warnf("Error decoding getmessages request")
-		return
-	}
-	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[ws.Userid] == nil {
-		return
+	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[*ctx.UserID] == nil {
+		return echo.NewHTTPError(http.StatusForbidden, "insufficient permissions to list messages")
 	}
 	var res *sql.Rows
 	var err error
-	if data.LastMessage == "" {
-		res, err = harmonydb.DBInst.Query("SELECT messageid, author, createdat, message FROM messages WHERE guildid=$1 AND channelid=$2 ORDER BY createdat DESC LIMIT 30", data.Guild, data.Channel)
+	if lastmessage == "" {
+		res, err = harmonydb.DBInst.Query("SELECT messageid, author, createdat, message FROM messages WHERE guildid=$1 AND channelid=$2 ORDER BY createdat DESC LIMIT 30", guild, channel)
 	} else {
-		res, err = harmonydb.DBInst.Query("SELECT messageid, author, createdat, message FROM messages WHERE guildid=$1 AND channelid=$2 AND createdat < (SELECT createdat FROM messages WHERE messageid=$3) ORDER BY createdat DESC LIMIT 30", data.Guild, data.Channel, data.LastMessage)
+		res, err = harmonydb.DBInst.Query("SELECT messageid, author, createdat, message FROM messages WHERE guildid=$1 AND channelid=$2 AND createdat < (SELECT createdat FROM messages WHERE messageid=$3) ORDER BY createdat DESC LIMIT 30", guild, channel, lastmessage)
 	}
 	if err != nil {
-		event.sendErr(ws, "We weren't able to get a list of messages. Please try again")
-		golog.Warnf("Error getting recent messages : %v", ws.Userid)
-		return
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid parameters")
 	}
-	var returnMsgs []Message
+	var returnMsgs []MessageData
 	for res.Next() {
-		var msg Message
+		var msg MessageData
 		err := res.Scan(&msg.Messageid, &msg.Userid, &msg.Createdat, &msg.Message)
 		if err != nil {
-			event.sendErr(ws, "We weren't able to get a list of messages. Please try again")
-			golog.Warnf("Error scanning next row getting messages. Reason: %v", err)
-			return
+			return echo.NewHTTPError(http.StatusInternalServerError, "unable to list messages, please try again later")
 		}
 
 		attachments, err := harmonydb.DBInst.Query("SELECT attachment FROM attachments WHERE messageid=$1", msg.Messageid)
 		if err != nil {
-			golog.Warnf("Error scanning for attachments : %v", err)
-			return
+			return echo.NewHTTPError(http.StatusInternalServerError, "unable to list messages, please try again later")
 		}
 
 		for attachments.Next() {
@@ -79,19 +61,7 @@ func GetMessages(limiter *rate.Limiter, c echo.Context) error {
 		
 		returnMsgs = append(returnMsgs, msg)
 	}
-	if data.LastMessage == "" {
-		ws.Send(&globals.Packet{
-			Type: "getmessages",
-			Data: map[string]interface{}{
-				"messages": returnMsgs,
-			},
-		})
-	} else {
-		ws.Send(&globals.Packet{
-			Type: "getmessages-old",
-			Data: map[string]interface{}{
-				"messages": returnMsgs,
-			},
-		})
-	}
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"messages": returnMsgs,
+	})
 }

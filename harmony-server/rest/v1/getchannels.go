@@ -2,7 +2,6 @@ package v1
 
 import (
 	"github.com/labstack/echo/v4"
-	"harmony-server/authentication"
 	"harmony-server/harmonydb"
 	"harmony-server/rest/hm"
 	"net/http"
@@ -16,11 +15,6 @@ type returnChannel struct {
 func GetChannels(c echo.Context) error {
 	ctx, _ := c.(*hm.HarmonyContext)
 	guildid := ctx.FormValue("guildid")
-	token := ctx.FormValue("token")
-	userid, err := authentication.VerifyToken(token)
-	if err != nil || userid == "" {
-		return echo.NewHTTPError(http.StatusUnauthorized, "invalid token")
-	}
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "you're getting channels too often! Please try again in a few seconds.")
 	}

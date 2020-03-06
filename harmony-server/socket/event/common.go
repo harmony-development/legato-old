@@ -25,7 +25,7 @@ func Deauth(ws *globals.Client) {
 	})
 }
 
-func registerSocket(guildid string, ws *globals.Client, userid string) {
+func RegisterSocket(guildid string, ws *globals.Client, userid string) {
 	if globals.Guilds[guildid] != nil {
 		globals.Guilds[guildid].Lock.Lock()
 		if globals.Guilds[guildid].Clients[userid] == nil {

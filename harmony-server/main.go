@@ -8,7 +8,7 @@ import (
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"harmony-server/rest"
-	middleware2 "harmony-server/rest/middleware"
+	"harmony-server/rest/hm"
 	"net/http"
 	"os"
 )
@@ -35,6 +35,6 @@ func main() {
 	r.Static("/filestore", "filestore")
 	r.Static("/static", "static")
 	r.File("/", "static/index.html")
-	go middleware2.CleanupRoutine()
+	go hm.CleanupRoutine()
 	golog.Fatalf("Fatal error caused server to crash! %v", http.ListenAndServe(PORT, r))
 }

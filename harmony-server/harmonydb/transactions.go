@@ -106,3 +106,23 @@ func DeleteMessageTransaction(guild string, channel string, message string, user
 	}
 	return nil
 }
+
+func JoinGuildTransaction(userid string, guildid string, inviteCode string) error {
+	joinGuildTransaction, err := DBInst.Begin()
+	if err != nil {
+		return err
+	}
+	_, err = joinGuildTransaction.Exec("INSERT INTO guildmembers(userid, guildid) VALUES($1, $2)", userid, guildid)
+	if err != nil {
+		return err
+	}
+	_, err = joinGuildTransaction.Exec("UPDATE invites SET invitecount=invitecount+1 WHERE inviteid=$1", inviteCode)
+	if err != nil {
+		return err
+	}
+	err = joinGuildTransaction.Commit()
+	if err != nil {
+		return err
+	}
+	return nil
+}

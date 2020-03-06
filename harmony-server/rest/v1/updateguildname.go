@@ -1,13 +1,11 @@
 package v1
 
 import (
-	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
-	"github.com/mitchellh/mapstructure"
-	"golang.org/x/time/rate"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
-	"harmony-server/socket/event"
+	"harmony-server/rest/hm"
+	"net/http"
 )
 
 type updateGuildName struct {
@@ -16,38 +14,31 @@ type updateGuildName struct {
 	Name string `mapstructure:"name"`
 }
 
-func UpdateGuildName(limiter *rate.Limiter, c echo.Context) error {
-	var data updateGuildName
-	if err := mapstructure.Decode(rawMap, &data); err != nil {
-		return
-	}
-	if globals.Guilds[data.Guild] == nil || globals.Guilds[data.Guild].Clients[ws.Userid] == nil || globals.Guilds[data.Guild].Owner != ws.Userid {
-		return
+func UpdateGuildName(c echo.Context) error {
+	ctx := c.(*hm.HarmonyContext)
+	guild, name := ctx.FormValue("guild"), ctx.FormValue("name")
+	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[*ctx.UserID] == nil || globals.Guilds[guild].Owner != *ctx.UserID {
+		return echo.NewHTTPError(http.StatusForbidden, "insufficient perms to update guild name")
 	}
 	if !ctx.Limiter.Allow() {
-		event.sendErr(ws, "You're updating the guild name a bit too fast... try again in a few seconds")
-		return
+		return echo.NewHTTPError(http.StatusTooManyRequests, "too many guild name update requests, please try again later")
 	}
-	_, err := harmonydb.DBInst.Exec("UPDATE guilds SET guildname=$1 WHERE guildid=$2", data.Name, data.Guild)
+	_, err := harmonydb.DBInst.Exec("UPDATE guilds SET guildname=$1 WHERE guildid=$2", name, guild)
 	if err != nil {
-		golog.Warnf("Error updating name. %v", err)
-		ws.Send(&globals.Packet{
-			Type: "updateguildname",
-			Data: map[string]interface{}{
-				"success": false,
-			},
-		})
-		return
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to update guild name, please try again later")
 	}
-	for _, client := range globals.Guilds[data.Guild].Clients {
+	for _, client := range globals.Guilds[guild].Clients {
 		for _, conn := range client {
 			conn.Send(&globals.Packet{
 				Type: "updateguildname",
 				Data: map[string]interface{}{
-					"guild": data.Guild,
-					"name":  data.Name,
+					"guild": guild,
+					"name":  name,
 				},
 			})
 		}
 	}
+	return ctx.JSON(http.StatusOK, map[string]string{
+		"message": "successfully updated guild name",
+	})
 }

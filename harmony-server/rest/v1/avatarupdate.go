@@ -6,7 +6,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
 	"gopkg.in/h2non/bimg.v1"
-	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"harmony-server/rest/hm"
@@ -22,8 +21,7 @@ func AvatarUpdate(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Valid form required")
 	}
 	files := form.File["files"]
-	userid, err := authentication.VerifyToken(ctx.FormValue("token"))
-	if err != nil || len(files) == 0 {
+	if len(files) == 0 {
 		golog.Debugf("Error updating avatar : %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error updating avatar")
 	}
@@ -64,14 +62,14 @@ func AvatarUpdate(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error saving file upload")
 	}
 	var oldAvatarID string
-	err = harmonydb.DBInst.QueryRow("SELECT avatar FROM users WHERE id=$1", userid).Scan(&oldAvatarID)
-	_, err = harmonydb.DBInst.Exec("UPDATE users SET avatar=$1 WHERE id=$2", fname, userid)
+	err = harmonydb.DBInst.QueryRow("SELECT avatar FROM users WHERE id=$1", *ctx.UserID).Scan(&oldAvatarID)
+	_, err = harmonydb.DBInst.Exec("UPDATE users SET avatar=$1 WHERE id=$2", fname, *ctx.UserID)
 	if err != nil {
 		go deleteFromFilestore(fname)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error reading uploaded file")
 	}
 	go deleteFromFilestore(path.Base(oldAvatarID))
-	res, err := harmonydb.DBInst.Query("SELECT guildid FROM guildmembers WHERE userid=$1", userid)
+	res, err := harmonydb.DBInst.Query("SELECT guildid FROM guildmembers WHERE userid=$1", *ctx.UserID)
 	if err != nil {
 		golog.Warnf("Error selecting guilds for avatarupdate : %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error broadcasting avatar update")
@@ -89,7 +87,7 @@ func AvatarUpdate(c echo.Context) error {
 					conn.Send(&globals.Packet{
 						Type: "avatarupdate",
 						Data: map[string]interface{}{
-							"userid": userid,
+							"userid": *ctx.UserID,
 							"avatar": fname,
 						},
 					})

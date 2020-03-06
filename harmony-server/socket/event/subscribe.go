@@ -4,6 +4,7 @@ import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
+	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 )
@@ -12,22 +13,22 @@ type subscribeData struct {
 	Token string `mapstructure:"token"`
 }
 
-type guildsData struct {
-	Guildname string `json:"guildname"`
-	Picture   string `json:"picture"`
-	IsOwner   bool   `json:"owner"`
-}
-
 func OnSubscribe(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
 	var data subscribeData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
-	if !ctx.Limiter.Allow() {
+	userid, err := authentication.VerifyToken(data.Token)
+	if err != nil {
+		sendErr(ws, "invalid token")
+		return
+	}
+	ws.Userid = userid
+	if !limiter.Allow() {
 		sendErr(ws, "Too many subscription attempts, please try later")
 		return
 	}
-	res, err := harmonydb.DBInst.Query("SELECT guilds.guildid FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=$1", ws.Userid)
+	res, err := harmonydb.DBInst.Query("SELECT guilds.guildid FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=$1", userid)
 	if err != nil {
 		sendErr(ws, "We weren't able to get a list of guilds. Try reloading the page / logging back in")
 		golog.Warnf("Error selecting guilds. Reason : %v", err)
@@ -42,6 +43,6 @@ func OnSubscribe(ws *globals.Client, rawMap map[string]interface{}, limiter *rat
 			return
 		}
 		// Now subscribe to all guilds that the client is a member of!
-		registerSocket(guildID, ws, ws.Userid)
+		RegisterSocket(guildID, ws, ws.Userid)
 	}
 }

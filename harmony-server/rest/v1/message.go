@@ -5,8 +5,6 @@ import (
 	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
-	"golang.org/x/time/rate"
-	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"harmony-server/rest/hm"
@@ -33,12 +31,8 @@ func Message(c echo.Context) error {
 	if len(files) > maxFiles {
 		return echo.NewHTTPError(http.StatusBadRequest, "too many files uploaded")
 	}
-	userid, err := authentication.VerifyToken(ctx.FormValue("token"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusForbidden, "invalid token")
-	}
 	// either the guild doesn't exist or the client isn't subbed to it - it doesn't matter.
-	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[userid] == nil {
+	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[*ctx.UserID] == nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "not permitted to send messages in this guild/channel")
 	}
 	if !ctx.Limiter.Allow() {
@@ -97,7 +91,7 @@ func Message(c echo.Context) error {
 				Data: map[string]interface{}{
 					"guild":     guild,
 					"channel":   channel,
-					"userid":    userid,
+					"userid":    *ctx.UserID,
 					"createdat": time.Now().UTC().Unix(),
 					"message":   message,
 					"attachments": attachments,
@@ -106,7 +100,7 @@ func Message(c echo.Context) error {
 			})
 		}
 	}
-	_, err = harmonydb.DBInst.Exec("INSERT INTO messages(messageid, guildid, channelid, author, createdat, message) VALUES($1, $2, $3, $4, $5, $6)", messageID, guild, channel, userid, time.Now().UTC().Unix(), message)
+	_, err = harmonydb.DBInst.Exec("INSERT INTO messages(messageid, guildid, channelid, author, createdat, message) VALUES($1, $2, $3, $4, $5, $6)", messageID, guild, channel, *ctx.UserID, time.Now().UTC().Unix(), message)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error saving message")
 	}

@@ -33,8 +33,8 @@ func CleanupRoutine() {
 }
 
 func WithRateLimit(handler echo.HandlerFunc, duration time.Duration, burst int) echo.HandlerFunc {
-	return func(ctx echo.Context) error {
-
+	return func(c echo.Context) error {
+		ctx := c.(*HarmonyContext)
 		ctx.Limiter = getVisitor(ctx.Path(), ctx.RealIP(), duration, burst)
 		return handler(ctx)
 	}
