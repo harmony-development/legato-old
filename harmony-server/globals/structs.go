@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/websocket"
 	"golang.org/x/time/rate"
+	"sync"
 	"time"
 )
 
@@ -19,6 +20,7 @@ type (
 
 	Guild struct {
 		Clients map[string][]*Client
+		Lock sync.Mutex
 		Owner string
 	}
 
@@ -49,29 +51,6 @@ func (ws *Client) Send(p *Packet) {
 	ws.Out <- data
 }
 
-func GetRESTClient(userid string) *rate.Limiter {
-	if RESTApiLimit[userid] == nil {
-		RESTApiLimit[userid] = &RESTClient{
-			limiter: rate.NewLimiter(rate.Every(3 * time.Second), 3),
-			lastReq: time.Now(),
-		}
-	} else {
-		RESTApiLimit[userid].lastReq = time.Now()
-	}
-	return RESTApiLimit[userid].limiter
-}
-
-func RateLimitCleanup() {
-	for {
-		time.Sleep(time.Minute)
-		for userid, client := range RESTApiLimit {
-			if time.Now().Sub(client.lastReq) > 3*time.Minute {
-				delete(RESTApiLimit, userid)
-			}
-		}
-	}
-}
-
 var Guilds = make(map[string]*Guild)
-var RESTApiLimit = make(map[string]*RESTClient)
+var GuildsLock = sync.Mutex{}
 var Bus EventBus

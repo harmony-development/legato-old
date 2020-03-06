@@ -1,12 +1,14 @@
 package main
 
 import (
-	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/kataras/golog"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"harmony-server/rest"
+	"harmony-server/rest/hm"
 	"net/http"
 	"os"
 )
@@ -25,16 +27,14 @@ func main() {
 	_ = os.Mkdir("./filestore", 0777)
 	globals.Bus = *makeEventBus()
 	golog.Infof("Started Harmony Server On Port %v", PORT)
-	router := mux.NewRouter()
-	router.HandleFunc("/api/socket", handleSocket)
-	router.HandleFunc("/api/rest/avatarupdate", rest.AvatarUpdate)
-	router.HandleFunc("/api/rest/updateguildpicture", rest.UpdateGuildPicture)
-	router.HandleFunc("/api/rest/message", rest.Message)
-	router.PathPrefix("/filestore/").Handler(http.StripPrefix("/filestore/", http.FileServer(http.Dir("./filestore"))))
-	router.PathPrefix("/static").Handler(http.FileServer(http.Dir("./static")))
-	router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./static/index.html")
-	})
-	go globals.RateLimitCleanup()
-	golog.Fatalf("Fatal error caused server to crash! %v", http.ListenAndServe(PORT, router))
+	r := echo.New()
+	r.Use(middleware.Recover())
+	api := r.Group("/api")
+	rest.SetupREST(*api)
+	api.Any("/socket", handleSocket)
+	r.Static("/filestore", "filestore")
+	r.Static("/static", "static")
+	r.File("/", "static/index.html")
+	go hm.CleanupRoutine()
+	golog.Fatalf("Fatal error caused server to crash! %v", http.ListenAndServe(PORT, r))
 }

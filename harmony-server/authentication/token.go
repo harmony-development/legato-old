@@ -3,6 +3,7 @@ package authentication
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -29,4 +30,16 @@ func VerifyToken(tokenstr string) (string, error) {
 		return id, nil
 	}
 	return "", fmt.Errorf("weird token")
+}
+
+func MakeToken(id string) (*string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":  id,
+		"exp": time.Now().UTC().Add(7 * 24 * time.Hour).Unix(),
+	})
+	tokenString, err := token.SignedString([]byte(jwtSecret))
+	if err != nil {
+		return nil, err
+	}
+	return &tokenString, nil
 }
