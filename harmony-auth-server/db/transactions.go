@@ -16,16 +16,16 @@ func MakeSessionTransaction(userid string) (*string, error) {
 	return &sessionid, nil
 }
 
-func GetUserBySession(session string) (*string, error) {
-	res, err := DB.Query("SELECT userid FROM sessions WHERE sessionid=$1 AND expiration>$2", session, time.Now().Unix())
+func GetUserBySession(session string) (*types.User, error) {
+	res, err := DB.Query("SELECT sessions.userid, users.username, users.avatar FROM sessions INNER JOIN users ON sessions.userid = users.userid WHERE sessionid=$1 AND expiration>$2", session, time.Now().Unix())
 	if err != nil {
 		return nil, err
 	}
-	var userid string
-	if err := res.Scan(&userid); err != nil {
+	var user types.User
+	if err := res.Scan(&user.Userid, &user.Username, &user.Avatar); err != nil {
 		return nil, err
 	}
-	return &userid, nil
+	return &user, nil
 }
 
 func GetUser(userid string) (*types.User, error) {
