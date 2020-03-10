@@ -40,16 +40,17 @@ func GetUser(userid string) (*types.User, error) {
 	return &user, nil
 }
 
-func ListServersTransaction(userid string) ([]string, error) {
+// NOTE : Servers are NOT guilds! they are self-hosted instances that connect with the authentication server, and host the actual guilds!
+func ListServersTransaction(userid string) ([]types.Server, error) {
 	res, err := DB.Query("SELECT host FROM servers WHERE userid=$1", userid)
 	if err != nil {
 		return nil, err
 	}
-	var servers []string
+	var servers []types.Server
 
 	for res.Next() {
 		var host string
-		servers = append(servers, host)
+		servers = append(servers, types.Server{IP:host})
 	}
 
 	return servers, nil

@@ -4,6 +4,7 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$" />
     <content url="file://$MODULE_DIR$/../harmony-server" />
+    <content url="file://$USER_HOME$/arduino-system-display/awesomeProject" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>

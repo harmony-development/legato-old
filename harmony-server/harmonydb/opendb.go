@@ -52,7 +52,7 @@ var queries = []string{
 	`INSERT INTO users(id, email, username, avatar, password) VALUES(
 		'82ee9c8dc9e165205548b7c3833e7372', 
 		'developer@harmonyapp.io', 
-		'developer', 
+		'developer',
 		'', 
 		'$2a$10$WHuq8sNHk0ks0JwlpkV36eNmpEvD7r9pqI/F7kB0q0yAUpENzmtne'
 	) ON CONFLICT DO NOTHING;`,
