@@ -24,7 +24,6 @@ func apiV1(g echo.Group) {
 	r.POST("/getmembers*", hm.WithAuth(hm.WithRateLimit(v1.GetMembers, 5 * time.Second, 3)))
 	r.POST("/getchannels*", hm.WithAuth(hm.WithRateLimit(v1.GetChannels, 500 * time.Millisecond, 5)))
 	r.POST("/getmessages*", hm.WithAuth(hm.WithRateLimit(v1.GetMessages, 5 * time.Second, 15)))
-	r.POST("/avatarupdate*", hm.WithAuth(hm.WithRateLimit(v1.AvatarUpdate, 3 * time.Second, 1)))
 	r.POST("/updateguildname*", hm.WithAuth(hm.WithRateLimit(v1.UpdateGuildName, 2 * time.Second, 3)))
 	r.POST("/updateguildpicture*", hm.WithAuth(hm.WithRateLimit(v1.UpdateGuildPicture, 3 * time.Second, 3)))
 	r.POST("/message*", hm.WithAuth(hm.WithRateLimit(v1.Message, 500 * time.Millisecond, 20)))
