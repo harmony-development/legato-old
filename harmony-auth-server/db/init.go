@@ -20,13 +20,14 @@ var queries = []string{
 	);`,
 	`CREATE TABLE IF NOT EXISTS servers(
 		userid TEXT NOT NULL REFERENCES users(userid), -- the userid of who owns this entry
-		host TEXT NOT NULL -- the host for the harmony instance
+		host TEXT PRIMARY KEY NOT NULL -- the host for the harmony instance
 	)`,
 	`CREATE TABLE IF NOT EXISTS sessions(
-		sesionid TEXT PRIMARY KEY NOT NULL, -- ID that the authserver uses for authentication
+		sessionid TEXT PRIMARY KEY NOT NULL, -- session corresponding to a user's identity'
 		expiration INTEGER NOT NULL, -- the time when the session expires
 		userid TEXT NOT NULL REFERENCES users(userid) -- the owner of the session
-	);`,
+	);
+	`,
 }
 
 func OpenDB() *sql.DB {

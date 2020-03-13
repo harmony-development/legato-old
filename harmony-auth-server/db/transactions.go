@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// MakeSessionTransaction generates a session corresponding to a user
 func MakeSessionTransaction(userid string) (*string, error) {
 	expiration := time.Now().Add(48 * time.Hour)
 	sessionid := randstr.Hex(16)
@@ -16,18 +17,29 @@ func MakeSessionTransaction(userid string) (*string, error) {
 	return &sessionid, nil
 }
 
+// VerifySession checks if a certain session is valid
+func VerifySession(session string) error {
+	_, err := DB.Query("SELECT 1 FROM sessions WHERE sessionid=$1 AND expiration>$2", session, time.Now().Unix())
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// GetUserBySession fetches a user from database using a session
 func GetUserBySession(session string) (*types.User, error) {
 	res, err := DB.Query("SELECT sessions.userid, users.username, users.avatar FROM sessions INNER JOIN users ON sessions.userid = users.userid WHERE sessionid=$1 AND expiration>$2", session, time.Now().Unix())
 	if err != nil {
 		return nil, err
 	}
 	var user types.User
-	if err := res.Scan(&user.Userid, &user.Username, &user.Avatar); err != nil {
+	if err := res.Scan(&user.ID, &user.Username, &user.Avatar); err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
+// GetUser fetches a user by their ID
 func GetUser(userid string) (*types.User, error) {
 	var user = types.User{}
 	res, err := DB.Query("SELECT username, avatar FROM users WHERE userid=$1", userid)
@@ -40,7 +52,7 @@ func GetUser(userid string) (*types.User, error) {
 	return &user, nil
 }
 
-// NOTE : Servers are NOT guilds! they are self-hosted instances that connect with the authentication server, and host the actual guilds!
+// ListServersTransaction returns an array of servers from SQL given a User ID
 func ListServersTransaction(userid string) ([]types.Server, error) {
 	res, err := DB.Query("SELECT host FROM servers WHERE userid=$1", userid)
 	if err != nil {

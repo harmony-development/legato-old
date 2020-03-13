@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// UsernameUpdate handles requests from the client to update names
 func UsernameUpdate(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
 	session, username := ctx.FormValue("session"), ctx.FormValue("username")
@@ -17,16 +18,16 @@ func UsernameUpdate(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "invalid session")
 	}
-	_, err = db.DB.Exec("UPDATE users SET username=$1 WHERE id=$2", username, *ctx.UserID)
+	_, err = db.DB.Exec("UPDATE users SET username=$1 WHERE id=$2", username, user.ID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to update username, please try again later")
 	}
-	servers, err := db.ListServersTransaction(user.Userid)
+	servers, err := db.ListServersTransaction(user.ID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to broadcast username update, please try again later")
 	}
 	for _, server := range servers {
-		go server.SendUsernameUpdate(user.Userid, username)
+		go server.SendUsernameUpdate(user.ID, username)
 	}
 	return ctx.JSON(http.StatusOK, map[string]string{
 		"message": "successfully updated username",

@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// GetUser gets data for a certain user given a userid
 func GetUser(c echo.Context) error {
 	ctx := c.(*hm.HarmonyContext)
 	userid := ctx.FormValue("userid")

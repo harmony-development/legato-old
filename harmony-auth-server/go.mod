@@ -12,4 +12,6 @@ require (
 	golang.org/x/crypto v0.0.0-20200221231518-2aa609cf4a9d
 	golang.org/x/sys v0.0.0-20200302150141-5c8b2ff67527 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0
+	gopkg.in/h2non/bimg.v1 v1.0.19
+	gopkg.in/square/go-jose.v2 v2.4.1
 )

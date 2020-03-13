@@ -7,9 +7,15 @@ import (
 	"net/http"
 )
 
+// ListServers returns an array of servers saved in the DB
 func ListServers(c echo.Context) error {
 	ctx, _ := c.(*hm.HarmonyContext)
-	servers, err := db.ListServersTransaction(*ctx.UserID)
+	session := ctx.FormValue("session")
+	user, err := db.GetUserBySession(session)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "invalid session")
+	}
+	servers, err := db.ListServersTransaction(user.ID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to list servers, please try again later")
 	}
