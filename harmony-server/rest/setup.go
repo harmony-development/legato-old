@@ -18,6 +18,7 @@ func apiV1(g echo.Group) {
 	r.Use(hm.WithHarmony)
 	r.POST("/login*", hm.WithRateLimit(v1.Login, 5 * time.Second, 1))
 	r.POST("/register*", hm.WithRateLimit(v1.Register, 10 * time.Minute, 10))
+	r.Any("/getidentity*", hm.WithRateLimit(v1.GetIdentity, 2 * time.Second, 20))
 	r.POST("/getself*", hm.WithRateLimit(v1.GetSelf, 3 * time.Second, 7))
 	r.POST("/getuser*", hm.WithRateLimit(v1.GetUser, 2 * time.Second, 45))
 	r.POST("/getguilds*", hm.WithAuth(hm.WithRateLimit(v1.GetGuilds, 5 * time.Second, 5)))

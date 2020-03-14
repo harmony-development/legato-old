@@ -34,7 +34,7 @@ func CleanupRoutine() {
 
 func WithRateLimit(handler echo.HandlerFunc, duration time.Duration, burst int) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx := c.(*HarmonyContext)
+		ctx := c.(HarmonyContext)
 		ctx.Limiter = getVisitor(ctx.Path(), ctx.RealIP(), duration, burst)
 		return handler(ctx)
 	}
@@ -50,7 +50,6 @@ func getVisitor(path string, ip string, duration time.Duration, burst int) *rate
 			limiter:  *limiter,
 			lastSeen: time.Now(),
 		}
-		rateLock.Unlock()
 		return limiter
 	}
 	if v, exists := rateLimits[path][ip]; !exists {
