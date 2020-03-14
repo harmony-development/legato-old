@@ -21,7 +21,8 @@ func Authenticate(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "invalid session")
 	}
 	serverSession := randstr.Hex(16)
-	token, err := authentication.MakeSessionToken(serverSession)
+	s := &types.Server{IP:host}
+	token, err := authentication.MakeSessionToken(serverSession, *s.GetIdentity())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "error creating auth token")
 	}
