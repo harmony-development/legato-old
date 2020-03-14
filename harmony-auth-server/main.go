@@ -5,6 +5,7 @@ import (
 	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"harmony-auth-server/authentication"
 	"harmony-auth-server/db"
 	"harmony-auth-server/rest"
 	"net/http"
@@ -21,6 +22,7 @@ func main() {
 		golog.Fatalf("Error loading .env! %v", err)
 	}
 	golog.SetLevel(os.Getenv("VERBOSITY_LEVEL"))
+	authentication.Init()
 	db.DB = *db.OpenDB()
 	_ = os.Mkdir("./avatars", 0777)
 	r := echo.New()
