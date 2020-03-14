@@ -12,7 +12,7 @@ import (
 
 // Authenticate takes in a user session and generates an instance-specific session
 func Authenticate(c echo.Context) error {
-	ctx := c.(*hm.HarmonyContext)
+	ctx := c.(hm.HarmonyContext)
 	host, session := ctx.FormValue("host"), ctx.FormValue("session")
 	if host == "" || session == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid auth arguments")

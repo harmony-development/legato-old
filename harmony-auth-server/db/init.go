@@ -34,7 +34,7 @@ func OpenDB() *sql.DB {
 	database, err := sql.Open("postgres", fmt.Sprintf("user=%v password=%v dbname=%v host=%v port=%v sslmode=%v",
 		os.Getenv("HARMONY_AUTH_USER"),
 		os.Getenv("HARMONY_AUTH_PASSWORD"),
-		"harmony-auth",
+		"harmonyauth",
 		os.Getenv("HARMONY_AUTH_HOST"),
 		os.Getenv("HARMONY_AUTH_PORT"),
 		"disable", ))

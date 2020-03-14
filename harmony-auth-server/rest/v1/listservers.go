@@ -9,7 +9,7 @@ import (
 
 // ListServers returns an array of servers saved in the DB
 func ListServers(c echo.Context) error {
-	ctx, _ := c.(*hm.HarmonyContext)
+	ctx, _ := c.(hm.HarmonyContext)
 	session := ctx.FormValue("session")
 	user, err := db.GetUserBySession(session)
 	if err != nil {

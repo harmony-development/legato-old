@@ -26,9 +26,13 @@ func main() {
 	db.DB = *db.OpenDB()
 	_ = os.Mkdir("./avatars", 0777)
 	r := echo.New()
-	r.Use(middleware.Recover())
+	r.Pre(middleware.AddTrailingSlash())
+	r.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
+		StackSize:         1 << 10,
+		DisableStackAll:   true,
+	}))
 	api := r.Group("/api")
-	rest.Setup(api)
+	rest.Setup(*api)
 	r.Static("/avatars", "avatars")
 	golog.Infof("Started Harmony AUTHENTICATION Server On Port %v", PORT)
 	golog.Fatalf("Fatal error caused server to crash! %v", http.ListenAndServe(PORT, r))

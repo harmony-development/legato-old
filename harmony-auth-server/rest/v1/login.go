@@ -10,7 +10,7 @@ import (
 
 // Login takes in an email and password and returns a session token for connecting to instances
 func Login(c echo.Context) error {
-	ctx, _ := c.(*hm.HarmonyContext)
+	ctx, _ := c.(hm.HarmonyContext)
 	email, password := ctx.FormValue("email"), ctx.FormValue("password")
 	if email == "" || password == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid form")

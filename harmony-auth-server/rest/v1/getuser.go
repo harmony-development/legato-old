@@ -9,7 +9,7 @@ import (
 
 // GetUser gets data for a certain user given a userid
 func GetUser(c echo.Context) error {
-	ctx := c.(*hm.HarmonyContext)
+	ctx := c.(hm.HarmonyContext)
 	userid := ctx.FormValue("userid")
 	if userid == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "userid field required")
