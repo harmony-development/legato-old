@@ -22,7 +22,7 @@ func Authenticate(c echo.Context) error {
 	}
 	serverSession := randstr.Hex(16)
 	s := &types.Server{IP:host}
-	token, err := authentication.MakeSessionToken(serverSession, *s.GetIdentity())
+	token, err := authentication.MakeServerSessionToken(serverSession, *s.GetIdentity())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "error creating auth token")
 	}

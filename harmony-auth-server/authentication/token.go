@@ -5,8 +5,8 @@ import (
 	"time"
 )
 
-// MakeSessionToken returns a signed session token, and an error if it fails
-func MakeSessionToken(session string, identity string) (string, error) {
+// MakeServerSessionToken returns a signed session token for instances, and an error if it fails
+func MakeServerSessionToken(session string, identity string) (string, error) {
 	claims := SessionClaims{
 		session,
 		identity,

@@ -6,11 +6,17 @@ import (
 	"time"
 )
 
+// RegisterUser registers a new account in the database given some arguments
+func RegisterUser(id string, email string, username string, hash string) error {
+	_, err := DB.Exec("INSERT INTO users (userid, email, username, avatar, password) VALUES ($1, $2, $3, $4, $5)", id, email, username, "", hash)
+	return err
+}
+
 // MakeSessionTransaction generates a session corresponding to a user
 func MakeSessionTransaction(userid string) (*string, error) {
 	expiration := time.Now().Add(48 * time.Hour)
 	sessionid := randstr.Hex(16)
-	_, err := DB.Exec("INSERT INTO sessions(sessionid, expiration, userid) VALUES($1. $2. $30)", sessionid, expiration.Unix(), userid)
+	_, err := DB.Exec("INSERT INTO sessions(sessionid, expiration, userid) VALUES($1, $2, $3)", sessionid, expiration.Unix(), userid)
 	if err != nil {
 		return nil, err
 	}
