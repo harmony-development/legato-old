@@ -22,5 +22,6 @@ func apiV1(g echo.Group) {
 	r.POST("/getuser*", hm.WithRateLimit(v1.GetUser, 5 * time.Second, 5))
 	r.POST("/usernameupdate**", hm.WithRateLimit(v1.UsernameUpdate, 2 * time.Second, 5))
 	r.POST("/auth*", hm.WithRateLimit(v1.Authenticate, 2 * time.Second, 5))
+	r.POST("/addserver*", hm.WithRateLimit(v1.AddServer, 5 * time.Second, 5))
 	r.POST("/listservers*", hm.WithRateLimit(v1.ListServers, 5 * time.Second, 5))
 }

@@ -73,3 +73,9 @@ func ListServersTransaction(userid string) ([]types.Server, error) {
 
 	return servers, nil
 }
+
+// AddServerTransaction adds a new server to a user's list
+func AddServerTransaction(userid string, host string) error {
+	_, err := DB.Query("INSERT INTO servers (userid, host) VALUES ($1, $2)", userid, host)
+	return err
+}
