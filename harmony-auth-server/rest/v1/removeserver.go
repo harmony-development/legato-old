@@ -16,10 +16,10 @@ func RemoveServer(c echo.Context) error {
 	}
 	user, err := db.GetUserBySession(session)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "invalid ")
+		return echo.NewHTTPError(http.StatusInternalServerError, "invalid session")
 	}
 	if err := db.RemoveServerTransaction(user.ID, host); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "error adding server to list")
+		return echo.NewHTTPError(http.StatusInternalServerError, "error removing server from list")
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]string{

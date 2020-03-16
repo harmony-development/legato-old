@@ -16,7 +16,7 @@ func AddServer(c echo.Context) error {
 	}
 	user, err := db.GetUserBySession(session)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "invalid ")
+		return echo.NewHTTPError(http.StatusInternalServerError, "invalid session")
 	}
 
 	if err := db.AddServerTransaction(user.ID, host); err != nil {
