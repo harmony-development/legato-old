@@ -22,7 +22,6 @@ func AddServer(c echo.Context) error {
 	if err := db.AddServerTransaction(user.ID, host); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "error adding server to list")
 	}
-
 	return ctx.JSON(http.StatusOK, map[string]string{
 		"message": "successfully added server to list!",
 	})
