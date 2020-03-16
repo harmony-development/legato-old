@@ -74,8 +74,14 @@ func ListServersTransaction(userid string) ([]types.Server, error) {
 	return servers, nil
 }
 
-// AddServerTransaction adds a new server to a user's list
+// AddServerTransaction adds a new server to a user's list in the DB
 func AddServerTransaction(userid string, host string) error {
 	_, err := DB.Query("INSERT INTO servers (userid, host) VALUES ($1, $2)", userid, host)
+	return err
+}
+
+// RemoveServerTransaction removes a server from a user's list in the DB
+func RemoveServerTransaction(userid string, host string) error {
+	_, err := DB.Query("DELETE FROM servers WHERE userid=$1 AND host=$2", userid, host)
 	return err
 }
