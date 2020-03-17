@@ -39,6 +39,7 @@ func GetUserBySession(session string) (*types.User, error) {
 			return nil, err
 		}
 		UserSessionCache.Add(session, *user)
+		UserIDCache.Add(user.ID, *user)
 		return user, nil
 	}
 	user, ok := entry.(types.User)
