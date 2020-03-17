@@ -14,6 +14,7 @@ import (
 	"path"
 )
 
+// AvatarUpdate handles request to update a user's avatar
 func AvatarUpdate(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
 	form, err := ctx.MultipartForm()
@@ -24,7 +25,7 @@ func AvatarUpdate(c echo.Context) error {
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many avatar updates, please try again later")
 	}
-	user, err := db.GetUserBySession(session)
+	user, err := db.GetUserFromDB(session)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "invalid session")
 	}

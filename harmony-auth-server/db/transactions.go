@@ -1,6 +1,8 @@
 package db
 
 import (
+	"errors"
+	"github.com/kataras/golog"
 	"github.com/thanhpk/randstr"
 	"harmony-auth-server/types"
 	"time"
@@ -32,14 +34,19 @@ func VerifySession(session string) error {
 	return nil
 }
 
-// GetUserBySession fetches a user from database using a session
-func GetUserBySession(session string) (*types.User, error) {
+// GetUserFromDB fetches a user from database using a session
+func GetUserFromDB(session string) (*types.User, error) {
 	res, err := DB.Query("SELECT sessions.userid, users.username, users.avatar FROM sessions INNER JOIN users ON sessions.userid = users.userid WHERE sessionid=$1 AND expiration>$2", session, time.Now().Unix())
 	if err != nil {
+		golog.Warn(err)
 		return nil, err
+	}
+	if !res.Next() {
+		return nil, errors.New("missing user")
 	}
 	var user types.User
 	if err := res.Scan(&user.ID, &user.Username, &user.Avatar); err != nil {
+		golog.Warn(err)
 		return nil, err
 	}
 	return &user, nil
@@ -68,6 +75,10 @@ func ListServersTransaction(userid string) ([]types.Server, error) {
 
 	for res.Next() {
 		var host string
+		err := res.Scan(&host)
+		if err != nil {
+			return nil, err
+		}
 		servers = append(servers, types.Server{IP:host})
 	}
 

@@ -2,7 +2,7 @@ package v1
 
 import (
 	"github.com/labstack/echo/v4"
-	"harmony-auth-server/db"
+	"harmony-auth-server/authentication"
 	"harmony-auth-server/rest/hm"
 	"net/http"
 )
@@ -17,7 +17,7 @@ func GetUser(c echo.Context) error {
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many get user requests, please try again in a few moments")
 	}
-	returnUser, err := db.GetUser(userid)
+	returnUser, err := authentication.GetUserByID(userid)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "user not found")
 	}

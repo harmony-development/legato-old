@@ -10,8 +10,11 @@ import (
 
 var signKey *rsa.PrivateKey
 
-// Init loads private key into memory for signing
+// Init initializes all the things necessary for authentication
 func Init() {
+	makeSessionCache()
+	makeUserIDCache()
+
 	privBytes, err := ioutil.ReadFile("private.pem")
 	if err != nil {
 		golog.Fatal("error reading private key!", err)

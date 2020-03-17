@@ -4,7 +4,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
 	"harmony-auth-server/authentication"
-	"harmony-auth-server/db"
 	"harmony-auth-server/rest/hm"
 	"harmony-auth-server/types"
 	"net/http"
@@ -17,7 +16,7 @@ func Authenticate(c echo.Context) error {
 	if host == "" || session == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid auth arguments")
 	}
-	if err := db.VerifySession(session); err != nil {
+	if !authentication.ValidateSession(session) {
 		return echo.NewHTTPError(http.StatusUnauthorized, "invalid session")
 	}
 	serverSession := randstr.Hex(16)

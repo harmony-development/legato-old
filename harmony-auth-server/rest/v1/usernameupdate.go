@@ -2,6 +2,7 @@ package v1
 
 import (
 	"github.com/labstack/echo/v4"
+	"harmony-auth-server/authentication"
 	"harmony-auth-server/db"
 	"harmony-auth-server/rest/hm"
 	"net/http"
@@ -14,11 +15,11 @@ func UsernameUpdate(c echo.Context) error {
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many username updates, please try again later")
 	}
-	user, err := db.GetUserBySession(session)
+	user, err := authentication.GetUserBySession(session)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "invalid session")
 	}
-	_, err = db.DB.Exec("UPDATE users SET username=$1 WHERE id=$2", username, user.ID)
+	_, err = db.DB.Exec("UPDATE users SET username=$1 WHERE userid=$2", username, user.ID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to update username, please try again later")
 	}

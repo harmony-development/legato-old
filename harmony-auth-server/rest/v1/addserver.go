@@ -2,6 +2,7 @@ package v1
 
 import (
 	"github.com/labstack/echo/v4"
+	"harmony-auth-server/authentication"
 	"harmony-auth-server/db"
 	"harmony-auth-server/rest/hm"
 	"net/http"
@@ -14,7 +15,7 @@ func AddServer(c echo.Context) error {
 	if session == "" || host == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "session and host required")
 	}
-	user, err := db.GetUserBySession(session)
+	user, err := authentication.GetUserBySession(session)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "invalid session")
 	}
