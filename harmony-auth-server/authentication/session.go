@@ -11,12 +11,12 @@ var UserSessionCache *lru.ARCCache
 var UserIDCache *lru.ARCCache
 
 func makeSessionCache() {
-	UserSessionCache, _ = lru.NewARC(5096)
+	UserSessionCache, _ = lru.NewARC(500000)
 	return
 }
 
 func makeUserIDCache() {
-	UserIDCache, _ = lru.NewARC(5096)
+	UserIDCache, _ = lru.NewARC(500000)
 	return
 }
 
