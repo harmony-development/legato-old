@@ -2,6 +2,8 @@ package types
 
 import (
 	"encoding/json"
+	"errors"
+	"github.com/kataras/golog"
 	"harmony-auth-server/conf"
 	"net/http"
 	"net/url"
@@ -28,14 +30,23 @@ func getJson(res *http.Response, target interface{}) error {
 }
 
 // GetIdentity requests an instance server to identify itself
-func (s Server) GetIdentity() (*string) {
-	r, err := http.Get(path.Join(s.IP, "/api/", conf.InstanceAPIVersion, "/getidentity"))
+func (s Server) GetIdentity() (*string, error) {
+	u, err := url.Parse(s.IP)
 	if err != nil {
-		return nil
+		return nil, err
+	}
+	u.Path = path.Join(u.Path, "/api/", conf.InstanceAPIVersion, "/getidentity/")
+	r, err := http.Get(u.String())
+	if err != nil {
+		golog.Warn("error GETing identity ", err)
+		return nil, errors.New("error GETing")
 	}
 	res := &identityResp{}
 	err = getJson(r, res)
-	return &res.Identity
+	if err != nil {
+		return nil, err
+	}
+	return &res.Identity, nil
 }
 
 // SendSession sends a POST request to a specific host to contain an IP
