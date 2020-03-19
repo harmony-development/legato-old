@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+//SetupREST binds the API paths for the server
 func SetupREST(g echo.Group) {
 	apiV1(g)
 }
@@ -16,7 +17,8 @@ func apiV1(g echo.Group) {
 	r := g.Group("/v1")
 	r.Use(middleware.CORS())
 	r.Use(hm.WithHarmony)
-	r.Any("/getidentity*", hm.WithRateLimit(v1.GetIdentity, 2 * time.Second, 20))
+	r.Any("/getidentity", hm.WithRateLimit(v1.GetIdentity, 2 * time.Second, 20))
+	r.POST("/session", hm.WithRateLimit(v1.Session, 1 * time.Second, 500))
 	r.POST("/getguilds*", hm.WithAuth(hm.WithRateLimit(v1.GetGuilds, 5 * time.Second, 5)))
 	r.POST("/getmembers*", hm.WithAuth(hm.WithRateLimit(v1.GetMembers, 5 * time.Second, 3)))
 	r.POST("/getchannels*", hm.WithAuth(hm.WithRateLimit(v1.GetChannels, 500 * time.Millisecond, 5)))

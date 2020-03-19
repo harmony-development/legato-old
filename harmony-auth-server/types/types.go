@@ -50,8 +50,15 @@ func (s Server) GetIdentity() (*string, error) {
 }
 
 // SendSession sends a POST request to a specific host to contain an IP
-func (s Server) SendSession(session string) {
-	_, err := http.PostForm(path.Join(s.IP, "/api/", conf.InstanceAPIVersion,"/session"), url.Values{"session": {session}})
+func (s Server) SendSession(session string, user *User) {
+	if user == nil {
+		return
+	}
+	userOut, err := json.Marshal(user)
+	if err != nil {
+		return
+	}
+	_, err = http.PostForm(path.Join(s.IP, "/api/", conf.InstanceAPIVersion,"/session"), url.Values{"session": {session}, "user": {string(userOut)}})
 	if err != nil {
 		return
 	}

@@ -5,6 +5,7 @@ import (
 	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"harmony-server/authentication"
 	"harmony-server/globals"
 	"harmony-server/harmonydb"
 	"harmony-server/rest"
@@ -23,12 +24,14 @@ func main() {
 		golog.Fatalf("Error loading .env! Reason : %v", err)
 	}
 	harmonydb.DBInst = harmonydb.OpenDB()
+	authentication.Init()
 	golog.SetLevel(os.Getenv("VERBOSITY_LEVEL"))
 	_ = os.Mkdir("./filestore", 0777)
 	globals.Bus = *makeEventBus()
 	golog.Infof("Started Harmony Server On Port %v", PORT)
 	r := echo.New()
 	r.Use(middleware.Recover())
+	r.Use(middleware.AddTrailingSlash())
 	api := r.Group("/api")
 	rest.SetupREST(*api)
 	api.Any("/socket", handleSocket)
