@@ -2,7 +2,7 @@ package v1
 
 import (
 	"github.com/labstack/echo/v4"
-	"harmony-server/harmonydb"
+	"harmony-server/db"
 	"harmony-server/rest/hm"
 	"net/http"
 )
@@ -18,7 +18,7 @@ func GetGuilds(c echo.Context) error {
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "you're getting guilds too fast, please wait a moment")
 	}
-	res, err := harmonydb.DBInst.Query("SELECT guilds.guildid, guilds.guildname, guilds.owner, guilds.picture FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=$1", ctx.UserID)
+	res, err := db.DBInst.Query("SELECT guilds.guildid, guilds.guildname, guilds.owner, guilds.picture FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=$1", ctx.User.ID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to get guilds at this time, please try again later")
 	}

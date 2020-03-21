@@ -2,7 +2,7 @@ package v1
 
 import (
 	"github.com/labstack/echo/v4"
-	"harmony-server/harmonydb"
+	"harmony-server/db"
 	"harmony-server/rest/hm"
 	"net/http"
 )
@@ -18,7 +18,7 @@ func GetChannels(c echo.Context) error {
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "you're getting channels too often! Please try again in a few seconds.")
 	}
-	res, err := harmonydb.DBInst.Query("SELECT channelid, channelname FROM channels WHERE guildid=$1", guildid)
+	res, err := db.DBInst.Query("SELECT channelid, channelname FROM channels WHERE guildid=$1", guildid)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to list channels, please try again later")
 	}

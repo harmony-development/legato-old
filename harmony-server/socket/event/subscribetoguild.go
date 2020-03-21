@@ -5,20 +5,21 @@ import (
 	"golang.org/x/time/rate"
 	"harmony-server/authentication"
 	"harmony-server/globals"
-	"harmony-server/harmonydb"
+	"harmony-server/db"
 )
 
 type subscribeToGuildData struct {
-	Token string `mapstructure:"token"`
+	Session string `mapstructure:"session"`
 	Guild string `mapstructure:"guild"`
 }
 
+// OnSubscribeToGuild handles requests to subscribe to a guilds events
 func OnSubscribeToGuild(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
 	var data subscribeToGuildData
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
-	userid, err := authentication.VerifyToken(data.Token)
+	userid, err := authentication.GetUserBySession(data.Session)
 	if err != nil {
 		sendErr(ws, "invalid token")
 		return
@@ -28,7 +29,7 @@ func OnSubscribeToGuild(ws *globals.Client, rawMap map[string]interface{}, limit
 		return
 	}
 	var count int
-	res, err := harmonydb.DBInst.Query("SELECT COUNT(*) FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=$1 AND guilds.guildid=$2", userid, data.Guild)
+	res, err := db.DBInst.Query("SELECT COUNT(*) FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=$1 AND guilds.guildid=$2", userid, data.Guild)
 	if err != nil {
 		sendErr(ws, "unable to subscribe to guild, try reloading?")
 		return
@@ -39,7 +40,7 @@ func OnSubscribeToGuild(ws *globals.Client, rawMap map[string]interface{}, limit
 		return
 	}
 	if count == 1 {
-		RegisterSocket(data.Guild, ws, userid)
+		RegisterSocket(data.Guild, ws, data.Session)
 	}
 	return
 }

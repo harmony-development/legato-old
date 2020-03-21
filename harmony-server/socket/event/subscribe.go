@@ -6,11 +6,11 @@ import (
 	"golang.org/x/time/rate"
 	"harmony-server/authentication"
 	"harmony-server/globals"
-	"harmony-server/harmonydb"
+	"harmony-server/db"
 )
 
 type subscribeData struct {
-	Token string `mapstructure:"token"`
+	Session string `mapstructure:"session"`
 }
 
 func OnSubscribe(ws *globals.Client, rawMap map[string]interface{}, limiter *rate.Limiter) {
@@ -18,17 +18,17 @@ func OnSubscribe(ws *globals.Client, rawMap map[string]interface{}, limiter *rat
 	if err := mapstructure.Decode(rawMap, &data); err != nil {
 		return
 	}
-	userid, err := authentication.VerifyToken(data.Token)
+	user, err := authentication.GetUserBySession(data.Session)
 	if err != nil {
-		sendErr(ws, "invalid token")
+		sendErr(ws, "invalid session")
 		return
 	}
-	ws.Userid = userid
+	ws.Userid = user.ID
 	if !limiter.Allow() {
 		sendErr(ws, "Too many subscription attempts, please try later")
 		return
 	}
-	res, err := harmonydb.DBInst.Query("SELECT guilds.guildid FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=$1", userid)
+	res, err := db.DBInst.Query("SELECT guilds.guildid FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=$1", user.ID)
 	if err != nil {
 		sendErr(ws, "We weren't able to get a list of guilds. Try reloading the page / logging back in")
 		golog.Warnf("Error selecting guilds. Reason : %v", err)

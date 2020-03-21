@@ -7,7 +7,7 @@ import (
 	"github.com/thanhpk/randstr"
 	"gopkg.in/h2non/bimg.v1"
 	"harmony-server/globals"
-	"harmony-server/harmonydb"
+	"harmony-server/db"
 	"harmony-server/rest/hm"
 	"io/ioutil"
 	"net/http"
@@ -61,8 +61,8 @@ func UpdateGuildPicture(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error saving file upload")
 	}
 	var oldPictureID string
-	err = harmonydb.DBInst.QueryRow("SELECT picture FROM guilds WHERE guildid=$1", guild).Scan(&oldPictureID)
-	_, err = harmonydb.DBInst.Exec("UPDATE guilds SET picture=$1 WHERE guildid=$2 AND owner=$3", fname, guild, *ctx.UserID)
+	err = db.DBInst.QueryRow("SELECT picture FROM guilds WHERE guildid=$1", guild).Scan(&oldPictureID)
+	_, err = db.DBInst.Exec("UPDATE guilds SET picture=$1 WHERE guildid=$2 AND owner=$3", fname, guild, ctx.User.ID)
 	if err != nil {
 		golog.Warnf("Error updating picture. %v", err)
 		go deleteFromFilestore(fname)

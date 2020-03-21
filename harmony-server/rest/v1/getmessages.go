@@ -5,7 +5,7 @@ import (
 	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
 	"harmony-server/globals"
-	"harmony-server/harmonydb"
+	"harmony-server/db"
 	"harmony-server/rest/hm"
 	"net/http"
 )
@@ -24,15 +24,15 @@ func GetMessages(c echo.Context) error {
 	if guild == "" || channel == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid parameters")
 	}
-	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[*ctx.UserID] == nil {
+	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[ctx.User.ID] == nil {
 		return echo.NewHTTPError(http.StatusForbidden, "insufficient permissions to list messages")
 	}
 	var res *sql.Rows
 	var err error
 	if lastmessage == "" {
-		res, err = harmonydb.DBInst.Query("SELECT messageid, author, createdat, message FROM messages WHERE guildid=$1 AND channelid=$2 ORDER BY createdat DESC LIMIT 30", guild, channel)
+		res, err = db.DBInst.Query("SELECT messageid, author, createdat, message FROM messages WHERE guildid=$1 AND channelid=$2 ORDER BY createdat DESC LIMIT 30", guild, channel)
 	} else {
-		res, err = harmonydb.DBInst.Query("SELECT messageid, author, createdat, message FROM messages WHERE guildid=$1 AND channelid=$2 AND createdat < (SELECT createdat FROM messages WHERE messageid=$3) ORDER BY createdat DESC LIMIT 30", guild, channel, lastmessage)
+		res, err = db.DBInst.Query("SELECT messageid, author, createdat, message FROM messages WHERE guildid=$1 AND channelid=$2 AND createdat < (SELECT createdat FROM messages WHERE messageid=$3) ORDER BY createdat DESC LIMIT 30", guild, channel, lastmessage)
 	}
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid parameters")
@@ -45,7 +45,7 @@ func GetMessages(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, "unable to list messages, please try again later")
 		}
 
-		attachments, err := harmonydb.DBInst.Query("SELECT attachment FROM attachments WHERE messageid=$1", msg.Messageid)
+		attachments, err := db.DBInst.Query("SELECT attachment FROM attachments WHERE messageid=$1", msg.Messageid)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, "unable to list messages, please try again later")
 		}

@@ -2,8 +2,8 @@ package v1
 
 import (
 	"github.com/labstack/echo/v4"
+	"harmony-server/db"
 	"harmony-server/globals"
-	"harmony-server/harmonydb"
 	"harmony-server/rest/hm"
 	"net/http"
 )
@@ -17,7 +17,7 @@ func DeleteMessage(c echo.Context) error {
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many message deletions, please try again later")
 	}
-	err := harmonydb.DeleteMessageTransaction(guild, channel, message, *ctx.UserID)
+	err := db.DeleteMessageTransaction(guild, channel, message, ctx.User.ID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to delete message, please try again later")
 	}

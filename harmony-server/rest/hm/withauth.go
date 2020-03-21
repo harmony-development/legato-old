@@ -9,12 +9,12 @@ import (
 func WithAuth(handler echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		token := ctx.FormValue("token")
-		userid, err := authentication.VerifyToken(token)
+		user, err := authentication.GetUserBySession(token)
 		hctx, ok := ctx.(HarmonyContext)
 		if err != nil || !ok {
 			return echo.NewHTTPError(http.StatusUnauthorized, "invalid token")
 		}
-		hctx.UserID = &userid
+		hctx.User = user
 		return handler(hctx)
 	}
 }

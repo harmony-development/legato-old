@@ -3,8 +3,8 @@ package v1
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
+	"harmony-server/db"
 	"harmony-server/globals"
-	"harmony-server/harmonydb"
 	"harmony-server/rest/hm"
 	"net/http"
 )
@@ -19,7 +19,12 @@ func AddChannel(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many channels being added, please wait a few seconds")
 	}
 	var channelID = randstr.Hex(16)
-	_, err := harmonydb.DBInst.Exec("INSERT INTO channels(channelid, guildid, channelname) VALUES($1, $2, $3) WHERE guilds.owner=$4", channelID, guild, channelname, ctx.UserID)
+
+	if !db.IsUserOwner(guild, ctx.User.ID) {
+		return echo.NewHTTPError(http.StatusUnauthorized, "insufficient permissions to add channel")
+	}
+
+	_, err := db.DBInst.Exec("INSERT INTO channels(channelid, guildid, channelname) VALUES($1, $2, $3)", channelID, guild, channelname)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "an error occurred adding the guild. Do you have sufficient permission?")
 	}

@@ -3,11 +3,11 @@ package socket
 import (
 	"github.com/kataras/golog"
 	"harmony-server/globals"
-	"harmony-server/harmonydb"
+	"harmony-server/db"
 )
 
 func deregister(ws *globals.Client) {
-	guildsQuery, err := harmonydb.DBInst.Query("SELECT guildid FROM guildmembers WHERE userid=$1", ws.Userid)
+	guildsQuery, err := db.DBInst.Query("SELECT guildid FROM guildmembers WHERE userid=$1", ws.Userid)
 		if err != nil {
 		golog.Warnf("error deregistering client, potential memory leak : %v", err)
 		return

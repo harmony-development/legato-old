@@ -2,8 +2,8 @@ package v1
 
 import (
 	"github.com/labstack/echo/v4"
+	"harmony-server/db"
 	"harmony-server/globals"
-	"harmony-server/harmonydb"
 	"harmony-server/rest/hm"
 	"net/http"
 )
@@ -11,13 +11,13 @@ import (
 func GetInvites(c echo.Context) error {
 	ctx, _ := c.(*hm.HarmonyContext)
 	guild := ctx.FormValue("guild")
-	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[*ctx.UserID] == nil || globals.Guilds[guild].Owner != *ctx.UserID {
+	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[ctx.User.ID] == nil || globals.Guilds[guild].Owner != ctx.User.ID {
 		return echo.NewHTTPError(http.StatusForbidden, "insufficient permissions to list invites")
 	}
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many invite listing requests, please try again later")
 	}
-	res, err := harmonydb.DBInst.Query("SElECT inviteid, invitecount FROM invites WHERE guildid=$1 ORDER BY invitecount", guild)
+	res, err := db.DBInst.Query("SElECT inviteid, invitecount FROM invites WHERE guildid=$1 ORDER BY invitecount", guild)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to list invites, please try again later")
 	}

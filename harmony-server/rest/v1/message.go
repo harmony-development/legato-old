@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
 	"harmony-server/globals"
-	"harmony-server/harmonydb"
+	"harmony-server/db"
 	"harmony-server/rest/hm"
 	"io/ioutil"
 	"net/http"
@@ -32,7 +32,7 @@ func Message(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "too many files uploaded")
 	}
 	// either the guild doesn't exist or the client isn't subbed to it - it doesn't matter.
-	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[*ctx.UserID] == nil {
+	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[ctx.User.ID] == nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "not permitted to send messages in this guild/channel")
 	}
 	if !ctx.Limiter.Allow() {
@@ -41,7 +41,7 @@ func Message(c echo.Context) error {
 	var messageID = randstr.Hex(16)
 	var attachments = make([]string, len(files))
 	if len(files) > 0 {
-		fileTransaction, err := harmonydb.DBInst.Begin()
+		fileTransaction, err := db.DBInst.Begin()
 		if err != nil {
 			golog.Warnf("error making file transaction : %v", err)
 			return echo.NewHTTPError(http.StatusInternalServerError, "Error saving files")
@@ -91,7 +91,7 @@ func Message(c echo.Context) error {
 				Data: map[string]interface{}{
 					"guild":     guild,
 					"channel":   channel,
-					"userid":    *ctx.UserID,
+					"userid":    ctx.User.ID,
 					"createdat": time.Now().UTC().Unix(),
 					"message":   message,
 					"attachments": attachments,
@@ -100,7 +100,7 @@ func Message(c echo.Context) error {
 			})
 		}
 	}
-	_, err = harmonydb.DBInst.Exec("INSERT INTO messages(messageid, guildid, channelid, author, createdat, message) VALUES($1, $2, $3, $4, $5, $6)", messageID, guild, channel, *ctx.UserID, time.Now().UTC().Unix(), message)
+	_, err = db.DBInst.Exec("INSERT INTO messages(messageid, guildid, channelid, author, createdat, message) VALUES($1, $2, $3, $4, $5, $6)", messageID, guild, channel, ctx.User.ID, time.Now().UTC().Unix(), message)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error saving message")
 	}

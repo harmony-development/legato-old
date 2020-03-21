@@ -3,7 +3,7 @@ package v1
 import (
 	"github.com/labstack/echo/v4"
 	"harmony-server/globals"
-	"harmony-server/harmonydb"
+	"harmony-server/db"
 	"harmony-server/rest/hm"
 	"net/http"
 )
@@ -17,13 +17,13 @@ type updateGuildName struct {
 func UpdateGuildName(c echo.Context) error {
 	ctx := c.(*hm.HarmonyContext)
 	guild, name := ctx.FormValue("guild"), ctx.FormValue("name")
-	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[*ctx.UserID] == nil || globals.Guilds[guild].Owner != *ctx.UserID {
+	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[ctx.User.ID] == nil || globals.Guilds[guild].Owner != ctx.User.ID {
 		return echo.NewHTTPError(http.StatusForbidden, "insufficient perms to update guild name")
 	}
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many guild name update requests, please try again later")
 	}
-	_, err := harmonydb.DBInst.Exec("UPDATE guilds SET guildname=$1 WHERE guildid=$2", name, guild)
+	_, err := db.DBInst.Exec("UPDATE guilds SET guildname=$1 WHERE guildid=$2", name, guild)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to update guild name, please try again later")
 	}

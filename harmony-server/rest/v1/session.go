@@ -9,12 +9,6 @@ import (
 	"os"
 )
 
-type User struct {
-	ID       string `json:"userid"`
-	Username string `json:"username"`
-	Avatar   string `json:"avatar"`
-}
-
 // Session is an endpoint for the auth server to send auth tokens to
 func Session(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
@@ -29,11 +23,12 @@ func Session(c echo.Context) error {
 	if token.Identity != os.Getenv("HARMONY_IDENTITY") {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid identity")
 	}
-	var user User
+	var user authentication.SessionData
 	if err := json.Unmarshal([]byte(rawUser), user); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "bad user")
 	}
-	authentication.SessionCache.Add(token.Session, user)
+	user.ExpiresAt = token.ExpiresAt
+	authentication.SessionStore[token.Session] = &user
 	return ctx.JSON(http.StatusOK, map[string]string{
 		"message": "session accepted",
 	})
