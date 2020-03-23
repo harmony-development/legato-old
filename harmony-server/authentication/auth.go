@@ -59,6 +59,7 @@ func ReadAuthToken(raw string) (*SessionClaims, error) {
 // GetUserBySession returns a user from the session cache or an error if the session is not valid
 func GetUserBySession(session string) (*SessionData, error) {
 	if SessionStore[session] == nil {
+		golog.Warnf("bruhhh")
 		return nil, errors.New("session is invalid")
 	}
 	return SessionStore[session], nil

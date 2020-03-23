@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
 	"harmony-auth-server/authentication"
@@ -23,11 +24,13 @@ func Authenticate(c echo.Context) error {
 	serverSession := randstr.Hex(16)
 	token, err := authentication.MakeServerSessionToken(serverSession, identity)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "error creating auth token")
+		return echo.NewHTTPError(http.StatusInternalServerError, "error creating server session")
 	}
-
-	types.Server{IP: host}.SendSession(token, user) // IMPORTANT : do not ever give the instance a user session!
-
+	resp, err := types.Server{IP: host}.SendSession(token, user) // IMPORTANT : do not ever give the instance a user session!
+	if err != nil || resp.StatusCode != http.StatusOK {
+		golog.Warn(resp.StatusCode)
+		return echo.NewHTTPError(http.StatusInternalServerError, "error sending session")
+	}
 	return ctx.JSON(http.StatusOK, map[string]string{
 		"session": serverSession,
 	})

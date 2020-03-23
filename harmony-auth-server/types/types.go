@@ -50,24 +50,30 @@ func (s Server) GetIdentity() (*string, error) {
 }
 
 // SendSession sends a POST request to a specific host to contain an IP
-func (s Server) SendSession(session string, user *User) {
+func (s Server) SendSession(session string, user *User) (*http.Response, error) {
 	if user == nil {
-		return
+		return nil, errors.New("user is nil")
 	}
 	userOut, err := json.Marshal(user)
 	if err != nil {
-		return
+		return nil, err
 	}
-	_, err = http.PostForm(
-		path.Join(s.IP, "/api/", conf.InstanceAPIVersion,"/session"),
+	u, err := url.Parse(s.IP)
+	if err != nil {
+		return nil, err
+	}
+	u.Path = path.Join(u.Path, "/api/", conf.InstanceAPIVersion,"/session")
+	res, err := http.PostForm(
+		u.String(),
 		url.Values{
 			"session": {session},
 			"user": {string(userOut)},
 		},
 	)
 	if err != nil {
-		return
+		return nil, err
 	}
+	return res, nil
 }
 
 // SendUsernameUpdate sends a POST request to a specific host to notify a username update

@@ -97,7 +97,7 @@ func GetUserBySession(session string) (*types.User, error) {
 
 // MakeServerSessionToken returns a signed session token for instances, and an error if it fails
 func MakeServerSessionToken(session string, identity string) (string, error) {
-	claims := SessionClaims{
+	claims := &SessionClaims{
 		session,
 		identity,
 		jwt.StandardClaims{

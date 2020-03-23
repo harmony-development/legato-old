@@ -14,7 +14,7 @@ type returnGuild struct {
 }
 
 func GetGuilds(c echo.Context) error {
-	ctx, _ := c.(*hm.HarmonyContext)
+	ctx, _ := c.(hm.HarmonyContext)
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "you're getting guilds too fast, please wait a moment")
 	}
