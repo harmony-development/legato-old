@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"harmony-auth-server/authentication"
 	"harmony-auth-server/db"
+	"harmony-auth-server/env"
 	"harmony-auth-server/rest"
 	"net/http"
 	"os"
@@ -21,10 +22,16 @@ func main() {
 	if err != nil {
 		golog.Fatalf("Error loading .env! %v", err)
 	}
-	golog.SetLevel(os.Getenv("VERBOSITY_LEVEL"))
-	authentication.Init()
-	db.DB = *db.OpenDB()
+
+	env.LoadVars()
 	_ = os.Mkdir("./avatars", 0777)
+
+	golog.SetLevel(env.Verbosity)
+	authentication.Init()
+	db.Init()
+
+	go db.ExpireSessions()
+
 	r := echo.New()
 	r.Pre(middleware.AddTrailingSlash())
 	r.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{

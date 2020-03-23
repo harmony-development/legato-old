@@ -58,7 +58,13 @@ func (s Server) SendSession(session string, user *User) {
 	if err != nil {
 		return
 	}
-	_, err = http.PostForm(path.Join(s.IP, "/api/", conf.InstanceAPIVersion,"/session"), url.Values{"session": {session}, "user": {string(userOut)}})
+	_, err = http.PostForm(
+		path.Join(s.IP, "/api/", conf.InstanceAPIVersion,"/session"),
+		url.Values{
+			"session": {session},
+			"user": {string(userOut)},
+		},
+	)
 	if err != nil {
 		return
 	}

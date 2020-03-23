@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/kataras/golog"
 	"github.com/thanhpk/randstr"
+	"harmony-auth-server/conf"
 	"harmony-auth-server/types"
 	"time"
 )
@@ -17,7 +18,7 @@ func RegisterUser(id string, email string, username string, hash string) error {
 // MakeSessionTransaction generates a session corresponding to a user
 func MakeSessionTransaction(userid string) (*string, error) {
 	expiration := time.Now().Add(48 * time.Hour)
-	sessionid := randstr.Hex(16)
+	sessionid := randstr.Hex(conf.SessionLength)
 	_, err := DB.Exec("INSERT INTO sessions(sessionid, expiration, userid) VALUES($1, $2, $3)", sessionid, expiration.Unix(), userid)
 	if err != nil {
 		return nil, err
@@ -59,9 +60,11 @@ func GetUser(userid string) (*types.User, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if err := res.Scan(&user.Username, &user.Avatar); err != nil {
 		return nil, err
 	}
+
 	return &user, nil
 }
 

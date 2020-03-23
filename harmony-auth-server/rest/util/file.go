@@ -12,10 +12,12 @@ func GetFile(form *multipart.Form, entry string) ([]byte, error) {
 	if len(files) == 0 {
 		return nil, errors.New("no file received")
 	}
+
 	file, err := files[0].Open()
 	if err != nil {
 		return nil, errors.New("error reading file")
 	}
+
 	defer file.Close()
 	fileBytes, err := ioutil.ReadAll(file)
 	if err != nil {

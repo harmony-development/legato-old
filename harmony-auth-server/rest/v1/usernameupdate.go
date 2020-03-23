@@ -27,9 +27,11 @@ func UsernameUpdate(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to broadcast username update, please try again later")
 	}
+
 	for _, server := range servers {
 		go server.SendUsernameUpdate(user.ID, username)
 	}
+
 	return ctx.JSON(http.StatusOK, map[string]string{
 		"message": "successfully updated username",
 	})

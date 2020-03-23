@@ -13,19 +13,25 @@ import (
 func Login(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
 	email, password := ctx.FormValue("email"), ctx.FormValue("password")
+
 	if email == "" || password == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid form")
 	}
+
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many requests, please try again later")
 	}
+
 	var passwd, userid string
+
 	if err := db.DB.QueryRow("SELECT password, userid from users WHERE email=$1", email).Scan(&passwd, &userid); err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "invalid email or password")
 	}
+
 	if err := bcrypt.CompareHashAndPassword([]byte(passwd), []byte(password)); err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "invalid email or password")
 	}
+
 	session, err := db.MakeSessionTransaction(userid)
 	if err != nil || session == nil {
 		golog.Warn(err)

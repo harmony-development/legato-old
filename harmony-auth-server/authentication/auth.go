@@ -6,6 +6,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	lru "github.com/hashicorp/golang-lru"
 	"github.com/kataras/golog"
+	"harmony-auth-server/conf"
 	"harmony-auth-server/db"
 	"harmony-auth-server/types"
 	"io/ioutil"
@@ -18,22 +19,24 @@ var UserSessionCache *lru.ARCCache
 var UserIDCache *lru.ARCCache
 
 type SessionClaims struct {
-	Session string `json:"session"`
+	Session  string `json:"session"`
 	Identity string `json:"identity"`
 	jwt.StandardClaims
 }
 
 // Init initializes all the things necessary for authentication
 func Init() {
-	UserIDCache, _ = lru.NewARC(500000)
-	UserSessionCache, _ = lru.NewARC(500000)
+	UserIDCache, _ = lru.NewARC(conf.IDCacheMax)
+	UserSessionCache, _ = lru.NewARC(conf.SessionCacheMax)
 
 	privBytes, err := ioutil.ReadFile("private.pem")
 	if err != nil {
 		golog.Fatal("error reading private key!", err)
 		os.Exit(-1)
 	}
+
 	signKey, err = jwt.ParseRSAPrivateKeyFromPEM(privBytes)
+
 	if err != nil {
 		golog.Fatal("error parsing RSA!", err)
 		os.Exit(-1)
@@ -59,7 +62,9 @@ func GetUserByID(userid string) (*types.User, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		UserIDCache.Add(userid, *user)
+
 		return user, nil
 	}
 	user, ok := entry.(types.User)
@@ -77,8 +82,10 @@ func GetUserBySession(session string) (*types.User, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		UserSessionCache.Add(session, *user)
 		UserIDCache.Add(user.ID, *user)
+
 		return user, nil
 	}
 	user, ok := entry.(types.User)
@@ -94,7 +101,7 @@ func MakeServerSessionToken(session string, identity string) (string, error) {
 		session,
 		identity,
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(24 * time.Hour).Unix(),
+			ExpiresAt: time.Now().Add(conf.SessionExpire).Unix(),
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)

@@ -14,9 +14,11 @@ func GetUser(c echo.Context) error {
 	if userid == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "userid field required")
 	}
+
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many get user requests, please try again in a few moments")
 	}
+
 	returnUser, err := authentication.GetUserByID(userid)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "user not found")

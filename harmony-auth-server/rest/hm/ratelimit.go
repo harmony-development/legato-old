@@ -10,7 +10,7 @@ import (
 // code adapted from https://www.alexedwards.net/blog/how-to-rate-limit-http-requests
 
 type visitor struct {
-	limiter rate.Limiter
+	limiter  *rate.Limiter
 	lastSeen time.Time
 }
 
@@ -21,14 +21,14 @@ func CleanupRoutine() {
 	for {
 		time.Sleep(3 * time.Minute)
 		rateLock.Lock()
-		defer rateLock.Unlock()
 		for _, path := range rateLimits {
 			for ip, v := range path {
-				if time.Now().Sub(v.lastSeen) > 3*time.Minute {
+				if time.Since(v.lastSeen) > 3*time.Minute {
 					delete(path, ip)
 				}
 			}
 		}
+		rateLock.Unlock()
 	}
 }
 
@@ -36,6 +36,7 @@ func WithRateLimit(handler echo.HandlerFunc, duration time.Duration, burst int) 
 	return func(c echo.Context) error {
 		ctx := c.(HarmonyContext)
 		ctx.Limiter = getVisitor(ctx.Path(), ctx.RealIP(), duration, burst)
+
 		return handler(ctx)
 	}
 }
@@ -43,23 +44,29 @@ func WithRateLimit(handler echo.HandlerFunc, duration time.Duration, burst int) 
 func getVisitor(path string, ip string, duration time.Duration, burst int) *rate.Limiter {
 	rateLock.Lock()
 	defer rateLock.Unlock()
+
 	if _, exists := rateLimits[path]; !exists {
 		limiter := rate.NewLimiter(rate.Every(duration), burst)
 		rateLimits[path] = make(map[string]*visitor)
 		rateLimits[path][ip] = &visitor{
-			limiter:  *limiter,
+			limiter:  limiter,
 			lastSeen: time.Now(),
 		}
+
 		return limiter
 	}
-	if v, exists := rateLimits[path][ip]; !exists {
+
+	v, exists := rateLimits[path][ip]
+
+	if !exists {
 		limiter := rate.NewLimiter(rate.Every(duration), burst)
 		rateLimits[path][ip] = &visitor{
-			limiter:  *limiter,
+			limiter:  limiter,
 			lastSeen: time.Now(),
 		}
+
 		return limiter
-	} else {
-		return &v.limiter
 	}
+
+	return v.limiter
 }

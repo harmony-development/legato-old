@@ -4,11 +4,12 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/kataras/golog"
+	// postgress support for sql library
 	_ "github.com/lib/pq"
-	"os"
+	"harmony-auth-server/env"
 )
 
-var DB sql.DB
+var DB *sql.DB
 
 var queries = []string{
 	`CREATE TABLE IF NOT EXISTS users(
@@ -30,22 +31,23 @@ var queries = []string{
 	`,
 }
 
-func OpenDB() *sql.DB {
+// Init initializes the connection to the database
+func Init() {
 	database, err := sql.Open("postgres", fmt.Sprintf("user=%v password=%v dbname=%v host=%v port=%v sslmode=%v",
-		os.Getenv("HARMONY_AUTH_USER"),
-		os.Getenv("HARMONY_AUTH_PASSWORD"),
+		env.DBUser,
+		env.DBPass,
 		"harmonyauth",
-		os.Getenv("HARMONY_AUTH_HOST"),
-		os.Getenv("HARMONY_AUTH_PORT"),
+		env.DBHost,
+		env.DBPort,
 		"disable", ))
 	if err != nil {
 		golog.Fatalf("Harmony was unable to open the database! Reason : %v", err)
-		return nil
+		return
 	}
 	initTransaction, err := database.Begin()
 	if err != nil {
 		golog.Fatalf("Error initializing transaction : %v", err)
-		return nil
+		return
 	}
 	for i := range queries {
 		_, err := initTransaction.Exec(queries[i])
@@ -57,5 +59,5 @@ func OpenDB() *sql.DB {
 	if err != nil {
 		golog.Fatalf("Error running initialization transaction! %v", err)
 	}
-	return database
+	DB = database
 }
