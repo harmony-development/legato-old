@@ -8,7 +8,7 @@ import (
 )
 
 func JoinGuild(c echo.Context) error {
-	ctx := c.(*hm.HarmonyContext)
+	ctx := c.(hm.HarmonyContext)
 	inviteCode := ctx.FormValue("inviteCode")
 	var guildid string
 	err := db.DBInst.QueryRow("SELECT guildid FROM invites WHERE inviteid=$1", inviteCode).Scan(&guildid)

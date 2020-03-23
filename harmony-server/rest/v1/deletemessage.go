@@ -9,7 +9,7 @@ import (
 )
 
 func DeleteMessage(c echo.Context) error {
-	ctx, _ := c.(*hm.HarmonyContext)
+	ctx, _ := c.(hm.HarmonyContext)
 	guild, channel, message := ctx.FormValue("guild"), ctx.FormValue("channel"), ctx.FormValue("message")
 	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[guild] == nil {
 		return echo.NewHTTPError(http.StatusForbidden, "insufficient permissions to delete message")

@@ -15,7 +15,7 @@ type updateGuildName struct {
 }
 
 func UpdateGuildName(c echo.Context) error {
-	ctx := c.(*hm.HarmonyContext)
+	ctx := c.(hm.HarmonyContext)
 	guild, name := ctx.FormValue("guild"), ctx.FormValue("name")
 	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[ctx.User.ID] == nil || globals.Guilds[guild].Owner != ctx.User.ID {
 		return echo.NewHTTPError(http.StatusForbidden, "insufficient perms to update guild name")

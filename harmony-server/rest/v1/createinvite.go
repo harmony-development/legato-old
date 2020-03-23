@@ -10,7 +10,7 @@ import (
 )
 
 func CreateInvite(c echo.Context) error {
-	ctx, _ := c.(*hm.HarmonyContext)
+	ctx, _ := c.(hm.HarmonyContext)
 	guild := ctx.FormValue("guildid")
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many invites created, try again in a few seconds")

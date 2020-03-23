@@ -9,7 +9,7 @@ import (
 )
 
 func DeleteInvite(c echo.Context) error {
-	ctx, _ := c.(*hm.HarmonyContext)
+	ctx, _ := c.(hm.HarmonyContext)
 	guild, invite := ctx.FormValue("guild"), ctx.FormValue("invite")
 	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[ctx.User.ID] == nil || globals.Guilds[guild].Owner != ctx.User.ID {
 		return echo.NewHTTPError(http.StatusForbidden, "insufficient permissions to delete invite")

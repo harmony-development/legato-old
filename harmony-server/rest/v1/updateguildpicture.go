@@ -15,7 +15,7 @@ import (
 )
 
 func UpdateGuildPicture(c echo.Context) error {
-	ctx, _ := c.(*hm.HarmonyContext)
+	ctx, _ := c.(hm.HarmonyContext)
 	form, err := ctx.MultipartForm()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Form required")

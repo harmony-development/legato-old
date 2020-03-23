@@ -13,7 +13,7 @@ type returnChannel struct {
 }
 
 func GetChannels(c echo.Context) error {
-	ctx, _ := c.(*hm.HarmonyContext)
+	ctx, _ := c.(hm.HarmonyContext)
 	guildid := ctx.FormValue("guildid")
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "you're getting channels too often! Please try again in a few seconds.")

@@ -10,7 +10,7 @@ import (
 )
 
 func AddChannel(c echo.Context) error {
-	ctx, _ := c.(*hm.HarmonyContext)
+	ctx, _ := c.(hm.HarmonyContext)
 	guild, channelname := ctx.FormValue("guildid"), ctx.FormValue("channelname")
 	if channelname == "" || guild == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid parameters")

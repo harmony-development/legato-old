@@ -9,7 +9,7 @@ import (
 )
 
 func LeaveGuild(c echo.Context) error {
-	ctx := c.(*hm.HarmonyContext)
+	ctx := c.(hm.HarmonyContext)
 	guild := ctx.FormValue("guild")
 	if globals.Guilds[guild] == nil || globals.Guilds[guild].Clients[ctx.User.ID] == nil {
 		return echo.NewHTTPError(http.StatusForbidden, "you are not part of the guild, so you cannot leave it")

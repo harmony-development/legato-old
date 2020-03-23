@@ -9,7 +9,7 @@ import (
 )
 
 func DeleteChannel(c echo.Context) error {
-	ctx, _ := c.(*hm.HarmonyContext)
+	ctx, _ := c.(hm.HarmonyContext)
 	guild, channelid := ctx.FormValue("guild"), ctx.FormValue("channelid")
 	if globals.Guilds[guild] == nil || globals.Guilds[guild].Owner != ctx.User.ID {
 		return echo.NewHTTPError(http.StatusForbidden, "insufficient permissions to delete channel")

@@ -19,7 +19,7 @@ type MessageData struct {
 }
 
 func GetMessages(c echo.Context) error {
-	ctx := c.(*hm.HarmonyContext)
+	ctx := c.(hm.HarmonyContext)
 	guild, channel, lastmessage := ctx.FormValue("guild"), ctx.FormValue("channel"), ctx.FormValue("lastmessage")
 	if guild == "" || channel == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid parameters")
