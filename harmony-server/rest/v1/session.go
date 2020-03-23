@@ -24,7 +24,7 @@ func Session(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid identity")
 	}
 	var user authentication.SessionData
-	if err := json.Unmarshal([]byte(rawUser), user); err != nil {
+	if err := json.Unmarshal([]byte(rawUser), &user); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "bad user")
 	}
 	user.ExpiresAt = token.ExpiresAt

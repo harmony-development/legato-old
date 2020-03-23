@@ -10,7 +10,7 @@ import (
 // code adapted from https://www.alexedwards.net/blog/how-to-rate-limit-http-requests
 
 type visitor struct {
-	limiter rate.Limiter
+	limiter *rate.Limiter
 	lastSeen time.Time
 }
 
@@ -21,7 +21,6 @@ func CleanupRoutine() {
 	for {
 		time.Sleep(3 * time.Minute)
 		rateLock.Lock()
-		defer rateLock.Unlock()
 		for _, path := range rateLimits {
 			for ip, v := range path {
 				if time.Now().Sub(v.lastSeen) > 3*time.Minute {
@@ -29,6 +28,7 @@ func CleanupRoutine() {
 				}
 			}
 		}
+		rateLock.Unlock()
 	}
 }
 
@@ -47,7 +47,7 @@ func getVisitor(path string, ip string, duration time.Duration, burst int) *rate
 		limiter := rate.NewLimiter(rate.Every(duration), burst)
 		rateLimits[path] = make(map[string]*visitor)
 		rateLimits[path][ip] = &visitor{
-			limiter:  *limiter,
+			limiter:  limiter,
 			lastSeen: time.Now(),
 		}
 		return limiter
@@ -55,11 +55,11 @@ func getVisitor(path string, ip string, duration time.Duration, burst int) *rate
 	if v, exists := rateLimits[path][ip]; !exists {
 		limiter := rate.NewLimiter(rate.Every(duration), burst)
 		rateLimits[path][ip] = &visitor{
-			limiter:  *limiter,
+			limiter:  limiter,
 			lastSeen: time.Now(),
 		}
 		return limiter
 	} else {
-		return &v.limiter
+		return v.limiter
 	}
 }
