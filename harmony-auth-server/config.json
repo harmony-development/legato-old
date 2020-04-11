@@ -1,0 +1,27 @@
+{
+  "db": {
+    "Host": "127.0.0.1",
+    "Port": 5432,
+    "User": "amadeus",
+    "Password": "password",
+    "SSL": false
+  },
+  "server": {
+    "Port": ":2289",
+    "InstanceAPIVersion": "v1",
+    "AvatarPath": "./avatars",
+    "UsernameLenMin": 2,
+    "UsernameLenMax": 48,
+    "PassLenMin": 5,
+    "PassLenMax": 128,
+    "UserIDLength": 16,
+    "SessionLength": 16,
+    "SessionExpire": 86400000000000,
+    "SessionCacheMax": 500000,
+    "IDCacheMax": 500000,
+    "AvatarQuality": 60,
+    "AvatarWidth": 128,
+    "AvatarHeight": 128,
+    "AvatarCrop": true
+  }
+}
