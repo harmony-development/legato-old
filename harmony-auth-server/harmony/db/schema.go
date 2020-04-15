@@ -19,8 +19,8 @@ var queries = []string{
 	);`,
 	`CREATE TABLE IF NOT EXISTS intances(
 		userid TEXT NOT NULL REFERENCES users(userid), -- the userid of who owns this entry
-		host TEXT PRIMARY KEY NOT NULL -- the host for the harmony instance
-		label TEXT NOT NULL
+		host TEXT PRIMARY KEY NOT NULL, -- the host for the harmony instance
+		name TEXT NOT NULL
 	)`,
 }
 

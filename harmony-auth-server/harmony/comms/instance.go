@@ -8,7 +8,7 @@ import (
 
 // Instance is an entry a user's list
 type Instance struct {
-	Label string
+	Name string
 	Host  string
 }
 

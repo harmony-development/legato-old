@@ -27,6 +27,7 @@ func (inst Instance) Start() {
 		logrus.Fatal("Unable to load config", err)
 	}
 	inst.Config = cfg
+	inst.Consts = consts.MakeConstants()
 	inst.DB, err = db.New(inst.Config)
 	if err != nil {
 		logrus.Fatal("Error connecting to database", err)

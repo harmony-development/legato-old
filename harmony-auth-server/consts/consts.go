@@ -8,8 +8,8 @@ type Constants struct {
 }
 
 // MakeConstants makes a new constants instance
-func MakeConstants() Constants {
-	return Constants{
+func MakeConstants() *Constants {
+	return &Constants{
 		EmailRegex: regexp.MustCompile(
 			"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$",
 		),
