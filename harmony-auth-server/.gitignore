@@ -6,3 +6,4 @@ filestore
 harmony.db
 static
 harmony-auth-server
+config.json

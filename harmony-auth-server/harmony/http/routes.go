@@ -7,5 +7,5 @@ import (
 
 // BindRoutes applies routes for /api
 func (s Server) BindRoutes(g *echo.Group) {
-	s.V1 = v1.New(s.DB, s.AuthManager, s.StorageManager, s.Config, s.Consts, g)
+	s.V1 = v1.New(s.DB, s.AuthManager, s.StorageManager, s.Config, g)
 }

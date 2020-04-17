@@ -11,7 +11,7 @@ import (
 )
 
 type registerData struct {
-	Email    string `validate:"required"`
+	Email    string `validate:"required,email"`
 	Username string `validate:"required"`
 	Password string `validate:"required"`
 }
@@ -38,10 +38,7 @@ func (h Handlers) Register(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Password must be between %v and %v characters long",
 			h.Config.Server.PassLenMin,
 			h.Config.Server.PassLenMax,
-		), )
-	}
-	if !h.Consts.EmailRegex.MatchString(data.Email) {
-		return echo.NewHTTPError(http.StatusBadRequest, "email is invalid")
+		))
 	}
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many registration requests, please try again later")

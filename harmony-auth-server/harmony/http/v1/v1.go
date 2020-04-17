@@ -2,7 +2,6 @@ package v1
 
 import (
 	"github.com/labstack/echo/v4"
-	"harmony-auth-server/consts"
 	"harmony-auth-server/harmony/auth"
 	"harmony-auth-server/harmony/config"
 	"harmony-auth-server/harmony/db"
@@ -18,17 +17,15 @@ type Handlers struct {
 	AuthManager    *auth.Manager
 	StorageManager *storage.Manager
 	Config         *config.Config
-	Consts         *consts.Constants
 }
 
 // New returns a new v1 model
-func New(db *db.DB, authManager *auth.Manager, storageManager *storage.Manager, config *config.Config, consts *consts.Constants, g *echo.Group) *Handlers {
+func New(db *db.DB, authManager *auth.Manager, storageManager *storage.Manager, config *config.Config, g *echo.Group) *Handlers {
 	h := &Handlers{
 		DB:             db,
 		AuthManager:    authManager,
 		StorageManager: storageManager,
 		Config:         config,
-		Consts:         consts,
 		Group:    g,
 	}
 

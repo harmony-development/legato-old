@@ -9,6 +9,7 @@ import (
 type Config struct {
 	Server ServerConf
 	DB     DBConf
+	Sentry SentryConf
 }
 
 // ServerConf is the servers configuration
@@ -40,6 +41,13 @@ type DBConf struct {
 	SSL      bool
 }
 
+// SentryConf is the config for sentry
+type SentryConf struct {
+	Dsn              string
+	AttachStacktrace bool
+	Enabled          bool
+}
+
 // Load reads a config file (YAML format)
 func Load() (*Config, error) {
 	defaultCFG := Config{
@@ -66,12 +74,16 @@ func Load() (*Config, error) {
 			Port: 5432,
 			SSL:  false,
 		},
+		Sentry: SentryConf{
+			Dsn:              "",
+			AttachStacktrace: true,
+			Enabled:          true,
+		},
 	}
 	viper.AddConfigPath(".")
 	viper.SetConfigName("config")
 	viper.SetConfigType("json")
-	viper.SetDefault("db", defaultCFG.DB)
-	viper.SetDefault("server", defaultCFG.Server)
+	viper.SetDefault("authserver", defaultCFG)
 	if err := viper.ReadInConfig(); err != nil {
 		if err := viper.SafeWriteConfig(); err != nil {
 			return nil, err
@@ -79,7 +91,7 @@ func Load() (*Config, error) {
 		return nil, err
 	}
 	var cfg Config
-	if err := viper.Unmarshal(&cfg); err != nil {
+	if err := viper.UnmarshalKey("authserver", &cfg); err != nil {
 		return nil, err
 	}
 	return &cfg, nil

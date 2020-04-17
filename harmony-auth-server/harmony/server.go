@@ -1,13 +1,14 @@
 package harmony
 
 import (
+	"github.com/getsentry/sentry-go"
 	"github.com/sirupsen/logrus"
-	"harmony-auth-server/consts"
 	"harmony-auth-server/harmony/auth"
 	"harmony-auth-server/harmony/config"
 	"harmony-auth-server/harmony/db"
 	"harmony-auth-server/harmony/http"
 	"harmony-auth-server/harmony/storage"
+	"time"
 )
 
 // Instance contains the server instance's variables.
@@ -16,7 +17,6 @@ type Instance struct {
 	DB             *db.DB
 	StorageManager *storage.Manager
 	AuthHandler    *auth.Manager
-	Consts         *consts.Constants
 	Config         *config.Config
 }
 
@@ -27,7 +27,9 @@ func (inst Instance) Start() {
 		logrus.Fatal("Unable to load config", err)
 	}
 	inst.Config = cfg
-	inst.Consts = consts.MakeConstants()
+	if err := ConnectSentry(cfg); err != nil {
+		logrus.Fatal("Error connecting to sentry", err)
+	}
 	inst.DB, err = db.New(inst.Config)
 	if err != nil {
 		logrus.Fatal("Error connecting to database", err)
@@ -38,16 +40,21 @@ func (inst Instance) Start() {
 	inst.AuthHandler = auth.New(cfg)
 	inst.StorageManager = storage.New()
 	go inst.StorageManager.DeleteRoutine(cfg.Server.AvatarPath)
-	inst.Server = http.New(inst.DB, inst.AuthHandler, inst.StorageManager, inst.Config, inst.Consts)
+	inst.Server = http.New(inst.DB, inst.AuthHandler, inst.StorageManager, inst.Config)
 	logrus.Fatal(inst.Server.Start(inst.Config.Server.Port))
 }
 
 // Stop ends the authentication server gracefully
 func (inst Instance) Stop() {
 	inst.Server.Stop()
+	if inst.Config.Sentry.Enabled {
+		sentry.Flush(2 * time.Second)
+	}
+
 	if err := inst.DB.Close(); err != nil {
 		logrus.Error("Error closing database", err)
 	}
+
 	if err := inst.DB.Close(); err != nil {
 		logrus.Error("Error closing redis connection", err)
 	}

@@ -2,9 +2,9 @@ package http
 
 import (
 	"context"
+	sentryecho "github.com/getsentry/sentry-go/echo"
 	"github.com/go-playground/validator/v10"
 	"github.com/sirupsen/logrus"
-	"harmony-auth-server/consts"
 	"harmony-auth-server/harmony/auth"
 	"harmony-auth-server/harmony/config"
 	"harmony-auth-server/harmony/db"
@@ -23,23 +23,25 @@ type Server struct {
 	AuthManager    *auth.Manager
 	StorageManager *storage.Manager
 	Config         *config.Config
-	Consts         *consts.Constants
 }
 
 // New returns a new http server with echo
-func New(db *db.DB, authManager *auth.Manager, storageManager *storage.Manager, config *config.Config, consts *consts.Constants) *Server {
+func New(db *db.DB, authManager *auth.Manager, storageManager *storage.Manager, config *config.Config) *Server {
 	s := &Server{
 		Echo:           echo.New(),
 		DB:             db,
 		AuthManager:    authManager,
 		StorageManager: storageManager,
 		Config:         config,
-		Consts:         consts,
 	}
 	s.Pre(middleware.RemoveTrailingSlash())
 	s.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
 		StackSize:       1 << 10,
 		DisableStackAll: true,
+	}))
+	s.Use(sentryecho.New(sentryecho.Options{
+		Repanic: true,
+		WaitForDelivery: false,
 	}))
 	s.Validator = &HarmonyValidator{
 		validator: validator.New(),
