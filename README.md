@@ -1,10 +1,18 @@
 <h1 align=center>
- <a href="https://github.com/harmony-development"><img align=center width="10%" src="https://avatars3.githubusercontent.com/u/58618825?s=200" /></a> Harmony Server
+ <a href="https://github.com/harmony-development"><img align=center width="10%" src="https://avatars3.githubusercontent.com/u/58618825?s=200" /></a> Harmony
 </h1>
 
-A free and open source communications platform server. It's designed to provide users with full featured open source Discord replacement with messaging, guilds, roles, voice chat and rich presence.
+A free and open source communications platform. It's designed to provide users with full featured open source Discord replacement with messaging, guilds, roles, voice chat and rich presence.
 
+### Screenshots
+App Preview  
 <img src="https://i.imgur.com/GHZN7BD.png" width="80%">
+
+Cool Theming  
+<img src="https://i.imgur.com/namHS1j.png" width="80%">
+
+Login screen  
+<img src="https://i.imgur.com/6YmxSDO.png" width="80%">
 
 ## Setup
 ### For setup you have two options : 
