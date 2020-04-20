@@ -5,14 +5,14 @@
 A free and open source communications platform. It's designed to provide users with full featured open source Discord replacement with messaging, guilds, roles, voice chat and rich presence.
 
 ### Screenshots
-App Preview  
-<img src="https://i.imgur.com/GHZN7BD.png" width="80%">
+App preview  
+<img src="https://i.imgur.com/GHZN7BD.png" width="70%">
 
-Cool Theming  
-<img src="https://i.imgur.com/namHS1j.png" width="80%">
+Cool theming  
+<img src="https://i.imgur.com/namHS1j.png" width="70%">
 
 Login screen  
-<img src="https://i.imgur.com/6YmxSDO.png" width="80%">
+<img src="https://i.imgur.com/6YmxSDO.png" width="60%">
 
 ### Setup
 #### For setup you have two options : 
