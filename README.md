@@ -14,8 +14,8 @@ Cool Theming
 Login screen  
 <img src="https://i.imgur.com/6YmxSDO.png" width="80%">
 
-## Setup
-### For setup you have two options : 
+### Setup
+#### For setup you have two options : 
 
 1. Use `docker-compose` to have the server automatically configured for you
     
