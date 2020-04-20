@@ -1,13 +1,12 @@
-# Harmony Server
-## A Free And Open Source Server For A Communications Platform With Guilds
-### **[!] This is under **very** heavy development, most things are NOT working!**
+<h1 align=center>
+ <a href="https://github.com/harmony-development"><img align=center width="10%" src="https://avatars3.githubusercontent.com/u/58618825?s=200" /></a> Harmony Server
+</h1>
 
-![Harmony Logo](https://avatars3.githubusercontent.com/u/58618825?s=200)
+A free and open source communications platform server. It's designed to provide users with full featured open source Discord replacement with messaging, guilds, roles, voice chat and rich presence.
 
-![App Preview](https://i.imgur.com/GHZN7BD.png)
+<img src="https://i.imgur.com/GHZN7BD.png" width="80%">
 
 ## Setup
-
 ### For setup you have two options : 
 
 1. Use `docker-compose` to have the server automatically configured for you
