@@ -22,7 +22,20 @@ jobs:
       - checkout
 
       # specify any bash command here prefixed with `run: `
-      - run: sudo apt-get update
-      - run: sudo apt-get install libvips libvips-dev
-      - run: go get -v -t -d ./...
-      - run: go test -v ./...
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt-get install libvips libvips-dev;
+
+      - run:
+          name: Build project
+          command: |
+            cd harmony-server/;
+            go get -v -t -d ./...;
+            go fmt ./...;
+            go vet ./...;
+            go build;
+
+      - store_artifacts:
+          path: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}/harmony-server/harmony-server
+          destination: harmony-bin
