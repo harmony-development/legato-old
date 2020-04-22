@@ -9,7 +9,6 @@ jobs:
       - image: cimg/go:1.14
     steps:
       - checkout
-
       # specify any bash command here prefixed with `run: `
       - run:
           name: Install dependencies
@@ -27,5 +26,5 @@ jobs:
             go build;
 
       - store_artifacts:
-          path: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}/harmony-server/harmony-server
+          path: ~/project/harmony-server/harmony-server
           destination: harmony-bin
