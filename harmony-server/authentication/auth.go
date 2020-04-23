@@ -4,7 +4,7 @@ import (
 	"crypto/rsa"
 	"errors"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/kataras/golog"
+
 	"io/ioutil"
 	"os"
 )
@@ -31,12 +31,12 @@ type SessionClaims struct {
 func Init() {
 	pubBytes, err := ioutil.ReadFile("public.pem")
 	if err != nil {
-		golog.Fatalf("error reading public key! ", err)
+		logrus.Fatalf("error reading public key! ", err)
 		os.Exit(-1)
 	}
 	pubKey, err = jwt.ParseRSAPublicKeyFromPEM(pubBytes)
 	if err != nil {
-		golog.Fatalf("invalid public key! ", err)
+		logrus.Fatalf("invalid public key! ", err)
 		os.Exit(-1)
 	}
 	SessionStore = make(map[string]*SessionData)
@@ -59,7 +59,7 @@ func ReadAuthToken(raw string) (*SessionClaims, error) {
 // GetUserBySession returns a user from the session cache or an error if the session is not valid
 func GetUserBySession(session string) (*SessionData, error) {
 	if SessionStore[session] == nil {
-		golog.Warnf("bruhhh")
+		logrus.Warnf("bruhhh")
 		return nil, errors.New("session is invalid")
 	}
 	return SessionStore[session], nil

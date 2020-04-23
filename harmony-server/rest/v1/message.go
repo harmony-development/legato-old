@@ -2,11 +2,11 @@ package v1
 
 import (
 	"fmt"
-	"github.com/kataras/golog"
+
 	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
-	"harmony-server/globals"
 	"harmony-server/db"
+	"harmony-server/globals"
 	"harmony-server/rest/hm"
 	"io/ioutil"
 	"net/http"
@@ -43,34 +43,34 @@ func Message(c echo.Context) error {
 	if len(files) > 0 {
 		fileTransaction, err := db.DBInst.Begin()
 		if err != nil {
-			golog.Warnf("error making file transaction : %v", err)
+			logrus.Warnf("error making file transaction : %v", err)
 			return echo.NewHTTPError(http.StatusInternalServerError, "Error saving files")
 		}
 		for i, v := range files {
 			file, err := v.Open()
 			if err != nil {
-				golog.Warnf("Failed to parse file : %v", err)
+				logrus.Warnf("Failed to parse file : %v", err)
 				return echo.NewHTTPError(http.StatusInternalServerError, "Error opening file")
 			}
 			fileBytes, err := ioutil.ReadAll(file)
 			if err != nil {
-				golog.Warnf("Error reading uploaded file : %v", err)
+				logrus.Warnf("Error reading uploaded file : %v", err)
 				return echo.NewHTTPError(http.StatusInternalServerError, "Error reading file")
 			}
 			err = file.Close()
 			if err != nil {
-				golog.Warnf("Failed to close file : %v", err)
+				logrus.Warnf("Failed to close file : %v", err)
 				return echo.NewHTTPError(http.StatusInternalServerError, "Error closing files")
 			}
 			fname := randstr.Hex(16)
 			err = ioutil.WriteFile(fmt.Sprintf("./filestore/%v", fname), fileBytes, 0666)
 			if err != nil {
-				golog.Warnf("Error saving file upload : %v", err)
+				logrus.Warnf("Error saving file upload : %v", err)
 				return echo.NewHTTPError(http.StatusInternalServerError, "Error writing file")
 			}
 			_, err = fileTransaction.Exec("INSERT INTO attachments(messageid, attachment) VALUES($1, $2)", messageID, fname)
 			if err != nil {
-				golog.Warnf("Error inserting into attachments : %v", err)
+				logrus.Warnf("Error inserting into attachments : %v", err)
 				go deleteFromFilestore(fname)
 				return echo.NewHTTPError(http.StatusInternalServerError, "Error linking file to message")
 			} else {
@@ -79,7 +79,7 @@ func Message(c echo.Context) error {
 		}
 		err = fileTransaction.Commit()
 		if err != nil {
-			golog.Warnf("Error committing attachment transaction  : %v", err)
+			logrus.Warnf("Error committing attachment transaction  : %v", err)
 			return echo.NewHTTPError(http.StatusInternalServerError, "Error committing attachment transaction")
 		}
 	}

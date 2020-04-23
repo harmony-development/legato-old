@@ -1,12 +1,12 @@
 package main
 
 import (
-	"harmony-auth-server/harmony"
+	"harmony-auth-server/server"
 	"os"
 )
 
 func main() {
 	_ = os.Mkdir("./avatars", 0777)
-	s := new(harmony.Instance)
+	s := new(server.Instance)
 	s.Start()
 }

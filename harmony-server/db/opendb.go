@@ -3,7 +3,8 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"github.com/kataras/golog"
+	"github.com/sirupsen/logrus"
+
 	_ "github.com/lib/pq"
 	"os"
 )
@@ -69,7 +70,7 @@ var queries = []string{
 		'dadcd6bf8c0338cbfc9aa9c369ea93cc', 
 		'developer2@harmonyapp.io', 
 		'developer2', 
-		'', 
+		'',
 		'$2a$10$yTHVSHmbAAgcIysrJZg/cesPg7o9qpoTGxFgeM/7pQIgOLFjJZPLW') ON CONFLICT DO NOTHING;`,
 	`INSERT INTO guildmembers(userid, guildid) VALUES(
 		'82ee9c8dc9e165205548b7c3833e7372', 
@@ -98,21 +99,21 @@ func OpenDB() *sql.DB {
 		os.Getenv("HARMONY_DB_PORT"),
 		"disable", ))
 	if err != nil {
-		golog.Fatalf("Harmony was unable to open the database! Reason : %v", err)
+		logrus.Fatalf("Harmony was unable to open the database! Reason : %v", err)
 	}
 	initTransaction, err := database.Begin()
 	if err != nil {
-		golog.Fatalf("Error initializing transaction : %v", err)
+		logrus.Fatalf("Error initializing transaction : %v", err)
 	}
 	for i := range queries {
 		_, err := initTransaction.Exec(queries[i])
 		if err != nil {
-			golog.Fatalf("Harmony was not able to initialize the database! The server cannot continue! Query: \n%v\nReason : %v", queries[i], err)
+			logrus.Fatalf("Harmony was not able to initialize the database! The server cannot continue! Query: \n%v\nReason : %v", queries[i], err)
 		}
 	}
 	err = initTransaction.Commit()
 	if err != nil {
-		golog.Fatalf("Error running initialization transaction! %v", err)
+		logrus.Fatalf("Error running initialization transaction! %v", err)
 	}
 	return database
 }

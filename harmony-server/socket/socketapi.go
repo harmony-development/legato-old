@@ -3,7 +3,7 @@ package socket
 import (
 	"encoding/json"
 	"github.com/gorilla/websocket"
-	"github.com/kataras/golog"
+
 	"harmony-server/globals"
 	"harmony-server/socket/event"
 	"net/http"
@@ -24,7 +24,7 @@ var (
 func NewSocket(w http.ResponseWriter, r *http.Request) *globals.Client {
 	rawsocket, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		golog.Warnf("error upgrading event for reason : %v", err)
+		logrus.Warnf("error upgrading event for reason : %v", err)
 	}
 	ws := &globals.Client{
 		Connection: rawsocket,
@@ -46,10 +46,10 @@ func pinger(ws *globals.Client) {
 	time.Sleep(20 * time.Second)
 	if time.Since(ws.LastPong) > 20 * time.Second {
 		deregister(ws)
-		golog.Debugf("Closing Socket : Ping Timeout")
+		logrus.Debugf("Closing Socket : Ping Timeout")
 		err := ws.Connection.Close()
 		if err != nil {
-			golog.Warnf("Error closing websocket connection : %v", err)
+			logrus.Warnf("Error closing websocket connection : %v", err)
 		}
 	}
 }
@@ -69,12 +69,12 @@ func reader(ws *globals.Client) {
 						event.Deauth(ws)
 					}
 				} else {
-					golog.Warnf("Unrecognized API Query Detected : %v", p.Type)
+					logrus.Warnf("Unrecognized API Query Detected : %v", p.Type)
 				}
 			}
 		} else {
-			golog.Warnf("Error reading data from event : %v", err)
-			golog.Debugf("Closing Socket : Data read error")
+			logrus.Warnf("Error reading data from event : %v", err)
+			logrus.Debugf("Closing Socket : Data read error")
 			if ws.Userid != "" {
 				deregister(ws)
 			}
@@ -90,8 +90,8 @@ func writer(ws *globals.Client) {
 		msg := <- ws.Out // wait for a new message to be sent
 		err := ws.Connection.WriteMessage(websocket.TextMessage, msg)
 		if err != nil {
-			golog.Warnf("Error writing data to event : %v", err)
-			golog.Debugf("Closing Socket : Data write error")
+			logrus.Warnf("Error writing data to event : %v", err)
+			logrus.Debugf("Closing Socket : Data write error")
 			_ = ws.Connection.Close()
 			if ws.Userid != "" {
 				deregister(ws)

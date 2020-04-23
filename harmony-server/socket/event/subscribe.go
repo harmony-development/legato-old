@@ -1,12 +1,11 @@
 package event
 
 import (
-	"github.com/kataras/golog"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/time/rate"
 	"harmony-server/authentication"
-	"harmony-server/globals"
 	"harmony-server/db"
+	"harmony-server/globals"
 )
 
 type subscribeData struct {
@@ -31,7 +30,7 @@ func OnSubscribe(ws *globals.Client, rawMap map[string]interface{}, limiter *rat
 	res, err := db.DBInst.Query("SELECT guilds.guildid FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=$1", user.ID)
 	if err != nil {
 		sendErr(ws, "We weren't able to get a list of guilds. Try reloading the page / logging back in")
-		golog.Warnf("Error selecting guilds. Reason : %v", err)
+		logrus.Warnf("Error selecting guilds. Reason : %v", err)
 		return
 	}
 	for res.Next() {
@@ -39,7 +38,7 @@ func OnSubscribe(ws *globals.Client, rawMap map[string]interface{}, limiter *rat
 		err := res.Scan(&guildID)
 		if err != nil {
 			sendErr(ws, "Unable to subscribe to all guilds. Please try again later")
-			golog.Warnf("Error scanning next row. Reason: %v", err)
+			logrus.Warnf("Error scanning next row. Reason: %v", err)
 			return
 		}
 		// Now subscribe to all guilds that the client is a member of!

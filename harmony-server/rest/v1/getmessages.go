@@ -2,10 +2,10 @@ package v1
 
 import (
 	"database/sql"
-	"github.com/kataras/golog"
+
 	"github.com/labstack/echo/v4"
-	"harmony-server/globals"
 	"harmony-server/db"
+	"harmony-server/globals"
 	"harmony-server/rest/hm"
 	"net/http"
 )
@@ -54,7 +54,7 @@ func GetMessages(c echo.Context) error {
 			var attachment string
 			err := attachments.Scan(&attachment)
 			if err != nil {
-				golog.Warnf("Error scanning attachment : %v", err)
+				logrus.Warnf("Error scanning attachment : %v", err)
 			}
 			msg.Attachments = append(msg.Attachments, attachment)
 		}
