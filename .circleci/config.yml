@@ -14,10 +14,11 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            sudo apt-get install libvips libvips-dev;
+            sudo apt-get update;
+            sudo apt-get install --no-install-recommends --no-install-suggests libvips libvips-dev;
 
       - run:
-          name: Build project
+          name: Build backend
           command: |
             cd harmony-server/;
             go get -v -t -d ./...;
@@ -40,10 +41,11 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            sudo apt-get install libvips libvips-dev;
+            sudo apt-get update;
+            sudo apt-get install --no-install-recommends --no-install-suggests libvips libvips-dev;
 
       - run:
-          name: Build project
+          name: Build auth server
           command: |
             cd harmony-auth-server/;
             go get -v -t -d ./...;
