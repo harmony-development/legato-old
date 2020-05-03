@@ -3,12 +3,16 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"github.com/hashicorp/golang-lru"
 	"harmony-server/server/config"
 )
 
 // DB is a wrapper for the SQL DB
 type DB struct {
 	*sql.DB
+	Config *config.Config
+	OwnerCache       *lru.Cache
+	SessionCache     *lru.Cache
 }
 
 // New creates a new DB connection
@@ -32,6 +36,12 @@ func New(cfg *config.Config) (*DB, error) {
 		return nil, err
 	}
 	if err = db.AddSampleData(); err != nil {
+		return nil, err
+	}
+	if db.OwnerCache, err = lru.New(cfg.Server.OwnerCacheMax); err != nil {
+		return nil, err
+	}
+	if db.SessionCache, err = lru.New(cfg.Server.SessionCacheMax); err != nil {
 		return nil, err
 	}
 	return db, nil

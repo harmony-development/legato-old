@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/spf13/viper"
+	"github.com/thanhpk/randstr"
 )
 
 // Config is the overall configuration for the auth service
@@ -13,7 +14,14 @@ type Config struct {
 
 // ServerConf is the servers configuration
 type ServerConf struct {
-	Port string
+	Port             string
+	Identity         string
+	ImagePath        string
+	GuildPicturePath string
+	MaxAttachments   int
+	GetMessageCount  int
+	OwnerCacheMax    int
+	SessionCacheMax  int
 }
 
 // DBConf is the config for the database
@@ -36,7 +44,13 @@ type SentryConf struct {
 func Load() (*Config, error) {
 	defaultCFG := Config{
 		Server: ServerConf{
-			Port: ":2289",
+			Port:             ":2289",
+			Identity:         randstr.Hex(16), // this is what prevents people from using auth tokens on other instances
+			ImagePath:        "images",
+			GuildPicturePath: "guild-pictures",
+			MaxAttachments:   1,
+			OwnerCacheMax:    5096,
+			SessionCacheMax:  5096,
 		},
 		DB: DBConf{
 			Host: "127.0.0.1",

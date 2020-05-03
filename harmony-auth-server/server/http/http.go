@@ -8,6 +8,7 @@ import (
 	"harmony-auth-server/server/auth"
 	"harmony-auth-server/server/config"
 	"harmony-auth-server/server/db"
+	"harmony-auth-server/server/http/hm"
 	"harmony-auth-server/server/storage"
 
 	"github.com/labstack/echo/v4"
@@ -48,6 +49,9 @@ func New(db *db.DB, authManager *auth.Manager, storageManager *storage.Manager, 
 	}
 	g := s.Group("/api")
 	s.BindRoutes(g)
+
+	go hm.CleanupRoutine()
+
 	return s
 }
 

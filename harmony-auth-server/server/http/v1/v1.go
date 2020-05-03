@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// Handlers represents the handlers for API v1
+// Handlers represents the events for API v1
 type Handlers struct {
 	Group          *echo.Group
 	DB             *db.DB
@@ -26,7 +26,7 @@ func New(db *db.DB, authManager *auth.Manager, storageManager *storage.Manager, 
 		AuthManager:    authManager,
 		StorageManager: storageManager,
 		Config:         config,
-		Group:    g,
+		Group:          g,
 	}
 
 	g.POST("/login", hm.WithRateLimit(h.Login, 5*time.Second, 5))
