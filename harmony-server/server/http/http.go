@@ -12,14 +12,13 @@ import (
 	"harmony-server/server/http/socket"
 	v1 "harmony-server/server/http/v1"
 	"harmony-server/server/state"
-	"harmony-server/server/state/event"
 	"harmony-server/server/storage"
 )
 
 // Server is an instance of the HTTP server
 type Server struct {
 	*echo.Echo
-	Socket *event.Handler
+	Socket *socket.Handler
 	V1     *v1.Handlers
 	Deps   *Dependencies
 }
@@ -36,10 +35,7 @@ type Dependencies struct {
 func New(deps *Dependencies) *Server {
 	s := &Server{
 		Echo:   echo.New(),
-		Socket: socket.NewHandler(socket.Dependencies{
-			DB:    deps.DB,
-			State: deps.State,
-		}),
+		Socket: socket.NewHandler(deps.State),
 		Deps:   deps,
 	}
 	s.Pre(middleware.RemoveTrailingSlash())

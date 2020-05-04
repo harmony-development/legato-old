@@ -6,7 +6,7 @@ import (
 	"github.com/thanhpk/randstr"
 	"gopkg.in/h2non/bimg.v1"
 	"harmony-server/server/http/hm"
-	"harmony-server/server/http/socket"
+	"harmony-server/server/http/socket/client"
 	"io/ioutil"
 	"net/http"
 )
@@ -81,7 +81,7 @@ func (h Handlers) UpdateGuildPicture(c echo.Context) error {
 	h.Deps.StorageManager.DeleteGuildPicture(*oldPicture)
 	h.Deps.State.GuildsLock.RLock()
 	defer h.Deps.State.GuildsLock.RUnlock()
-	h.Deps.State.Guilds[data.Guild].Broadcast(&socket.OutPacket{
+	h.Deps.State.Guilds[data.Guild].Broadcast(&client.OutPacket{
 		Type: "GuildPictureUpdate",
 		Data: map[string]interface{}{
 			"guild": data.Guild,

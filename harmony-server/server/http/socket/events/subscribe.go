@@ -3,7 +3,7 @@ package events
 import (
 	"encoding/json"
 	"github.com/sirupsen/logrus"
-	"harmony-server/server/state/event"
+	"harmony-server/server/http/socket/client"
 	"harmony-server/server/state/guild"
 )
 
@@ -12,7 +12,7 @@ type subscribeData struct {
 }
 
 // Subscribe gets
-func (e Events) Subscribe(ws guild.Client, event *event.Event, raw *json.RawMessage) {
+func (e Events) Subscribe(ws client.Client, event *client.Event, raw *json.RawMessage) {
 	var data subscribeData
 	if err := json.Unmarshal(*raw, &data); err != nil {
 		ws.SendError("bad request")

@@ -4,7 +4,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/labstack/echo/v4"
 	"harmony-server/server/http/hm"
-	"harmony-server/server/http/socket"
+	"harmony-server/server/http/socket/client"
 	"net/http"
 )
 
@@ -40,7 +40,7 @@ func (h Handlers) DeleteGuild(c echo.Context) error {
 	if h.Deps.DB.DeleteGuild(data.Guild) != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "error deleting guild, please try again later or report to the administrator")
 	}
-	h.Deps.State.Guilds[data.Guild].Broadcast(&socket.OutPacket{
+	h.Deps.State.Guilds[data.Guild].Broadcast(&client.OutPacket{
 		Type: "deleteGuild",
 		Data: map[string]interface{}{
 			"guild": data.Guild,

@@ -5,7 +5,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
 	"harmony-server/server/http/hm"
-	"harmony-server/server/http/socket"
+	"harmony-server/server/http/socket/client"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -71,7 +71,7 @@ func (h Handlers) Message(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, "Error committing attachment transaction")
 		}
 	}
-	h.Deps.State.Guilds[data.Guild].Broadcast(&socket.OutPacket{
+	h.Deps.State.Guilds[data.Guild].Broadcast(&client.OutPacket{
 		Type: "MessageAdd",
 		Data: map[string]interface{}{
 			"guild":       data.Guild,
@@ -79,13 +79,13 @@ func (h Handlers) Message(c echo.Context) error {
 			"createdAt":   time.Now().UTC().Unix(),
 			"message":     data.Message,
 			"attachments": attachments,
-			"userID":      userID,
+			"userID":      ctx.UserID,
 			"messageID":   messageID,
 		},
 	})
 	if _, err := h.Deps.DB.Exec(`INSERT INTO messages(messageid, guildid, channelid, author, createdat, message)
 			VALUES($1, $2, $3, $4, $5, $6)`,
-			messageID, data.Guild, data.Channel, userID, data.Message); err != nil {
+			messageID, data.Guild, data.Channel, ctx.UserID, data.Message); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error saving message")
 	}
 	return nil

@@ -4,7 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
 	"harmony-server/server/http/hm"
-	"harmony-server/server/http/socket"
+	"harmony-server/server/http/socket/client"
 	"net/http"
 )
 
@@ -44,7 +44,7 @@ func (h Handlers) AddChannel(c echo.Context) error {
 			"message": "successfully added channel",
 		})
 	} else {
-		h.Deps.State.Guilds[data.Guild].Broadcast(&socket.OutPacket{
+		h.Deps.State.Guilds[data.Guild].Broadcast(&client.OutPacket{
 			Type: "AddChannel",
 			Data: map[string]interface{}{
 				"guild": data.Guild,

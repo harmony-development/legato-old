@@ -7,9 +7,9 @@ import (
 )
 
 type returnGuild struct {
-	Guildname string `json:"guildname"`
-	Picture   string `json:"picture"`
-	Owner     string `json:"owner"`
+	GuildName string
+	Picture   string
+	Owner     string
 }
 
 // GetGuilds lists the guilds a user is in
@@ -26,7 +26,7 @@ func (h Handlers) GetGuilds(c echo.Context) error {
 	for res.Next() {
 		var guildID string
 		var fetchedGuild returnGuild
-		err := res.Scan(&guildID, &fetchedGuild.Guildname, &fetchedGuild.Owner, &fetchedGuild.Picture)
+		err := res.Scan(&guildID, &fetchedGuild.GuildName, &fetchedGuild.Owner, &fetchedGuild.Picture)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, "we were unable to list one of the guilds, please try again later")
 		}

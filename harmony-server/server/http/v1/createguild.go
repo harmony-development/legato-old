@@ -13,9 +13,6 @@ type CreateGuildData struct {
 
 func (h Handlers) CreateGuild(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "unauthorized")
-	}
 	var data CreateGuildData
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "you're creating too many guilds, please try again in a minute or two")

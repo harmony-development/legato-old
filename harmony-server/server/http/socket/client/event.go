@@ -1,14 +1,9 @@
-package event
+package client
 
 import (
-	"encoding/json"
 	"golang.org/x/time/rate"
-	"harmony-server/server/state/guild"
 	"time"
 )
-
-// Handler is a function that is called for an event
-type Handler func(c guild.Client, e *Event, data *json.RawMessage)
 
 // Bus is a collection of websocket events
 type Bus map[string]*Event
