@@ -9,7 +9,7 @@ import (
 )
 
 type GetMessagesData struct {
-	Guild string `validate:"required"`
+	Guild   string `validate:"required"`
 	Channel string `validate:"required"`
 	// MessageRef is the ID of the message you want to load before.
 	// Used to load old messages

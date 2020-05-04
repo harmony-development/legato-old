@@ -50,8 +50,8 @@ func (h Handlers) DeleteMessage(c echo.Context) error {
 	h.Deps.State.Guilds[data.Guild].Broadcast(&client.OutPacket{
 		Type: "deleteMessage",
 		Data: map[string]interface{}{
-			"guild": data.Guild,
-			"channel": data.Channel,
+			"guild":     data.Guild,
+			"channel":   data.Channel,
 			"messageID": data.MessageID,
 		},
 	})

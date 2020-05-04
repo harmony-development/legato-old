@@ -4,15 +4,16 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/hashicorp/golang-lru"
+	_ "github.com/lib/pq"
 	"harmony-server/server/config"
 )
 
 // DB is a wrapper for the SQL DB
 type DB struct {
 	*sql.DB
-	Config *config.Config
-	OwnerCache       *lru.Cache
-	SessionCache     *lru.Cache
+	Config       *config.Config
+	OwnerCache   *lru.Cache
+	SessionCache *lru.Cache
 }
 
 // New creates a new DB connection

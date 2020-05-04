@@ -9,7 +9,7 @@ import (
 
 type UpdateGuildName struct {
 	Guild string `validate:"required"`
-	Name string `validate:"name"`
+	Name  string `validate:"name"`
 }
 
 func (h Handlers) UpdateGuildName(c echo.Context) error {
@@ -41,7 +41,7 @@ func (h Handlers) UpdateGuildName(c echo.Context) error {
 			Type: "GuildNameUpdate",
 			Data: map[string]string{
 				"guild": data.Guild,
-				"name": data.Name,
+				"name":  data.Name,
 			},
 		})
 	}

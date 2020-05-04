@@ -7,7 +7,7 @@ import (
 
 type subscribeToGuildData struct {
 	Session string
-	Guild string
+	Guild   string
 }
 
 // OnSubscribeToGuild handles requests to subscribe to a guilds events

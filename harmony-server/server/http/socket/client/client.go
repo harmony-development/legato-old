@@ -61,7 +61,6 @@ func (c *Client) Pinger() {
 		})
 		time.Sleep(20 * time.Second)
 		if time.Since(c.LastPong) > 20*time.Second {
-			// TODO : add mission-critical guild de-registration here
 			logrus.Debug("closing socket : ping timeout")
 			if err := c.Conn.Close(); err != nil {
 				logrus.Warn("error closing socket", err)

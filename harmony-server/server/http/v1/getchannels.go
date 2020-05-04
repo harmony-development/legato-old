@@ -41,5 +41,5 @@ func (h Handlers) GetChannels(c echo.Context) error {
 		}
 		returnChannels[channelID] = channel
 	}
- 	return ctx.JSON(http.StatusOK, returnChannels)
+	return ctx.JSON(http.StatusOK, returnChannels)
 }

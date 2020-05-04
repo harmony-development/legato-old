@@ -6,6 +6,7 @@ import (
 	"harmony-server/server/config"
 	"harmony-server/server/db"
 	"harmony-server/server/http"
+	"harmony-server/server/logger"
 	"harmony-server/server/state"
 	"harmony-server/server/state/guild"
 	"harmony-server/server/storage"
@@ -19,6 +20,7 @@ type Instance struct {
 	Config         *config.Config
 	AuthManager    *auth.Manager
 	StorageManager *storage.Manager
+	Logger         *logger.Logger
 	DB             *db.DB
 }
 
@@ -32,13 +34,14 @@ func (inst Instance) Start() {
 	if err := ConnectSentry(cfg); err != nil {
 		logrus.Fatal("Error connecting to sentry", err)
 	}
+	inst.Logger = logger.New(cfg)
 	inst.DB, err = db.New(inst.Config)
 	if err != nil {
 		logrus.Fatal("Error initializing DB", err)
 	}
 	inst.AuthManager, err = auth.New()
 	if err != nil {
-		logrus.Fatal("Error initialization auth", err)
+		inst.Logger.Exception(err)
 	}
 	inst.StorageManager = &storage.Manager{
 		ImageDeleteQueue:        make(chan string, 512),

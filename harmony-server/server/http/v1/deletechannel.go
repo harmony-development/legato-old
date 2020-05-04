@@ -9,7 +9,7 @@ import (
 )
 
 type DeleteChannelData struct {
-	Guild string `validate:"required"`
+	Guild   string `validate:"required"`
 	Channel string `validate:"required"`
 }
 
@@ -44,7 +44,7 @@ func (h Handlers) DeleteChannel(c echo.Context) error {
 	h.Deps.State.Guilds[data.Guild].Broadcast(&client.OutPacket{
 		Type: "DeleteChannel",
 		Data: map[string]interface{}{
-			"guild": data.Guild,
+			"guild":     data.Guild,
 			"channelID": data.Channel,
 		},
 	})

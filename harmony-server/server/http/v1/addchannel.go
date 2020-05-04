@@ -47,9 +47,9 @@ func (h Handlers) AddChannel(c echo.Context) error {
 		h.Deps.State.Guilds[data.Guild].Broadcast(&client.OutPacket{
 			Type: "AddChannel",
 			Data: map[string]interface{}{
-				"guild": data.Guild,
+				"guild":       data.Guild,
 				"channelName": data.ChannelName,
-				"channelID": channelID,
+				"channelID":   channelID,
 			},
 		})
 		return ctx.JSON(http.StatusOK, map[string]string{

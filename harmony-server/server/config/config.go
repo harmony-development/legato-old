@@ -22,6 +22,7 @@ type ServerConf struct {
 	GetMessageCount  int
 	OwnerCacheMax    int
 	SessionCacheMax  int
+	LogErrors        bool
 }
 
 // DBConf is the config for the database
@@ -51,6 +52,7 @@ func Load() (*Config, error) {
 			MaxAttachments:   1,
 			OwnerCacheMax:    5096,
 			SessionCacheMax:  5096,
+			LogErrors:        false,
 		},
 		DB: DBConf{
 			Host: "127.0.0.1",
@@ -60,13 +62,13 @@ func Load() (*Config, error) {
 		Sentry: SentryConf{
 			Dsn:              "",
 			AttachStacktrace: true,
-			Enabled:          true,
+			Enabled:          false,
 		},
 	}
 	viper.AddConfigPath(".")
 	viper.SetConfigName("config")
 	viper.SetConfigType("json")
-	viper.SetDefault("instanceserver", defaultCFG)
+	viper.SetDefault("InstanceServer", defaultCFG)
 	if err := viper.ReadInConfig(); err != nil {
 		if err := viper.SafeWriteConfig(); err != nil {
 			return nil, err
@@ -74,7 +76,7 @@ func Load() (*Config, error) {
 		return nil, err
 	}
 	var cfg Config
-	if err := viper.UnmarshalKey("instanceserver", &cfg); err != nil {
+	if err := viper.UnmarshalKey("InstanceServer", &cfg); err != nil {
 		return nil, err
 	}
 	return &cfg, nil

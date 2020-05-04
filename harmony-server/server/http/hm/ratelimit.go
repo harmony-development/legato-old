@@ -10,7 +10,7 @@ import (
 // code adapted from https://www.alexedwards.net/blog/how-to-rate-limit-http-requests
 
 type visitor struct {
-	limiter *rate.Limiter
+	limiter  *rate.Limiter
 	lastSeen time.Time
 }
 

@@ -49,7 +49,7 @@ type Message struct {
 }
 
 type Invite struct {
-	ID string
+	ID   string
 	Uses int
 }
 

@@ -56,10 +56,10 @@ func (h Handlers) UpdateGuildPicture(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error reading uploaded file")
 	}
 	scaled, err := bimg.NewImage(fileBytes).Process(bimg.Options{
-		Height: 128,
-		Width: 128,
+		Height:  128,
+		Width:   128,
 		Quality: 60,
-		Crop: true,
+		Crop:    true,
 	})
 	if err != nil {
 		sentry.CaptureException(err)
@@ -84,7 +84,7 @@ func (h Handlers) UpdateGuildPicture(c echo.Context) error {
 	h.Deps.State.Guilds[data.Guild].Broadcast(&client.OutPacket{
 		Type: "GuildPictureUpdate",
 		Data: map[string]interface{}{
-			"guild": data.Guild,
+			"guild":   data.Guild,
 			"picture": fileName,
 		},
 	})

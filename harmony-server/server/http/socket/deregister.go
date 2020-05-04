@@ -7,7 +7,7 @@ import (
 
 func (h Handler) Deregister(ws *client.Client) {
 	guildsQuery, err := h.DB.Query("SELECT guildid FROM guildmembers WHERE userid=$1", ws.UserID)
-		if err != nil {
+	if err != nil {
 		logrus.Warnf("error deregistering client, potential memory leak : %v", err)
 		return
 	}

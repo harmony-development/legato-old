@@ -9,7 +9,7 @@ import (
 type HarmonyContext struct {
 	echo.Context
 	Limiter *rate.Limiter
-	UserID string
+	UserID  string
 }
 
 type HarmonyHandler func(ctx HarmonyContext) error

@@ -10,8 +10,8 @@ import (
 type Manager struct {
 	ImageDeleteQueue        chan string
 	GuildPictureDeleteQueue chan string
-	ImagePath string
-	GuildPicturePath string
+	ImagePath               string
+	GuildPicturePath        string
 }
 
 // DeleteImage adds an image to delete to the queue
@@ -28,16 +28,18 @@ func (m Manager) DeleteGuildPicture(id string) {
 func (m Manager) DeleteRoutine() {
 	for {
 		select {
-		case target := <- m.ImageDeleteQueue: {
-			if err := os.Remove(path.Join(m.ImagePath, target)); err != nil {
-				sentry.CaptureException(err)
+		case target := <-m.ImageDeleteQueue:
+			{
+				if err := os.Remove(path.Join(m.ImagePath, target)); err != nil {
+					sentry.CaptureException(err)
+				}
 			}
-		}
-		case target := <- m.GuildPictureDeleteQueue: {
-			if err := os.Remove(path.Join(m.GuildPicturePath, target)); err != nil {
-				sentry.CaptureException(err)
+		case target := <-m.GuildPictureDeleteQueue:
+			{
+				if err := os.Remove(path.Join(m.GuildPicturePath, target)); err != nil {
+					sentry.CaptureException(err)
+				}
 			}
-		}
 		}
 	}
 }

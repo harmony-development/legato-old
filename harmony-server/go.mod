@@ -9,7 +9,7 @@ require (
 	github.com/gorilla/websocket v1.4.1
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/labstack/echo/v4 v4.1.14
-	github.com/lib/pq v1.2.0 // indirect
+	github.com/lib/pq v1.2.0
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/sirupsen/logrus v1.5.0
 	github.com/spf13/cobra v0.0.5

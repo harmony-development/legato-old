@@ -85,7 +85,7 @@ func (h Handlers) Message(c echo.Context) error {
 	})
 	if _, err := h.Deps.DB.Exec(`INSERT INTO messages(messageid, guildid, channelid, author, createdat, message)
 			VALUES($1, $2, $3, $4, $5, $6)`,
-			messageID, data.Guild, data.Channel, ctx.UserID, data.Message); err != nil {
+		messageID, data.Guild, data.Channel, ctx.UserID, data.Message); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error saving message")
 	}
 	return nil
