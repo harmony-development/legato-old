@@ -2,7 +2,8 @@ package events
 
 import (
 	"encoding/json"
-	"harmony-server/server/http/socket/handling"
+	"harmony-server/server/state/event"
+	"harmony-server/server/state/guild"
 )
 
 type subscribeToGuildData struct {
@@ -11,7 +12,7 @@ type subscribeToGuildData struct {
 }
 
 // OnSubscribeToGuild handles requests to subscribe to a guilds events
-func (e Events) OnSubscribeToGuild(ws handling.Client, event *handling.Event, raw *json.RawMessage) {
+func (e Events) OnSubscribeToGuild(ws guild.Client, event *event.Event, raw *json.RawMessage) {
 	var data subscribeToGuildData
 	if err := json.Unmarshal(*raw, &data); err != nil {
 		ws.SendError("bad request")

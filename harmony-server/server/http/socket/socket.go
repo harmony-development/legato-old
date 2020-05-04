@@ -1,4 +1,4 @@
-package handling
+package socket
 
 import (
 	"encoding/json"
@@ -6,27 +6,29 @@ import (
 	"github.com/sirupsen/logrus"
 	"harmony-server/server/db"
 	"harmony-server/server/state"
+	"harmony-server/server/state/event"
+	"harmony-server/server/state/guild"
 	"net/http"
 	"sync"
 	"time"
 )
 
-// Handler is an instance of the socket handler
-type Handler struct {
-	Upgrader *websocket.Upgrader
-	DB       *db.DB
-	Bus      Bus
-	State    *state.State
-}
-
 // Client is the data structure for a connected client
 type Client struct {
 	*sync.RWMutex
 	Conn     *websocket.Conn
-	Bus      Bus
+	Bus      event.Bus
 	UserID   *string
 	LastPong time.Time
 	Out      chan []byte
+}
+
+// Handler is an instance of the socket handler
+type Handler struct {
+	Upgrader *websocket.Upgrader
+	DB       *db.DB
+	Bus      event.Bus
+	State    *state.State
 }
 
 // Packet is the standard way all messages are delivered and received from the server
@@ -43,7 +45,7 @@ type OutPacket struct {
 
 // NewHandler creates a new socket handler
 func NewHandler(state *state.State) *Handler {
-	var bus = make(Bus)
+	var bus = make(event.Bus)
 	h := &Handler{
 		Upgrader: &websocket.Upgrader{
 			ReadBufferSize:  2048,
@@ -56,17 +58,18 @@ func NewHandler(state *state.State) *Handler {
 		Bus: bus,
 		State: state,
 	}
-
+	h.Setup()
 	return h
 }
 
 // Handle upgrades an HTTP request to a Client
-func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) *Client {
+func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) *guild.Client {
 	conn, err := h.Upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		logrus.Warnf("error upgrading events", err)
 		return nil
 	}
+
 	c := &Client{
 		Conn: conn,
 		Bus:  h.Bus,

@@ -1,10 +1,11 @@
-package handling
+package socket
 
 import (
 	"github.com/sirupsen/logrus"
+	"harmony-server/server/state/guild"
 )
 
-func (h Handler) Deregister(ws *Client) {
+func (h Handler) Deregister(ws *guild.Client) {
 	guildsQuery, err := h.DB.Query("SELECT guildid FROM guildmembers WHERE userid=$1", ws.UserID)
 		if err != nil {
 		logrus.Warnf("error deregistering client, potential memory leak : %v", err)

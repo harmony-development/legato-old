@@ -2,12 +2,11 @@ package v1
 
 import (
 	"github.com/getsentry/sentry-go"
-	"harmony-server/server/http/hm"
-	"harmony-server/server/http/socket/handling"
-
 	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
 	"gopkg.in/h2non/bimg.v1"
+	"harmony-server/server/http/hm"
+	"harmony-server/server/http/socket"
 	"io/ioutil"
 	"net/http"
 )
@@ -82,7 +81,7 @@ func (h Handlers) UpdateGuildPicture(c echo.Context) error {
 	h.Deps.StorageManager.DeleteGuildPicture(*oldPicture)
 	h.Deps.State.GuildsLock.RLock()
 	defer h.Deps.State.GuildsLock.RUnlock()
-	h.Deps.State.Guilds[data.Guild].Broadcast(&handling.OutPacket{
+	h.Deps.State.Guilds[data.Guild].Broadcast(&socket.OutPacket{
 		Type: "GuildPictureUpdate",
 		Data: map[string]interface{}{
 			"guild": data.Guild,

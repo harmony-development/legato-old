@@ -3,7 +3,7 @@ package v1
 import (
 	"github.com/labstack/echo/v4"
 	"harmony-server/server/http/hm"
-	"harmony-server/server/http/socket/handling"
+	"harmony-server/server/http/socket"
 	"net/http"
 )
 
@@ -37,7 +37,7 @@ func (h Handlers) UpdateGuildName(c echo.Context) error {
 	h.Deps.State.GuildsLock.RLock()
 	defer h.Deps.State.GuildsLock.RUnlock()
 	if h.Deps.State.Guilds[data.Guild] != nil {
-		h.Deps.State.Guilds[data.Guild].Broadcast(&handling.OutPacket{
+		h.Deps.State.Guilds[data.Guild].Broadcast(&socket.OutPacket{
 			Type: "GuildNameUpdate",
 			Data: map[string]string{
 				"guild": data.Guild,

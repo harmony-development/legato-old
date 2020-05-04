@@ -1,14 +1,14 @@
 package guild
 
 import (
-	"harmony-server/server/http/socket/handling"
+	"harmony-server/server/http/socket"
 	"sync"
 )
 
 // ClientArray is a thread-safe array of client connections
 type ClientArray struct {
 	*sync.RWMutex
-	Clients []*handling.Client // TODO come up with a better name for this
+	Clients []*socket.Client // TODO come up with a better name for this
 }
 
 // Guild is the data structure for an active guild
@@ -17,12 +17,12 @@ type Guild struct {
 	Clients map[string]*ClientArray
 }
 
-func (g Guild) AddClient(userID *string, client *handling.Client) {
+func (g Guild) AddClient(userID *string, client *socket.Client) {
 	if g.Clients[*userID] == nil {
 		g.Lock()
 		defer g.Unlock()
 		g.Clients[*userID] = &ClientArray{
-			Clients: []*handling.Client{client},
+			Clients: []*socket.Client{client},
 		}
 		return
 	}
@@ -31,7 +31,7 @@ func (g Guild) AddClient(userID *string, client *handling.Client) {
 	g.Clients[*userID].Unlock()
 }
 
-func (g Guild) Broadcast(packet *handling.OutPacket) {
+func (g Guild) Broadcast(packet *socket.OutPacket) {
 	for _, client := range g.Clients {
 		for _, conn := range client.Clients {
 			conn.Send(packet)

@@ -2,11 +2,10 @@ package v1
 
 import (
 	"github.com/getsentry/sentry-go"
-	"harmony-server/server/http/hm"
-	"harmony-server/server/http/socket/handling"
-
 	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
+	"harmony-server/server/http/hm"
+	"harmony-server/server/http/socket"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -72,7 +71,7 @@ func (h Handlers) Message(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, "Error committing attachment transaction")
 		}
 	}
-	h.Deps.State.Guilds[data.Guild].Broadcast(&handling.OutPacket{
+	h.Deps.State.Guilds[data.Guild].Broadcast(&socket.OutPacket{
 		Type: "MessageAdd",
 		Data: map[string]interface{}{
 			"guild":       data.Guild,

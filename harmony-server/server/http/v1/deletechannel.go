@@ -4,7 +4,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/labstack/echo/v4"
 	"harmony-server/server/http/hm"
-	"harmony-server/server/http/socket/handling"
+	"harmony-server/server/http/socket"
 	"net/http"
 )
 
@@ -41,7 +41,7 @@ func (h Handlers) DeleteChannel(c echo.Context) error {
 		sentry.CaptureException(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "error deleting channel, please try again later")
 	}
-	h.Deps.State.Guilds[data.Guild].Broadcast(&handling.OutPacket{
+	h.Deps.State.Guilds[data.Guild].Broadcast(&socket.OutPacket{
 		Type: "DeleteChannel",
 		Data: map[string]interface{}{
 			"guild": data.Guild,
