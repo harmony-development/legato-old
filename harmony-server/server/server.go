@@ -37,11 +37,11 @@ func (inst Instance) Start() {
 	inst.Logger = logger.New(cfg)
 	inst.DB, err = db.New(inst.Config)
 	if err != nil {
-		logrus.Fatal("Error initializing DB", err)
+		inst.Logger.Fatal("Error migrating database : ", err)
 	}
 	inst.AuthManager, err = auth.New()
 	if err != nil {
-		inst.Logger.Exception(err)
+		inst.Logger.Fatal(err)
 	}
 	inst.StorageManager = &storage.Manager{
 		ImageDeleteQueue:        make(chan string, 512),

@@ -50,9 +50,10 @@ func Load() (*Config, error) {
 			ImagePath:        "images",
 			GuildPicturePath: "guild-pictures",
 			MaxAttachments:   1,
+			GetMessageCount:  30,
 			OwnerCacheMax:    5096,
 			SessionCacheMax:  5096,
-			LogErrors:        false,
+			LogErrors:        true,
 		},
 		DB: DBConf{
 			Host: "127.0.0.1",

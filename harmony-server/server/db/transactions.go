@@ -13,14 +13,18 @@ func (db *DB) AddGuild(guildID string, owner string, guildName string, picture s
 	}
 	if _, err = tx.Exec(`INSERT INTO 
     	guilds(guildid, guildname, picture, userid) 
-    	VALUES($1, $2, $3, $4);
+    	VALUES($1, $2, $3, $4) ON CONFLICT DO NOTHING;
 	`, guildID, guildName, picture, owner); err != nil {
 		return err
 	}
-	if _, err := tx.Exec(`INSERT INTO guildmembers(userid, guildid) VALUES($1, $2);`, owner, guildID); err != nil {
+	if _, err := tx.Exec(`INSERT INTO 
+    	guildmembers(userid, guildid) 
+    	VALUES($1, $2) ON CONFLICT DO NOTHING ;`, owner, guildID); err != nil {
 		return err
 	}
-	if _, err := tx.Exec(`INSERT INTO channels(channelid, guildid, channelname) VALUES($1, $2, $3)`, randstr.Hex(16), guildID, "general"); err != nil {
+	if _, err := tx.Exec(`INSERT INTO 
+    	channels(channelid, guildid, channelname) 
+    	VALUES($1, $2, $3) ON CONFLICT DO NOTHING`, randstr.Hex(16), guildID, "general"); err != nil {
 		return err
 	}
 	if err := tx.Commit(); err != nil {
@@ -89,7 +93,7 @@ func (db *DB) AddInvite(inviteID string, guildID string) error {
     invites(inviteid, guildid) 
     VALUES($1, $2)
 	ON CONFLICT DO NOTHING;
-	`, guildID, inviteID, guildID)
+	`, inviteID, guildID)
 	return err
 }
 

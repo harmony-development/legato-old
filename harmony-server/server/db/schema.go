@@ -7,12 +7,12 @@ var queries = []string{
 	);`,
 	`CREATE TABLE IF NOT EXISTS guilds(
 		guildid TEXT PRIMARY KEY NOT NULL,
-		guildname TEXT NOT NULL, 
-		userid TEXT NOT NULL REFERENCES users(userid),
+		userid TEXT NOT NULL,
+		guildname TEXT NOT NULL,
 		picture TEXT NOT NULL
 	);`,
 	`CREATE TABLE IF NOT EXISTS guildmembers(
-		userid TEXT NOT NULL REFERENCES users(userid), 
+		userid TEXT NOT NULL, 
 		guildid TEXT REFERENCES guilds(guildid),
 		UNIQUE(userid, guildid)
 	);`,
@@ -30,7 +30,7 @@ var queries = []string{
 		messageid TEXT PRIMARY KEY, 
 		guildid TEXT REFERENCES guilds(guildid), 
 		channelid TEXT REFERENCES channels(channelid), 
-		userid TEXT REFERENCES users(userid), 
+		userid TEXT NOT NULL, 
 		createdat INTEGER NOT NULL, 
 		message TEXT NOT NULL
 	);`,

@@ -23,7 +23,7 @@ func New(cfg *config.Config) (*DB, error) {
 	if db.DB, err = sql.Open("postgres", fmt.Sprintf("user=%v password=%v dbname=%v host=%v port=%v sslmode=%v",
 		cfg.DB.User,
 		cfg.DB.Password,
-		"harmonyauth",
+		"harmony",
 		cfg.DB.Host,
 		cfg.DB.Port,
 		map[bool]string{true: "enable", false: "disable"}[cfg.DB.SSL],

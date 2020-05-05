@@ -5,3 +5,4 @@ filestore
 harmony.db
 static
 harmony-server
+config.json
