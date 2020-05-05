@@ -20,14 +20,14 @@ func New(cfg *config.Config) *Logger {
 
 func (l Logger) Exception(err ...interface{}) {
 	if l.Config.Sentry.Enabled {
-		sentry.CaptureMessage(fmt.Sprint(err))
+		sentry.CaptureMessage(fmt.Sprint(err...))
 	}
 	if l.Config.Server.LogErrors {
-		logrus.Warn(err)
+		logrus.Warn(err...)
 	}
 }
 
 func (l Logger) Fatal(err ...interface{}) {
-	l.Exception(err)
+	l.Exception(err...)
 	os.Exit(-1)
 }
