@@ -12,16 +12,22 @@
 		"eslint-plugin-react-hooks": "^0.0.0-b53ea6ca0",
 		"fbemitter": "latest",
 		"glamor": "^2.20.40",
+		"i18next": "^19.4.4",
+		"i18next-browser-languagedetector": "^4.1.1",
+		"i18next-http-backend": "^1.0.8",
 		"react": "latest",
 		"react-confirm": "^0.1.18",
 		"react-contextmenu": "latest",
 		"react-dom": "latest",
+		"react-i18next": "^11.4.0",
 		"react-redux": "latest",
 		"react-router": "latest",
 		"react-router-dom": "latest",
 		"react-scripts": "latest",
 		"react-toastify": "latest",
-		"redux": "latest"
+		"redux": "^4.0.5",
+		"redux-persist": "^6.0.0",
+		"redux-thunk": "^2.3.0"
 	},
 	"scripts": {
 		"start": "react-scripts start",
