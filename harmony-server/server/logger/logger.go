@@ -1,8 +1,8 @@
 package logger
 
 import (
-	"fmt"
 	"github.com/getsentry/sentry-go"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"harmony-server/server/config"
 	"os"
@@ -18,16 +18,16 @@ func New(cfg *config.Config) *Logger {
 	}
 }
 
-func (l Logger) Exception(err ...interface{}) {
+func (l Logger) Exception(err error) {
 	if l.Config.Sentry.Enabled {
-		sentry.CaptureMessage(fmt.Sprint(err...))
+		sentry.CaptureException(errors.WithStack(err))
 	}
 	if l.Config.Server.LogErrors {
-		logrus.Warn(err...)
+		logrus.Warn(err)
 	}
 }
 
-func (l Logger) Fatal(err ...interface{}) {
-	l.Exception(err...)
+func (l Logger) Fatal(err error) {
+	l.Exception(err)
 	os.Exit(-1)
 }

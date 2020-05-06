@@ -37,7 +37,7 @@ func (inst Instance) Start() {
 	inst.Logger = logger.New(cfg)
 	inst.DB, err = db.New(inst.Config)
 	if err != nil {
-		inst.Logger.Fatal("Error migrating database : ", err)
+		inst.Logger.Fatal(err)
 	}
 	inst.AuthManager, err = auth.New()
 	if err != nil {

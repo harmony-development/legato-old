@@ -60,8 +60,8 @@ export const Root = React.memo(() => {
 			secondary: themeState.secondary,
 			type: themeState.type,
 			background: {
-				default: themeState.type === 'dark' ? HarmonyDark[600] : '#FFF',
-				paper: themeState.type === 'dark' ? HarmonyDark[500] : '#f7f7f7',
+				default: themeState.type === 'dark' ? HarmonyDark[900] : '#FFF',
+				paper: themeState.type === 'dark' ? HarmonyDark[800] : '#f7f7f7',
 			},
 		},
 	});

@@ -1,4 +1,9 @@
 {
 	"login": "Login",
-	"register": "Register"
+	"register": "Register",
+	"email": "Email",
+	"password": "Password",
+	"username": "Username",
+	"confirm-password": "Confirm Password",
+	"log-in": "Log In"
 }

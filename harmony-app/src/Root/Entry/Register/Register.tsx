@@ -1,62 +1,42 @@
-import React, { useRef, useEffect } from 'react';
-import { TextField, Typography, Button } from '@material-ui/core';
+import React, { useRef, useEffect, useState } from 'react';
+import { TextField, Typography, Button, makeStyles, Theme } from '@material-ui/core';
 import { toast } from 'react-toastify';
 import { useHistory } from 'react-router';
+import { useTranslation } from 'react-i18next';
 
 import { harmonySocket } from '../../Root';
+import { AuthAPI } from '../../../api/Auth';
 
-import { useRegisterStyles } from './RegisterStyle';
+const registerStyles = makeStyles((theme: Theme) => ({
+	root: {
+		paddingLeft: theme.spacing(1),
+		paddingRight: theme.spacing(1),
+		paddingTop: theme.spacing(1),
+		paddingBottom: theme.spacing(1),
+	},
+	submitBtn: {
+		marginTop: theme.spacing(2),
+	},
+}));
 
 export const Register = () => {
-	const classes = useRegisterStyles();
+	const classes = registerStyles();
 	const history = useHistory();
-	const [err, setErr] = React.useState<string | undefined>(undefined);
-	const emailRef = useRef<HTMLInputElement | undefined>(undefined);
-	const usernameRef = useRef<HTMLInputElement | undefined>(undefined);
-	const pwdRef = useRef<HTMLInputElement | undefined>(undefined);
+	const { t } = useTranslation('entry');
+	const [err, setErr] = useState<string | undefined>(undefined);
+	const [email, setEmail] = useState('');
+	const [username, setUsername] = useState('');
+	const [password, setPassword] = useState('');
+	const [confirmPassword, setConfirmPassword] = useState('');
 
-	const register = () => {
-		if (harmonySocket.conn.readyState === WebSocket.CLOSED) {
-			toast.error("Can't register, trouble connecting to server");
-		} else if (
-			emailRef.current &&
-			usernameRef.current &&
-			pwdRef.current &&
-			emailRef.current.value &&
-			pwdRef.current.value &&
-			usernameRef.current.value
-		) {
-			harmonySocket.register(emailRef.current.value, usernameRef.current.value, pwdRef.current.value);
-		} else {
-			toast.error("Can't register, missing email, username, or password");
-		}
+	const onSubmit = (e: React.FormEvent<EventTarget>) => {
+		e.preventDefault();
+		AuthAPI.register();
 	};
-
-	useEffect(() => {
-		harmonySocket.events.addListener('registererror', (raw: any) => {
-			if (typeof raw['message'] === 'string') {
-				setErr(raw['message']);
-			}
-		});
-		harmonySocket.events.addListener('token', (raw: any) => {
-			if (typeof raw['token'] === 'string' && typeof raw['userid'] === 'string') {
-				localStorage.setItem('token', raw['token']);
-				localStorage.setItem('userid', raw['userid']);
-				harmonySocket.refreshToken();
-				harmonySocket.getGuilds();
-				harmonySocket.getSelf();
-				history.push('/app');
-			}
-		});
-		return () => {
-			harmonySocket.events.removeAllListeners('registererror');
-			harmonySocket.events.removeAllListeners('token');
-		};
-	}, [history]);
 
 	return (
 		<div className={classes.root}>
-			<form onSubmit={(e: React.FormEvent<EventTarget>) => e.preventDefault()}>
+			<form onSubmit={onSubmit}>
 				<TextField
 					label="Email"
 					type="email"
@@ -64,16 +44,18 @@ export const Register = () => {
 					autoComplete="email"
 					margin="normal"
 					fullWidth
-					inputRef={emailRef}
+					required
+					onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.currentTarget.value)}
 				/>
 				<TextField
 					label="Username"
 					type="text"
-					name="usernamee"
+					name="username"
 					autoComplete="username"
 					margin="normal"
 					fullWidth
-					inputRef={usernameRef}
+					required
+					onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.currentTarget.value)}
 				/>
 				<TextField
 					label="Password"
@@ -82,7 +64,8 @@ export const Register = () => {
 					autoComplete="new-password"
 					margin="normal"
 					fullWidth
-					inputRef={pwdRef}
+					required
+					onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.currentTarget.value)}
 				/>
 				<TextField
 					label="Confirm Password"
@@ -91,6 +74,8 @@ export const Register = () => {
 					autoComplete="none"
 					margin="normal"
 					fullWidth
+					required
+					onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.currentTarget.value)}
 				/>
 				{err ? (
 					<Typography variant="subtitle1" color={'error'}>
@@ -99,8 +84,15 @@ export const Register = () => {
 				) : (
 					undefined
 				)}
-				<Button variant="contained" color="primary" className={classes.submitBtn} onClick={register} type="submit">
-					Log In
+				<Button
+					variant="contained"
+					color="primary"
+					className={classes.submitBtn}
+					disabled={!email || !username || !password || !confirmPassword}
+					type="submit"
+					fullWidth
+				>
+					{t('entry:register')}
 				</Button>
 			</form>
 		</div>

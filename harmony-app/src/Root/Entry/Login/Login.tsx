@@ -1,15 +1,27 @@
 import React, { useRef, useEffect } from 'react';
-import { TextField, Typography, Button } from '@material-ui/core';
+import { TextField, Typography, Button, makeStyles, Theme } from '@material-ui/core';
 import { toast } from 'react-toastify';
 import { useHistory } from 'react-router';
+import { useTranslation } from 'react-i18next';
 
 import { harmonySocket } from '../../Root';
 
-import { useLoginStyles } from './LoginStyle';
+const loginStyles = makeStyles((theme: Theme) => ({
+	root: {
+		paddingLeft: theme.spacing(1),
+		paddingRight: theme.spacing(1),
+		paddingTop: theme.spacing(1),
+		paddingBottom: theme.spacing(1),
+	},
+	submitBtn: {
+		marginTop: theme.spacing(2),
+	},
+}));
 
-export const Login: React.FC = () => {
-	const history = useHistory(); // history for better routing
-	const classes = useLoginStyles();
+export const Login = () => {
+	const history = useHistory();
+	const classes = loginStyles();
+	const { t } = useTranslation('entry');
 
 	const [err, setErr] = React.useState<string | undefined>(undefined);
 	const emailRef = useRef<HTMLInputElement | undefined>(undefined);
@@ -51,7 +63,7 @@ export const Login: React.FC = () => {
 		<div className={classes.root}>
 			<form onSubmit={(e: React.FormEvent<EventTarget>) => e.preventDefault()}>
 				<TextField
-					label="Email"
+					label={t('entry:email')}
 					type="email"
 					name="email"
 					autoComplete="email"
@@ -59,7 +71,14 @@ export const Login: React.FC = () => {
 					fullWidth
 					inputRef={emailRef}
 				/>
-				<TextField label="Password" type="password" name="password" margin="normal" fullWidth inputRef={pwdRef} />
+				<TextField
+					label={t('entry:password')}
+					type="password"
+					name="password"
+					margin="normal"
+					fullWidth
+					inputRef={pwdRef}
+				/>
 				{err ? (
 					<Typography variant="subtitle1" color={'error'}>
 						{err}
@@ -67,8 +86,15 @@ export const Login: React.FC = () => {
 				) : (
 					undefined
 				)}
-				<Button variant="contained" color="primary" className={classes.submitBtn} onClick={login} type="submit">
-					Log In
+				<Button
+					variant="contained"
+					color="primary"
+					className={classes.submitBtn}
+					onClick={login}
+					type="submit"
+					fullWidth
+				>
+					{t('entry:log-in')}
 				</Button>
 			</form>
 		</div>

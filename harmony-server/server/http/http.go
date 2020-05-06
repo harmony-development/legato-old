@@ -39,6 +39,7 @@ func New(deps *Dependencies) *Server {
 		Deps:   deps,
 	}
 	s.Pre(middleware.RemoveTrailingSlash())
+	s.Use(middleware.CORS())
 	s.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
 		StackSize:       1 << 10,
 		DisableStackAll: true,

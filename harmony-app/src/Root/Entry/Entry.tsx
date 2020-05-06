@@ -1,30 +1,46 @@
 import React from 'react';
-import { Paper, Tabs, Tab } from '@material-ui/core';
+import { Paper, Tabs, Tab, makeStyles, Container } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
 
-import { useEntryStyles } from './EntryStyle';
 import { Login } from './Login/Login';
 import { Register } from './Register/Register';
 
+const entryStyles = makeStyles({
+	form: {
+		width: '60%',
+		height: '60%',
+		position: 'relative',
+	},
+	root: {
+		width: '100vw',
+		height: '100vh',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+});
+
 export const Entry = () => {
-	const classes = useEntryStyles();
+	const classes = entryStyles();
 	const [tabIDX, setTabIDX] = React.useState(0);
 	const { t } = useTranslation('entry');
 
 	return (
 		<div className={classes.root}>
-			<Paper className={classes.form} elevation={5}>
-				<Tabs
-					value={tabIDX}
-					onChange={(_event, newValue: number): void => setTabIDX(newValue)}
-					variant="fullWidth"
-					indicatorColor={'primary'}
-				>
-					<Tab label={t('entry:login')} />
-					<Tab label={t('entry:register')} />
-				</Tabs>
-				{tabIDX === 0 ? <Login /> : <Register />}
-			</Paper>
+			<Container maxWidth="sm">
+				<Paper elevation={5}>
+					<Tabs
+						value={tabIDX}
+						onChange={(_event, newValue: number): void => setTabIDX(newValue)}
+						variant="fullWidth"
+						indicatorColor={'primary'}
+					>
+						<Tab label={t('entry:login')} />
+						<Tab label={t('entry:register')} />
+					</Tabs>
+					{tabIDX === 0 ? <Login /> : <Register />}
+				</Paper>
+			</Container>
 		</div>
 	);
 };
