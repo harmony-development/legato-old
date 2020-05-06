@@ -36,6 +36,7 @@ func New(db *db.DB, authManager *auth.Manager, storageManager *storage.Manager, 
 		Config:         config,
 	}
 	s.Pre(middleware.RemoveTrailingSlash())
+	s.Use(middleware.CORS())
 	s.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
 		StackSize:       1 << 10,
 		DisableStackAll: true,
