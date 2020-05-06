@@ -21,22 +21,22 @@ type Handlers struct {
 
 // New returns a new v1 model
 func New(db *db.DB, authManager *auth.Manager, storageManager *storage.Manager, config *config.Config, g *echo.Group) *Handlers {
+	v1 := g.Group("/v1")
 	h := &Handlers{
 		DB:             db,
 		AuthManager:    authManager,
 		StorageManager: storageManager,
 		Config:         config,
-		Group:          g,
+		Group:          v1,
 	}
-
-	g.POST("/login", hm.WithRateLimit(h.Login, 5*time.Second, 5))
-	g.POST("/register", hm.WithRateLimit(h.Register, 15*time.Second, 8))
-	g.POST("/getuser", hm.WithRateLimit(h.GetUser, 5*time.Second, 5))
-	g.POST("/usernameupdate", hm.WithRateLimit(h.UsernameUpdate, 2*time.Second, 5))
-	g.POST("/auth", hm.WithRateLimit(h.Authenticate, 2*time.Second, 5))
-	g.POST("/addinstance", hm.WithRateLimit(h.AddInstance, 5*time.Second, 5))
-	g.POST("/removeserver", hm.WithRateLimit(h.RemoveServer, 5*time.Second, 5))
-	g.POST("/listservers", hm.WithRateLimit(h.ListInstances, 5*time.Second, 5))
+	v1.POST("/login", hm.WithRateLimit(h.Login, 5*time.Second, 5))
+	v1.POST("/register", hm.WithRateLimit(h.Register, 15*time.Second, 8))
+	v1.POST("/getuser", hm.WithRateLimit(h.GetUser, 5*time.Second, 5))
+	v1.POST("/usernameupdate", hm.WithRateLimit(h.UsernameUpdate, 2*time.Second, 5))
+	v1.POST("/auth", hm.WithRateLimit(h.Authenticate, 2*time.Second, 5))
+	v1.POST("/addinstance", hm.WithRateLimit(h.AddInstance, 5*time.Second, 5))
+	v1.POST("/removeserver", hm.WithRateLimit(h.RemoveServer, 5*time.Second, 5))
+	v1.POST("/listservers", hm.WithRateLimit(h.ListInstances, 5*time.Second, 5))
 
 	return h
 }
