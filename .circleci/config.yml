@@ -2,7 +2,7 @@ version: 2
 jobs:
   build_backend:
     docker:
-      - image: circleci/golang:1.13.8
+      - image: cimg/go:1.14
 
     working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
     steps:
