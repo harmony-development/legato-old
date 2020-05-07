@@ -39,7 +39,7 @@ export const Register = () => {
 		}
 		setErr('');
 		try {
-			await AuthAPI.register(email, username, password);
+			const resp = await AuthAPI.register(email, username, password);
 		} catch (err) {
 			dialog({
 				type: 'alert',
