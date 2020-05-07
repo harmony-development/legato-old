@@ -72,8 +72,8 @@ export class ReqHelper {
 		} catch (e) {
 			throw new Error(i18n.t(`errors:parse-error`));
 		}
-		if (data.error) {
-			throw new Error(i18n.t(`errors:${data.error}`));
+		if (data.message && !response.ok) {
+			throw new Error(i18n.t(`errors:${data.message}`, data.fields));
 		}
 		return data as T;
 	}

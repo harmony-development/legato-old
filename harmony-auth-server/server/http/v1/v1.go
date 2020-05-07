@@ -29,6 +29,8 @@ func New(db *db.DB, authManager *auth.Manager, storageManager *storage.Manager, 
 		Config:         config,
 		Group:          v1,
 	}
+	v1.Use(hm.WithHarmony)
+
 	v1.POST("/login", hm.WithRateLimit(h.Login, 5*time.Second, 5))
 	v1.POST("/register", hm.WithRateLimit(h.Register, 15*time.Second, 8))
 	v1.POST("/getuser", hm.WithRateLimit(h.GetUser, 5*time.Second, 5))

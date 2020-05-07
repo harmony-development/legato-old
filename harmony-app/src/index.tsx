@@ -1,5 +1,5 @@
 import './index.css';
-import './Root/ContextMenu.css';
+import './ContextMenu.css';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -11,8 +11,8 @@ import { Provider } from 'react-redux';
 
 import { store, persistor } from './redux/store';
 import * as serviceWorker from './serviceWorker';
-import { ConfirmationContextProvider } from './Root/App/ConfirmationContext';
-import { Root } from './Root/Root';
+import { ConfirmationContextProvider } from './pages/App/ConfirmationContext';
+import { Root } from './Root';
 import './i18n/i18n';
 
 const Index = React.memo(() => {

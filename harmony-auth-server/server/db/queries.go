@@ -54,8 +54,13 @@ func (db DB) GetUser(userID string) (*User, error) {
 	return user, nil
 }
 
-// RegisterUser inserts a new user into the DB
-func (db DB) RegisterUser(userID string, email string, username string, passHash string) error {
+// AddUser inserts a new user into the DB
+func (db DB) AddUser(userID string, email string, username string, passHash string) error {
 	_, err := db.Exec("INSERT INTO users(userid, email, username, avatar, password) VALUES($1, $2, $3, $4, $5)", userID, email, username, "", passHash)
 	return err
+}
+
+// EmailRegistered checks if an email has already been used to make an account
+func (db DB) EmailRegistered(email string) (bool, error) {
+	return db.ContainsRow("SELECT email FROM users WHERE email=$1", email)
 }

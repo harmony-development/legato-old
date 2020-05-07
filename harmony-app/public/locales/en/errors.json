@@ -1,3 +1,7 @@
 {
-	"network": "Unable to send request"
+	"network": "Unable to send request",
+	"register": {
+		"username-length": "username must be between {{ minLength }} and {{ maxLength }} characters long",
+		"password-length": "password must be between {{ minLength }} and {{ maxLength }} characters long"
+	}
 }

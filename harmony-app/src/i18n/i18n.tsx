@@ -12,6 +12,7 @@ i18n
 		interpolation: {
 			escapeValue: false,
 		},
+		ns: ['errors'],
 	});
 
 export default i18n;

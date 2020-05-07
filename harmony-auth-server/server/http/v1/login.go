@@ -15,7 +15,7 @@ type loginData struct {
 
 // Login takes in an email and password and returns a session token for connecting to instances
 func (h Handlers) Login(c echo.Context) error {
-	ctx, _ := c.(hm.HarmonyContext)
+	ctx, _ := c.(*hm.HarmonyContext)
 	data := new(loginData)
 	if err := ctx.Bind(data); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")

@@ -5,5 +5,7 @@
 	"password": "Password",
 	"username": "Username",
 	"confirm-password": "Confirm Password",
-	"log-in": "Log In"
+	"log-in": "Log In",
+	"passwords-no-match": "Passwords do not match",
+	"parse-error": "Unable to get server response"
 }
