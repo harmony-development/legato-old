@@ -64,10 +64,10 @@ jobs:
       - run:
           name: Build frontend
           command: |
-            npm install netlify-cli -g
+            sudo npm install netlify-cli -g
             cd harmony-app/;
             yarn;
-            yarn build;
+            CI=false yarn build;
             netlify deploy --site $NETLIFY_SITE_ID --auth $NETLIFY_AUTH_TOKEN --prod --dir=build
 
       - store_artifacts:
