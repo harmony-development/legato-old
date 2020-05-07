@@ -22,6 +22,7 @@ type ServerConf struct {
 	UsernameLenMax     int
 	PassLenMin         int
 	PassLenMax         int
+	PassRegex          string
 	UserIDLength       int
 	SessionLength      int
 	SessionExpire      time.Duration
@@ -68,6 +69,7 @@ func Load() (*Config, error) {
 			UsernameLenMax:     48,
 			PassLenMin:         5,
 			PassLenMax:         128,
+			PassRegex:          "",
 			UserIDLength:       16,
 			SessionLength:      16,
 			SessionExpire:      24 * time.Hour,

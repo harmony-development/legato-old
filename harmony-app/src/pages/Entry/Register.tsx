@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { harmonySocket } from '../../Root';
 import { AuthAPI } from '../../api/Auth';
+import { useDialog } from '../../component/Dialog/CommonDialogContext';
 
 const registerStyles = makeStyles((theme: Theme) => ({
 	root: {
@@ -22,7 +23,8 @@ const registerStyles = makeStyles((theme: Theme) => ({
 export const Register = () => {
 	const classes = registerStyles();
 	const history = useHistory();
-	const { t } = useTranslation('entry');
+	const dialog = useDialog();
+	const { t } = useTranslation(['entry', 'common']);
 	const [err, setErr] = useState<string>(' ');
 	const [email, setEmail] = useState('');
 	const [username, setUsername] = useState('');
@@ -39,6 +41,11 @@ export const Register = () => {
 		try {
 			await AuthAPI.register(email, username, password);
 		} catch (err) {
+			dialog({
+				type: 'alert',
+				title: t('common:error'),
+				description: err.message,
+			});
 			console.error('error registering', err);
 		}
 	};

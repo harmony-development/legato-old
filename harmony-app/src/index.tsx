@@ -11,7 +11,7 @@ import { Provider } from 'react-redux';
 
 import { store, persistor } from './redux/store';
 import * as serviceWorker from './serviceWorker';
-import { ConfirmationContextProvider } from './pages/App/ConfirmationContext';
+import { CommonDialogContextProvider } from './component/Dialog/CommonDialogContext';
 import { Root } from './Root';
 import './i18n/i18n';
 
@@ -28,11 +28,9 @@ const Index = React.memo(() => {
 						duration: 200,
 					})}
 				/>
-				<ConfirmationContextProvider>
-					<BrowserRouter>
-						<Root />
-					</BrowserRouter>
-				</ConfirmationContextProvider>
+				<BrowserRouter>
+					<Root />
+				</BrowserRouter>
 			</PersistGate>
 		</Provider>
 	);

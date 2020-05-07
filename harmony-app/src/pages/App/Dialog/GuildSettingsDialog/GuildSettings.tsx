@@ -10,14 +10,14 @@ import { harmonySocket } from '../../../../Root';
 import { AppDispatch } from '../../../../redux/store';
 import { ToggleGuildSettingsDialog } from '../../../../redux/AppReducer';
 import { ImagePicker } from '../../../../component/ImagePicker';
-import { useConfirmationContext } from '../../ConfirmationContext';
+import { useDialog } from '../../../../component/Dialog/CommonDialogContext';
 
 import { useGuildSettingsStyle } from './GuildSettingsStyle';
 import { GuildInvites } from './GuildInvites';
 
 export const GuildSettings = () => {
 	const dispatch = useDispatch<AppDispatch>();
-	const confirm = useConfirmationContext();
+	const confirm = useDialog();
 	const [open, currentGuild, inputStyle, guilds] = useSelector((state: IState) => [
 		state.guildSettingsDialog,
 		state.currentGuild,
@@ -57,6 +57,7 @@ export const GuildSettings = () => {
 		confirm({
 			title: 'Are you sure you would like to delete this guild?',
 			description: 'This cannot be undone!',
+			type: 'confirm',
 		}).then(() => {
 			if (currentGuild) {
 				harmonySocket.sendDeleteGuild(currentGuild);

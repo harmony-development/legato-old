@@ -11,6 +11,7 @@ import { IState } from './types/redux';
 import './Root.css';
 import { Loading } from './component/Loading';
 import { HarmonyDark } from './pages/App/HarmonyColor';
+import { CommonDialogContextProvider } from './component/Dialog/CommonDialogContext';
 
 export const harmonySocket = new HarmonySocket();
 
@@ -78,19 +79,21 @@ export const Root = React.memo(() => {
 	return (
 		<ThemeProvider theme={theme}>
 			<CssBaseline />
-			<Suspense fallback={Loading()}>
-				<Switch>
-					<Route exact path="/">
-						<EntryPage />
-					</Route>
-					<Route exact path="/app/:selectedguildparam?/:selectedchannelparam?">
-						<AppPage />
-					</Route>
-					<Route exact path="/invite/:invitecode">
-						<InvitePage />
-					</Route>
-				</Switch>
-			</Suspense>
+			<CommonDialogContextProvider>
+				<Suspense fallback={Loading()}>
+					<Switch>
+						<Route exact path="/">
+							<EntryPage />
+						</Route>
+						<Route exact path="/app/:selectedguildparam?/:selectedchannelparam?">
+							<AppPage />
+						</Route>
+						<Route exact path="/invite/:invitecode">
+							<InvitePage />
+						</Route>
+					</Switch>
+				</Suspense>
+			</CommonDialogContextProvider>
 		</ThemeProvider>
 	);
 });

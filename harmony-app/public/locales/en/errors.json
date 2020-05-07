@@ -1,7 +1,8 @@
 {
 	"network": "Unable to send request",
 	"register": {
-		"username-length": "username must be between {{ minLength }} and {{ maxLength }} characters long",
-		"password-length": "password must be between {{ minLength }} and {{ maxLength }} characters long"
+		"username-length": "Username must be between {{ minLength }} and {{ maxLength }} characters long",
+		"password-length": "Password must be between {{ minLength }} and {{ maxLength }} characters long",
+		"already-registered": "Email has already been registered"
 	}
 }
