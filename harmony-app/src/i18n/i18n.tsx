@@ -12,7 +12,7 @@ i18n
 		interpolation: {
 			escapeValue: false,
 		},
-		ns: ['errors'],
+		ns: ['errors', 'common'],
 	});
 
 export default i18n;

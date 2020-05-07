@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"time"
 
 	"github.com/spf13/viper"
@@ -104,7 +105,7 @@ func Load() (*Config, error) {
 		if err := viper.SafeWriteConfig(); err != nil {
 			return nil, err
 		}
-		return nil, err
+		return nil, errors.New("Config file was not found, so one was g")
 	}
 	var cfg Config
 	if err := viper.UnmarshalKey("authserver", &cfg); err != nil {
