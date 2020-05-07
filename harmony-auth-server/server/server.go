@@ -1,14 +1,16 @@
 package server
 
 import (
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/sirupsen/logrus"
+
 	"harmony-auth-server/server/auth"
 	"harmony-auth-server/server/config"
 	"harmony-auth-server/server/db"
 	"harmony-auth-server/server/http"
 	"harmony-auth-server/server/storage"
-	"time"
 )
 
 // Instance is an instance of the harmony auth server
@@ -41,7 +43,19 @@ func (inst Instance) Start() {
 	inst.StorageManager = storage.New()
 	go inst.StorageManager.DeleteRoutine(cfg.Server.AvatarPath)
 	inst.Server = http.New(inst.DB, inst.AuthHandler, inst.StorageManager, inst.Config)
-	logrus.Fatal(inst.Server.Start(inst.Config.Server.Port))
+	if inst.Config.Server.TLS.Enabled {
+		if inst.Config.Server.TLS.KeyPath == "" || inst.Config.Server.TLS.CertPath == "" {
+			logrus.Fatal(inst.Server.StartAutoTLS(inst.Config.Server.Port))
+		} else {
+			logrus.Fatal(inst.Server.StartTLS(
+				inst.Config.Server.Port,
+				inst.Config.Server.TLS.CertPath,
+				inst.Config.Server.TLS.KeyPath,
+			))
+		}
+	} else {
+		logrus.Fatal(inst.Server.Start(inst.Config.Server.Port))
+	}
 }
 
 // Stop ends the authentication server gracefully

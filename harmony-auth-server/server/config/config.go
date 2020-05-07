@@ -1,8 +1,9 @@
 package config
 
 import (
-	"github.com/spf13/viper"
 	"time"
+
+	"github.com/spf13/viper"
 )
 
 // Config is the overall configuration for the auth service
@@ -30,6 +31,14 @@ type ServerConf struct {
 	AvatarWidth        int
 	AvatarHeight       int
 	AvatarCrop         bool
+	TLS                TLSConf
+}
+
+// TLSConf contains the configurations to use for TLS
+type TLSConf struct {
+	Enabled  bool
+	CertPath string
+	KeyPath  string
 }
 
 // DBConf is the config for the database
@@ -68,6 +77,11 @@ func Load() (*Config, error) {
 			AvatarWidth:        128,
 			AvatarHeight:       128,
 			AvatarCrop:         true,
+			TLS: TLSConf{
+				Enabled:  false,
+				CertPath: "",
+				KeyPath:  "",
+			},
 		},
 		DB: DBConf{
 			Host: "127.0.0.1",
