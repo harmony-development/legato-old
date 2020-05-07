@@ -64,7 +64,7 @@ jobs:
       - run:
           name: Build frontend
           command: |
-            sudo npm install netlify-cli -g
+            sudo npm install netlify-cli -g;
             cd harmony-app/;
             yarn;
             CI=false yarn build;
