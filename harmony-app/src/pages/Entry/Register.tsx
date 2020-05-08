@@ -40,6 +40,8 @@ export const Register = () => {
 		setErr('');
 		try {
 			const resp = await AuthAPI.register(email, username, password);
+			localStorage.setItem('authsession', resp.session);
+			history.push('/app');
 		} catch (err) {
 			dialog({
 				type: 'alert',

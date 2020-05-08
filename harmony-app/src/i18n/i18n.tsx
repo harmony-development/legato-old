@@ -13,6 +13,9 @@ i18n
 			escapeValue: false,
 		},
 		ns: ['errors', 'common'],
+		react: {
+			useSuspense: false,
+		},
 	});
 
 export default i18n;

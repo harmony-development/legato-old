@@ -63,10 +63,14 @@ func (h Handlers) Register(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "register.error-registering")
 	}
-	err = h.DB.AddUser(randstr.Hex(h.Config.Server.UserIDLength), data.Email, data.Username, string(hash))
+	userid := randstr.Hex(h.Config.Server.UserIDLength)
+	err = h.DB.AddUser(userid, data.Email, data.Username, string(hash))
 	if err != nil {
 		logrus.Warn(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "register.error-registering")
 	}
-	return ctx.NoContent(http.StatusOK)
+	session := h.AuthManager.Sessions.MakeSession(userid, h.Config.Server.SessionExpire)
+	return ctx.JSON(http.StatusOK, map[string]string{
+		"session": session,
+	})
 }

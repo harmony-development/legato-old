@@ -1,8 +1,11 @@
 import { ReqHelper, Auth } from './ReqHelper';
 
 interface IRegisterResponse {
-	userid: string;
-	token: string;
+	session: string;
+}
+
+interface ILoginResponse {
+	session: string;
 }
 
 export class AuthAPI {
@@ -18,10 +21,8 @@ export class AuthAPI {
 		);
 	}
 
-	static async login() {
-		fetch(`${this.endPoint}/login`, {
-			method: 'POST',
-		});
+	static async login(email: string, password: string) {
+		return ReqHelper.post<ILoginResponse>(`${this.endPoint}/login`, null, { email, password }, Auth.TOKEN);
 	}
 }
 
