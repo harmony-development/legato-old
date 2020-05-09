@@ -18,6 +18,7 @@ const CommonDialogContext = React.createContext<(options: DialogOptions) => Prom
 
 export const CommonDialogContextProvider = ({ children }: Props) => {
 	const [dialogState, setConfirmState] = React.useState<DialogOptions | null>(null);
+	const [dialogOpen, setDialogOpen] = React.useState(false);
 	const pendingDialogRef = React.useRef<{
 		resolve: () => void;
 		reject: () => void;
@@ -25,6 +26,7 @@ export const CommonDialogContextProvider = ({ children }: Props) => {
 
 	const openDialog = (options: DialogOptions) => {
 		setConfirmState(options);
+		setDialogOpen(true);
 		return new Promise<void>((resolve, reject) => {
 			pendingDialogRef.current = { resolve, reject };
 		});
@@ -34,24 +36,30 @@ export const CommonDialogContextProvider = ({ children }: Props) => {
 		if (pendingDialogRef.current) {
 			pendingDialogRef.current.reject();
 		}
-		setConfirmState(null);
+		setDialogOpen(false);
 	};
 
 	const confirmHandler = () => {
 		if (pendingDialogRef.current) {
 			pendingDialogRef.current.resolve();
 		}
+		setDialogOpen(false);
+	};
+
+	const exitHandler = () => {
 		setConfirmState(null);
 	};
 
 	return (
 		<>
 			<CommonDialogContext.Provider value={openDialog}>{children}</CommonDialogContext.Provider>
-			{dialogState ? (
-				<CommonDialog onSubmit={confirmHandler} onClose={cancelHandler} open={Boolean(dialogState)} {...dialogState} />
-			) : (
-				undefined
-			)}
+			<CommonDialog
+				onSubmit={confirmHandler}
+				onClose={cancelHandler}
+				onExited={exitHandler}
+				open={dialogOpen}
+				{...dialogState}
+			/>
 		</>
 	);
 };

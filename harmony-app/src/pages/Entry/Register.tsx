@@ -1,10 +1,8 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { TextField, Typography, Button, makeStyles, Theme } from '@material-ui/core';
-import { toast } from 'react-toastify';
 import { useHistory } from 'react-router';
 import { useTranslation } from 'react-i18next';
 
-import { harmonySocket } from '../../Root';
 import { AuthAPI } from '../../api/Auth';
 import { useDialog } from '../../component/Dialog/CommonDialogContext';
 

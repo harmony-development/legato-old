@@ -1,16 +1,26 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useHistory } from 'react-router';
-import { Typography, Button } from '@material-ui/core';
+import { Typography, Button, makeStyles, Theme } from '@material-ui/core';
 
 import { harmonySocket } from '../../Root';
 
-import { useInviteHandlerStyle } from './InviteHandlerStyle';
+const inviteStyles = makeStyles((theme: Theme) => ({
+	errorRoot: {
+		textAlign: 'center',
+	},
+	errorMsg: {
+		paddingTop: theme.spacing(10),
+	},
+	errorBtn: {
+		marginTop: theme.spacing(2),
+	},
+}));
 
-export const InviteHandler = () => {
+export const Invite = React.memo(() => {
 	const { invitecode } = useParams();
 	const history = useHistory();
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
-	const classes = useInviteHandlerStyle();
+	const classes = inviteStyles();
 
 	const handleJoinGuild = useCallback(
 		(raw: any) => {
@@ -65,4 +75,4 @@ export const InviteHandler = () => {
 			)}
 		</div>
 	);
-};
+});

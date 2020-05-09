@@ -1,10 +1,8 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { TextField, Typography, Button, makeStyles, Theme } from '@material-ui/core';
-import { toast } from 'react-toastify';
 import { useHistory } from 'react-router';
 import { useTranslation } from 'react-i18next';
 
-import { harmonySocket } from '../../Root';
 import { AuthAPI } from '../../api/Auth';
 import { useDialog } from '../../component/Dialog/CommonDialogContext';
 
@@ -25,8 +23,6 @@ export const Login = () => {
 	const classes = loginStyles();
 	const dialog = useDialog();
 	const { t } = useTranslation('entry');
-
-	const [err, setErr] = React.useState<string | undefined>(undefined);
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 
@@ -69,13 +65,6 @@ export const Login = () => {
 					margin="normal"
 					fullWidth
 				/>
-				{err ? (
-					<Typography variant="subtitle1" color={'error'}>
-						{err}
-					</Typography>
-				) : (
-					undefined
-				)}
 				<Button variant="contained" color="secondary" className={classes.submitBtn} type="submit" fullWidth>
 					{t('entry:log-in')}
 				</Button>

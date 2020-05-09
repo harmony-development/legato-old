@@ -7,7 +7,6 @@ import { ThemeProvider, Theme, makeStyles } from '@material-ui/core/styles';
 import 'react-toastify/dist/ReactToastify.css';
 import HarmonySocket from './socket/socket';
 import { IState } from './types/redux';
-
 import './Root.css';
 import { Loading } from './component/Loading';
 import { HarmonyDark } from './pages/App/HarmonyColor';
@@ -16,7 +15,7 @@ import { CommonDialogContextProvider } from './component/Dialog/CommonDialogCont
 export const harmonySocket = new HarmonySocket();
 
 const InvitePage = lazy(async () => ({
-	default: (await import('./pages/InviteHandler/HandleInvite')).InviteHandler,
+	default: (await import('./pages/Invite/Invite')).Invite,
 }));
 
 const EntryPage = lazy(async () => ({

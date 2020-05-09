@@ -4,18 +4,19 @@ import { useTranslation } from 'react-i18next';
 
 interface Props {
 	open: boolean;
-	title: string;
-	description: string;
-	type: 'confirm' | 'alert';
-	onSubmit: () => void;
-	onClose: () => void;
+	title?: string;
+	description?: string;
+	type?: 'confirm' | 'alert';
+	onSubmit?: () => void;
+	onClose?: () => void;
+	onExited?: () => void;
 }
 
 export const CommonDialog = (props: Props) => {
 	const { t } = useTranslation(['common']);
 
 	return (
-		<Dialog open={props.open} onClose={props.onClose}>
+		<Dialog open={props.open} onClose={props.onClose} onExited={props.onExited}>
 			<DialogTitle>{props.title}</DialogTitle>
 			<DialogContent>
 				<DialogContentText>{props.description}</DialogContentText>
