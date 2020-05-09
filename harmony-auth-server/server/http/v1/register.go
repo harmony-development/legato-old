@@ -9,12 +9,19 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"harmony-auth-server/server/http/hm"
+	"harmony-auth-server/util"
 )
 
 type registerData struct {
-	Email    string `validate:"required,email"`
-	Username string `validate:"required"`
-	Password string `validate:"required"`
+	Email         string `validate:"required,email"`
+	Username      string `validate:"required"`
+	Password      string `validate:"required"`
+	PasswordStats struct {
+		Capital   int
+		Lowercase int
+		Numbers   int
+		Special   int
+	} `validate:"required"`
 }
 
 // Register takes in an email, username, and password and tries to create an account on the server
@@ -27,24 +34,40 @@ func (h Handlers) Register(c echo.Context) error {
 	if err := ctx.Validate(data); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid")
 	}
-	if len(data.Username) < h.Config.Server.UsernameLenMin || len(data.Username) > h.Config.Server.UsernameLenMax {
+	if !util.InRange(len(data.Username), h.Config.Server.UsernamePolicy.MinLength, h.Config.Server.UsernamePolicy.MaxLength) {
 		return echo.NewHTTPError(http.StatusBadRequest,
 			map[string]interface{}{
 				"message": "register.username-length",
 				"fields": map[string]interface{}{
-					"minLength": h.Config.Server.UsernameLenMin,
-					"maxLength": h.Config.Server.UsernameLenMax,
+					"minLength": h.Config.Server.UsernamePolicy.MinLength,
+					"maxLength": h.Config.Server.UsernamePolicy.MaxLength,
 				},
 			},
 		)
 	}
-	if len(data.Password) < h.Config.Server.PassLenMin || len(data.Password) > h.Config.Server.PassLenMax {
+	if !util.InRange(len(data.Password), h.Config.Server.PasswordPolicy.MinLength, h.Config.Server.PasswordPolicy.MaxLength) {
 		return echo.NewHTTPError(http.StatusBadRequest,
 			map[string]interface{}{
 				"message": "register.password-length",
 				"fields": map[string]interface{}{
-					"minLength": h.Config.Server.PassLenMin,
-					"maxLength": h.Config.Server.PassLenMax,
+					"minLength": h.Config.Server.PasswordPolicy.MinLength,
+					"maxLength": h.Config.Server.PasswordPolicy.MaxLength,
+				},
+			},
+		)
+	}
+	if data.PasswordStats.Capital < h.Config.Server.PasswordPolicy.MinCapital ||
+		data.PasswordStats.Lowercase < h.Config.Server.PasswordPolicy.MinLowercase ||
+		data.PasswordStats.Numbers < h.Config.Server.PasswordPolicy.MinNumbers ||
+		data.PasswordStats.Special < h.Config.Server.PasswordPolicy.MinSpecial {
+		return echo.NewHTTPError(http.StatusBadRequest,
+			map[string]interface{}{
+				"message": "register.password-policy",
+				"fields": map[string]interface{}{
+					"minCapital":   h.Config.Server.PasswordPolicy.MinCapital,
+					"minLowercase": h.Config.Server.PasswordPolicy.MinLowercase,
+					"minNumbers":   h.Config.Server.PasswordPolicy.MinNumbers,
+					"minSpecial":   h.Config.Server.PasswordPolicy.MinSpecial,
 				},
 			},
 		)

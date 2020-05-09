@@ -34,7 +34,10 @@ export const CommonDialogContextProvider = ({ children }: Props) => {
 
 	const cancelHandler = () => {
 		if (pendingDialogRef.current) {
-			pendingDialogRef.current.reject();
+			if (dialogState?.type === 'confirm') {
+				pendingDialogRef.current.reject();
+			}
+			pendingDialogRef.current.resolve();
 		}
 		setDialogOpen(false);
 	};

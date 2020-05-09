@@ -80,17 +80,19 @@ export const Root = React.memo(() => {
 			<CssBaseline />
 			<CommonDialogContextProvider>
 				<Suspense fallback={Loading()}>
-					<Switch>
-						<Route exact path="/">
-							<EntryPage />
-						</Route>
-						<Route exact path="/app/:selectedguildparam?/:selectedchannelparam?">
-							<AppPage />
-						</Route>
-						<Route exact path="/invite/:invitecode">
-							<InvitePage />
-						</Route>
-					</Switch>
+					<div className="root">
+						<Switch>
+							<Route exact path="/">
+								<EntryPage />
+							</Route>
+							<Route exact path="/app/:selectedguildparam?/:selectedchannelparam?">
+								<AppPage />
+							</Route>
+							<Route exact path="/invite/:invitecode">
+								<InvitePage />
+							</Route>
+						</Switch>
+					</div>
 				</Suspense>
 			</CommonDialogContextProvider>
 		</ThemeProvider>

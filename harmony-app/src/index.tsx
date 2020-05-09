@@ -11,7 +11,6 @@ import { Provider } from 'react-redux';
 
 import { store, persistor } from './redux/store';
 import * as serviceWorker from './serviceWorker';
-import { CommonDialogContextProvider } from './component/Dialog/CommonDialogContext';
 import { Root } from './Root';
 import './i18n/i18n';
 

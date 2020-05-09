@@ -19,10 +19,6 @@ type ServerConf struct {
 	Port               string
 	InstanceAPIVersion string
 	AvatarPath         string
-	UsernameLenMin     int
-	UsernameLenMax     int
-	PassLenMin         int
-	PassLenMax         int
 	PassRegex          string
 	UserIDLength       int
 	SessionLength      int
@@ -34,6 +30,24 @@ type ServerConf struct {
 	AvatarHeight       int
 	AvatarCrop         bool
 	TLS                TLSConf
+	PasswordPolicy     PasswordPolicy
+	UsernamePolicy     UsernamePolicy
+}
+
+// UsernamePolicy contains the settings for password safety
+type UsernamePolicy struct {
+	MinLength int
+	MaxLength int
+}
+
+// PasswordPolicy contains the settings for password safety
+type PasswordPolicy struct {
+	MinLength    int
+	MaxLength    int
+	MinCapital   int
+	MinLowercase int
+	MinNumbers   int
+	MinSpecial   int
 }
 
 // TLSConf contains the configurations to use for TLS
@@ -66,10 +80,6 @@ func Load() (*Config, error) {
 			Port:               ":2289",
 			InstanceAPIVersion: "v1",
 			AvatarPath:         "./avatars",
-			UsernameLenMin:     2,
-			UsernameLenMax:     48,
-			PassLenMin:         5,
-			PassLenMax:         128,
 			PassRegex:          "",
 			UserIDLength:       16,
 			SessionLength:      16,
@@ -84,6 +94,18 @@ func Load() (*Config, error) {
 				Enabled:  false,
 				CertPath: "",
 				KeyPath:  "",
+			},
+			UsernamePolicy: UsernamePolicy{
+				MinLength: 5,
+				MaxLength: 32,
+			},
+			PasswordPolicy: PasswordPolicy{
+				MinLength:    5,
+				MaxLength:    50,
+				MinCapital:   1,
+				MinLowercase: 1,
+				MinNumbers:   1,
+				MinSpecial:   0,
 			},
 		},
 		DB: DBConf{
@@ -105,7 +127,7 @@ func Load() (*Config, error) {
 		if err := viper.SafeWriteConfig(); err != nil {
 			return nil, err
 		}
-		return nil, errors.New("Config file was not found, so one was g")
+		return nil, errors.New("config file not found, default config generated at config.yml. Restart server to see effects")
 	}
 	var cfg Config
 	if err := viper.UnmarshalKey("authserver", &cfg); err != nil {
