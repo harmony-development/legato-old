@@ -1,0 +1,52 @@
+
+{
+	"extends": [
+		"eslint:recommended",
+		"plugin:react/recommended",
+		"plugin:@typescript-eslint/recommended",
+		// Import sorting
+		"plugin:import/errors",
+		"plugin:import/warnings",
+		"plugin:import/typescript",
+
+		// prettier/recommended disables any eslint rules that could conflict
+		"plugin:prettier/recommended",
+		"prettier/react",
+		"prettier/@typescript-eslint"
+	],
+	"plugins": ["react", "react-hooks", "@typescript-eslint", "import", "prettier"],
+	"env": {
+		"browser": true,
+		"jasmine": true,
+		"jest": true,
+		"es6": true
+	},
+	"rules": {
+		// Formatting
+		// See also .prettierrc.json and .editorconfig
+		"prettier/prettier": "warn",
+		"import/order": [
+			"warn",
+			{
+				"groups": ["builtin", "external", "parent", "sibling", "index"],
+				"newlines-between": "always"
+			}
+		],
+
+		// Rules
+		"react-hooks/rules-of-hooks": "error",
+		"react-hooks/exhaustive-deps": "off",
+		"@typescript-eslint/no-non-null-assertion": "off",
+		"@typescript-eslint/interface-name-prefix": "off",
+		"@typescript-eslint/explicit-function-return-type": "off",
+		"react/display-name": "off",
+		"@typescript-eslint/ban-ts-ignore": "off"
+	},
+	"settings": {
+		"react": {
+			"pragma": "React",
+			"version": "detect"
+		}
+	},
+	"parser": "@typescript-eslint/parser"
+}
