@@ -2,8 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Paper } from '@material-ui/core';
 
-import { IState } from '../../../types/redux';
-import { AppDispatch } from '../../../redux/store';
+import { AppDispatch, RootState } from '../../../redux/store';
 import { FocusChatInput } from '../../../redux/AppReducer';
 import { DisconnectedStatus } from '../DisconnectedStatus';
 import { harmonySocket } from '../../../Root';
@@ -22,7 +21,7 @@ let scrollTrigger = false;
 export const ChatArea = () => {
 	const classes = useChatAreaStyles();
 	const dispatch = useDispatch<AppDispatch>();
-	const { messages, connected, currentGuild, currentChannel } = useSelector((state: IState) => state);
+	const { messages, connected, currentGuild, currentChannel } = useSelector((state: RootState) => state.app);
 	const messagesRef = useRef<HTMLDivElement | null>(null);
 
 	useEffect(() => {

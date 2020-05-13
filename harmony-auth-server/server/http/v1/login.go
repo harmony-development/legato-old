@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"github.com/getsentry/sentry-go"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 	"harmony-auth-server/server/db"
@@ -27,10 +28,14 @@ func (h Handlers) Login(c echo.Context) error {
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many requests, please try again later")
 	}
+	if exists, err := h.DB.EmailRegistered(data.Email); err != nil || !exists {
+		return echo.NewHTTPError(http.StatusNotFound, "login.not-registered")
+	}
 	var user db.User
 	if err := h.DB.QueryRow(
 		"SELECT userid, password FROM users WHERE email=$1", data.Email,
 	).Scan(&user.UserID, &user.Password); err != nil {
+		sentry.CaptureException(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "error getting user details")
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.Password)); err != nil {

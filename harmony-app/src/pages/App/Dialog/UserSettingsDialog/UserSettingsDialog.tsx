@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Dialog, AppBar, Toolbar, IconButton, Typography, DialogContent, TextField, Button } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
-import { IState } from '../../../../types/redux';
-import { AppDispatch } from '../../../../redux/store';
+import { AppDispatch, RootState } from '../../../../redux/store';
 import { ToggleUserSettingsDialog } from '../../../../redux/AppReducer';
 import { ImagePicker } from '../../../../component/ImagePicker';
 import { harmonySocket } from '../../../../Root';
@@ -15,11 +14,11 @@ import { useUserSettingsStyle } from './UserSettingsStyle';
 
 export const UserSettingsDialog = () => {
 	const dispatch = useDispatch<AppDispatch>();
-	const [open, globalUsername, globalAvatar, inputStyle] = useSelector((state: IState) => [
-		state.userSettingsDialog,
-		state.self.username || undefined,
-		state.self.avatar || undefined,
-		state.theme.inputStyle,
+	const [open, globalUsername, globalAvatar, inputStyle] = useSelector((state: RootState) => [
+		state.app.userSettingsDialog,
+		state.app.self.username || undefined,
+		state.app.self.avatar || undefined,
+		state.app.theme.inputStyle,
 	]);
 	const [username, setUsername] = useState<string>(globalUsername || '');
 	const [avatar, setAvatar] = useState<string | undefined>(globalAvatar);

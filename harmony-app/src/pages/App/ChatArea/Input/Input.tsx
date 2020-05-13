@@ -1,21 +1,21 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { TextField, Button, Box } from '@material-ui/core';
+import { TextField, Button } from '@material-ui/core';
 import { useSelector } from 'react-redux';
 import { Add as AddIcon } from '@material-ui/icons';
 
-import { IState } from '../../../../types/redux';
 import { harmonySocket } from '../../../../Root';
+import { RootState } from '../../../../redux/store';
 
 import { useInputStyles } from './InputStyle';
 import { FileCard } from './FileCard/FileCard';
 
 export const Input = () => {
-	const [connected, inputStyle, guildID, channelID, focus] = useSelector((state: IState) => [
-		state.connected,
-		state.theme.inputStyle,
-		state.currentGuild,
-		state.currentChannel,
-		state.chatInputFocus,
+	const [connected, inputStyle, guildID, channelID, focus] = useSelector((state: RootState) => [
+		state.app.connected,
+		state.app.theme.inputStyle,
+		state.app.currentGuild,
+		state.app.currentChannel,
+		state.app.chatInputFocus,
 	]);
 	const inputField = useRef<HTMLInputElement | undefined>();
 	const fileUploadRef = useRef<HTMLInputElement | null>(null);

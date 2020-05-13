@@ -3,12 +3,10 @@ module harmony-auth-server
 go 1.14
 
 require (
-	github.com/chzyer/logex v1.1.10 // indirect
-	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
-	github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/getsentry/sentry-go v0.5.1
 	github.com/go-playground/validator/v10 v10.2.0
+	github.com/hashicorp/golang-lru v0.5.4
 	github.com/labstack/echo/v4 v4.1.15
 	github.com/lib/pq v1.3.0
 	github.com/sirupsen/logrus v1.2.0

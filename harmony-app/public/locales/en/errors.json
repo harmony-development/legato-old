@@ -5,5 +5,8 @@
 		"password-length": "Password must be between {{ minLength }} and {{ maxLength }} characters long",
 		"password-policy": "Password must at least {{ minCapital }} capital, {{ minLowercase }} lowercase, {{ minNumbers }} number(s), and {{ minSpecial }} special",
 		"already-registered": "Email has already been registered"
+	},
+	"login": {
+		"not-registered": "Email has not been registered"
 	}
 }

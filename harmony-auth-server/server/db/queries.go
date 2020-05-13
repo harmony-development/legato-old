@@ -1,6 +1,10 @@
 package db
 
 import (
+	"time"
+
+	"github.com/thanhpk/randstr"
+
 	"harmony-auth-server/server/comms"
 )
 
@@ -10,7 +14,7 @@ func (db DB) GetInstanceList(userID string) ([]comms.Instance, error) {
 	if err != nil {
 		return nil, err
 	}
-	var out []comms.Instance
+	var out = make([]comms.Instance, 0)
 	for res.Next() {
 		var inst comms.Instance
 		if err := res.Scan(&inst.Name, &inst.Host); err != nil {
@@ -63,4 +67,10 @@ func (db DB) AddUser(userID string, email string, username string, passHash stri
 // EmailRegistered checks if an email has already been used to make an account
 func (db DB) EmailRegistered(email string) (bool, error) {
 	return db.ContainsRow("SELECT email FROM users WHERE email=$1", email)
+}
+
+// MakeSession creates a new session
+func (db DB) MakeSession(userID string, expire time.Duration) string {
+	session := randstr.Hex(32)
+	db.SessionCache.Add(session, userID)
 }

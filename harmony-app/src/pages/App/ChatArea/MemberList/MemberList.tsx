@@ -2,12 +2,12 @@ import React from 'react';
 import { List } from '@material-ui/core';
 import { useSelector } from 'react-redux';
 
-import { IState } from '../../../../types/redux';
+import { RootState } from '../../../../redux/store';
 
 import { Member } from './Member';
 
 export const MemberList = () => {
-	const { guildMembers, currentGuild } = useSelector((state: IState) => state);
+	const { guildMembers, currentGuild } = useSelector((state: RootState) => state.app);
 
 	return (
 		<List>

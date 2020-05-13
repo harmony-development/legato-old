@@ -24,9 +24,9 @@ import {
 	SetGuildMembers,
 	DeleteMessage,
 } from './redux/AppReducer';
-import { AppDispatch } from './redux/store';
+import { AppDispatch, RootState } from './redux/store';
 import HarmonySocket from './socket/socket';
-import { IState, IGuild, IMessage } from './types/redux';
+import { IGuild, IMessage } from './types/redux';
 
 export function useSocketHandler(socket: HarmonySocket, history: h.History<any>): void {
 	const dispatch = useDispatch<AppDispatch>();
@@ -41,7 +41,7 @@ export function useSocketHandler(socket: HarmonySocket, history: h.History<any>)
 		guildDialog,
 		guildList,
 		guildSettingsDialog,
-	} = useSelector((state: IState) => state);
+	} = useSelector((state: RootState) => state.app);
 	const firstDisconnect = useRef(true);
 
 	const getGuildsCallback = useCallback(

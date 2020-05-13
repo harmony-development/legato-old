@@ -17,20 +17,19 @@ import {
 } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { IState } from '../../../types/redux';
-import { AppDispatch } from '../../../redux/store';
+import { AppDispatch, RootState } from '../../../redux/store';
 import { SetInputStyle, SetPrimary, SetSecondary, ToggleThemeDialog, InvertTheme } from '../../../redux/AppReducer';
 
 import { ColorPicker } from './ColorPicker';
 
-export const ThemeDialog = () => {
+export const ThemeDialog = React.memo(() => {
 	const dispatch = useDispatch<AppDispatch>();
-	const [open, themeType, globalPrimary, globalSecondary, inputStyle] = useSelector((state: IState) => [
-		state.themeDialog,
-		state.theme.type,
-		state.theme.primary,
-		state.theme.secondary,
-		state.theme.inputStyle,
+	const [open, themeType, globalPrimary, globalSecondary, inputStyle] = useSelector((state: RootState) => [
+		state.app.themeDialog,
+		state.app.theme.type,
+		state.app.theme.primary,
+		state.app.theme.secondary,
+		state.app.theme.inputStyle,
 	]);
 	const [primary, setPrimary] = useState<Color>(globalPrimary);
 	const [secondary, setSecondary] = useState<Color>(globalSecondary);
@@ -87,4 +86,4 @@ export const ThemeDialog = () => {
 			</DialogActions>
 		</Dialog>
 	);
-};
+});

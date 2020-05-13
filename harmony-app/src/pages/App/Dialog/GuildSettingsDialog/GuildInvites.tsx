@@ -7,11 +7,11 @@ import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ShareIcon from '@material-ui/icons/Share';
 
-import { IState } from '../../../../types/redux';
 import { harmonySocket } from '../../../../Root';
+import { RootState } from '../../../../redux/store';
 
 export const GuildInvites: React.FC = () => {
-	const [currentGuild, invites] = useSelector((state: IState) => [state.currentGuild, state.invites]);
+	const [currentGuild, invites] = useSelector((state: RootState) => [state.app.currentGuild, state.app.invites]);
 
 	const deleteInvite = (invite: string) => {
 		if (currentGuild) {

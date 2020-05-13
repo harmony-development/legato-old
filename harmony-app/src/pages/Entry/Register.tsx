@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { AuthAPI } from '../../api/Auth';
 import { useDialog } from '../../component/Dialog/CommonDialogContext';
+import { ReqHelper } from '../../api/ReqHelper';
 
 const registerStyles = makeStyles((theme: Theme) => ({
 	root: {
@@ -39,6 +40,7 @@ export const Register = () => {
 		try {
 			const resp = await AuthAPI.register(email, username, password);
 			localStorage.setItem('authsession', resp.session);
+			ReqHelper.refreshAuthSession();
 			history.push('/app');
 		} catch (err) {
 			dialog({

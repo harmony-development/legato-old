@@ -1,11 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import GroupAdd from '@material-ui/icons/GroupAdd';
 import { useDispatch, useSelector } from 'react-redux';
 import { ButtonBase, Tooltip } from '@material-ui/core';
 
-import { IState } from '../../../../types/redux';
 import { ToggleGuildDialog } from '../../../../redux/AppReducer';
-import { AppDispatch } from '../../../../redux/store';
+import { AppDispatch, RootState } from '../../../../redux/store';
 
 import { useGuildListStyle } from './GuildListStyle';
 import { GuildIcon } from './GuildIcon';
@@ -13,7 +12,7 @@ import { GuildIcon } from './GuildIcon';
 export const GuildList = () => {
 	const classes = useGuildListStyle();
 	const dispatch = useDispatch<AppDispatch>();
-	const [guildList, currentGuild] = useSelector((state: IState) => [state.guildList, state.currentGuild]);
+	const [guildList, currentGuild] = useSelector((state: RootState) => [state.app.guildList, state.app.currentGuild]);
 
 	return (
 		<div className={classes.guildlist}>

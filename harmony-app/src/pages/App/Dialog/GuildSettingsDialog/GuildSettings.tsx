@@ -5,9 +5,8 @@ import { Dialog, DialogContent, AppBar, Toolbar, IconButton, Typography, Button,
 import CloseIcon from '@material-ui/icons/Close';
 import { toast } from 'react-toastify';
 
-import { IState } from '../../../../types/redux';
 import { harmonySocket } from '../../../../Root';
-import { AppDispatch } from '../../../../redux/store';
+import { AppDispatch, RootState } from '../../../../redux/store';
 import { ToggleGuildSettingsDialog } from '../../../../redux/AppReducer';
 import { ImagePicker } from '../../../../component/ImagePicker';
 import { useDialog } from '../../../../component/Dialog/CommonDialogContext';
@@ -15,14 +14,14 @@ import { useDialog } from '../../../../component/Dialog/CommonDialogContext';
 import { useGuildSettingsStyle } from './GuildSettingsStyle';
 import { GuildInvites } from './GuildInvites';
 
-export const GuildSettings = () => {
+export const GuildSettings = React.memo(() => {
 	const dispatch = useDispatch<AppDispatch>();
 	const confirm = useDialog();
-	const [open, currentGuild, inputStyle, guilds] = useSelector((state: IState) => [
-		state.guildSettingsDialog,
-		state.currentGuild,
-		state.theme.inputStyle,
-		state.guildList,
+	const [open, currentGuild, inputStyle, guilds] = useSelector((state: RootState) => [
+		state.app.guildSettingsDialog,
+		state.app.currentGuild,
+		state.app.theme.inputStyle,
+		state.app.guildList,
 	]);
 	const [guildName, setGuildName] = useState<string | undefined>(
 		currentGuild ? (guilds[currentGuild] ? guilds[currentGuild].guildname : undefined) : undefined
@@ -114,4 +113,4 @@ export const GuildSettings = () => {
 			</DialogContent>
 		</Dialog>
 	);
-};
+});

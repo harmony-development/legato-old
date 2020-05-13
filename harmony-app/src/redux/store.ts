@@ -1,29 +1,16 @@
-import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
-import { persistStore, persistReducer, PERSIST } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
-import hardSet from 'redux-persist/es/stateReconciler/hardSet';
-
-import { IState } from '../types/redux';
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
 
 import { AppReducer } from './AppReducer';
-const persisted = persistReducer<IState>(
-	{
-		key: 'root',
-		storage,
-		stateReconciler: hardSet,
-	},
-	AppReducer
-);
+import { AuthReducer } from './AuthReducer';
 
-export const store = configureStore({
-	reducer: persisted,
-	middleware: getDefaultMiddleware({
-		serializableCheck: {
-			ignoredActions: [PERSIST],
-		},
-	}),
+const rootReducer = combineReducers({
+	app: AppReducer,
+	auth: AuthReducer,
 });
 
-export const persistor = persistStore(store);
+export const store = configureStore({
+	reducer: rootReducer,
+});
 
+export type RootState = ReturnType<typeof rootReducer>;
 export type AppDispatch = typeof store.dispatch;

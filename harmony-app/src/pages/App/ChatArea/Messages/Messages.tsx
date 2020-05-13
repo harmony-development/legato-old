@@ -2,13 +2,13 @@ import React, { useEffect, useRef } from 'react';
 import { List } from '@material-ui/core';
 import { useSelector } from 'react-redux';
 
-import { IState } from '../../../../types/redux';
 import { harmonySocket } from '../../../../Root';
+import { RootState } from '../../../../redux/store';
 
 import { Message } from './Message';
 
 export const Messages = () => {
-	const [messages, users] = useSelector((state: IState) => [state.messages, state.users]);
+	const [messages, users] = useSelector((state: RootState) => [state.app.messages, state.app.users]);
 	const messageList = useRef<HTMLUListElement | undefined>(undefined);
 
 	useEffect(() => {

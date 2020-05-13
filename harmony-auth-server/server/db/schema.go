@@ -17,10 +17,14 @@ var queries = []string{
 		avatar TEXT NOT NULL,
 		password TEXT NOT NULL
 	);`,
-	`CREATE TABLE IF NOT EXISTS intances(
+	`CREATE TABLE IF NOT EXISTS instances(
 		userid TEXT NOT NULL REFERENCES users(userid), -- the userid of who owns this entry
 		host TEXT PRIMARY KEY NOT NULL, -- the host for the harmony instance
 		name TEXT NOT NULL
+	)`,
+	`CREATE TABLE IF NOT EXISTS sessions(
+		session TEXT NOT NULL,
+		userid TEXT NOT NULL REFERENCES users(userid)
 	)`,
 }
 

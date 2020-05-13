@@ -7,9 +7,8 @@ import LeaveIcon from '@material-ui/icons/ExitToApp';
 import { ContextMenu, ContextMenuTrigger } from 'react-contextmenu';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { IState } from '../../../../types/redux';
 import { harmonySocket } from '../../../../Root';
-import { AppDispatch } from '../../../../redux/store';
+import { AppDispatch, RootState } from '../../../../redux/store';
 import { SetCurrentChannel, ToggleGuildSettingsDialog } from '../../../../redux/AppReducer';
 
 import { useChannelListStyle } from './ChannelListStyle';
@@ -21,10 +20,10 @@ interface IChannelProps {
 }
 
 const Channel = (props: IChannelProps) => {
-	const [currentGuild, selectedChannel, guildsList] = useSelector((state: IState) => [
-		state.currentGuild,
-		state.currentChannel,
-		state.guildList,
+	const [currentGuild, selectedChannel, guildsList] = useSelector((state: RootState) => [
+		state.app.currentGuild,
+		state.app.currentChannel,
+		state.app.guildList,
 	]);
 	const classes = useChannelListStyle();
 
@@ -63,10 +62,10 @@ const Channel = (props: IChannelProps) => {
 
 export const ChannelList = () => {
 	const dispatch = useDispatch<AppDispatch>();
-	const [channels, currentGuild, guildsList] = useSelector((state: IState) => [
-		state.channels,
-		state.currentGuild,
-		state.guildList,
+	const [channels, currentGuild, guildsList] = useSelector((state: RootState) => [
+		state.app.channels,
+		state.app.currentGuild,
+		state.app.guildList,
 	]);
 	const [actionsExpanded, setActionsExpanded] = useState<boolean>(false);
 	const [addingChannel, setAddingChannel] = useState<boolean>(false);

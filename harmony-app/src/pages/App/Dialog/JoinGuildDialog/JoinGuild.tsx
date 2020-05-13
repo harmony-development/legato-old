@@ -2,14 +2,13 @@ import React, { useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Dialog, TextField, Typography, DialogContent, Button, Grid } from '@material-ui/core';
 
-import { IState } from '../../../../types/redux';
 import { harmonySocket } from '../../../../Root';
 import { ToggleGuildDialog } from '../../../../redux/AppReducer';
-import { AppDispatch } from '../../../../redux/store';
+import { AppDispatch, RootState } from '../../../../redux/store';
 
-export const JoinGuild = () => {
+export const JoinGuild = React.memo(() => {
 	const dispatch = useDispatch<AppDispatch>();
-	const [open, inputStyle] = useSelector((state: IState) => [state.guildDialog, state.theme.inputStyle]);
+	const [open, inputStyle] = useSelector((state: RootState) => [state.app.guildDialog, state.app.theme.inputStyle]);
 	const [joinErr] = useState<string>('');
 	const [createErr] = useState<string>('');
 	const joinCodeRef = useRef<HTMLInputElement | null>(null);
@@ -55,4 +54,4 @@ export const JoinGuild = () => {
 			</DialogContent>
 		</Dialog>
 	);
-};
+});

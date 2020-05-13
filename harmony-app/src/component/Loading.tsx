@@ -1,5 +1,4 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/styles';
 import { CircularProgress } from '@material-ui/core';
 
 const rootElementStyle = {
@@ -10,10 +9,10 @@ const rootElementStyle = {
 	alignItems: 'center',
 };
 
-export const Loading = () => {
+export const Loading = React.memo(() => {
 	return (
 		<div style={rootElementStyle}>
 			<CircularProgress />
 		</div>
 	);
-};
+});

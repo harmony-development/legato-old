@@ -11,6 +11,7 @@ import './Root.css';
 import { Loading } from './component/Loading';
 import { HarmonyDark } from './pages/App/HarmonyColor';
 import { CommonDialogContextProvider } from './component/Dialog/CommonDialogContext';
+import { RootState } from './redux/store';
 
 export const harmonySocket = new HarmonySocket();
 
@@ -52,7 +53,7 @@ const rootStyles = makeStyles((theme: Theme) => ({
 }));
 
 export const Root = React.memo(() => {
-	const themeState = useSelector((state: IState) => state.theme);
+	const themeState = useSelector((state: RootState) => state.app.theme);
 	const theme = createMuiTheme({
 		palette: {
 			primary: themeState.primary,
@@ -79,7 +80,7 @@ export const Root = React.memo(() => {
 		<ThemeProvider theme={theme}>
 			<CssBaseline />
 			<CommonDialogContextProvider>
-				<Suspense fallback={Loading()}>
+				<Suspense fallback={<Loading />}>
 					<div className="root">
 						<Switch>
 							<Route exact path="/">

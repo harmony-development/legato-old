@@ -2,42 +2,41 @@ import i18n from '../i18n/i18n';
 
 export enum Auth {
 	NONE,
-	TOKEN,
+	AUTH_SESSION,
 }
 
 type GetParams = {
 	[key: string]: any;
 } | null;
 
+enum StorageKeys {
+	AUTH_SESSION = 'authsession',
+}
+
 export class ReqHelper {
-	static authToken = localStorage.getItem('token') || undefined;
-	static tokenKey = 'token';
+	static authSession = localStorage.getItem('authsession') || null;
 
-	static async getToken() {
-		return localStorage.getItem('token');
+	static async refreshAuthSession() {
+		this.authSession = localStorage.getItem(StorageKeys.AUTH_SESSION);
 	}
 
-	static async refreshToken() {
-		this.authToken = (await this.getToken()) || undefined;
-	}
-
-	static async get<T>(url: string, params: GetParams, auth: Auth = Auth.TOKEN) {
+	static async get<T>(url: string, params: GetParams, auth: Auth = Auth.AUTH_SESSION) {
 		return this.http<T>('GET', url, params, null, auth);
 	}
 
-	static async post<T>(url: string, args: GetParams, body: any, auth: Auth = Auth.TOKEN) {
+	static async post<T>(url: string, args: GetParams, body: any, auth: Auth = Auth.AUTH_SESSION) {
 		return await this.http<T>('POST', url, args, body, auth);
 	}
 
-	static async put<T>(url: string, args: GetParams, body: any, auth: Auth = Auth.TOKEN) {
+	static async put<T>(url: string, args: GetParams, body: any, auth: Auth = Auth.AUTH_SESSION) {
 		return await this.http<T>('PUT', url, args, body, auth);
 	}
 
-	static async patch<T>(url: string, args: GetParams, body: any, auth: Auth = Auth.TOKEN) {
+	static async patch<T>(url: string, args: GetParams, body: any, auth: Auth = Auth.AUTH_SESSION) {
 		return await this.http<T>('PATCH', url, args, body, auth);
 	}
 
-	static async delete<T>(url: string, args: GetParams, auth: Auth = Auth.TOKEN) {
+	static async delete<T>(url: string, args: GetParams, auth: Auth = Auth.AUTH_SESSION) {
 		return await this.http<T>('DELETE', url, args, null, auth);
 	}
 
@@ -49,8 +48,8 @@ export class ReqHelper {
 				url.searchParams.set(param, params[param]);
 			});
 		}
-		if (auth === Auth.TOKEN && this.authToken) {
-			headers.set('Authorization', this.authToken);
+		if (auth === Auth.AUTH_SESSION && this.authSession) {
+			headers.set('Authorization', this.authSession);
 		}
 		if (body) {
 			body = JSON.stringify(body);

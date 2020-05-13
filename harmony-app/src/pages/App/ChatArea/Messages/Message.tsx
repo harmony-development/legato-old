@@ -14,7 +14,7 @@ import { MoreVert, PlayArrow } from '@material-ui/icons';
 import { useSelector } from 'react-redux';
 
 import { harmonySocket } from '../../../../Root';
-import { IState } from '../../../../types/redux';
+import { RootState } from '../../../../redux/store';
 
 interface IProps {
 	userid: string;
@@ -36,7 +36,7 @@ export const Message = (props: IProps) => {
 	const [dropdownBtnVisible, setDropdownBtnVisible] = useState(false);
 	const [output, setOutput] = useState('');
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-	const { currentGuild, currentChannel, self } = useSelector((state: IState) => state);
+	const { currentGuild, currentChannel, self } = useSelector((state: RootState) => state.app);
 
 	const handleDropdownBtnClick = (event: React.MouseEvent<HTMLButtonElement>) => {
 		setAnchorEl(event.currentTarget);

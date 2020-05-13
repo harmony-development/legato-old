@@ -8,9 +8,17 @@ interface ILoginResponse {
 	session: string;
 }
 
+type IListServersResponse = {
+	name: string;
+	host: string;
+}[];
+
 export class AuthAPI {
-	static endPoint = `http://localhost:2289/api/v1`;
-	static token = localStorage.getItem('token');
+	static endPoint = `https://localhost:2289/api/v1`;
+
+	static async getSession() {
+		return localStorage.getItem('authsession');
+	}
 
 	static async register(email: string, username: string, password: string) {
 		const passwordStats = {
@@ -36,12 +44,16 @@ export class AuthAPI {
 				password,
 				passwordStats,
 			},
-			Auth.TOKEN
+			Auth.AUTH_SESSION
 		);
 	}
 
 	static async login(email: string, password: string) {
-		return ReqHelper.post<ILoginResponse>(`${this.endPoint}/login`, null, { email, password }, Auth.TOKEN);
+		return ReqHelper.post<ILoginResponse>(`${this.endPoint}/login`, null, { email, password }, Auth.AUTH_SESSION);
+	}
+
+	static async listServers() {
+		return ReqHelper.post<IListServersResponse>(`${this.endPoint}/listservers`, null, null, Auth.AUTH_SESSION);
 	}
 }
 

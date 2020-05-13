@@ -4,9 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ContextMenuTrigger, ContextMenu, MenuItem } from 'react-contextmenu';
 
 import { harmonySocket } from '../../../../Root';
-import { AppDispatch } from '../../../../redux/store';
+import { AppDispatch, RootState } from '../../../../redux/store';
 import { SetCurrentGuild, ToggleGuildSettingsDialog, SetCurrentChannel } from '../../../../redux/AppReducer';
-import { IState } from '../../../../types/redux';
 
 import { useGuildListStyle } from './GuildListStyle';
 
@@ -19,7 +18,7 @@ interface IProps {
 
 export const GuildIcon = (props: IProps) => {
 	const dispatch = useDispatch<AppDispatch>();
-	const [guildsList] = useSelector((state: IState) => [state.guildList]);
+	const [guildsList] = useSelector((state: RootState) => [state.app.guildList]);
 	const classes = useGuildListStyle();
 
 	const onClick = () => {
