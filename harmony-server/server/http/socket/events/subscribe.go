@@ -2,9 +2,10 @@ package events
 
 import (
 	"encoding/json"
-	"github.com/sirupsen/logrus"
 	"harmony-server/server/http/socket/client"
 	"harmony-server/server/state/guild"
+
+	"github.com/sirupsen/logrus"
 )
 
 type subscribeData struct {

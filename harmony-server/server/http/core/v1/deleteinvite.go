@@ -1,17 +1,20 @@
 package v1
 
 import (
-	"github.com/getsentry/sentry-go"
-	"github.com/labstack/echo/v4"
 	"harmony-server/server/http/hm"
 	"net/http"
+
+	"github.com/getsentry/sentry-go"
+	"github.com/labstack/echo/v4"
 )
 
+// DeleteInviteData is the data for an invite delete request
 type DeleteInviteData struct {
 	Guild  string `validate:"required"`
 	Invite string `validate:"required"`
 }
 
+// DeleteInvite is the request to delete an invite
 func (h Handlers) DeleteInvite(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
 	var data DeleteInviteData

@@ -30,6 +30,7 @@ func (m *Middlewares) RateCleanup() {
 	}
 }
 
+// RateLimit enforces a rate limit on clients
 func (m *Middlewares) RateLimit(duration time.Duration, burst int) echo.MiddlewareFunc {
 	return func(handler echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
@@ -40,6 +41,7 @@ func (m *Middlewares) RateLimit(duration time.Duration, burst int) echo.Middlewa
 	}
 }
 
+// GetVisitor gets the rate limiter for a visitor
 func (m *Middlewares) GetVisitor(path string, ip string, duration time.Duration, burst int) *rate.Limiter {
 	m.RateLock.Lock()
 	defer m.RateLock.RUnlock()

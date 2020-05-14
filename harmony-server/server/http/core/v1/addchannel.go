@@ -1,11 +1,12 @@
 package v1
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/thanhpk/randstr"
 	"harmony-server/server/http/hm"
 	"harmony-server/server/http/socket/client"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
+	"github.com/thanhpk/randstr"
 )
 
 // AddChannelData represents data received from client on AddChannel
@@ -14,6 +15,7 @@ type AddChannelData struct {
 	ChannelName string `validate:"required"`
 }
 
+// AddChannel is a request to add a channel to a guild
 func (h Handlers) AddChannel(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
 	data := new(AddChannelData)

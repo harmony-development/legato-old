@@ -1,19 +1,22 @@
 package v1
 
 import (
-	"github.com/getsentry/sentry-go"
-	"github.com/labstack/echo/v4"
 	"harmony-server/server/http/hm"
 	"harmony-server/server/http/socket/client"
 	"net/http"
+
+	"github.com/getsentry/sentry-go"
+	"github.com/labstack/echo/v4"
 )
 
+// DeleteMessageData is the data for a message deletion request
 type DeleteMessageData struct {
 	Guild     string `validate:"guild"`
 	Channel   string `validate:"channel"`
 	MessageID string `validate:"message"`
 }
 
+// DeleteMessage deletes a message
 func (h Handlers) DeleteMessage(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
 	var data DeleteMessageData

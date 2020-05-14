@@ -1,8 +1,9 @@
 package client
 
 import (
-	"golang.org/x/time/rate"
 	"time"
+
+	"golang.org/x/time/rate"
 )
 
 // Bus is a collection of websocket events

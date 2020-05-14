@@ -40,6 +40,7 @@ var queries = []string{
 	);`,
 }
 
+// Message is the schema for a message
 type Message struct {
 	UserID      string
 	MessageID   string
@@ -48,6 +49,7 @@ type Message struct {
 	CreatedAt   int
 }
 
+// Invite is the schema for a guild invite
 type Invite struct {
 	ID   string
 	Uses int

@@ -1,20 +1,23 @@
 package v1
 
 import (
-	"github.com/labstack/echo/v4"
 	"harmony-server/server/http/hm"
 	"harmony-server/server/http/socket/client"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
-type UpdateGuildName struct {
+// UpdateGuildNameData is the data for a guild name update request
+type UpdateGuildNameData struct {
 	Guild string `validate:"required"`
 	Name  string `validate:"name"`
 }
 
+// UpdateGuildName updates the guild name
 func (h Handlers) UpdateGuildName(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
-	var data UpdateGuildName
+	var data UpdateGuildNameData
 	if err := ctx.Bind(data); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
 	}

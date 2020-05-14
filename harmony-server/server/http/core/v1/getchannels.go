@@ -1,9 +1,10 @@
 package v1
 
 import (
-	"github.com/labstack/echo/v4"
 	"harmony-server/server/http/hm"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 //TODO make the channel list ordered
@@ -11,10 +12,12 @@ type returnChannel struct {
 	Name string `json:"name"`
 }
 
+// GetChannelsData is the data for GetChannels
 type GetChannelsData struct {
 	Guild string `validate:"required"`
 }
 
+// GetChannels gets the channels for a given guild
 func (h Handlers) GetChannels(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
 	if !ctx.Limiter.Allow() {

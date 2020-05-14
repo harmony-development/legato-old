@@ -18,6 +18,7 @@ type API struct {
 	Deps *Dependencies
 }
 
+// Dependencies are items that an API needs to function
 type Dependencies struct {
 	Router         *routing.Router
 	APIGroup       *echo.Group
@@ -28,14 +29,16 @@ type Dependencies struct {
 	State          *state.State
 }
 
+// New instantiates the handlers for CoreKit
 func New(deps *Dependencies) *API {
 	core := deps.APIGroup.Group("/core")
 	return &API{
 		Group: core,
-		Deps: deps,
+		Deps:  deps,
 	}
 }
 
+// MakeRoutes creates the handlers for CoreKit
 func (api *API) MakeRoutes() {
 	api.Deps.Router.BindRoutes(api.Group.Group("/v1"), v1.New(&v1.Dependencies{
 		DB:             api.Deps.DB,

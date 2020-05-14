@@ -3,9 +3,10 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"github.com/hashicorp/golang-lru"
-	_ "github.com/lib/pq"
 	"harmony-server/server/config"
+
+	lru "github.com/hashicorp/golang-lru"
+	_ "github.com/lib/pq"
 )
 
 // DB is a wrapper for the SQL DB

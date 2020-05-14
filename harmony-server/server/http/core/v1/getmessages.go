@@ -4,10 +4,12 @@ import (
 	"harmony-server/server/db"
 	"harmony-server/server/http/hm"
 
-	"github.com/labstack/echo/v4"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
+// GetMessagesData is the data for a message listing request
 type GetMessagesData struct {
 	Guild   string `validate:"required"`
 	Channel string `validate:"required"`
@@ -16,6 +18,7 @@ type GetMessagesData struct {
 	MessageRef string
 }
 
+// GetMessages gets messages in a given channel
 func (h Handlers) GetMessages(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
 	var data GetMessagesData

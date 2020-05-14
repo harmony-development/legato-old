@@ -1,12 +1,14 @@
 package storage
 
 import (
-	"github.com/getsentry/sentry-go"
 	"io/ioutil"
 	"os"
 	"path"
+
+	"github.com/getsentry/sentry-go"
 )
 
+// Manager manages storage operations
 type Manager struct {
 	ImageDeleteQueue        chan string
 	GuildPictureDeleteQueue chan string
@@ -44,10 +46,12 @@ func (m Manager) DeleteRoutine() {
 	}
 }
 
+// AddImage writes an image to storage
 func (m Manager) AddImage(id string, image []byte) error {
 	return ioutil.WriteFile(path.Join(m.ImagePath, id), image, 0666)
 }
 
+// AddGuildPicture adds an image for a guild to storage
 func (m Manager) AddGuildPicture(id string, image []byte) error {
 	return ioutil.WriteFile(path.Join(m.GuildPicturePath, id), image, 0666)
 }

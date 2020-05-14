@@ -1,10 +1,12 @@
 package socket
 
 import (
-	"github.com/sirupsen/logrus"
 	"harmony-server/server/http/socket/client"
+
+	"github.com/sirupsen/logrus"
 )
 
+// Deregister terminates a client's session
 func (h Handler) Deregister(ws *client.Client) {
 	guildsQuery, err := h.DB.Query("SELECT guildid FROM guildmembers WHERE userid=$1", ws.UserID)
 	if err != nil {

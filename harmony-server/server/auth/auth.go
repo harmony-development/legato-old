@@ -11,9 +11,10 @@ import (
 
 // Manager wraps logic for authentication
 type Manager struct {
-	Dependencies       *Dependencies
+	Dependencies *Dependencies
 }
 
+// Dependencies are items that an authentication manager needs
 type Dependencies struct {
 	Config *config.Config
 }
@@ -27,6 +28,7 @@ func New(d *Dependencies) (*Manager, error) {
 	return m, nil
 }
 
+// GetPublicKey gets the public key for a domain
 func (m Manager) GetPublicKey(domain string) ([]byte, error) {
 	u, err := url.Parse(domain)
 	if err != nil {

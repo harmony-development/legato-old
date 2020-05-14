@@ -1,14 +1,15 @@
 package v1
 
 import (
-	"github.com/getsentry/sentry-go"
-	"github.com/labstack/echo/v4"
-	"github.com/thanhpk/randstr"
 	"harmony-server/server/http/hm"
 	"harmony-server/server/http/socket/client"
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/getsentry/sentry-go"
+	"github.com/labstack/echo/v4"
+	"github.com/thanhpk/randstr"
 )
 
 type MessageData struct {
@@ -17,6 +18,7 @@ type MessageData struct {
 	Message string `validate:"required"`
 }
 
+// Message : Receive a message from a client.
 func (h Handlers) Message(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
 	form, err := ctx.MultipartForm()

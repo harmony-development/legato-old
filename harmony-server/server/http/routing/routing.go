@@ -37,6 +37,7 @@ type Router struct {
 	Middlewares *hm.Middlewares
 }
 
+// BindRoute binds a route to an echo.Group
 func (r Router) BindRoute(g *echo.Group, endPoint Route) {
 	var middleware []echo.MiddlewareFunc
 	if endPoint.Auth {
@@ -73,6 +74,7 @@ func (r Router) BindRoute(g *echo.Group, endPoint Route) {
 	}
 }
 
+// BindRoutes binds multiple Routes
 func (r Router) BindRoutes(g *echo.Group, endPoints []Route) {
 	for _, endPoint := range endPoints {
 		r.BindRoute(g, endPoint)

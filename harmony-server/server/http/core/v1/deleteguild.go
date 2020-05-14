@@ -1,17 +1,20 @@
 package v1
 
 import (
-	"github.com/getsentry/sentry-go"
-	"github.com/labstack/echo/v4"
 	"harmony-server/server/http/hm"
 	"harmony-server/server/http/socket/client"
 	"net/http"
+
+	"github.com/getsentry/sentry-go"
+	"github.com/labstack/echo/v4"
 )
 
+// DeleteGuildData is the data for a guild deletion request
 type DeleteGuildData struct {
 	Guild string `validate:"required"`
 }
 
+// DeleteGuild is the handler for a delete guild request
 func (h Handlers) DeleteGuild(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
 	var data DeleteGuildData

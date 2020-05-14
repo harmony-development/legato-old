@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Setup sets up a Handler
 func (h Handler) Setup() {
 	e := events.NewEvents(h.DB, h.State)
 	h.Bus.Bind(client.NewEvent(e.Ping, "ping", 3*time.Second, 10))

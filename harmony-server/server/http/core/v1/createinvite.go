@@ -1,17 +1,20 @@
 package v1
 
 import (
+	"harmony-server/server/http/hm"
+	"net/http"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
-	"harmony-server/server/http/hm"
-	"net/http"
 )
 
+// CreateInviteData is the data that a CreateInvite request has
 type CreateInviteData struct {
 	Guild string `validate:"required"`
 }
 
+// CreateInvite : Create an invite for a given guild
 func (h Handlers) CreateInvite(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
 	var data CreateInviteData

@@ -1,10 +1,12 @@
 package hm
 
 import (
-	"github.com/labstack/echo/v4"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
+// WithAuth checks for authentication
 func (m *Middlewares) WithAuth(handler echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := c.(HarmonyContext)

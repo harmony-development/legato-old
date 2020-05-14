@@ -1,8 +1,9 @@
 package server
 
 import (
-	"github.com/getsentry/sentry-go"
 	"harmony-server/server/config"
+
+	"github.com/getsentry/sentry-go"
 )
 
 // This file shouldn't exist, but sentry's package is garbage so I had to deviate from the standard package layout.

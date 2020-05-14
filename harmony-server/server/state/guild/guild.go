@@ -17,6 +17,7 @@ type Guild struct {
 	Clients map[string]*ClientArray
 }
 
+// AddClient adds a client to a guild
 func (g Guild) AddClient(userID *string, c *client.Client) {
 	if g.Clients[*userID] == nil {
 		g.Lock()
@@ -31,6 +32,7 @@ func (g Guild) AddClient(userID *string, c *client.Client) {
 	g.Clients[*userID].Unlock()
 }
 
+// Broadcast broadcasts a packet to clients of a guild
 func (g Guild) Broadcast(packet *client.OutPacket) {
 	for _, client := range g.Clients {
 		for _, conn := range client.Clients {

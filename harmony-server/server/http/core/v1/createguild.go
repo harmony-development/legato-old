@@ -1,16 +1,19 @@
 package v1
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/thanhpk/randstr"
 	"harmony-server/server/http/hm"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
+	"github.com/thanhpk/randstr"
 )
 
+// CreateGuildData is the data for a guild creation request
 type CreateGuildData struct {
 	GuildName string `validate:"requried"`
 }
 
+// CreateGuild creates a guild for a user
 func (h Handlers) CreateGuild(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
 	var data CreateGuildData

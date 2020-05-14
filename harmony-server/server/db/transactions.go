@@ -1,8 +1,9 @@
 package db
 
 import (
-	"github.com/thanhpk/randstr"
 	"time"
+
+	"github.com/thanhpk/randstr"
 )
 
 // AddGuild creates a standard guild
@@ -74,6 +75,7 @@ func (db *DB) GetOwner(guildID string) (*string, error) {
 	return &s, nil
 }
 
+// IsOwner returns whether the user is the guild owner
 func (db *DB) IsOwner(guildID string, userID string) (bool, error) {
 	owner, exists := db.OwnerCache.Get(guildID)
 	if !exists {
@@ -115,6 +117,7 @@ func (db *DB) AddChannelToGuild(channelID string, guildID string, channelName st
 	return err
 }
 
+// DeleteChannelFromGuild removes a channel from a guild
 func (db *DB) DeleteChannelFromGuild(guildID string, channelID string) error {
 	tx, err := db.Begin()
 	if err != nil {
@@ -188,6 +191,7 @@ func (db *DB) DeleteMessage(messageID string, channelID string, guildID string) 
 	return nil
 }
 
+// GetMessageOwner gets the owner of a messageID
 func (db *DB) GetMessageOwner(messageID string) (*string, error) {
 	var userID string
 	err := db.QueryRow("SELECT userid FROM messages WHERE messageid=$1", messageID).Scan(&userID)
@@ -209,6 +213,7 @@ func (db *DB) IncrementInvite(inviteID string) error {
 	return err
 }
 
+// DeleteInvite deletes an invite
 func (db *DB) DeleteInvite(inviteID string, guildID string) error {
 	tx, err := db.Begin()
 	if err != nil {
@@ -236,6 +241,7 @@ func (db *DB) DeleteInvite(inviteID string, guildID string) error {
 	return nil
 }
 
+// SessionToUserID gets the user ID from a session
 func (db *DB) SessionToUserID(session string) (*string, error) {
 	userID, exists := db.SessionCache.Get(session)
 	s := userID.(string)
@@ -248,6 +254,7 @@ func (db *DB) SessionToUserID(session string) (*string, error) {
 	return &s, nil
 }
 
+// UserInGuild checks whether a user is in a guild
 func (db *DB) UserInGuild(userID string, guildID string) (bool, error) {
 	ok, err := db.ContainsRow("SELECT userid FROM guildmembers WHERE userid=$1 AND guildid=$2", userID, guildID)
 	if !ok || err != nil {
@@ -256,6 +263,7 @@ func (db *DB) UserInGuild(userID string, guildID string) (bool, error) {
 	return ok, nil
 }
 
+// GetAttachments gets attachments for a message
 func (db *DB) GetAttachments(messageID string) ([]string, error) {
 	res, err := db.Query("SELECT attachment FROM attachments WHERE messageid=$1", messageID)
 	if err != nil {
@@ -272,6 +280,7 @@ func (db *DB) GetAttachments(messageID string) ([]string, error) {
 	return attachments, nil
 }
 
+// GetMessageDate gets the date for a message
 func (db *DB) GetMessageDate(messageID string) (*int, error) {
 	var createdAt int
 	if err := db.QueryRow("SELECT createdat FROM messages WHERE messageid=$1", messageID).Scan(&createdAt); err != nil {
@@ -280,10 +289,12 @@ func (db *DB) GetMessageDate(messageID string) (*int, error) {
 	return &createdAt, nil
 }
 
+// GetMessages gets the newest messages from a guild
 func (db *DB) GetMessages(guildID string, channelID string) ([]Message, error) {
 	return db.GetMessagesBefore(guildID, channelID, 0)
 }
 
+// GetMessagesBefore gets messages before a given message in a guild
 func (db *DB) GetMessagesBefore(guildID string, channelID string, date int) ([]Message, error) {
 	res, err := db.Query(
 		`SELECT messageid, userid, message, createdat FROM messages 
@@ -318,22 +329,26 @@ func (db *DB) GetMessagesBefore(guildID string, channelID string, date int) ([]M
 	return messages, nil
 }
 
+// UpdateGuildName updates the guild name
 func (db *DB) UpdateGuildName(guildID string, newName string) error {
 	_, err := db.Exec("UPDATE guilds SET guildname=$1 WHERE guildid=$2", newName, guildID)
 	return err
 }
 
+// GetGuildPicture gets the picture for a given guild
 func (db *DB) GetGuildPicture(guildID string) (*string, error) {
 	var picture string
 	err := db.QueryRow("SELECT picture FROM guilds WHERE guildid=$1", guildID).Scan(&picture)
 	return &picture, err
 }
 
+// SetGuildPicture sets the picture for a given guild
 func (db *DB) SetGuildPicture(guildID string, pictureID string) error {
 	_, err := db.Exec("UPDATE guilds SET picture=$1 WHERE guildid=$2", pictureID, guildID)
 	return err
 }
 
+// AddAttachments adds attachments to a message
 func (db *DB) AddAttachments(messageID string, attachments []string) error {
 	tx, err := db.Begin()
 	if err != nil {
@@ -347,6 +362,7 @@ func (db *DB) AddAttachments(messageID string, attachments []string) error {
 	return nil
 }
 
+// GetInvites gets open invites for a guild
 func (db *DB) GetInvites(guildID string) ([]Invite, error) {
 	res, err := db.Query("SElECT inviteid, invitecount FROM invites WHERE guildid=$1 ORDER BY invitecount", guildID)
 	if err != nil {
@@ -363,6 +379,7 @@ func (db *DB) GetInvites(guildID string) ([]Invite, error) {
 	return invites, nil
 }
 
+// DeleteMember deletes a member from a guild
 func (db *DB) DeleteMember(guildID string, userID string) error {
 	_, err := db.Exec("DELETE FROM guildmembers WHERE guildid=$1 AND userid=$2", guildID, userID)
 	return err

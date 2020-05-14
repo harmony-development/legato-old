@@ -1,16 +1,19 @@
 package v1
 
 import (
-	"github.com/getsentry/sentry-go"
-	"github.com/labstack/echo/v4"
 	"harmony-server/server/http/hm"
 	"net/http"
+
+	"github.com/getsentry/sentry-go"
+	"github.com/labstack/echo/v4"
 )
 
+// LeaveGuildData is the data for a guild leave request
 type LeaveGuildData struct {
 	Guild string `validate:"required"`
 }
 
+// LeaveGuild unjoins a user from a guild
 func (h Handlers) LeaveGuild(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
 	var data LeaveGuildData

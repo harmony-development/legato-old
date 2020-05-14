@@ -1,12 +1,13 @@
 package socket
 
 import (
-	"github.com/gorilla/websocket"
 	"harmony-server/server/db"
 	"harmony-server/server/http/socket/client"
 	"harmony-server/server/logger"
 	"harmony-server/server/state"
 	"net/http"
+
+	"github.com/gorilla/websocket"
 )
 
 // Handler is an instance of the socket handler

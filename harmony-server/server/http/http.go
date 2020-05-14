@@ -26,6 +26,7 @@ type Server struct {
 	Deps    *Dependencies
 }
 
+// Dependencies are elements that a Server needs
 type Dependencies struct {
 	DB             *db.DB
 	AuthManager    *auth.Manager
