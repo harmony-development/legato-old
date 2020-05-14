@@ -1,7 +1,10 @@
 package server
 
 import (
+	"sync"
+
 	"github.com/sirupsen/logrus"
+
 	"harmony-server/server/auth"
 	"harmony-server/server/config"
 	"harmony-server/server/db"
@@ -10,7 +13,6 @@ import (
 	"harmony-server/server/state"
 	"harmony-server/server/state/guild"
 	"harmony-server/server/storage"
-	"sync"
 )
 
 // Instance is an instance of the harmony server
@@ -39,7 +41,7 @@ func (inst Instance) Start() {
 	if err != nil {
 		inst.Logger.Fatal(err)
 	}
-	inst.AuthManager, err = auth.New()
+	inst.AuthManager, err = auth.New(&auth.Dependencies{Config: cfg})
 	if err != nil {
 		inst.Logger.Fatal(err)
 	}

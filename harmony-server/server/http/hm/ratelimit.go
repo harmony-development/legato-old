@@ -1,10 +1,10 @@
 package hm
 
 import (
+	"time"
+
 	"github.com/labstack/echo/v4"
 	"golang.org/x/time/rate"
-	"sync"
-	"time"
 )
 
 // code adapted from https://www.alexedwards.net/blog/how-to-rate-limit-http-requests
@@ -14,48 +14,41 @@ type visitor struct {
 	lastSeen time.Time
 }
 
-var rateLimits = make(map[string]map[string]*visitor)
-var rateLock = sync.RWMutex{}
-
-// CleanupRoutine cleans up old visitors from memory
-func CleanupRoutine() {
+// RateCleanup cleans up old visitors from memory
+func (m *Middlewares) RateCleanup() {
 	for {
 		time.Sleep(3 * time.Minute)
-		rateLock.Lock()
-		for _, path := range rateLimits {
+		m.RateLock.Lock()
+		for _, path := range m.RateLimits {
 			for ip, v := range path {
 				if time.Now().Sub(v.lastSeen) > 3*time.Minute {
 					delete(path, ip)
 				}
 			}
 		}
-		rateLock.Unlock()
+		m.RateLock.Unlock()
 	}
 }
 
-func (m *Middlewares) WithRateLimit(handler echo.HandlerFunc, duration time.Duration, burst int) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		ctx := c.(HarmonyContext)
-		ctx.Limiter = getVisitor(ctx.Path(), ctx.RealIP(), duration, burst)
-		return handler(ctx)
-	}
-}
-
-func getVisitor(path string, ip string, duration time.Duration, burst int) *rate.Limiter {
-	rateLock.Lock()
-	defer rateLock.Unlock()
-	if _, exists := rateLimits[path]; !exists {
-		limiter := rate.NewLimiter(rate.Every(duration), burst)
-		rateLimits[path] = make(map[string]*visitor)
-		rateLimits[path][ip] = &visitor{
-			limiter:  limiter,
-			lastSeen: time.Now(),
+func (m *Middlewares) RateLimit(duration time.Duration, burst int) echo.MiddlewareFunc {
+	return func(handler echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			ctx := c.(HarmonyContext)
+			ctx.Limiter = m.GetVisitor(ctx.Path(), ctx.RealIP(), duration, burst)
+			return handler(ctx)
 		}
-		return limiter
 	}
-	if v, exists := rateLimits[path][ip]; !exists {
+}
+
+func (m *Middlewares) GetVisitor(path string, ip string, duration time.Duration, burst int) *rate.Limiter {
+	m.RateLock.Lock()
+	defer m.RateLock.RUnlock()
+	if _, exists := m.RateLimits[path]; !exists {
+		m.RateLimits[path] = make(map[string]*visitor)
+	}
+	if v, exists := m.RateLimits[path][ip]; !exists {
 		limiter := rate.NewLimiter(rate.Every(duration), burst)
-		rateLimits[path][ip] = &visitor{
+		m.RateLimits[path][ip] = &visitor{
 			limiter:  limiter,
 			lastSeen: time.Now(),
 		}

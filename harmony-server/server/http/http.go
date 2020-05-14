@@ -5,12 +5,14 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+
 	"harmony-server/server/auth"
 	"harmony-server/server/config"
 	"harmony-server/server/db"
+	"harmony-server/server/http/core"
 	"harmony-server/server/http/hm"
+	"harmony-server/server/http/routing"
 	"harmony-server/server/http/socket"
-	v1 "harmony-server/server/http/v1"
 	"harmony-server/server/state"
 	"harmony-server/server/storage"
 )
@@ -18,9 +20,10 @@ import (
 // Server is an instance of the HTTP server
 type Server struct {
 	*echo.Echo
-	Socket *socket.Handler
-	V1     *v1.Handlers
-	Deps   *Dependencies
+	Router  *routing.Router
+	CoreAPI *core.API
+	Socket  *socket.Handler
+	Deps    *Dependencies
 }
 
 type Dependencies struct {
@@ -51,10 +54,18 @@ func New(deps *Dependencies) *Server {
 	s.Validator = &HarmonyValidator{
 		validator: validator.New(),
 	}
-	g := s.Group("/api")
-	s.BindRoutes(g)
-
-	go hm.CleanupRoutine()
-
+	m := hm.New(deps.DB)
+	s.Router = &routing.Router{Middlewares: m}
+	api := s.Group("/api")
+	api.Use(m.WithHarmony)
+	s.CoreAPI = core.New(&core.Dependencies{
+		Router:         s.Router,
+		APIGroup:       api,
+		DB:             s.Deps.DB,
+		Config:         s.Deps.Config,
+		AuthManager:    s.Deps.AuthManager,
+		StorageManager: s.Deps.StorageManager,
+		State:          s.Deps.State,
+	})
 	return s
 }

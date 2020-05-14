@@ -1,48 +1,46 @@
 package auth
 
 import (
-	"crypto/rsa"
-	"errors"
-	"github.com/dgrijalva/jwt-go"
 	"io/ioutil"
+	"net/http"
+	"net/url"
+	"path"
+
+	"harmony-server/server/config"
 )
 
 // Manager wraps logic for authentication
 type Manager struct {
-	PublicKey *rsa.PublicKey
+	Dependencies       *Dependencies
 }
 
-// TokenClaims is the structure for the JWT signed session token
-type TokenClaims struct {
-	Session  string `json:"session"`
-	Identity string `json:"identity"`
-	jwt.StandardClaims
+type Dependencies struct {
+	Config *config.Config
 }
 
 // New creates a new authenticator
-func New() (*Manager, error) {
-	handler := &Manager{}
-	pubBytes, err := ioutil.ReadFile("public.pem")
-	if err != nil {
-		return nil, err
+func New(d *Dependencies) (*Manager, error) {
+	m := &Manager{
+		Dependencies: d,
 	}
-	handler.PublicKey, err = jwt.ParseRSAPublicKeyFromPEM(pubBytes)
-	if err != nil {
-		return nil, err
-	}
-	return handler, nil
+
+	return m, nil
 }
 
-// ReadAuthToken takes in a token string and returns a session structure or an error
-func (m Manager) ReadAuthToken(raw string) (*TokenClaims, error) {
-	token, err := jwt.ParseWithClaims(raw, &TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return m.PublicKey, nil
-	})
+func (m Manager) GetPublicKey(domain string) ([]byte, error) {
+	u, err := url.Parse(domain)
 	if err != nil {
 		return nil, err
 	}
-	if session, ok := token.Claims.(*TokenClaims); ok {
-		return session, nil
+	u.Path = path.Join(u.Path, "/api/pubkey")
+	resp, err := http.Get(u.RawQuery)
+	if err != nil {
+		return nil, err
 	}
-	return nil, errors.New("invalid session claims")
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return body, nil
 }
