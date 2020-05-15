@@ -56,7 +56,7 @@ type Invite struct {
 }
 
 // Migrate applies the DB layout to the connected DB
-func (db *DB) Migrate() error {
+func (db *HarmonyDB) Migrate() error {
 	tx, err := db.Begin()
 	if err != nil {
 		return err
@@ -76,7 +76,7 @@ func (db *DB) Migrate() error {
 }
 
 // AddSampleData adds sample values to the DB for testing
-func (db *DB) AddSampleData() error {
+func (db *HarmonyDB) AddSampleData() error {
 	if err := db.AddGuild(
 		"harmony-devs",
 		"82ee9c8dc9e165205548b7c3833e7372",

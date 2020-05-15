@@ -21,13 +21,13 @@ type HarmonyHandler func(ctx HarmonyContext) error
 
 // Middlewares contains middlewares for Harmony
 type Middlewares struct {
-	DB         *db.DB
+	DB         *db.HarmonyDB
 	RateLimits map[string]map[string]*visitor
 	RateLock   sync.RWMutex
 }
 
 // New instantiates the middlewares for Harmony
-func New(db *db.DB) *Middlewares {
+func New(db *db.HarmonyDB) *Middlewares {
 	m := &Middlewares{
 		DB: db,
 	}
