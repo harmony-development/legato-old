@@ -16,9 +16,6 @@ type HarmonyContext struct {
 	UserID  string
 }
 
-// HarmonyHandler is a type of handler that takes a HarmonyContext
-type HarmonyHandler func(ctx HarmonyContext) error
-
 // Middlewares contains middlewares for Harmony
 type Middlewares struct {
 	DB         *db.DB
@@ -29,7 +26,8 @@ type Middlewares struct {
 // New instantiates the middlewares for Harmony
 func New(db *db.DB) *Middlewares {
 	m := &Middlewares{
-		DB: db,
+		DB:         db,
+		RateLimits: make(map[string]map[string]*visitor),
 	}
 	go m.RateCleanup()
 	return m

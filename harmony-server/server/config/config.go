@@ -14,16 +14,17 @@ type Config struct {
 
 // ServerConf is the servers configuration
 type ServerConf struct {
-	Port                  string
-	Identity              string
-	ImagePath             string
-	GuildPicturePath      string
-	MaxAttachments        int
-	GetMessageCount       int
-	OwnerCacheMax         int
-	SessionCacheMax       int
-	PendingConnectionsMax int
-	LogErrors             bool
+	Port             string
+	Identity         string
+	ImagePath        string
+	GuildPicturePath string
+	PublicKeyPath    string
+	PrivateKeyPath   string
+	MaxAttachments   int
+	GetMessageCount  int
+	OwnerCacheMax    int
+	SessionCacheMax  int
+	LogErrors        bool
 }
 
 // DBConf is the config for the database
@@ -46,16 +47,17 @@ type SentryConf struct {
 func Load() (*Config, error) {
 	defaultCFG := Config{
 		Server: ServerConf{
-			Port:                  ":2289",
-			Identity:              randstr.Hex(16), // this is what prevents people from using auth tokens on other instances
-			ImagePath:             "images",
-			GuildPicturePath:      "guild-pictures",
-			MaxAttachments:        1,
-			GetMessageCount:       30,
-			OwnerCacheMax:         5096,
-			SessionCacheMax:       5096,
-			PendingConnectionsMax: 10192,
-			LogErrors:             true,
+			Port:             ":2289",
+			Identity:         randstr.Hex(16), // this is what prevents people from using auth tokens on other instances
+			ImagePath:        "images",
+			GuildPicturePath: "guild-pictures",
+			PrivateKeyPath:   "harmony-key.pem",
+			PublicKeyPath:    "harmony-key.pub",
+			MaxAttachments:   1,
+			GetMessageCount:  30,
+			OwnerCacheMax:    5096,
+			SessionCacheMax:  5096,
+			LogErrors:        true,
 		},
 		DB: DBConf{
 			Host: "127.0.0.1",

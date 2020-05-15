@@ -3,6 +3,7 @@ package v1
 import (
 	"harmony-server/server/db"
 	"harmony-server/server/http/hm"
+	"harmony-server/server/http/responses"
 
 	"net/http"
 
@@ -23,7 +24,7 @@ func (h Handlers) GetMessages(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
 	var data GetMessagesData
 	if err := ctx.Bind(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
+		return echo.NewHTTPError(http.StatusBadRequest, responses.InvalidRequest)
 	}
 	if err := ctx.Validate(data); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")

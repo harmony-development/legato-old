@@ -197,13 +197,23 @@ func (h Handlers) MakeRoutes() []routing.Route {
 		},
 		{
 			Path:    "/leave",
-			Handler: h.JoinGuild,
+			Handler: h.LeaveGuild,
 			RateLimit: &routing.RateLimit{
 				Duration: 3 * time.Second,
 				Burst:    2,
 			},
 			Auth:   true,
 			Method: routing.POST,
+		},
+		{
+			Path:    "/key",
+			Handler: h.GetKey,
+			RateLimit: &routing.RateLimit{
+				Duration: 500 * time.Millisecond,
+				Burst:    1024,
+			},
+			Auth:   false,
+			Method: routing.GET,
 		},
 	}
 }
