@@ -19,6 +19,7 @@ func (m *Middlewares) Schema(schema interface{}) echo.MiddlewareFunc {
 				return echo.NewHTTPError(http.StatusBadRequest, responses.InvalidRequest)
 			}
 			ctx.Data = schema
+			return handler(ctx)
 		}
 	}
 }

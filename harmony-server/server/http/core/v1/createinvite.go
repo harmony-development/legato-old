@@ -17,13 +17,9 @@ type CreateInviteData struct {
 // CreateInvite : Create an invite for a given guild
 func (h Handlers) CreateInvite(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
-	var data CreateInviteData
-	if err := ctx.Bind(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
-	}
-	if err := ctx.Validate(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
-	}
+	data := ctx.Data.(CreateInviteData)
+
+
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many invites created, try again in a few seconds")
 	}

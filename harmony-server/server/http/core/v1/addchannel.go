@@ -19,12 +19,8 @@ type AddChannelData struct {
 func (h Handlers) AddChannel(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
 	data := new(AddChannelData)
-	if err := ctx.Bind(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
-	}
-	if err := ctx.Validate(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
-	}
+
+
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many channels being added, please wait a few seconds")
 	}

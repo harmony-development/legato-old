@@ -17,7 +17,7 @@ type DeleteGuildData struct {
 // DeleteGuild is the handler for a delete guild request
 func (h Handlers) DeleteGuild(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
-	var data DeleteGuildData
+	data := ctx.Data.(DeleteGuildData)
 	if err := ctx.Bind(data); err != nil {
 		return err
 	}

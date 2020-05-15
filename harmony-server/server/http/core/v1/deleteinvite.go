@@ -17,10 +17,8 @@ type DeleteInviteData struct {
 // DeleteInvite is the request to delete an invite
 func (h Handlers) DeleteInvite(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
-	var data DeleteInviteData
-	if err := ctx.Bind(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
-	}
+	data := ctx.Data.(DeleteInviteData)
+
 	h.Deps.State.GuildsLock.RLock()
 	defer h.Deps.State.GuildsLock.RUnlock()
 	if h.Deps.State.Guilds[data.Guild] == nil {

@@ -1,11 +1,10 @@
 package v1
 
 import (
+	"net/http"
+
 	"harmony-server/server/db"
 	"harmony-server/server/http/hm"
-	"harmony-server/server/http/responses"
-
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
@@ -22,13 +21,7 @@ type GetMessagesData struct {
 // GetMessages gets messages in a given channel
 func (h Handlers) GetMessages(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
-	var data GetMessagesData
-	if err := ctx.Bind(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, responses.InvalidRequest)
-	}
-	if err := ctx.Validate(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
-	}
+	data := ctx.Data.(GetMessagesData)
 	exists, err := h.Deps.DB.UserInGuild(ctx.UserID, data.Guild)
 	if err != nil || !exists {
 		return echo.NewHTTPError(http.StatusForbidden, "not allowed to get messages")

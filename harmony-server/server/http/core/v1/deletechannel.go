@@ -18,13 +18,9 @@ type DeleteChannelData struct {
 // DeleteChannel is the request to delete a channel
 func (h Handlers) DeleteChannel(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
-	var data DeleteChannelData
-	if err := ctx.Bind(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
-	}
-	if err := ctx.Validate(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
-	}
+	data := ctx.Data.(DeleteChannelData)
+
+
 	h.Deps.State.GuildsLock.RLock()
 	defer h.Deps.State.GuildsLock.RUnlock()
 	if h.Deps.State.Guilds[data.Guild] == nil {

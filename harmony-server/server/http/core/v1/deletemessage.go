@@ -19,13 +19,7 @@ type DeleteMessageData struct {
 // DeleteMessage deletes a message
 func (h Handlers) DeleteMessage(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
-	var data DeleteMessageData
-	if err := ctx.Bind(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
-	}
-	if err := ctx.Validate(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
-	}
+	data := ctx.Data.(DeleteMessageData)
 	h.Deps.State.GuildsLock.RLock()
 	defer h.Deps.State.GuildsLock.RUnlock()
 	if h.Deps.State.Guilds[data.Guild] == nil {

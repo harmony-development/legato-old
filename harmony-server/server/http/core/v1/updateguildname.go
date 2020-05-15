@@ -17,13 +17,7 @@ type UpdateGuildNameData struct {
 // UpdateGuildName updates the guild name
 func (h Handlers) UpdateGuildName(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
-	var data UpdateGuildNameData
-	if err := ctx.Bind(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
-	}
-	if err := ctx.Validate(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
-	}
+	data := ctx.Data.(UpdateGuildNameData)
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many guild name updates")
 	}

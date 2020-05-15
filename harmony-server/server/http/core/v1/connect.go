@@ -14,5 +14,5 @@ func (h Handlers) Connect(c echo.Context) error {
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, responses.TooManyRequests)
 	}
-
+	return ctx.NoContent(http.StatusNotImplemented)
 }

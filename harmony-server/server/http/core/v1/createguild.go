@@ -16,7 +16,7 @@ type CreateGuildData struct {
 // CreateGuild creates a guild for a user
 func (h Handlers) CreateGuild(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
-	var data CreateGuildData
+	data := ctx.Data.(CreateGuildData)
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "you're creating too many guilds, please try again in a minute or two")
 	}
