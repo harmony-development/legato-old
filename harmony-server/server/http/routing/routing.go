@@ -30,6 +30,7 @@ type Route struct {
 	Handler   echo.HandlerFunc
 	RateLimit *RateLimit
 	Auth      bool
+	Schema    interface{}
 	Method    RequestMethod
 }
 
@@ -45,6 +46,9 @@ func (r Router) BindRoute(g *echo.Group, endPoint Route) {
 	}
 	if endPoint.RateLimit != nil {
 		middleware = append(middleware, r.Middlewares.RateLimit(endPoint.RateLimit.Duration, endPoint.RateLimit.Burst))
+	}
+	if endPoint.Schema != nil {
+		middleware = append(middleware, r.Middlewares.Schema(endPoint.Schema))
 	}
 	switch endPoint.Method {
 	case GET:

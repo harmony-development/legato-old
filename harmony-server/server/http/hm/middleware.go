@@ -14,6 +14,7 @@ type HarmonyContext struct {
 	echo.Context
 	Limiter *rate.Limiter
 	UserID  string
+	Data    interface{}
 }
 
 // Middlewares contains middlewares for Harmony
