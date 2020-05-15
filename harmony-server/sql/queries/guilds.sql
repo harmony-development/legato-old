@@ -21,3 +21,23 @@ INSERT INTO Channels (
     $1, $2
 )
 RETURNING *;
+
+-- name: DeleteGuild :exec
+DELETE FROM Guilds WHERE Guild_ID = $1;
+
+-- name: GetGuildOwner :one
+SELECT Owner_ID from GUILDS
+    WHERE Guild_ID = $1;
+
+-- name: CreateGuildInvite :one
+INSERT INTO Invites (
+    Name, Possible_Uses, Guild_ID
+) VALUES (
+    $1, $2, $3
+)
+RETURNING *;
+
+-- name: DeleteChannel :exec
+DELETE FROM Channels
+    WHERE Guild_ID = $1
+    AND Channel_ID = $2;

@@ -74,3 +74,68 @@ func (q *Queries) CreateGuild(ctx context.Context, arg CreateGuildParams) (Guild
 	)
 	return i, err
 }
+
+const createGuildInvite = `-- name: CreateGuildInvite :one
+INSERT INTO Invites (
+    Name, Possible_Uses, Guild_ID
+) VALUES (
+    $1, $2, $3
+)
+RETURNING invite_id, name, uses, possible_uses, guild_id
+`
+
+type CreateGuildInviteParams struct {
+	Name         string        `json:"name"`
+	PossibleUses sql.NullInt32 `json:"possible_uses"`
+	GuildID      sql.NullInt64 `json:"guild_id"`
+}
+
+func (q *Queries) CreateGuildInvite(ctx context.Context, arg CreateGuildInviteParams) (Invite, error) {
+	row := q.queryRow(ctx, q.createGuildInviteStmt, createGuildInvite, arg.Name, arg.PossibleUses, arg.GuildID)
+	var i Invite
+	err := row.Scan(
+		&i.InviteID,
+		&i.Name,
+		&i.Uses,
+		&i.PossibleUses,
+		&i.GuildID,
+	)
+	return i, err
+}
+
+const deleteChannel = `-- name: DeleteChannel :exec
+DELETE FROM Channels
+    WHERE Guild_ID = $1
+    AND Channel_ID = $2
+`
+
+type DeleteChannelParams struct {
+	GuildID   sql.NullInt64 `json:"guild_id"`
+	ChannelID int64         `json:"channel_id"`
+}
+
+func (q *Queries) DeleteChannel(ctx context.Context, arg DeleteChannelParams) error {
+	_, err := q.exec(ctx, q.deleteChannelStmt, deleteChannel, arg.GuildID, arg.ChannelID)
+	return err
+}
+
+const deleteGuild = `-- name: DeleteGuild :exec
+DELETE FROM Guilds WHERE Guild_ID = $1
+`
+
+func (q *Queries) DeleteGuild(ctx context.Context, guildID int64) error {
+	_, err := q.exec(ctx, q.deleteGuildStmt, deleteGuild, guildID)
+	return err
+}
+
+const getGuildOwner = `-- name: GetGuildOwner :one
+SELECT Owner_ID from GUILDS
+    WHERE Guild_ID = $1
+`
+
+func (q *Queries) GetGuildOwner(ctx context.Context, guildID int64) (string, error) {
+	row := q.queryRow(ctx, q.getGuildOwnerStmt, getGuildOwner, guildID)
+	var owner_id string
+	err := row.Scan(&owner_id)
+	return owner_id, err
+}

@@ -31,6 +31,18 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.createGuildStmt, err = db.PrepareContext(ctx, createGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateGuild: %w", err)
 	}
+	if q.createGuildInviteStmt, err = db.PrepareContext(ctx, createGuildInvite); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateGuildInvite: %w", err)
+	}
+	if q.deleteChannelStmt, err = db.PrepareContext(ctx, deleteChannel); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteChannel: %w", err)
+	}
+	if q.deleteGuildStmt, err = db.PrepareContext(ctx, deleteGuild); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteGuild: %w", err)
+	}
+	if q.getGuildOwnerStmt, err = db.PrepareContext(ctx, getGuildOwner); err != nil {
+		return nil, fmt.Errorf("error preparing query GetGuildOwner: %w", err)
+	}
 	return &q, nil
 }
 
@@ -49,6 +61,26 @@ func (q *Queries) Close() error {
 	if q.createGuildStmt != nil {
 		if cerr := q.createGuildStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing createGuildStmt: %w", cerr)
+		}
+	}
+	if q.createGuildInviteStmt != nil {
+		if cerr := q.createGuildInviteStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createGuildInviteStmt: %w", cerr)
+		}
+	}
+	if q.deleteChannelStmt != nil {
+		if cerr := q.deleteChannelStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteChannelStmt: %w", cerr)
+		}
+	}
+	if q.deleteGuildStmt != nil {
+		if cerr := q.deleteGuildStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteGuildStmt: %w", cerr)
+		}
+	}
+	if q.getGuildOwnerStmt != nil {
+		if cerr := q.getGuildOwnerStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getGuildOwnerStmt: %w", cerr)
 		}
 	}
 	return err
@@ -88,19 +120,27 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                 DBTX
-	tx                 *sql.Tx
-	addUserToGuildStmt *sql.Stmt
-	createChannelStmt  *sql.Stmt
-	createGuildStmt    *sql.Stmt
+	db                    DBTX
+	tx                    *sql.Tx
+	addUserToGuildStmt    *sql.Stmt
+	createChannelStmt     *sql.Stmt
+	createGuildStmt       *sql.Stmt
+	createGuildInviteStmt *sql.Stmt
+	deleteChannelStmt     *sql.Stmt
+	deleteGuildStmt       *sql.Stmt
+	getGuildOwnerStmt     *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                 tx,
-		tx:                 tx,
-		addUserToGuildStmt: q.addUserToGuildStmt,
-		createChannelStmt:  q.createChannelStmt,
-		createGuildStmt:    q.createGuildStmt,
+		db:                    tx,
+		tx:                    tx,
+		addUserToGuildStmt:    q.addUserToGuildStmt,
+		createChannelStmt:     q.createChannelStmt,
+		createGuildStmt:       q.createGuildStmt,
+		createGuildInviteStmt: q.createGuildInviteStmt,
+		deleteChannelStmt:     q.deleteChannelStmt,
+		deleteGuildStmt:       q.deleteGuildStmt,
+		getGuildOwnerStmt:     q.getGuildOwnerStmt,
 	}
 }
