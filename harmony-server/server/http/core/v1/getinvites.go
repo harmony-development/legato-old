@@ -13,7 +13,7 @@ type GetInvitesData struct {
 
 func (h Handlers) GetInvites(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
-	data := ctx.Data.(GetInvitesData)
+	data := ctx.Data.(*GetInvitesData)
 
 	h.Deps.State.GuildsLock.RLock()
 	defer h.Deps.State.GuildsLock.RUnlock()

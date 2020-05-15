@@ -55,7 +55,7 @@ func (h Handlers) MakeRoutes() []routing.Route {
 				Burst:    3,
 			},
 			Auth:   true,
-			Schema: CreateGuildData{},
+			Schema: new(CreateGuildData),
 		},
 		{
 			Path:    "/guilds",
@@ -66,7 +66,7 @@ func (h Handlers) MakeRoutes() []routing.Route {
 				Burst:    5,
 			},
 			Auth:   true,
-			Schema: DeleteGuildData{},
+			Schema: new(DeleteGuildData),
 		},
 		{
 			Path:    "/members",
@@ -77,7 +77,7 @@ func (h Handlers) MakeRoutes() []routing.Route {
 				Burst:    3,
 			},
 			Auth:   true,
-			Schema: GetMembersData{},
+			Schema: new(GetMembersData),
 		},
 		{
 			Path:    "/channels",
@@ -88,7 +88,7 @@ func (h Handlers) MakeRoutes() []routing.Route {
 				Burst:    5,
 			},
 			Auth:   true,
-			Schema: GetChannelsData{},
+			Schema: new(GetChannelsData),
 		},
 		{
 			Path:    "/channels",
@@ -99,7 +99,7 @@ func (h Handlers) MakeRoutes() []routing.Route {
 				Burst:    3,
 			},
 			Auth:   true,
-			Schema: AddChannelData{},
+			Schema: new(AddChannelData),
 		},
 		{
 			Path:    "/channels",
@@ -110,7 +110,7 @@ func (h Handlers) MakeRoutes() []routing.Route {
 				Burst:    3,
 			},
 			Auth:   true,
-			Schema: DeleteChannelData{},
+			Schema: new(DeleteChannelData),
 		},
 		{
 			Path:    "/messages",
@@ -121,7 +121,7 @@ func (h Handlers) MakeRoutes() []routing.Route {
 				Burst:    15,
 			},
 			Auth:   true,
-			Schema: GetMessagesData{},
+			Schema: new(GetMessagesData),
 		},
 		{
 			Path:    "/guildname",
@@ -132,7 +132,7 @@ func (h Handlers) MakeRoutes() []routing.Route {
 				Burst:    3,
 			},
 			Auth:   true,
-			Schema: UpdateGuildNameData{},
+			Schema: new(UpdateGuildNameData),
 		},
 		{
 			Path:    "/guildpicture",
@@ -143,7 +143,7 @@ func (h Handlers) MakeRoutes() []routing.Route {
 				Burst:    3,
 			},
 			Auth:   true,
-			Schema: UpdateGuildPictureData{},
+			Schema: new(UpdateGuildPictureData),
 		},
 		{
 			Path:    "/message",
@@ -154,7 +154,7 @@ func (h Handlers) MakeRoutes() []routing.Route {
 				Burst:    20,
 			},
 			Auth:   true,
-			Schema: UpdateGuildNameData{},
+			Schema: new(UpdateGuildNameData),
 		},
 		{
 			Path:    "/message",
@@ -165,7 +165,7 @@ func (h Handlers) MakeRoutes() []routing.Route {
 				Burst:    10,
 			},
 			Auth:   true,
-			Schema: DeleteMessageData{},
+			Schema: new(DeleteMessageData),
 		},
 		{
 			Path:    "/invite",
@@ -176,7 +176,7 @@ func (h Handlers) MakeRoutes() []routing.Route {
 				Burst:    5,
 			},
 			Auth:   true,
-			Schema: CreateInviteData{},
+			Schema: new(CreateInviteData),
 		},
 		{
 			Path:    "/invite",
@@ -187,7 +187,7 @@ func (h Handlers) MakeRoutes() []routing.Route {
 				Burst:    5,
 			},
 			Auth:   true,
-			Schema: DeleteInviteData{},
+			Schema: new(DeleteInviteData),
 		},
 		{
 			Path:    "/invite",
@@ -198,7 +198,7 @@ func (h Handlers) MakeRoutes() []routing.Route {
 				Burst:    4,
 			},
 			Auth:   true,
-			Schema: DeleteInviteData{},
+			Schema: new(DeleteInviteData),
 		},
 		{
 			Path:    "/join",
@@ -209,7 +209,7 @@ func (h Handlers) MakeRoutes() []routing.Route {
 				Burst:    3,
 			},
 			Auth:   true,
-			Schema: JoinGuildData{},
+			Schema: new(JoinGuildData),
 		},
 		{
 			Path:    "/leave",
@@ -220,7 +220,7 @@ func (h Handlers) MakeRoutes() []routing.Route {
 				Burst:    2,
 			},
 			Auth:   true,
-			Schema: LeaveGuildData{},
+			Schema: new(LeaveGuildData),
 		},
 		{
 			Path:    "/key",
@@ -232,6 +232,17 @@ func (h Handlers) MakeRoutes() []routing.Route {
 			},
 			Auth:   false,
 			Schema: nil,
+		},
+		{
+			Path:    "/connect",
+			Handler: h.Connect,
+			Method:  routing.GET,
+			RateLimit: &routing.RateLimit{
+				Duration: 500 * time.Millisecond,
+				Burst:    1024,
+			},
+			Auth:   false,
+			Schema: new(ConnectData),
 		},
 	}
 }

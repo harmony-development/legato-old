@@ -25,7 +25,7 @@ func (h Handlers) UpdateGuildPicture(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Form required")
 	}
 	files := form.File["files"]
-	data := ctx.Data.(UpdateGuildPictureData)
+	data := ctx.Data.(*UpdateGuildPictureData)
 	if len(files) == 0 {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
 	}

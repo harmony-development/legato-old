@@ -16,7 +16,7 @@ type LeaveGuildData struct {
 // LeaveGuild unjoins a user from a guild
 func (h Handlers) LeaveGuild(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
-	data := ctx.Data.(LeaveGuildData)
+	data := ctx.Data.(*LeaveGuildData)
 	h.Deps.State.GuildsLock.RLock()
 	defer h.Deps.State.GuildsLock.RUnlock()
 	if h.Deps.State.Guilds[data.Guild] == nil {

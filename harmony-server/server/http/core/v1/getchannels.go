@@ -23,7 +23,7 @@ func (h Handlers) GetChannels(c echo.Context) error {
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "you're getting channels too often! Please try again in a few seconds.")
 	}
-	data := ctx.Data.(GetChannelsData)
+	data := ctx.Data.(*GetChannelsData)
 	res, err := h.Deps.DB.Query("SELECT channelid, channelname FROM channels WHERE guildid=$1", data.Guild)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to list channels, please try again later")

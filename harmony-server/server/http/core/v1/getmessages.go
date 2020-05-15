@@ -21,7 +21,7 @@ type GetMessagesData struct {
 // GetMessages gets messages in a given channel
 func (h Handlers) GetMessages(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
-	data := ctx.Data.(GetMessagesData)
+	data := ctx.Data.(*GetMessagesData)
 	exists, err := h.Deps.DB.UserInGuild(ctx.UserID, data.Guild)
 	if err != nil || !exists {
 		return echo.NewHTTPError(http.StatusForbidden, "not allowed to get messages")

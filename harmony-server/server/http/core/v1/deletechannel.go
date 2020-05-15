@@ -18,7 +18,7 @@ type DeleteChannelData struct {
 // DeleteChannel is the request to delete a channel
 func (h Handlers) DeleteChannel(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
-	data := ctx.Data.(DeleteChannelData)
+	data := ctx.Data.(*DeleteChannelData)
 
 	h.Deps.State.GuildsLock.RLock()
 	defer h.Deps.State.GuildsLock.RUnlock()

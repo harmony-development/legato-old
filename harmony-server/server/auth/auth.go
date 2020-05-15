@@ -2,13 +2,13 @@ package auth
 
 import (
 	"crypto/rsa"
-	"crypto/x509"
-	"encoding/pem"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
+
+	"github.com/dgrijalva/jwt-go"
 
 	"harmony-server/server/config"
 )
@@ -25,6 +25,13 @@ type Dependencies struct {
 	Config *config.Config
 }
 
+// Token is the structure for an authentication JWT
+type Token struct {
+	jwt.StandardClaims
+	UserID string
+	Target string
+}
+
 // New creates a new authenticator
 func New(d *Dependencies) (*Manager, error) {
 	m := &Manager{
@@ -34,22 +41,24 @@ func New(d *Dependencies) (*Manager, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error reading private key : %v", err)
 	}
-	privPem, _ := pem.Decode(priv)
-	m.PrivKey, err = x509.ParsePKCS1PrivateKey(privPem.Bytes)
+	m.PrivKey, err = jwt.ParseRSAPrivateKeyFromPEM(priv)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing private key : %v", err)
+		return nil, err
 	}
 	pub, err := ioutil.ReadFile(d.Config.Server.PublicKeyPath)
+	m.PubKey, err = jwt.ParseRSAPublicKeyFromPEM(pub)
 	if err != nil {
-		return nil, fmt.Errorf("error reading public key : %v", err)
+		return nil, err
 	}
-	pubPem, _ := pem.Decode(pub)
-	pubKey, err := x509.ParsePKIXPublicKey(pubPem.Bytes)
-	if err != nil {
-		return nil, fmt.Errorf("error parsing public key : %v", err)
-	}
-	m.PubKey = pubKey.(*rsa.PublicKey)
 	return m, nil
+}
+
+func (m Manager) MakeAuthToken(userID string, target string) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, &Token{
+		UserID: userID,
+		Target: target,
+	})
+	return token.SignedString(m.PrivKey)
 }
 
 // GetPublicKey gets the public key from a domain

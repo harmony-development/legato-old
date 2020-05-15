@@ -15,7 +15,7 @@ type GetMembersData struct {
 // GetMembers lists the members in a guild
 func (h Handlers) GetMembers(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
-	data := ctx.Data.(GetMembersData)
+	data := ctx.Data.(*GetMembersData)
 	h.Deps.State.GuildsLock.RLock()
 	if h.Deps.State.Guilds[data.Guild] == nil || h.Deps.State.Guilds[data.Guild].Clients[ctx.UserID] == nil {
 		return echo.NewHTTPError(http.StatusForbidden, "insufficient permissions to list members")

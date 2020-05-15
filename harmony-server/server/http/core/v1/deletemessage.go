@@ -19,7 +19,7 @@ type DeleteMessageData struct {
 // DeleteMessage deletes a message
 func (h Handlers) DeleteMessage(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
-	data := ctx.Data.(DeleteMessageData)
+	data := ctx.Data.(*DeleteMessageData)
 	h.Deps.State.GuildsLock.RLock()
 	defer h.Deps.State.GuildsLock.RUnlock()
 	if h.Deps.State.Guilds[data.Guild] == nil {
