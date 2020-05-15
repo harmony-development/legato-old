@@ -1,9 +1,10 @@
 package v1
 
 import (
+	"net/http"
+
 	"harmony-server/server/http/hm"
 	"harmony-server/server/http/socket/client"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
@@ -19,7 +20,6 @@ type AddChannelData struct {
 func (h Handlers) AddChannel(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
 	data := new(AddChannelData)
-
 
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many channels being added, please wait a few seconds")

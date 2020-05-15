@@ -15,7 +15,6 @@ func (h Handlers) GetInvites(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
 	data := ctx.Data.(GetInvitesData)
 
-
 	h.Deps.State.GuildsLock.RLock()
 	defer h.Deps.State.GuildsLock.RUnlock()
 	if h.Deps.State.Guilds[data.Guild] == nil {

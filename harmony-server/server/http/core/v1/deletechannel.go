@@ -20,7 +20,6 @@ func (h Handlers) DeleteChannel(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
 	data := ctx.Data.(DeleteChannelData)
 
-
 	h.Deps.State.GuildsLock.RLock()
 	defer h.Deps.State.GuildsLock.RUnlock()
 	if h.Deps.State.Guilds[data.Guild] == nil {
