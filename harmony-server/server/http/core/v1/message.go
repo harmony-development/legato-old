@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"encoding/json"
 	"harmony-server/server/http/hm"
 	"harmony-server/server/http/socket/client"
 	"io/ioutil"
@@ -16,6 +17,8 @@ type MessageData struct {
 	Guild   int64  `validate:"required"`
 	Channel int64  `validate:"required"`
 	Content string `validate:"required"`
+	Embeds  []string
+	Actions []string
 }
 
 // Message : Receive a message from a client.
@@ -65,10 +68,37 @@ func (h Handlers) Message(c echo.Context) error {
 			attachments[i] = fileName
 		}
 	}
-	msg, err := h.Deps.DB.AddMessage(data.Channel, data.Guild, ctx.UserID, data.Content, attachments)
+	var actions [][]byte
+	var embeds [][]byte
+	if len(data.Actions) > 0 {
+		for _, action := range data.Actions {
+			parsed, err := CleanAction([]byte(action))
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+			actions = append(actions, parsed)
+		}
+	}
+	if len(data.Embeds) > 0 {
+		for _, embed := range data.Embeds {
+			parsed, err := CleanEmbed([]byte(embed))
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+			embeds = append(embeds, parsed)
+		}
+	}
+	msg, err := h.Deps.DB.AddMessage(data.Channel, data.Guild, ctx.UserID, data.Content, attachments, embeds, actions)
 	if err != nil {
 		sentry.CaptureException(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error storing message in DB")
+	}
+	var rawEmbeds, rawActions []json.RawMessage
+	for _, embed := range embeds {
+		rawEmbeds = append(rawEmbeds, json.RawMessage(embed))
+	}
+	for _, action := range actions {
+		rawActions = append(rawActions, json.RawMessage(action))
 	}
 	h.Deps.State.Guilds[data.Guild].Broadcast(&client.OutPacket{
 		Type: "MessageAdd",
@@ -80,6 +110,8 @@ func (h Handlers) Message(c echo.Context) error {
 			"attachments": attachments,
 			"userID":      ctx.UserID,
 			"messageID":   msg.MessageID,
+			"actions":     rawActions,
+			"embeds":      rawEmbeds,
 		},
 	})
 	return nil
