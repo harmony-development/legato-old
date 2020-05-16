@@ -10,22 +10,18 @@ import (
 
 // LeaveGuildData is the data for a guild leave request
 type LeaveGuildData struct {
-	Guild string `validate:"required"`
+	Guild int64 `validate:"required"`
 }
 
 // LeaveGuild unjoins a user from a guild
 func (h Handlers) LeaveGuild(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
-	data := ctx.Data.(*LeaveGuildData)
-	h.Deps.State.GuildsLock.RLock()
-	defer h.Deps.State.GuildsLock.RUnlock()
-	if h.Deps.State.Guilds[data.Guild] == nil {
-		return echo.NewHTTPError(http.StatusNotFound, "guild not found")
+	var data LeaveGuildData
+	if err := ctx.BindAndVerify(&data); err != nil {
+		return err
 	}
-	if !ctx.Limiter.Allow() {
-		return echo.NewHTTPError(http.StatusTooManyRequests, "too many guild leave requests, please try again later")
-	}
-	if isOwner, err := h.Deps.DB.IsOwner(data.Guild, ctx.UserID); err != nil || !isOwner {
+
+	if isOwner, err := h.Deps.DB.IsOwner(data.Guild, ctx.UserID); err != nil || isOwner {
 		return echo.NewHTTPError(http.StatusForbidden, "you cannot leave a guild you own")
 	}
 	if err := h.Deps.DB.DeleteMember(data.Guild, ctx.UserID); err != nil {

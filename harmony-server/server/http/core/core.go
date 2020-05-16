@@ -22,7 +22,7 @@ type API struct {
 type Dependencies struct {
 	Router         *routing.Router
 	APIGroup       *echo.Group
-	DB             *db.DB
+	DB             *db.HarmonyDB
 	Config         *config.Config
 	AuthManager    *auth.Manager
 	StorageManager *storage.Manager

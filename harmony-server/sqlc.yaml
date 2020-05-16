@@ -1,0 +1,11 @@
+version: "1"
+packages:
+    - name: "queries"
+      path: "server/db/queries"
+      queries: "./sql/queries"
+      schema: "./sql/schemas"
+      engine: "postgresql"
+      emit_json_tags: true
+      emit_prepared_queries: true
+      emit_interface: false
+      emit_exact_table_names: false

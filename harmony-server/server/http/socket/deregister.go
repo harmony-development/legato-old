@@ -8,18 +8,12 @@ import (
 
 // Deregister terminates a client's session
 func (h Handler) Deregister(ws *client.Client) {
-	guildsQuery, err := h.DB.Query("SELECT guildid FROM guildmembers WHERE userid=$1", ws.UserID)
+	guilds, err := h.DB.GuildsForUser(*ws.UserID)
 	if err != nil {
 		logrus.Warnf("error deregistering client, potential memory leak : %v", err)
 		return
 	}
-	for guildsQuery.Next() {
-		var guildID string
-		err = guildsQuery.Scan(&guildID)
-		if err != nil {
-			logrus.Warnf("Error scanning guilds : %v", err)
-			return
-		}
+	for _, guildID := range guilds {
 		if h.State.Guilds[guildID] != nil && h.State.Guilds[guildID].Clients[*ws.UserID] != nil {
 			if len(h.State.Guilds[guildID].Clients[*ws.UserID].Clients) == 1 {
 				h.State.Guilds[guildID].Clients[*ws.UserID].Lock()

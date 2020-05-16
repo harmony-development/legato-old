@@ -6,7 +6,7 @@ import (
 )
 
 // ContainsRow returns whether the database has a given row
-func (db *DB) ContainsRow(query string, args ...interface{}) (bool, error) {
+func (db *HarmonyDB) ContainsRow(query string, args ...interface{}) (bool, error) {
 	var exists bool
 	query = fmt.Sprintf("SELECT exists (%s)", query)
 	err := db.QueryRow(query, args...).Scan(&exists)

@@ -14,27 +14,27 @@ import (
 
 // UpdateGuildPictureData is the data for a guild picture update request
 type UpdateGuildPictureData struct {
-	Guild string `validate:"required"`
+	Guild int64 `validate:"required"`
 }
 
 // UpdateGuildPicture is the request to update a guild's picture
 func (h Handlers) UpdateGuildPicture(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
+	var data UpdateGuildPictureData
+	if err := ctx.BindAndVerify(&data); err != nil {
+		return err
+	}
+	if err := ctx.VerifyOwner(h.Deps.DB, data.Guild, ctx.UserID); err != nil {
+		return err
+	}
+
 	form, err := ctx.MultipartForm()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Form required")
 	}
 	files := form.File["files"]
-	data := ctx.Data.(*UpdateGuildPictureData)
 	if len(files) == 0 {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
-	}
-	if !ctx.Limiter.Allow() {
-		return echo.NewHTTPError(http.StatusTooManyRequests, "Too many requests, please try again later")
-	}
-	isOwner, err := h.Deps.DB.IsOwner(data.Guild, ctx.UserID)
-	if err != nil || !isOwner {
-		return echo.NewHTTPError(http.StatusForbidden, "insufficient permission to change picture")
 	}
 	file, err := files[0].Open()
 	if err != nil {
@@ -75,7 +75,7 @@ func (h Handlers) UpdateGuildPicture(c echo.Context) error {
 		h.Deps.StorageManager.DeleteGuildPicture(fileName)
 		return echo.NewHTTPError(http.StatusInternalServerError, "error updating picture")
 	}
-	h.Deps.StorageManager.DeleteGuildPicture(*oldPicture)
+	h.Deps.StorageManager.DeleteGuildPicture(oldPicture)
 	h.Deps.State.GuildsLock.RLock()
 	defer h.Deps.State.GuildsLock.RUnlock()
 	h.Deps.State.Guilds[data.Guild].Broadcast(&client.OutPacket{

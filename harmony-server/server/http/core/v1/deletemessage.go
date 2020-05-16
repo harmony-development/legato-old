@@ -11,23 +11,19 @@ import (
 
 // DeleteMessageData is the data for a message deletion request
 type DeleteMessageData struct {
-	Guild     string `validate:"guild"`
-	Channel   string `validate:"channel"`
-	MessageID string `validate:"message"`
+	Guild     int64 `validate:"guild"`
+	Channel   int64 `validate:"channel"`
+	MessageID int64 `validate:"message"`
 }
 
 // DeleteMessage deletes a message
 func (h Handlers) DeleteMessage(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
-	data := ctx.Data.(*DeleteMessageData)
-	h.Deps.State.GuildsLock.RLock()
-	defer h.Deps.State.GuildsLock.RUnlock()
-	if h.Deps.State.Guilds[data.Guild] == nil {
-		return echo.NewHTTPError(http.StatusNotFound, "guild not found")
+	var data DeleteMessageData
+	if err := ctx.BindAndVerify(&data); err != nil {
+		return err
 	}
-	if !ctx.Limiter.Allow() {
-		return echo.NewHTTPError(http.StatusTooManyRequests, "too many message deletions, please try again later")
-	}
+
 	isOwner, err := h.Deps.DB.IsOwner(data.Guild, ctx.UserID)
 	if err != nil {
 		sentry.CaptureException(err)
@@ -38,7 +34,7 @@ func (h Handlers) DeleteMessage(c echo.Context) error {
 		sentry.CaptureException(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to check permissions")
 	}
-	if !(isOwner || *messageOwner == ctx.UserID) {
+	if !(isOwner || messageOwner == ctx.UserID) {
 		return echo.NewHTTPError(http.StatusForbidden, "insufficient permissions to delete message")
 	}
 	if err := h.Deps.DB.DeleteMessage(data.Guild, data.Channel, data.MessageID); err != nil {

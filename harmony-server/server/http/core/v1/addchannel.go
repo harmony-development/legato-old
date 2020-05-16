@@ -7,51 +7,38 @@ import (
 	"harmony-server/server/http/socket/client"
 
 	"github.com/labstack/echo/v4"
-	"github.com/thanhpk/randstr"
 )
 
 // AddChannelData represents data received from client on AddChannel
 type AddChannelData struct {
-	Guild       string `validate:"required"`
+	Guild       int64  `validate:"required"`
 	ChannelName string `validate:"required"`
 }
 
 // AddChannel is a request to add a channel to a guild
 func (h Handlers) AddChannel(c echo.Context) error {
-	ctx, _ := c.(hm.HarmonyContext)
-	data := new(AddChannelData)
-
-	if !ctx.Limiter.Allow() {
-		return echo.NewHTTPError(http.StatusTooManyRequests, "too many channels being added, please wait a few seconds")
+	ctx := c.(hm.HarmonyContext)
+	var data AddChannelData
+	if err := ctx.BindAndVerify(&data); err != nil {
+		return err
 	}
-	var channelID = randstr.Hex(16)
-	owner, err := h.Deps.DB.GetOwner(data.Guild)
+	if err := ctx.VerifyOwner(h.Deps.DB, data.Guild, ctx.UserID); err != nil {
+		return err
+	}
+	channel, err := h.Deps.DB.AddChannelToGuild(data.Guild, data.ChannelName)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "unable to verify ownership, please try again later")
-	}
-	if !(*owner == ctx.UserID) {
-		return echo.NewHTTPError(http.StatusUnauthorized, "insufficient permissions to add channel")
-	}
-	if err := h.Deps.DB.AddChannelToGuild(channelID, data.Guild, data.ChannelName); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "")
 	}
-	h.Deps.State.GuildsLock.RLock()
-	defer h.Deps.State.GuildsLock.RUnlock()
-	if h.Deps.State.Guilds[data.Guild] == nil || h.Deps.State.Guilds[data.Guild].Clients == nil {
-		return ctx.JSON(http.StatusOK, map[string]string{
-			"message": "successfully added channel",
-		})
-	} else {
-		h.Deps.State.Guilds[data.Guild].Broadcast(&client.OutPacket{
-			Type: "AddChannel",
-			Data: map[string]interface{}{
-				"guild":       data.Guild,
-				"channelName": data.ChannelName,
-				"channelID":   channelID,
-			},
-		})
-		return ctx.JSON(http.StatusOK, map[string]string{
-			"message": "successfully added channel",
-		})
-	}
+
+	h.Deps.State.Guilds[data.Guild].Broadcast(&client.OutPacket{
+		Type: "AddChannel",
+		Data: map[string]interface{}{
+			"guild":       data.Guild,
+			"channelName": data.ChannelName,
+			"channelID":   channel.ChannelID,
+		},
+	})
+	return ctx.JSON(http.StatusOK, map[string]string{
+		"message": "successfully added channel",
+	})
 }

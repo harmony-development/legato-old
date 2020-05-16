@@ -14,11 +14,11 @@ type ClientArray struct {
 // Guild is the data structure for an active guild
 type Guild struct {
 	*sync.RWMutex
-	Clients map[string]*ClientArray
+	Clients map[int64]*ClientArray
 }
 
 // AddClient adds a client to a guild
-func (g Guild) AddClient(userID *string, c *client.Client) {
+func (g Guild) AddClient(userID *int64, c *client.Client) {
 	if g.Clients[*userID] == nil {
 		g.Lock()
 		defer g.Unlock()

@@ -4,22 +4,24 @@ import (
 	"database/sql"
 	"fmt"
 	"harmony-server/server/config"
+	"harmony-server/server/db/queries"
 
 	lru "github.com/hashicorp/golang-lru"
 	_ "github.com/lib/pq"
 )
 
-// DB is a wrapper for the SQL DB
-type DB struct {
+// HarmonyDB is a wrapper for the SQL HarmonyDB
+type HarmonyDB struct {
 	*sql.DB
+	queries      *queries.Queries
 	Config       *config.Config
 	OwnerCache   *lru.Cache
 	SessionCache *lru.Cache
 }
 
 // New creates a new DB connection
-func New(cfg *config.Config) (*DB, error) {
-	db := &DB{}
+func New(cfg *config.Config) (*HarmonyDB, error) {
+	db := &HarmonyDB{}
 	var err error
 	if db.DB, err = sql.Open("postgres", fmt.Sprintf("user=%v password=%v dbname=%v host=%v port=%v sslmode=%v",
 		cfg.DB.User,
@@ -35,9 +37,6 @@ func New(cfg *config.Config) (*DB, error) {
 		return nil, err
 	}
 	if err = db.Migrate(); err != nil {
-		return nil, err
-	}
-	if err = db.AddSampleData(); err != nil {
 		return nil, err
 	}
 	if db.OwnerCache, err = lru.New(cfg.Server.OwnerCacheMax); err != nil {

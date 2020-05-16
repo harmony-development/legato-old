@@ -13,9 +13,9 @@ import (
 )
 
 type MessageData struct {
-	Guild   string `validate:"required"`
-	Channel string `validate:"required"`
-	Message string `validate:"required"`
+	Guild   int64  `validate:"required"`
+	Channel int64  `validate:"required"`
+	Content string `validate:"required"`
 }
 
 // Message : Receive a message from a client.
@@ -39,7 +39,6 @@ func (h Handlers) Message(c echo.Context) error {
 	if h.Deps.State.Guilds[data.Guild] == nil || h.Deps.State.Guilds[data.Guild].Clients[ctx.UserID] == nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "insufficient permissions to send message")
 	}
-	var messageID = randstr.Hex(16)
 	var attachments = make([]string, len(files))
 	if len(files) > 0 {
 		for i, v := range files {
@@ -65,10 +64,11 @@ func (h Handlers) Message(c echo.Context) error {
 			}
 			attachments[i] = fileName
 		}
-		if err := h.Deps.DB.AddAttachments(messageID, attachments); err != nil {
-			sentry.CaptureException(err)
-			return echo.NewHTTPError(http.StatusInternalServerError, "Error committing attachment transaction")
-		}
+	}
+	msg, err := h.Deps.DB.AddMessage(data.Channel, data.Guild, ctx.UserID, data.Content, attachments)
+	if err != nil {
+		sentry.CaptureException(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error storing message in DB")
 	}
 	h.Deps.State.Guilds[data.Guild].Broadcast(&client.OutPacket{
 		Type: "MessageAdd",
@@ -76,16 +76,11 @@ func (h Handlers) Message(c echo.Context) error {
 			"guild":       data.Guild,
 			"channel":     data.Channel,
 			"createdAt":   time.Now().UTC().Unix(),
-			"message":     data.Message,
+			"message":     msg,
 			"attachments": attachments,
 			"userID":      ctx.UserID,
-			"messageID":   messageID,
+			"messageID":   msg.MessageID,
 		},
 	})
-	if _, err := h.Deps.DB.Exec(`INSERT INTO messages(messageid, guildid, channelid, author, createdat, message)
-			VALUES($1, $2, $3, $4, $5, $6)`,
-		messageID, data.Guild, data.Channel, ctx.UserID, data.Message); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error saving message")
-	}
 	return nil
 }

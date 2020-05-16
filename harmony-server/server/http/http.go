@@ -28,7 +28,7 @@ type Server struct {
 
 // Dependencies are elements that a Server needs
 type Dependencies struct {
-	DB             *db.DB
+	DB             *db.HarmonyDB
 	AuthManager    *auth.Manager
 	StorageManager *storage.Manager
 	State          *state.State
