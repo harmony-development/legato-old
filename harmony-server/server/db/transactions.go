@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"context"
+
+	"harmony-server/server/db/queries"
 )
 
 func toSqlString(input string) sql.NullString {
@@ -20,13 +22,13 @@ func toSqlInt64(input int64) sql.NullInt64 {
 var ctx = context.Background()
 
 // CreateGuild creates a standard guild
-func (db *HarmonyDB) CreateGuild(owner string, guildName string, picture string) (*Guild, error) {
+func (db *HarmonyDB) CreateGuild(owner string, guildName string, picture string) (*queries.Guild, error) {
 	tx, err := db.Begin()
 	if err != nil {
 		return nil, err
 	}
-	queries := db.Queries.WithTx(tx)
-	guild, err := queries.CreateGuild(ctx, CreateGuildParams{
+	tq := db.Queries.WithTx(tx)
+	guild, err := tq.CreateGuild(ctx, queries.CreateGuildParams{
 		OwnerID:    owner,
 		GuildName:  guildName,
 		PictureUrl: picture,
@@ -34,14 +36,14 @@ func (db *HarmonyDB) CreateGuild(owner string, guildName string, picture string)
 	if err != nil {
 		return nil, err
 	}
-	err = queries.AddUserToGuild(ctx, AddUserToGuildParams{
+	err = tq.AddUserToGuild(ctx, queries.AddUserToGuildParams{
 		UserID:  owner,
 		GuildID: guild.GuildID,
 	})
 	if err != nil {
 		return nil, err
 	}
-	_, err = queries.CreateChannel(ctx, CreateChannelParams{
+	_, err = tq.CreateChannel(ctx, queries.CreateChannelParams{
 		GuildID:     toSqlInt64(guild.GuildID),
 		ChannelName: "general",
 	})
@@ -74,8 +76,8 @@ func (db *HarmonyDB) IsOwner(guildID int64, userID string) (bool, error) {
 }
 
 // AddInvite inserts a new invite to the DB
-func (db *HarmonyDB) CreateInvite(guildID int64, possibleUses int32, name string) (Invite, error) {
-	return db.Queries.CreateGuildInvite(ctx, CreateGuildInviteParams{
+func (db *HarmonyDB) CreateInvite(guildID int64, possibleUses int32, name string) (queries.Invite, error) {
+	return db.Queries.CreateGuildInvite(ctx, queries.CreateGuildInviteParams{
 		Name:         name,
 		PossibleUses: sql.NullInt32{Int32: possibleUses, Valid: true},
 		GuildID:      toSqlInt64(guildID),
@@ -84,15 +86,15 @@ func (db *HarmonyDB) CreateInvite(guildID int64, possibleUses int32, name string
 
 // AddMemberToGuild adds a new member to a guild
 func (db *HarmonyDB) AddMemberToGuild(userID string, guildID int64) error {
-	return db.Queries.AddUserToGuild(ctx, AddUserToGuildParams{
+	return db.Queries.AddUserToGuild(ctx, queries.AddUserToGuildParams{
 		UserID:  userID,
 		GuildID: guildID,
 	})
 }
 
 // AddChannelToGuild adds a new channel to a guild
-func (db *HarmonyDB) AddChannelToGuild(guildID int64, channelName string) (Channel, error) {
-	return db.Queries.CreateChannel(ctx, CreateChannelParams{
+func (db *HarmonyDB) AddChannelToGuild(guildID int64, channelName string) (queries.Channel, error) {
+	return db.Queries.CreateChannel(ctx, queries.CreateChannelParams{
 		GuildID:     toSqlInt64(guildID),
 		ChannelName: channelName,
 	})
@@ -100,29 +102,36 @@ func (db *HarmonyDB) AddChannelToGuild(guildID int64, channelName string) (Chann
 
 // DeleteChannelFromGuild removes a channel from a guild
 func (db *HarmonyDB) DeleteChannelFromGuild(guildID, channelID int64) error {
-	return db.Queries.DeleteChannel(ctx, DeleteChannelParams{
+	return db.Queries.DeleteChannel(ctx, queries.DeleteChannelParams{
 		GuildID:   toSqlInt64(guildID),
 		ChannelID: channelID,
 	})
 }
 
 // AddMessage adds a message to a channel
-func (db *HarmonyDB) AddMessage(messageID string, channelID string, guildID string, userID string, message string, attachments []string) error {
-	if _, err := db.Exec(`
-	INSERT INTO messages(messageid, channelid, guildid, userid, createdat, message) 
-	VALUES($1, $2, $3, $4, $5, $6)
-	`, messageID, channelID, guildID, userID, time.Now().UTC().Unix(), message); err != nil {
-		return err
-	}
+func (db *HarmonyDB) AddMessage(messageID, channelID, guildID, userID int64, message string, attachments []string) error {
 	tx, err := db.Begin()
 	if err != nil {
 		return err
 	}
+	tq := db.Queries.WithTx(tx)
+	if _, err := tq.AddMessage(ctx, queries.AddMessageParams{
+		MessageID: messageID,
+		GuildID:   toSqlInt64(guildID),
+		ChannelID: toSqlInt64(channelID),
+		UserID:    userID,
+		CreatedAt: time.Now(),
+		EditedAt:  sql.NullTime{},
+		Content:   message,
+	}); err != nil {
+		return err
+	}
 	for _, attachment := range attachments {
-		if _, err := tx.Exec(`
-			INSERT INTO attachments(messageid, attachment)
-			VALUES($1, $2)
-		`, messageID, attachment); err != nil {
+		if err := tq.AddAttachment(ctx, queries.AddAttachmentParams{
+			MessageID:     messageID,
+			AttachmentUrl: attachment,
+		}); err != nil {
+			_ = tx.Rollback()
 			return err
 		}
 	}
@@ -133,22 +142,21 @@ func (db *HarmonyDB) AddMessage(messageID string, channelID string, guildID stri
 }
 
 // DeleteMessage deletes a message
-func (db *HarmonyDB) DeleteMessage(messageID string, channelID string, guildID string) error {
+func (db *HarmonyDB) DeleteMessage(messageID int64, channelID int64, guildID int64) error {
 	tx, err := db.Begin()
 	if err != nil {
 		return err
 	}
-	res, err := tx.Exec(`
-		DELETE FROM messages WHERE messageid=$1 AND channelid=$2 AND guildID=$3
-	`, messageID, channelID, guildID)
+	tq := db.Queries.WithTx(tx)
+	numRows, err := tq.DeleteMessage(ctx, queries.DeleteMessageParams{
+		MessageID: messageID,
+		ChannelID: toSqlInt64(channelID),
+		GuildID:   toSqlInt64(guildID),
+	})
 	if err != nil {
 		return err
 	}
-	rowCount, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowCount != 1 {
+	if numRows > 1 { // JUST IN CASE the delete query deletes too much
 		if err := tx.Rollback(); err != nil {
 			return err
 		}

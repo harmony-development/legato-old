@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"harmony-server/server/config"
+	"harmony-server/server/db/queries"
 
 	lru "github.com/hashicorp/golang-lru"
 	_ "github.com/lib/pq"
@@ -12,7 +13,7 @@ import (
 // HarmonyDB is a wrapper for the SQL HarmonyDB
 type HarmonyDB struct {
 	*sql.DB
-	Queries      *Queries
+	Queries      *queries.Queries
 	Config       *config.Config
 	OwnerCache   *lru.Cache
 	SessionCache *lru.Cache

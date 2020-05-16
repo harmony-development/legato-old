@@ -32,6 +32,7 @@ type DBConf struct {
 	Port     int
 	User     string
 	Password string
+	Models   string
 	SSL      bool
 }
 
@@ -58,9 +59,10 @@ func Load() (*Config, error) {
 			LogErrors:             true,
 		},
 		DB: DBConf{
-			Host: "127.0.0.1",
-			Port: 5432,
-			SSL:  false,
+			Host:   "127.0.0.1",
+			Port:   5432,
+			SSL:    false,
+			Models: "sql/schemas/models.sql",
 		},
 		Sentry: SentryConf{
 			Dsn:              "",
