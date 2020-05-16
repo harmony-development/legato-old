@@ -18,7 +18,7 @@ func (m *Middlewares) WithAuth(handler echo.HandlerFunc) echo.HandlerFunc {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusUnauthorized, "invalid session")
 		}
-		ctx.UserID = *userID
+		ctx.UserID = userID
 		return handler(ctx)
 	}
 }

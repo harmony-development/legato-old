@@ -13,7 +13,7 @@ import (
 type HarmonyContext struct {
 	echo.Context
 	Limiter *rate.Limiter
-	UserID  string
+	UserID  int64
 }
 
 // HarmonyHandler is a type of handler that takes a HarmonyContext

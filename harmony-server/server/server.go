@@ -53,7 +53,7 @@ func (inst Instance) Start() {
 	}
 	go inst.StorageManager.DeleteRoutine()
 	inst.State = &state.State{
-		Guilds:     make(map[string]*guild.Guild),
+		Guilds:     make(map[int64]*guild.Guild),
 		GuildsLock: &sync.RWMutex{},
 	}
 	inst.Server = http.New(&http.Dependencies{

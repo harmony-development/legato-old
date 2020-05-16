@@ -24,32 +24,24 @@ func (e Events) Subscribe(ws client.Client, event *client.Event, raw *json.RawMe
 		ws.SendError("invalid session")
 		return
 	}
-	ws.UserID = userID
+	ws.UserID = &userID
 	if !event.Limiter.Allow() {
 		ws.SendError("too many requests")
 		return
 	}
-	res, err := e.DB.Query("SELECT guilds.guildid FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=$1", userID)
+	guildIDs, err := e.DB.GuildsForUser(userID)
 	if err != nil {
 		ws.SendError("Unable to get guilds list")
 		logrus.Warnf("Error selecting guilds. Reason : %v", err)
 		return
 	}
-	for res.Next() {
-		var guildID string
-		err := res.Scan(&guildID)
-		if err != nil {
-			ws.SendError("Unable to subscribe to guilds")
-			logrus.Warnf("Error scanning next row. Reason: %v", err)
-			return
-		}
-		// Now subscribe to all guilds that the client is a member of!
-		if e.State.Guilds[guildID] == nil {
+	for _, id := range guildIDs {
+		if e.State.Guilds[id] == nil {
 			e.State.GuildsLock.Lock()
-			e.State.Guilds[guildID] = &guild.Guild{}
-			e.State.Guilds[guildID].AddClient(userID, &ws)
+			e.State.Guilds[id] = &guild.Guild{}
+			e.State.Guilds[id].AddClient(&userID, &ws)
 		} else {
-			e.State.Guilds[guildID].AddClient(userID, &ws)
+			e.State.Guilds[id].AddClient(&userID, &ws)
 		}
 	}
 }

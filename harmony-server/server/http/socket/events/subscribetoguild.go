@@ -7,7 +7,7 @@ import (
 
 type subscribeToGuildData struct {
 	Session string
-	Guild   string
+	Guild   int64
 }
 
 // OnSubscribeToGuild handles requests to subscribe to a guilds events
@@ -38,7 +38,7 @@ func (e Events) OnSubscribeToGuild(ws client.Client, event *client.Event, raw *j
 		return
 	}
 	if count == 1 {
-		e.State.Guilds[data.Guild].AddClient(userID, &ws)
+		e.State.Guilds[data.Guild].AddClient(&userID, &ws)
 	}
 	return
 }

@@ -11,7 +11,7 @@ import (
 
 // DeleteGuildData is the data for a guild deletion request
 type DeleteGuildData struct {
-	Guild string `validate:"required"`
+	Guild int64 `validate:"required"`
 }
 
 // DeleteGuild is the handler for a delete guild request

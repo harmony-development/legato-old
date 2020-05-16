@@ -58,6 +58,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getGuildOwnerStmt, err = db.PrepareContext(ctx, getGuildOwner); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGuildOwner: %w", err)
 	}
+	if q.getGuildPictureStmt, err = db.PrepareContext(ctx, getGuildPicture); err != nil {
+		return nil, fmt.Errorf("error preparing query GetGuildPicture: %w", err)
+	}
 	if q.getMessageAuthorStmt, err = db.PrepareContext(ctx, getMessageAuthor); err != nil {
 		return nil, fmt.Errorf("error preparing query GetMessageAuthor: %w", err)
 	}
@@ -67,14 +70,29 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getMessagesStmt, err = db.PrepareContext(ctx, getMessages); err != nil {
 		return nil, fmt.Errorf("error preparing query GetMessages: %w", err)
 	}
+	if q.guildsForUserStmt, err = db.PrepareContext(ctx, guildsForUser); err != nil {
+		return nil, fmt.Errorf("error preparing query GuildsForUser: %w", err)
+	}
 	if q.incrementInviteStmt, err = db.PrepareContext(ctx, incrementInvite); err != nil {
 		return nil, fmt.Errorf("error preparing query IncrementInvite: %w", err)
+	}
+	if q.openInvitesStmt, err = db.PrepareContext(ctx, openInvites); err != nil {
+		return nil, fmt.Errorf("error preparing query OpenInvites: %w", err)
+	}
+	if q.removeUserFromGuildStmt, err = db.PrepareContext(ctx, removeUserFromGuild); err != nil {
+		return nil, fmt.Errorf("error preparing query RemoveUserFromGuild: %w", err)
 	}
 	if q.resolveGuildIDStmt, err = db.PrepareContext(ctx, resolveGuildID); err != nil {
 		return nil, fmt.Errorf("error preparing query ResolveGuildID: %w", err)
 	}
 	if q.sessionToUserIDStmt, err = db.PrepareContext(ctx, sessionToUserID); err != nil {
 		return nil, fmt.Errorf("error preparing query SessionToUserID: %w", err)
+	}
+	if q.setGuildNameStmt, err = db.PrepareContext(ctx, setGuildName); err != nil {
+		return nil, fmt.Errorf("error preparing query SetGuildName: %w", err)
+	}
+	if q.setGuildPictureStmt, err = db.PrepareContext(ctx, setGuildPicture); err != nil {
+		return nil, fmt.Errorf("error preparing query SetGuildPicture: %w", err)
 	}
 	if q.userInGuildStmt, err = db.PrepareContext(ctx, userInGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query UserInGuild: %w", err)
@@ -144,6 +162,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getGuildOwnerStmt: %w", cerr)
 		}
 	}
+	if q.getGuildPictureStmt != nil {
+		if cerr := q.getGuildPictureStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getGuildPictureStmt: %w", cerr)
+		}
+	}
 	if q.getMessageAuthorStmt != nil {
 		if cerr := q.getMessageAuthorStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getMessageAuthorStmt: %w", cerr)
@@ -159,9 +182,24 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getMessagesStmt: %w", cerr)
 		}
 	}
+	if q.guildsForUserStmt != nil {
+		if cerr := q.guildsForUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing guildsForUserStmt: %w", cerr)
+		}
+	}
 	if q.incrementInviteStmt != nil {
 		if cerr := q.incrementInviteStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing incrementInviteStmt: %w", cerr)
+		}
+	}
+	if q.openInvitesStmt != nil {
+		if cerr := q.openInvitesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing openInvitesStmt: %w", cerr)
+		}
+	}
+	if q.removeUserFromGuildStmt != nil {
+		if cerr := q.removeUserFromGuildStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing removeUserFromGuildStmt: %w", cerr)
 		}
 	}
 	if q.resolveGuildIDStmt != nil {
@@ -172,6 +210,16 @@ func (q *Queries) Close() error {
 	if q.sessionToUserIDStmt != nil {
 		if cerr := q.sessionToUserIDStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing sessionToUserIDStmt: %w", cerr)
+		}
+	}
+	if q.setGuildNameStmt != nil {
+		if cerr := q.setGuildNameStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing setGuildNameStmt: %w", cerr)
+		}
+	}
+	if q.setGuildPictureStmt != nil {
+		if cerr := q.setGuildPictureStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing setGuildPictureStmt: %w", cerr)
 		}
 	}
 	if q.userInGuildStmt != nil {
@@ -216,51 +264,63 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                    DBTX
-	tx                    *sql.Tx
-	addAttachmentStmt     *sql.Stmt
-	addMessageStmt        *sql.Stmt
-	addUserToGuildStmt    *sql.Stmt
-	createChannelStmt     *sql.Stmt
-	createGuildStmt       *sql.Stmt
-	createGuildInviteStmt *sql.Stmt
-	deleteChannelStmt     *sql.Stmt
-	deleteGuildStmt       *sql.Stmt
-	deleteInviteStmt      *sql.Stmt
-	deleteMessageStmt     *sql.Stmt
-	getAttachmentsStmt    *sql.Stmt
-	getGuildOwnerStmt     *sql.Stmt
-	getMessageAuthorStmt  *sql.Stmt
-	getMessageDateStmt    *sql.Stmt
-	getMessagesStmt       *sql.Stmt
-	incrementInviteStmt   *sql.Stmt
-	resolveGuildIDStmt    *sql.Stmt
-	sessionToUserIDStmt   *sql.Stmt
-	userInGuildStmt       *sql.Stmt
+	db                      DBTX
+	tx                      *sql.Tx
+	addAttachmentStmt       *sql.Stmt
+	addMessageStmt          *sql.Stmt
+	addUserToGuildStmt      *sql.Stmt
+	createChannelStmt       *sql.Stmt
+	createGuildStmt         *sql.Stmt
+	createGuildInviteStmt   *sql.Stmt
+	deleteChannelStmt       *sql.Stmt
+	deleteGuildStmt         *sql.Stmt
+	deleteInviteStmt        *sql.Stmt
+	deleteMessageStmt       *sql.Stmt
+	getAttachmentsStmt      *sql.Stmt
+	getGuildOwnerStmt       *sql.Stmt
+	getGuildPictureStmt     *sql.Stmt
+	getMessageAuthorStmt    *sql.Stmt
+	getMessageDateStmt      *sql.Stmt
+	getMessagesStmt         *sql.Stmt
+	guildsForUserStmt       *sql.Stmt
+	incrementInviteStmt     *sql.Stmt
+	openInvitesStmt         *sql.Stmt
+	removeUserFromGuildStmt *sql.Stmt
+	resolveGuildIDStmt      *sql.Stmt
+	sessionToUserIDStmt     *sql.Stmt
+	setGuildNameStmt        *sql.Stmt
+	setGuildPictureStmt     *sql.Stmt
+	userInGuildStmt         *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                    tx,
-		tx:                    tx,
-		addAttachmentStmt:     q.addAttachmentStmt,
-		addMessageStmt:        q.addMessageStmt,
-		addUserToGuildStmt:    q.addUserToGuildStmt,
-		createChannelStmt:     q.createChannelStmt,
-		createGuildStmt:       q.createGuildStmt,
-		createGuildInviteStmt: q.createGuildInviteStmt,
-		deleteChannelStmt:     q.deleteChannelStmt,
-		deleteGuildStmt:       q.deleteGuildStmt,
-		deleteInviteStmt:      q.deleteInviteStmt,
-		deleteMessageStmt:     q.deleteMessageStmt,
-		getAttachmentsStmt:    q.getAttachmentsStmt,
-		getGuildOwnerStmt:     q.getGuildOwnerStmt,
-		getMessageAuthorStmt:  q.getMessageAuthorStmt,
-		getMessageDateStmt:    q.getMessageDateStmt,
-		getMessagesStmt:       q.getMessagesStmt,
-		incrementInviteStmt:   q.incrementInviteStmt,
-		resolveGuildIDStmt:    q.resolveGuildIDStmt,
-		sessionToUserIDStmt:   q.sessionToUserIDStmt,
-		userInGuildStmt:       q.userInGuildStmt,
+		db:                      tx,
+		tx:                      tx,
+		addAttachmentStmt:       q.addAttachmentStmt,
+		addMessageStmt:          q.addMessageStmt,
+		addUserToGuildStmt:      q.addUserToGuildStmt,
+		createChannelStmt:       q.createChannelStmt,
+		createGuildStmt:         q.createGuildStmt,
+		createGuildInviteStmt:   q.createGuildInviteStmt,
+		deleteChannelStmt:       q.deleteChannelStmt,
+		deleteGuildStmt:         q.deleteGuildStmt,
+		deleteInviteStmt:        q.deleteInviteStmt,
+		deleteMessageStmt:       q.deleteMessageStmt,
+		getAttachmentsStmt:      q.getAttachmentsStmt,
+		getGuildOwnerStmt:       q.getGuildOwnerStmt,
+		getGuildPictureStmt:     q.getGuildPictureStmt,
+		getMessageAuthorStmt:    q.getMessageAuthorStmt,
+		getMessageDateStmt:      q.getMessageDateStmt,
+		getMessagesStmt:         q.getMessagesStmt,
+		guildsForUserStmt:       q.guildsForUserStmt,
+		incrementInviteStmt:     q.incrementInviteStmt,
+		openInvitesStmt:         q.openInvitesStmt,
+		removeUserFromGuildStmt: q.removeUserFromGuildStmt,
+		resolveGuildIDStmt:      q.resolveGuildIDStmt,
+		sessionToUserIDStmt:     q.sessionToUserIDStmt,
+		setGuildNameStmt:        q.setGuildNameStmt,
+		setGuildPictureStmt:     q.setGuildPictureStmt,
+		userInGuildStmt:         q.userInGuildStmt,
 	}
 }

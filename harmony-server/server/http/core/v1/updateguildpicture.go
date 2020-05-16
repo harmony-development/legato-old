@@ -14,7 +14,7 @@ import (
 
 // UpdateGuildPictureData is the data for a guild picture update request
 type UpdateGuildPictureData struct {
-	Guild string `validate:"required"`
+	Guild int64 `validate:"required"`
 }
 
 // UpdateGuildPicture is the request to update a guild's picture
@@ -81,7 +81,7 @@ func (h Handlers) UpdateGuildPicture(c echo.Context) error {
 		h.Deps.StorageManager.DeleteGuildPicture(fileName)
 		return echo.NewHTTPError(http.StatusInternalServerError, "error updating picture")
 	}
-	h.Deps.StorageManager.DeleteGuildPicture(*oldPicture)
+	h.Deps.StorageManager.DeleteGuildPicture(oldPicture)
 	h.Deps.State.GuildsLock.RLock()
 	defer h.Deps.State.GuildsLock.RUnlock()
 	h.Deps.State.Guilds[data.Guild].Broadcast(&client.OutPacket{

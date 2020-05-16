@@ -7,6 +7,6 @@ import (
 
 // State contains the variables related to application state
 type State struct {
-	Guilds     map[string]*guild.Guild
+	Guilds     map[int64]*guild.Guild
 	GuildsLock *sync.RWMutex
 }

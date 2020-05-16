@@ -10,8 +10,8 @@ import (
 
 // DeleteInviteData is the data for an invite delete request
 type DeleteInviteData struct {
-	Guild  string `validate:"required"`
-	Invite string `validate:"required"`
+	Guild  int64 `validate:"required"`
+	Invite int64 `validate:"required"`
 }
 
 // DeleteInvite is the request to delete an invite
@@ -40,7 +40,7 @@ func (h Handlers) DeleteInvite(c echo.Context) error {
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "too many invite deletions, please wait a few moments")
 	}
-	if err := h.Deps.DB.DeleteInvite(data.Invite, data.Guild); err != nil {
+	if err := h.Deps.DB.DeleteInvite(data.Invite); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to delete invite, please try again later")
 	}
 	return ctx.JSON(http.StatusOK, map[string]string{

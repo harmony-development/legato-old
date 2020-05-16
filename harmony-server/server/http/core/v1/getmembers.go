@@ -9,7 +9,7 @@ import (
 
 // GetMembersData is the data for a member list request
 type GetMembersData struct {
-	Guild string `validate:"required"`
+	Guild int64 `validate:"required"`
 }
 
 // GetMembers lists the members in a guild

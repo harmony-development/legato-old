@@ -11,7 +11,7 @@ import (
 
 // AddChannelData represents data received from client on AddChannel
 type AddChannelData struct {
-	Guild       string `validate:"required"`
+	Guild       int64  `validate:"required"`
 	ChannelName string `validate:"required"`
 }
 
@@ -33,10 +33,10 @@ func (h Handlers) AddChannel(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to verify ownership, please try again later")
 	}
-	if !(*owner == ctx.UserID) {
+	if !(owner == ctx.UserID) {
 		return echo.NewHTTPError(http.StatusUnauthorized, "insufficient permissions to add channel")
 	}
-	if err := h.Deps.DB.AddChannelToGuild(channelID, data.Guild, data.ChannelName); err != nil {
+	if _, err := h.Deps.DB.AddChannelToGuild(data.Guild, data.ChannelName); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "")
 	}
 	h.Deps.State.GuildsLock.RLock()

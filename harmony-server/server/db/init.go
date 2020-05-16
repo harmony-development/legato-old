@@ -13,7 +13,7 @@ import (
 // HarmonyDB is a wrapper for the SQL HarmonyDB
 type HarmonyDB struct {
 	*sql.DB
-	Queries      *queries.Queries
+	queries      *queries.Queries
 	Config       *config.Config
 	OwnerCache   *lru.Cache
 	SessionCache *lru.Cache
@@ -37,9 +37,6 @@ func New(cfg *config.Config) (*HarmonyDB, error) {
 		return nil, err
 	}
 	if err = db.Migrate(); err != nil {
-		return nil, err
-	}
-	if err = db.AddSampleData(); err != nil {
 		return nil, err
 	}
 	if db.OwnerCache, err = lru.New(cfg.Server.OwnerCacheMax); err != nil {

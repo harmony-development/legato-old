@@ -10,7 +10,7 @@ import (
 
 // LeaveGuildData is the data for a guild leave request
 type LeaveGuildData struct {
-	Guild string `validate:"required"`
+	Guild int64 `validate:"required"`
 }
 
 // LeaveGuild unjoins a user from a guild

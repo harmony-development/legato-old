@@ -29,33 +29,3 @@ func (db *HarmonyDB) Migrate() error {
 	}
 	return nil
 }
-
-// AddSampleData adds sample values to the DB for testing
-func (db *HarmonyDB) AddSampleData() error {
-	if err := db.Queries.AddGuild(
-		"harmony-devs",
-		"82ee9c8dc9e165205548b7c3833e7372",
-		"Harmony Development",
-		"",
-	); err != nil {
-		return err
-	}
-
-	if err := db.Queries.AddInvite("join-harmony-dev", "harmony-devs"); err != nil {
-		return err
-	}
-
-	if err := db.Queries.AddUserToGuild("82ee9c8dc9e165205548b7c3833e7372", "harmony-devs"); err != nil {
-		return err
-	}
-
-	if err := db.AddMemberToGuild("dadcd6bf8c0338cbfc9aa9c369ea93cc", "harmony-devs"); err != nil {
-		return err
-	}
-
-	if err := db.AddChannelToGuild("yf8e3bhbp0Bk8UKG", "harmony-devs", "media"); err != nil {
-		return err
-	}
-
-	return nil
-}

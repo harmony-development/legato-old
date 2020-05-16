@@ -1,14 +1,15 @@
 package v1
 
 import (
-	"github.com/getsentry/sentry-go"
-	"github.com/labstack/echo/v4"
 	"harmony-server/server/http/hm"
 	"net/http"
+
+	"github.com/getsentry/sentry-go"
+	"github.com/labstack/echo/v4"
 )
 
 type GetInvitesData struct {
-	Guild string `validate:"required"`
+	Guild int64 `validate:"required"`
 }
 
 func (h Handlers) GetInvites(c echo.Context) error {
