@@ -20,20 +20,10 @@ type DeleteMessageData struct {
 func (h Handlers) DeleteMessage(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
 	var data DeleteMessageData
-	if err := ctx.Bind(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
+	if err := ctx.BindAndVerify(&data); err != nil {
+		return err
 	}
-	if err := ctx.Validate(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
-	}
-	h.Deps.State.GuildsLock.RLock()
-	defer h.Deps.State.GuildsLock.RUnlock()
-	if h.Deps.State.Guilds[data.Guild] == nil {
-		return echo.NewHTTPError(http.StatusNotFound, "guild not found")
-	}
-	if !ctx.Limiter.Allow() {
-		return echo.NewHTTPError(http.StatusTooManyRequests, "too many message deletions, please try again later")
-	}
+
 	isOwner, err := h.Deps.DB.IsOwner(data.Guild, ctx.UserID)
 	if err != nil {
 		sentry.CaptureException(err)

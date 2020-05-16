@@ -55,6 +55,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getAttachmentsStmt, err = db.PrepareContext(ctx, getAttachments); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAttachments: %w", err)
 	}
+	if q.getChannelsStmt, err = db.PrepareContext(ctx, getChannels); err != nil {
+		return nil, fmt.Errorf("error preparing query GetChannels: %w", err)
+	}
+	if q.getGuildMembersStmt, err = db.PrepareContext(ctx, getGuildMembers); err != nil {
+		return nil, fmt.Errorf("error preparing query GetGuildMembers: %w", err)
+	}
 	if q.getGuildOwnerStmt, err = db.PrepareContext(ctx, getGuildOwner); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGuildOwner: %w", err)
 	}
@@ -155,6 +161,16 @@ func (q *Queries) Close() error {
 	if q.getAttachmentsStmt != nil {
 		if cerr := q.getAttachmentsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getAttachmentsStmt: %w", cerr)
+		}
+	}
+	if q.getChannelsStmt != nil {
+		if cerr := q.getChannelsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getChannelsStmt: %w", cerr)
+		}
+	}
+	if q.getGuildMembersStmt != nil {
+		if cerr := q.getGuildMembersStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getGuildMembersStmt: %w", cerr)
 		}
 	}
 	if q.getGuildOwnerStmt != nil {
@@ -277,6 +293,8 @@ type Queries struct {
 	deleteInviteStmt        *sql.Stmt
 	deleteMessageStmt       *sql.Stmt
 	getAttachmentsStmt      *sql.Stmt
+	getChannelsStmt         *sql.Stmt
+	getGuildMembersStmt     *sql.Stmt
 	getGuildOwnerStmt       *sql.Stmt
 	getGuildPictureStmt     *sql.Stmt
 	getMessageAuthorStmt    *sql.Stmt
@@ -308,6 +326,8 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		deleteInviteStmt:        q.deleteInviteStmt,
 		deleteMessageStmt:       q.deleteMessageStmt,
 		getAttachmentsStmt:      q.getAttachmentsStmt,
+		getChannelsStmt:         q.getChannelsStmt,
+		getGuildMembersStmt:     q.getGuildMembersStmt,
 		getGuildOwnerStmt:       q.getGuildOwnerStmt,
 		getGuildPictureStmt:     q.getGuildPictureStmt,
 		getMessageAuthorStmt:    q.getMessageAuthorStmt,

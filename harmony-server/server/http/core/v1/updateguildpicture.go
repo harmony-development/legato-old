@@ -20,27 +20,21 @@ type UpdateGuildPictureData struct {
 // UpdateGuildPicture is the request to update a guild's picture
 func (h Handlers) UpdateGuildPicture(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
+	var data UpdateGuildPictureData
+	if err := ctx.BindAndVerify(&data); err != nil {
+		return err
+	}
+	if err := ctx.VerifyOwner(h.Deps.DB, data.Guild, ctx.UserID); err != nil {
+		return err
+	}
+
 	form, err := ctx.MultipartForm()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Form required")
 	}
 	files := form.File["files"]
-	var data UpdateGuildPictureData
-	if err := ctx.Bind(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
-	}
-	if err := ctx.Validate(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
-	}
 	if len(files) == 0 {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
-	}
-	if !ctx.Limiter.Allow() {
-		return echo.NewHTTPError(http.StatusTooManyRequests, "Too many requests, please try again later")
-	}
-	isOwner, err := h.Deps.DB.IsOwner(data.Guild, ctx.UserID)
-	if err != nil || !isOwner {
-		return echo.NewHTTPError(http.StatusForbidden, "insufficient permission to change picture")
 	}
 	file, err := files[0].Open()
 	if err != nil {

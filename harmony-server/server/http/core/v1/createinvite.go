@@ -18,27 +18,16 @@ type CreateInviteData struct {
 func (h Handlers) CreateInvite(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
 	var data CreateInviteData
-	if err := ctx.Bind(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
+	if err := ctx.BindAndVerify(&data); err != nil {
+		return err
 	}
-	if err := ctx.Validate(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
+	if err := ctx.VerifyOwner(h.Deps.DB, data.Guild, ctx.UserID); err != nil {
+		return err
 	}
-	if !ctx.Limiter.Allow() {
-		return echo.NewHTTPError(http.StatusTooManyRequests, "too many invites created, try again in a few seconds")
-	}
-	h.Deps.State.GuildsLock.RLock()
-	defer h.Deps.State.GuildsLock.RUnlock()
-	isOwner, err := h.Deps.DB.IsOwner(data.Guild, ctx.UserID)
-	if h.Deps.State.Guilds[data.Guild] == nil || !isOwner {
-		return echo.NewHTTPError(http.StatusForbidden, "insufficient permissions to create an invite")
-	}
+
 	invite, err := h.Deps.DB.CreateInvite(data.Guild, -1, data.Name)
 	if err != nil {
 		sentry.CaptureException(err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "unable to create invite")
-	}
-	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "error creating invite, please try again later")
 	}
 	return ctx.JSON(http.StatusOK, map[string]int64{

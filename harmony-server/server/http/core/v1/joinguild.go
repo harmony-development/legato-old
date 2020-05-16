@@ -17,8 +17,8 @@ type JoinGuildData struct {
 func (h Handlers) JoinGuild(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
 	var data JoinGuildData
-	if err := ctx.Bind(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
+	if err := ctx.BindAndVerify(&data); err != nil {
+		return err
 	}
 	guildID, err := h.Deps.DB.ResolveGuildID(data.InviteCode)
 	if err != nil {

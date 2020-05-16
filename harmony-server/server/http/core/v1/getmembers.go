@@ -16,34 +16,22 @@ type GetMembersData struct {
 func (h Handlers) GetMembers(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
 	var data GetMembersData
-	if err := ctx.Bind(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
+	if err := ctx.BindAndVerify(&data); err != nil {
+		return err
 	}
-	if err := ctx.Validate(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
+	inGuild, err := h.Deps.DB.UserInGuild(ctx.UserID, data.Guild)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
-	h.Deps.State.GuildsLock.RLock()
-	if h.Deps.State.Guilds[data.Guild] == nil || h.Deps.State.Guilds[data.Guild].Clients[ctx.UserID] == nil {
-		return echo.NewHTTPError(http.StatusForbidden, "insufficient permissions to list members")
+	if !inGuild {
+		return echo.NewHTTPError(http.StatusForbidden)
 	}
-	if !ctx.Limiter.Allow() {
-		return echo.NewHTTPError(http.StatusTooManyRequests, "too many member listing requests, please try again later")
-	}
-	res, err := h.Deps.DB.Query("SELECT userid FROM guildmembers WHERE guildid=$1", data.Guild)
+	res, err := h.Deps.DB.MembersInGuild(data.Guild)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to list members, please try again later")
 	}
-	var returnMembers []string
-	for res.Next() {
-		var userid string
-		err = res.Scan(&userid)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, "unable to list members, please try again later")
-		}
-		returnMembers = append(returnMembers, userid)
-	}
 
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
-		"members": returnMembers,
+		"members": res,
 	})
 }

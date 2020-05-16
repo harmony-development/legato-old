@@ -18,22 +18,13 @@ type UpdateGuildNameData struct {
 func (h Handlers) UpdateGuildName(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
 	var data UpdateGuildNameData
-	if err := ctx.Bind(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
+	if err := ctx.BindAndVerify(&data); err != nil {
+		return err
 	}
-	if err := ctx.Validate(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
+	if err := ctx.VerifyOwner(h.Deps.DB, data.Guild, ctx.UserID); err != nil {
+		return err
 	}
-	if !ctx.Limiter.Allow() {
-		return echo.NewHTTPError(http.StatusTooManyRequests, "too many guild name updates")
-	}
-	owner, err := h.Deps.DB.GetOwner(data.Guild)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "unable to check perms")
-	}
-	if owner != ctx.UserID {
-		return echo.NewHTTPError(http.StatusForbidden, "not allowed to change guild name")
-	}
+
 	if err := h.Deps.DB.UpdateGuildName(data.Guild, data.Name); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to update guild name, please try again later")
 	}

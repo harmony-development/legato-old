@@ -101,6 +101,62 @@ func (q *Queries) DeleteGuild(ctx context.Context, guildID int64) error {
 	return err
 }
 
+const getChannels = `-- name: GetChannels :many
+SELECT channel_id, guild_id, channel_name FROM Channels
+    WHERE Guild_ID = $1
+`
+
+func (q *Queries) GetChannels(ctx context.Context, guildID sql.NullInt64) ([]Channel, error) {
+	rows, err := q.query(ctx, q.getChannelsStmt, getChannels, guildID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Channel
+	for rows.Next() {
+		var i Channel
+		if err := rows.Scan(&i.ChannelID, &i.GuildID, &i.ChannelName); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getGuildMembers = `-- name: GetGuildMembers :many
+SELECT user_id, guild_id FROM Guild_Members
+    WHERE Guild_ID = $1
+`
+
+func (q *Queries) GetGuildMembers(ctx context.Context, guildID int64) ([]GuildMember, error) {
+	rows, err := q.query(ctx, q.getGuildMembersStmt, getGuildMembers, guildID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GuildMember
+	for rows.Next() {
+		var i GuildMember
+		if err := rows.Scan(&i.UserID, &i.GuildID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getGuildOwner = `-- name: GetGuildOwner :one
 SELECT Owner_ID FROM GUILDS
     WHERE Guild_ID = $1
@@ -129,7 +185,7 @@ const guildsForUser = `-- name: GuildsForUser :many
 SELECT Guilds.Guild_ID FROM Guild_Members
     INNER JOIN guilds
     ON Guild_Members.Guild_ID = Guilds.Guild_ID
-    WHERE User_ID=$1
+    WHERE User_ID = $1
 `
 
 func (q *Queries) GuildsForUser(ctx context.Context, userID int64) ([]int64, error) {

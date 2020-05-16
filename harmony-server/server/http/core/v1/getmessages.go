@@ -22,11 +22,8 @@ type GetMessagesData struct {
 func (h Handlers) GetMessages(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
 	var data GetMessagesData
-	if err := ctx.Bind(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
-	}
-	if err := ctx.Validate(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
+	if err := ctx.BindAndVerify(&data); err != nil {
+		return err
 	}
 	exists, err := h.Deps.DB.UserInGuild(ctx.UserID, data.Guild)
 	if err != nil || !exists {

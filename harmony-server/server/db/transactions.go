@@ -300,3 +300,13 @@ func (db *HarmonyDB) DeleteMember(guildID, userID int64) error {
 func (db *HarmonyDB) GuildsForUser(userID int64) ([]int64, error) {
 	return db.queries.GuildsForUser(ctx, userID)
 }
+
+// ChannelsForGuild gets the channels for a guild
+func (db *HarmonyDB) ChannelsForGuild(guildID int64) ([]queries.Channel, error) {
+	return db.queries.GetChannels(ctx, toSqlInt64(guildID))
+}
+
+// MembersInGuild lists the members of a guild
+func (db *HarmonyDB) MembersInGuild(guildID int64) ([]queries.GuildMember, error) {
+	return db.queries.GetGuildMembers(ctx, guildID)
+}
