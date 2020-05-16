@@ -169,10 +169,8 @@ func (db *HarmonyDB) DeleteMessage(messageID int64, channelID int64, guildID int
 }
 
 // GetMessageOwner gets the owner of a messageID
-func (db *HarmonyDB) GetMessageOwner(messageID string) (*string, error) {
-	var userID string
-	err := db.QueryRow("SELECT userid FROM messages WHERE messageid=$1", messageID).Scan(&userID)
-	return &userID, err
+func (db *HarmonyDB) GetMessageOwner(messageID int64) (int64, error) {
+	return db.Queries.GetMessageAuthor(ctx, messageID)
 }
 
 // ResolveInvite gets a guildID from an invite code

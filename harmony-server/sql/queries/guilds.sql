@@ -49,3 +49,8 @@ FROM Messages
 WHERE Message_ID = $1
   AND Channel_ID = $2
   AND Guild_ID = $3;
+
+-- name: GetMessageAuthor :one
+SELECT User_ID
+FROM Messages
+WHERE Message_ID = $1;

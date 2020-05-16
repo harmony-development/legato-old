@@ -208,3 +208,16 @@ func (q *Queries) GetGuildOwner(ctx context.Context, guildID int64) (string, err
 	err := row.Scan(&owner_id)
 	return owner_id, err
 }
+
+const getMessageAuthor = `-- name: GetMessageAuthor :one
+SELECT User_ID
+FROM Messages
+WHERE Message_ID = $1
+`
+
+func (q *Queries) GetMessageAuthor(ctx context.Context, messageID int64) (int64, error) {
+	row := q.queryRow(ctx, q.getMessageAuthorStmt, getMessageAuthor, messageID)
+	var user_id int64
+	err := row.Scan(&user_id)
+	return user_id, err
+}

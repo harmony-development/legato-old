@@ -52,6 +52,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getGuildOwnerStmt, err = db.PrepareContext(ctx, getGuildOwner); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGuildOwner: %w", err)
 	}
+	if q.getMessageAuthorStmt, err = db.PrepareContext(ctx, getMessageAuthor); err != nil {
+		return nil, fmt.Errorf("error preparing query GetMessageAuthor: %w", err)
+	}
 	return &q, nil
 }
 
@@ -107,6 +110,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getGuildOwnerStmt: %w", cerr)
 		}
 	}
+	if q.getMessageAuthorStmt != nil {
+		if cerr := q.getMessageAuthorStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getMessageAuthorStmt: %w", cerr)
+		}
+	}
 	return err
 }
 
@@ -156,6 +164,7 @@ type Queries struct {
 	deleteGuildStmt       *sql.Stmt
 	deleteMessageStmt     *sql.Stmt
 	getGuildOwnerStmt     *sql.Stmt
+	getMessageAuthorStmt  *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
@@ -172,5 +181,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		deleteGuildStmt:       q.deleteGuildStmt,
 		deleteMessageStmt:     q.deleteMessageStmt,
 		getGuildOwnerStmt:     q.getGuildOwnerStmt,
+		getMessageAuthorStmt:  q.getMessageAuthorStmt,
 	}
 }
