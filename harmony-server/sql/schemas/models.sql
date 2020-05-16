@@ -1,18 +1,18 @@
 CREATE TABLE Sessions
 (
-    User_ID TEXT             NOT NULL,
+    User_ID BIGSERIAL        NOT NULL,
     Session TEXT PRIMARY KEY NOT NULL
 );
 CREATE TABLE Guilds
 (
     Guild_ID    BIGSERIAL PRIMARY KEY NOT NULL,
-    Owner_ID    TEXT                  NOT NULL,
+    Owner_ID    BIGSERIAL             NOT NULL,
     Guild_Name  TEXT                  NOT NULL,
     Picture_URL TEXT                  NOT NULL
 );
 CREATE TABLE Guild_Members
 (
-    User_ID  TEXT      NOT NULL,
+    User_ID  BIGSERIAL NOT NULL,
     Guild_ID BIGSERIAL NOT NULL,
     UNIQUE (User_ID, Guild_ID),
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE
@@ -20,10 +20,10 @@ CREATE TABLE Guild_Members
 CREATE TABLE Invites
 (
     Invite_ID     BIGSERIAL PRIMARY KEY UNIQUE,
-    Name          TEXT    NOT NULL,
-    Uses          INTEGER NOT NULL DEFAULT 0,
-    Possible_Uses INTEGER          DEFAULT -1,
-    Guild_ID      BIGSERIAL,
+    Name          TEXT      NOT NULL,
+    Uses          INTEGER   NOT NULL DEFAULT 0,
+    Possible_Uses INTEGER            DEFAULT -1,
+    Guild_ID      BIGSERIAL NOT NULL,
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE
 );
 CREATE TABLE Channels
@@ -36,8 +36,8 @@ CREATE TABLE Channels
 CREATE TABLE Messages
 (
     Message_ID BIGSERIAL PRIMARY KEY,
-    Guild_ID   BIGSERIAL,
-    Channel_ID BIGSERIAL,
+    Guild_ID   BIGSERIAL NOT NULL,
+    Channel_ID BIGSERIAL NOT NULL,
     User_ID    BIGSERIAL NOT NULL,
     Created_At TIMESTAMP NOT NULL,
     Edited_At  TIMESTAMP,

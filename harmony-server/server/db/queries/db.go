@@ -46,14 +46,38 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.deleteGuildStmt, err = db.PrepareContext(ctx, deleteGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteGuild: %w", err)
 	}
+	if q.deleteInviteStmt, err = db.PrepareContext(ctx, deleteInvite); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteInvite: %w", err)
+	}
 	if q.deleteMessageStmt, err = db.PrepareContext(ctx, deleteMessage); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteMessage: %w", err)
+	}
+	if q.getAttachmentsStmt, err = db.PrepareContext(ctx, getAttachments); err != nil {
+		return nil, fmt.Errorf("error preparing query GetAttachments: %w", err)
 	}
 	if q.getGuildOwnerStmt, err = db.PrepareContext(ctx, getGuildOwner); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGuildOwner: %w", err)
 	}
 	if q.getMessageAuthorStmt, err = db.PrepareContext(ctx, getMessageAuthor); err != nil {
 		return nil, fmt.Errorf("error preparing query GetMessageAuthor: %w", err)
+	}
+	if q.getMessageDateStmt, err = db.PrepareContext(ctx, getMessageDate); err != nil {
+		return nil, fmt.Errorf("error preparing query GetMessageDate: %w", err)
+	}
+	if q.getMessagesStmt, err = db.PrepareContext(ctx, getMessages); err != nil {
+		return nil, fmt.Errorf("error preparing query GetMessages: %w", err)
+	}
+	if q.incrementInviteStmt, err = db.PrepareContext(ctx, incrementInvite); err != nil {
+		return nil, fmt.Errorf("error preparing query IncrementInvite: %w", err)
+	}
+	if q.resolveGuildIDStmt, err = db.PrepareContext(ctx, resolveGuildID); err != nil {
+		return nil, fmt.Errorf("error preparing query ResolveGuildID: %w", err)
+	}
+	if q.sessionToUserIDStmt, err = db.PrepareContext(ctx, sessionToUserID); err != nil {
+		return nil, fmt.Errorf("error preparing query SessionToUserID: %w", err)
+	}
+	if q.userInGuildStmt, err = db.PrepareContext(ctx, userInGuild); err != nil {
+		return nil, fmt.Errorf("error preparing query UserInGuild: %w", err)
 	}
 	return &q, nil
 }
@@ -100,9 +124,19 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing deleteGuildStmt: %w", cerr)
 		}
 	}
+	if q.deleteInviteStmt != nil {
+		if cerr := q.deleteInviteStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteInviteStmt: %w", cerr)
+		}
+	}
 	if q.deleteMessageStmt != nil {
 		if cerr := q.deleteMessageStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteMessageStmt: %w", cerr)
+		}
+	}
+	if q.getAttachmentsStmt != nil {
+		if cerr := q.getAttachmentsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getAttachmentsStmt: %w", cerr)
 		}
 	}
 	if q.getGuildOwnerStmt != nil {
@@ -113,6 +147,36 @@ func (q *Queries) Close() error {
 	if q.getMessageAuthorStmt != nil {
 		if cerr := q.getMessageAuthorStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getMessageAuthorStmt: %w", cerr)
+		}
+	}
+	if q.getMessageDateStmt != nil {
+		if cerr := q.getMessageDateStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getMessageDateStmt: %w", cerr)
+		}
+	}
+	if q.getMessagesStmt != nil {
+		if cerr := q.getMessagesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getMessagesStmt: %w", cerr)
+		}
+	}
+	if q.incrementInviteStmt != nil {
+		if cerr := q.incrementInviteStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing incrementInviteStmt: %w", cerr)
+		}
+	}
+	if q.resolveGuildIDStmt != nil {
+		if cerr := q.resolveGuildIDStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing resolveGuildIDStmt: %w", cerr)
+		}
+	}
+	if q.sessionToUserIDStmt != nil {
+		if cerr := q.sessionToUserIDStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing sessionToUserIDStmt: %w", cerr)
+		}
+	}
+	if q.userInGuildStmt != nil {
+		if cerr := q.userInGuildStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing userInGuildStmt: %w", cerr)
 		}
 	}
 	return err
@@ -162,9 +226,17 @@ type Queries struct {
 	createGuildInviteStmt *sql.Stmt
 	deleteChannelStmt     *sql.Stmt
 	deleteGuildStmt       *sql.Stmt
+	deleteInviteStmt      *sql.Stmt
 	deleteMessageStmt     *sql.Stmt
+	getAttachmentsStmt    *sql.Stmt
 	getGuildOwnerStmt     *sql.Stmt
 	getMessageAuthorStmt  *sql.Stmt
+	getMessageDateStmt    *sql.Stmt
+	getMessagesStmt       *sql.Stmt
+	incrementInviteStmt   *sql.Stmt
+	resolveGuildIDStmt    *sql.Stmt
+	sessionToUserIDStmt   *sql.Stmt
+	userInGuildStmt       *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
@@ -179,8 +251,16 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		createGuildInviteStmt: q.createGuildInviteStmt,
 		deleteChannelStmt:     q.deleteChannelStmt,
 		deleteGuildStmt:       q.deleteGuildStmt,
+		deleteInviteStmt:      q.deleteInviteStmt,
 		deleteMessageStmt:     q.deleteMessageStmt,
+		getAttachmentsStmt:    q.getAttachmentsStmt,
 		getGuildOwnerStmt:     q.getGuildOwnerStmt,
 		getMessageAuthorStmt:  q.getMessageAuthorStmt,
+		getMessageDateStmt:    q.getMessageDateStmt,
+		getMessagesStmt:       q.getMessagesStmt,
+		incrementInviteStmt:   q.incrementInviteStmt,
+		resolveGuildIDStmt:    q.resolveGuildIDStmt,
+		sessionToUserIDStmt:   q.sessionToUserIDStmt,
+		userInGuildStmt:       q.userInGuildStmt,
 	}
 }

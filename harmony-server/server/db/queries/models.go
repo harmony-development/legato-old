@@ -20,14 +20,14 @@ type Channel struct {
 
 type Guild struct {
 	GuildID    int64  `json:"guild_id"`
-	OwnerID    string `json:"owner_id"`
+	OwnerID    int64  `json:"owner_id"`
 	GuildName  string `json:"guild_name"`
 	PictureUrl string `json:"picture_url"`
 }
 
 type GuildMember struct {
-	UserID  string `json:"user_id"`
-	GuildID int64  `json:"guild_id"`
+	UserID  int64 `json:"user_id"`
+	GuildID int64 `json:"guild_id"`
 }
 
 type Invite struct {
@@ -35,20 +35,20 @@ type Invite struct {
 	Name         string        `json:"name"`
 	Uses         int32         `json:"uses"`
 	PossibleUses sql.NullInt32 `json:"possible_uses"`
-	GuildID      sql.NullInt64 `json:"guild_id"`
+	GuildID      int64         `json:"guild_id"`
 }
 
 type Message struct {
-	MessageID int64         `json:"message_id"`
-	GuildID   sql.NullInt64 `json:"guild_id"`
-	ChannelID sql.NullInt64 `json:"channel_id"`
-	UserID    int64         `json:"user_id"`
-	CreatedAt time.Time     `json:"created_at"`
-	EditedAt  sql.NullTime  `json:"edited_at"`
-	Content   string        `json:"content"`
+	MessageID int64        `json:"message_id"`
+	GuildID   int64        `json:"guild_id"`
+	ChannelID int64        `json:"channel_id"`
+	UserID    int64        `json:"user_id"`
+	CreatedAt time.Time    `json:"created_at"`
+	EditedAt  sql.NullTime `json:"edited_at"`
+	Content   string       `json:"content"`
 }
 
 type Session struct {
-	UserID  string `json:"user_id"`
+	UserID  int64  `json:"user_id"`
 	Session string `json:"session"`
 }

@@ -31,13 +31,13 @@ RETURNING message_id, guild_id, channel_id, user_id, created_at, edited_at, cont
 `
 
 type AddMessageParams struct {
-	MessageID int64         `json:"message_id"`
-	GuildID   sql.NullInt64 `json:"guild_id"`
-	ChannelID sql.NullInt64 `json:"channel_id"`
-	UserID    int64         `json:"user_id"`
-	CreatedAt time.Time     `json:"created_at"`
-	EditedAt  sql.NullTime  `json:"edited_at"`
-	Content   string        `json:"content"`
+	MessageID int64        `json:"message_id"`
+	GuildID   int64        `json:"guild_id"`
+	ChannelID int64        `json:"channel_id"`
+	UserID    int64        `json:"user_id"`
+	CreatedAt time.Time    `json:"created_at"`
+	EditedAt  sql.NullTime `json:"edited_at"`
+	Content   string       `json:"content"`
 }
 
 func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) (Message, error) {
@@ -70,8 +70,8 @@ ON CONFLICT DO NOTHING
 `
 
 type AddUserToGuildParams struct {
-	UserID  string `json:"user_id"`
-	GuildID int64  `json:"guild_id"`
+	UserID  int64 `json:"user_id"`
+	GuildID int64 `json:"guild_id"`
 }
 
 func (q *Queries) AddUserToGuild(ctx context.Context, arg AddUserToGuildParams) error {
@@ -104,7 +104,7 @@ RETURNING guild_id, owner_id, guild_name, picture_url
 `
 
 type CreateGuildParams struct {
-	OwnerID    string `json:"owner_id"`
+	OwnerID    int64  `json:"owner_id"`
 	GuildName  string `json:"guild_name"`
 	PictureUrl string `json:"picture_url"`
 }
@@ -130,7 +130,7 @@ RETURNING invite_id, name, uses, possible_uses, guild_id
 type CreateGuildInviteParams struct {
 	Name         string        `json:"name"`
 	PossibleUses sql.NullInt32 `json:"possible_uses"`
-	GuildID      sql.NullInt64 `json:"guild_id"`
+	GuildID      int64         `json:"guild_id"`
 }
 
 func (q *Queries) CreateGuildInvite(ctx context.Context, arg CreateGuildInviteParams) (Invite, error) {
@@ -174,6 +174,20 @@ func (q *Queries) DeleteGuild(ctx context.Context, guildID int64) error {
 	return err
 }
 
+const deleteInvite = `-- name: DeleteInvite :execrows
+DELETE
+FROM Invites
+WHERE Invite_ID = $1
+`
+
+func (q *Queries) DeleteInvite(ctx context.Context, inviteID int64) (int64, error) {
+	result, err := q.exec(ctx, q.deleteInviteStmt, deleteInvite, inviteID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 const deleteMessage = `-- name: DeleteMessage :execrows
 DELETE
 FROM Messages
@@ -183,9 +197,9 @@ WHERE Message_ID = $1
 `
 
 type DeleteMessageParams struct {
-	MessageID int64         `json:"message_id"`
-	ChannelID sql.NullInt64 `json:"channel_id"`
-	GuildID   sql.NullInt64 `json:"guild_id"`
+	MessageID int64 `json:"message_id"`
+	ChannelID int64 `json:"channel_id"`
+	GuildID   int64 `json:"guild_id"`
 }
 
 func (q *Queries) DeleteMessage(ctx context.Context, arg DeleteMessageParams) (int64, error) {
@@ -196,15 +210,44 @@ func (q *Queries) DeleteMessage(ctx context.Context, arg DeleteMessageParams) (i
 	return result.RowsAffected()
 }
 
+const getAttachments = `-- name: GetAttachments :many
+SELECT Attachment_URL
+FROM Attachments
+WHERE Message_ID = $1
+`
+
+func (q *Queries) GetAttachments(ctx context.Context, messageID int64) ([]string, error) {
+	rows, err := q.query(ctx, q.getAttachmentsStmt, getAttachments, messageID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var attachment_url string
+		if err := rows.Scan(&attachment_url); err != nil {
+			return nil, err
+		}
+		items = append(items, attachment_url)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getGuildOwner = `-- name: GetGuildOwner :one
 SELECT Owner_ID
 from GUILDS
 WHERE Guild_ID = $1
 `
 
-func (q *Queries) GetGuildOwner(ctx context.Context, guildID int64) (string, error) {
+func (q *Queries) GetGuildOwner(ctx context.Context, guildID int64) (int64, error) {
 	row := q.queryRow(ctx, q.getGuildOwnerStmt, getGuildOwner, guildID)
-	var owner_id string
+	var owner_id int64
 	err := row.Scan(&owner_id)
 	return owner_id, err
 }
@@ -217,6 +260,132 @@ WHERE Message_ID = $1
 
 func (q *Queries) GetMessageAuthor(ctx context.Context, messageID int64) (int64, error) {
 	row := q.queryRow(ctx, q.getMessageAuthorStmt, getMessageAuthor, messageID)
+	var user_id int64
+	err := row.Scan(&user_id)
+	return user_id, err
+}
+
+const getMessageDate = `-- name: GetMessageDate :one
+SELECT Created_At
+FROM Messages
+WHERE Message_ID = $1
+`
+
+func (q *Queries) GetMessageDate(ctx context.Context, messageID int64) (time.Time, error) {
+	row := q.queryRow(ctx, q.getMessageDateStmt, getMessageDate, messageID)
+	var created_at time.Time
+	err := row.Scan(&created_at)
+	return created_at, err
+}
+
+const getMessages = `-- name: GetMessages :many
+SELECT Message_ID, User_ID, Content, Created_At
+FROM Messages
+WHERE Guild_ID = $1
+  AND Channel_ID = $2
+  AND Created_At < $3
+ORDER BY Created_At DESC
+LIMIT $4
+`
+
+type GetMessagesParams struct {
+	Guildid   int64     `json:"guildid"`
+	Channelid int64     `json:"channelid"`
+	Before    time.Time `json:"before"`
+	Max       int32     `json:"max"`
+}
+
+type GetMessagesRow struct {
+	MessageID int64     `json:"message_id"`
+	UserID    int64     `json:"user_id"`
+	Content   string    `json:"content"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+func (q *Queries) GetMessages(ctx context.Context, arg GetMessagesParams) ([]GetMessagesRow, error) {
+	rows, err := q.query(ctx, q.getMessagesStmt, getMessages,
+		arg.Guildid,
+		arg.Channelid,
+		arg.Before,
+		arg.Max,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetMessagesRow
+	for rows.Next() {
+		var i GetMessagesRow
+		if err := rows.Scan(
+			&i.MessageID,
+			&i.UserID,
+			&i.Content,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const incrementInvite = `-- name: IncrementInvite :exec
+UPDATE Invites
+SET Uses=Uses + 1
+WHERe Invite_ID = $1
+`
+
+func (q *Queries) IncrementInvite(ctx context.Context, inviteID int64) error {
+	_, err := q.exec(ctx, q.incrementInviteStmt, incrementInvite, inviteID)
+	return err
+}
+
+const resolveGuildID = `-- name: ResolveGuildID :one
+SELECT Guild_ID
+FROM Invites
+WHERE Invite_ID = $1
+`
+
+func (q *Queries) ResolveGuildID(ctx context.Context, inviteID int64) (int64, error) {
+	row := q.queryRow(ctx, q.resolveGuildIDStmt, resolveGuildID, inviteID)
+	var guild_id int64
+	err := row.Scan(&guild_id)
+	return guild_id, err
+}
+
+const sessionToUserID = `-- name: SessionToUserID :one
+SELECT User_ID
+FROM Sessions
+WHERE Session = $1
+`
+
+func (q *Queries) SessionToUserID(ctx context.Context, session string) (int64, error) {
+	row := q.queryRow(ctx, q.sessionToUserIDStmt, sessionToUserID, session)
+	var user_id int64
+	err := row.Scan(&user_id)
+	return user_id, err
+}
+
+const userInGuild = `-- name: UserInGuild :one
+SELECT User_ID
+FROM Guild_Members
+WHERE User_ID = $1
+  AND Guild_ID = $2
+`
+
+type UserInGuildParams struct {
+	UserID  int64 `json:"user_id"`
+	GuildID int64 `json:"guild_id"`
+}
+
+func (q *Queries) UserInGuild(ctx context.Context, arg UserInGuildParams) (int64, error) {
+	row := q.queryRow(ctx, q.userInGuildStmt, userInGuild, arg.UserID, arg.GuildID)
 	var user_id int64
 	err := row.Scan(&user_id)
 	return user_id, err
