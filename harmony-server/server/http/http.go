@@ -68,5 +68,6 @@ func New(deps *Dependencies) *Server {
 		StorageManager: s.Deps.StorageManager,
 		State:          s.Deps.State,
 	})
+	s.CoreAPI.MakeRoutes()
 	return s
 }

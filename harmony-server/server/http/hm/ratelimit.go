@@ -44,7 +44,7 @@ func (m *Middlewares) RateLimit(duration time.Duration, burst int) echo.Middlewa
 // GetVisitor gets the rate limiter for a visitor
 func (m *Middlewares) GetVisitor(path string, ip string, duration time.Duration, burst int) *rate.Limiter {
 	m.RateLock.Lock()
-	defer m.RateLock.RUnlock()
+	defer m.RateLock.Unlock()
 	if _, exists := m.RateLimits[path]; !exists {
 		m.RateLimits[path] = make(map[string]*visitor)
 	}

@@ -3,6 +3,7 @@ module harmony-server
 go 1.13
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/getsentry/sentry-go v0.6.0
 	github.com/go-playground/validator/v10 v10.2.0
 	github.com/gorilla/websocket v1.4.1

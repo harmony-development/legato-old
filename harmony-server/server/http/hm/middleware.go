@@ -15,10 +15,8 @@ type HarmonyContext struct {
 	echo.Context
 	Limiter *rate.Limiter
 	UserID  int64
+	Data    interface{}
 }
-
-// HarmonyHandler is a type of handler that takes a HarmonyContext
-type HarmonyHandler func(ctx HarmonyContext) error
 
 // Middlewares contains middlewares for Harmony
 type Middlewares struct {
@@ -56,7 +54,8 @@ func (hc *HarmonyContext) VerifyOwner(db *db.HarmonyDB, guildID, userID int64) e
 // New instantiates the middlewares for Harmony
 func New(db *db.HarmonyDB) *Middlewares {
 	m := &Middlewares{
-		DB: db,
+		DB:         db,
+		RateLimits: make(map[string]map[string]*visitor),
 	}
 	go m.RateCleanup()
 	return m

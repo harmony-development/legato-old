@@ -26,10 +26,7 @@ func (h Handlers) Message(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
 	}
 	files := form.File["files"]
-	var data MessageData
-	if err := ctx.Bind(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
-	}
+	data := ctx.Data.(*MessageData)
 	if len(files) > h.Deps.Config.Server.MaxAttachments {
 		return echo.NewHTTPError(http.StatusBadRequest, "too many files uploaded")
 	}
