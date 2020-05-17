@@ -23,7 +23,7 @@ func (h Handlers) Register(c echo.Context) error {
 	data := ctx.Data.(*RegisterData)
 	if len(data.Username) < h.Deps.Config.Server.UsernamePolicy.MinLength ||
 		len(data.Username) > h.Deps.Config.Server.UsernamePolicy.MaxLength {
-		return echo.NewHTTPError(
+		return ctx.JSON(
 			http.StatusNotAcceptable,
 			responses.UsernameLength(
 				h.Deps.Config.Server.UsernamePolicy.MinLength,
@@ -33,7 +33,7 @@ func (h Handlers) Register(c echo.Context) error {
 	}
 	if len(data.Password) < h.Deps.Config.Server.PasswordPolicy.MinLength ||
 		len(data.Password) > h.Deps.Config.Server.PasswordPolicy.MaxLength {
-		return echo.NewHTTPError(
+		return ctx.JSON(
 			http.StatusNotAcceptable,
 			responses.PasswordLength(
 				h.Deps.Config.Server.PasswordPolicy.MinLength,
@@ -46,7 +46,7 @@ func (h Handlers) Register(c echo.Context) error {
 		stats.lower < h.Deps.Config.Server.PasswordPolicy.MinLower ||
 		stats.numbers < h.Deps.Config.Server.PasswordPolicy.MinNumbers ||
 		stats.symbols < h.Deps.Config.Server.PasswordPolicy.MinSymbols {
-		return echo.NewHTTPError(
+		return ctx.JSON(
 			http.StatusNotAcceptable,
 			responses.PasswordPolicy(
 				h.Deps.Config.Server.PasswordPolicy.MinUpper,
