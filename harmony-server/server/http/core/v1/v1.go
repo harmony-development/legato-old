@@ -3,6 +3,8 @@ package v1
 import (
 	"time"
 
+	"github.com/sony/sonyflake"
+
 	"harmony-server/server/auth"
 	"harmony-server/server/config"
 	"harmony-server/server/db"
@@ -23,6 +25,7 @@ type Dependencies struct {
 	AuthManager    *auth.Manager
 	StorageManager *storage.Manager
 	State          *state.State
+	Sonyflake      *sonyflake.Sonyflake
 }
 
 // New creates a new set of Handlers

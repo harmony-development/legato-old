@@ -2,6 +2,7 @@ package core
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/sony/sonyflake"
 
 	"harmony-server/server/auth"
 	"harmony-server/server/config"
@@ -27,6 +28,7 @@ type Dependencies struct {
 	AuthManager    *auth.Manager
 	StorageManager *storage.Manager
 	State          *state.State
+	Sonyflake      *sonyflake.Sonyflake
 }
 
 // New instantiates the handlers for CoreKit
@@ -46,5 +48,6 @@ func (api *API) MakeRoutes() {
 		AuthManager:    api.Deps.AuthManager,
 		StorageManager: api.Deps.StorageManager,
 		State:          api.Deps.State,
+		Sonyflake:      api.Deps.Sonyflake,
 	}).MakeRoutes())
 }

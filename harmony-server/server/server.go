@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/sirupsen/logrus"
+	"github.com/sony/sonyflake"
 
 	"harmony-server/server/auth"
 	"harmony-server/server/config"
@@ -17,6 +18,7 @@ import (
 
 // Instance is an instance of the harmony server
 type Instance struct {
+	Sonyflake      *sonyflake.Sonyflake
 	Server         *http.Server
 	State          *state.State
 	Config         *config.Config
@@ -33,6 +35,9 @@ func (inst Instance) Start() {
 		logrus.Fatal("Unable to load config", err)
 	}
 	inst.Config = cfg
+	inst.Sonyflake = sonyflake.NewSonyflake(sonyflake.Settings{
+		StartTime: cfg.Server.SnowflakeStart,
+	})
 	if err := ConnectSentry(cfg); err != nil {
 		logrus.Fatal("Error connecting to sentry", err)
 	}
@@ -62,6 +67,7 @@ func (inst Instance) Start() {
 		StorageManager: inst.StorageManager,
 		State:          inst.State,
 		Config:         inst.Config,
+		Sonyflake:      inst.Sonyflake,
 	})
 	logrus.Fatal(inst.Server.Start(inst.Config.Server.Port))
 }

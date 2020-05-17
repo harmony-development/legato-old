@@ -55,3 +55,11 @@ type Session struct {
 	UserID  int64  `json:"user_id"`
 	Session string `json:"session"`
 }
+
+type User struct {
+	UserID   int64          `json:"user_id"`
+	Email    string         `json:"email"`
+	Username string         `json:"username"`
+	Avatar   sql.NullString `json:"avatar"`
+	Password []byte         `json:"password"`
+}

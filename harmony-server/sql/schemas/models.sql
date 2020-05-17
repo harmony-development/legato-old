@@ -1,3 +1,12 @@
+CREATE TABLE Users
+(
+    User_ID  BIGSERIAL   NOT NULL,
+    Email    TEXT UNIQUE NOT NULL,
+    Username TEXT UNIQUE NOT NULL,
+    Avatar   TEXT,
+    Password BYTEA       NOT NULL
+);
+
 CREATE TABLE Sessions
 (
     User_ID BIGSERIAL        NOT NULL,

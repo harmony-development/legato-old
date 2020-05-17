@@ -7,17 +7,16 @@ import (
 
 	"harmony-server/server/http/hm"
 )
-
-type RequestMethod string
-
 const (
-	GET    RequestMethod = "GET"
-	POST   RequestMethod = "POST"
-	PUT    RequestMethod = "PUT"
-	DELETE RequestMethod = "DELETE"
-	PATCH  RequestMethod = "PATCH"
-	ANY    RequestMethod = "ANY"
+	GET = iota
+	POST
+	PUT
+	DELETE
+	PATCH
+	ANY
 )
+
+
 
 type RateLimit struct {
 	Duration time.Duration
@@ -31,7 +30,7 @@ type Route struct {
 	RateLimit *RateLimit
 	Auth      bool
 	Schema    interface{}
-	Method    RequestMethod
+	Method    int
 }
 
 type Router struct {
