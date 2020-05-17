@@ -335,8 +335,8 @@ func (db *HarmonyDB) GetUser(email string) (queries.GetUserRow, error) {
 func (db *HarmonyDB) AddSession(userID uint64, session string) error {
 	db.SessionCache.Add(session, userID)
 	return db.queries.AddSession(ctx, queries.AddSessionParams{
-		UserID:  userID,
-		Session: session,
+		UserID:     userID,
+		Session:    session,
 		Expiration: time.Now().UTC().Add(db.Config.Server.SessionDuration).Unix(),
 	})
 }
@@ -358,4 +358,15 @@ func (db *HarmonyDB) EmailExists(email string) bool {
 
 func (db *HarmonyDB) ExpireSessions() error {
 	return db.queries.ExpireSessions(ctx, time.Now().UTC().Unix())
+}
+
+func (db *HarmonyDB) UpdateUsername(userID uint64, username string) error {
+	return db.queries.UpdateUsername(ctx, queries.UpdateUsernameParams{
+		Username: username,
+		UserID:   userID,
+	})
+}
+
+func (db *HarmonyDB) GetAvatar(userID uint64) (sql.NullString, error) {
+	return db.queries.GetAvatar(ctx, userID)
 }

@@ -45,6 +45,19 @@ func (q *Queries) EmailExists(ctx context.Context, email string) (uint64, error)
 	return user_id, err
 }
 
+const getAvatar = `-- name: GetAvatar :one
+SELECT Avatar
+FROM Users
+WHERE User_ID = $1
+`
+
+func (q *Queries) GetAvatar(ctx context.Context, userID uint64) (sql.NullString, error) {
+	row := q.queryRow(ctx, q.getAvatarStmt, getAvatar, userID)
+	var avatar sql.NullString
+	err := row.Scan(&avatar)
+	return avatar, err
+}
+
 const getUser = `-- name: GetUser :one
 SELECT User_ID, Email, Username, Avatar, Password
 FROM Users
@@ -70,4 +83,20 @@ func (q *Queries) GetUser(ctx context.Context, email string) (GetUserRow, error)
 		&i.Password,
 	)
 	return i, err
+}
+
+const updateUsername = `-- name: UpdateUsername :exec
+UPDATE Users
+SET Username=$1
+WHERE User_ID = $2
+`
+
+type UpdateUsernameParams struct {
+	Username string `json:"username"`
+	UserID   uint64 `json:"user_id"`
+}
+
+func (q *Queries) UpdateUsername(ctx context.Context, arg UpdateUsernameParams) error {
+	_, err := q.exec(ctx, q.updateUsernameStmt, updateUsername, arg.Username, arg.UserID)
+	return err
 }

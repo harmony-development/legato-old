@@ -11,3 +11,13 @@ VALUES ($1, $2, $3, $4, $5);
 SELECT User_ID
 FROM Users
 WHERE Email = $1;
+
+-- name: UpdateUsername :exec
+UPDATE Users
+SET Username=$1
+WHERE User_ID = $2;
+
+-- name: GetAvatar :one
+SELECT Avatar
+FROM Users
+WHERE User_ID = $1;

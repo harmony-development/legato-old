@@ -29,8 +29,16 @@ type ServerConf struct {
 	SessionCacheMax  int
 	SessionDuration  time.Duration
 	LogErrors        bool
+	Avatar           Avatar
 	UsernamePolicy   UsernamePolicy
 	PasswordPolicy   PasswordPolicy
+}
+
+type Avatar struct {
+	Width   int
+	Height  int
+	Quality int
+	Crop    bool
 }
 
 type UsernamePolicy struct {
@@ -81,6 +89,12 @@ func Load() (*Config, error) {
 			SessionDuration:  48 * time.Hour,
 			LogErrors:        true,
 			SnowflakeStart:   0,
+			Avatar: Avatar{
+				Width:   256,
+				Height:  256,
+				Quality: 50,
+				Crop:    true,
+			},
 			UsernamePolicy: UsernamePolicy{
 				MinLength: 2,
 				MaxLength: 32,

@@ -67,6 +67,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getAttachmentsStmt, err = db.PrepareContext(ctx, getAttachments); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAttachments: %w", err)
 	}
+	if q.getAvatarStmt, err = db.PrepareContext(ctx, getAvatar); err != nil {
+		return nil, fmt.Errorf("error preparing query GetAvatar: %w", err)
+	}
 	if q.getChannelsStmt, err = db.PrepareContext(ctx, getChannels); err != nil {
 		return nil, fmt.Errorf("error preparing query GetChannels: %w", err)
 	}
@@ -117,6 +120,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.setGuildPictureStmt, err = db.PrepareContext(ctx, setGuildPicture); err != nil {
 		return nil, fmt.Errorf("error preparing query SetGuildPicture: %w", err)
+	}
+	if q.updateUsernameStmt, err = db.PrepareContext(ctx, updateUsername); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateUsername: %w", err)
 	}
 	if q.userInGuildStmt, err = db.PrepareContext(ctx, userInGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query UserInGuild: %w", err)
@@ -199,6 +205,11 @@ func (q *Queries) Close() error {
 	if q.getAttachmentsStmt != nil {
 		if cerr := q.getAttachmentsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getAttachmentsStmt: %w", cerr)
+		}
+	}
+	if q.getAvatarStmt != nil {
+		if cerr := q.getAvatarStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getAvatarStmt: %w", cerr)
 		}
 	}
 	if q.getChannelsStmt != nil {
@@ -286,6 +297,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing setGuildPictureStmt: %w", cerr)
 		}
 	}
+	if q.updateUsernameStmt != nil {
+		if cerr := q.updateUsernameStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateUsernameStmt: %w", cerr)
+		}
+	}
 	if q.userInGuildStmt != nil {
 		if cerr := q.userInGuildStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing userInGuildStmt: %w", cerr)
@@ -345,6 +361,7 @@ type Queries struct {
 	emailExistsStmt         *sql.Stmt
 	expireSessionsStmt      *sql.Stmt
 	getAttachmentsStmt      *sql.Stmt
+	getAvatarStmt           *sql.Stmt
 	getChannelsStmt         *sql.Stmt
 	getGuildMembersStmt     *sql.Stmt
 	getGuildOwnerStmt       *sql.Stmt
@@ -362,6 +379,7 @@ type Queries struct {
 	sessionToUserIDStmt     *sql.Stmt
 	setGuildNameStmt        *sql.Stmt
 	setGuildPictureStmt     *sql.Stmt
+	updateUsernameStmt      *sql.Stmt
 	userInGuildStmt         *sql.Stmt
 }
 
@@ -384,6 +402,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		emailExistsStmt:         q.emailExistsStmt,
 		expireSessionsStmt:      q.expireSessionsStmt,
 		getAttachmentsStmt:      q.getAttachmentsStmt,
+		getAvatarStmt:           q.getAvatarStmt,
 		getChannelsStmt:         q.getChannelsStmt,
 		getGuildMembersStmt:     q.getGuildMembersStmt,
 		getGuildOwnerStmt:       q.getGuildOwnerStmt,
@@ -401,6 +420,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		sessionToUserIDStmt:     q.sessionToUserIDStmt,
 		setGuildNameStmt:        q.setGuildNameStmt,
 		setGuildPictureStmt:     q.setGuildPictureStmt,
+		updateUsernameStmt:      q.updateUsernameStmt,
 		userInGuildStmt:         q.userInGuildStmt,
 	}
 }
