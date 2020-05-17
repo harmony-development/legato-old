@@ -1,6 +1,8 @@
 package config
 
 import (
+	"time"
+
 	"github.com/spf13/viper"
 	"github.com/thanhpk/randstr"
 )
@@ -14,6 +16,7 @@ type Config struct {
 
 // ServerConf is the servers configuration
 type ServerConf struct {
+	SnowflakeStart   time.Time
 	Port             string
 	Identity         string
 	ImagePath        string
@@ -59,6 +62,7 @@ func Load() (*Config, error) {
 			OwnerCacheMax:    5096,
 			SessionCacheMax:  5096,
 			LogErrors:        true,
+			SnowflakeStart:   time.Unix(0, 0),
 		},
 		DB: DBConf{
 			Host:   "127.0.0.1",

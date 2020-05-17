@@ -5,6 +5,8 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
+	"github.com/thanhpk/randstr"
+	"golang.org/x/crypto/bcrypt"
 
 	"harmony-server/server/auth"
 	"harmony-server/server/http/hm"
@@ -30,15 +32,30 @@ func (h Handlers) Login(c echo.Context) error {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 		}
-		_, err = jwt.ParseWithClaims(data.AuthToken, &auth.Token{}, func(_ *jwt.Token) (interface{}, error) {
+		t, err := jwt.ParseWithClaims(data.AuthToken, &auth.Token{}, func(_ *jwt.Token) (interface{}, error) {
 			return pubKey, nil
 		})
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 		}
-		// TODO : add session, fetch user, cache public key
+		token := t.Claims.(*auth.Token)
+		session := randstr.Hex(16)
+		if err := h.Deps.DB.AddSession(token.UserID, session); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
+		}
+		return ctx.JSON(http.StatusOK, LoginResponse{Session: session})
 	} else {
-		// TODO : migrate user management from harmony-auth-server
+		user, err := h.Deps.DB.GetUser(data.Email)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusUnauthorized, responses.InvalidEmail)
+		}
+		if err := bcrypt.CompareHashAndPassword(user.Password, []byte(data.Password)); err != nil {
+			return echo.NewHTTPError(http.StatusUnauthorized, responses.InvalidPassword)
+		}
+		session := randstr.Hex(16)
+		if err := h.Deps.DB.AddSession(user.UserID, session); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
+		}
+		return ctx.JSON(http.StatusOK, LoginResponse{Session: session})
 	}
-	return ctx.NoContent(http.StatusNotImplemented)
 }

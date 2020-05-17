@@ -28,6 +28,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.addMessageStmt, err = db.PrepareContext(ctx, addMessage); err != nil {
 		return nil, fmt.Errorf("error preparing query AddMessage: %w", err)
 	}
+	if q.addSessionStmt, err = db.PrepareContext(ctx, addSession); err != nil {
+		return nil, fmt.Errorf("error preparing query AddSession: %w", err)
+	}
 	if q.addUserToGuildStmt, err = db.PrepareContext(ctx, addUserToGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query AddUserToGuild: %w", err)
 	}
@@ -79,6 +82,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getMessagesStmt, err = db.PrepareContext(ctx, getMessages); err != nil {
 		return nil, fmt.Errorf("error preparing query GetMessages: %w", err)
 	}
+	if q.getUserStmt, err = db.PrepareContext(ctx, getUser); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUser: %w", err)
+	}
 	if q.guildsForUserStmt, err = db.PrepareContext(ctx, guildsForUser); err != nil {
 		return nil, fmt.Errorf("error preparing query GuildsForUser: %w", err)
 	}
@@ -119,6 +125,11 @@ func (q *Queries) Close() error {
 	if q.addMessageStmt != nil {
 		if cerr := q.addMessageStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing addMessageStmt: %w", cerr)
+		}
+	}
+	if q.addSessionStmt != nil {
+		if cerr := q.addSessionStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addSessionStmt: %w", cerr)
 		}
 	}
 	if q.addUserToGuildStmt != nil {
@@ -204,6 +215,11 @@ func (q *Queries) Close() error {
 	if q.getMessagesStmt != nil {
 		if cerr := q.getMessagesStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getMessagesStmt: %w", cerr)
+		}
+	}
+	if q.getUserStmt != nil {
+		if cerr := q.getUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUserStmt: %w", cerr)
 		}
 	}
 	if q.guildsForUserStmt != nil {
@@ -292,6 +308,7 @@ type Queries struct {
 	tx                      *sql.Tx
 	addAttachmentStmt       *sql.Stmt
 	addMessageStmt          *sql.Stmt
+	addSessionStmt          *sql.Stmt
 	addUserToGuildStmt      *sql.Stmt
 	createChannelStmt       *sql.Stmt
 	createGuildStmt         *sql.Stmt
@@ -309,6 +326,7 @@ type Queries struct {
 	getMessageAuthorStmt    *sql.Stmt
 	getMessageDateStmt      *sql.Stmt
 	getMessagesStmt         *sql.Stmt
+	getUserStmt             *sql.Stmt
 	guildsForUserStmt       *sql.Stmt
 	incrementInviteStmt     *sql.Stmt
 	openInvitesStmt         *sql.Stmt
@@ -326,6 +344,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		tx:                      tx,
 		addAttachmentStmt:       q.addAttachmentStmt,
 		addMessageStmt:          q.addMessageStmt,
+		addSessionStmt:          q.addSessionStmt,
 		addUserToGuildStmt:      q.addUserToGuildStmt,
 		createChannelStmt:       q.createChannelStmt,
 		createGuildStmt:         q.createGuildStmt,
@@ -343,6 +362,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getMessageAuthorStmt:    q.getMessageAuthorStmt,
 		getMessageDateStmt:      q.getMessageDateStmt,
 		getMessagesStmt:         q.getMessagesStmt,
+		getUserStmt:             q.getUserStmt,
 		guildsForUserStmt:       q.guildsForUserStmt,
 		incrementInviteStmt:     q.incrementInviteStmt,
 		openInvitesStmt:         q.openInvitesStmt,

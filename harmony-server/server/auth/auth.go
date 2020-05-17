@@ -28,7 +28,7 @@ type Dependencies struct {
 // Token is the structure for an authentication JWT
 type Token struct {
 	jwt.StandardClaims
-	UserID string
+	UserID int64
 	Target string
 }
 
