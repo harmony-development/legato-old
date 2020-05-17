@@ -30,7 +30,7 @@ func (h Handlers) CreateInvite(c echo.Context) error {
 		sentry.CaptureException(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "error creating invite, please try again later")
 	}
-	return ctx.JSON(http.StatusOK, map[string]int64{
+	return ctx.JSON(http.StatusOK, map[string]uint64{
 		"invite": invite.InviteID,
 	})
 }

@@ -17,7 +17,7 @@ type Client struct {
 	*sync.RWMutex
 	Conn     *websocket.Conn
 	Bus      Bus
-	UserID   *int64
+	UserID   *uint64
 	LastPong time.Time
 	Out      chan []byte
 }

@@ -2,6 +2,7 @@ package server
 
 import (
 	"sync"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/sony/sonyflake"
@@ -36,7 +37,7 @@ func (inst Instance) Start() {
 	}
 	inst.Config = cfg
 	inst.Sonyflake = sonyflake.NewSonyflake(sonyflake.Settings{
-		StartTime: cfg.Server.SnowflakeStart,
+		StartTime: time.Unix(cfg.Server.SnowflakeStart, 0),
 	})
 	if err := ConnectSentry(cfg); err != nil {
 		logrus.Fatal("Error connecting to sentry", err)
@@ -58,7 +59,7 @@ func (inst Instance) Start() {
 	}
 	go inst.StorageManager.DeleteRoutine()
 	inst.State = &state.State{
-		Guilds:     make(map[int64]*guild.Guild),
+		Guilds:     make(map[uint64]*guild.Guild),
 		GuildsLock: &sync.RWMutex{},
 	}
 	inst.Server = http.New(&http.Dependencies{

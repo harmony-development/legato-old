@@ -33,16 +33,16 @@ func (q *Queries) AddUser(ctx context.Context, arg AddUserParams) error {
 }
 
 const emailExists = `-- name: EmailExists :one
-SELECT Email
+SELECT User_ID
 FROM Users
 WHERE Email = $1
 `
 
-func (q *Queries) EmailExists(ctx context.Context, email string) (string, error) {
+func (q *Queries) EmailExists(ctx context.Context, email string) (uint64, error) {
 	row := q.queryRow(ctx, q.emailExistsStmt, emailExists, email)
-	var email string
-	err := row.Scan(&email)
-	return email, err
+	var user_id uint64
+	err := row.Scan(&user_id)
+	return user_id, err
 }
 
 const getUser = `-- name: GetUser :one
@@ -51,9 +51,17 @@ FROM Users
 WHERE Email = $1
 `
 
-func (q *Queries) GetUser(ctx context.Context, email string) (User, error) {
+type GetUserRow struct {
+	UserID   uint64         `json:"user_id"`
+	Email    string         `json:"email"`
+	Username string         `json:"username"`
+	Avatar   sql.NullString `json:"avatar"`
+	Password []byte         `json:"password"`
+}
+
+func (q *Queries) GetUser(ctx context.Context, email string) (GetUserRow, error) {
 	row := q.queryRow(ctx, q.getUserStmt, getUser, email)
-	var i User
+	var i GetUserRow
 	err := row.Scan(
 		&i.UserID,
 		&i.Email,

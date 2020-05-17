@@ -25,7 +25,7 @@ func (h Handlers) CreateGuild(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to create guild, please try again later")
 	}
-	return ctx.JSON(http.StatusOK, map[string]int64{
+	return ctx.JSON(http.StatusOK, map[string]uint64{
 		"guild": guild.GuildID,
 	})
 }

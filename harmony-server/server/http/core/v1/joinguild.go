@@ -32,7 +32,7 @@ func (h Handlers) JoinGuild(c echo.Context) error {
 		sentry.CaptureException(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "error updating invite counter")
 	}
-	return ctx.JSON(http.StatusOK, map[string]int64{
+	return ctx.JSON(http.StatusOK, map[string]uint64{
 		"guild": guildID,
 	})
 }

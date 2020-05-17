@@ -16,7 +16,7 @@ func toSqlString(input string) sql.NullString {
 }
 
 func toSqlInt64(input uint64) sql.NullInt64 {
-	return sql.NullInt64{Int64: input, Valid: true}
+	return sql.NullInt64{Int64: int64(input), Valid: true}
 }
 
 var ctx = context.Background()
@@ -307,7 +307,7 @@ func (db *HarmonyDB) DeleteMember(guildID, userID uint64) error {
 }
 
 // GuildsForUser gets the guilds a user is in
-func (db *HarmonyDB) GuildsForUser(userID uint64) ([]int64, error) {
+func (db *HarmonyDB) GuildsForUser(userID uint64) ([]uint64, error) {
 	return db.queries.GuildsForUser(ctx, userID)
 }
 
@@ -327,7 +327,7 @@ func (db *HarmonyDB) GetMessage(messageID uint64) (queries.Message, error) {
 }
 
 // GetUser gets a user with their email
-func (db *HarmonyDB) GetUser(email string) (queries.User, error) {
+func (db *HarmonyDB) GetUser(email string) (queries.GetUserRow, error) {
 	return db.queries.GetUser(ctx, email)
 }
 
@@ -342,10 +342,10 @@ func (db *HarmonyDB) AddSession(userID uint64, session string) error {
 
 func (db *HarmonyDB) AddUser(userID uint64, email, username string, passwordHash []byte) error {
 	return db.queries.AddUser(ctx, queries.AddUserParams{
-		UserID:   uint64(userID),
+		UserID:   userID,
 		Email:    email,
 		Username: username,
-		Avatar:   nil,
+		Avatar:   sql.NullString{},
 		Password: passwordHash,
 	})
 }
