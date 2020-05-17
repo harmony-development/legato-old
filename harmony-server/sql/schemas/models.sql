@@ -1,4 +1,4 @@
-CREATE TABLE Users
+CREATE TABLE IF NOT EXISTS Users
 (
     User_ID   BIGSERIAL   NOT NULL,
     Email     TEXT UNIQUE NOT NULL,
@@ -7,26 +7,26 @@ CREATE TABLE Users
     Password  BYTEA       NOT NULL,
     Instances jsonb[]
 );
-CREATE TABLE Sessions
+CREATE TABLE IF NOT EXISTS Sessions
 (
-    User_ID BIGSERIAL        NOT NULL,
+    User_ID BIGSERIAL        NOT NULL REFERENCES Users(User_ID),
     Session TEXT PRIMARY KEY NOT NULL
 );
-CREATE TABLE Guilds
+CREATE TABLE IF NOT EXISTS Guilds
 (
     Guild_ID    BIGSERIAL PRIMARY KEY NOT NULL,
     Owner_ID    BIGSERIAL             NOT NULL,
     Guild_Name  TEXT                  NOT NULL,
     Picture_URL TEXT                  NOT NULL
 );
-CREATE TABLE Guild_Members
+CREATE TABLE IF NOT EXISTS Guild_Members
 (
     User_ID  BIGSERIAL NOT NULL,
     Guild_ID BIGSERIAL NOT NULL,
     UNIQUE (User_ID, Guild_ID),
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE
 );
-CREATE TABLE Invites
+CREATE TABLE IF NOT EXISTS Invites
 (
     Invite_ID     BIGSERIAL PRIMARY KEY UNIQUE,
     Name          TEXT      NOT NULL,
@@ -35,14 +35,14 @@ CREATE TABLE Invites
     Guild_ID      BIGSERIAL NOT NULL,
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE
 );
-CREATE TABLE Channels
+CREATE TABLE IF NOT EXISTS Channels
 (
     Channel_ID   BIGSERIAL PRIMARY KEY UNIQUE,
     Guild_ID     BIGSERIAL,
     Channel_Name TEXT NOT NULL,
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE
 );
-CREATE TABLE Messages
+CREATE TABLE IF NOT EXISTS Messages
 (
     Message_ID BIGSERIAL PRIMARY KEY,
     Guild_ID   BIGSERIAL NOT NULL,
@@ -56,7 +56,7 @@ CREATE TABLE Messages
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE,
     FOREIGN KEY (Channel_ID) REFERENCES Channels (Channel_ID) ON DELETE CASCADE
 );
-CREATE TABLE Attachments
+CREATE TABLE IF NOT EXISTS Attachments
 (
     Message_ID     BIGSERIAL NOT NULL,
     Attachment_URL TEXT      NOT NULL,
