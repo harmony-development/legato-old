@@ -161,14 +161,14 @@ func (h Handlers) MakeRoutes() []routing.Route {
 		},
 		{
 			Path:    "/message",
-			Handler: h.UpdateGuildName,
+			Handler: h.Message,
 			Method:  routing.POST,
 			RateLimit: &routing.RateLimit{
 				Duration: 500 * time.Millisecond,
 				Burst:    20,
 			},
 			Auth:   true,
-			Schema: new(UpdateGuildNameData),
+			Schema: new(MessageData),
 		},
 		{
 			Path:    "/message",
