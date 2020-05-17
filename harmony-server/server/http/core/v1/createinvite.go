@@ -10,7 +10,7 @@ import (
 
 // CreateInviteData is the data that a CreateInvite request has
 type CreateInviteData struct {
-	Guild int64  `validate:"required"`
+	Guild uint64 `validate:"required"`
 	Name  string `validate:"required"`
 }
 

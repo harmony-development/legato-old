@@ -14,7 +14,7 @@ import (
 type HarmonyContext struct {
 	echo.Context
 	Limiter *rate.Limiter
-	UserID  int64
+	UserID  uint64
 	Data    interface{}
 }
 
@@ -40,7 +40,7 @@ func (h *HarmonyContext) BindAndVerify(v interface{}) error {
 	return nil
 }
 
-func (hc *HarmonyContext) VerifyOwner(db *db.HarmonyDB, guildID, userID int64) error {
+func (hc *HarmonyContext) VerifyOwner(db *db.HarmonyDB, guildID, userID uint64) error {
 	owner, err := db.GetOwner(guildID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to verify ownership, please try again later")

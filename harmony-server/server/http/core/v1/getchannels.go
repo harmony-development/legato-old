@@ -9,7 +9,7 @@ import (
 
 // GetChannelsData is the data for GetChannels
 type GetChannelsData struct {
-	Guild int64 `validate:"required"`
+	Guild uint64 `validate:"required"`
 }
 
 // GetChannels gets the channels for a given guild

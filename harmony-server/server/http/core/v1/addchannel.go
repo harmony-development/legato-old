@@ -11,7 +11,7 @@ import (
 
 // AddChannelData represents data received from client on AddChannel
 type AddChannelData struct {
-	Guild       int64  `validate:"required"`
+	Guild       uint64 `validate:"required"`
 	ChannelName string `validate:"required"`
 }
 

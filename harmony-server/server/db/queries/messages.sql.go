@@ -20,7 +20,7 @@ INSERT INTO Attachments(
 `
 
 type AddAttachmentParams struct {
-	MessageID     int64  `json:"message_id"`
+	MessageID     uint64 `json:"message_id"`
 	AttachmentUrl string `json:"attachment_url"`
 }
 
@@ -39,9 +39,9 @@ RETURNING message_id, guild_id, channel_id, user_id, created_at, edited_at, cont
 `
 
 type AddMessageParams struct {
-	GuildID   int64             `json:"guild_id"`
-	ChannelID int64             `json:"channel_id"`
-	UserID    int64             `json:"user_id"`
+	GuildID   uint64            `json:"guild_id"`
+	ChannelID uint64            `json:"channel_id"`
+	UserID    uint64            `json:"user_id"`
 	Content   string            `json:"content"`
 	Embeds    []json.RawMessage `json:"embeds"`
 	Actions   []json.RawMessage `json:"actions"`
@@ -79,9 +79,9 @@ DELETE FROM Messages
 `
 
 type DeleteMessageParams struct {
-	MessageID int64 `json:"message_id"`
-	ChannelID int64 `json:"channel_id"`
-	GuildID   int64 `json:"guild_id"`
+	MessageID uint64 `json:"message_id"`
+	ChannelID uint64 `json:"channel_id"`
+	GuildID   uint64 `json:"guild_id"`
 }
 
 func (q *Queries) DeleteMessage(ctx context.Context, arg DeleteMessageParams) (int64, error) {
@@ -97,7 +97,7 @@ SELECT Attachment_URL FROM Attachments
     WHERE Message_ID = $1
 `
 
-func (q *Queries) GetAttachments(ctx context.Context, messageID int64) ([]string, error) {
+func (q *Queries) GetAttachments(ctx context.Context, messageID uint64) ([]string, error) {
 	rows, err := q.query(ctx, q.getAttachmentsStmt, getAttachments, messageID)
 	if err != nil {
 		return nil, err
@@ -125,7 +125,7 @@ SELECT message_id, guild_id, channel_id, user_id, created_at, edited_at, content
     WHERE Message_ID = $1
 `
 
-func (q *Queries) GetMessage(ctx context.Context, messageID int64) (Message, error) {
+func (q *Queries) GetMessage(ctx context.Context, messageID uint64) (Message, error) {
 	row := q.queryRow(ctx, q.getMessageStmt, getMessage, messageID)
 	var i Message
 	err := row.Scan(
@@ -147,9 +147,9 @@ SELECT User_ID FROM Messages
     WHERE Message_ID = $1
 `
 
-func (q *Queries) GetMessageAuthor(ctx context.Context, messageID int64) (int64, error) {
+func (q *Queries) GetMessageAuthor(ctx context.Context, messageID uint64) (uint64, error) {
 	row := q.queryRow(ctx, q.getMessageAuthorStmt, getMessageAuthor, messageID)
-	var user_id int64
+	var user_id uint64
 	err := row.Scan(&user_id)
 	return user_id, err
 }
@@ -159,7 +159,7 @@ SELECT Created_At FROM Messages
     WHERE Message_ID = $1
 `
 
-func (q *Queries) GetMessageDate(ctx context.Context, messageID int64) (time.Time, error) {
+func (q *Queries) GetMessageDate(ctx context.Context, messageID uint64) (time.Time, error) {
 	row := q.queryRow(ctx, q.getMessageDateStmt, getMessageDate, messageID)
 	var created_at time.Time
 	err := row.Scan(&created_at)
@@ -176,15 +176,15 @@ SELECT Message_ID, User_ID, Content, Created_At FROM Messages
 `
 
 type GetMessagesParams struct {
-	Guildid   int64     `json:"guildid"`
-	Channelid int64     `json:"channelid"`
+	Guildid   uint64    `json:"guildid"`
+	Channelid uint64    `json:"channelid"`
 	Before    time.Time `json:"before"`
 	Max       int32     `json:"max"`
 }
 
 type GetMessagesRow struct {
-	MessageID int64     `json:"message_id"`
-	UserID    int64     `json:"user_id"`
+	MessageID uint64    `json:"message_id"`
+	UserID    uint64    `json:"user_id"`
 	Content   string    `json:"content"`
 	CreatedAt time.Time `json:"created_at"`
 }

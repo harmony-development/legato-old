@@ -18,8 +18,8 @@ ON CONFLICT DO NOTHING
 `
 
 type AddUserToGuildParams struct {
-	UserID  int64 `json:"user_id"`
-	GuildID int64 `json:"guild_id"`
+	UserID  uint64 `json:"user_id"`
+	GuildID uint64 `json:"guild_id"`
 }
 
 func (q *Queries) AddUserToGuild(ctx context.Context, arg AddUserToGuildParams) error {
@@ -58,7 +58,7 @@ RETURNING guild_id, owner_id, guild_name, picture_url
 `
 
 type CreateGuildParams struct {
-	OwnerID    int64  `json:"owner_id"`
+	OwnerID    uint64 `json:"owner_id"`
 	GuildName  string `json:"guild_name"`
 	PictureUrl string `json:"picture_url"`
 }
@@ -83,7 +83,7 @@ DELETE FROM Channels
 
 type DeleteChannelParams struct {
 	GuildID   sql.NullInt64 `json:"guild_id"`
-	ChannelID int64         `json:"channel_id"`
+	ChannelID uint64        `json:"channel_id"`
 }
 
 func (q *Queries) DeleteChannel(ctx context.Context, arg DeleteChannelParams) error {
@@ -96,7 +96,7 @@ DELETE FROM Guilds
     WHERE Guild_ID = $1
 `
 
-func (q *Queries) DeleteGuild(ctx context.Context, guildID int64) error {
+func (q *Queries) DeleteGuild(ctx context.Context, guildID uint64) error {
 	_, err := q.exec(ctx, q.deleteGuildStmt, deleteGuild, guildID)
 	return err
 }
@@ -134,7 +134,7 @@ SELECT user_id, guild_id FROM Guild_Members
     WHERE Guild_ID = $1
 `
 
-func (q *Queries) GetGuildMembers(ctx context.Context, guildID int64) ([]GuildMember, error) {
+func (q *Queries) GetGuildMembers(ctx context.Context, guildID uint64) ([]GuildMember, error) {
 	rows, err := q.query(ctx, q.getGuildMembersStmt, getGuildMembers, guildID)
 	if err != nil {
 		return nil, err
@@ -162,9 +162,9 @@ SELECT Owner_ID FROM GUILDS
     WHERE Guild_ID = $1
 `
 
-func (q *Queries) GetGuildOwner(ctx context.Context, guildID int64) (int64, error) {
+func (q *Queries) GetGuildOwner(ctx context.Context, guildID uint64) (uint64, error) {
 	row := q.queryRow(ctx, q.getGuildOwnerStmt, getGuildOwner, guildID)
-	var owner_id int64
+	var owner_id uint64
 	err := row.Scan(&owner_id)
 	return owner_id, err
 }
@@ -174,7 +174,7 @@ SELECT Picture_URL FROM Guilds
     WHERE Guild_ID = $1
 `
 
-func (q *Queries) GetGuildPicture(ctx context.Context, guildID int64) (string, error) {
+func (q *Queries) GetGuildPicture(ctx context.Context, guildID uint64) (string, error) {
 	row := q.queryRow(ctx, q.getGuildPictureStmt, getGuildPicture, guildID)
 	var picture_url string
 	err := row.Scan(&picture_url)
@@ -188,15 +188,15 @@ SELECT Guilds.Guild_ID FROM Guild_Members
     WHERE User_ID = $1
 `
 
-func (q *Queries) GuildsForUser(ctx context.Context, userID int64) ([]int64, error) {
+func (q *Queries) GuildsForUser(ctx context.Context, userID uint64) ([]uint64, error) {
 	rows, err := q.query(ctx, q.guildsForUserStmt, guildsForUser, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []int64
+	var items []uint64
 	for rows.Next() {
-		var guild_id int64
+		var guild_id uint64
 		if err := rows.Scan(&guild_id); err != nil {
 			return nil, err
 		}
@@ -218,8 +218,8 @@ DELETE FROM Guild_Members
 `
 
 type RemoveUserFromGuildParams struct {
-	GuildID int64 `json:"guild_id"`
-	UserID  int64 `json:"user_id"`
+	GuildID uint64 `json:"guild_id"`
+	UserID  uint64 `json:"user_id"`
 }
 
 func (q *Queries) RemoveUserFromGuild(ctx context.Context, arg RemoveUserFromGuildParams) error {
@@ -235,7 +235,7 @@ UPDATE Guilds
 
 type SetGuildNameParams struct {
 	GuildName string `json:"guild_name"`
-	GuildID   int64  `json:"guild_id"`
+	GuildID   uint64 `json:"guild_id"`
 }
 
 func (q *Queries) SetGuildName(ctx context.Context, arg SetGuildNameParams) error {
@@ -251,7 +251,7 @@ UPDATE Guilds
 
 type SetGuildPictureParams struct {
 	PictureUrl string `json:"picture_url"`
-	GuildID    int64  `json:"guild_id"`
+	GuildID    uint64 `json:"guild_id"`
 }
 
 func (q *Queries) SetGuildPicture(ctx context.Context, arg SetGuildPictureParams) error {
@@ -266,13 +266,13 @@ SELECT User_ID FROM Guild_Members
 `
 
 type UserInGuildParams struct {
-	UserID  int64 `json:"user_id"`
-	GuildID int64 `json:"guild_id"`
+	UserID  uint64 `json:"user_id"`
+	GuildID uint64 `json:"guild_id"`
 }
 
-func (q *Queries) UserInGuild(ctx context.Context, arg UserInGuildParams) (int64, error) {
+func (q *Queries) UserInGuild(ctx context.Context, arg UserInGuildParams) (uint64, error) {
 	row := q.queryRow(ctx, q.userInGuildStmt, userInGuild, arg.UserID, arg.GuildID)
-	var user_id int64
+	var user_id uint64
 	err := row.Scan(&user_id)
 	return user_id, err
 }

@@ -9,7 +9,7 @@ import (
 )
 
 type GetInvitesData struct {
-	Guild int64 `validate:"required"`
+	Guild uint64 `validate:"required"`
 }
 
 func (h Handlers) GetInvites(c echo.Context) error {

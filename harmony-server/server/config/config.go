@@ -28,6 +28,22 @@ type ServerConf struct {
 	OwnerCacheMax    int
 	SessionCacheMax  int
 	LogErrors        bool
+	UsernamePolicy   UsernamePolicy
+	PasswordPolicy   PasswordPolicy
+}
+
+type UsernamePolicy struct {
+	MinLength int
+	MaxLength int
+}
+
+type PasswordPolicy struct {
+	MinLength  int
+	MaxLength  int
+	MinLower   int
+	MinUpper   int
+	MinNumbers int
+	MinSymbols int
 }
 
 // DBConf is the config for the database

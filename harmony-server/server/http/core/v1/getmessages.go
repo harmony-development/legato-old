@@ -11,11 +11,11 @@ import (
 
 // GetMessagesData is the data for a message listing request
 type GetMessagesData struct {
-	Guild   int64 `validate:"required"`
-	Channel int64 `validate:"required"`
+	Guild   uint64 `validate:"required"`
+	Channel uint64 `validate:"required"`
 	// MessageRef is the ID of the message you want to load before.
 	// Used to load old messages
-	MessageRef int64
+	MessageRef uint64
 }
 
 // GetMessages gets messages in a given channel

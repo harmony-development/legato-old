@@ -31,6 +31,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.addSessionStmt, err = db.PrepareContext(ctx, addSession); err != nil {
 		return nil, fmt.Errorf("error preparing query AddSession: %w", err)
 	}
+	if q.addUserStmt, err = db.PrepareContext(ctx, addUser); err != nil {
+		return nil, fmt.Errorf("error preparing query AddUser: %w", err)
+	}
 	if q.addUserToGuildStmt, err = db.PrepareContext(ctx, addUserToGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query AddUserToGuild: %w", err)
 	}
@@ -54,6 +57,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.deleteMessageStmt, err = db.PrepareContext(ctx, deleteMessage); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteMessage: %w", err)
+	}
+	if q.emailExistsStmt, err = db.PrepareContext(ctx, emailExists); err != nil {
+		return nil, fmt.Errorf("error preparing query EmailExists: %w", err)
 	}
 	if q.getAttachmentsStmt, err = db.PrepareContext(ctx, getAttachments); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAttachments: %w", err)
@@ -132,6 +138,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing addSessionStmt: %w", cerr)
 		}
 	}
+	if q.addUserStmt != nil {
+		if cerr := q.addUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addUserStmt: %w", cerr)
+		}
+	}
 	if q.addUserToGuildStmt != nil {
 		if cerr := q.addUserToGuildStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing addUserToGuildStmt: %w", cerr)
@@ -170,6 +181,11 @@ func (q *Queries) Close() error {
 	if q.deleteMessageStmt != nil {
 		if cerr := q.deleteMessageStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteMessageStmt: %w", cerr)
+		}
+	}
+	if q.emailExistsStmt != nil {
+		if cerr := q.emailExistsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing emailExistsStmt: %w", cerr)
 		}
 	}
 	if q.getAttachmentsStmt != nil {
@@ -309,6 +325,7 @@ type Queries struct {
 	addAttachmentStmt       *sql.Stmt
 	addMessageStmt          *sql.Stmt
 	addSessionStmt          *sql.Stmt
+	addUserStmt             *sql.Stmt
 	addUserToGuildStmt      *sql.Stmt
 	createChannelStmt       *sql.Stmt
 	createGuildStmt         *sql.Stmt
@@ -317,6 +334,7 @@ type Queries struct {
 	deleteGuildStmt         *sql.Stmt
 	deleteInviteStmt        *sql.Stmt
 	deleteMessageStmt       *sql.Stmt
+	emailExistsStmt         *sql.Stmt
 	getAttachmentsStmt      *sql.Stmt
 	getChannelsStmt         *sql.Stmt
 	getGuildMembersStmt     *sql.Stmt
@@ -345,6 +363,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		addAttachmentStmt:       q.addAttachmentStmt,
 		addMessageStmt:          q.addMessageStmt,
 		addSessionStmt:          q.addSessionStmt,
+		addUserStmt:             q.addUserStmt,
 		addUserToGuildStmt:      q.addUserToGuildStmt,
 		createChannelStmt:       q.createChannelStmt,
 		createGuildStmt:         q.createGuildStmt,
@@ -353,6 +372,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		deleteGuildStmt:         q.deleteGuildStmt,
 		deleteInviteStmt:        q.deleteInviteStmt,
 		deleteMessageStmt:       q.deleteMessageStmt,
+		emailExistsStmt:         q.emailExistsStmt,
 		getAttachmentsStmt:      q.getAttachmentsStmt,
 		getChannelsStmt:         q.getChannelsStmt,
 		getGuildMembersStmt:     q.getGuildMembersStmt,

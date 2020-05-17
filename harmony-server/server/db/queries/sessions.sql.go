@@ -14,7 +14,7 @@ VALUES ($1, $2)
 `
 
 type AddSessionParams struct {
-	UserID  int64  `json:"user_id"`
+	UserID  uint64 `json:"user_id"`
 	Session string `json:"session"`
 }
 
@@ -29,9 +29,9 @@ FROM Sessions
 WHERE Session = $1
 `
 
-func (q *Queries) SessionToUserID(ctx context.Context, session string) (int64, error) {
+func (q *Queries) SessionToUserID(ctx context.Context, session string) (uint64, error) {
 	row := q.queryRow(ctx, q.sessionToUserIDStmt, sessionToUserID, session)
-	var user_id int64
+	var user_id uint64
 	err := row.Scan(&user_id)
 	return user_id, err
 }

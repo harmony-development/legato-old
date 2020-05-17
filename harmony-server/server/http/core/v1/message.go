@@ -14,8 +14,8 @@ import (
 )
 
 type MessageData struct {
-	Guild   int64  `validate:"required"`
-	Channel int64  `validate:"required"`
+	Guild   uint64 `validate:"required"`
+	Channel uint64 `validate:"required"`
 	Content string `validate:"required"`
 	Embeds  []string
 	Actions []string

@@ -11,19 +11,19 @@ import (
 
 // TriggerActionData represents data received from client on TriggerAction
 type TriggerActionData struct {
-	GuildID   int64  `validate:"required"`
-	MessageID int64  `validate:"required"`
-	BotID     int64  `validate:"required"`
+	GuildID   uint64 `validate:"required"`
+	MessageID uint64 `validate:"required"`
+	BotID     uint64 `validate:"required"`
 	ActionID  string `validate:"required"`
 	Data      string
 }
 
 // SendActionData is the data that will be sent to a client
 type SendActionData struct {
-	GuildID   int64 `json:"guildID"`
-	ChannelID int64 `json:"channelID"`
-	MessageID int64 `json:"messageID"`
-	TriggerID int64 `json:"triggerID"`
+	GuildID   uint64 `json:"guildID"`
+	ChannelID uint64 `json:"channelID"`
+	MessageID uint64 `json:"messageID"`
+	TriggerID uint64 `json:"triggerID"`
 	Action    struct {
 		ID   string `json:"id"`
 		Data string `json:"data"`

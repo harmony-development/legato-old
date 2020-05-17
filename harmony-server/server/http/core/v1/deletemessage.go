@@ -11,9 +11,9 @@ import (
 
 // DeleteMessageData is the data for a message deletion request
 type DeleteMessageData struct {
-	Guild     int64 `validate:"guild"`
-	Channel   int64 `validate:"channel"`
-	MessageID int64 `validate:"message"`
+	Guild     uint64 `validate:"guild"`
+	Channel   uint64 `validate:"channel"`
+	MessageID uint64 `validate:"message"`
 }
 
 // DeleteMessage deletes a message

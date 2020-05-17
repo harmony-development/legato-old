@@ -11,8 +11,8 @@ import (
 
 // DeleteChannelData is the data for a channel deletion request
 type DeleteChannelData struct {
-	Guild   int64 `validate:"required"`
-	Channel int64 `validate:"required"`
+	Guild   uint64 `validate:"required"`
+	Channel uint64 `validate:"required"`
 }
 
 // DeleteChannel is the request to delete a channel

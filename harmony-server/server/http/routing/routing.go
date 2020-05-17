@@ -7,6 +7,7 @@ import (
 
 	"harmony-server/server/http/hm"
 )
+
 const (
 	GET = iota
 	POST
@@ -15,8 +16,6 @@ const (
 	PATCH
 	ANY
 )
-
-
 
 type RateLimit struct {
 	Duration time.Duration

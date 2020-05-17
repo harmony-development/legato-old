@@ -14,7 +14,7 @@ import (
 
 // UpdateGuildPictureData is the data for a guild picture update request
 type UpdateGuildPictureData struct {
-	Guild int64 `validate:"required"`
+	Guild uint64 `validate:"required"`
 }
 
 // UpdateGuildPicture is the request to update a guild's picture
