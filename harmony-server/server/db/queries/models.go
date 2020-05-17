@@ -52,8 +52,9 @@ type Message struct {
 }
 
 type Session struct {
-	UserID  uint64 `json:"user_id"`
-	Session string `json:"session"`
+	Session    string `json:"session"`
+	UserID     uint64 `json:"user_id"`
+	Expiration int64  `json:"expiration"`
 }
 
 type User struct {

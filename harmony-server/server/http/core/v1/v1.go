@@ -258,5 +258,27 @@ func (h Handlers) MakeRoutes() []routing.Route {
 			Auth:   false,
 			Schema: new(ConnectData),
 		},
+		{
+			Path:    "/login",
+			Handler: h.Login,
+			Method:  routing.POST,
+			RateLimit: &routing.RateLimit{
+				Duration: 10 * time.Second,
+				Burst:    8,
+			},
+			Auth:   false,
+			Schema: new(LoginData),
+		},
+		{
+			Path:    "/register",
+			Handler: h.Register,
+			Method:  routing.POST,
+			RateLimit: &routing.RateLimit{
+				Duration: 15 * time.Second,
+				Burst:    4,
+			},
+			Auth:   false,
+			Schema: new(RegisterData),
+		},
 	}
 }

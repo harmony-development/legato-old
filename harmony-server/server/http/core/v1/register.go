@@ -1,13 +1,15 @@
 package v1
 
 import (
+	"net/http"
+	"unicode"
+
 	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
 	"golang.org/x/crypto/bcrypt"
+
 	"harmony-server/server/http/hm"
 	"harmony-server/server/http/responses"
-	"net/http"
-	"unicode"
 )
 
 type RegisterData struct {

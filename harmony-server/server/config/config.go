@@ -1,6 +1,8 @@
 package config
 
 import (
+	"time"
+
 	"github.com/spf13/viper"
 	"github.com/thanhpk/randstr"
 )
@@ -25,6 +27,7 @@ type ServerConf struct {
 	GetMessageCount  int
 	OwnerCacheMax    int
 	SessionCacheMax  int
+	SessionDuration  time.Duration
 	LogErrors        bool
 	UsernamePolicy   UsernamePolicy
 	PasswordPolicy   PasswordPolicy
@@ -75,6 +78,7 @@ func Load() (*Config, error) {
 			GetMessageCount:  30,
 			OwnerCacheMax:    5096,
 			SessionCacheMax:  5096,
+			SessionDuration:  48 * time.Hour,
 			LogErrors:        true,
 			SnowflakeStart:   0,
 			UsernamePolicy: UsernamePolicy{

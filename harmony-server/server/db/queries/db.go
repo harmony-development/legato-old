@@ -61,6 +61,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.emailExistsStmt, err = db.PrepareContext(ctx, emailExists); err != nil {
 		return nil, fmt.Errorf("error preparing query EmailExists: %w", err)
 	}
+	if q.expireSessionsStmt, err = db.PrepareContext(ctx, expireSessions); err != nil {
+		return nil, fmt.Errorf("error preparing query ExpireSessions: %w", err)
+	}
 	if q.getAttachmentsStmt, err = db.PrepareContext(ctx, getAttachments); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAttachments: %w", err)
 	}
@@ -186,6 +189,11 @@ func (q *Queries) Close() error {
 	if q.emailExistsStmt != nil {
 		if cerr := q.emailExistsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing emailExistsStmt: %w", cerr)
+		}
+	}
+	if q.expireSessionsStmt != nil {
+		if cerr := q.expireSessionsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing expireSessionsStmt: %w", cerr)
 		}
 	}
 	if q.getAttachmentsStmt != nil {
@@ -335,6 +343,7 @@ type Queries struct {
 	deleteInviteStmt        *sql.Stmt
 	deleteMessageStmt       *sql.Stmt
 	emailExistsStmt         *sql.Stmt
+	expireSessionsStmt      *sql.Stmt
 	getAttachmentsStmt      *sql.Stmt
 	getChannelsStmt         *sql.Stmt
 	getGuildMembersStmt     *sql.Stmt
@@ -373,6 +382,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		deleteInviteStmt:        q.deleteInviteStmt,
 		deleteMessageStmt:       q.deleteMessageStmt,
 		emailExistsStmt:         q.emailExistsStmt,
+		expireSessionsStmt:      q.expireSessionsStmt,
 		getAttachmentsStmt:      q.getAttachmentsStmt,
 		getChannelsStmt:         q.getChannelsStmt,
 		getGuildMembersStmt:     q.getGuildMembersStmt,

@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
+
 	"harmony-server/server/config"
 	"harmony-server/server/db/queries"
 
@@ -39,11 +40,13 @@ func New(cfg *config.Config) (*HarmonyDB, error) {
 	if err = db.Migrate(); err != nil {
 		return nil, err
 	}
+	db.queries = queries.New(db)
 	if db.OwnerCache, err = lru.New(cfg.Server.OwnerCacheMax); err != nil {
 		return nil, err
 	}
 	if db.SessionCache, err = lru.New(cfg.Server.SessionCacheMax); err != nil {
 		return nil, err
 	}
+	go db.SessionExpireRoutine()
 	return db, nil
 }

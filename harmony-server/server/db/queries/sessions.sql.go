@@ -8,18 +8,32 @@ import (
 )
 
 const addSession = `-- name: AddSession :exec
-INSERT INTO Sessions (User_ID,
-                      Session)
-VALUES ($1, $2)
+INSERT INTO Sessions
+(User_ID,
+ Session,
+ Expiration)
+VALUES ($1, $2, $3)
 `
 
 type AddSessionParams struct {
-	UserID  uint64 `json:"user_id"`
-	Session string `json:"session"`
+	UserID     uint64 `json:"user_id"`
+	Session    string `json:"session"`
+	Expiration int64  `json:"expiration"`
 }
 
 func (q *Queries) AddSession(ctx context.Context, arg AddSessionParams) error {
-	_, err := q.exec(ctx, q.addSessionStmt, addSession, arg.UserID, arg.Session)
+	_, err := q.exec(ctx, q.addSessionStmt, addSession, arg.UserID, arg.Session, arg.Expiration)
+	return err
+}
+
+const expireSessions = `-- name: ExpireSessions :exec
+DELETE
+FROM Sessions
+WHERE Expiration <= $1
+`
+
+func (q *Queries) ExpireSessions(ctx context.Context, expiration int64) error {
+	_, err := q.exec(ctx, q.expireSessionsStmt, expireSessions, expiration)
 	return err
 }
 

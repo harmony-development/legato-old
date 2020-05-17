@@ -337,6 +337,7 @@ func (db *HarmonyDB) AddSession(userID uint64, session string) error {
 	return db.queries.AddSession(ctx, queries.AddSessionParams{
 		UserID:  userID,
 		Session: session,
+		Expiration: time.Now().UTC().Add(db.Config.Server.SessionDuration).Unix(),
 	})
 }
 
@@ -353,4 +354,8 @@ func (db *HarmonyDB) AddUser(userID uint64, email, username string, passwordHash
 func (db *HarmonyDB) EmailExists(email string) bool {
 	_, err := db.queries.EmailExists(ctx, email)
 	return err != nil
+}
+
+func (db *HarmonyDB) ExpireSessions() error {
+	return db.queries.ExpireSessions(ctx, time.Now().UTC().Unix())
 }
