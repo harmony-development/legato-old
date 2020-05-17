@@ -324,6 +324,7 @@ func (db *HarmonyDB) MembersInGuild(guildID int64) ([]queries.GuildMember, error
 // GetMessage gets the data of a message
 func (db *HarmonyDB) GetMessage(messageID int64) (queries.Message, error) {
 	return db.queries.GetMessage(ctx, messageID)
+}
 
 // GetUser gets a user with their email
 func (db *HarmonyDB) GetUser(email string) (queries.User, error) {
