@@ -21,10 +21,6 @@ type AvatarUpdateEvent struct {
 
 func (h Handlers) AvatarUpdate(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
-	form, err := ctx.MultipartForm()
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, responses.InvalidRequest)
-	}
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, responses.TooManyRequests)
 	}
