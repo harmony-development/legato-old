@@ -275,11 +275,11 @@ func (db *HarmonyDB) AddAttachments(messageID int64, attachments []string) error
 			AttachmentUrl: a,
 		})
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 	}
-	tx.Commit()
+	_ = tx.Commit()
 	return nil
 }
 
@@ -309,4 +309,17 @@ func (db *HarmonyDB) ChannelsForGuild(guildID int64) ([]queries.Channel, error) 
 // MembersInGuild lists the members of a guild
 func (db *HarmonyDB) MembersInGuild(guildID int64) ([]queries.GuildMember, error) {
 	return db.queries.GetGuildMembers(ctx, guildID)
+}
+
+// GetUser gets a user with their email
+func (db *HarmonyDB) GetUser(email string) (queries.User, error) {
+	return db.queries.GetUser(ctx, email)
+}
+
+func (db *HarmonyDB) AddSession(userID int64, session string) error {
+	db.SessionCache.Add(session, userID)
+	return db.queries.AddSession(ctx, queries.AddSessionParams{
+		UserID:  userID,
+		Session: session,
+	})
 }

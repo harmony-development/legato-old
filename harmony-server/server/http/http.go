@@ -5,6 +5,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/sony/sonyflake"
 
 	"harmony-server/server/auth"
 	"harmony-server/server/config"
@@ -33,6 +34,7 @@ type Dependencies struct {
 	StorageManager *storage.Manager
 	State          *state.State
 	Config         *config.Config
+	Sonyflake      *sonyflake.Sonyflake
 }
 
 // New creates a new HTTP server instance
@@ -67,6 +69,7 @@ func New(deps *Dependencies) *Server {
 		AuthManager:    s.Deps.AuthManager,
 		StorageManager: s.Deps.StorageManager,
 		State:          s.Deps.State,
+		Sonyflake:      s.Deps.Sonyflake,
 	})
 	s.CoreAPI.MakeRoutes()
 	return s
