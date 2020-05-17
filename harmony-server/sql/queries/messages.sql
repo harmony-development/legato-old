@@ -1,8 +1,8 @@
 -- name: AddMessage :one
 INSERT INTO Messages (
-    Guild_ID, Channel_ID, User_ID, Content, Created_At
+    Guild_ID, Channel_ID, User_ID, Content, Embeds, Actions, Created_At
 ) VALUES (
-    $1, $2, $3, $4, NOW()
+    $1, $2, $3, $4, $5, $6, NOW()
 )
 RETURNING *;
 
@@ -21,6 +21,10 @@ DELETE FROM Messages
 
 -- name: GetMessageAuthor :one
 SELECT User_ID FROM Messages
+    WHERE Message_ID = $1;
+
+-- name: GetMessage :one
+SELECT * FROM Messages
     WHERE Message_ID = $1;
 
 -- name: GetAttachments :many

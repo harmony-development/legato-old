@@ -4,7 +4,6 @@ import (
 	"harmony-server/server/db/queries"
 	"net/http"
 
-	"harmony-server/server/db"
 	"harmony-server/server/http/hm"
 
 	"github.com/labstack/echo/v4"

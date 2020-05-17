@@ -5,6 +5,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"time"
 
 	"harmony-server/server/db/queries"
@@ -108,17 +109,26 @@ func (db *HarmonyDB) DeleteChannelFromGuild(guildID, channelID int64) error {
 }
 
 // AddMessage adds a message to a channel
-func (db *HarmonyDB) AddMessage(channelID, guildID, userID int64, message string, attachments []string) (*queries.Message, error) {
+func (db *HarmonyDB) AddMessage(channelID, guildID, userID int64, message string, attachments []string, embeds, actions [][]byte) (*queries.Message, error) {
 	tx, err := db.Begin()
 	if err != nil {
 		return nil, err
 	}
 	tq := db.queries.WithTx(tx)
+	var rawEmbeds, rawActions []json.RawMessage
+	for _, embed := range embeds {
+		rawEmbeds = append(rawEmbeds, json.RawMessage(embed))
+	}
+	for _, action := range actions {
+		rawActions = append(rawActions, json.RawMessage(action))
+	}
 	msg, err := tq.AddMessage(ctx, queries.AddMessageParams{
 		GuildID:   guildID,
 		ChannelID: channelID,
 		UserID:    userID,
 		Content:   message,
+		Embeds:    rawEmbeds,
+		Actions:   rawActions,
 	})
 	if err != nil {
 		return nil, err
@@ -310,6 +320,10 @@ func (db *HarmonyDB) ChannelsForGuild(guildID int64) ([]queries.Channel, error) 
 func (db *HarmonyDB) MembersInGuild(guildID int64) ([]queries.GuildMember, error) {
 	return db.queries.GetGuildMembers(ctx, guildID)
 }
+
+// GetMessage gets the data of a message
+func (db *HarmonyDB) GetMessage(messageID int64) (queries.Message, error) {
+	return db.queries.GetMessage(ctx, messageID)
 
 // GetUser gets a user with their email
 func (db *HarmonyDB) GetUser(email string) (queries.User, error) {

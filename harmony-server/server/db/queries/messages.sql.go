@@ -5,7 +5,10 @@ package queries
 
 import (
 	"context"
+	"encoding/json"
 	"time"
+
+	"github.com/lib/pq"
 )
 
 const addAttachment = `-- name: AddAttachment :exec
@@ -28,18 +31,20 @@ func (q *Queries) AddAttachment(ctx context.Context, arg AddAttachmentParams) er
 
 const addMessage = `-- name: AddMessage :one
 INSERT INTO Messages (
-    Guild_ID, Channel_ID, User_ID, Content, Created_At
+    Guild_ID, Channel_ID, User_ID, Content, Embeds, Actions, Created_At
 ) VALUES (
-    $1, $2, $3, $4, NOW()
+    $1, $2, $3, $4, $5, $6, NOW()
 )
-RETURNING message_id, guild_id, channel_id, user_id, created_at, edited_at, content
+RETURNING message_id, guild_id, channel_id, user_id, created_at, edited_at, content, embeds, actions
 `
 
 type AddMessageParams struct {
-	GuildID   int64  `json:"guild_id"`
-	ChannelID int64  `json:"channel_id"`
-	UserID    int64  `json:"user_id"`
-	Content   string `json:"content"`
+	GuildID   int64             `json:"guild_id"`
+	ChannelID int64             `json:"channel_id"`
+	UserID    int64             `json:"user_id"`
+	Content   string            `json:"content"`
+	Embeds    []json.RawMessage `json:"embeds"`
+	Actions   []json.RawMessage `json:"actions"`
 }
 
 func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) (Message, error) {
@@ -48,6 +53,8 @@ func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) (Message
 		arg.ChannelID,
 		arg.UserID,
 		arg.Content,
+		pq.Array(arg.Embeds),
+		pq.Array(arg.Actions),
 	)
 	var i Message
 	err := row.Scan(
@@ -58,6 +65,8 @@ func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) (Message
 		&i.CreatedAt,
 		&i.EditedAt,
 		&i.Content,
+		pq.Array(&i.Embeds),
+		pq.Array(&i.Actions),
 	)
 	return i, err
 }
@@ -109,6 +118,28 @@ func (q *Queries) GetAttachments(ctx context.Context, messageID int64) ([]string
 		return nil, err
 	}
 	return items, nil
+}
+
+const getMessage = `-- name: GetMessage :one
+SELECT message_id, guild_id, channel_id, user_id, created_at, edited_at, content, embeds, actions FROM Messages
+    WHERE Message_ID = $1
+`
+
+func (q *Queries) GetMessage(ctx context.Context, messageID int64) (Message, error) {
+	row := q.queryRow(ctx, q.getMessageStmt, getMessage, messageID)
+	var i Message
+	err := row.Scan(
+		&i.MessageID,
+		&i.GuildID,
+		&i.ChannelID,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.EditedAt,
+		&i.Content,
+		pq.Array(&i.Embeds),
+		pq.Array(&i.Actions),
+	)
+	return i, err
 }
 
 const getMessageAuthor = `-- name: GetMessageAuthor :one

@@ -39,6 +39,17 @@ func New(deps *Dependencies) *Handlers {
 func (h Handlers) MakeRoutes() []routing.Route {
 	return []routing.Route{
 		{
+			Path:    "/trigger_action",
+			Handler: h.TriggerAction,
+			Method:  routing.POST,
+			RateLimit: &routing.RateLimit{
+				Duration: 1 * time.Second,
+				Burst:    5,
+			},
+			Auth:   true,
+			Schema: nil,
+		},
+		{
 			Path:    "/guilds",
 			Handler: h.GetGuilds,
 			Method:  routing.GET,

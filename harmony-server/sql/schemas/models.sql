@@ -51,6 +51,8 @@ CREATE TABLE Messages
     Created_At TIMESTAMP NOT NULL,
     Edited_At  TIMESTAMP,
     Content    TEXT      NOT NULL,
+    Embeds     jsonb[],
+    Actions    jsonb[],
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE,
     FOREIGN KEY (Channel_ID) REFERENCES Channels (Channel_ID) ON DELETE CASCADE
 );

@@ -70,6 +70,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getGuildPictureStmt, err = db.PrepareContext(ctx, getGuildPicture); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGuildPicture: %w", err)
 	}
+	if q.getMessageStmt, err = db.PrepareContext(ctx, getMessage); err != nil {
+		return nil, fmt.Errorf("error preparing query GetMessage: %w", err)
+	}
 	if q.getMessageAuthorStmt, err = db.PrepareContext(ctx, getMessageAuthor); err != nil {
 		return nil, fmt.Errorf("error preparing query GetMessageAuthor: %w", err)
 	}
@@ -194,6 +197,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getGuildPictureStmt: %w", cerr)
 		}
 	}
+	if q.getMessageStmt != nil {
+		if cerr := q.getMessageStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getMessageStmt: %w", cerr)
+		}
+	}
 	if q.getMessageAuthorStmt != nil {
 		if cerr := q.getMessageAuthorStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getMessageAuthorStmt: %w", cerr)
@@ -314,6 +322,7 @@ type Queries struct {
 	getGuildMembersStmt     *sql.Stmt
 	getGuildOwnerStmt       *sql.Stmt
 	getGuildPictureStmt     *sql.Stmt
+	getMessageStmt          *sql.Stmt
 	getMessageAuthorStmt    *sql.Stmt
 	getMessageDateStmt      *sql.Stmt
 	getMessagesStmt         *sql.Stmt
@@ -349,6 +358,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getGuildMembersStmt:     q.getGuildMembersStmt,
 		getGuildOwnerStmt:       q.getGuildOwnerStmt,
 		getGuildPictureStmt:     q.getGuildPictureStmt,
+		getMessageStmt:          q.getMessageStmt,
 		getMessageAuthorStmt:    q.getMessageAuthorStmt,
 		getMessageDateStmt:      q.getMessageDateStmt,
 		getMessagesStmt:         q.getMessagesStmt,

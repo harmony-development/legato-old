@@ -4,6 +4,7 @@ package queries
 
 import (
 	"database/sql"
+	"encoding/json"
 	"time"
 )
 
@@ -39,13 +40,15 @@ type Invite struct {
 }
 
 type Message struct {
-	MessageID int64        `json:"message_id"`
-	GuildID   int64        `json:"guild_id"`
-	ChannelID int64        `json:"channel_id"`
-	UserID    int64        `json:"user_id"`
-	CreatedAt time.Time    `json:"created_at"`
-	EditedAt  sql.NullTime `json:"edited_at"`
-	Content   string       `json:"content"`
+	MessageID int64             `json:"message_id"`
+	GuildID   int64             `json:"guild_id"`
+	ChannelID int64             `json:"channel_id"`
+	UserID    int64             `json:"user_id"`
+	CreatedAt time.Time         `json:"created_at"`
+	EditedAt  sql.NullTime      `json:"edited_at"`
+	Content   string            `json:"content"`
+	Embeds    []json.RawMessage `json:"embeds"`
+	Actions   []json.RawMessage `json:"actions"`
 }
 
 type Session struct {
