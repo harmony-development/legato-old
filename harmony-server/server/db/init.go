@@ -23,6 +23,7 @@ type HarmonyDB struct {
 // New creates a new DB connection
 func New(cfg *config.Config) (*HarmonyDB, error) {
 	db := &HarmonyDB{}
+	db.Config = cfg
 	var err error
 	if db.DB, err = sql.Open("postgres", fmt.Sprintf("user=%v password=%v dbname=%v host=%v port=%v sslmode=%v",
 		cfg.DB.User,
