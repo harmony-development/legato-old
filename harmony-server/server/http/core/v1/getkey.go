@@ -16,10 +16,14 @@ func (h Handlers) GetKey(c echo.Context) error {
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, responses.TooManyRequests)
 	}
+	keyBytes, err := x509.MarshalPKIXPublicKey(h.Deps.AuthManager.PubKey)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
+	}
 	pemData := pem.EncodeToMemory(
 		&pem.Block{
 			Type:  "RSA PUBLIC KEY",
-			Bytes: x509.MarshalPKCS1PublicKey(h.Deps.AuthManager.PubKey),
+			Bytes: keyBytes,
 		},
 	)
 	return ctx.String(http.StatusOK, string(pemData))
