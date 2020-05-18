@@ -10,22 +10,15 @@ import (
 
 // CreateInviteData is the data that a CreateInvite request has
 type CreateInviteData struct {
-	Guild uint64 `validate:"required"`
-	Name  string `validate:"required"`
+	Name string `validate:"required"`
 }
 
 // CreateInvite : Create an invite for a given guild
 func (h Handlers) CreateInvite(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
-	var data CreateInviteData
-	if err := ctx.BindAndVerify(&data); err != nil {
-		return err
-	}
-	if err := ctx.VerifyOwner(h.Deps.DB, data.Guild, ctx.UserID); err != nil {
-		return err
-	}
+	data := ctx.Data.(*CreateInviteData)
 
-	invite, err := h.Deps.DB.CreateInvite(data.Guild, -1, data.Name)
+	invite, err := h.Deps.DB.CreateInvite(*ctx.Location.GuildID, -1, data.Name)
 	if err != nil {
 		sentry.CaptureException(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "error creating invite, please try again later")

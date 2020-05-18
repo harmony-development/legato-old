@@ -17,6 +17,15 @@ const (
 	ANY
 )
 
+type LocationType int
+
+const (
+	LocationNone = iota
+	LocationGuild
+	LocationGuildAndChannel
+	LocationGuildChannelAndMessage
+)
+
 type RateLimit struct {
 	Duration time.Duration
 	Burst    int
@@ -24,12 +33,14 @@ type RateLimit struct {
 
 type Route struct {
 	*echo.Group
-	Path      string
-	Handler   echo.HandlerFunc
-	RateLimit *RateLimit
-	Auth      bool
-	Schema    interface{}
-	Method    int
+	Path        string
+	Handler     echo.HandlerFunc
+	RateLimit   *RateLimit
+	Auth        bool
+	Schema      interface{}
+	Method      int
+	Location    LocationType
+	Permissions hm.Permission
 }
 
 type Router struct {
@@ -37,41 +48,58 @@ type Router struct {
 }
 
 // BindRoute binds a route to an echo.Group
-func (r Router) BindRoute(g *echo.Group, endPoint Route) {
+func (r Router) BindRoute(g *echo.Group, endpoint Route) {
 	var middleware []echo.MiddlewareFunc
-	if endPoint.Auth {
+	if endpoint.Auth {
 		middleware = append(middleware, r.Middlewares.WithAuth)
 	}
-	if endPoint.RateLimit != nil {
-		middleware = append(middleware, r.Middlewares.RateLimit(endPoint.RateLimit.Duration, endPoint.RateLimit.Burst))
+	if endpoint.RateLimit != nil {
+		middleware = append(middleware, r.Middlewares.RateLimit(endpoint.RateLimit.Duration, endpoint.RateLimit.Burst))
 	}
-	if endPoint.Schema != nil {
-		middleware = append(middleware, r.Middlewares.Schema(endPoint.Schema))
+	if endpoint.Schema != nil {
+		middleware = append(middleware, r.Middlewares.Schema(endpoint.Schema))
 	}
-	switch endPoint.Method {
+	switch endpoint.Location {
+	case LocationNone: // Do nothing.
+	case LocationGuild:
+		middleware = append(middleware, r.Middlewares.WithGuild)
+	case LocationGuildAndChannel:
+		middleware = append(middleware, r.Middlewares.WithGuild, r.Middlewares.WithChannel)
+	case LocationGuildChannelAndMessage:
+		middleware = append(middleware, r.Middlewares.WithGuild, r.Middlewares.WithChannel, r.Middlewares.WithMessage)
+	}
+	if endpoint.Permissions != 0 {
+		switch endpoint.Location {
+		case LocationGuild:
+			middleware = append(middleware, r.Middlewares.ForGuildPermission(endpoint.Permissions))
+		case LocationGuildAndChannel, LocationGuildChannelAndMessage:
+			middleware = append(middleware, r.Middlewares.ForChannelPermission(endpoint.Permissions))
+		}
+	}
+	switch endpoint.Method {
 	case GET:
 		{
-			g.GET(endPoint.Path, endPoint.Handler, middleware...)
+			g.GET(endpoint.Path, endpoint.Handler, middleware...)
 		}
 	case POST:
 		{
-			g.POST(endPoint.Path, endPoint.Handler, middleware...)
+			g.POST(endpoint.Path, endpoint.Handler, middleware...)
 		}
 	case PUT:
 		{
-			g.PUT(endPoint.Path, endPoint.Handler, middleware...)
+			g.PUT(endpoint.Path, endpoint.Handler, middleware...)
 		}
 	case DELETE:
 		{
-			g.DELETE(endPoint.Path, endPoint.Handler, middleware...)
+			g.DELETE(endpoint.Path, endpoint.Handler, middleware...)
 		}
 	case PATCH:
 		{
-			g.PATCH(endPoint.Path, endPoint.Handler, middleware...)
+			g.PATCH(endpoint.Path, endpoint.Handler, middleware...)
 		}
 	case ANY:
 		{
-			g.Any(endPoint.Path, endPoint.Handler, middleware...)
+			g.Any(endpoint.Path, endpoint.Handler, middleware...)
 		}
 	}
 }

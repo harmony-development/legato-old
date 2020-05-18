@@ -103,6 +103,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.incrementInviteStmt, err = db.PrepareContext(ctx, incrementInvite); err != nil {
 		return nil, fmt.Errorf("error preparing query IncrementInvite: %w", err)
 	}
+	if q.numChannelsWithIDStmt, err = db.PrepareContext(ctx, numChannelsWithID); err != nil {
+		return nil, fmt.Errorf("error preparing query NumChannelsWithID: %w", err)
+	}
+	if q.numGuildsWithIDStmt, err = db.PrepareContext(ctx, numGuildsWithID); err != nil {
+		return nil, fmt.Errorf("error preparing query NumGuildsWithID: %w", err)
+	}
 	if q.openInvitesStmt, err = db.PrepareContext(ctx, openInvites); err != nil {
 		return nil, fmt.Errorf("error preparing query OpenInvites: %w", err)
 	}
@@ -267,6 +273,16 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing incrementInviteStmt: %w", cerr)
 		}
 	}
+	if q.numChannelsWithIDStmt != nil {
+		if cerr := q.numChannelsWithIDStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing numChannelsWithIDStmt: %w", cerr)
+		}
+	}
+	if q.numGuildsWithIDStmt != nil {
+		if cerr := q.numGuildsWithIDStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing numGuildsWithIDStmt: %w", cerr)
+		}
+	}
 	if q.openInvitesStmt != nil {
 		if cerr := q.openInvitesStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing openInvitesStmt: %w", cerr)
@@ -373,6 +389,8 @@ type Queries struct {
 	getUserStmt             *sql.Stmt
 	guildsForUserStmt       *sql.Stmt
 	incrementInviteStmt     *sql.Stmt
+	numChannelsWithIDStmt   *sql.Stmt
+	numGuildsWithIDStmt     *sql.Stmt
 	openInvitesStmt         *sql.Stmt
 	removeUserFromGuildStmt *sql.Stmt
 	resolveGuildIDStmt      *sql.Stmt
@@ -414,6 +432,8 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getUserStmt:             q.getUserStmt,
 		guildsForUserStmt:       q.guildsForUserStmt,
 		incrementInviteStmt:     q.incrementInviteStmt,
+		numChannelsWithIDStmt:   q.numChannelsWithIDStmt,
+		numGuildsWithIDStmt:     q.numGuildsWithIDStmt,
 		openInvitesStmt:         q.openInvitesStmt,
 		removeUserFromGuildStmt: q.removeUserFromGuildStmt,
 		resolveGuildIDStmt:      q.resolveGuildIDStmt,

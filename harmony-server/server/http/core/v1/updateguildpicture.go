@@ -12,21 +12,9 @@ import (
 	"gopkg.in/h2non/bimg.v1"
 )
 
-// UpdateGuildPictureData is the data for a guild picture update request
-type UpdateGuildPictureData struct {
-	Guild uint64 `validate:"required"`
-}
-
 // UpdateGuildPicture is the request to update a guild's picture
 func (h Handlers) UpdateGuildPicture(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
-	var data UpdateGuildPictureData
-	if err := ctx.BindAndVerify(&data); err != nil {
-		return err
-	}
-	if err := ctx.VerifyOwner(h.Deps.DB, data.Guild, ctx.UserID); err != nil {
-		return err
-	}
 
 	form, err := ctx.MultipartForm()
 	if err != nil {
@@ -67,21 +55,21 @@ func (h Handlers) UpdateGuildPicture(c echo.Context) error {
 		sentry.CaptureException(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error saving file upload")
 	}
-	oldPicture, err := h.Deps.DB.GetGuildPicture(data.Guild)
+	oldPicture, err := h.Deps.DB.GetGuildPicture(*ctx.Location.GuildID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "error removing old picture")
 	}
-	if err := h.Deps.DB.SetGuildPicture(data.Guild, fileName); err != nil {
+	if err := h.Deps.DB.SetGuildPicture(*ctx.Location.GuildID, fileName); err != nil {
 		h.Deps.StorageManager.DeleteGuildPicture(fileName)
 		return echo.NewHTTPError(http.StatusInternalServerError, "error updating picture")
 	}
 	h.Deps.StorageManager.DeleteGuildPicture(oldPicture)
 	h.Deps.State.GuildsLock.RLock()
 	defer h.Deps.State.GuildsLock.RUnlock()
-	h.Deps.State.Guilds[data.Guild].Broadcast(&client.OutPacket{
+	h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
 		Type: "GuildPictureUpdate",
 		Data: map[string]interface{}{
-			"guild":   data.Guild,
+			"guild":   *ctx.Location.GuildID,
 			"picture": fileName,
 		},
 	})

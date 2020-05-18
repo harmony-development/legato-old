@@ -9,20 +9,13 @@ import (
 
 // DeleteInviteData is the data for an invite delete request
 type DeleteInviteData struct {
-	Guild  uint64 `validate:"required"`
 	Invite uint64 `validate:"required"`
 }
 
 // DeleteInvite is the request to delete an invite
 func (h Handlers) DeleteInvite(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
-	var data DeleteInviteData
-	if err := ctx.BindAndVerify(&data); err != nil {
-		return err
-	}
-	if err := ctx.VerifyOwner(h.Deps.DB, data.Guild, ctx.UserID); err != nil {
-		return err
-	}
+	data := ctx.Data.(*DeleteInviteData)
 
 	if err := h.Deps.DB.DeleteInvite(data.Invite); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to delete invite, please try again later")

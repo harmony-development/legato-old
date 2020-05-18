@@ -72,3 +72,12 @@ SELECT Guilds.Guild_ID FROM Guild_Members
 SELECT User_ID FROM Guild_Members
     WHERE User_ID = $1
     AND Guild_ID = $2;
+
+-- name: NumGuildsWithID :one
+SELECT COUNT(*) FROM Guilds
+    WHERE Guild_ID = $1;
+
+-- name: NumChannelsWithID :one
+SELECT COUNT(*) FROM Channels
+    WHERE Guild_ID = $1
+      AND Channel_ID = $2;

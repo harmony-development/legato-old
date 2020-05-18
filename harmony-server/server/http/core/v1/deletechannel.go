@@ -9,32 +9,19 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// DeleteChannelData is the data for a channel deletion request
-type DeleteChannelData struct {
-	Guild   uint64 `validate:"required"`
-	Channel uint64 `validate:"required"`
-}
-
 // DeleteChannel is the request to delete a channel
 func (h Handlers) DeleteChannel(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
-	var data DeleteChannelData
-	if err := ctx.BindAndVerify(&data); err != nil {
-		return err
-	}
-	if err := ctx.VerifyOwner(h.Deps.DB, data.Guild, ctx.UserID); err != nil {
-		return err
-	}
 
-	if err := h.Deps.DB.DeleteChannelFromGuild(data.Guild, data.Channel); err != nil {
+	if err := h.Deps.DB.DeleteChannelFromGuild(*ctx.Location.GuildID, *ctx.Location.ChannelID); err != nil {
 		sentry.CaptureException(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "error deleting channel, please try again later")
 	}
-	h.Deps.State.Guilds[data.Guild].Broadcast(&client.OutPacket{
+	h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
 		Type: "DeleteChannel",
 		Data: map[string]interface{}{
-			"guild":     data.Guild,
-			"channelID": data.Channel,
+			"guild":     *ctx.Location.GuildID,
+			"channelID": *ctx.Location.ChannelID,
 		},
 	})
 	return ctx.JSON(http.StatusOK, map[string]string{

@@ -14,8 +14,6 @@ import (
 )
 
 type MessageData struct {
-	Guild   uint64 `validate:"required"`
-	Channel uint64 `validate:"required"`
 	Content string `validate:"required"`
 	Embeds  []string
 	Actions []string
@@ -24,12 +22,12 @@ type MessageData struct {
 // Message : Receive a message from a client.
 func (h Handlers) Message(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
+	data := ctx.Data.(*MessageData)
 	form, err := ctx.MultipartForm()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
 	}
 	files := form.File["files"]
-	data := ctx.Data.(*MessageData)
 	if len(files) > h.Deps.Config.Server.MaxAttachments {
 		return echo.NewHTTPError(http.StatusBadRequest, "too many files uploaded")
 	}
@@ -39,7 +37,7 @@ func (h Handlers) Message(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusTooManyRequests, "Too many requests, please try again later")
 	}
 	// either the guild doesn't exist or the client isn't subbed to it - it doesn't matter.
-	if h.Deps.State.Guilds[data.Guild] == nil || h.Deps.State.Guilds[data.Guild].Clients[ctx.UserID] == nil {
+	if h.Deps.State.Guilds[*ctx.Location.GuildID] == nil || h.Deps.State.Guilds[*ctx.Location.GuildID].Clients[ctx.UserID] == nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "insufficient permissions to send message")
 	}
 	var attachments = make([]string, len(files))
@@ -88,7 +86,7 @@ func (h Handlers) Message(c echo.Context) error {
 			embeds = append(embeds, parsed)
 		}
 	}
-	msg, err := h.Deps.DB.AddMessage(data.Channel, data.Guild, ctx.UserID, data.Content, attachments, embeds, actions)
+	msg, err := h.Deps.DB.AddMessage(*ctx.Location.ChannelID, *ctx.Location.GuildID, ctx.UserID, data.Content, attachments, embeds, actions)
 	if err != nil {
 		sentry.CaptureException(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error storing message in DB")
@@ -100,11 +98,11 @@ func (h Handlers) Message(c echo.Context) error {
 	for _, action := range actions {
 		rawActions = append(rawActions, json.RawMessage(action))
 	}
-	h.Deps.State.Guilds[data.Guild].Broadcast(&client.OutPacket{
+	h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
 		Type: "MessageAdd",
 		Data: map[string]interface{}{
-			"guild":       data.Guild,
-			"channel":     data.Channel,
+			"guild":       *ctx.Location.GuildID,
+			"channel":     *ctx.Location.ChannelID,
 			"createdAt":   time.Now().UTC().Unix(),
 			"message":     msg,
 			"attachments": attachments,
