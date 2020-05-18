@@ -18,8 +18,12 @@ func (h Handlers) Connect(c echo.Context) error {
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, responses.TooManyRequests)
 	}
+	user, err := h.Deps.DB.GetUserByID(ctx.UserID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, responses.InvalidRequest)
+	}
 	data := ctx.Data.(*ConnectData)
-	token, err := h.Deps.AuthManager.MakeAuthToken(ctx.UserID, data.Target)
+	token, err := h.Deps.AuthManager.MakeAuthToken(ctx.UserID, data.Target, user.Username, user.Avatar.String)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 	}

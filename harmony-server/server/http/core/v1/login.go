@@ -27,26 +27,24 @@ func (h Handlers) Login(c echo.Context) error {
 	if data.AuthToken != "" {
 		pem, err := h.Deps.AuthManager.GetPublicKey(data.Domain)
 		if err != nil {
-			fmt.Println(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 		}
-		fmt.Println(string(pem))
 		pubKey, err := jwt.ParseRSAPublicKeyFromPEM(pem)
 		if err != nil {
-			fmt.Println("parse RSA error : ", err)
 			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 		}
 		t, err := jwt.ParseWithClaims(data.AuthToken, &auth.Token{}, func(_ *jwt.Token) (interface{}, error) {
 			return pubKey, nil
 		})
 		if err != nil {
-			fmt.Println(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 		}
 		token := t.Claims.(*auth.Token)
 		session := randstr.Hex(16)
-		if err := h.Deps.DB.AddSession(token.UserID, session); err != nil {
-			fmt.Println(err)
+		if err := h.Deps.DB.AddForeignUser(token.UserID, data.Domain, token.Username, token.Avatar); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
+		}
+		if err := h.Deps.DB.AddForeignSession(token.UserID, data.Domain, session); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 		}
 		return ctx.JSON(http.StatusOK, LoginResponse{Session: session})
