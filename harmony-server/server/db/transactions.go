@@ -331,11 +331,27 @@ func (db *HarmonyDB) GetUser(email string) (queries.GetUserRow, error) {
 	return db.queries.GetUser(ctx, email)
 }
 
+// GetUserByID gets a user with their ID
+func (db *HarmonyDB) GetUserByID(userID uint64) (queries.GetUserByIDRow, error) {
+	return db.queries.GetUserByID(ctx, userID)
+}
+
 // AddSession persists a session into the DB
 func (db *HarmonyDB) AddSession(userID uint64, session string) error {
 	db.SessionCache.Add(session, userID)
 	return db.queries.AddSession(ctx, queries.AddSessionParams{
 		UserID:     userID,
+		Session:    session,
+		Expiration: time.Now().UTC().Add(db.Config.Server.SessionDuration).Unix(),
+	})
+}
+
+// AddForeignSession persists a foreign session into the DB
+func (db *HarmonyDB) AddForeignSession(userID uint64, homeServer, session string) error {
+	db.SessionCache.Add(session, userID)
+	return db.queries.AddForeignSession(ctx, queries.AddForeignSessionParams{
+		UserID:     userID,
+		HomeServer: homeServer,
 		Session:    session,
 		Expiration: time.Now().UTC().Add(db.Config.Server.SessionDuration).Unix(),
 	})
@@ -351,13 +367,28 @@ func (db *HarmonyDB) AddUser(userID uint64, email, username string, passwordHash
 	})
 }
 
+func (db *HarmonyDB) AddForeignUser(userID uint64, homeServer, username, avatar string) error {
+	return db.queries.AddForeignUser(ctx, queries.AddForeignUserParams{
+		UserID:     userID,
+		HomeServer: homeServer,
+		Username:   username,
+		Avatar:     avatar,
+	})
+}
+
 func (db *HarmonyDB) EmailExists(email string) bool {
 	_, err := db.queries.EmailExists(ctx, email)
 	return err != nil
 }
 
 func (db *HarmonyDB) ExpireSessions() error {
-	return db.queries.ExpireSessions(ctx, time.Now().UTC().Unix())
+	if err := db.queries.ExpireSessions(ctx, time.Now().UTC().Unix()); err != nil {
+		return err
+	}
+	if err := db.queries.ExpireForeignSessions(ctx, time.Now().UTC().Unix()); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (db *HarmonyDB) UpdateUsername(userID uint64, username string) error {
@@ -370,7 +401,6 @@ func (db *HarmonyDB) UpdateUsername(userID uint64, username string) error {
 func (db *HarmonyDB) GetAvatar(userID uint64) (sql.NullString, error) {
 	return db.queries.GetAvatar(ctx, userID)
 }
-
 func (db *HarmonyDB) HasGuildWithID(guildID uint64) (bool, error) {
 	count, err := db.queries.NumGuildsWithID(ctx, guildID)
 	return count != 0, err

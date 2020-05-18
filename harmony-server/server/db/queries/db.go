@@ -25,6 +25,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.addAttachmentStmt, err = db.PrepareContext(ctx, addAttachment); err != nil {
 		return nil, fmt.Errorf("error preparing query AddAttachment: %w", err)
 	}
+	if q.addForeignSessionStmt, err = db.PrepareContext(ctx, addForeignSession); err != nil {
+		return nil, fmt.Errorf("error preparing query AddForeignSession: %w", err)
+	}
+	if q.addForeignUserStmt, err = db.PrepareContext(ctx, addForeignUser); err != nil {
+		return nil, fmt.Errorf("error preparing query AddForeignUser: %w", err)
+	}
 	if q.addMessageStmt, err = db.PrepareContext(ctx, addMessage); err != nil {
 		return nil, fmt.Errorf("error preparing query AddMessage: %w", err)
 	}
@@ -61,8 +67,14 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.emailExistsStmt, err = db.PrepareContext(ctx, emailExists); err != nil {
 		return nil, fmt.Errorf("error preparing query EmailExists: %w", err)
 	}
+	if q.expireForeignSessionsStmt, err = db.PrepareContext(ctx, expireForeignSessions); err != nil {
+		return nil, fmt.Errorf("error preparing query ExpireForeignSessions: %w", err)
+	}
 	if q.expireSessionsStmt, err = db.PrepareContext(ctx, expireSessions); err != nil {
 		return nil, fmt.Errorf("error preparing query ExpireSessions: %w", err)
+	}
+	if q.foreignSessionToUserIDStmt, err = db.PrepareContext(ctx, foreignSessionToUserID); err != nil {
+		return nil, fmt.Errorf("error preparing query ForeignSessionToUserID: %w", err)
 	}
 	if q.getAttachmentsStmt, err = db.PrepareContext(ctx, getAttachments); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAttachments: %w", err)
@@ -72,6 +84,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getChannelsStmt, err = db.PrepareContext(ctx, getChannels); err != nil {
 		return nil, fmt.Errorf("error preparing query GetChannels: %w", err)
+	}
+	if q.getForeignUserStmt, err = db.PrepareContext(ctx, getForeignUser); err != nil {
+		return nil, fmt.Errorf("error preparing query GetForeignUser: %w", err)
 	}
 	if q.getGuildMembersStmt, err = db.PrepareContext(ctx, getGuildMembers); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGuildMembers: %w", err)
@@ -96,6 +111,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getUserStmt, err = db.PrepareContext(ctx, getUser); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUser: %w", err)
+	}
+	if q.getUserByIDStmt, err = db.PrepareContext(ctx, getUserByID); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUserByID: %w", err)
 	}
 	if q.guildsForUserStmt, err = db.PrepareContext(ctx, guildsForUser); err != nil {
 		return nil, fmt.Errorf("error preparing query GuildsForUser: %w", err)
@@ -141,6 +159,16 @@ func (q *Queries) Close() error {
 	if q.addAttachmentStmt != nil {
 		if cerr := q.addAttachmentStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing addAttachmentStmt: %w", cerr)
+		}
+	}
+	if q.addForeignSessionStmt != nil {
+		if cerr := q.addForeignSessionStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addForeignSessionStmt: %w", cerr)
+		}
+	}
+	if q.addForeignUserStmt != nil {
+		if cerr := q.addForeignUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addForeignUserStmt: %w", cerr)
 		}
 	}
 	if q.addMessageStmt != nil {
@@ -203,9 +231,19 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing emailExistsStmt: %w", cerr)
 		}
 	}
+	if q.expireForeignSessionsStmt != nil {
+		if cerr := q.expireForeignSessionsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing expireForeignSessionsStmt: %w", cerr)
+		}
+	}
 	if q.expireSessionsStmt != nil {
 		if cerr := q.expireSessionsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing expireSessionsStmt: %w", cerr)
+		}
+	}
+	if q.foreignSessionToUserIDStmt != nil {
+		if cerr := q.foreignSessionToUserIDStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing foreignSessionToUserIDStmt: %w", cerr)
 		}
 	}
 	if q.getAttachmentsStmt != nil {
@@ -221,6 +259,11 @@ func (q *Queries) Close() error {
 	if q.getChannelsStmt != nil {
 		if cerr := q.getChannelsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getChannelsStmt: %w", cerr)
+		}
+	}
+	if q.getForeignUserStmt != nil {
+		if cerr := q.getForeignUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getForeignUserStmt: %w", cerr)
 		}
 	}
 	if q.getGuildMembersStmt != nil {
@@ -261,6 +304,11 @@ func (q *Queries) Close() error {
 	if q.getUserStmt != nil {
 		if cerr := q.getUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getUserStmt: %w", cerr)
+		}
+	}
+	if q.getUserByIDStmt != nil {
+		if cerr := q.getUserByIDStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUserByIDStmt: %w", cerr)
 		}
 	}
 	if q.guildsForUserStmt != nil {

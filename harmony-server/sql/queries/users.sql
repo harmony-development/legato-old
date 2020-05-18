@@ -7,6 +7,11 @@ WHERE Email = $1;
 INSERT INTO Users (User_ID, Email, Username, Avatar, Password)
 VALUES ($1, $2, $3, $4, $5);
 
+-- name: GetUserByID :one
+SELECT User_ID, Email, Username, Avatar, Password
+FROM Users
+WHERE User_ID = $1;
+
 -- name: EmailExists :one
 SELECT User_ID
 FROM Users

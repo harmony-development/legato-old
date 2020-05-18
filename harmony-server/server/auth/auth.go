@@ -28,8 +28,10 @@ type Dependencies struct {
 // Token is the structure for an authentication JWT
 type Token struct {
 	jwt.StandardClaims
-	UserID uint64
-	Target string
+	UserID   uint64
+	Target   string
+	Username string
+	Avatar   string
 }
 
 // New creates a new authenticator
@@ -53,10 +55,12 @@ func New(d *Dependencies) (*Manager, error) {
 	return m, nil
 }
 
-func (m Manager) MakeAuthToken(userID uint64, target string) (string, error) {
+func (m Manager) MakeAuthToken(userID uint64, target, username string, avatar string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, &Token{
-		UserID: userID,
-		Target: target,
+		UserID:   userID,
+		Target:   target,
+		Username: username,
+		Avatar:   avatar,
 	})
 	return token.SignedString(m.PrivKey)
 }
