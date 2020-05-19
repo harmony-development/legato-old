@@ -11,29 +11,23 @@ import (
 
 // AddChannelData represents data received from client on AddChannel
 type AddChannelData struct {
-	Guild       uint64 `validate:"required"`
 	ChannelName string `validate:"required"`
 }
 
 // AddChannel is a request to add a channel to a guild
 func (h Handlers) AddChannel(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
-	var data AddChannelData
-	if err := ctx.BindAndVerify(&data); err != nil {
-		return err
-	}
-	if err := ctx.VerifyOwner(h.Deps.DB, data.Guild, ctx.UserID); err != nil {
-		return err
-	}
-	channel, err := h.Deps.DB.AddChannelToGuild(data.Guild, data.ChannelName)
+	data := ctx.Data.(*AddChannelData)
+
+	channel, err := h.Deps.DB.AddChannelToGuild(*ctx.Location.GuildID, data.ChannelName)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "")
 	}
 
-	h.Deps.State.Guilds[data.Guild].Broadcast(&client.OutPacket{
+	h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
 		Type: "AddChannel",
 		Data: map[string]interface{}{
-			"guild":       data.Guild,
+			"guild":       *ctx.Location.GuildID,
 			"channelName": data.ChannelName,
 			"channelID":   channel.ChannelID,
 		},

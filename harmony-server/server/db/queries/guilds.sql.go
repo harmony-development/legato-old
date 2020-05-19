@@ -211,6 +211,36 @@ func (q *Queries) GuildsForUser(ctx context.Context, userID uint64) ([]uint64, e
 	return items, nil
 }
 
+const numChannelsWithID = `-- name: NumChannelsWithID :one
+SELECT COUNT(*) FROM Channels
+    WHERE Guild_ID = $1
+      AND Channel_ID = $2
+`
+
+type NumChannelsWithIDParams struct {
+	GuildID   sql.NullInt64 `json:"guild_id"`
+	ChannelID uint64        `json:"channel_id"`
+}
+
+func (q *Queries) NumChannelsWithID(ctx context.Context, arg NumChannelsWithIDParams) (int64, error) {
+	row := q.queryRow(ctx, q.numChannelsWithIDStmt, numChannelsWithID, arg.GuildID, arg.ChannelID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const numGuildsWithID = `-- name: NumGuildsWithID :one
+SELECT COUNT(*) FROM Guilds
+    WHERE Guild_ID = $1
+`
+
+func (q *Queries) NumGuildsWithID(ctx context.Context, guildID uint64) (int64, error) {
+	row := q.queryRow(ctx, q.numGuildsWithIDStmt, numGuildsWithID, guildID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const removeUserFromGuild = `-- name: RemoveUserFromGuild :exec
 DELETE FROM Guild_Members
     WHERE Guild_ID = $1

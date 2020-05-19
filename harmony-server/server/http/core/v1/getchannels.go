@@ -7,19 +7,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// GetChannelsData is the data for GetChannels
-type GetChannelsData struct {
-	Guild uint64 `validate:"required"`
-}
-
 // GetChannels gets the channels for a given guild
 func (h Handlers) GetChannels(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
-	var data GetChannelsData
-	if err := ctx.BindAndVerify(&data); err != nil {
-		return err
-	}
-	res, err := h.Deps.DB.ChannelsForGuild(data.Guild)
+
+	res, err := h.Deps.DB.ChannelsForGuild(*ctx.Location.GuildID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to list channels, please try again later")
 	}

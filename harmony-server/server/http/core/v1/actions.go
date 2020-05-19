@@ -11,11 +11,8 @@ import (
 
 // TriggerActionData represents data received from client on TriggerAction
 type TriggerActionData struct {
-	GuildID   uint64 `validate:"required"`
-	MessageID uint64 `validate:"required"`
-	BotID     uint64 `validate:"required"`
-	ActionID  string `validate:"required"`
-	Data      string
+	ActionID string `validate:"required"`
+	Data     string
 }
 
 // SendActionData is the data that will be sent to a client
@@ -33,20 +30,11 @@ type SendActionData struct {
 // TriggerAction will trigger an action for a client to receive
 func (h Handlers) TriggerAction(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
-	var data TriggerActionData
-	if err := ctx.BindAndVerify(&data); err != nil {
-		return err
-	}
-	msg, err := h.Deps.DB.GetMessage(data.MessageID)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
-	}
-	if msg.UserID != data.BotID {
-		return echo.NewHTTPError(http.StatusBadRequest)
-	}
+	data := ctx.Data.(*TriggerActionData)
+
 	handle := func() *guild.ClientArray {
-		for id, client := range h.Deps.State.Guilds[data.GuildID].Clients {
-			if id == data.BotID {
+		for id, client := range h.Deps.State.Guilds[*ctx.Location.GuildID].Clients {
+			if id == ctx.Location.Message.UserID {
 				return client
 			}
 		}
@@ -59,9 +47,9 @@ func (h Handlers) TriggerAction(c echo.Context) error {
 		conn.Send(&client.OutPacket{
 			Type: "action",
 			Data: SendActionData{
-				GuildID:   data.GuildID,
-				ChannelID: msg.ChannelID,
-				MessageID: msg.MessageID,
+				GuildID:   *ctx.Location.GuildID,
+				ChannelID: ctx.Location.Message.ChannelID,
+				MessageID: ctx.Location.Message.MessageID,
 				TriggerID: ctx.UserID,
 				Action: struct {
 					ID   string "json:\"id\""

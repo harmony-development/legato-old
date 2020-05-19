@@ -5,17 +5,26 @@ import (
 	"sync"
 
 	"harmony-server/server/db"
+	"harmony-server/server/db/queries"
 
 	"github.com/labstack/echo/v4"
 	"golang.org/x/time/rate"
 )
 
+// LocationContext stores information about the location of items
+type LocationContext struct {
+	GuildID   *uint64
+	ChannelID *uint64
+	Message   *queries.Message
+}
+
 // A HarmonyContext adds rate limiting and a user ID to an echo.Context
 type HarmonyContext struct {
 	echo.Context
-	Limiter *rate.Limiter
-	UserID  uint64
-	Data    interface{}
+	Limiter  *rate.Limiter
+	UserID   uint64
+	Data     interface{}
+	Location LocationContext
 }
 
 // Middlewares contains middlewares for Harmony

@@ -401,3 +401,15 @@ func (db *HarmonyDB) UpdateUsername(userID uint64, username string) error {
 func (db *HarmonyDB) GetAvatar(userID uint64) (sql.NullString, error) {
 	return db.queries.GetAvatar(ctx, userID)
 }
+func (db *HarmonyDB) HasGuildWithID(guildID uint64) (bool, error) {
+	count, err := db.queries.NumGuildsWithID(ctx, guildID)
+	return count != 0, err
+}
+
+func (db *HarmonyDB) HasChannelWithID(guildID, channelID uint64) (bool, error) {
+	count, err := db.queries.NumChannelsWithID(ctx, queries.NumChannelsWithIDParams{
+		GuildID:   toSqlInt64(guildID),
+		ChannelID: channelID,
+	})
+	return count != 0, err
+}
