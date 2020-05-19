@@ -4,7 +4,7 @@
 
 A free and open source communications platform. It's designed to provide users with full featured open source Discord replacement with messaging, guilds, roles, voice chat and rich presence. Join our [project chat](https://discord.gg/jypXPA4) for announcements, support and contribution.
 
-## WARNING : This project is in maintenance mode! Most things will probably NOT work at this stage
+## WARNING : This project is in maintenance mode! Most things will probably NOT work at this stage.
 
 ### Screenshots
 App preview  
