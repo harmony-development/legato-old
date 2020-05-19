@@ -8,10 +8,12 @@ CREATE TABLE IF NOT EXISTS Users
 );
 CREATE TABLE IF NOT EXISTS Local_Users
 (
+    User_ID   BIGSERIAL   NOT NULL,
     Email     TEXT UNIQUE NOT NULL,
     Password  BYTEA       NOT NULL,
-    Instances JSONB[]
-) INHERITS (Users);
+    Instances JSONB[],
+    FOREIGN KEY (User_ID) REFERENCES Users (User_ID) ON DELETE CASCADE
+);
 CREATE TABLE IF NOT EXISTS Sessions
 (
     Session     TEXT PRIMARY KEY NOT NULL,
