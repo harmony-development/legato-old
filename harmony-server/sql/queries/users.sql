@@ -26,3 +26,8 @@ WHERE User_ID = $2;
 SELECT Avatar
 FROM Users
 WHERE User_ID = $1;
+
+-- name: UpdateAvatar :exec
+UPDATE Users
+SET Avatar=$1
+WHERE User_ID = $2;

@@ -25,6 +25,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.addAttachmentStmt, err = db.PrepareContext(ctx, addAttachment); err != nil {
 		return nil, fmt.Errorf("error preparing query AddAttachment: %w", err)
 	}
+	if q.addFileHashStmt, err = db.PrepareContext(ctx, addFileHash); err != nil {
+		return nil, fmt.Errorf("error preparing query AddFileHash: %w", err)
+	}
 	if q.addForeignSessionStmt, err = db.PrepareContext(ctx, addForeignSession); err != nil {
 		return nil, fmt.Errorf("error preparing query AddForeignSession: %w", err)
 	}
@@ -84,6 +87,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getChannelsStmt, err = db.PrepareContext(ctx, getChannels); err != nil {
 		return nil, fmt.Errorf("error preparing query GetChannels: %w", err)
+	}
+	if q.getFileByHashStmt, err = db.PrepareContext(ctx, getFileByHash); err != nil {
+		return nil, fmt.Errorf("error preparing query GetFileByHash: %w", err)
 	}
 	if q.getForeignUserStmt, err = db.PrepareContext(ctx, getForeignUser); err != nil {
 		return nil, fmt.Errorf("error preparing query GetForeignUser: %w", err)
@@ -145,6 +151,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.setGuildPictureStmt, err = db.PrepareContext(ctx, setGuildPicture); err != nil {
 		return nil, fmt.Errorf("error preparing query SetGuildPicture: %w", err)
 	}
+	if q.updateAvatarStmt, err = db.PrepareContext(ctx, updateAvatar); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateAvatar: %w", err)
+	}
 	if q.updateUsernameStmt, err = db.PrepareContext(ctx, updateUsername); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateUsername: %w", err)
 	}
@@ -159,6 +168,11 @@ func (q *Queries) Close() error {
 	if q.addAttachmentStmt != nil {
 		if cerr := q.addAttachmentStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing addAttachmentStmt: %w", cerr)
+		}
+	}
+	if q.addFileHashStmt != nil {
+		if cerr := q.addFileHashStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addFileHashStmt: %w", cerr)
 		}
 	}
 	if q.addForeignSessionStmt != nil {
@@ -261,6 +275,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getChannelsStmt: %w", cerr)
 		}
 	}
+	if q.getFileByHashStmt != nil {
+		if cerr := q.getFileByHashStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getFileByHashStmt: %w", cerr)
+		}
+	}
 	if q.getForeignUserStmt != nil {
 		if cerr := q.getForeignUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getForeignUserStmt: %w", cerr)
@@ -361,6 +380,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing setGuildPictureStmt: %w", cerr)
 		}
 	}
+	if q.updateAvatarStmt != nil {
+		if cerr := q.updateAvatarStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateAvatarStmt: %w", cerr)
+		}
+	}
 	if q.updateUsernameStmt != nil {
 		if cerr := q.updateUsernameStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateUsernameStmt: %w", cerr)
@@ -411,6 +435,7 @@ type Queries struct {
 	db                         DBTX
 	tx                         *sql.Tx
 	addAttachmentStmt          *sql.Stmt
+	addFileHashStmt            *sql.Stmt
 	addForeignSessionStmt      *sql.Stmt
 	addForeignUserStmt         *sql.Stmt
 	addMessageStmt             *sql.Stmt
@@ -431,6 +456,7 @@ type Queries struct {
 	getAttachmentsStmt         *sql.Stmt
 	getAvatarStmt              *sql.Stmt
 	getChannelsStmt            *sql.Stmt
+	getFileByHashStmt          *sql.Stmt
 	getForeignUserStmt         *sql.Stmt
 	getGuildMembersStmt        *sql.Stmt
 	getGuildOwnerStmt          *sql.Stmt
@@ -451,6 +477,7 @@ type Queries struct {
 	sessionToUserIDStmt        *sql.Stmt
 	setGuildNameStmt           *sql.Stmt
 	setGuildPictureStmt        *sql.Stmt
+	updateAvatarStmt           *sql.Stmt
 	updateUsernameStmt         *sql.Stmt
 	userInGuildStmt            *sql.Stmt
 }
@@ -460,6 +487,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		db:                         tx,
 		tx:                         tx,
 		addAttachmentStmt:          q.addAttachmentStmt,
+		addFileHashStmt:            q.addFileHashStmt,
 		addForeignSessionStmt:      q.addForeignSessionStmt,
 		addForeignUserStmt:         q.addForeignUserStmt,
 		addMessageStmt:             q.addMessageStmt,
@@ -480,6 +508,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getAttachmentsStmt:         q.getAttachmentsStmt,
 		getAvatarStmt:              q.getAvatarStmt,
 		getChannelsStmt:            q.getChannelsStmt,
+		getFileByHashStmt:          q.getFileByHashStmt,
 		getForeignUserStmt:         q.getForeignUserStmt,
 		getGuildMembersStmt:        q.getGuildMembersStmt,
 		getGuildOwnerStmt:          q.getGuildOwnerStmt,
@@ -500,6 +529,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		sessionToUserIDStmt:        q.sessionToUserIDStmt,
 		setGuildNameStmt:           q.setGuildNameStmt,
 		setGuildPictureStmt:        q.setGuildPictureStmt,
+		updateAvatarStmt:           q.updateAvatarStmt,
 		updateUsernameStmt:         q.updateUsernameStmt,
 		userInGuildStmt:            q.userInGuildStmt,
 	}
