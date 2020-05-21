@@ -1,12 +1,14 @@
 package v1
 
 import (
+	"crypto/sha512"
 	"encoding/json"
-	"harmony-server/server/http/hm"
-	"harmony-server/server/http/socket/client"
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"harmony-server/server/http/hm"
+	"harmony-server/server/http/socket/client"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/labstack/echo/v4"
@@ -58,12 +60,17 @@ func (h Handlers) Message(c echo.Context) error {
 				sentry.CaptureException(err)
 				return echo.NewHTTPError(http.StatusInternalServerError, "Error closing files")
 			}
-			fileName := randstr.Hex(16)
-			if err := h.Deps.StorageManager.AddImage(fileName, fileBytes); err != nil {
-				sentry.CaptureException(err)
-				return echo.NewHTTPError(http.StatusInternalServerError, "Error writing file")
+			sum := sha512.New().Sum(fileBytes)
+			fileID, err := h.Deps.DB.GetFileIDFromHash(sum)
+			if err != nil {
+				fileName := randstr.Hex(16)
+				if err := h.Deps.StorageManager.AddImage(fileName, fileBytes); err != nil {
+					sentry.CaptureException(err)
+					return echo.NewHTTPError(http.StatusInternalServerError, "Error writing file")
+				}
+			} else {
+				attachments[i] = fileID
 			}
-			attachments[i] = fileName
 		}
 	}
 	var actions [][]byte

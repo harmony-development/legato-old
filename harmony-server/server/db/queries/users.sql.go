@@ -112,6 +112,22 @@ func (q *Queries) GetUserByID(ctx context.Context, userID uint64) (GetUserByIDRo
 	return i, err
 }
 
+const updateAvatar = `-- name: UpdateAvatar :exec
+UPDATE Users
+SET Avatar=$1
+WHERE User_ID = $2
+`
+
+type UpdateAvatarParams struct {
+	Avatar sql.NullString `json:"avatar"`
+	UserID uint64         `json:"user_id"`
+}
+
+func (q *Queries) UpdateAvatar(ctx context.Context, arg UpdateAvatarParams) error {
+	_, err := q.exec(ctx, q.updateAvatarStmt, updateAvatar, arg.Avatar, arg.UserID)
+	return err
+}
+
 const updateUsername = `-- name: UpdateUsername :exec
 UPDATE Users
 SET Username=$1
