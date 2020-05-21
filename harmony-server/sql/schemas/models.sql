@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS Messages
     Embeds     jsonb[],
     Actions    jsonb[],
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE,
-    FOREIGN KEY (Channel_ID) REFERENCES Channels (Channel_ID) ON DELETE CASCADE
+    FOREIGN KEY (Channel_ID) REFERENCES Channels (Channel_ID) ON DELETE CASCADE,
 );
 CREATE TABLE IF NOT EXISTS Attachments
 (

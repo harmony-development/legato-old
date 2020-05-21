@@ -10,19 +10,26 @@ import (
 const addSession = `-- name: AddSession :exec
 INSERT INTO Sessions
 (User_ID,
+ Home_Server,
  Session,
  Expiration)
-VALUES ($1, $2, $3)
+VALUES ($1, $2, $3, $4)
 `
 
 type AddSessionParams struct {
 	UserID     uint64 `json:"user_id"`
+	HomeServer string `json:"home_server"`
 	Session    string `json:"session"`
 	Expiration int64  `json:"expiration"`
 }
 
 func (q *Queries) AddSession(ctx context.Context, arg AddSessionParams) error {
-	_, err := q.exec(ctx, q.addSessionStmt, addSession, arg.UserID, arg.Session, arg.Expiration)
+	_, err := q.exec(ctx, q.addSessionStmt, addSession,
+		arg.UserID,
+		arg.HomeServer,
+		arg.Session,
+		arg.Expiration,
+	)
 	return err
 }
 
@@ -38,14 +45,19 @@ func (q *Queries) ExpireSessions(ctx context.Context, expiration int64) error {
 }
 
 const sessionToUserID = `-- name: SessionToUserID :one
-SELECT User_ID
+SELECT User_ID, Home_Server
 FROM Sessions
 WHERE Session = $1
 `
 
-func (q *Queries) SessionToUserID(ctx context.Context, session string) (uint64, error) {
+type SessionToUserIDRow struct {
+	UserID     uint64 `json:"user_id"`
+	HomeServer string `json:"home_server"`
+}
+
+func (q *Queries) SessionToUserID(ctx context.Context, session string) (SessionToUserIDRow, error) {
 	row := q.queryRow(ctx, q.sessionToUserIDStmt, sessionToUserID, session)
-	var user_id uint64
-	err := row.Scan(&user_id)
-	return user_id, err
+	var i SessionToUserIDRow
+	err := row.Scan(&i.UserID, &i.HomeServer)
+	return i, err
 }

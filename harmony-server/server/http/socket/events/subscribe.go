@@ -24,7 +24,7 @@ func (e Events) Subscribe(ws client.Client, event *client.Event, raw *json.RawMe
 		ws.SendError("invalid session")
 		return
 	}
-	ws.UserID = &userID
+	ws.UserID = &userID.UserID
 	if !event.Limiter.Allow() {
 		ws.SendError("too many requests")
 		return

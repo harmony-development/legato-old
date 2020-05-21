@@ -24,9 +24,15 @@ SELECT User_ID
 FROM Local_Users
 WHERE Email = $1;
 
--- name: UpdateLocalUsername :exec
+-- name: UpdateUsername :exec
 UPDATE Users
 SET Username=$1
+WHERE User_ID = $2
+  AND Home_Server = $3;
+
+-- name: UpdateAvatar :exec
+UPDATE Users
+SET Avatar=$1
 WHERE User_ID = $2
   AND Home_Server = $3;
 

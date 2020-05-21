@@ -1,6 +1,6 @@
 -- name: AddMessage :one
 INSERT INTO Messages (
-    Guild_ID, Channel_ID, User_ID, Content, Embeds, Actions, Created_At
+    Guild_ID, Channel_ID, User_ID, Home_Server, Content, Embeds, Actions, Created_At
 ) VALUES (
     $1, $2, $3, $4, $5, $6, NOW()
 )
