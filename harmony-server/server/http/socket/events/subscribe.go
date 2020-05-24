@@ -2,6 +2,7 @@ package events
 
 import (
 	"encoding/json"
+
 	"harmony-server/server/http/socket/client"
 	"harmony-server/server/state/guild"
 

@@ -28,11 +28,11 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.addFileHashStmt, err = db.PrepareContext(ctx, addFileHash); err != nil {
 		return nil, fmt.Errorf("error preparing query AddFileHash: %w", err)
 	}
-	if q.addForeignSessionStmt, err = db.PrepareContext(ctx, addForeignSession); err != nil {
-		return nil, fmt.Errorf("error preparing query AddForeignSession: %w", err)
-	}
 	if q.addForeignUserStmt, err = db.PrepareContext(ctx, addForeignUser); err != nil {
 		return nil, fmt.Errorf("error preparing query AddForeignUser: %w", err)
+	}
+	if q.addLocalUserStmt, err = db.PrepareContext(ctx, addLocalUser); err != nil {
+		return nil, fmt.Errorf("error preparing query AddLocalUser: %w", err)
 	}
 	if q.addMessageStmt, err = db.PrepareContext(ctx, addMessage); err != nil {
 		return nil, fmt.Errorf("error preparing query AddMessage: %w", err)
@@ -70,14 +70,8 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.emailExistsStmt, err = db.PrepareContext(ctx, emailExists); err != nil {
 		return nil, fmt.Errorf("error preparing query EmailExists: %w", err)
 	}
-	if q.expireForeignSessionsStmt, err = db.PrepareContext(ctx, expireForeignSessions); err != nil {
-		return nil, fmt.Errorf("error preparing query ExpireForeignSessions: %w", err)
-	}
 	if q.expireSessionsStmt, err = db.PrepareContext(ctx, expireSessions); err != nil {
 		return nil, fmt.Errorf("error preparing query ExpireSessions: %w", err)
-	}
-	if q.foreignSessionToUserIDStmt, err = db.PrepareContext(ctx, foreignSessionToUserID); err != nil {
-		return nil, fmt.Errorf("error preparing query ForeignSessionToUserID: %w", err)
 	}
 	if q.getAttachmentsStmt, err = db.PrepareContext(ctx, getAttachments); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAttachments: %w", err)
@@ -91,9 +85,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getFileByHashStmt, err = db.PrepareContext(ctx, getFileByHash); err != nil {
 		return nil, fmt.Errorf("error preparing query GetFileByHash: %w", err)
 	}
-	if q.getForeignUserStmt, err = db.PrepareContext(ctx, getForeignUser); err != nil {
-		return nil, fmt.Errorf("error preparing query GetForeignUser: %w", err)
-	}
 	if q.getGuildMembersStmt, err = db.PrepareContext(ctx, getGuildMembers); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGuildMembers: %w", err)
 	}
@@ -102,6 +93,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getGuildPictureStmt, err = db.PrepareContext(ctx, getGuildPicture); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGuildPicture: %w", err)
+	}
+	if q.getLocalUserIDStmt, err = db.PrepareContext(ctx, getLocalUserID); err != nil {
+		return nil, fmt.Errorf("error preparing query GetLocalUserID: %w", err)
 	}
 	if q.getMessageStmt, err = db.PrepareContext(ctx, getMessage); err != nil {
 		return nil, fmt.Errorf("error preparing query GetMessage: %w", err)
@@ -118,8 +112,8 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getUserStmt, err = db.PrepareContext(ctx, getUser); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUser: %w", err)
 	}
-	if q.getUserByIDStmt, err = db.PrepareContext(ctx, getUserByID); err != nil {
-		return nil, fmt.Errorf("error preparing query GetUserByID: %w", err)
+	if q.getUserByEmailStmt, err = db.PrepareContext(ctx, getUserByEmail); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUserByEmail: %w", err)
 	}
 	if q.guildsForUserStmt, err = db.PrepareContext(ctx, guildsForUser); err != nil {
 		return nil, fmt.Errorf("error preparing query GuildsForUser: %w", err)
@@ -175,14 +169,14 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing addFileHashStmt: %w", cerr)
 		}
 	}
-	if q.addForeignSessionStmt != nil {
-		if cerr := q.addForeignSessionStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing addForeignSessionStmt: %w", cerr)
-		}
-	}
 	if q.addForeignUserStmt != nil {
 		if cerr := q.addForeignUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing addForeignUserStmt: %w", cerr)
+		}
+	}
+	if q.addLocalUserStmt != nil {
+		if cerr := q.addLocalUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addLocalUserStmt: %w", cerr)
 		}
 	}
 	if q.addMessageStmt != nil {
@@ -245,19 +239,9 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing emailExistsStmt: %w", cerr)
 		}
 	}
-	if q.expireForeignSessionsStmt != nil {
-		if cerr := q.expireForeignSessionsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing expireForeignSessionsStmt: %w", cerr)
-		}
-	}
 	if q.expireSessionsStmt != nil {
 		if cerr := q.expireSessionsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing expireSessionsStmt: %w", cerr)
-		}
-	}
-	if q.foreignSessionToUserIDStmt != nil {
-		if cerr := q.foreignSessionToUserIDStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing foreignSessionToUserIDStmt: %w", cerr)
 		}
 	}
 	if q.getAttachmentsStmt != nil {
@@ -280,11 +264,6 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getFileByHashStmt: %w", cerr)
 		}
 	}
-	if q.getForeignUserStmt != nil {
-		if cerr := q.getForeignUserStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getForeignUserStmt: %w", cerr)
-		}
-	}
 	if q.getGuildMembersStmt != nil {
 		if cerr := q.getGuildMembersStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getGuildMembersStmt: %w", cerr)
@@ -298,6 +277,11 @@ func (q *Queries) Close() error {
 	if q.getGuildPictureStmt != nil {
 		if cerr := q.getGuildPictureStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getGuildPictureStmt: %w", cerr)
+		}
+	}
+	if q.getLocalUserIDStmt != nil {
+		if cerr := q.getLocalUserIDStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getLocalUserIDStmt: %w", cerr)
 		}
 	}
 	if q.getMessageStmt != nil {
@@ -325,9 +309,9 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getUserStmt: %w", cerr)
 		}
 	}
-	if q.getUserByIDStmt != nil {
-		if cerr := q.getUserByIDStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getUserByIDStmt: %w", cerr)
+	if q.getUserByEmailStmt != nil {
+		if cerr := q.getUserByEmailStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUserByEmailStmt: %w", cerr)
 		}
 	}
 	if q.guildsForUserStmt != nil {
@@ -432,105 +416,101 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                         DBTX
-	tx                         *sql.Tx
-	addAttachmentStmt          *sql.Stmt
-	addFileHashStmt            *sql.Stmt
-	addForeignSessionStmt      *sql.Stmt
-	addForeignUserStmt         *sql.Stmt
-	addMessageStmt             *sql.Stmt
-	addSessionStmt             *sql.Stmt
-	addUserStmt                *sql.Stmt
-	addUserToGuildStmt         *sql.Stmt
-	createChannelStmt          *sql.Stmt
-	createGuildStmt            *sql.Stmt
-	createGuildInviteStmt      *sql.Stmt
-	deleteChannelStmt          *sql.Stmt
-	deleteGuildStmt            *sql.Stmt
-	deleteInviteStmt           *sql.Stmt
-	deleteMessageStmt          *sql.Stmt
-	emailExistsStmt            *sql.Stmt
-	expireForeignSessionsStmt  *sql.Stmt
-	expireSessionsStmt         *sql.Stmt
-	foreignSessionToUserIDStmt *sql.Stmt
-	getAttachmentsStmt         *sql.Stmt
-	getAvatarStmt              *sql.Stmt
-	getChannelsStmt            *sql.Stmt
-	getFileByHashStmt          *sql.Stmt
-	getForeignUserStmt         *sql.Stmt
-	getGuildMembersStmt        *sql.Stmt
-	getGuildOwnerStmt          *sql.Stmt
-	getGuildPictureStmt        *sql.Stmt
-	getMessageStmt             *sql.Stmt
-	getMessageAuthorStmt       *sql.Stmt
-	getMessageDateStmt         *sql.Stmt
-	getMessagesStmt            *sql.Stmt
-	getUserStmt                *sql.Stmt
-	getUserByIDStmt            *sql.Stmt
-	guildsForUserStmt          *sql.Stmt
-	incrementInviteStmt        *sql.Stmt
-	numChannelsWithIDStmt      *sql.Stmt
-	numGuildsWithIDStmt        *sql.Stmt
-	openInvitesStmt            *sql.Stmt
-	removeUserFromGuildStmt    *sql.Stmt
-	resolveGuildIDStmt         *sql.Stmt
-	sessionToUserIDStmt        *sql.Stmt
-	setGuildNameStmt           *sql.Stmt
-	setGuildPictureStmt        *sql.Stmt
-	updateAvatarStmt           *sql.Stmt
-	updateUsernameStmt         *sql.Stmt
-	userInGuildStmt            *sql.Stmt
+	db                      DBTX
+	tx                      *sql.Tx
+	addAttachmentStmt       *sql.Stmt
+	addFileHashStmt         *sql.Stmt
+	addForeignUserStmt      *sql.Stmt
+	addLocalUserStmt        *sql.Stmt
+	addMessageStmt          *sql.Stmt
+	addSessionStmt          *sql.Stmt
+	addUserStmt             *sql.Stmt
+	addUserToGuildStmt      *sql.Stmt
+	createChannelStmt       *sql.Stmt
+	createGuildStmt         *sql.Stmt
+	createGuildInviteStmt   *sql.Stmt
+	deleteChannelStmt       *sql.Stmt
+	deleteGuildStmt         *sql.Stmt
+	deleteInviteStmt        *sql.Stmt
+	deleteMessageStmt       *sql.Stmt
+	emailExistsStmt         *sql.Stmt
+	expireSessionsStmt      *sql.Stmt
+	getAttachmentsStmt      *sql.Stmt
+	getAvatarStmt           *sql.Stmt
+	getChannelsStmt         *sql.Stmt
+	getFileByHashStmt       *sql.Stmt
+	getGuildMembersStmt     *sql.Stmt
+	getGuildOwnerStmt       *sql.Stmt
+	getGuildPictureStmt     *sql.Stmt
+	getLocalUserIDStmt      *sql.Stmt
+	getMessageStmt          *sql.Stmt
+	getMessageAuthorStmt    *sql.Stmt
+	getMessageDateStmt      *sql.Stmt
+	getMessagesStmt         *sql.Stmt
+	getUserStmt             *sql.Stmt
+	getUserByEmailStmt      *sql.Stmt
+	guildsForUserStmt       *sql.Stmt
+	incrementInviteStmt     *sql.Stmt
+	numChannelsWithIDStmt   *sql.Stmt
+	numGuildsWithIDStmt     *sql.Stmt
+	openInvitesStmt         *sql.Stmt
+	removeUserFromGuildStmt *sql.Stmt
+	resolveGuildIDStmt      *sql.Stmt
+	sessionToUserIDStmt     *sql.Stmt
+	setGuildNameStmt        *sql.Stmt
+	setGuildPictureStmt     *sql.Stmt
+	updateAvatarStmt        *sql.Stmt
+	updateUsernameStmt      *sql.Stmt
+	userInGuildStmt         *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                         tx,
-		tx:                         tx,
-		addAttachmentStmt:          q.addAttachmentStmt,
-		addFileHashStmt:            q.addFileHashStmt,
-		addForeignSessionStmt:      q.addForeignSessionStmt,
-		addForeignUserStmt:         q.addForeignUserStmt,
-		addMessageStmt:             q.addMessageStmt,
-		addSessionStmt:             q.addSessionStmt,
-		addUserStmt:                q.addUserStmt,
-		addUserToGuildStmt:         q.addUserToGuildStmt,
-		createChannelStmt:          q.createChannelStmt,
-		createGuildStmt:            q.createGuildStmt,
-		createGuildInviteStmt:      q.createGuildInviteStmt,
-		deleteChannelStmt:          q.deleteChannelStmt,
-		deleteGuildStmt:            q.deleteGuildStmt,
-		deleteInviteStmt:           q.deleteInviteStmt,
-		deleteMessageStmt:          q.deleteMessageStmt,
-		emailExistsStmt:            q.emailExistsStmt,
-		expireForeignSessionsStmt:  q.expireForeignSessionsStmt,
-		expireSessionsStmt:         q.expireSessionsStmt,
-		foreignSessionToUserIDStmt: q.foreignSessionToUserIDStmt,
-		getAttachmentsStmt:         q.getAttachmentsStmt,
-		getAvatarStmt:              q.getAvatarStmt,
-		getChannelsStmt:            q.getChannelsStmt,
-		getFileByHashStmt:          q.getFileByHashStmt,
-		getForeignUserStmt:         q.getForeignUserStmt,
-		getGuildMembersStmt:        q.getGuildMembersStmt,
-		getGuildOwnerStmt:          q.getGuildOwnerStmt,
-		getGuildPictureStmt:        q.getGuildPictureStmt,
-		getMessageStmt:             q.getMessageStmt,
-		getMessageAuthorStmt:       q.getMessageAuthorStmt,
-		getMessageDateStmt:         q.getMessageDateStmt,
-		getMessagesStmt:            q.getMessagesStmt,
-		getUserStmt:                q.getUserStmt,
-		getUserByIDStmt:            q.getUserByIDStmt,
-		guildsForUserStmt:          q.guildsForUserStmt,
-		incrementInviteStmt:        q.incrementInviteStmt,
-		numChannelsWithIDStmt:      q.numChannelsWithIDStmt,
-		numGuildsWithIDStmt:        q.numGuildsWithIDStmt,
-		openInvitesStmt:            q.openInvitesStmt,
-		removeUserFromGuildStmt:    q.removeUserFromGuildStmt,
-		resolveGuildIDStmt:         q.resolveGuildIDStmt,
-		sessionToUserIDStmt:        q.sessionToUserIDStmt,
-		setGuildNameStmt:           q.setGuildNameStmt,
-		setGuildPictureStmt:        q.setGuildPictureStmt,
-		updateAvatarStmt:           q.updateAvatarStmt,
-		updateUsernameStmt:         q.updateUsernameStmt,
-		userInGuildStmt:            q.userInGuildStmt,
+		db:                      tx,
+		tx:                      tx,
+		addAttachmentStmt:       q.addAttachmentStmt,
+		addFileHashStmt:         q.addFileHashStmt,
+		addForeignUserStmt:      q.addForeignUserStmt,
+		addLocalUserStmt:        q.addLocalUserStmt,
+		addMessageStmt:          q.addMessageStmt,
+		addSessionStmt:          q.addSessionStmt,
+		addUserStmt:             q.addUserStmt,
+		addUserToGuildStmt:      q.addUserToGuildStmt,
+		createChannelStmt:       q.createChannelStmt,
+		createGuildStmt:         q.createGuildStmt,
+		createGuildInviteStmt:   q.createGuildInviteStmt,
+		deleteChannelStmt:       q.deleteChannelStmt,
+		deleteGuildStmt:         q.deleteGuildStmt,
+		deleteInviteStmt:        q.deleteInviteStmt,
+		deleteMessageStmt:       q.deleteMessageStmt,
+		emailExistsStmt:         q.emailExistsStmt,
+		expireSessionsStmt:      q.expireSessionsStmt,
+		getAttachmentsStmt:      q.getAttachmentsStmt,
+		getAvatarStmt:           q.getAvatarStmt,
+		getChannelsStmt:         q.getChannelsStmt,
+		getFileByHashStmt:       q.getFileByHashStmt,
+		getGuildMembersStmt:     q.getGuildMembersStmt,
+		getGuildOwnerStmt:       q.getGuildOwnerStmt,
+		getGuildPictureStmt:     q.getGuildPictureStmt,
+		getLocalUserIDStmt:      q.getLocalUserIDStmt,
+		getMessageStmt:          q.getMessageStmt,
+		getMessageAuthorStmt:    q.getMessageAuthorStmt,
+		getMessageDateStmt:      q.getMessageDateStmt,
+		getMessagesStmt:         q.getMessagesStmt,
+		getUserStmt:             q.getUserStmt,
+		getUserByEmailStmt:      q.getUserByEmailStmt,
+		guildsForUserStmt:       q.guildsForUserStmt,
+		incrementInviteStmt:     q.incrementInviteStmt,
+		numChannelsWithIDStmt:   q.numChannelsWithIDStmt,
+		numGuildsWithIDStmt:     q.numGuildsWithIDStmt,
+		openInvitesStmt:         q.openInvitesStmt,
+		removeUserFromGuildStmt: q.removeUserFromGuildStmt,
+		resolveGuildIDStmt:      q.resolveGuildIDStmt,
+		sessionToUserIDStmt:     q.sessionToUserIDStmt,
+		setGuildNameStmt:        q.setGuildNameStmt,
+		setGuildPictureStmt:     q.setGuildPictureStmt,
+		updateAvatarStmt:        q.updateAvatarStmt,
+		updateUsernameStmt:      q.updateUsernameStmt,
+		userInGuildStmt:         q.userInGuildStmt,
 	}
 }

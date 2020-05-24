@@ -327,13 +327,13 @@ func (db *HarmonyDB) GetMessage(messageID uint64) (queries.Message, error) {
 }
 
 // GetUser gets a user with their email
-func (db *HarmonyDB) GetUser(email string) (queries.GetUserRow, error) {
-	return db.queries.GetUser(ctx, email)
+func (db *HarmonyDB) GetUserByEmail(email string) (queries.GetUserByEmailRow, error) {
+	return db.queries.GetUserByEmail(ctx, email)
 }
 
-// GetUserByID gets a user with their ID
-func (db *HarmonyDB) GetUserByID(userID uint64) (queries.GetUserByIDRow, error) {
-	return db.queries.GetUserByID(ctx, userID)
+// GetUserByID gets a user with their ID and their home server
+func (db *HarmonyDB) GetUserByID(userID uint64) (queries.User, error) {
+	return db.queries.GetUser(ctx, userID)
 }
 
 // AddSession persists a session into the DB
@@ -346,33 +346,36 @@ func (db *HarmonyDB) AddSession(userID uint64, session string) error {
 	})
 }
 
-// AddForeignSession persists a foreign session into the DB
-func (db *HarmonyDB) AddForeignSession(userID uint64, homeServer, session string) error {
-	db.SessionCache.Add(session, userID)
-	return db.queries.AddForeignSession(ctx, queries.AddForeignSessionParams{
-		UserID:     userID,
-		HomeServer: homeServer,
-		Session:    session,
-		Expiration: time.Now().UTC().Add(db.Config.Server.SessionDuration).Unix(),
+// AddLocalUser adds a user to the DB that contains login information (not foreign)
+func (db *HarmonyDB) AddLocalUser(userID uint64, email, username string, passwordHash []byte) error {
+	if err := db.AddUser(userID, username, ""); err != nil {
+		return err
+	}
+	if err := db.queries.AddLocalUser(ctx, queries.AddLocalUserParams{
+		Email:     email,
+		Password:  passwordHash,
+		Instances: nil,
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+// AddForeignUser inserts
+func (db *HarmonyDB) AddForeignUser(homeServer string, userID, localUserID uint64) (uint64, error) {
+	return db.queries.AddForeignUser(ctx, queries.AddForeignUserParams{
+		UserID:      userID,
+		HomeServer:  homeServer,
+		LocalUserID: localUserID,
 	})
 }
 
-func (db *HarmonyDB) AddUser(userID uint64, email, username string, passwordHash []byte) error {
+// AddUser adds a user to the DB that contains a user ID, username, and avatar
+func (db *HarmonyDB) AddUser(userID uint64, username string, avatar string) error {
 	return db.queries.AddUser(ctx, queries.AddUserParams{
 		UserID:   userID,
-		Email:    email,
 		Username: username,
-		Avatar:   sql.NullString{},
-		Password: passwordHash,
-	})
-}
-
-func (db *HarmonyDB) AddForeignUser(userID uint64, homeServer, username, avatar string) error {
-	return db.queries.AddForeignUser(ctx, queries.AddForeignUserParams{
-		UserID:     userID,
-		HomeServer: homeServer,
-		Username:   username,
-		Avatar:     avatar,
+		Avatar:   toSqlString(avatar),
 	})
 }
 
@@ -383,9 +386,6 @@ func (db *HarmonyDB) EmailExists(email string) bool {
 
 func (db *HarmonyDB) ExpireSessions() error {
 	if err := db.queries.ExpireSessions(ctx, time.Now().UTC().Unix()); err != nil {
-		return err
-	}
-	if err := db.queries.ExpireForeignSessions(ctx, time.Now().UTC().Unix()); err != nil {
 		return err
 	}
 	return nil

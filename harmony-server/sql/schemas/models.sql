@@ -1,28 +1,24 @@
 CREATE TABLE IF NOT EXISTS Users
 (
-    User_ID     BIGSERIAL   NOT NULL PRIMARY KEY,
-    Home_Server TEXT        NOT NULL,
-    Email       TEXT UNIQUE NOT NULL,
-    Username    TEXT UNIQUE NOT NULL,
-    Avatar      TEXT,
-    Password    BYTEA       NOT NULL,
-    Instances   jsonb[]
+    User_ID  BIGSERIAL   NOT NULL,
+    Username TEXT UNIQUE NOT NULL,
+    Avatar   TEXT,
+    PRIMARY KEY (User_ID)
+);
+CREATE TABLE IF NOT EXISTS Local_Users
+(
+    User_ID   BIGSERIAL   NOT NULL,
+    Email     TEXT UNIQUE NOT NULL,
+    Password  BYTEA       NOT NULL,
+    Instances JSONB[],
+    FOREIGN KEY (User_ID) REFERENCES Users (User_ID) ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS Foreign_Users
 (
-    User_ID     BIGSERIAL NOT NULL,
-    Home_Server TEXT      NOT NULL,
-    Username    TEXT      NOT NULL,
-    Avatar      TEXT      NOT NULL,
-    PRIMARY KEY (User_ID, Home_Server)
-);
-CREATE TABLE IF NOT EXISTS Foreign_Sessions
-(
-    Session     TEXT PRIMARY KEY NOT NULL,
-    User_ID     BIGSERIAL        NOT NULL,
-    Home_Server TEXT             NOT NULL,
-    Expiration  BIGINT           NOT NULL,
-    FOREIGN KEY (User_ID, Home_Server) REFERENCES Foreign_Users (User_ID, Home_Server) ON DELETE CASCADE
+    User_ID       BIGSERIAL NOT NULL,
+    Home_Server   TEXT      NOT NULL,
+    Local_User_ID BIGSERIAL NOT NULL,
+    FOREIGN KEY (Local_User_ID) REFERENCES Users (User_ID) ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS Sessions
 (

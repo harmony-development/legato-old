@@ -24,18 +24,10 @@ type File struct {
 	FileID string `json:"file_id"`
 }
 
-type ForeignSession struct {
-	Session    string `json:"session"`
-	UserID     uint64 `json:"user_id"`
-	HomeServer string `json:"home_server"`
-	Expiration int64  `json:"expiration"`
-}
-
 type ForeignUser struct {
-	UserID     uint64 `json:"user_id"`
-	HomeServer string `json:"home_server"`
-	Username   string `json:"username"`
-	Avatar     string `json:"avatar"`
+	UserID      uint64 `json:"user_id"`
+	HomeServer  string `json:"home_server"`
+	LocalUserID uint64 `json:"local_user_id"`
 }
 
 type Guild struct {
@@ -58,6 +50,13 @@ type Invite struct {
 	GuildID      uint64        `json:"guild_id"`
 }
 
+type LocalUser struct {
+	UserID    uint64            `json:"user_id"`
+	Email     string            `json:"email"`
+	Password  []byte            `json:"password"`
+	Instances []json.RawMessage `json:"instances"`
+}
+
 type Message struct {
 	MessageID uint64            `json:"message_id"`
 	GuildID   uint64            `json:"guild_id"`
@@ -77,11 +76,7 @@ type Session struct {
 }
 
 type User struct {
-	UserID     uint64            `json:"user_id"`
-	HomeServer string            `json:"home_server"`
-	Email      string            `json:"email"`
-	Username   string            `json:"username"`
-	Avatar     sql.NullString    `json:"avatar"`
-	Password   []byte            `json:"password"`
-	Instances  []json.RawMessage `json:"instances"`
+	UserID   uint64         `json:"user_id"`
+	Username string         `json:"username"`
+	Avatar   sql.NullString `json:"avatar"`
 }

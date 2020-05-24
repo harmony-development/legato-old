@@ -41,15 +41,20 @@ func (h Handlers) Login(c echo.Context) error {
 		}
 		token := t.Claims.(*auth.Token)
 		session := randstr.Hex(16)
-		if err := h.Deps.DB.AddForeignUser(token.UserID, data.Domain, token.Username, token.Avatar); err != nil {
+		id, err := h.Deps.Sonyflake.NextID()
+		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 		}
-		if err := h.Deps.DB.AddForeignSession(token.UserID, data.Domain, session); err != nil {
+		localUserID, err := h.Deps.DB.AddForeignUser(data.Domain, token.UserID, id)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
+		}
+		if err := h.Deps.DB.AddUser(localUserID, token.Username, token.Avatar); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 		}
 		return ctx.JSON(http.StatusOK, LoginResponse{Session: session})
 	} else {
-		user, err := h.Deps.DB.GetUser(data.Email)
+		user, err := h.Deps.DB.GetUserByEmail(data.Email)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusUnauthorized, responses.InvalidEmail)
 		}
