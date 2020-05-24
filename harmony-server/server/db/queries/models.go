@@ -24,13 +24,6 @@ type File struct {
 	FileID string `json:"file_id"`
 }
 
-type ForeignSession struct {
-	Session    string `json:"session"`
-	UserID     uint64 `json:"user_id"`
-	HomeServer string `json:"home_server"`
-	Expiration int64  `json:"expiration"`
-}
-
 type ForeignUser struct {
 	UserID      uint64 `json:"user_id"`
 	HomeServer  string `json:"home_server"`
