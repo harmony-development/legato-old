@@ -1,10 +1,9 @@
 CREATE TABLE IF NOT EXISTS Users
 (
-    User_ID     BIGSERIAL   NOT NULL,
-    Home_Server TEXT        NOT NULL,
-    Username    TEXT UNIQUE NOT NULL,
-    Avatar      TEXT,
-    PRIMARY KEY (User_ID, Home_Server)
+    User_ID  BIGSERIAL   NOT NULL,
+    Username TEXT UNIQUE NOT NULL,
+    Avatar   TEXT,
+    PRIMARY KEY (User_ID)
 );
 CREATE TABLE IF NOT EXISTS Local_Users
 (
@@ -14,13 +13,19 @@ CREATE TABLE IF NOT EXISTS Local_Users
     Instances JSONB[],
     FOREIGN KEY (User_ID) REFERENCES Users (User_ID) ON DELETE CASCADE
 );
+CREATE TABLE IF NOT EXISTS Foreign_Users
+(
+    User_ID       BIGSERIAL NOT NULL,
+    Home_Server   TEXT      NOT NULL,
+    Local_User_ID BIGSERIAL NOT NULL,
+    FOREIGN KEY (Local_User_ID) REFERENCES Users (User_ID) ON DELETE CASCADE
+);
 CREATE TABLE IF NOT EXISTS Sessions
 (
-    Session     TEXT PRIMARY KEY NOT NULL,
-    User_ID     BIGSERIAL        NOT NULL,
-    Home_Server TEXT             NOT NULL,
-    Expiration  BIGINT           NOT NULL,
-    FOREIGN KEY (User_ID, Home_Server) REFERENCES Users (User_ID, Home_Server) ON DELETE CASCADE
+    Session    TEXT PRIMARY KEY NOT NULL,
+    User_ID    BIGSERIAL        NOT NULL,
+    Expiration BIGINT           NOT NULL,
+    FOREIGN KEY (User_ID) REFERENCES Users (User_ID) ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS Guilds
 (
@@ -64,7 +69,7 @@ CREATE TABLE IF NOT EXISTS Messages
     Embeds     jsonb[],
     Actions    jsonb[],
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE,
-    FOREIGN KEY (Channel_ID) REFERENCES Channels (Channel_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Channel_ID) REFERENCES Channels (Channel_ID) ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS Attachments
 (

@@ -34,11 +34,6 @@ type Token struct {
 	Avatar   string
 }
 
-type UserID struct {
-	ID         uint64
-	HomeServer string
-}
-
 // New creates a new authenticator
 func New(d *Dependencies) (*Manager, error) {
 	m := &Manager{

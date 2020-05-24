@@ -19,6 +19,12 @@ type Channel struct {
 	ChannelName string        `json:"channel_name"`
 }
 
+type ForeignUser struct {
+	UserID      uint64 `json:"user_id"`
+	HomeServer  string `json:"home_server"`
+	LocalUserID uint64 `json:"local_user_id"`
+}
+
 type Guild struct {
 	GuildID    uint64 `json:"guild_id"`
 	OwnerID    uint64 `json:"owner_id"`
@@ -61,13 +67,11 @@ type Message struct {
 type Session struct {
 	Session    string `json:"session"`
 	UserID     uint64 `json:"user_id"`
-	HomeServer string `json:"home_server"`
 	Expiration int64  `json:"expiration"`
 }
 
 type User struct {
-	UserID     uint64         `json:"user_id"`
-	HomeServer string         `json:"home_server"`
-	Username   string         `json:"username"`
-	Avatar     sql.NullString `json:"avatar"`
+	UserID   uint64         `json:"user_id"`
+	Username string         `json:"username"`
+	Avatar   sql.NullString `json:"avatar"`
 }

@@ -70,7 +70,7 @@ func (h Handlers) Register(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 	}
-	if err := h.Deps.DB.AddUser(userID, data.Email, data.Username, hash); err != nil {
+	if err := h.Deps.DB.AddLocalUser(userID, data.Email, data.Username, hash); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 	}
 	session := randstr.Hex(16)

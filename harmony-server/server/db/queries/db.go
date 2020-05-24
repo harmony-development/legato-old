@@ -25,6 +25,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.addAttachmentStmt, err = db.PrepareContext(ctx, addAttachment); err != nil {
 		return nil, fmt.Errorf("error preparing query AddAttachment: %w", err)
 	}
+	if q.addForeignUserStmt, err = db.PrepareContext(ctx, addForeignUser); err != nil {
+		return nil, fmt.Errorf("error preparing query AddForeignUser: %w", err)
+	}
 	if q.addLocalUserStmt, err = db.PrepareContext(ctx, addLocalUser); err != nil {
 		return nil, fmt.Errorf("error preparing query AddLocalUser: %w", err)
 	}
@@ -84,6 +87,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getGuildPictureStmt, err = db.PrepareContext(ctx, getGuildPicture); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGuildPicture: %w", err)
+	}
+	if q.getLocalUserIDStmt, err = db.PrepareContext(ctx, getLocalUserID); err != nil {
+		return nil, fmt.Errorf("error preparing query GetLocalUserID: %w", err)
 	}
 	if q.getMessageStmt, err = db.PrepareContext(ctx, getMessage); err != nil {
 		return nil, fmt.Errorf("error preparing query GetMessage: %w", err)
@@ -150,6 +156,11 @@ func (q *Queries) Close() error {
 	if q.addAttachmentStmt != nil {
 		if cerr := q.addAttachmentStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing addAttachmentStmt: %w", cerr)
+		}
+	}
+	if q.addForeignUserStmt != nil {
+		if cerr := q.addForeignUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addForeignUserStmt: %w", cerr)
 		}
 	}
 	if q.addLocalUserStmt != nil {
@@ -250,6 +261,11 @@ func (q *Queries) Close() error {
 	if q.getGuildPictureStmt != nil {
 		if cerr := q.getGuildPictureStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getGuildPictureStmt: %w", cerr)
+		}
+	}
+	if q.getLocalUserIDStmt != nil {
+		if cerr := q.getLocalUserIDStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getLocalUserIDStmt: %w", cerr)
 		}
 	}
 	if q.getMessageStmt != nil {
@@ -387,6 +403,7 @@ type Queries struct {
 	db                      DBTX
 	tx                      *sql.Tx
 	addAttachmentStmt       *sql.Stmt
+	addForeignUserStmt      *sql.Stmt
 	addLocalUserStmt        *sql.Stmt
 	addMessageStmt          *sql.Stmt
 	addSessionStmt          *sql.Stmt
@@ -407,6 +424,7 @@ type Queries struct {
 	getGuildMembersStmt     *sql.Stmt
 	getGuildOwnerStmt       *sql.Stmt
 	getGuildPictureStmt     *sql.Stmt
+	getLocalUserIDStmt      *sql.Stmt
 	getMessageStmt          *sql.Stmt
 	getMessageAuthorStmt    *sql.Stmt
 	getMessageDateStmt      *sql.Stmt
@@ -433,6 +451,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		db:                      tx,
 		tx:                      tx,
 		addAttachmentStmt:       q.addAttachmentStmt,
+		addForeignUserStmt:      q.addForeignUserStmt,
 		addLocalUserStmt:        q.addLocalUserStmt,
 		addMessageStmt:          q.addMessageStmt,
 		addSessionStmt:          q.addSessionStmt,
@@ -453,6 +472,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getGuildMembersStmt:     q.getGuildMembersStmt,
 		getGuildOwnerStmt:       q.getGuildOwnerStmt,
 		getGuildPictureStmt:     q.getGuildPictureStmt,
+		getLocalUserIDStmt:      q.getLocalUserIDStmt,
 		getMessageStmt:          q.getMessageStmt,
 		getMessageAuthorStmt:    q.getMessageAuthorStmt,
 		getMessageDateStmt:      q.getMessageDateStmt,

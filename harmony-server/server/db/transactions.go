@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"time"
 
-	"harmony-server/server/auth"
 	"harmony-server/server/db/queries"
 )
 
@@ -209,9 +208,9 @@ func (db *HarmonyDB) DeleteInvite(inviteID uint64) error {
 }
 
 // SessionToUserID gets the user ID from a session
-func (db *HarmonyDB) SessionToUserID(session string) (queries.SessionToUserIDRow, error) {
+func (db *HarmonyDB) SessionToUserID(session string) (uint64, error) {
 	userID, exists := db.SessionCache.Get(session)
-	s, ok := userID.(queries.SessionToUserIDRow)
+	s, ok := userID.(uint64)
 	if !exists || !ok {
 		return db.queries.SessionToUserID(ctx, session)
 	}
@@ -333,26 +332,23 @@ func (db *HarmonyDB) GetUserByEmail(email string) (queries.GetUserByEmailRow, er
 }
 
 // GetUserByID gets a user with their ID and their home server
-func (db *HarmonyDB) GetUserByID(userID auth.UserID) (queries.GetUserRow, error) {
-	return db.queries.GetUser(ctx, queries.GetUserParams{
-		UserID:     userID.ID,
-		HomeServer: userID.HomeServer,
-	})
+func (db *HarmonyDB) GetUserByID(userID uint64) (queries.User, error) {
+	return db.queries.GetUser(ctx, userID)
 }
 
 // AddSession persists a session into the DB
-func (db *HarmonyDB) AddSession(userID auth.UserID, session string) error {
+func (db *HarmonyDB) AddSession(userID uint64, session string) error {
 	db.SessionCache.Add(session, userID)
 	return db.queries.AddSession(ctx, queries.AddSessionParams{
-		UserID:     userID.ID,
-		HomeServer: userID.HomeServer,
+		UserID:     userID,
 		Session:    session,
 		Expiration: time.Now().UTC().Add(db.Config.Server.SessionDuration).Unix(),
 	})
 }
 
-func (db *HarmonyDB) AddLocalUser(userID auth.UserID, homeServer, email, username string, passwordHash []byte) error {
-	if err := db.AddUser(userID.ID, homeServer, username); err != nil {
+// AddLocalUser adds a user to the DB that contains login information (not foreign)
+func (db *HarmonyDB) AddLocalUser(userID uint64, email, username string, passwordHash []byte) error {
+	if err := db.AddUser(userID, username, ""); err != nil {
 		return err
 	}
 	if err := db.queries.AddLocalUser(ctx, queries.AddLocalUserParams{
@@ -365,12 +361,21 @@ func (db *HarmonyDB) AddLocalUser(userID auth.UserID, homeServer, email, usernam
 	return nil
 }
 
-func (db *HarmonyDB) AddUser(userID uint64, homeServer, username string) error {
+// AddForeignUser inserts
+func (db *HarmonyDB) AddForeignUser(homeServer string, userID, localUserID uint64) (uint64, error) {
+	return db.queries.AddForeignUser(ctx, queries.AddForeignUserParams{
+		UserID:      userID,
+		HomeServer:  homeServer,
+		LocalUserID: localUserID,
+	})
+}
+
+// AddUser adds a user to the DB that contains a user ID, username, and avatar
+func (db *HarmonyDB) AddUser(userID uint64, username string, avatar string) error {
 	return db.queries.AddUser(ctx, queries.AddUserParams{
-		UserID:     userID,
-		HomeServer: homeServer,
-		Username:   username,
-		Avatar:     sql.NullString{},
+		UserID:   userID,
+		Username: username,
+		Avatar:   toSqlString(avatar),
 	})
 }
 
@@ -386,27 +391,15 @@ func (db *HarmonyDB) ExpireSessions() error {
 	return nil
 }
 
-func (db *HarmonyDB) UpdateLocalUsername(userID uint64, username string) error {
-	return db.UpdateUsername(userID, "", username)
-}
-
-func (db *HarmonyDB) UpdateUsername(userID uint64, homeServer, username string) error {
+func (db *HarmonyDB) UpdateUsername(userID uint64, username string) error {
 	return db.queries.UpdateUsername(ctx, queries.UpdateUsernameParams{
-		Username:   username,
-		UserID:     userID,
-		HomeServer: homeServer,
+		Username: username,
+		UserID:   userID,
 	})
 }
 
-func (db *HarmonyDB) GetLocalAvatar(userID uint64) (sql.NullString, error) {
-	return db.GetAvatar(userID, "")
-}
-
-func (db *HarmonyDB) GetAvatar(userID uint64, homeServer string) (sql.NullString, error) {
-	return db.queries.GetAvatar(ctx, queries.GetAvatarParams{
-		UserID:     userID,
-		HomeServer: homeServer,
-	})
+func (db *HarmonyDB) GetAvatar(userID uint64) (sql.NullString, error) {
+	return db.queries.GetAvatar(ctx, userID)
 }
 
 func (db *HarmonyDB) HasGuildWithID(guildID uint64) (bool, error) {
@@ -420,4 +413,11 @@ func (db *HarmonyDB) HasChannelWithID(guildID, channelID uint64) (bool, error) {
 		ChannelID: channelID,
 	})
 	return count != 0, err
+}
+
+func (db *HarmonyDB) GetLocalUserID(userID uint64, homeServer string) (uint64, error) {
+	return db.queries.GetLocalUserID(ctx, queries.GetLocalUserIDParams{
+		UserID:     userID,
+		HomeServer: homeServer,
+	})
 }

@@ -11,6 +11,27 @@ import (
 	"github.com/lib/pq"
 )
 
+const addForeignUser = `-- name: AddForeignUser :one
+INSERT INTO Foreign_Users (User_ID, Home_Server, Local_User_ID)
+VALUES ($1, $2, $3)
+ON CONFLICT (Local_User_ID) DO UPDATE
+    SET Local_User_ID=Local_User_ID
+RETURNING Local_User_ID
+`
+
+type AddForeignUserParams struct {
+	UserID      uint64 `json:"user_id"`
+	HomeServer  string `json:"home_server"`
+	LocalUserID uint64 `json:"local_user_id"`
+}
+
+func (q *Queries) AddForeignUser(ctx context.Context, arg AddForeignUserParams) (uint64, error) {
+	row := q.queryRow(ctx, q.addForeignUserStmt, addForeignUser, arg.UserID, arg.HomeServer, arg.LocalUserID)
+	var local_user_id uint64
+	err := row.Scan(&local_user_id)
+	return local_user_id, err
+}
+
 const addLocalUser = `-- name: AddLocalUser :exec
 INSERT INTO Local_Users (Email, Password, Instances)
 VALUES ($1, $2, $3)
@@ -28,24 +49,18 @@ func (q *Queries) AddLocalUser(ctx context.Context, arg AddLocalUserParams) erro
 }
 
 const addUser = `-- name: AddUser :exec
-INSERT INTO Users (User_ID, Home_Server, Username, Avatar)
-VALUES ($1, $2, $3, $4)
+INSERT INTO Users (User_ID, Username, Avatar)
+VALUES ($1, $2, $3)
 `
 
 type AddUserParams struct {
-	UserID     uint64         `json:"user_id"`
-	HomeServer string         `json:"home_server"`
-	Username   string         `json:"username"`
-	Avatar     sql.NullString `json:"avatar"`
+	UserID   uint64         `json:"user_id"`
+	Username string         `json:"username"`
+	Avatar   sql.NullString `json:"avatar"`
 }
 
 func (q *Queries) AddUser(ctx context.Context, arg AddUserParams) error {
-	_, err := q.exec(ctx, q.addUserStmt, addUser,
-		arg.UserID,
-		arg.HomeServer,
-		arg.Username,
-		arg.Avatar,
-	)
+	_, err := q.exec(ctx, q.addUserStmt, addUser, arg.UserID, arg.Username, arg.Avatar)
 	return err
 }
 
@@ -66,42 +81,43 @@ const getAvatar = `-- name: GetAvatar :one
 SELECT Avatar
 FROM Users
 WHERE User_ID = $1
+`
+
+func (q *Queries) GetAvatar(ctx context.Context, userID uint64) (sql.NullString, error) {
+	row := q.queryRow(ctx, q.getAvatarStmt, getAvatar, userID)
+	var avatar sql.NullString
+	err := row.Scan(&avatar)
+	return avatar, err
+}
+
+const getLocalUserID = `-- name: GetLocalUserID :one
+SELECT Local_User_ID
+FROM Foreign_Users
+WHERE User_ID = $1
   AND Home_Server = $2
 `
 
-type GetAvatarParams struct {
+type GetLocalUserIDParams struct {
 	UserID     uint64 `json:"user_id"`
 	HomeServer string `json:"home_server"`
 }
 
-func (q *Queries) GetAvatar(ctx context.Context, arg GetAvatarParams) (sql.NullString, error) {
-	row := q.queryRow(ctx, q.getAvatarStmt, getAvatar, arg.UserID, arg.HomeServer)
-	var avatar sql.NullString
-	err := row.Scan(&avatar)
-	return avatar, err
+func (q *Queries) GetLocalUserID(ctx context.Context, arg GetLocalUserIDParams) (uint64, error) {
+	row := q.queryRow(ctx, q.getLocalUserIDStmt, getLocalUserID, arg.UserID, arg.HomeServer)
+	var local_user_id uint64
+	err := row.Scan(&local_user_id)
+	return local_user_id, err
 }
 
 const getUser = `-- name: GetUser :one
 SELECT User_ID, Username, Avatar
 FROM Users
 WHERE User_ID = $1
-  AND Home_Server = $2
 `
 
-type GetUserParams struct {
-	UserID     uint64 `json:"user_id"`
-	HomeServer string `json:"home_server"`
-}
-
-type GetUserRow struct {
-	UserID   uint64         `json:"user_id"`
-	Username string         `json:"username"`
-	Avatar   sql.NullString `json:"avatar"`
-}
-
-func (q *Queries) GetUser(ctx context.Context, arg GetUserParams) (GetUserRow, error) {
-	row := q.queryRow(ctx, q.getUserStmt, getUser, arg.UserID, arg.HomeServer)
-	var i GetUserRow
+func (q *Queries) GetUser(ctx context.Context, userID uint64) (User, error) {
+	row := q.queryRow(ctx, q.getUserStmt, getUser, userID)
+	var i User
 	err := row.Scan(&i.UserID, &i.Username, &i.Avatar)
 	return i, err
 }
@@ -139,17 +155,15 @@ const updateAvatar = `-- name: UpdateAvatar :exec
 UPDATE Users
 SET Avatar=$1
 WHERE User_ID = $2
-  AND Home_Server = $3
 `
 
 type UpdateAvatarParams struct {
-	Avatar     sql.NullString `json:"avatar"`
-	UserID     uint64         `json:"user_id"`
-	HomeServer string         `json:"home_server"`
+	Avatar sql.NullString `json:"avatar"`
+	UserID uint64         `json:"user_id"`
 }
 
 func (q *Queries) UpdateAvatar(ctx context.Context, arg UpdateAvatarParams) error {
-	_, err := q.exec(ctx, q.updateAvatarStmt, updateAvatar, arg.Avatar, arg.UserID, arg.HomeServer)
+	_, err := q.exec(ctx, q.updateAvatarStmt, updateAvatar, arg.Avatar, arg.UserID)
 	return err
 }
 
@@ -157,16 +171,14 @@ const updateUsername = `-- name: UpdateUsername :exec
 UPDATE Users
 SET Username=$1
 WHERE User_ID = $2
-  AND Home_Server = $3
 `
 
 type UpdateUsernameParams struct {
-	Username   string `json:"username"`
-	UserID     uint64 `json:"user_id"`
-	HomeServer string `json:"home_server"`
+	Username string `json:"username"`
+	UserID   uint64 `json:"user_id"`
 }
 
 func (q *Queries) UpdateUsername(ctx context.Context, arg UpdateUsernameParams) error {
-	_, err := q.exec(ctx, q.updateUsernameStmt, updateUsername, arg.Username, arg.UserID, arg.HomeServer)
+	_, err := q.exec(ctx, q.updateUsernameStmt, updateUsername, arg.Username, arg.UserID)
 	return err
 }

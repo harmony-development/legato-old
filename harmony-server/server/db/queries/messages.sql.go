@@ -12,11 +12,8 @@ import (
 )
 
 const addAttachment = `-- name: AddAttachment :exec
-INSERT INTO Attachments(
-    Message_ID, Attachment_URL
-) VALUES (
-    $1, $2
-)
+INSERT INTO Attachments(Message_ID, Attachment_URL)
+VALUES ($1, $2)
 `
 
 type AddAttachmentParams struct {
@@ -30,11 +27,8 @@ func (q *Queries) AddAttachment(ctx context.Context, arg AddAttachmentParams) er
 }
 
 const addMessage = `-- name: AddMessage :one
-INSERT INTO Messages (
-    Guild_ID, Channel_ID, User_ID, Content, Embeds, Actions, Created_At
-) VALUES (
-    $1, $2, $3, $4, $5, $6, NOW()
-)
+INSERT INTO Messages (Guild_ID, Channel_ID, User_ID, Content, Embeds, Actions, Created_At)
+VALUES ($1, $2, $3, $4, $5, $6, NOW())
 RETURNING message_id, guild_id, channel_id, user_id, created_at, edited_at, content, embeds, actions
 `
 
@@ -72,10 +66,11 @@ func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) (Message
 }
 
 const deleteMessage = `-- name: DeleteMessage :execrows
-DELETE FROM Messages
-    WHERE Message_ID = $1
-    AND Channel_ID = $2
-    AND Guild_ID = $3
+DELETE
+FROM Messages
+WHERE Message_ID = $1
+  AND Channel_ID = $2
+  AND Guild_ID = $3
 `
 
 type DeleteMessageParams struct {
@@ -93,8 +88,9 @@ func (q *Queries) DeleteMessage(ctx context.Context, arg DeleteMessageParams) (i
 }
 
 const getAttachments = `-- name: GetAttachments :many
-SELECT Attachment_URL FROM Attachments
-    WHERE Message_ID = $1
+SELECT Attachment_URL
+FROM Attachments
+WHERE Message_ID = $1
 `
 
 func (q *Queries) GetAttachments(ctx context.Context, messageID uint64) ([]string, error) {
@@ -121,8 +117,9 @@ func (q *Queries) GetAttachments(ctx context.Context, messageID uint64) ([]strin
 }
 
 const getMessage = `-- name: GetMessage :one
-SELECT message_id, guild_id, channel_id, user_id, created_at, edited_at, content, embeds, actions FROM Messages
-    WHERE Message_ID = $1
+SELECT message_id, guild_id, channel_id, user_id, created_at, edited_at, content, embeds, actions
+FROM Messages
+WHERE Message_ID = $1
 `
 
 func (q *Queries) GetMessage(ctx context.Context, messageID uint64) (Message, error) {
@@ -143,8 +140,9 @@ func (q *Queries) GetMessage(ctx context.Context, messageID uint64) (Message, er
 }
 
 const getMessageAuthor = `-- name: GetMessageAuthor :one
-SELECT User_ID FROM Messages
-    WHERE Message_ID = $1
+SELECT User_ID
+FROM Messages
+WHERE Message_ID = $1
 `
 
 func (q *Queries) GetMessageAuthor(ctx context.Context, messageID uint64) (uint64, error) {
@@ -155,8 +153,9 @@ func (q *Queries) GetMessageAuthor(ctx context.Context, messageID uint64) (uint6
 }
 
 const getMessageDate = `-- name: GetMessageDate :one
-SELECT Created_At FROM Messages
-    WHERE Message_ID = $1
+SELECT Created_At
+FROM Messages
+WHERE Message_ID = $1
 `
 
 func (q *Queries) GetMessageDate(ctx context.Context, messageID uint64) (time.Time, error) {
@@ -167,12 +166,13 @@ func (q *Queries) GetMessageDate(ctx context.Context, messageID uint64) (time.Ti
 }
 
 const getMessages = `-- name: GetMessages :many
-SELECT Message_ID, User_ID, Content, Created_At FROM Messages
-    WHERE Guild_ID = $1
-    AND Channel_ID = $2
-    AND Created_At < $3
-    ORDER BY Created_At DESC
-    LIMIT $4
+SELECT Message_ID, User_ID, Content, Created_At
+FROM Messages
+WHERE Guild_ID = $1
+  AND Channel_ID = $2
+  AND Created_At < $3
+ORDER BY Created_At DESC
+LIMIT $4
 `
 
 type GetMessagesParams struct {

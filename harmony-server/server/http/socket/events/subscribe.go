@@ -2,6 +2,7 @@ package events
 
 import (
 	"encoding/json"
+
 	"harmony-server/server/http/socket/client"
 	"harmony-server/server/state/guild"
 
@@ -24,7 +25,7 @@ func (e Events) Subscribe(ws client.Client, event *client.Event, raw *json.RawMe
 		ws.SendError("invalid session")
 		return
 	}
-	ws.UserID = &userID.UserID
+	ws.UserID = &userID
 	if !event.Limiter.Allow() {
 		ws.SendError("too many requests")
 		return
