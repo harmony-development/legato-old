@@ -4,7 +4,7 @@ VALUES ($1, $2, $3, $4, $5, $6, NOW())
 RETURNING *;
 
 -- name: AddAttachment :exec
-INSERT INTO Attachments(Message_ID, Attachment_URL)
+INSERT INTO Attachments(Message_ID, Attachment)
 VALUES ($1, $2);
 
 -- name: DeleteMessage :execrows
@@ -25,7 +25,7 @@ FROM Messages
 WHERE Message_ID = $1;
 
 -- name: GetAttachments :many
-SELECT Attachment_URL
+SELECT Attachment
 FROM Attachments
 WHERE Message_ID = $1;
 

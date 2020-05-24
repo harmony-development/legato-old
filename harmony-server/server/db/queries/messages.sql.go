@@ -12,17 +12,17 @@ import (
 )
 
 const addAttachment = `-- name: AddAttachment :exec
-INSERT INTO Attachments(Message_ID, Attachment_URL)
+INSERT INTO Attachments(Message_ID, Attachment)
 VALUES ($1, $2)
 `
 
 type AddAttachmentParams struct {
-	MessageID     uint64 `json:"message_id"`
-	AttachmentUrl string `json:"attachment_url"`
+	MessageID  uint64 `json:"message_id"`
+	Attachment string `json:"attachment"`
 }
 
 func (q *Queries) AddAttachment(ctx context.Context, arg AddAttachmentParams) error {
-	_, err := q.exec(ctx, q.addAttachmentStmt, addAttachment, arg.MessageID, arg.AttachmentUrl)
+	_, err := q.exec(ctx, q.addAttachmentStmt, addAttachment, arg.MessageID, arg.Attachment)
 	return err
 }
 
@@ -88,7 +88,7 @@ func (q *Queries) DeleteMessage(ctx context.Context, arg DeleteMessageParams) (i
 }
 
 const getAttachments = `-- name: GetAttachments :many
-SELECT Attachment_URL
+SELECT Attachment
 FROM Attachments
 WHERE Message_ID = $1
 `
@@ -101,11 +101,11 @@ func (q *Queries) GetAttachments(ctx context.Context, messageID uint64) ([]strin
 	defer rows.Close()
 	var items []string
 	for rows.Next() {
-		var attachment_url string
-		if err := rows.Scan(&attachment_url); err != nil {
+		var attachment string
+		if err := rows.Scan(&attachment); err != nil {
 			return nil, err
 		}
-		items = append(items, attachment_url)
+		items = append(items, attachment)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err

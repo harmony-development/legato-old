@@ -135,8 +135,8 @@ func (db *HarmonyDB) AddMessage(channelID, guildID, userID uint64, message strin
 	}
 	for _, attachment := range attachments {
 		if err := tq.AddAttachment(ctx, queries.AddAttachmentParams{
-			MessageID:     msg.MessageID,
-			AttachmentUrl: attachment,
+			MessageID:  msg.MessageID,
+			Attachment: attachment,
 		}); err != nil {
 			_ = tx.Rollback()
 			return nil, err
@@ -281,8 +281,8 @@ func (db *HarmonyDB) AddAttachments(messageID uint64, attachments []string) erro
 	withTX := db.queries.WithTx(tx)
 	for _, a := range attachments {
 		err = withTX.AddAttachment(ctx, queries.AddAttachmentParams{
-			MessageID:     messageID,
-			AttachmentUrl: a,
+			MessageID:  messageID,
+			Attachment: a,
 		})
 		if err != nil {
 			_ = tx.Rollback()
@@ -402,6 +402,13 @@ func (db *HarmonyDB) GetAvatar(userID uint64) (sql.NullString, error) {
 	return db.queries.GetAvatar(ctx, userID)
 }
 
+func (db *HarmonyDB) UpdateAvatar(userID uint64, avatar string) error {
+	return db.queries.UpdateAvatar(ctx, queries.UpdateAvatarParams{
+		Avatar: toSqlString(avatar),
+		UserID: userID,
+	})
+}
+
 func (db *HarmonyDB) HasGuildWithID(guildID uint64) (bool, error) {
 	count, err := db.queries.NumGuildsWithID(ctx, guildID)
 	return count != 0, err
@@ -415,9 +422,13 @@ func (db *HarmonyDB) HasChannelWithID(guildID, channelID uint64) (bool, error) {
 	return count != 0, err
 }
 
-func (db *HarmonyDB) GetLocalUserID(userID uint64, homeServer string) (uint64, error) {
-	return db.queries.GetLocalUserID(ctx, queries.GetLocalUserIDParams{
-		UserID:     userID,
-		HomeServer: homeServer,
+func (db *HarmonyDB) AddFileHash(fileID string, hash []byte) error {
+	return db.queries.AddFileHash(ctx, queries.AddFileHashParams{
+		Hash:   hash,
+		FileID: fileID,
 	})
+}
+
+func (db *HarmonyDB) GetFileIDFromHash(hash []byte) (string, error) {
+	return db.queries.GetFileByHash(ctx, hash)
 }

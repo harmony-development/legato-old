@@ -73,7 +73,12 @@ CREATE TABLE IF NOT EXISTS Messages
 );
 CREATE TABLE IF NOT EXISTS Attachments
 (
-    Message_ID     BIGSERIAL NOT NULL,
-    Attachment_URL TEXT      NOT NULL,
+    Message_ID BIGSERIAL NOT NULL,
+    Attachment TEXT      NOT NULL,
     FOREIGN KEY (Message_ID) REFERENCES Messages (Message_ID) ON DELETE CASCADE
 );
+CREATE TABLE IF NOT EXISTS Files
+(
+    Hash    BYTEA PRIMARY KEY NOT NULL,
+    File_ID TEXT              NOT NULL
+)
