@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"harmony-server/server/auth"
 	"harmony-server/server/db/queries"
 )
 
@@ -331,35 +332,27 @@ func (db *HarmonyDB) GetUserByEmail(email string) (queries.GetUserByEmailRow, er
 	return db.queries.GetUserByEmail(ctx, email)
 }
 
-// GetUserByID gets a local user with their ID
-func (db *HarmonyDB) GetLocalUserByID(userID uint64) (queries.GetUserRow, error) {
-	return db.queries.GetUser(ctx, queries.GetUserParams{
-		UserID:     userID,
-		HomeServer: "",
-	})
-}
-
 // GetUserByID gets a user with their ID and their home server
-func (db *HarmonyDB) GetUserByID(userID uint64, homeServer string) (queries.GetUserRow, error) {
+func (db *HarmonyDB) GetUserByID(userID auth.UserID) (queries.GetUserRow, error) {
 	return db.queries.GetUser(ctx, queries.GetUserParams{
-		UserID:     userID,
-		HomeServer: homeServer,
+		UserID:     userID.ID,
+		HomeServer: userID.HomeServer,
 	})
 }
 
 // AddSession persists a session into the DB
-func (db *HarmonyDB) AddSession(userID uint64, homeServer string, session string) error {
+func (db *HarmonyDB) AddSession(userID auth.UserID, session string) error {
 	db.SessionCache.Add(session, userID)
 	return db.queries.AddSession(ctx, queries.AddSessionParams{
-		UserID:     userID,
-		HomeServer: homeServer,
+		UserID:     userID.ID,
+		HomeServer: userID.HomeServer,
 		Session:    session,
 		Expiration: time.Now().UTC().Add(db.Config.Server.SessionDuration).Unix(),
 	})
 }
 
-func (db *HarmonyDB) AddLocalUser(userID uint64, homeServer, email, username string, passwordHash []byte) error {
-	if err := db.AddUser(userID, homeServer, username); err != nil {
+func (db *HarmonyDB) AddLocalUser(userID auth.UserID, homeServer, email, username string, passwordHash []byte) error {
+	if err := db.AddUser(userID.ID, homeServer, username); err != nil {
 		return err
 	}
 	if err := db.queries.AddLocalUser(ctx, queries.AddLocalUserParams{
