@@ -10,10 +10,11 @@ import (
 )
 
 func (m *Middlewares) Schema(schema interface{}) echo.MiddlewareFunc {
+	schemaType := reflect.TypeOf(schema)
 	return func(handler echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			ctx := c.(HarmonyContext)
-			data := reflect.New(reflect.TypeOf(schema)).Interface()
+			data := reflect.New(schemaType).Interface()
 			ctx.Data = data
 			if err := ctx.Bind(data); err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, responses.InvalidRequest)
