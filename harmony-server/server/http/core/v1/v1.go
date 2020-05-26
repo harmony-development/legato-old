@@ -274,7 +274,7 @@ func (h Handlers) MakeRoutes() []routing.Route {
 				Duration: 500 * time.Millisecond,
 				Burst:    1024,
 			},
-			Auth:   false,
+			Auth:   true,
 			Schema: new(ConnectData),
 		},
 		{
