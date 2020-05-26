@@ -347,6 +347,14 @@ func (db *HarmonyDB) AddSession(userID uint64, session string) error {
 	})
 }
 
+// GetLocalUserForForeignUser gets a local user from the foreign users database
+func (db *HarmonyDB) GetLocalUserForForeignUser(userID uint64, homeserver string) (uint64, error) {
+	return db.queries.GetLocalUserID(ctx, queries.GetLocalUserIDParams{
+		UserID:     userID,
+		HomeServer: homeserver,
+	})
+}
+
 // AddLocalUser adds a user to the DB that contains login information (not foreign)
 func (db *HarmonyDB) AddLocalUser(userID uint64, email, username string, passwordHash []byte) error {
 	tx, err := db.Begin()

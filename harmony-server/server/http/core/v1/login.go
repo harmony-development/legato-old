@@ -43,15 +43,22 @@ func (h Handlers) Login(c echo.Context) error {
 		}
 		token := t.Claims.(*auth.Token)
 		session := randstr.Hex(16)
-		id, err := h.Deps.Sonyflake.NextID()
+		localUserID, err := h.Deps.DB.GetLocalUserForForeignUser(token.UserID, data.Domain)
 		if err != nil {
 			h.Deps.Logger.Exception(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 		}
-		localUserID, err := h.Deps.DB.AddForeignUser(data.Domain, token.UserID, id, token.Username, token.Avatar)
-		if err != nil {
-			h.Deps.Logger.Exception(err)
-			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
+		if localUserID == 0 {
+			id, err := h.Deps.Sonyflake.NextID()
+			if err != nil {
+				h.Deps.Logger.Exception(err)
+				return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
+			}
+			localUserID, err = h.Deps.DB.AddForeignUser(data.Domain, token.UserID, id, token.Username, token.Avatar)
+			if err != nil {
+				h.Deps.Logger.Exception(err)
+				return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
+			}
 		}
 		if err := h.Deps.DB.AddSession(localUserID, session); err != nil {
 			h.Deps.Logger.Exception(err)
