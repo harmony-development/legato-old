@@ -77,7 +77,11 @@ func (c *Client) Reader() {
 		_, msg, err := c.Conn.ReadMessage()
 		if err != nil {
 			logrus.Warn("Error reading message from client", err)
-			continue
+			if c.UserID != nil {
+				c.Deregister(c)
+			}
+			_ = c.Conn.Close()
+			return
 		}
 		var p Packet
 		if err := json.Unmarshal(msg, &p); err != nil {
@@ -98,8 +102,10 @@ func (c *Client) Writer() {
 		if err != nil {
 			logrus.Warnf("Error writing data to events : %v", err)
 			logrus.Debugf("Closing Socket : Data write error")
+			if c.UserID != nil {
+				c.Deregister(c)
+			}
 			_ = c.Conn.Close()
-			c.Deregister(c)
 			return
 		}
 	}
