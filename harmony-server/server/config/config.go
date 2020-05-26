@@ -1,6 +1,9 @@
 package config
 
 import (
+	"github.com/fsnotify/fsnotify"
+	"github.com/logrusorgru/aurora"
+	"log"
 	"time"
 
 	"github.com/spf13/viper"
@@ -134,5 +137,14 @@ func Load() (*Config, error) {
 	if err := viper.UnmarshalKey("InstanceServer", &cfg); err != nil {
 		return nil, err
 	}
+	viper.OnConfigChange(func(e fsnotify.Event) {
+		log.Println(aurora.Yellow("⌛ Reloading config..."))
+		if err := viper.UnmarshalKey("InstanceServer", &cfg); err != nil {
+			log.Println("failed to read reloaded config", err)
+			return
+		}
+		log.Println(aurora.Green("✔ Config reloaded successfully").Bold())
+	})
+	viper.WatchConfig()
 	return &cfg, nil
 }

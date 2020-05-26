@@ -79,7 +79,7 @@ func (db *HarmonyDB) IsOwner(guildID uint64, userID uint64) (bool, error) {
 // AddInvite inserts a new invite to the DB
 func (db *HarmonyDB) CreateInvite(guildID uint64, possibleUses int32, name string) (queries.Invite, error) {
 	return db.queries.CreateGuildInvite(ctx, queries.CreateGuildInviteParams{
-		Name:         name,
+		InviteID:     name,
 		PossibleUses: sql.NullInt32{Int32: possibleUses, Valid: true},
 		GuildID:      guildID,
 	})
@@ -179,17 +179,17 @@ func (db *HarmonyDB) GetMessageOwner(messageID uint64) (uint64, error) {
 }
 
 // InviteToGuild
-func (db *HarmonyDB) ResolveGuildID(inviteID uint64) (uint64, error) {
+func (db *HarmonyDB) ResolveGuildID(inviteID string) (uint64, error) {
 	return db.queries.ResolveGuildID(ctx, inviteID)
 }
 
 // IncrementInvite adds to the invite counter in a DB
-func (db *HarmonyDB) IncrementInvite(inviteID uint64) error {
+func (db *HarmonyDB) IncrementInvite(inviteID string) error {
 	return db.queries.IncrementInvite(ctx, inviteID)
 }
 
 // DeleteInvite removes an invite from the DB
-func (db *HarmonyDB) DeleteInvite(inviteID uint64) error {
+func (db *HarmonyDB) DeleteInvite(inviteID string) error {
 	tx, err := db.Begin()
 	if err != nil {
 		return err
@@ -344,6 +344,14 @@ func (db *HarmonyDB) AddSession(userID uint64, session string) error {
 		UserID:     userID,
 		Session:    session,
 		Expiration: time.Now().UTC().Add(db.Config.Server.SessionDuration).Unix(),
+	})
+}
+
+// GetLocalUserForForeignUser gets a local user from the foreign users database
+func (db *HarmonyDB) GetLocalUserForForeignUser(userID uint64, homeserver string) (uint64, error) {
+	return db.queries.GetLocalUserID(ctx, queries.GetLocalUserIDParams{
+		UserID:     userID,
+		HomeServer: homeserver,
 	})
 }
 

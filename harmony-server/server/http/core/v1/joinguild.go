@@ -11,7 +11,7 @@ import (
 
 // JoinGuildData is the data for a guild join request
 type JoinGuildData struct {
-	InviteCode uint64 `validate:"required"`
+	InviteCode string `validate:"required"`
 }
 
 // JoinGuild is the request to join a guild

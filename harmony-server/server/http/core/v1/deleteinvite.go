@@ -9,7 +9,7 @@ import (
 
 // DeleteInviteData is the data for an invite delete request
 type DeleteInviteData struct {
-	Invite uint64 `validate:"required"`
+	Invite string `validate:"required"`
 }
 
 // DeleteInvite is the request to delete an invite

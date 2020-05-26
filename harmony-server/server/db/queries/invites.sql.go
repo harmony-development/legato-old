@@ -10,25 +10,24 @@ import (
 
 const createGuildInvite = `-- name: CreateGuildInvite :one
 INSERT INTO Invites (
-    Name, Possible_Uses, Guild_ID
+    Invite_ID, Possible_Uses, Guild_ID
 ) VALUES (
     $1, $2, $3
 )
-RETURNING invite_id, name, uses, possible_uses, guild_id
+RETURNING invite_id, uses, possible_uses, guild_id
 `
 
 type CreateGuildInviteParams struct {
-	Name         string        `json:"name"`
+	InviteID     string        `json:"invite_id"`
 	PossibleUses sql.NullInt32 `json:"possible_uses"`
 	GuildID      uint64        `json:"guild_id"`
 }
 
 func (q *Queries) CreateGuildInvite(ctx context.Context, arg CreateGuildInviteParams) (Invite, error) {
-	row := q.queryRow(ctx, q.createGuildInviteStmt, createGuildInvite, arg.Name, arg.PossibleUses, arg.GuildID)
+	row := q.queryRow(ctx, q.createGuildInviteStmt, createGuildInvite, arg.InviteID, arg.PossibleUses, arg.GuildID)
 	var i Invite
 	err := row.Scan(
 		&i.InviteID,
-		&i.Name,
 		&i.Uses,
 		&i.PossibleUses,
 		&i.GuildID,
@@ -41,7 +40,7 @@ DELETE FROM Invites
     WHERE Invite_ID = $1
 `
 
-func (q *Queries) DeleteInvite(ctx context.Context, inviteID uint64) (int64, error) {
+func (q *Queries) DeleteInvite(ctx context.Context, inviteID string) (int64, error) {
 	result, err := q.exec(ctx, q.deleteInviteStmt, deleteInvite, inviteID)
 	if err != nil {
 		return 0, err
@@ -55,13 +54,13 @@ UPDATE Invites
     WHERE Invite_ID = $1
 `
 
-func (q *Queries) IncrementInvite(ctx context.Context, inviteID uint64) error {
+func (q *Queries) IncrementInvite(ctx context.Context, inviteID string) error {
 	_, err := q.exec(ctx, q.incrementInviteStmt, incrementInvite, inviteID)
 	return err
 }
 
 const openInvites = `-- name: OpenInvites :many
-SELECT invite_id, name, uses, possible_uses, guild_id FROM Invites
+SELECT invite_id, uses, possible_uses, guild_id FROM Invites
     WHERE Guild_ID = $1
     AND ( Uses < Possible_Uses OR Possible_Uses = -1)
 `
@@ -77,7 +76,6 @@ func (q *Queries) OpenInvites(ctx context.Context, guildID uint64) ([]Invite, er
 		var i Invite
 		if err := rows.Scan(
 			&i.InviteID,
-			&i.Name,
 			&i.Uses,
 			&i.PossibleUses,
 			&i.GuildID,
@@ -100,7 +98,7 @@ SELECT Guild_ID FROM Invites
     WHERE Invite_ID = $1
 `
 
-func (q *Queries) ResolveGuildID(ctx context.Context, inviteID uint64) (uint64, error) {
+func (q *Queries) ResolveGuildID(ctx context.Context, inviteID string) (uint64, error) {
 	row := q.queryRow(ctx, q.resolveGuildIDStmt, resolveGuildID, inviteID)
 	var guild_id uint64
 	err := row.Scan(&guild_id)

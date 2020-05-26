@@ -13,7 +13,7 @@ DELETE FROM Invites
 
 -- name: CreateGuildInvite :one
 INSERT INTO Invites (
-    Name, Possible_Uses, Guild_ID
+    Invite_ID, Possible_Uses, Guild_ID
 ) VALUES (
     $1, $2, $3
 )
