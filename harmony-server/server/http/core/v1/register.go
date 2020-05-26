@@ -61,6 +61,7 @@ func (h Handlers) Register(c echo.Context) error {
 	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
 	if err != nil {
+		h.Deps.Logger.Exception(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 	}
 	if !h.Deps.DB.EmailExists(data.Email) {
@@ -71,10 +72,12 @@ func (h Handlers) Register(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 	}
 	if err := h.Deps.DB.AddLocalUser(userID, data.Email, data.Username, hash); err != nil {
+		h.Deps.Logger.Exception(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 	}
 	session := randstr.Hex(16)
 	if err := h.Deps.DB.AddSession(userID, session); err != nil {
+		h.Deps.Logger.Exception(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 	}
 	return ctx.JSON(http.StatusOK, RegisterResponse{Session: session})

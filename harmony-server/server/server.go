@@ -66,6 +66,7 @@ func (inst Instance) Start() {
 		DB:             inst.DB,
 		AuthManager:    inst.AuthManager,
 		StorageManager: inst.StorageManager,
+		Logger:         inst.Logger,
 		State:          inst.State,
 		Config:         inst.Config,
 		Sonyflake:      inst.Sonyflake,

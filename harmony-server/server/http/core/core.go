@@ -9,6 +9,7 @@ import (
 	"harmony-server/server/db"
 	v1 "harmony-server/server/http/core/v1"
 	"harmony-server/server/http/routing"
+	"harmony-server/server/logger"
 	"harmony-server/server/state"
 	"harmony-server/server/storage"
 )
@@ -27,6 +28,7 @@ type Dependencies struct {
 	Config         *config.Config
 	AuthManager    *auth.Manager
 	StorageManager *storage.Manager
+	Logger         *logger.Logger
 	State          *state.State
 	Sonyflake      *sonyflake.Sonyflake
 }
@@ -47,6 +49,7 @@ func (api *API) MakeRoutes() {
 		Config:         api.Deps.Config,
 		AuthManager:    api.Deps.AuthManager,
 		StorageManager: api.Deps.StorageManager,
+		Logger:         api.Deps.Logger,
 		State:          api.Deps.State,
 		Sonyflake:      api.Deps.Sonyflake,
 	}).MakeRoutes())

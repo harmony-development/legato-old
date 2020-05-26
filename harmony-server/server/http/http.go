@@ -14,6 +14,7 @@ import (
 	"harmony-server/server/http/hm"
 	"harmony-server/server/http/routing"
 	"harmony-server/server/http/socket"
+	"harmony-server/server/logger"
 	"harmony-server/server/state"
 	"harmony-server/server/storage"
 )
@@ -32,6 +33,7 @@ type Dependencies struct {
 	DB             *db.HarmonyDB
 	AuthManager    *auth.Manager
 	StorageManager *storage.Manager
+	Logger         *logger.Logger
 	State          *state.State
 	Config         *config.Config
 	Sonyflake      *sonyflake.Sonyflake
@@ -68,6 +70,7 @@ func New(deps *Dependencies) *Server {
 		Config:         s.Deps.Config,
 		AuthManager:    s.Deps.AuthManager,
 		StorageManager: s.Deps.StorageManager,
+		Logger:         s.Deps.Logger,
 		State:          s.Deps.State,
 		Sonyflake:      s.Deps.Sonyflake,
 	})
