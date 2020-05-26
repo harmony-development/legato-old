@@ -348,15 +348,27 @@ func (db *HarmonyDB) AddSession(userID uint64, session string) error {
 
 // AddLocalUser adds a user to the DB that contains login information (not foreign)
 func (db *HarmonyDB) AddLocalUser(userID uint64, email, username string, passwordHash []byte) error {
-	if err := db.AddUser(userID, username, ""); err != nil {
+	tx, err := db.Begin()
+	if err != nil {
 		return err
 	}
-	if err := db.queries.AddLocalUser(ctx, queries.AddLocalUserParams{
+	tq := db.queries.WithTx(tx)
+	if err := tq.AddUser(ctx, queries.AddUserParams{
+		UserID:   userID,
+		Username: username,
+		Avatar:   sql.NullString{},
+	}); err != nil {
+		return err
+	}
+	if err := tq.AddLocalUser(ctx, queries.AddLocalUserParams{
 		Email:     email,
 		Password:  passwordHash,
 		Instances: nil,
 	}); err != nil {
 		return err
+	}
+	if err := tx.Commit(); err != nil {
+		return tx.Rollback()
 	}
 	return nil
 }
