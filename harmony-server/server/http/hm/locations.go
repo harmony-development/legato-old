@@ -20,7 +20,7 @@ func (m *Middlewares) WithGuild(handler echo.HandlerFunc) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusInternalServerError)
 		}
 		if !valid {
-			return echo.NewHTTPError(http.StatusBadRequest)
+			return echo.NewHTTPError(http.StatusBadRequest, "guild ID doesn't exist")
 		}
 		ctx.Location.GuildID = &parsed
 		return handler(ctx)
