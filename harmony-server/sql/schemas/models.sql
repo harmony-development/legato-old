@@ -43,8 +43,7 @@ CREATE TABLE IF NOT EXISTS Guild_Members
 );
 CREATE TABLE IF NOT EXISTS Invites
 (
-    Invite_ID     BIGSERIAL PRIMARY KEY UNIQUE,
-    Name          TEXT      NOT NULL,
+    Invite_ID     TEXT      PRIMARY KEY UNIQUE,
     Uses          INTEGER   NOT NULL DEFAULT 0,
     Possible_Uses INTEGER            DEFAULT -1,
     Guild_ID      BIGSERIAL NOT NULL,

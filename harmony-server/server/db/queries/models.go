@@ -43,8 +43,7 @@ type GuildMember struct {
 }
 
 type Invite struct {
-	InviteID     uint64        `json:"invite_id"`
-	Name         string        `json:"name"`
+	InviteID     string        `json:"invite_id"`
 	Uses         int32         `json:"uses"`
 	PossibleUses sql.NullInt32 `json:"possible_uses"`
 	GuildID      uint64        `json:"guild_id"`
