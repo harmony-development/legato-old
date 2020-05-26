@@ -42,9 +42,13 @@ type Dependencies struct {
 // New creates a new HTTP server instance
 func New(deps *Dependencies) *Server {
 	s := &Server{
-		Echo:   echo.New(),
-		Socket: socket.NewHandler(deps.State),
-		Deps:   deps,
+		Echo: echo.New(),
+		Socket: socket.NewHandler(&socket.Dependencies{
+			DB:     deps.DB,
+			Logger: deps.Logger,
+			State:  deps.State,
+		}),
+		Deps: deps,
 	}
 	s.Pre(middleware.RemoveTrailingSlash())
 	s.Use(middleware.CORS())

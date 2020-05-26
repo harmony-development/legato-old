@@ -20,8 +20,14 @@ type Handler struct {
 	State    *state.State
 }
 
+type Dependencies struct {
+	DB     *db.HarmonyDB
+	Logger *logger.Logger
+	State  *state.State
+}
+
 // NewHandler creates a new socket handler
-func NewHandler(state *state.State) *Handler {
+func NewHandler(deps *Dependencies) *Handler {
 	var bus = make(client.Bus)
 	h := &Handler{
 		Upgrader: &websocket.Upgrader{
@@ -32,8 +38,10 @@ func NewHandler(state *state.State) *Handler {
 			},
 			EnableCompression: true,
 		},
-		Bus:   bus,
-		State: state,
+		Bus:    bus,
+		State:  deps.State,
+		DB:     deps.DB,
+		Logger: deps.Logger,
 	}
 	h.Setup()
 	return h
