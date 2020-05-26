@@ -10,8 +10,8 @@ INSERT INTO Users (User_ID, Username, Avatar)
 VALUES ($1, $2, $3);
 
 -- name: AddLocalUser :exec
-INSERT INTO Local_Users (Email, Password, Instances)
-VALUES ($1, $2, $3);
+INSERT INTO Local_Users (User_ID, Email, Password, Instances)
+VALUES ($1, $2, $3, $4);
 
 -- name: AddForeignUser :one
 INSERT INTO Foreign_Users (User_ID, Home_Server, Local_User_ID)

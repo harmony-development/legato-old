@@ -33,18 +33,24 @@ func (q *Queries) AddForeignUser(ctx context.Context, arg AddForeignUserParams) 
 }
 
 const addLocalUser = `-- name: AddLocalUser :exec
-INSERT INTO Local_Users (Email, Password, Instances)
-VALUES ($1, $2, $3)
+INSERT INTO Local_Users (User_ID, Email, Password, Instances)
+VALUES ($1, $2, $3, $4)
 `
 
 type AddLocalUserParams struct {
+	UserID    uint64            `json:"user_id"`
 	Email     string            `json:"email"`
 	Password  []byte            `json:"password"`
 	Instances []json.RawMessage `json:"instances"`
 }
 
 func (q *Queries) AddLocalUser(ctx context.Context, arg AddLocalUserParams) error {
-	_, err := q.exec(ctx, q.addLocalUserStmt, addLocalUser, arg.Email, arg.Password, pq.Array(arg.Instances))
+	_, err := q.exec(ctx, q.addLocalUserStmt, addLocalUser,
+		arg.UserID,
+		arg.Email,
+		arg.Password,
+		pq.Array(arg.Instances),
+	)
 	return err
 }
 

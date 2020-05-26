@@ -361,6 +361,7 @@ func (db *HarmonyDB) AddLocalUser(userID uint64, email, username string, passwor
 		return err
 	}
 	if err := tq.AddLocalUser(ctx, queries.AddLocalUserParams{
+		UserID:    userID,
 		Email:     email,
 		Password:  passwordHash,
 		Instances: nil,
