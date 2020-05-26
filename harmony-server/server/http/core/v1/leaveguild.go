@@ -1,8 +1,9 @@
 package v1
 
 import (
-	"harmony-server/server/http/hm"
 	"net/http"
+
+	"harmony-server/server/http/hm"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/labstack/echo/v4"
@@ -16,10 +17,7 @@ type LeaveGuildData struct {
 // LeaveGuild unjoins a user from a guild
 func (h Handlers) LeaveGuild(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
-	var data LeaveGuildData
-	if err := ctx.BindAndVerify(&data); err != nil {
-		return err
-	}
+	data := ctx.Data.(*LeaveGuildData)
 
 	if isOwner, err := h.Deps.DB.IsOwner(data.Guild, ctx.UserID); err != nil || isOwner {
 		return echo.NewHTTPError(http.StatusForbidden, "you cannot leave a guild you own")
