@@ -34,21 +34,6 @@ type Middlewares struct {
 	RateLock   sync.RWMutex
 }
 
-func (h *HarmonyContext) BindAndVerify(v interface{}) error {
-	if !h.Limiter.Allow() {
-		return echo.NewHTTPError(http.StatusTooManyRequests, "too many channels being added, please wait a few seconds")
-	}
-	err := h.Bind(v)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to parse data")
-	}
-	err = h.Validate(v)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to parse data")
-	}
-	return nil
-}
-
 func (hc *HarmonyContext) VerifyOwner(db *db.HarmonyDB, guildID, userID uint64) error {
 	owner, err := db.GetOwner(guildID)
 	if err != nil {

@@ -1,8 +1,9 @@
 package v1
 
 import (
-	"harmony-server/server/http/hm"
 	"net/http"
+
+	"harmony-server/server/http/hm"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/labstack/echo/v4"
@@ -16,10 +17,7 @@ type JoinGuildData struct {
 // JoinGuild is the request to join a guild
 func (h Handlers) JoinGuild(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
-	var data JoinGuildData
-	if err := ctx.BindAndVerify(&data); err != nil {
-		return err
-	}
+	data := ctx.Data.(*JoinGuildData)
 	guildID, err := h.Deps.DB.ResolveGuildID(data.InviteCode)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "error joining guild, invite code may not exist")
