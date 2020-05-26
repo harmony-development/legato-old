@@ -75,5 +75,9 @@ func New(deps *Dependencies) *Server {
 		Sonyflake:      s.Deps.Sonyflake,
 	})
 	s.CoreAPI.MakeRoutes()
+	api.Any("/socket", func(c echo.Context) error {
+		s.Socket.Handle(c.Response(), c.Request())
+		return nil
+	})
 	return s
 }
