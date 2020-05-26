@@ -57,6 +57,9 @@ func (c *Client) SendError(msg string) {
 // Pinger sends ping requests to the client periodically
 func (c *Client) Pinger() {
 	for {
+		if c.Conn == nil {
+			return
+		}
 		c.Send(&OutPacket{
 			Type: "ping",
 			Data: nil,
@@ -74,6 +77,9 @@ func (c *Client) Pinger() {
 // Reader eternally waits for things to read from the client
 func (c *Client) Reader() {
 	for {
+		if c.Conn == nil {
+			return
+		}
 		_, msg, err := c.Conn.ReadMessage()
 		if err != nil {
 			logrus.Warn("Error reading message from client", err)
@@ -96,8 +102,8 @@ func (c *Client) Reader() {
 
 // Writer eternally waits for things to write to the client
 func (c *Client) Writer() {
-	for {
-		msg := <-c.Out // wait for a new message to be sent
+	select {
+	case msg := <-c.Out:
 		err := c.Conn.WriteMessage(websocket.TextMessage, msg)
 		if err != nil {
 			logrus.Warnf("Error writing data to events : %v", err)

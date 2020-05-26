@@ -8,6 +8,13 @@ import (
 
 // Deregister terminates a client's session
 func (h Handler) Deregister(ws *client.Client) {
+<<<<<<< HEAD
+=======
+	if ws.UserID == nil {
+		return
+	}
+	close(ws.Out)
+>>>>>>> 399b888371284fa097bf5a0cbdc0e5ac248d2524
 	guilds, err := h.DB.GuildsForUser(*ws.UserID)
 	if err != nil {
 		logrus.Warnf("error deregistering client, potential memory leak : %v", err)
