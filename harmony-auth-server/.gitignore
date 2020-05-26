@@ -1,9 +1,0 @@
-.env
-private.pem
-.idea/
-vendor
-filestore
-harmony.db
-static
-harmony-auth-server
-config.json
