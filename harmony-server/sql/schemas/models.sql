@@ -15,9 +15,9 @@ CREATE TABLE IF NOT EXISTS Local_Users
 );
 CREATE TABLE IF NOT EXISTS Foreign_Users
 (
-    User_ID       BIGSERIAL NOT NULL,
-    Home_Server   TEXT      NOT NULL,
-    Local_User_ID BIGSERIAL NOT NULL,
+    User_ID       BIGSERIAL        NOT NULL,
+    Home_Server   TEXT             NOT NULL,
+    Local_User_ID BIGSERIAL UNIQUE NOT NULL,
     FOREIGN KEY (Local_User_ID) REFERENCES Users (User_ID) ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS Sessions

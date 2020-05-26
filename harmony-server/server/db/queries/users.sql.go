@@ -15,7 +15,7 @@ const addForeignUser = `-- name: AddForeignUser :one
 INSERT INTO Foreign_Users (User_ID, Home_Server, Local_User_ID)
 VALUES ($1, $2, $3)
 ON CONFLICT (Local_User_ID) DO UPDATE
-    SET Local_User_ID=Local_User_ID
+    SET Local_User_ID=Foreign_Users.Local_User_ID
 RETURNING Local_User_ID
 `
 
