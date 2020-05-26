@@ -1,11 +1,12 @@
 package socket
 
 import (
+	"net/http"
+
 	"harmony-server/server/db"
 	"harmony-server/server/http/socket/client"
 	"harmony-server/server/logger"
 	"harmony-server/server/state"
-	"net/http"
 
 	"github.com/gorilla/websocket"
 )
@@ -46,9 +47,10 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) *client.Client 
 		return nil
 	}
 	c := &client.Client{
-		Conn: conn,
-		Bus:  h.Bus,
-		Out:  make(chan []byte),
+		Conn:       conn,
+		Bus:        h.Bus,
+		Out:        make(chan []byte),
+		Deregister: h.Deregister,
 	}
 	go c.Reader()
 	go c.Writer()

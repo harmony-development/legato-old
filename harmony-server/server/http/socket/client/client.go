@@ -15,11 +15,12 @@ type Handler func(c Client, e *Event, data *json.RawMessage)
 // Client is the data structure for a connected client
 type Client struct {
 	*sync.RWMutex
-	Conn     *websocket.Conn
-	Bus      Bus
-	UserID   *uint64
-	LastPong time.Time
-	Out      chan []byte
+	Conn       *websocket.Conn
+	Bus        Bus
+	UserID     *uint64
+	LastPong   time.Time
+	Out        chan []byte
+	Deregister func(client *Client)
 }
 
 // Packet is the standard way all messages are delivered and received from the server
@@ -98,7 +99,7 @@ func (c *Client) Writer() {
 			logrus.Warnf("Error writing data to events : %v", err)
 			logrus.Debugf("Closing Socket : Data write error")
 			_ = c.Conn.Close()
-			// TODO : add mission-critical guild de-registration here
+			c.Deregister(c)
 			return
 		}
 	}
