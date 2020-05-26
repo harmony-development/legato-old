@@ -20,6 +20,7 @@ func (h Handlers) Connect(c echo.Context) error {
 	}
 	user, err := h.Deps.DB.GetUserByID(ctx.UserID)
 	if err != nil {
+		h.Deps.Logger.Exception(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.InvalidRequest)
 	}
 	data := ctx.Data.(*ConnectData)
