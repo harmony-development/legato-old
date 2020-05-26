@@ -48,12 +48,12 @@ func (h Handlers) Login(c echo.Context) error {
 			h.Deps.Logger.Exception(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 		}
-		localUserID, err := h.Deps.DB.AddForeignUser(data.Domain, token.UserID, id)
+		localUserID, err := h.Deps.DB.AddForeignUser(data.Domain, token.UserID, id, token.Username, token.Avatar)
 		if err != nil {
 			h.Deps.Logger.Exception(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 		}
-		if err := h.Deps.DB.AddUser(localUserID, token.Username, token.Avatar); err != nil {
+		if err := h.Deps.DB.AddSession(localUserID, session); err != nil {
 			h.Deps.Logger.Exception(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 		}

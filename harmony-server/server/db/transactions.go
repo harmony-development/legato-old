@@ -375,12 +375,34 @@ func (db *HarmonyDB) AddLocalUser(userID uint64, email, username string, passwor
 }
 
 // AddForeignUser inserts
-func (db *HarmonyDB) AddForeignUser(homeServer string, userID, localUserID uint64) (uint64, error) {
-	return db.queries.AddForeignUser(ctx, queries.AddForeignUserParams{
+func (db *HarmonyDB) AddForeignUser(homeServer string, userID, localUserID uint64, username, avatar string) (uint64, error) {
+	id := userID
+	tx, err := db.Begin()
+	if err != nil {
+		return 0, err
+	}
+	tq := db.queries.WithTx(tx)
+	if err := tq.AddUser(ctx, queries.AddUserParams{
+		UserID:   localUserID,
+		Username: username,
+		Avatar:   toSqlString(avatar),
+	}); err != nil {
+		return 0, err
+	}
+	if id, err = tq.AddForeignUser(ctx, queries.AddForeignUserParams{
 		UserID:      userID,
 		HomeServer:  homeServer,
 		LocalUserID: localUserID,
-	})
+	}); err != nil {
+		return 0, err
+	}
+	if err := tx.Commit(); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return 0, err
+		}
+		return 0, err
+	}
+	return id, nil
 }
 
 // AddUser adds a user to the DB that contains a user ID, username, and avatar

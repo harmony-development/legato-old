@@ -9,7 +9,7 @@ import (
 
 // CreateGuildData is the data for a guild creation request
 type CreateGuildData struct {
-	GuildName string `validate:"requried"`
+	GuildName string `validate:"required"`
 }
 
 // CreateGuild creates a guild for a user
