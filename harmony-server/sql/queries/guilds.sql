@@ -1,8 +1,8 @@
 -- name: CreateGuild :one
 INSERT INTO Guilds (
-    Owner_ID, Guild_Name, Picture_URL
+    Guild_ID, Owner_ID, Guild_Name, Picture_URL
 ) VALUES (
-    $1, $2, $3
+    $1, $2, $3, $4
 )
 RETURNING *;
 

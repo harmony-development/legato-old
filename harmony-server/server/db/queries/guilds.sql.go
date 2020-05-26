@@ -50,21 +50,27 @@ func (q *Queries) CreateChannel(ctx context.Context, arg CreateChannelParams) (C
 
 const createGuild = `-- name: CreateGuild :one
 INSERT INTO Guilds (
-    Owner_ID, Guild_Name, Picture_URL
+    Guild_ID, Owner_ID, Guild_Name, Picture_URL
 ) VALUES (
-    $1, $2, $3
+    $1, $2, $3, $4
 )
 RETURNING guild_id, owner_id, guild_name, picture_url
 `
 
 type CreateGuildParams struct {
+	GuildID    uint64 `json:"guild_id"`
 	OwnerID    uint64 `json:"owner_id"`
 	GuildName  string `json:"guild_name"`
 	PictureUrl string `json:"picture_url"`
 }
 
 func (q *Queries) CreateGuild(ctx context.Context, arg CreateGuildParams) (Guild, error) {
-	row := q.queryRow(ctx, q.createGuildStmt, createGuild, arg.OwnerID, arg.GuildName, arg.PictureUrl)
+	row := q.queryRow(ctx, q.createGuildStmt, createGuild,
+		arg.GuildID,
+		arg.OwnerID,
+		arg.GuildName,
+		arg.PictureUrl,
+	)
 	var i Guild
 	err := row.Scan(
 		&i.GuildID,

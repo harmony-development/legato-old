@@ -22,13 +22,14 @@ func toSqlInt64(input uint64) sql.NullInt64 {
 var ctx = context.Background()
 
 // CreateGuild creates a standard guild
-func (db *HarmonyDB) CreateGuild(owner uint64, guildName string, picture string) (*queries.Guild, error) {
+func (db *HarmonyDB) CreateGuild(owner, id uint64, guildName string, picture string) (*queries.Guild, error) {
 	tx, err := db.Begin()
 	if err != nil {
 		return nil, err
 	}
 	tq := db.queries.WithTx(tx)
 	guild, err := tq.CreateGuild(ctx, queries.CreateGuildParams{
+		GuildID:    id,
 		OwnerID:    owner,
 		GuildName:  guildName,
 		PictureUrl: picture,

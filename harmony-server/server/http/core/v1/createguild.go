@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"harmony-server/server/http/hm"
+	"harmony-server/server/http/responses"
 
 	"github.com/labstack/echo/v4"
 )
@@ -17,8 +18,11 @@ type CreateGuildData struct {
 func (h Handlers) CreateGuild(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
 	data := ctx.Data.(CreateGuildData)
-
-	guild, err := h.Deps.DB.CreateGuild(ctx.UserID, data.GuildName, "")
+	guildID, err := h.Deps.Sonyflake.NextID()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
+	}
+	guild, err := h.Deps.DB.CreateGuild(ctx.UserID, guildID, data.GuildName, "")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to create guild, please try again later")
 	}
