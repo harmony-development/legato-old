@@ -22,7 +22,7 @@ type LoginData struct {
 
 func (h Handlers) Login(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
-	data := ctx.Data.(*LoginData)
+	data := ctx.Data.(LoginData)
 	if data.AuthToken != "" {
 		pem, err := h.Deps.AuthManager.GetPublicKey(data.Domain)
 		if err != nil {

@@ -23,7 +23,7 @@ func (h Handlers) Connect(c echo.Context) error {
 		h.Deps.Logger.Exception(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.InvalidRequest)
 	}
-	data := ctx.Data.(*ConnectData)
+	data := ctx.Data.(ConnectData)
 	token, err := h.Deps.AuthManager.MakeAuthToken(ctx.UserID, data.Target, user.Username, user.Avatar.String)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)

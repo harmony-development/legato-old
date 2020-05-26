@@ -17,7 +17,7 @@ type AddChannelData struct {
 // AddChannel is a request to add a channel to a guild
 func (h Handlers) AddChannel(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
-	data := ctx.Data.(*AddChannelData)
+	data := ctx.Data.(AddChannelData)
 
 	channel, err := h.Deps.DB.AddChannelToGuild(*ctx.Location.GuildID, data.ChannelName)
 	if err != nil {

@@ -17,7 +17,7 @@ type LeaveGuildData struct {
 // LeaveGuild unjoins a user from a guild
 func (h Handlers) LeaveGuild(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
-	data := ctx.Data.(*LeaveGuildData)
+	data := ctx.Data.(LeaveGuildData)
 
 	if isOwner, err := h.Deps.DB.IsOwner(data.Guild, ctx.UserID); err != nil || isOwner {
 		return echo.NewHTTPError(http.StatusForbidden, "you cannot leave a guild you own")

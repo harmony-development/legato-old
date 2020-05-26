@@ -24,7 +24,7 @@ type MessageData struct {
 // Message : Receive a message from a client.
 func (h Handlers) Message(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
-	data := ctx.Data.(*MessageData)
+	data := ctx.Data.(MessageData)
 	form, err := ctx.MultipartForm()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")

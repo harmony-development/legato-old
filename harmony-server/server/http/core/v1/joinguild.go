@@ -17,7 +17,7 @@ type JoinGuildData struct {
 // JoinGuild is the request to join a guild
 func (h Handlers) JoinGuild(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
-	data := ctx.Data.(*JoinGuildData)
+	data := ctx.Data.(JoinGuildData)
 	guildID, err := h.Deps.DB.ResolveGuildID(data.InviteCode)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "error joining guild, invite code may not exist")

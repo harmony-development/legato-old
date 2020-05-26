@@ -20,7 +20,7 @@ type RegisterData struct {
 
 func (h Handlers) Register(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
-	data := ctx.Data.(*RegisterData)
+	data := ctx.Data.(RegisterData)
 	if len(data.Username) < h.Deps.Config.Server.UsernamePolicy.MinLength ||
 		len(data.Username) > h.Deps.Config.Server.UsernamePolicy.MaxLength {
 		return ctx.JSON(

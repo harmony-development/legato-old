@@ -21,7 +21,7 @@ type UsernameUpdateEvent struct {
 
 func (h Handlers) UsernameUpdate(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
-	data := ctx.Data.(*UsernameUpdateData)
+	data := ctx.Data.(UsernameUpdateData)
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, responses.TooManyRequests)
 	}

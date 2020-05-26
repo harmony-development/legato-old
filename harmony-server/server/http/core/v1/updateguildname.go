@@ -16,7 +16,7 @@ type UpdateGuildNameData struct {
 // UpdateGuildName updates the guild name
 func (h Handlers) UpdateGuildName(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
-	data := ctx.Data.(*UpdateGuildNameData)
+	data := ctx.Data.(UpdateGuildNameData)
 
 	if err := h.Deps.DB.UpdateGuildName(*ctx.Location.GuildID, data.Name); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to update guild name, please try again later")

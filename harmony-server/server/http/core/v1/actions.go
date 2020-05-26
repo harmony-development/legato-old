@@ -30,7 +30,7 @@ type SendActionData struct {
 // TriggerAction will trigger an action for a client to receive
 func (h Handlers) TriggerAction(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
-	data := ctx.Data.(*TriggerActionData)
+	data := ctx.Data.(TriggerActionData)
 
 	handle := func() *guild.ClientArray {
 		for id, client := range h.Deps.State.Guilds[*ctx.Location.GuildID].Clients {

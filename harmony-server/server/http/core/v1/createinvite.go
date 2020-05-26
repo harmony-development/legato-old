@@ -16,7 +16,7 @@ type CreateInviteData struct {
 // CreateInvite : Create an invite for a given guild
 func (h Handlers) CreateInvite(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
-	data := ctx.Data.(*CreateInviteData)
+	data := ctx.Data.(CreateInviteData)
 
 	invite, err := h.Deps.DB.CreateInvite(*ctx.Location.GuildID, -1, data.Name)
 	if err != nil {
