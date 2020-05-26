@@ -74,6 +74,9 @@ func (c *Client) Pinger() {
 // Reader eternally waits for things to read from the client
 func (c *Client) Reader() {
 	for {
+		if c.Conn == nil {
+			return
+		}
 		_, msg, err := c.Conn.ReadMessage()
 		if err != nil {
 			logrus.Warn("Error reading message from client", err)
