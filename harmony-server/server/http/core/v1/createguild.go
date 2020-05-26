@@ -15,11 +15,7 @@ type CreateGuildData struct {
 // CreateGuild creates a guild for a user
 func (h Handlers) CreateGuild(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
-	var data CreateGuildData
-	err := ctx.BindAndVerify(&data)
-	if err != nil {
-		return err
-	}
+	data := ctx.Data.(*CreateGuildData)
 
 	guild, err := h.Deps.DB.CreateGuild(ctx.UserID, data.GuildName, "")
 	if err != nil {
