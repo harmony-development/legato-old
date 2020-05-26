@@ -11,6 +11,7 @@ func (h Handler) Deregister(ws *client.Client) {
 	if ws.UserID == nil {
 		return
 	}
+	close(ws.Out)
 	guilds, err := h.DB.GuildsForUser(*ws.UserID)
 	if err != nil {
 		logrus.Warnf("error deregistering client, potential memory leak : %v", err)
