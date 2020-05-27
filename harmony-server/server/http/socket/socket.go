@@ -62,6 +62,5 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) *client.Client 
 	}
 	go c.Reader()
 	go c.Writer()
-	go c.Pinger()
 	return c
 }

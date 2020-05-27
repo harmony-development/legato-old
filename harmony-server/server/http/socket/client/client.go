@@ -18,7 +18,7 @@ type Client struct {
 	Conn       *websocket.Conn
 	Bus        Bus
 	UserID     *uint64
-	LastPong   time.Time
+	PingTicker *time.Ticker
 	Out        chan []byte
 	Deregister func(client *Client)
 }
@@ -54,35 +54,21 @@ func (c *Client) SendError(msg string) {
 	})
 }
 
-// Pinger sends ping requests to the client periodically
-func (c *Client) Pinger() {
-	for {
-		if c.Conn == nil {
-			return
-		}
-		c.Send(&OutPacket{
-			Type: "ping",
-			Data: nil,
-		})
-		time.Sleep(20 * time.Second)
-		if time.Since(c.LastPong) > 20*time.Second {
-			logrus.Debug("closing socket : ping timeout")
-			if err := c.Conn.Close(); err != nil {
-				logrus.Warn("error closing socket", err)
-			}
-		}
-	}
-}
-
 // Reader eternally waits for things to read from the client
 func (c *Client) Reader() {
+	c.Conn.SetReadDeadline(time.Now().Add(1 * time.Minute))
+	c.Conn.SetPongHandler(func(string) error {
+		logrus.Println("PONG")
+		c.Conn.SetReadDeadline(time.Now().Add(1 * time.Minute))
+		return nil
+	})
 	for {
 		if c.Conn == nil {
 			return
 		}
 		_, msg, err := c.Conn.ReadMessage()
 		if err != nil {
-			logrus.Warn("Error reading message from client", err)
+			logrus.Warn("Error reading message from client ", err)
 			if c.UserID != nil {
 				c.Deregister(c)
 			}
@@ -102,6 +88,7 @@ func (c *Client) Reader() {
 
 // Writer eternally waits for things to write to the client
 func (c *Client) Writer() {
+	c.PingTicker = time.NewTicker(15 * time.Second)
 	select {
 	case msg := <-c.Out:
 		err := c.Conn.WriteMessage(websocket.TextMessage, msg)
@@ -113,6 +100,15 @@ func (c *Client) Writer() {
 			}
 			_ = c.Conn.Close()
 			return
+		}
+	case <-c.PingTicker.C:
+		logrus.Println("PING")
+		c.Conn.SetWriteDeadline(time.Now().Add(15 * time.Second))
+		if err := c.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+			logrus.Warnf("Ping timeout: %v", err)
+			if c.UserID != nil {
+				c.Deregister(c)
+			}
 		}
 	}
 }
