@@ -21,11 +21,12 @@ jobs:
             go fmt ./...;
             go vet ./...;
             go build;
+            echo $? > /tmp/build-status; # Meh
 
       - run:
           name: Send webhook
           command: |
-            curl $WEBHOOK_URL -H 'content-type: application/json' --data "{\"content\":\"$?\"}"
+            curl $WEBHOOK_URL -H 'content-type: application/json' --data "{\"content\":\"$(cat /tmp/build-status)\"}"
             
       - store_artifacts:
           path: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}/harmony-server/harmony-server
