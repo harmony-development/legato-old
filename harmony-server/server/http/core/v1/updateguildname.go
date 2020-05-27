@@ -10,7 +10,7 @@ import (
 
 // UpdateGuildNameData is the data for a guild name update request
 type UpdateGuildNameData struct {
-	Name string `validate:"name"`
+	Name string `validate:"required"`
 }
 
 // UpdateGuildName updates the guild name
