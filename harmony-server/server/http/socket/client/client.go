@@ -26,13 +26,13 @@ type Client struct {
 // Packet is the standard way all messages are delivered and received from the server
 type Packet struct {
 	Type string           `json:"type"`
-	Data *json.RawMessage `json:"data'`
+	Data *json.RawMessage `json:"data"`
 }
 
 // OutPacket is like packet but the data doesn't necessarily have to be raw bytes
 type OutPacket struct {
 	Type string      `json:"type"`
-	Data interface{} `json:"data'`
+	Data interface{} `json:"data"`
 }
 
 // Send adds a packet to the socket queue
