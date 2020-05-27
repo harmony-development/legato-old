@@ -14,7 +14,7 @@ type Handler func(c Client, e *Event, data *json.RawMessage)
 
 // Client is the data structure for a connected client
 type Client struct {
-	*sync.RWMutex
+	sync.RWMutex
 	Conn       *websocket.Conn
 	Bus        Bus
 	UserID     *uint64
