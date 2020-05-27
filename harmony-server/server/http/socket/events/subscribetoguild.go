@@ -10,8 +10,8 @@ type subscribeToGuildData struct {
 	Guild   uint64
 }
 
-// OnSubscribeToGuild handles requests to subscribe to a guilds events
-func (e Events) OnSubscribeToGuild(ws client.Client, event *client.Event, raw *json.RawMessage) {
+// SubscribeToGuild handles requests to subscribe to a guilds events
+func (e Events) SubscribeToGuild(ws client.Client, event *client.Event, raw *json.RawMessage) {
 	var data subscribeToGuildData
 	if err := json.Unmarshal(*raw, &data); err != nil {
 		ws.SendError("bad request")
