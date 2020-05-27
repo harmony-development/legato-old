@@ -97,27 +97,29 @@ func (c *Client) Reader() {
 func (c *Client) Writer() {
 	c.PingTicker = time.NewTicker(15 * time.Second)
 	defer c.PingTicker.Stop()
-	select {
-	case msg := <-c.Out:
-		err := c.Conn.WriteMessage(websocket.TextMessage, msg)
-		if err != nil {
-			logrus.Warnf("Error writing data to events : %v", err)
-			logrus.Debugf("Closing Socket : Data write error")
-			if c.UserID != nil {
-				c.Deregister(c)
+	for {
+		select {
+		case msg := <-c.Out:
+			err := c.Conn.WriteMessage(websocket.TextMessage, msg)
+			if err != nil {
+				logrus.Warnf("Error writing data to events : %v", err)
+				logrus.Debugf("Closing Socket : Data write error")
+				if c.UserID != nil {
+					c.Deregister(c)
+				}
+				_ = c.Conn.Close()
+				return
 			}
-			_ = c.Conn.Close()
-			return
-		}
-	case <-c.PingTicker.C:
-		logrus.Println("PING")
-		if err := c.Conn.SetWriteDeadline(time.Now().Add(15 * time.Second)); err != nil {
-			logrus.Warn(err)
-		}
-		if err := c.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
-			logrus.Warnf("Ping timeout: %v", err)
-			if c.UserID != nil {
-				c.Deregister(c)
+		case <-c.PingTicker.C:
+			logrus.Println("PING")
+			if err := c.Conn.SetWriteDeadline(time.Now().Add(15 * time.Second)); err != nil {
+				logrus.Warn(err)
+			}
+			if err := c.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				logrus.Warnf("Ping timeout: %v", err)
+				if c.UserID != nil {
+					c.Deregister(c)
+				}
 			}
 		}
 	}
