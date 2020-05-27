@@ -200,13 +200,14 @@ func (h Handlers) MakeRoutes() []routing.Route {
 		},
 		{
 			Path:    "/guilds/:guild_id/channels/:channel_id/messages/:message_id",
-			Handler: h.DeleteMessage,
-			Method:  routing.DELETE,
+			Handler: h.UpdateMessage,
+			Method:  routing.PATCH,
 			RateLimit: &routing.RateLimit{
-				Duration: 1 * time.Second,
-				Burst:    10,
+				Duration: 500 * time.Millisecond,
+				Burst:    20,
 			},
 			Auth:     true,
+			Schema:   MessageUpdateData{},
 			Location: routing.LocationGuildChannelAndMessage,
 		},
 		{

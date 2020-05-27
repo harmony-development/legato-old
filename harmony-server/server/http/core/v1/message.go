@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"time"
 
 	"harmony-server/server/http/hm"
 	"harmony-server/server/http/socket/client"
@@ -110,8 +109,8 @@ func (h Handlers) Message(c echo.Context) error {
 		Data: MessageCreateEvent{
 			GuildID:     *ctx.Location.GuildID,
 			ChannelID:   *ctx.Location.ChannelID,
-			CreatedAt:   time.Now().UTC().Unix(),
-			Message:     msg,
+			CreatedAt:   msg.CreatedAt.Unix(),
+			Message:     msg.Content,
 			Attachments: attachments,
 			AuthorID:    ctx.UserID,
 			MessageID:   msg.MessageID,

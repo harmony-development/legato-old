@@ -2,7 +2,6 @@ package v1
 
 import (
 	"encoding/json"
-	"harmony-server/server/db/queries"
 )
 
 const (
@@ -14,7 +13,16 @@ const (
 	GuildUpdateEventType   = "guild_update"
 	MessageDeleteEventType = "message_delete"
 	MessageCreateEventType = "message_create"
+	MessageUpdateEventType = "message_update"
 	UserUpdateEventType    = "user_update"
+)
+
+type MessageUpdateFlags uint64
+
+const (
+	UpdateContent MessageUpdateFlags = 1 << iota
+	UpdateActions
+	UpdateEmbeds
 )
 
 // ActionEvent is the data that will be sent to a client on an action trigger
@@ -65,7 +73,7 @@ type MessageCreateEvent struct {
 	GuildID     uint64            `json:"guild_id"`
 	ChannelID   uint64            `json:"channel_id"`
 	CreatedAt   int64             `json:"created_at"`
-	Message     *queries.Message  `json:"message"`
+	Message     string            `json:"message"`
 	Attachments []string          `json:"attachments,omitempty"`
 	AuthorID    uint64            `json:"author_id"`
 	MessageID   uint64            `json:"message_id"`
@@ -84,4 +92,16 @@ type GuildUpdateEvent struct {
 type UserUpdateEvent struct {
 	UserID   uint64 `json:"user_id"`
 	Username string `json:"username,omitempty"`
+}
+
+// MessageUpdateEvent is the data that will be sent to a client on a message update
+type MessageUpdateEvent struct {
+	GuildID   uint64             `json:"guild_id"`
+	ChannelID uint64             `json:"channel_id"`
+	MessageID uint64             `json:"message_id"`
+	Flags     MessageUpdateFlags `json:"flags"`
+	EditedAt  int64              `json:"edited_at"`
+	Message   string             `json:"message,omitempty"`
+	Actions   []json.RawMessage  `json:"actions,omitempty"`
+	Embeds    []json.RawMessage  `json:"embeds,omitempty"`
 }

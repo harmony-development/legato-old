@@ -19,6 +19,17 @@ func toSqlInt64(input uint64) sql.NullInt64 {
 	return sql.NullInt64{Int64: int64(input), Valid: true}
 }
 
+type executor struct {
+	err error
+}
+
+func (e *executor) Execute(f func() error) {
+	if e.err != nil {
+		return
+	}
+	e.err = f()
+}
+
 var ctx = context.Background()
 
 // CreateGuild creates a standard guild
@@ -475,4 +486,58 @@ func (db *HarmonyDB) AddFileHash(fileID string, hash []byte) error {
 
 func (db *HarmonyDB) GetFileIDFromHash(hash []byte) (string, error) {
 	return db.queries.GetFileByHash(ctx, hash)
+}
+
+func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, actions *[][]byte) (time.Time, error) {
+	tx, err := db.Begin()
+	if err != nil {
+		return time.Time{}, err
+	}
+	tq := db.queries.WithTx(tx)
+	var editedAt time.Time
+	e := executor{}
+	if content != nil {
+		e.Execute(func() error {
+			data, err := tq.UpdateMessageContent(ctx, queries.UpdateMessageContentParams{
+				MessageID: messageID,
+				Content:   *content,
+			})
+			editedAt = data.EditedAt.Time
+			return err
+		})
+	}
+	if embeds != nil {
+		e.Execute(func() error {
+			var rawEmbeds []json.RawMessage
+			for _, embed := range *embeds {
+				rawEmbeds = append(rawEmbeds, json.RawMessage(embed))
+			}
+			data, err := tq.UpdateMessageEmbeds(ctx, queries.UpdateMessageEmbedsParams{
+				MessageID: messageID,
+				Embeds:    rawEmbeds,
+			})
+			editedAt = data.EditedAt.Time
+			return err
+		})
+	}
+	if actions != nil {
+		e.Execute(func() error {
+			var rawActions []json.RawMessage
+			for _, action := range *actions {
+				rawActions = append(rawActions, json.RawMessage(action))
+			}
+			data, err := tq.UpdateMessageActions(ctx, queries.UpdateMessageActionsParams{
+				MessageID: messageID,
+				Actions:   rawActions,
+			})
+			editedAt = data.EditedAt.Time
+			return err
+		})
+	}
+	if e.err != nil {
+		tx.Rollback()
+		return time.Time{}, e.err
+	}
+	tx.Commit()
+	return editedAt, nil
 }
