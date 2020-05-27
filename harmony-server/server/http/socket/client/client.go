@@ -56,10 +56,15 @@ func (c *Client) SendError(msg string) {
 
 // Reader eternally waits for things to read from the client
 func (c *Client) Reader() {
-	c.Conn.SetReadDeadline(time.Now().Add(1 * time.Minute))
+	c.Conn.SetReadLimit(4096)
+	if err := c.Conn.SetReadDeadline(time.Now().Add(1 * time.Minute)); err != nil {
+		logrus.Warn(err)
+	}
 	c.Conn.SetPongHandler(func(string) error {
 		logrus.Println("PONG")
-		c.Conn.SetReadDeadline(time.Now().Add(1 * time.Minute))
+		if err := c.Conn.SetReadDeadline(time.Now().Add(1 * time.Minute)); err != nil {
+			logrus.Warn(err)
+		}
 		return nil
 	})
 	for {
