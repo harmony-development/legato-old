@@ -39,7 +39,9 @@ func (e Events) Subscribe(ws client.Client, event *client.Event, raw *json.RawMe
 	for _, id := range guildIDs {
 		if e.State.Guilds[id] == nil {
 			e.State.GuildsLock.Lock()
-			e.State.Guilds[id] = &guild.Guild{}
+			e.State.Guilds[id] = &guild.Guild{
+				Clients: make(map[uint64]*guild.ClientArray),
+			}
 			e.State.Guilds[id].AddClient(&userID, &ws)
 			e.State.GuildsLock.Unlock()
 		} else {
