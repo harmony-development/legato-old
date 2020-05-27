@@ -41,6 +41,7 @@ func (e Events) Subscribe(ws client.Client, event *client.Event, raw *json.RawMe
 			e.State.GuildsLock.Lock()
 			e.State.Guilds[id] = &guild.Guild{}
 			e.State.Guilds[id].AddClient(&userID, &ws)
+			e.State.GuildsLock.Unlock()
 		} else {
 			e.State.Guilds[id].AddClient(&userID, &ws)
 		}
