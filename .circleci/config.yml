@@ -24,7 +24,7 @@ jobs:
 
       - slack/notify:
           color: '#42e2f4'
-          message: This is a custom message notification
+          message: This is a custom message notification TEST
           webhook: "$WEBHOOK_URL"
             
       - store_artifacts:
