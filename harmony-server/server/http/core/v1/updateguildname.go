@@ -25,10 +25,10 @@ func (h Handlers) UpdateGuildName(c echo.Context) error {
 	defer h.Deps.State.GuildsLock.RUnlock()
 	if h.Deps.State.Guilds[*ctx.Location.GuildID] != nil {
 		h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
-			Type: "GuildNameUpdate",
-			Data: map[string]interface{}{
-				"guild": *ctx.Location.GuildID,
-				"name":  data.Name,
+			Type: GuildUpdateEventType,
+			Data: GuildUpdateEvent{
+				GuildID: *ctx.Location.GuildID,
+				Name:    data.Name,
 			},
 		})
 	}

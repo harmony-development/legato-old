@@ -25,11 +25,11 @@ func (h Handlers) DeleteMessage(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to delete message, please try again later")
 	}
 	h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
-		Type: "deleteMessage",
-		Data: map[string]interface{}{
-			"guild":     *ctx.Location.GuildID,
-			"channel":   *ctx.Location.ChannelID,
-			"messageID": ctx.Location.Message.MessageID,
+		Type: MessageDeleteEventType,
+		Data: MessageDeleteEvent{
+			GuildID:   *ctx.Location.GuildID,
+			ChannelID: *ctx.Location.ChannelID,
+			MessageID: ctx.Location.Message.MessageID,
 		},
 	})
 	return ctx.JSON(http.StatusOK, map[string]string{

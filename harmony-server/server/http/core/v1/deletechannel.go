@@ -18,10 +18,10 @@ func (h Handlers) DeleteChannel(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "error deleting channel, please try again later")
 	}
 	h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
-		Type: "DeleteChannel",
-		Data: map[string]interface{}{
-			"guild":     *ctx.Location.GuildID,
-			"channelID": *ctx.Location.ChannelID,
+		Type: ChannelDeleteEventType,
+		Data: ChannelDeleteEvent{
+			GuildID:   *ctx.Location.GuildID,
+			ChannelID: *ctx.Location.ChannelID,
 		},
 	})
 	return ctx.JSON(http.StatusOK, map[string]string{

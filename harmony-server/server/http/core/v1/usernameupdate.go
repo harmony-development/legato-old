@@ -14,11 +14,6 @@ type UsernameUpdateData struct {
 	Username string `validate:"required"`
 }
 
-type UsernameUpdateEvent struct {
-	UserID   uint64
-	Username string
-}
-
 func (h Handlers) UsernameUpdate(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
 	data := ctx.Data.(UsernameUpdateData)
@@ -27,8 +22,8 @@ func (h Handlers) UsernameUpdate(c echo.Context) error {
 	}
 	for c := range h.Deps.State.UserUpdateListeners {
 		c.Send(&client.OutPacket{
-			Type: "UsernameUpdate",
-			Data: UsernameUpdateEvent{
+			Type: UserUpdateEventType,
+			Data: UserUpdateEvent{
 				UserID:   ctx.UserID,
 				Username: data.Username,
 			},

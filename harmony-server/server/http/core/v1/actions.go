@@ -15,28 +15,14 @@ type TriggerActionData struct {
 	Data     string
 }
 
-// SendActionData is the data that will be sent to a client
-type SendActionData struct {
-	GuildID   uint64 `json:"guildID"`
-	ChannelID uint64 `json:"channelID"`
-	MessageID uint64 `json:"messageID"`
-	TriggerID uint64 `json:"triggerID"`
-	Action    struct {
-		ID   string `json:"id"`
-		Data string `json:"data"`
-	} `json:"action"`
-}
-
 // TriggerAction will trigger an action for a client to receive
 func (h Handlers) TriggerAction(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
 	data := ctx.Data.(TriggerActionData)
 
 	handle := func() *guild.ClientArray {
-		for id, client := range h.Deps.State.Guilds[*ctx.Location.GuildID].Clients {
-			if id == ctx.Location.Message.UserID {
-				return client
-			}
+		if val, ok := h.Deps.State.Guilds[*ctx.Location.GuildID].Clients[ctx.Location.Message.MessageID]; ok {
+			return val
 		}
 		return nil
 	}()
@@ -45,8 +31,8 @@ func (h Handlers) TriggerAction(c echo.Context) error {
 	}
 	for _, conn := range handle.Clients {
 		conn.Send(&client.OutPacket{
-			Type: "action",
-			Data: SendActionData{
+			Type: ActionEventType,
+			Data: ActionEvent{
 				GuildID:   *ctx.Location.GuildID,
 				ChannelID: ctx.Location.Message.ChannelID,
 				MessageID: ctx.Location.Message.MessageID,

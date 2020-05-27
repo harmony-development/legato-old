@@ -67,10 +67,10 @@ func (h Handlers) UpdateGuildPicture(c echo.Context) error {
 	h.Deps.State.GuildsLock.RLock()
 	defer h.Deps.State.GuildsLock.RUnlock()
 	h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
-		Type: "GuildPictureUpdate",
-		Data: map[string]interface{}{
-			"guild":   *ctx.Location.GuildID,
-			"picture": fileName,
+		Type: GuildUpdateEventType,
+		Data: GuildUpdateEvent{
+			GuildID: *ctx.Location.GuildID,
+			Picture: fileName,
 		},
 	})
 	return ctx.NoContent(http.StatusOK)

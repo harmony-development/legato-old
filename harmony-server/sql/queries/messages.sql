@@ -42,3 +42,24 @@ WHERE Guild_ID = @GuildID
   AND Created_At < @Before
 ORDER BY Created_At DESC
 LIMIT @Max;
+
+-- name: UpdateMessageContent :one
+UPDATE Messages
+  SET Content = $2,
+      Edited_At = NOW()
+  WHERE Message_ID = $1
+RETURNING Content, Edited_At;
+
+-- name: UpdateMessageEmbeds :one
+UPDATE Messages
+  SET Embeds = $2,
+      Edited_At = NOW()
+  WHERE Message_ID = $1
+RETURNING Embeds, Edited_At;
+
+-- name: UpdateMessageActions :one
+UPDATE Messages
+  SET Actions = $2,
+      Edited_At = NOW()
+  WHERE Message_ID = $1
+RETURNING Actions, Edited_At;
