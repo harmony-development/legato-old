@@ -17,5 +17,5 @@ func (h Handlers) GetGuilds(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
-	return ctx.JSON(http.StatusOK, res)
+	return ctx.JSON(http.StatusOK, u64TSA(res))
 }

@@ -33,10 +33,10 @@ func (h Handlers) TriggerAction(c echo.Context) error {
 		conn.Send(&client.OutPacket{
 			Type: ActionEventType,
 			Data: ActionEvent{
-				GuildID:   *ctx.Location.GuildID,
-				ChannelID: ctx.Location.Message.ChannelID,
-				MessageID: ctx.Location.Message.MessageID,
-				TriggerID: ctx.UserID,
+				GuildID:   u64TS(*ctx.Location.GuildID),
+				ChannelID: u64TS(ctx.Location.Message.ChannelID),
+				MessageID: u64TS(ctx.Location.Message.MessageID),
+				TriggerID: u64TS(ctx.UserID),
 				Action: struct {
 					ID   string "json:\"id\""
 					Data string "json:\"data\""

@@ -187,6 +187,20 @@ func (q *Queries) GetGuildPicture(ctx context.Context, guildID uint64) (string, 
 	return picture_url, err
 }
 
+const guildWithIDExists = `-- name: GuildWithIDExists :one
+SELECT EXISTS (
+    SELECT 1 FROM Guilds
+             WHERE Guild_ID = $1
+)
+`
+
+func (q *Queries) GuildWithIDExists(ctx context.Context, guildID uint64) (bool, error) {
+	row := q.queryRow(ctx, q.guildWithIDExistsStmt, guildWithIDExists, guildID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const guildsForUser = `-- name: GuildsForUser :many
 SELECT Guilds.Guild_ID FROM Guild_Members
     INNER JOIN guilds
@@ -230,18 +244,6 @@ type NumChannelsWithIDParams struct {
 
 func (q *Queries) NumChannelsWithID(ctx context.Context, arg NumChannelsWithIDParams) (int64, error) {
 	row := q.queryRow(ctx, q.numChannelsWithIDStmt, numChannelsWithID, arg.GuildID, arg.ChannelID)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
-
-const numGuildsWithID = `-- name: NumGuildsWithID :one
-SELECT COUNT(*) FROM Guilds
-    WHERE Guild_ID = $1
-`
-
-func (q *Queries) NumGuildsWithID(ctx context.Context, guildID uint64) (int64, error) {
-	row := q.queryRow(ctx, q.numGuildsWithIDStmt, numGuildsWithID, guildID)
 	var count int64
 	err := row.Scan(&count)
 	return count, err

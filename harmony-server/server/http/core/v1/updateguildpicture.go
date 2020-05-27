@@ -69,7 +69,7 @@ func (h Handlers) UpdateGuildPicture(c echo.Context) error {
 	h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
 		Type: GuildUpdateEventType,
 		Data: GuildUpdateEvent{
-			GuildID: *ctx.Location.GuildID,
+			GuildID: u64TS(*ctx.Location.GuildID),
 			Picture: fileName,
 		},
 	})

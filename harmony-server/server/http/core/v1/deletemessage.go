@@ -27,9 +27,9 @@ func (h Handlers) DeleteMessage(c echo.Context) error {
 	h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
 		Type: MessageDeleteEventType,
 		Data: MessageDeleteEvent{
-			GuildID:   *ctx.Location.GuildID,
-			ChannelID: *ctx.Location.ChannelID,
-			MessageID: ctx.Location.Message.MessageID,
+			GuildID:   u64TS(*ctx.Location.GuildID),
+			ChannelID: u64TS(*ctx.Location.ChannelID),
+			MessageID: u64TS(ctx.Location.Message.MessageID),
 		},
 	})
 	return ctx.JSON(http.StatusOK, map[string]string{

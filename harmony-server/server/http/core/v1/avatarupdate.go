@@ -63,7 +63,7 @@ func (h Handlers) AvatarUpdate(c echo.Context) error {
 		c.Send(&client.OutPacket{
 			Type: AvatarUpdateEventType,
 			Data: AvatarUpdateEvent{
-				UserID:    ctx.UserID,
+				UserID:    u64TS(ctx.UserID),
 				NewAvatar: fileID,
 			},
 		})

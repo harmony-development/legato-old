@@ -27,7 +27,7 @@ func (h Handlers) UpdateGuildName(c echo.Context) error {
 		h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
 			Type: GuildUpdateEventType,
 			Data: GuildUpdateEvent{
-				GuildID: *ctx.Location.GuildID,
+				GuildID: u64TS(*ctx.Location.GuildID),
 				Name:    data.Name,
 			},
 		})

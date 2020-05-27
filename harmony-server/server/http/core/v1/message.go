@@ -107,13 +107,13 @@ func (h Handlers) Message(c echo.Context) error {
 	h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
 		Type: MessageCreateEventType,
 		Data: MessageCreateEvent{
-			GuildID:     *ctx.Location.GuildID,
-			ChannelID:   *ctx.Location.ChannelID,
+			GuildID:     u64TS(*ctx.Location.GuildID),
+			ChannelID:   u64TS(*ctx.Location.ChannelID),
 			CreatedAt:   msg.CreatedAt.Unix(),
 			Message:     msg.Content,
 			Attachments: attachments,
-			AuthorID:    ctx.UserID,
-			MessageID:   msg.MessageID,
+			AuthorID:    u64TS(ctx.UserID),
+			MessageID:   u64TS(msg.MessageID),
 			Actions:     rawActions,
 			Embeds:      rawEmbeds,
 		},

@@ -24,7 +24,7 @@ func (h Handlers) UsernameUpdate(c echo.Context) error {
 		c.Send(&client.OutPacket{
 			Type: UserUpdateEventType,
 			Data: UserUpdateEvent{
-				UserID:   ctx.UserID,
+				UserID:   u64TS(ctx.UserID),
 				Username: data.Username,
 			},
 		})

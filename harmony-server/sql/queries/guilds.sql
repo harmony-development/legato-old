@@ -73,9 +73,11 @@ SELECT User_ID FROM Guild_Members
     WHERE User_ID = $1
     AND Guild_ID = $2;
 
--- name: NumGuildsWithID :one
-SELECT COUNT(*) FROM Guilds
-    WHERE Guild_ID = $1;
+-- name: GuildWithIDExists :one
+SELECT EXISTS (
+    SELECT 1 FROM Guilds
+             WHERE Guild_ID = $1
+);
 
 -- name: NumChannelsWithID :one
 SELECT COUNT(*) FROM Channels

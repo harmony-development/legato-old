@@ -20,7 +20,7 @@ func (h Handlers) DeleteGuild(c echo.Context) error {
 	h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
 		Type: GuildDeleteEventType,
 		Data: GuildDeleteEvent{
-			GuildID: *ctx.Location.GuildID,
+			GuildID: u64TS(*ctx.Location.GuildID),
 		},
 	})
 	delete(h.Deps.State.Guilds, *ctx.Location.GuildID)
