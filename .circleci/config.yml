@@ -5,7 +5,6 @@ jobs:
       - image: cimg/go:1.14
     steps:
       - checkout
-
       - run:
           name: Install dependencies
           command: |
@@ -24,34 +23,6 @@ jobs:
       - store_artifacts:
           path: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}/harmony-server/harmony-server
           destination: harmony-bin
-
-  build_auth:
-    docker:
-      - image: circleci/golang:1.13.8
-
-    working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
-    steps:
-      - checkout
-
-      - run:
-          name: Install dependencies
-          command: |
-            sudo apt-get update;
-            sudo apt-get install --no-install-recommends --no-install-suggests libvips libvips-dev;
-
-      - run:
-          name: Build auth server
-          command: |
-            cd harmony-auth-server/;
-            go get -v -t -d ./...;
-            go fmt ./...;
-            go vet ./...;
-            go build;
-
-      - store_artifacts:
-          path: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}/harmony-auth-server/harmony-auth-server
-          destination: harmony-auth-bin
-
   build_frontend:
     docker:
       - image: cimg/node:12.16
@@ -77,5 +48,4 @@ workflows:
   build_all:
     jobs:
       - build_backend
-      - build_auth
       - build_frontend
