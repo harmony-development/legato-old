@@ -106,17 +106,17 @@ func (h Handlers) Message(c echo.Context) error {
 		rawActions = append(rawActions, json.RawMessage(action))
 	}
 	h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
-		Type: "MessageAdd",
-		Data: map[string]interface{}{
-			"guild":       *ctx.Location.GuildID,
-			"channel":     *ctx.Location.ChannelID,
-			"createdAt":   time.Now().UTC().Unix(),
-			"message":     msg,
-			"attachments": attachments,
-			"userID":      ctx.UserID,
-			"messageID":   msg.MessageID,
-			"actions":     rawActions,
-			"embeds":      rawEmbeds,
+		Type: MessageCreateEventType,
+		Data: MessageCreateEvent{
+			GuildID:     *ctx.Location.GuildID,
+			ChannelID:   *ctx.Location.ChannelID,
+			CreatedAt:   time.Now().UTC().Unix(),
+			Message:     msg,
+			Attachments: attachments,
+			AuthorID:    ctx.UserID,
+			MessageID:   msg.MessageID,
+			Actions:     rawActions,
+			Embeds:      rawEmbeds,
 		},
 	})
 	return nil

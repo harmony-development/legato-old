@@ -1,12 +1,20 @@
 package v1
 
+import (
+	"encoding/json"
+	"harmony-server/server/db/queries"
+)
+
 const (
 	ActionEventType        = "action"
 	ChannelCreateEventType = "channel_create"
 	ChannelDeleteEventType = "channel_delete"
 	AvatarUpdateEventType  = "avatar_update"
 	GuildDeleteEventType   = "guild_delete"
+	GuildUpdateEventType   = "guild_update"
 	MessageDeleteEventType = "message_delete"
+	MessageCreateEventType = "message_create"
+	UserUpdateEventType    = "user_update"
 )
 
 // ActionEvent is the data that will be sent to a client on an action trigger
@@ -50,4 +58,30 @@ type MessageDeleteEvent struct {
 	GuildID   uint64 `json:"guild_id"`
 	ChannelID uint64 `json:"channel_id"`
 	MessageID uint64 `json:"message_id"`
+}
+
+// MessageCreateEvent is the data that will be sent to a client on a message create
+type MessageCreateEvent struct {
+	GuildID     uint64            `json:"guild_id"`
+	ChannelID   uint64            `json:"channel_id"`
+	CreatedAt   int64             `json:"created_at"`
+	Message     *queries.Message  `json:"message"`
+	Attachments []string          `json:"attachments,omitempty"`
+	AuthorID    uint64            `json:"author_id"`
+	MessageID   uint64            `json:"message_id"`
+	Actions     []json.RawMessage `json:"actions,omitempty"`
+	Embeds      []json.RawMessage `json:"embeds,omitempty"`
+}
+
+// GuildUpdateEvent is the data that will be sent to a client on a guild update
+type GuildUpdateEvent struct {
+	GuildID uint64 `json:"guild_id"`
+	Name    string `json:"name,omitempty"`
+	Picture string `json:"picture,omitempty"`
+}
+
+// UserUpdateEvent is the data that will be sent to a client on a user update
+type UserUpdateEvent struct {
+	UserID   uint64 `json:"user_id"`
+	Username string `json:"username,omitempty"`
 }
