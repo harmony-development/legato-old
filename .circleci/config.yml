@@ -21,6 +21,7 @@ jobs:
             go build;
 
       - slack/notify:
+            channel_id: 709945941096005742
             color: '#42e2f4'
             message: This is a custom message notification
             webhook: $SLACK_WEBHOOK
