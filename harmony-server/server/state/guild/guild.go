@@ -7,13 +7,13 @@ import (
 
 // ClientArray is a thread-safe array of client connections
 type ClientArray struct {
-	sync.RWMutex
+	*sync.RWMutex
 	Clients []*client.Client // TODO come up with a better name for this
 }
 
 // Guild is the data structure for an active guild
 type Guild struct {
-	sync.RWMutex
+	*sync.RWMutex
 	Clients map[uint64]*ClientArray
 }
 
@@ -24,6 +24,7 @@ func (g Guild) AddClient(userID *uint64, c *client.Client) {
 		defer g.Unlock()
 		g.Clients[*userID] = &ClientArray{
 			Clients: []*client.Client{},
+			RWMutex: &sync.RWMutex{},
 		}
 		return
 	}

@@ -14,7 +14,7 @@ type Handler func(c Client, e *Event, data *json.RawMessage)
 
 // Client is the data structure for a connected client
 type Client struct {
-	sync.RWMutex
+	*sync.RWMutex
 	Conn       *websocket.Conn
 	Bus        Bus
 	UserID     *uint64
@@ -103,7 +103,9 @@ func (c *Client) Writer() {
 		}
 	case <-c.PingTicker.C:
 		logrus.Println("PING")
-		c.Conn.SetWriteDeadline(time.Now().Add(15 * time.Second))
+		if err := c.Conn.SetWriteDeadline(time.Now().Add(15 * time.Second)); err != nil {
+			logrus.Warn(err)
+		}
 		if err := c.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 			logrus.Warnf("Ping timeout: %v", err)
 			if c.UserID != nil {
