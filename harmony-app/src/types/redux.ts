@@ -56,3 +56,14 @@ export interface IState {
 	userSettingsDialog: boolean;
 	chatInputFocus: boolean;
 }
+
+export interface IInstanceList {
+	[key: string]: {
+		name: string;
+		host: string;
+	};
+}
+
+export interface IAuthState {
+	instanceList: IInstanceList;
+}

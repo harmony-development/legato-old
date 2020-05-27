@@ -1,3 +1,4 @@
+
 {
 	"extends": [
 		"eslint:recommended",
@@ -37,7 +38,9 @@
 		"react-hooks/exhaustive-deps": "off",
 		"@typescript-eslint/no-non-null-assertion": "off",
 		"@typescript-eslint/interface-name-prefix": "off",
-		"@typescript-eslint/explicit-function-return-type": "off"
+		"@typescript-eslint/explicit-function-return-type": "off",
+		"react/display-name": "off",
+		"@typescript-eslint/ban-ts-ignore": "off"
 	},
 	"settings": {
 		"react": {

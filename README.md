@@ -1,4 +1,3 @@
-
 <h1 align=center>
  <a href="https://github.com/harmony-development"><img align=center width="15%" src="https://i.imgur.com/lx2RCZj.png" /></a> Harmony
 </h1>

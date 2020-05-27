@@ -1,15 +1,10 @@
-# Golang CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-go/ for more details
 version: 2
 jobs:
-  build:
+  build_backend:
     docker:
-      # specify the version
       - image: cimg/go:1.14
     steps:
       - checkout
-      # specify any bash command here prefixed with `run: `
       - run:
           name: Install dependencies
           command: |
@@ -17,7 +12,7 @@ jobs:
             sudo apt-get install --no-install-recommends --no-install-suggests libvips libvips-dev;
 
       - run:
-          name: Build project
+          name: Build backend
           command: |
             cd harmony-server/;
             go get -v -t -d ./...;
@@ -26,5 +21,31 @@ jobs:
             go build;
 
       - store_artifacts:
-          path: ~/project/harmony-server/harmony-server
+          path: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}/harmony-server/harmony-server
           destination: harmony-bin
+  build_frontend:
+    docker:
+      - image: cimg/node:12.16
+
+    steps:
+      - checkout
+
+      - run:
+          name: Build frontend
+          command: |
+            cd harmony-app/;
+            npm install netlify-cli;
+            yarn;
+            CI=false yarn build;
+            ./node_modules/.bin/netlify deploy --site $NETLIFY_SITE_ID --auth $NETLIFY_AUTH_TOKEN --prod --dir=build
+
+      - store_artifacts:
+          path: ~/project/harmony-app/build
+          destination: harmony-app
+
+workflows:
+  version: 2
+  build_all:
+    jobs:
+      - build_backend
+      - build_frontend

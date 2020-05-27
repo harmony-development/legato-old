@@ -1,7 +1,9 @@
-.env
 .idea/
 vendor
 filestore
 harmony.db
 static
 harmony-server
+config.json
+harmony-key.pem
+harmony-key.pub
