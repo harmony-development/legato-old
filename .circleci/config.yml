@@ -23,9 +23,9 @@ jobs:
             go build;
 
       - slack/notify:
+            channel: 709945941096005742
             color: '#42e2f4'
             message: This is a custom message notification
-            webhook: webhook
             
       - store_artifacts:
           path: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}/harmony-server/harmony-server
