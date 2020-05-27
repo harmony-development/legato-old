@@ -1,4 +1,6 @@
-version: 2
+version: 2.1
+orbs:
+  slack: circleci/slack@3.4.2
 jobs:
   build_backend:
     docker:
@@ -23,6 +25,10 @@ jobs:
       - store_artifacts:
           path: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}/harmony-server/harmony-server
           destination: harmony-bin
+      - slack/status:
+          fail_only: false
+          webhook: {{WEBHOOK_URL}}/slack
+          
   build_frontend:
     docker:
       - image: cimg/node:12.16
