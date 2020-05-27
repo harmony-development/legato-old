@@ -66,7 +66,7 @@ func (c *Client) Reader() {
 		if c.Conn == nil {
 			return
 		}
-		_, msg, err := c.Conn.ReadMessage()
+		msgType, msg, err := c.Conn.ReadMessage()
 		if err != nil {
 			logrus.Warn("Error reading message from client ", err)
 			if c.UserID != nil {
@@ -75,13 +75,15 @@ func (c *Client) Reader() {
 			_ = c.Conn.Close()
 			return
 		}
-		var p Packet
-		if err := json.Unmarshal(msg, &p); err != nil {
-			logrus.Warn("Error parsing client packet", err)
-			continue
-		}
-		if c.Bus[p.Type] != nil {
-			c.Bus[p.Type].Handler(*c, c.Bus[p.Type], p.Data)
+		if msgType == websocket.TextMessage {
+			var p Packet
+			if err := json.Unmarshal(msg, &p); err != nil {
+				logrus.Warn("Error parsing client packet", err)
+				continue
+			}
+			if c.Bus[p.Type] != nil {
+				c.Bus[p.Type].Handler(*c, c.Bus[p.Type], p.Data)
+			}
 		}
 	}
 }
