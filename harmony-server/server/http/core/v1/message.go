@@ -4,6 +4,7 @@ import (
 	"crypto/sha512"
 	"encoding/json"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 
 	"harmony-server/server/http/hm"
@@ -25,10 +26,13 @@ func (h Handlers) Message(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
 	data := ctx.Data.(MessageData)
 	form, err := ctx.MultipartForm()
+	var attachments []string
+	var files []*multipart.FileHeader
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
+		goto pastTheForm
 	}
-	files := form.File["files"]
+	files = form.File["files"]
+	attachments = make([]string, len(files))
 	if len(files) > h.Deps.Config.Server.MaxAttachments {
 		return echo.NewHTTPError(http.StatusBadRequest, "too many files uploaded")
 	}
@@ -41,7 +45,6 @@ func (h Handlers) Message(c echo.Context) error {
 	if h.Deps.State.Guilds[*ctx.Location.GuildID] == nil || h.Deps.State.Guilds[*ctx.Location.GuildID].Clients[ctx.UserID] == nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "insufficient permissions to send message")
 	}
-	var attachments = make([]string, len(files))
 	if len(files) > 0 {
 		for i, v := range files {
 			file, err := v.Open()
@@ -72,6 +75,7 @@ func (h Handlers) Message(c echo.Context) error {
 			}
 		}
 	}
+pastTheForm:
 	var actions [][]byte
 	var embeds [][]byte
 	if len(data.Actions) > 0 {
@@ -103,6 +107,9 @@ func (h Handlers) Message(c echo.Context) error {
 	}
 	for _, action := range actions {
 		rawActions = append(rawActions, json.RawMessage(action))
+	}
+	if h.Deps.State.Guilds[*ctx.Location.GuildID] == nil {
+		return nil
 	}
 	h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
 		Type: MessageCreateEventType,
