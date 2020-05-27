@@ -27,7 +27,7 @@ jobs:
           destination: harmony-bin
       - slack/status:
           fail_only: false
-          webhook: {{WEBHOOK_URL}}
+          webhook: "{{WEBHOOK_URL}}"
           
   build_frontend:
     docker:
