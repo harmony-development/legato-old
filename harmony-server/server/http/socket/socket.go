@@ -2,6 +2,7 @@ package socket
 
 import (
 	"net/http"
+	"sync"
 
 	"harmony-server/server/db"
 	"harmony-server/server/http/socket/client"
@@ -59,6 +60,7 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) *client.Client 
 		Bus:        h.Bus,
 		Out:        make(chan []byte),
 		Deregister: h.Deregister,
+		RWMutex:    &sync.RWMutex{},
 	}
 	go c.Reader()
 	go c.Writer()

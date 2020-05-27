@@ -2,6 +2,7 @@ package events
 
 import (
 	"encoding/json"
+	"sync"
 
 	"harmony-server/server/http/socket/client"
 	"harmony-server/server/state/guild"
@@ -41,6 +42,7 @@ func (e Events) Subscribe(ws client.Client, event *client.Event, raw *json.RawMe
 			e.State.GuildsLock.Lock()
 			e.State.Guilds[id] = &guild.Guild{
 				Clients: make(map[uint64]*guild.ClientArray),
+				RWMutex: &sync.RWMutex{},
 			}
 			e.State.Guilds[id].AddClient(&userID, &ws)
 			e.State.GuildsLock.Unlock()
