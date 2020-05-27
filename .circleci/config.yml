@@ -22,12 +22,14 @@ jobs:
             go vet ./...;
             go build;
 
+      - run:
+          name: Send webhook
+          command: |
+            curl $WEBHOOK_URL -H 'content-type: application/json' --data "{\"content\":\"$?\"}"
+            
       - store_artifacts:
           path: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}/harmony-server/harmony-server
           destination: harmony-bin
-      - slack/status:
-          fail_only: false
-          webhook: "{{WEBHOOK_URL}}"
           
   build_frontend:
     docker:
