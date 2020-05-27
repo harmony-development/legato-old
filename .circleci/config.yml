@@ -23,7 +23,7 @@ jobs:
       - slack/notify:
             color: '#42e2f4'
             message: This is a custom message notification
-            webhook: webhook
+            webhook: $SLACK_WEBHOOK
             
       - store_artifacts:
           path: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}/harmony-server/harmony-server
