@@ -21,12 +21,11 @@ jobs:
             go fmt ./...;
             go vet ./...;
             go build;
-            echo $? > /tmp/build-status; # Meh
 
-      - run:
-          name: Send webhook
-          command: |
-            curl $WEBHOOK_URL -H 'content-type: application/json' --data "{\"content\":\"$(cat /tmp/build-status)\"}"
+      - slack/notify:
+          color: '#42e2f4'
+          message: This is a custom message notification
+          webhook: "{{WEBHOOK_URL}}"
             
       - store_artifacts:
           path: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}/harmony-server/harmony-server
