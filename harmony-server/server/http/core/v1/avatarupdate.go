@@ -16,11 +16,6 @@ import (
 	"harmony-server/server/http/socket/client"
 )
 
-type AvatarUpdateEvent struct {
-	UserID    uint64
-	NewAvatar string
-}
-
 func (h Handlers) AvatarUpdate(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
 	if !ctx.Limiter.Allow() {
@@ -66,7 +61,7 @@ func (h Handlers) AvatarUpdate(c echo.Context) error {
 	}
 	for c := range h.Deps.State.UserUpdateListeners {
 		c.Send(&client.OutPacket{
-			Type: "AvatarUpdate",
+			Type: AvatarUpdateEventType,
 			Data: AvatarUpdateEvent{
 				UserID:    ctx.UserID,
 				NewAvatar: fileID,

@@ -18,9 +18,9 @@ func (h Handlers) DeleteGuild(c echo.Context) error {
 
 	h.Deps.State.GuildsLock.Lock()
 	h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
-		Type: "deleteGuild",
-		Data: map[string]interface{}{
-			"guild": *ctx.Location.GuildID,
+		Type: GuildDeleteEventType,
+		Data: GuildDeleteEvent{
+			GuildID: *ctx.Location.GuildID,
 		},
 	})
 	delete(h.Deps.State.Guilds, *ctx.Location.GuildID)

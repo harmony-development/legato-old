@@ -25,11 +25,11 @@ func (h Handlers) AddChannel(c echo.Context) error {
 	}
 
 	h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
-		Type: "AddChannel",
-		Data: map[string]interface{}{
-			"guild":       *ctx.Location.GuildID,
-			"channelName": data.ChannelName,
-			"channelID":   channel.ChannelID,
+		Type: ChannelCreateEventType,
+		Data: ChannelCreateEvent{
+			GuildID:     *ctx.Location.GuildID,
+			ChannelName: data.ChannelName,
+			ChannelID:   channel.ChannelID,
 		},
 	})
 	return ctx.JSON(http.StatusOK, map[string]string{
