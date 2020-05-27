@@ -26,7 +26,6 @@ func (g Guild) AddClient(userID *uint64, c *client.Client) {
 			Clients: []*client.Client{},
 			RWMutex: &sync.RWMutex{},
 		}
-		return
 	}
 	g.Clients[*userID].Lock()
 	g.Clients[*userID].Clients = append(g.Clients[*userID].Clients, c)
