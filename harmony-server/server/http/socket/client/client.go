@@ -96,6 +96,7 @@ func (c *Client) Reader() {
 // Writer eternally waits for things to write to the client
 func (c *Client) Writer() {
 	c.PingTicker = time.NewTicker(15 * time.Second)
+	defer c.PingTicker.Stop()
 	select {
 	case msg := <-c.Out:
 		err := c.Conn.WriteMessage(websocket.TextMessage, msg)
