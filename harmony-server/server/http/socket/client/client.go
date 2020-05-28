@@ -56,6 +56,9 @@ func (c *Client) SendError(msg string) {
 
 // Reader eternally waits for things to read from the client
 func (c *Client) Reader() {
+	defer func() {
+		logrus.Debug("Reader routine exited")
+	}()
 	c.Conn.SetReadLimit(4096)
 	if err := c.Conn.SetReadDeadline(time.Now().Add(1 * time.Minute)); err != nil {
 		logrus.Warn(err)
@@ -92,7 +95,10 @@ func (c *Client) Reader() {
 // Writer eternally waits for things to write to the client
 func (c *Client) Writer() {
 	c.PingTicker = time.NewTicker(15 * time.Second)
-	defer c.PingTicker.Stop()
+	defer func() {
+		c.PingTicker.Stop()
+		logrus.Debug("Writer routine exited")
+	}()
 	for {
 		select {
 		case msg := <-c.Out:
