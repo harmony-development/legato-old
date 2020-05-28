@@ -61,23 +61,19 @@ func (c *Client) Reader() {
 		logrus.Warn(err)
 	}
 	c.Conn.SetPongHandler(func(string) error {
-		logrus.Println("PONG")
 		if err := c.Conn.SetReadDeadline(time.Now().Add(1 * time.Minute)); err != nil {
 			logrus.Warn(err)
 		}
 		return nil
 	})
 	for {
-		if c.Conn == nil {
-			return
-		}
 		msgType, msg, err := c.Conn.ReadMessage()
 		if err != nil {
-			logrus.Warn("Error reading message from client ", err)
+			logrus.Warn("Read failure: ", err)
 			if c.UserID != nil {
 				c.Deregister(c)
 			}
-			_ = c.Conn.Close()
+			c.Conn.Close()
 			return
 		}
 		if msgType == websocket.TextMessage {
@@ -111,15 +107,16 @@ func (c *Client) Writer() {
 				return
 			}
 		case <-c.PingTicker.C:
-			logrus.Println("PING")
 			if err := c.Conn.SetWriteDeadline(time.Now().Add(15 * time.Second)); err != nil {
 				logrus.Warn(err)
 			}
 			if err := c.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
-				logrus.Warnf("Ping timeout: %v", err)
+				logrus.Debug("Write failure: ", err)
 				if c.UserID != nil {
 					c.Deregister(c)
 				}
+				c.Conn.Close()
+				return
 			}
 		}
 	}
