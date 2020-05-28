@@ -27,5 +27,7 @@ func (h Handlers) GetChannels(c echo.Context) error {
 			ID:   channel.ChannelID,
 		})
 	}
-	return ctx.JSON(http.StatusOK, ret)
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"channels": ret,
+	})
 }
