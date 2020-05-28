@@ -10,7 +10,7 @@ import (
 
 // UpdateGuildNameData is the data for a guild name update request
 type UpdateGuildNameData struct {
-	Name string `validate:"name"`
+	GuildName string `json:"guild_name" validate:"required"`
 }
 
 // UpdateGuildName updates the guild name
@@ -18,7 +18,7 @@ func (h Handlers) UpdateGuildName(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
 	data := ctx.Data.(UpdateGuildNameData)
 
-	if err := h.Deps.DB.UpdateGuildName(*ctx.Location.GuildID, data.Name); err != nil {
+	if err := h.Deps.DB.UpdateGuildName(*ctx.Location.GuildID, data.GuildName); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to update guild name, please try again later")
 	}
 	h.Deps.State.GuildsLock.RLock()
@@ -28,11 +28,9 @@ func (h Handlers) UpdateGuildName(c echo.Context) error {
 			Type: GuildUpdateEventType,
 			Data: GuildUpdateEvent{
 				GuildID: u64TS(*ctx.Location.GuildID),
-				Name:    data.Name,
+				Name:    data.GuildName,
 			},
 		})
 	}
-	return ctx.JSON(http.StatusOK, map[string]string{
-		"message": "successfully updated guild name",
-	})
+	return nil
 }

@@ -63,3 +63,20 @@ func (m *Middlewares) WithMessage(handler echo.HandlerFunc) echo.HandlerFunc {
 		return handler(ctx)
 	}
 }
+
+func (m *Middlewares) WithUser(handler echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx := c.(HarmonyContext)
+		userIDString := c.Param("user_id")
+		parsed, err := strconv.ParseUint(userIDString, 10, 64)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "user ID in invalid form")
+		}
+		user, err := m.DB.GetUserByID(uint64(parsed))
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError)
+		}
+		ctx.Location.User = &user
+		return handler(ctx)
+	}
+}

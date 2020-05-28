@@ -488,6 +488,10 @@ func (db *HarmonyDB) GetFileIDFromHash(hash []byte) (string, error) {
 	return db.queries.GetFileByHash(ctx, hash)
 }
 
+func (db *HarmonyDB) GetGuildByID(guildID uint64) (queries.Guild, error) {
+	return db.queries.GetGuildData(ctx, guildID)
+}
+
 func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, actions *[][]byte) (time.Time, error) {
 	tx, err := db.Begin()
 	if err != nil {

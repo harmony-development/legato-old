@@ -90,6 +90,17 @@ func (h Handlers) MakeRoutes() []routing.Route {
 			Permissions: hm.Owner,
 		},
 		{
+			Path:    "/guilds/:guild_id",
+			Handler: h.GetGuild,
+			Method:  routing.GET,
+			RateLimit: &routing.RateLimit{
+				Duration: 5 * time.Second,
+				Burst:    5,
+			},
+			Auth:     true,
+			Location: routing.LocationGuild,
+		},
+		{
 			Path:    "/guilds/:guild_id/members",
 			Handler: h.GetMembers,
 			Method:  routing.GET,
@@ -255,6 +266,17 @@ func (h Handlers) MakeRoutes() []routing.Route {
 			Auth:     true,
 			Schema:   LeaveGuildData{},
 			Location: routing.LocationGuild,
+		},
+		{
+			Path:    "/users/:user_id",
+			Handler: h.GetUser,
+			Method:  routing.GET,
+			RateLimit: &routing.RateLimit{
+				Duration: 3 * time.Second,
+				Burst:    2,
+			},
+			Auth:     true,
+			Location: routing.LocationUser,
 		},
 		{
 			Path:    "/key",

@@ -6,6 +6,10 @@ INSERT INTO Guilds (
 )
 RETURNING *;
 
+-- name: GetGuildData :one
+SELECT * FROM Guilds
+    WHERE Guild_ID = $1;
+
 -- name: DeleteGuild :exec
 DELETE FROM Guilds
     WHERE Guild_ID = $1;

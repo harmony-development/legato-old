@@ -16,17 +16,17 @@ func (h Handlers) DeleteGuild(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "error deleting guild, please try again later or report to the administrator")
 	}
 
-	h.Deps.State.GuildsLock.Lock()
-	h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
-		Type: GuildDeleteEventType,
-		Data: GuildDeleteEvent{
-			GuildID: u64TS(*ctx.Location.GuildID),
-		},
-	})
-	delete(h.Deps.State.Guilds, *ctx.Location.GuildID)
-	h.Deps.State.GuildsLock.RUnlock()
+	if h.Deps.State.Guilds[*ctx.Location.GuildID] != nil {
+		h.Deps.State.GuildsLock.Lock()
+		h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
+			Type: GuildDeleteEventType,
+			Data: GuildDeleteEvent{
+				GuildID: u64TS(*ctx.Location.GuildID),
+			},
+		})
+		delete(h.Deps.State.Guilds, *ctx.Location.GuildID)
+		h.Deps.State.GuildsLock.RUnlock()
+	}
 
-	return ctx.JSON(http.StatusOK, map[string]string{
-		"message": "successfully deleted guild",
-	})
+	return nil
 }

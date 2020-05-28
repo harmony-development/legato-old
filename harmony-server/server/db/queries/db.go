@@ -85,6 +85,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getFileByHashStmt, err = db.PrepareContext(ctx, getFileByHash); err != nil {
 		return nil, fmt.Errorf("error preparing query GetFileByHash: %w", err)
 	}
+	if q.getGuildDataStmt, err = db.PrepareContext(ctx, getGuildData); err != nil {
+		return nil, fmt.Errorf("error preparing query GetGuildData: %w", err)
+	}
 	if q.getGuildMembersStmt, err = db.PrepareContext(ctx, getGuildMembers); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGuildMembers: %w", err)
 	}
@@ -271,6 +274,11 @@ func (q *Queries) Close() error {
 	if q.getFileByHashStmt != nil {
 		if cerr := q.getFileByHashStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getFileByHashStmt: %w", cerr)
+		}
+	}
+	if q.getGuildDataStmt != nil {
+		if cerr := q.getGuildDataStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getGuildDataStmt: %w", cerr)
 		}
 	}
 	if q.getGuildMembersStmt != nil {
@@ -463,6 +471,7 @@ type Queries struct {
 	getAvatarStmt            *sql.Stmt
 	getChannelsStmt          *sql.Stmt
 	getFileByHashStmt        *sql.Stmt
+	getGuildDataStmt         *sql.Stmt
 	getGuildMembersStmt      *sql.Stmt
 	getGuildOwnerStmt        *sql.Stmt
 	getGuildPictureStmt      *sql.Stmt
@@ -516,6 +525,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getAvatarStmt:            q.getAvatarStmt,
 		getChannelsStmt:          q.getChannelsStmt,
 		getFileByHashStmt:        q.getFileByHashStmt,
+		getGuildDataStmt:         q.getGuildDataStmt,
 		getGuildMembersStmt:      q.getGuildMembersStmt,
 		getGuildOwnerStmt:        q.getGuildOwnerStmt,
 		getGuildPictureStmt:      q.getGuildPictureStmt,

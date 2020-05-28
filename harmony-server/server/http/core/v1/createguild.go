@@ -11,7 +11,7 @@ import (
 
 // CreateGuildData is the data for a guild creation request
 type CreateGuildData struct {
-	GuildName string `validate:"required"`
+	GuildName string `json:"guild_name" validate:"required"`
 }
 
 // CreateGuild creates a guild for a user
@@ -26,7 +26,7 @@ func (h Handlers) CreateGuild(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to create guild, please try again later")
 	}
-	return ctx.JSON(http.StatusOK, map[string]uint64{
-		"guild": guild.GuildID,
+	return ctx.JSON(http.StatusOK, GuildCreateResponse{
+		GuildID: u64TS(guild.GuildID),
 	})
 }

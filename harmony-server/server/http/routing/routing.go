@@ -24,6 +24,7 @@ const (
 	LocationGuild
 	LocationGuildAndChannel
 	LocationGuildChannelAndMessage
+	LocationUser
 )
 
 type RateLimit struct {
@@ -67,6 +68,8 @@ func (r Router) BindRoute(g *echo.Group, endpoint Route) {
 		middleware = append(middleware, r.Middlewares.WithGuild, r.Middlewares.WithChannel)
 	case LocationGuildChannelAndMessage:
 		middleware = append(middleware, r.Middlewares.WithGuild, r.Middlewares.WithChannel, r.Middlewares.WithMessage)
+	case LocationUser:
+		middleware = append(middleware, r.Middlewares.WithUser)
 	}
 	if endpoint.Permissions != 0 {
 		switch endpoint.Location {

@@ -135,6 +135,23 @@ func (q *Queries) GetChannels(ctx context.Context, guildID sql.NullInt64) ([]Cha
 	return items, nil
 }
 
+const getGuildData = `-- name: GetGuildData :one
+SELECT guild_id, owner_id, guild_name, picture_url FROM Guilds
+    WHERE Guild_ID = $1
+`
+
+func (q *Queries) GetGuildData(ctx context.Context, guildID uint64) (Guild, error) {
+	row := q.queryRow(ctx, q.getGuildDataStmt, getGuildData, guildID)
+	var i Guild
+	err := row.Scan(
+		&i.GuildID,
+		&i.OwnerID,
+		&i.GuildName,
+		&i.PictureUrl,
+	)
+	return i, err
+}
+
 const getGuildMembers = `-- name: GetGuildMembers :many
 SELECT user_id, guild_id FROM Guild_Members
     WHERE Guild_ID = $1
