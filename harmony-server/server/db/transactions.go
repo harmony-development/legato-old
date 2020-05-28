@@ -329,7 +329,7 @@ func (db *HarmonyDB) ChannelsForGuild(guildID uint64) ([]queries.Channel, error)
 }
 
 // MembersInGuild lists the members of a guild
-func (db *HarmonyDB) MembersInGuild(guildID uint64) ([]queries.GuildMember, error) {
+func (db *HarmonyDB) MembersInGuild(guildID uint64) ([]uint64, error) {
 	return db.queries.GetGuildMembers(ctx, guildID)
 }
 

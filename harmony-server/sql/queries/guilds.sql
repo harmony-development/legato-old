@@ -63,7 +63,7 @@ UPDATE Guilds
     WHERE Guild_ID = $2;
 
 -- name: GetGuildMembers :many
-SELECT * FROM Guild_Members
+SELECT User_ID FROM Guild_Members
     WHERE Guild_ID = $1;
 
 -- name: GuildsForUser :many
