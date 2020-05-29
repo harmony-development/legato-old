@@ -23,7 +23,7 @@ func (h Handlers) GetMembers(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to list members, please try again later")
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]interface{}{
-		"members": res,
+	return ctx.JSON(http.StatusOK, MemberListResponse{
+		Members: u64TSA(res),
 	})
 }

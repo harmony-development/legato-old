@@ -15,6 +15,10 @@ type UserInfoResponse struct {
 	UserAvatar string `json:"user_avatar"`
 }
 
+type MemberListResponse struct {
+	Members []string `json:"members"`
+}
+
 type LoginResponse struct {
 	Session string
 }
