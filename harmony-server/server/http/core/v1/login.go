@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"database/sql"
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
@@ -44,7 +45,7 @@ func (h Handlers) Login(c echo.Context) error {
 		token := t.Claims.(*auth.Token)
 		session := randstr.Hex(16)
 		localUserID, err := h.Deps.DB.GetLocalUserForForeignUser(token.UserID, data.Domain)
-		if err != nil {
+		if err != nil && err != sql.ErrNoRows {
 			h.Deps.Logger.Exception(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 		}
