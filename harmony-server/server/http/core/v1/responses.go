@@ -19,6 +19,10 @@ type MemberListResponse struct {
 	Members []string `json:"members"`
 }
 
+type ChannelListResponse struct {
+	Channels []Channel `json:"channels"`
+}
+
 type LoginResponse struct {
 	Session string
 }
