@@ -32,7 +32,7 @@ type Message struct {
 	EditedAt  *string  `json:"edited_at,omitempty"`
 	Content   string   `json:"content"`
 	Embeds    []Embed  `json:"embeds,omitempty"`
-	Actions   []Action `json:"actions",omitempty`
+	Actions   []Action `json:"actions,omitempty"`
 }
 
 type MessageListResponse struct {
