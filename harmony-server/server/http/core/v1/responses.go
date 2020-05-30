@@ -23,6 +23,22 @@ type ChannelListResponse struct {
 	Channels []Channel `json:"channels"`
 }
 
+type Message struct {
+	MessageID string   `json:"message_id"`
+	GuildID   string   `json:"guild_id"`
+	ChannelID string   `json:"channel_id"`
+	AuthorID  string   `json:"author_id"`
+	CreatedAt string   `json:"created_at"`
+	EditedAt  *string  `json:"edited_at,omitempty"`
+	Content   string   `json:"content"`
+	Embeds    []Embed  `json:"embeds,omitempty"`
+	Actions   []Action `json:"actions",omitempty`
+}
+
+type MessageListResponse struct {
+	Messages []Message `json:"messages"`
+}
+
 type LoginResponse struct {
 	Session string
 }
