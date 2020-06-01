@@ -249,12 +249,12 @@ func (db *HarmonyDB) GetMessageDate(messageID uint64) (time.Time, error) {
 }
 
 // GetMessages gets the newest messages from a guild
-func (db *HarmonyDB) GetMessages(guildID uint64, channelID uint64) ([]queries.GetMessagesRow, error) {
+func (db *HarmonyDB) GetMessages(guildID uint64, channelID uint64) ([]queries.Message, error) {
 	return db.GetMessagesBefore(guildID, channelID, time.Now())
 }
 
 // GetMessagesBefore gets messages before a given message in a guild
-func (db *HarmonyDB) GetMessagesBefore(guildID uint64, channelID uint64, date time.Time) ([]queries.GetMessagesRow, error) {
+func (db *HarmonyDB) GetMessagesBefore(guildID uint64, channelID uint64, date time.Time) ([]queries.Message, error) {
 	return db.queries.GetMessages(ctx, queries.GetMessagesParams{
 		Guildid:   guildID,
 		Channelid: channelID,
@@ -329,7 +329,7 @@ func (db *HarmonyDB) ChannelsForGuild(guildID uint64) ([]queries.Channel, error)
 }
 
 // MembersInGuild lists the members of a guild
-func (db *HarmonyDB) MembersInGuild(guildID uint64) ([]queries.GuildMember, error) {
+func (db *HarmonyDB) MembersInGuild(guildID uint64) ([]uint64, error) {
 	return db.queries.GetGuildMembers(ctx, guildID)
 }
 

@@ -35,7 +35,7 @@ FROM Messages
 WHERE Message_ID = $1;
 
 -- name: GetMessages :many
-SELECT Message_ID, User_ID, Content, Created_At
+SELECT *
 FROM Messages
 WHERE Guild_ID = @GuildID
   AND Channel_ID = @ChannelID

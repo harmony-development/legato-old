@@ -15,6 +15,36 @@ type UserInfoResponse struct {
 	UserAvatar string `json:"user_avatar"`
 }
 
+type MemberListResponse struct {
+	Members []string `json:"members"`
+}
+
+type ChannelListResponse struct {
+	Channels []Channel `json:"channels"`
+}
+
+type Message struct {
+	MessageID string   `json:"message_id"`
+	GuildID   string   `json:"guild_id"`
+	ChannelID string   `json:"channel_id"`
+	AuthorID  string   `json:"author_id"`
+	CreatedAt string   `json:"created_at"`
+	EditedAt  *string  `json:"edited_at,omitempty"`
+	Content   string   `json:"content"`
+	Embeds    []Embed  `json:"embeds,omitempty"`
+	Actions   []Action `json:"actions,omitempty"`
+}
+
+type ChannelCreateResponse struct {
+	GuildID     string `json:"guild_id"`
+	ChannelID   string `json:"channel_id"`
+	ChannelName string `json:"channel_name"`
+}
+
+type MessageListResponse struct {
+	Messages []Message `json:"messages"`
+}
+
 type LoginResponse struct {
 	Session string
 }

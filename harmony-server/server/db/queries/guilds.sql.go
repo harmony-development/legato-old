@@ -153,23 +153,23 @@ func (q *Queries) GetGuildData(ctx context.Context, guildID uint64) (Guild, erro
 }
 
 const getGuildMembers = `-- name: GetGuildMembers :many
-SELECT user_id, guild_id FROM Guild_Members
+SELECT User_ID FROM Guild_Members
     WHERE Guild_ID = $1
 `
 
-func (q *Queries) GetGuildMembers(ctx context.Context, guildID uint64) ([]GuildMember, error) {
+func (q *Queries) GetGuildMembers(ctx context.Context, guildID uint64) ([]uint64, error) {
 	rows, err := q.query(ctx, q.getGuildMembersStmt, getGuildMembers, guildID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GuildMember
+	var items []uint64
 	for rows.Next() {
-		var i GuildMember
-		if err := rows.Scan(&i.UserID, &i.GuildID); err != nil {
+		var user_id uint64
+		if err := rows.Scan(&user_id); err != nil {
 			return nil, err
 		}
-		items = append(items, i)
+		items = append(items, user_id)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err

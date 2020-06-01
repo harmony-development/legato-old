@@ -1,8 +1,11 @@
 package v1
 
 import (
+	"database/sql"
+	"encoding/json"
 	"harmony-server/server/db/queries"
 	"net/http"
+	"strconv"
 
 	"harmony-server/server/http/hm"
 
@@ -13,32 +16,68 @@ import (
 type GetMessagesData struct {
 	// MessageRef is the ID of the message you want to load before.
 	// Used to load old messages
-	MessageRef uint64
+	MessageRef string `json:"before_message"`
 }
 
 // GetMessages gets messages in a given channel
 func (h Handlers) GetMessages(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
 	data := ctx.Data.(GetMessagesData)
+	var messageRef uint64
+	if data.MessageRef != "" {
+		var err error
+		messageRef, err = strconv.ParseUint(data.MessageRef, 10, 64)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest)
+		}
+	}
 
 	exists, err := h.Deps.DB.UserInGuild(ctx.UserID, *ctx.Location.GuildID)
 	if err != nil || !exists {
 		return echo.NewHTTPError(http.StatusForbidden, "not allowed to get messages")
 	}
-	var messages []queries.GetMessagesRow
-	if data.MessageRef != 0 {
+	var messages []queries.Message
+	if messageRef == 0 {
 		messages, err = h.Deps.DB.GetMessages(*ctx.Location.GuildID, *ctx.Location.ChannelID)
 	} else {
-		time, err := h.Deps.DB.GetMessageDate(data.MessageRef)
+		time, err := h.Deps.DB.GetMessageDate(messageRef)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, "error getting message date")
 		}
 		messages, err = h.Deps.DB.GetMessagesBefore(*ctx.Location.GuildID, *ctx.Location.ChannelID, time)
 	}
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		return echo.NewHTTPError(http.StatusInternalServerError, "error listing messages")
 	}
-	return ctx.JSON(http.StatusOK, map[string]interface{}{
-		"messages": messages,
+	return ctx.JSON(http.StatusOK, MessageListResponse{
+		Messages: func() []Message {
+			var ret []Message
+			for _, message := range messages {
+				var embeds []Embed
+				var actions []Action
+				for _, rawEmbed := range message.Embeds {
+					var embed Embed
+					json.Unmarshal(rawEmbed, &embed)
+					embeds = append(embeds, embed)
+				}
+				for _, rawAction := range message.Actions {
+					var action Action
+					json.Unmarshal(rawAction, &action)
+					actions = append(actions, action)
+				}
+				ret = append(ret, Message{
+					MessageID: u64TS(message.MessageID),
+					GuildID:   u64TS(message.GuildID),
+					ChannelID: u64TS(message.ChannelID),
+					AuthorID:  u64TS(message.UserID),
+					CreatedAt: timeTS(message.CreatedAt),
+					EditedAt:  nullTimeTS(message.EditedAt),
+					Content:   message.Content,
+					Embeds:    embeds,
+					Actions:   actions,
+				})
+			}
+			return ret
+		}(),
 	})
 }

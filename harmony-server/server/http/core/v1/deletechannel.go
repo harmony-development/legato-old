@@ -17,14 +17,14 @@ func (h Handlers) DeleteChannel(c echo.Context) error {
 		sentry.CaptureException(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "error deleting channel, please try again later")
 	}
-	h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
-		Type: ChannelDeleteEventType,
-		Data: ChannelDeleteEvent{
-			GuildID:   u64TS(*ctx.Location.GuildID),
-			ChannelID: u64TS(*ctx.Location.ChannelID),
-		},
-	})
-	return ctx.JSON(http.StatusOK, map[string]string{
-		"message": "successfully deleted channel",
-	})
+	if h.Deps.State.Guilds[*ctx.Location.GuildID] != nil {
+		h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
+			Type: ChannelDeleteEventType,
+			Data: ChannelDeleteEvent{
+				GuildID:   u64TS(*ctx.Location.GuildID),
+				ChannelID: u64TS(*ctx.Location.ChannelID),
+			},
+		})
+	}
+	return nil
 }

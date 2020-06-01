@@ -21,12 +21,12 @@ jobs:
             go build;
 
       - slack/status:
-            fail_only: 'false'
-            
+          fail_only: false
+
       - store_artifacts:
           path: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}/harmony-server/harmony-server
           destination: harmony-bin
-          
+
   build_frontend:
     docker:
       - image: cimg/node:12.16
@@ -43,12 +43,15 @@ jobs:
             CI=false yarn build;
             ./node_modules/.bin/netlify deploy --site $NETLIFY_SITE_ID --auth $NETLIFY_AUTH_TOKEN --prod --dir=build
 
+      - slack/status:
+          fail_only: false
+
       - store_artifacts:
           path: ~/project/harmony-app/build
           destination: harmony-app
 
 orbs:
-  slack: circleci/slack@0.1.0
+  slack: circleci/slack@3.4.2
 workflows:
   version: 2
   build_all:

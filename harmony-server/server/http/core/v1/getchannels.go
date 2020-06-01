@@ -9,7 +9,7 @@ import (
 
 type Channel struct {
 	Name string `json:"name"`
-	ID   uint64 `json:"id"`
+	ID   string `json:"id"`
 }
 
 // GetChannels gets the channels for a given guild
@@ -24,8 +24,10 @@ func (h Handlers) GetChannels(c echo.Context) error {
 	for _, channel := range res {
 		ret = append(ret, Channel{
 			Name: channel.ChannelName,
-			ID:   channel.ChannelID,
+			ID:   u64TS(channel.ChannelID),
 		})
 	}
-	return ctx.JSON(http.StatusOK, ret)
+	return ctx.JSON(http.StatusOK, ChannelListResponse{
+		Channels: ret,
+	})
 }

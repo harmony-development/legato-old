@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS Users
 (
     User_ID  BIGSERIAL   NOT NULL,
-    Username TEXT UNIQUE NOT NULL,
+    Username TEXT        NOT NULL,
     Avatar   TEXT,
     PRIMARY KEY (User_ID)
 );

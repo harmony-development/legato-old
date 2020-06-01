@@ -167,7 +167,7 @@ func (q *Queries) GetMessageDate(ctx context.Context, messageID uint64) (time.Ti
 }
 
 const getMessages = `-- name: GetMessages :many
-SELECT Message_ID, User_ID, Content, Created_At
+SELECT message_id, guild_id, channel_id, user_id, created_at, edited_at, content, embeds, actions
 FROM Messages
 WHERE Guild_ID = $1
   AND Channel_ID = $2
@@ -183,14 +183,7 @@ type GetMessagesParams struct {
 	Max       int32     `json:"max"`
 }
 
-type GetMessagesRow struct {
-	MessageID uint64    `json:"message_id"`
-	UserID    uint64    `json:"user_id"`
-	Content   string    `json:"content"`
-	CreatedAt time.Time `json:"created_at"`
-}
-
-func (q *Queries) GetMessages(ctx context.Context, arg GetMessagesParams) ([]GetMessagesRow, error) {
+func (q *Queries) GetMessages(ctx context.Context, arg GetMessagesParams) ([]Message, error) {
 	rows, err := q.query(ctx, q.getMessagesStmt, getMessages,
 		arg.Guildid,
 		arg.Channelid,
@@ -201,14 +194,19 @@ func (q *Queries) GetMessages(ctx context.Context, arg GetMessagesParams) ([]Get
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetMessagesRow
+	var items []Message
 	for rows.Next() {
-		var i GetMessagesRow
+		var i Message
 		if err := rows.Scan(
 			&i.MessageID,
+			&i.GuildID,
+			&i.ChannelID,
 			&i.UserID,
-			&i.Content,
 			&i.CreatedAt,
+			&i.EditedAt,
+			&i.Content,
+			pq.Array(&i.Embeds),
+			pq.Array(&i.Actions),
 		); err != nil {
 			return nil, err
 		}
