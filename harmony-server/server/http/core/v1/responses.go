@@ -66,4 +66,8 @@ type GetInvitesResponse struct {
 	Invites []Invite `json:"invites"`
 }
 
+type JoinGuildResponse struct {
+	GuildID string `json:"guild_id"`
+}
+
 type RegisterResponse LoginResponse

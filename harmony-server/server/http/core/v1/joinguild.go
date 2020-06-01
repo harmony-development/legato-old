@@ -11,7 +11,7 @@ import (
 
 // JoinGuildData is the data for a guild join request
 type JoinGuildData struct {
-	InviteCode string `validate:"required"`
+	InviteCode string `json:"invite_id" validate:"required"`
 }
 
 // JoinGuild is the request to join a guild
@@ -30,7 +30,7 @@ func (h Handlers) JoinGuild(c echo.Context) error {
 		sentry.CaptureException(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "error updating invite counter")
 	}
-	return ctx.JSON(http.StatusOK, map[string]uint64{
-		"guild": guildID,
+	return ctx.JSON(http.StatusOK, JoinGuildResponse{
+		GuildID: u64TS(guildID),
 	})
 }
