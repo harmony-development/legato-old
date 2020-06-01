@@ -35,6 +35,12 @@ type Message struct {
 	Actions   []Action `json:"actions,omitempty"`
 }
 
+type ChannelCreateResponse struct {
+	GuildID     string `json:"guild_id"`
+	ChannelID   string `json:"channel_id"`
+	ChannelName string `json:"channel_name"`
+}
+
 type MessageListResponse struct {
 	Messages []Message `json:"messages"`
 }

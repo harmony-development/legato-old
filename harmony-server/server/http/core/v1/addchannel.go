@@ -11,7 +11,7 @@ import (
 
 // AddChannelData represents data received from client on AddChannel
 type AddChannelData struct {
-	ChannelName string `validate:"required"`
+	ChannelName string `json:"channel_name" validate:"required"`
 }
 
 // AddChannel is a request to add a channel to a guild
@@ -24,15 +24,19 @@ func (h Handlers) AddChannel(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "")
 	}
 
-	h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
-		Type: ChannelCreateEventType,
-		Data: ChannelCreateEvent{
-			GuildID:     u64TS(*ctx.Location.GuildID),
-			ChannelName: data.ChannelName,
-			ChannelID:   u64TS(channel.ChannelID),
-		},
-	})
-	return ctx.JSON(http.StatusOK, map[string]string{
-		"message": "successfully added channel",
+	if h.Deps.State.Guilds[*ctx.Location.GuildID] != nil {
+		h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
+			Type: ChannelCreateEventType,
+			Data: ChannelCreateEvent{
+				GuildID:     u64TS(*ctx.Location.GuildID),
+				ChannelName: data.ChannelName,
+				ChannelID:   u64TS(channel.ChannelID),
+			},
+		})
+	}
+	return ctx.JSON(http.StatusOK, ChannelCreateResponse{
+		GuildID:     u64TS(*ctx.Location.GuildID),
+		ChannelName: data.ChannelName,
+		ChannelID:   u64TS(channel.ChannelID),
 	})
 }
