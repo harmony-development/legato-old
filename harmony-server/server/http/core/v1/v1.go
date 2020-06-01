@@ -277,49 +277,5 @@ func (h Handlers) MakeRoutes() []routing.Route {
 			Auth:     true,
 			Location: routing.LocationUser,
 		},
-		{
-			Path:    "/key",
-			Handler: h.GetKey,
-			Method:  routing.GET,
-			RateLimit: &routing.RateLimit{
-				Duration: 500 * time.Millisecond,
-				Burst:    1024,
-			},
-			Auth:   false,
-			Schema: nil,
-		},
-		{
-			Path:    "/connect",
-			Handler: h.Connect,
-			Method:  routing.GET,
-			RateLimit: &routing.RateLimit{
-				Duration: 500 * time.Millisecond,
-				Burst:    1024,
-			},
-			Auth:   true,
-			Schema: ConnectData{},
-		},
-		{
-			Path:    "/login",
-			Handler: h.Login,
-			Method:  routing.POST,
-			RateLimit: &routing.RateLimit{
-				Duration: 10 * time.Second,
-				Burst:    8,
-			},
-			Auth:   false,
-			Schema: LoginData{},
-		},
-		{
-			Path:    "/register",
-			Handler: h.Register,
-			Method:  routing.POST,
-			RateLimit: &routing.RateLimit{
-				Duration: 15 * time.Second,
-				Burst:    4,
-			},
-			Auth:   false,
-			Schema: RegisterData{},
-		},
 	}
 }

@@ -1,7 +1,7 @@
-package v1
+package protocol
 
 import (
-	"database/sql"
+	"harmony-server/server/http/core/v1"
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
@@ -21,7 +21,7 @@ type LoginData struct {
 	Password  string `validate:"required_without=AuthToken"`
 }
 
-func (h Handlers) Login(c echo.Context) error {
+func (h API) Login(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
 	data := ctx.Data.(LoginData)
 	if data.AuthToken != "" {
@@ -45,7 +45,7 @@ func (h Handlers) Login(c echo.Context) error {
 		token := t.Claims.(*auth.Token)
 		session := randstr.Hex(16)
 		localUserID, err := h.Deps.DB.GetLocalUserForForeignUser(token.UserID, data.Domain)
-		if err != nil && err != sql.ErrNoRows {
+		if err != nil {
 			h.Deps.Logger.Exception(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 		}
@@ -65,7 +65,7 @@ func (h Handlers) Login(c echo.Context) error {
 			h.Deps.Logger.Exception(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 		}
-		return ctx.JSON(http.StatusOK, LoginResponse{Session: session})
+		return ctx.JSON(http.StatusOK, v1.LoginResponse{Session: session})
 	} else {
 		user, err := h.Deps.DB.GetUserByEmail(data.Email)
 		if err != nil {
@@ -79,6 +79,6 @@ func (h Handlers) Login(c echo.Context) error {
 			h.Deps.Logger.Exception(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 		}
-		return ctx.JSON(http.StatusOK, LoginResponse{Session: session})
+		return ctx.JSON(http.StatusOK, v1.LoginResponse{Session: session})
 	}
 }

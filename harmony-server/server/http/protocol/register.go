@@ -1,6 +1,7 @@
-package v1
+package protocol
 
 import (
+	"harmony-server/server/http/core/v1"
 	"net/http"
 	"unicode"
 
@@ -18,7 +19,7 @@ type RegisterData struct {
 	Password string `validate:"required"`
 }
 
-func (h Handlers) Register(c echo.Context) error {
+func (h API) Register(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
 	data := ctx.Data.(RegisterData)
 	if len(data.Username) < h.Deps.Config.Server.UsernamePolicy.MinLength ||
@@ -80,7 +81,7 @@ func (h Handlers) Register(c echo.Context) error {
 		h.Deps.Logger.Exception(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 	}
-	return ctx.JSON(http.StatusOK, RegisterResponse{Session: session})
+	return ctx.JSON(http.StatusOK, v1.RegisterResponse{Session: session})
 }
 
 type passwordStats struct {
