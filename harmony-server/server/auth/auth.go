@@ -71,7 +71,7 @@ func (m Manager) GetPublicKey(domain string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	u.Path = path.Join(u.Path, "/api/core/v1/key")
+	u.Path = path.Join(u.Path, "/api/protocol/key")
 	resp, err := http.Get(u.String())
 	if err != nil {
 		return nil, err
