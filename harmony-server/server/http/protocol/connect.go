@@ -1,4 +1,4 @@
-package v1
+package protocol
 
 import (
 	"net/http"
@@ -13,7 +13,7 @@ type ConnectData struct {
 	Target string `validate:"required"`
 }
 
-func (h Handlers) Connect(c echo.Context) error {
+func (h API) Connect(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, responses.TooManyRequests)

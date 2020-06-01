@@ -1,4 +1,4 @@
-package v1
+package protocol
 
 import (
 	"crypto/x509"
@@ -11,7 +11,7 @@ import (
 	"harmony-server/server/http/responses"
 )
 
-func (h Handlers) GetKey(c echo.Context) error {
+func (h API) GetKey(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, responses.TooManyRequests)

@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sony/sonyflake"
+	"harmony-server/server/http/protocol"
 
 	"harmony-server/server/auth"
 	"harmony-server/server/config"
@@ -78,10 +79,14 @@ func New(deps *Dependencies) *Server {
 		State:          s.Deps.State,
 		Sonyflake:      s.Deps.Sonyflake,
 	})
-	s.CoreAPI.MakeRoutes()
-	api.Any("/socket", func(c echo.Context) error {
-		s.Socket.Handle(c.Response(), c.Request())
-		return nil
+	protocol.New(&protocol.Dependencies{
+		Router:      s.Router,
+		APIGroup:    api,
+		DB:          s.Deps.DB,
+		Logger:      s.Deps.Logger,
+		AuthManager: s.Deps.AuthManager,
+		Sonyflake:   s.Deps.Sonyflake,
+		Config:      s.Deps.Config,
 	})
 	return s
 }

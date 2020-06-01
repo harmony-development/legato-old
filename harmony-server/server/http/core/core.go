@@ -3,11 +3,11 @@ package core
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/sony/sonyflake"
+	v1 "harmony-server/server/http/core/v1"
 
 	"harmony-server/server/auth"
 	"harmony-server/server/config"
 	"harmony-server/server/db"
-	v1 "harmony-server/server/http/core/v1"
 	"harmony-server/server/http/routing"
 	"harmony-server/server/logger"
 	"harmony-server/server/state"
@@ -36,14 +36,10 @@ type Dependencies struct {
 // New instantiates the handlers for CoreKit
 func New(deps *Dependencies) *API {
 	core := deps.APIGroup.Group("/core")
-	return &API{
+	api := &API{
 		Group: core,
 		Deps:  deps,
 	}
-}
-
-// MakeRoutes creates the handlers for CoreKit
-func (api *API) MakeRoutes() {
 	api.Deps.Router.BindRoutes(api.Group.Group("/v1"), v1.New(&v1.Dependencies{
 		DB:             api.Deps.DB,
 		Config:         api.Deps.Config,
@@ -53,4 +49,5 @@ func (api *API) MakeRoutes() {
 		State:          api.Deps.State,
 		Sonyflake:      api.Deps.Sonyflake,
 	}).MakeRoutes())
+	return api
 }
