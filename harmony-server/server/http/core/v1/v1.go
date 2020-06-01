@@ -181,7 +181,6 @@ func (h Handlers) MakeRoutes() []routing.Route {
 				Burst:    5,
 			},
 			Auth:        true,
-			Schema:      DeleteInviteData{},
 			Location:    routing.LocationGuild,
 			Permissions: hm.ModifyInvites,
 		},
