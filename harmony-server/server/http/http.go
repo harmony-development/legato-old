@@ -87,6 +87,7 @@ func New(deps *Dependencies) *Server {
 		AuthManager: s.Deps.AuthManager,
 		Sonyflake:   s.Deps.Sonyflake,
 		Config:      s.Deps.Config,
+		Socket:      s.Socket,
 	})
 	return s
 }

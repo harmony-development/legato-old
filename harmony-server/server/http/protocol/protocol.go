@@ -7,6 +7,7 @@ import (
 	"harmony-server/server/config"
 	"harmony-server/server/db"
 	"harmony-server/server/http/routing"
+	"harmony-server/server/http/socket"
 	"harmony-server/server/logger"
 	"time"
 )
@@ -19,6 +20,7 @@ type API struct {
 type Dependencies struct {
 	Router      *routing.Router
 	APIGroup    *echo.Group
+	Socket      *socket.Handler
 	DB          *db.HarmonyDB
 	Logger      *logger.Logger
 	AuthManager *auth.Manager
@@ -32,6 +34,10 @@ func New(deps *Dependencies) *API {
 		Group: protocol,
 		Deps:  deps,
 	}
+	api.Any("/socket", func(c echo.Context) error {
+		deps.Socket.Handle(c.Response(), c.Request())
+		return nil
+	})
 	deps.Router.BindRoutes(protocol, []routing.Route{
 		{
 			Path:    "/connect",
