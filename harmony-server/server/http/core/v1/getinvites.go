@@ -16,7 +16,22 @@ func (h Handlers) GetInvites(c echo.Context) error {
 		sentry.CaptureException(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to get invites")
 	}
-	return ctx.JSON(http.StatusOK, map[string]interface{}{
-		"invites": invites,
+	return ctx.JSON(http.StatusOK, GetInvitesResponse{
+		Invites: func() (ret []Invite) {
+			for _, invite := range invites {
+				ret = append(ret, Invite{
+					ID:      invite.InviteID,
+					GuildID: u64TS(invite.GuildID),
+					Uses: func() int32 {
+						if invite.PossibleUses.Valid {
+							return invite.PossibleUses.Int32
+						}
+						return -1
+					}(),
+					UsedCount: invite.Uses,
+				})
+			}
+			return
+		}(),
 	})
 }

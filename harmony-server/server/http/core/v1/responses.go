@@ -49,4 +49,21 @@ type LoginResponse struct {
 	Session string
 }
 
+type InviteCreateResponse struct {
+	Name string `json:"invite_name"`
+	ID   string `json:"invite_id"`
+	Uses int32  `json:"invite_uses"`
+}
+
+type Invite struct {
+	ID        string `json:"invite_id"`
+	GuildID   string `json:"guild_id"`
+	Uses      int32  `json:"invite_uses,omitempty"`
+	UsedCount int32  `json:"invite_used"`
+}
+
+type GetInvitesResponse struct {
+	Invites []Invite `json:"invites"`
+}
+
 type RegisterResponse LoginResponse
