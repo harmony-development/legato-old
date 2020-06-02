@@ -10,6 +10,7 @@ jobs:
           command: |
             sudo apt-get update;
             sudo apt-get install --no-install-recommends --no-install-suggests libvips libvips-dev;
+            wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.27.0
 
       - run:
           name: Build backend
@@ -18,11 +19,12 @@ jobs:
             go get -v -t -d ./...;
             go fmt ./...;
             go vet ./...;
+            golangci-lint run ./...;
             go build;
 
       - slack/status:
           fail_only: false
-
+      
       - store_artifacts:
           path: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}/harmony-server/harmony-server
           destination: harmony-bin
