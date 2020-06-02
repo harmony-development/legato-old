@@ -396,7 +396,6 @@ func (db *HarmonyDB) AddLocalUser(userID uint64, email, username string, passwor
 
 // AddForeignUser inserts
 func (db *HarmonyDB) AddForeignUser(homeServer string, userID, localUserID uint64, username, avatar string) (uint64, error) {
-	id := userID
 	tx, err := db.Begin()
 	if err != nil {
 		return 0, err
@@ -409,7 +408,7 @@ func (db *HarmonyDB) AddForeignUser(homeServer string, userID, localUserID uint6
 	}); err != nil {
 		return 0, err
 	}
-	if id, err = tq.AddForeignUser(ctx, queries.AddForeignUserParams{
+	if userID, err = tq.AddForeignUser(ctx, queries.AddForeignUserParams{
 		UserID:      userID,
 		HomeServer:  homeServer,
 		LocalUserID: localUserID,
@@ -422,7 +421,7 @@ func (db *HarmonyDB) AddForeignUser(homeServer string, userID, localUserID uint6
 		}
 		return 0, err
 	}
-	return id, nil
+	return userID, nil
 }
 
 // AddUser adds a user to the DB that contains a user ID, username, and avatar
@@ -514,7 +513,7 @@ func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, ac
 		e.Execute(func() error {
 			var rawEmbeds []json.RawMessage
 			for _, embed := range *embeds {
-				rawEmbeds = append(rawEmbeds, json.RawMessage(embed))
+				rawEmbeds = append(rawEmbeds, embed)
 			}
 			data, err := tq.UpdateMessageEmbeds(ctx, queries.UpdateMessageEmbedsParams{
 				MessageID: messageID,
@@ -528,7 +527,7 @@ func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, ac
 		e.Execute(func() error {
 			var rawActions []json.RawMessage
 			for _, action := range *actions {
-				rawActions = append(rawActions, json.RawMessage(action))
+				rawActions = append(rawActions, action)
 			}
 			data, err := tq.UpdateMessageActions(ctx, queries.UpdateMessageActionsParams{
 				MessageID: messageID,
@@ -539,9 +538,13 @@ func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, ac
 		})
 	}
 	if e.err != nil {
-		tx.Rollback()
+		if err := tx.Rollback(); err != nil {
+			return time.Time{}, err
+		}
 		return time.Time{}, e.err
 	}
-	tx.Commit()
+	if err := tx.Commit(); err != nil {
+		return time.Time{}, err
+	}
 	return editedAt, nil
 }

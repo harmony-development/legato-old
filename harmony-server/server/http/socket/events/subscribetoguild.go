@@ -40,5 +40,4 @@ func (e Events) SubscribeToGuild(ws client.Client, event *client.Event, raw *jso
 	if count == 1 {
 		e.State.Guilds[data.Guild].AddClient(&userID, &ws)
 	}
-	return
 }

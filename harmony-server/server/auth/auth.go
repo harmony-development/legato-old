@@ -48,6 +48,9 @@ func New(d *Dependencies) (*Manager, error) {
 		return nil, err
 	}
 	pub, err := ioutil.ReadFile(d.Config.Server.PublicKeyPath)
+	if err != nil {
+		return nil, err
+	}
 	m.PubKey, err = jwt.ParseRSAPublicKeyFromPEM(pub)
 	if err != nil {
 		return nil, err

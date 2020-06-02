@@ -21,7 +21,7 @@ func (m *Middlewares) RateCleanup() {
 		m.RateLock.Lock()
 		for _, path := range m.RateLimits {
 			for ip, v := range path {
-				if time.Now().Sub(v.lastSeen) > 3*time.Minute {
+				if time.Since(v.lastSeen) > 3*time.Minute {
 					delete(path, ip)
 				}
 			}

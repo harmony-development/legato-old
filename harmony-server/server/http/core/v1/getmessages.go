@@ -3,9 +3,11 @@ package v1
 import (
 	"database/sql"
 	"encoding/json"
-	"harmony-server/server/db/queries"
 	"net/http"
 	"strconv"
+
+	"harmony-server/server/db/queries"
+	"harmony-server/server/http/responses"
 
 	"harmony-server/server/http/hm"
 
@@ -45,6 +47,9 @@ func (h Handlers) GetMessages(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, "error getting message date")
 		}
 		messages, err = h.Deps.DB.GetMessagesBefore(*ctx.Location.GuildID, *ctx.Location.ChannelID, time)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
+		}
 	}
 	if err != nil && err != sql.ErrNoRows {
 		return echo.NewHTTPError(http.StatusInternalServerError, "error listing messages")
@@ -57,12 +62,16 @@ func (h Handlers) GetMessages(c echo.Context) error {
 				var actions []Action
 				for _, rawEmbed := range message.Embeds {
 					var embed Embed
-					json.Unmarshal(rawEmbed, &embed)
+					if err := json.Unmarshal(rawEmbed, &embed); err != nil {
+						continue
+					}
 					embeds = append(embeds, embed)
 				}
 				for _, rawAction := range message.Actions {
 					var action Action
-					json.Unmarshal(rawAction, &action)
+					if err := json.Unmarshal(rawAction, &action); err != nil {
+						continue
+					}
 					actions = append(actions, action)
 				}
 				ret = append(ret, Message{
