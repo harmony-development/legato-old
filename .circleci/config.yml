@@ -10,7 +10,7 @@ jobs:
           command: |
             sudo apt-get update;
             sudo apt-get install --no-install-recommends --no-install-suggests libvips libvips-dev;
-            wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.27.0
+            curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.27.0
 
       - run:
           name: Build backend
