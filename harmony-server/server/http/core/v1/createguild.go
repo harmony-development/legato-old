@@ -5,6 +5,7 @@ import (
 
 	"harmony-server/server/http/hm"
 	"harmony-server/server/http/responses"
+	"harmony-server/util"
 
 	"github.com/labstack/echo/v4"
 )
@@ -27,6 +28,6 @@ func (h Handlers) CreateGuild(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to create guild, please try again later")
 	}
 	return ctx.JSON(http.StatusOK, GuildCreateResponse{
-		GuildID: u64TS(guild.GuildID),
+		GuildID: util.u64TS(guild.GuildID),
 	})
 }

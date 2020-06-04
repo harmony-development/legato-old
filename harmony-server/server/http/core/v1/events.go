@@ -8,13 +8,11 @@ const (
 	ActionEventType        = "action"
 	ChannelCreateEventType = "channel_create"
 	ChannelDeleteEventType = "channel_delete"
-	AvatarUpdateEventType  = "avatar_update"
 	GuildDeleteEventType   = "guild_delete"
 	GuildUpdateEventType   = "guild_update"
 	MessageDeleteEventType = "message_delete"
 	MessageCreateEventType = "message_create"
 	MessageUpdateEventType = "message_update"
-	UserUpdateEventType    = "user_update"
 )
 
 type MessageUpdateFlags uint64
@@ -50,12 +48,6 @@ type ChannelDeleteEvent struct {
 	GuildID   string `json:"guild_id"`
 }
 
-// AvatarUpdateEvent is the data that will be sent to a client on an avatar update
-type AvatarUpdateEvent struct {
-	UserID    string `json:"user_id"`
-	NewAvatar string `json:"new_avatar"`
-}
-
 // GuildDeleteEvent is the data that will be sent to a client on a guild delete
 type GuildDeleteEvent struct {
 	GuildID string `json:"guild_id"`
@@ -86,12 +78,6 @@ type GuildUpdateEvent struct {
 	GuildID string `json:"guild_id"`
 	Name    string `json:"name,omitempty"`
 	Picture string `json:"picture,omitempty"`
-}
-
-// UserUpdateEvent is the data that will be sent to a client on a user update
-type UserUpdateEvent struct {
-	UserID   string `json:"user_id"`
-	Username string `json:"username,omitempty"`
 }
 
 // MessageUpdateEvent is the data that will be sent to a client on a message update

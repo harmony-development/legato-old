@@ -9,6 +9,7 @@ import (
 
 	"harmony-server/server/http/hm"
 	"harmony-server/server/http/socket/client"
+	"harmony-server/util"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/labstack/echo/v4"
@@ -114,13 +115,13 @@ pastTheForm:
 	h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
 		Type: MessageCreateEventType,
 		Data: MessageCreateEvent{
-			GuildID:     u64TS(*ctx.Location.GuildID),
-			ChannelID:   u64TS(*ctx.Location.ChannelID),
+			GuildID:     util.u64TS(*ctx.Location.GuildID),
+			ChannelID:   util.u64TS(*ctx.Location.ChannelID),
 			CreatedAt:   msg.CreatedAt.Unix(),
 			Message:     msg.Content,
 			Attachments: attachments,
-			AuthorID:    u64TS(ctx.UserID),
-			MessageID:   u64TS(msg.MessageID),
+			AuthorID:    util.u64TS(ctx.UserID),
+			MessageID:   util.u64TS(msg.MessageID),
 			Actions:     rawActions,
 			Embeds:      rawEmbeds,
 		},

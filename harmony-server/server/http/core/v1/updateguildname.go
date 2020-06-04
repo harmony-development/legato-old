@@ -3,6 +3,8 @@ package v1
 import (
 	"harmony-server/server/http/hm"
 	"harmony-server/server/http/socket/client"
+	"harmony-server/util"
+
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -27,7 +29,7 @@ func (h Handlers) UpdateGuildName(c echo.Context) error {
 		h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
 			Type: GuildUpdateEventType,
 			Data: GuildUpdateEvent{
-				GuildID: u64TS(*ctx.Location.GuildID),
+				GuildID: util.u64TS(*ctx.Location.GuildID),
 				Name:    data.GuildName,
 			},
 		})

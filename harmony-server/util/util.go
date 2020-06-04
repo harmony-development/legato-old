@@ -1,4 +1,4 @@
-package v1
+package util
 
 import (
 	"database/sql"
@@ -6,24 +6,24 @@ import (
 	"time"
 )
 
-func u64TSA(uint64s []uint64) (ret []string) {
+func U64TSA(uint64s []uint64) (ret []string) {
 	for _, number := range uint64s {
 		ret = append(ret, strconv.FormatUint(number, 10))
 	}
 	return
 }
 
-func u64TS(number uint64) string {
+func U64TS(number uint64) string {
 	return strconv.FormatUint(number, 10)
 }
 
-func timeTS(tiempo time.Time) string {
+func TimeTS(tiempo time.Time) string {
 	return strconv.FormatInt(tiempo.UTC().Unix(), 10)
 }
 
-func nullTimeTS(tiempo sql.NullTime) (ret *string) {
+func NullTimeTS(tiempo sql.NullTime) (ret *string) {
 	if tiempo.Valid {
-		formatted := timeTS(tiempo.Time)
+		formatted := TimeTS(tiempo.Time)
 		ret = &formatted
 	}
 	return

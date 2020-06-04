@@ -2,6 +2,8 @@ package v1
 
 import (
 	"harmony-server/server/http/hm"
+	"harmony-server/util"
+
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -18,7 +20,7 @@ func (h Handlers) GetGuild(c echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, GuildInfoResponse{
 		GuildName:    guild.GuildName,
-		GuildOwner:   u64TS(guild.OwnerID),
+		GuildOwner:   util.u64TS(guild.OwnerID),
 		GuildPicture: guild.PictureUrl,
 	})
 }
