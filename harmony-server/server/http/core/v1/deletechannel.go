@@ -23,8 +23,8 @@ func (h Handlers) DeleteChannel(c echo.Context) error {
 		h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
 			Type: ChannelDeleteEventType,
 			Data: ChannelDeleteEvent{
-				GuildID:   util.u64TS(*ctx.Location.GuildID),
-				ChannelID: util.u64TS(*ctx.Location.ChannelID),
+				GuildID:   util.U64TS(*ctx.Location.GuildID),
+				ChannelID: util.U64TS(*ctx.Location.ChannelID),
 			},
 		})
 	}

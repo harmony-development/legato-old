@@ -1,12 +1,14 @@
 package http
 
 import (
+	"harmony-server/server/http/profile"
+	"harmony-server/server/http/protocol"
+
 	sentryecho "github.com/getsentry/sentry-go/echo"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sony/sonyflake"
-	"harmony-server/server/http/protocol"
 
 	"harmony-server/server/auth"
 	"harmony-server/server/config"
@@ -23,10 +25,11 @@ import (
 // Server is an instance of the HTTP server
 type Server struct {
 	*echo.Echo
-	Router  *routing.Router
-	CoreAPI *core.API
-	Socket  *socket.Handler
-	Deps    *Dependencies
+	Router     *routing.Router
+	CoreAPI    *core.API
+	ProfileAPI *profile.API
+	Socket     *socket.Handler
+	Deps       *Dependencies
 }
 
 // Dependencies are elements that a Server needs
@@ -78,6 +81,15 @@ func New(deps *Dependencies) *Server {
 		Logger:         s.Deps.Logger,
 		State:          s.Deps.State,
 		Sonyflake:      s.Deps.Sonyflake,
+	})
+	s.ProfileAPI = profile.New(&profile.Dependencies{
+		Router:         s.Router,
+		APIGroup:       api,
+		DB:             s.Deps.DB,
+		Config:         s.Deps.Config,
+		StorageManager: s.Deps.StorageManager,
+		Logger:         s.Deps.Logger,
+		State:          s.Deps.State,
 	})
 	protocol.New(&protocol.Dependencies{
 		Router:      s.Router,

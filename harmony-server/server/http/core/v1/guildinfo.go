@@ -20,7 +20,7 @@ func (h Handlers) GetGuild(c echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, GuildInfoResponse{
 		GuildName:    guild.GuildName,
-		GuildOwner:   util.u64TS(guild.OwnerID),
+		GuildOwner:   util.U64TS(guild.OwnerID),
 		GuildPicture: guild.PictureUrl,
 	})
 }

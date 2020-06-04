@@ -69,9 +69,9 @@ func (h Handlers) UpdateMessage(c echo.Context) error {
 	h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
 		Type: MessageUpdateEventType,
 		Data: MessageUpdateEvent{
-			GuildID:   util.u64TS(*ctx.Location.GuildID),
-			ChannelID: util.u64TS(*ctx.Location.ChannelID),
-			MessageID: util.u64TS(ctx.Location.Message.MessageID),
+			GuildID:   util.U64TS(*ctx.Location.GuildID),
+			ChannelID: util.U64TS(*ctx.Location.ChannelID),
+			MessageID: util.U64TS(ctx.Location.Message.MessageID),
 			Flags:     flags,
 			EditedAt:  editedAt.Unix(),
 			Message:   *data.Content,

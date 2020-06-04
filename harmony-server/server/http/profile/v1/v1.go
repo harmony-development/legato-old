@@ -3,9 +3,6 @@ package v1
 import (
 	"time"
 
-	"github.com/sony/sonyflake"
-
-	"harmony-server/server/auth"
 	"harmony-server/server/config"
 	"harmony-server/server/db"
 	"harmony-server/server/http/routing"
@@ -23,11 +20,9 @@ type Handlers struct {
 type Dependencies struct {
 	DB             *db.HarmonyDB
 	Config         *config.Config
-	AuthManager    *auth.Manager
 	StorageManager *storage.Manager
 	Logger         *logger.Logger
 	State          *state.State
-	Sonyflake      *sonyflake.Sonyflake
 }
 
 // New creates a new set of Handlers
@@ -50,6 +45,28 @@ func (h Handlers) MakeRoutes() []routing.Route {
 			},
 			Auth:     true,
 			Location: routing.LocationUser,
+		},
+		{
+			Path:    "/users/~/avatar",
+			Handler: h.AvatarUpdate,
+			Method:  routing.PATCH,
+			RateLimit: &routing.RateLimit{
+				Duration: 10 * time.Second,
+				Burst:    2,
+			},
+			Auth:     true,
+			Location: routing.LocationNone,
+		},
+		{
+			Path:    "/users/~/username",
+			Handler: h.UsernameUpdate,
+			Method:  routing.PATCH,
+			RateLimit: &routing.RateLimit{
+				Duration: 5 * time.Second,
+				Burst:    2,
+			},
+			Auth:     true,
+			Location: routing.LocationNone,
 		},
 	}
 }

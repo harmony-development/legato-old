@@ -26,7 +26,7 @@ func (h Handlers) GetChannels(c echo.Context) error {
 	for _, channel := range res {
 		ret = append(ret, Channel{
 			Name: channel.ChannelName,
-			ID:   util.u64TS(channel.ChannelID),
+			ID:   util.U64TS(channel.ChannelID),
 		})
 	}
 	return ctx.JSON(http.StatusOK, ChannelListResponse{

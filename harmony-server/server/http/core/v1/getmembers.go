@@ -26,6 +26,6 @@ func (h Handlers) GetMembers(c echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, MemberListResponse{
-		Members: util.u64TSA(res),
+		Members: util.U64TSA(res),
 	})
 }

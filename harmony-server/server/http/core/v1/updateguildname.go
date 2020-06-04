@@ -29,7 +29,7 @@ func (h Handlers) UpdateGuildName(c echo.Context) error {
 		h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
 			Type: GuildUpdateEventType,
 			Data: GuildUpdateEvent{
-				GuildID: util.u64TS(*ctx.Location.GuildID),
+				GuildID: util.U64TS(*ctx.Location.GuildID),
 				Name:    data.GuildName,
 			},
 		})

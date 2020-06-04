@@ -23,7 +23,7 @@ func (h Handlers) GetInvites(c echo.Context) error {
 			for _, invite := range invites {
 				ret = append(ret, Invite{
 					ID:      invite.InviteID,
-					GuildID: util.u64TS(invite.GuildID),
+					GuildID: util.U64TS(invite.GuildID),
 					Uses: func() int32 {
 						if invite.PossibleUses.Valid {
 							return invite.PossibleUses.Int32

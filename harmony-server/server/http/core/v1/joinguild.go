@@ -32,6 +32,6 @@ func (h Handlers) JoinGuild(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "error updating invite counter")
 	}
 	return ctx.JSON(http.StatusOK, JoinGuildResponse{
-		GuildID: util.u64TS(guildID),
+		GuildID: util.U64TS(guildID),
 	})
 }

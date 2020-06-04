@@ -76,12 +76,12 @@ func (h Handlers) GetMessages(c echo.Context) error {
 					actions = append(actions, action)
 				}
 				ret = append(ret, Message{
-					MessageID: util.u64TS(message.MessageID),
-					GuildID:   util.u64TS(message.GuildID),
-					ChannelID: util.u64TS(message.ChannelID),
-					AuthorID:  util.u64TS(message.UserID),
-					CreatedAt: util.timeTS(message.CreatedAt),
-					EditedAt:  util.nullTimeTS(message.EditedAt),
+					MessageID: util.U64TS(message.MessageID),
+					GuildID:   util.U64TS(message.GuildID),
+					ChannelID: util.U64TS(message.ChannelID),
+					AuthorID:  util.U64TS(message.UserID),
+					CreatedAt: util.TimeTS(message.CreatedAt),
+					EditedAt:  util.NullTimeTS(message.EditedAt),
 					Content:   message.Content,
 					Embeds:    embeds,
 					Actions:   actions,
