@@ -8,6 +8,7 @@ import (
 	"harmony-server/server/http/hm"
 	"harmony-server/server/http/responses"
 	"harmony-server/server/http/socket/client"
+	"harmony-server/util"
 )
 
 type UsernameUpdateData struct {
@@ -24,7 +25,7 @@ func (h Handlers) UsernameUpdate(c echo.Context) error {
 		c.Send(&client.OutPacket{
 			Type: UserUpdateEventType,
 			Data: UserUpdateEvent{
-				UserID:   u64TS(ctx.UserID),
+				UserID:   util.U64TS(ctx.UserID),
 				Username: data.Username,
 			},
 		})

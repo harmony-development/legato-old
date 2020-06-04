@@ -2,6 +2,8 @@ package v1
 
 import (
 	"harmony-server/server/http/hm"
+	"harmony-server/util"
+
 	"net/http"
 
 	"github.com/getsentry/sentry-go"
@@ -21,7 +23,7 @@ func (h Handlers) GetInvites(c echo.Context) error {
 			for _, invite := range invites {
 				ret = append(ret, Invite{
 					ID:      invite.InviteID,
-					GuildID: u64TS(invite.GuildID),
+					GuildID: util.U64TS(invite.GuildID),
 					Uses: func() int32 {
 						if invite.PossibleUses.Valid {
 							return invite.PossibleUses.Int32

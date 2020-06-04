@@ -2,9 +2,11 @@ package v1
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"harmony-server/server/http/hm"
 	"harmony-server/server/http/socket/client"
-	"net/http"
+	"harmony-server/util"
 
 	"github.com/labstack/echo/v4"
 )
@@ -67,9 +69,9 @@ func (h Handlers) UpdateMessage(c echo.Context) error {
 	h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
 		Type: MessageUpdateEventType,
 		Data: MessageUpdateEvent{
-			GuildID:   u64TS(*ctx.Location.GuildID),
-			ChannelID: u64TS(*ctx.Location.ChannelID),
-			MessageID: u64TS(ctx.Location.Message.MessageID),
+			GuildID:   util.U64TS(*ctx.Location.GuildID),
+			ChannelID: util.U64TS(*ctx.Location.ChannelID),
+			MessageID: util.U64TS(ctx.Location.Message.MessageID),
 			Flags:     flags,
 			EditedAt:  editedAt.Unix(),
 			Message:   *data.Content,

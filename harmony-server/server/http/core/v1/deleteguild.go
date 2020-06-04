@@ -3,6 +3,8 @@ package v1
 import (
 	"harmony-server/server/http/hm"
 	"harmony-server/server/http/socket/client"
+	"harmony-server/util"
+
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -21,7 +23,7 @@ func (h Handlers) DeleteGuild(c echo.Context) error {
 		h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
 			Type: GuildDeleteEventType,
 			Data: GuildDeleteEvent{
-				GuildID: u64TS(*ctx.Location.GuildID),
+				GuildID: util.U64TS(*ctx.Location.GuildID),
 			},
 		})
 		delete(h.Deps.State.Guilds, *ctx.Location.GuildID)

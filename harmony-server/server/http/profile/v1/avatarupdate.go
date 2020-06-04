@@ -14,6 +14,7 @@ import (
 	"harmony-server/server/http/hm"
 	"harmony-server/server/http/responses"
 	"harmony-server/server/http/socket/client"
+	"harmony-server/util"
 )
 
 func (h Handlers) AvatarUpdate(c echo.Context) error {
@@ -63,7 +64,7 @@ func (h Handlers) AvatarUpdate(c echo.Context) error {
 		c.Send(&client.OutPacket{
 			Type: AvatarUpdateEventType,
 			Data: AvatarUpdateEvent{
-				UserID:    u64TS(ctx.UserID),
+				UserID:    util.U64TS(ctx.UserID),
 				NewAvatar: fileID,
 			},
 		})

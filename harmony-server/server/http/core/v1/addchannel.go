@@ -5,6 +5,7 @@ import (
 
 	"harmony-server/server/http/hm"
 	"harmony-server/server/http/socket/client"
+	"harmony-server/util"
 
 	"github.com/labstack/echo/v4"
 )
@@ -28,15 +29,15 @@ func (h Handlers) AddChannel(c echo.Context) error {
 		h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
 			Type: ChannelCreateEventType,
 			Data: ChannelCreateEvent{
-				GuildID:     u64TS(*ctx.Location.GuildID),
+				GuildID:     util.U64TS(*ctx.Location.GuildID),
 				ChannelName: data.ChannelName,
-				ChannelID:   u64TS(channel.ChannelID),
+				ChannelID:   util.U64TS(channel.ChannelID),
 			},
 		})
 	}
 	return ctx.JSON(http.StatusOK, ChannelCreateResponse{
-		GuildID:     u64TS(*ctx.Location.GuildID),
+		GuildID:     util.U64TS(*ctx.Location.GuildID),
 		ChannelName: data.ChannelName,
-		ChannelID:   u64TS(channel.ChannelID),
+		ChannelID:   util.U64TS(channel.ChannelID),
 	})
 }

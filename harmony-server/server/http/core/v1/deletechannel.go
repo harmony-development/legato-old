@@ -3,6 +3,8 @@ package v1
 import (
 	"harmony-server/server/http/hm"
 	"harmony-server/server/http/socket/client"
+	"harmony-server/util"
+
 	"net/http"
 
 	"github.com/getsentry/sentry-go"
@@ -21,8 +23,8 @@ func (h Handlers) DeleteChannel(c echo.Context) error {
 		h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
 			Type: ChannelDeleteEventType,
 			Data: ChannelDeleteEvent{
-				GuildID:   u64TS(*ctx.Location.GuildID),
-				ChannelID: u64TS(*ctx.Location.ChannelID),
+				GuildID:   util.U64TS(*ctx.Location.GuildID),
+				ChannelID: util.U64TS(*ctx.Location.ChannelID),
 			},
 		})
 	}

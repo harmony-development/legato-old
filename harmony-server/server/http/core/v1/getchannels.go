@@ -2,6 +2,8 @@ package v1
 
 import (
 	"harmony-server/server/http/hm"
+	"harmony-server/util"
+
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -24,7 +26,7 @@ func (h Handlers) GetChannels(c echo.Context) error {
 	for _, channel := range res {
 		ret = append(ret, Channel{
 			Name: channel.ChannelName,
-			ID:   u64TS(channel.ChannelID),
+			ID:   util.U64TS(channel.ChannelID),
 		})
 	}
 	return ctx.JSON(http.StatusOK, ChannelListResponse{

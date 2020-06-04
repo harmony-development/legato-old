@@ -2,6 +2,8 @@ package v1
 
 import (
 	"harmony-server/server/http/hm"
+	"harmony-server/util"
+
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -17,5 +19,5 @@ func (h Handlers) GetGuilds(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
-	return ctx.JSON(http.StatusOK, u64TSA(res))
+	return ctx.JSON(http.StatusOK, util.U64TSA(res))
 }

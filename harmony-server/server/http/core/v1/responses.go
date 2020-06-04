@@ -10,11 +10,6 @@ type GuildInfoResponse struct {
 	GuildPicture string `json:"guild_picture"`
 }
 
-type UserInfoResponse struct {
-	UserName   string `json:"user_name"`
-	UserAvatar string `json:"user_avatar"`
-}
-
 type MemberListResponse struct {
 	Members []string `json:"members"`
 }

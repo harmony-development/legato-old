@@ -2,6 +2,8 @@ package v1
 
 import (
 	"harmony-server/server/http/hm"
+	"harmony-server/util"
+
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -24,6 +26,6 @@ func (h Handlers) GetMembers(c echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, MemberListResponse{
-		Members: u64TSA(res),
+		Members: util.U64TSA(res),
 	})
 }

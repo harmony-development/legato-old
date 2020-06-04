@@ -3,6 +3,8 @@ package v1
 import (
 	"harmony-server/server/http/hm"
 	"harmony-server/server/http/socket/client"
+	"harmony-server/util"
+
 	"net/http"
 
 	"github.com/getsentry/sentry-go"
@@ -27,9 +29,9 @@ func (h Handlers) DeleteMessage(c echo.Context) error {
 	h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
 		Type: MessageDeleteEventType,
 		Data: MessageDeleteEvent{
-			GuildID:   u64TS(*ctx.Location.GuildID),
-			ChannelID: u64TS(*ctx.Location.ChannelID),
-			MessageID: u64TS(ctx.Location.Message.MessageID),
+			GuildID:   util.U64TS(*ctx.Location.GuildID),
+			ChannelID: util.U64TS(*ctx.Location.ChannelID),
+			MessageID: util.U64TS(ctx.Location.Message.MessageID),
 		},
 	})
 	return ctx.JSON(http.StatusOK, map[string]string{

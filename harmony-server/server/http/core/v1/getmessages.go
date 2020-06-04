@@ -8,6 +8,7 @@ import (
 
 	"harmony-server/server/db/queries"
 	"harmony-server/server/http/responses"
+	"harmony-server/util"
 
 	"harmony-server/server/http/hm"
 
@@ -75,12 +76,12 @@ func (h Handlers) GetMessages(c echo.Context) error {
 					actions = append(actions, action)
 				}
 				ret = append(ret, Message{
-					MessageID: u64TS(message.MessageID),
-					GuildID:   u64TS(message.GuildID),
-					ChannelID: u64TS(message.ChannelID),
-					AuthorID:  u64TS(message.UserID),
-					CreatedAt: timeTS(message.CreatedAt),
-					EditedAt:  nullTimeTS(message.EditedAt),
+					MessageID: util.U64TS(message.MessageID),
+					GuildID:   util.U64TS(message.GuildID),
+					ChannelID: util.U64TS(message.ChannelID),
+					AuthorID:  util.U64TS(message.UserID),
+					CreatedAt: util.TimeTS(message.CreatedAt),
+					EditedAt:  util.NullTimeTS(message.EditedAt),
 					Content:   message.Content,
 					Embeds:    embeds,
 					Actions:   actions,

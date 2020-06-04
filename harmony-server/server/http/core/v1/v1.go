@@ -266,16 +266,5 @@ func (h Handlers) MakeRoutes() []routing.Route {
 			Schema:   LeaveGuildData{},
 			Location: routing.LocationGuild,
 		},
-		{
-			Path:    "/users/:user_id",
-			Handler: h.GetUser,
-			Method:  routing.GET,
-			RateLimit: &routing.RateLimit{
-				Duration: 3 * time.Second,
-				Burst:    2,
-			},
-			Auth:     true,
-			Location: routing.LocationUser,
-		},
 	}
 }
