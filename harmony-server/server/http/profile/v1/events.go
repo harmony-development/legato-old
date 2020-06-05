@@ -22,5 +22,5 @@ type UsernameUpdateEvent struct {
 // StatusUpdateEvent is the data that will be sent to a client on a user status update
 type StatusUpdateEvent struct {
 	UserID string             `json:"user_id"`
-	Status queries.Userstatus `json:"status`
+	Status queries.Userstatus `json:"status"`
 }
