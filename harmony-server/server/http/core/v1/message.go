@@ -17,15 +17,18 @@ import (
 )
 
 type MessageData struct {
-	Content string   `json:"content" validate:"required_without=Embeds,Actions"`
-	Embeds  []string `json:"embeds" validate:"required_without=Content,Actions"`
-	Actions []string `json:"actions" validate:"required_without=Content,Embeds"`
+	Content string   `json:"content"`
+	Embeds  []string `json:"embeds"`
+	Actions []string `json:"actions"`
 }
 
 // Message : Receive a message from a client.
 func (h Handlers) Message(c echo.Context) error {
 	ctx, _ := c.(hm.HarmonyContext)
 	data := ctx.Data.(MessageData)
+	if data.Content == "" && len(data.Embeds) == 0 && len(data.Actions) == 0 {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
 	form, err := ctx.MultipartForm()
 	var attachments []string
 	var files []*multipart.FileHeader
@@ -110,7 +113,7 @@ pastTheForm:
 		rawActions = append(rawActions, json.RawMessage(action))
 	}
 	if h.Deps.State.Guilds[*ctx.Location.GuildID] == nil {
-		return nil
+		return c.JSON(http.StatusOK, MessageCreateResponse{util.U64TS(msg.MessageID)})
 	}
 	h.Deps.State.Guilds[*ctx.Location.GuildID].Broadcast(&client.OutPacket{
 		Type: MessageCreateEventType,
