@@ -344,7 +344,7 @@ func (db *HarmonyDB) GetUserByEmail(email string) (queries.GetUserByEmailRow, er
 }
 
 // GetUserByID gets a user with their ID and their home server
-func (db *HarmonyDB) GetUserByID(userID uint64) (queries.User, error) {
+func (db *HarmonyDB) GetUserByID(userID uint64) (queries.GetUserRow, error) {
 	return db.queries.GetUser(ctx, userID)
 }
 
@@ -373,11 +373,7 @@ func (db *HarmonyDB) AddLocalUser(userID uint64, email, username string, passwor
 		return err
 	}
 	tq := db.queries.WithTx(tx)
-	if err := tq.AddUser(ctx, queries.AddUserParams{
-		UserID:   userID,
-		Username: username,
-		Avatar:   sql.NullString{},
-	}); err != nil {
+	if err := tq.AddUser(ctx, userID); err != nil {
 		return err
 	}
 	if err := tq.AddLocalUser(ctx, queries.AddLocalUserParams{
@@ -385,6 +381,14 @@ func (db *HarmonyDB) AddLocalUser(userID uint64, email, username string, passwor
 		Email:     email,
 		Password:  passwordHash,
 		Instances: nil,
+	}); err != nil {
+		return err
+	}
+	if err := tq.AddProfile(ctx, queries.AddProfileParams{
+		UserID:   userID,
+		Username: username,
+		Avatar:   sql.NullString{},
+		Status:   queries.UserstatusOffline,
 	}); err != nil {
 		return err
 	}
@@ -401,10 +405,14 @@ func (db *HarmonyDB) AddForeignUser(homeServer string, userID, localUserID uint6
 		return 0, err
 	}
 	tq := db.queries.WithTx(tx)
-	if err := tq.AddUser(ctx, queries.AddUserParams{
+	if err := tq.AddUser(ctx, localUserID); err != nil {
+		return 0, err
+	}
+	if err := tq.AddProfile(ctx, queries.AddProfileParams{
 		UserID:   localUserID,
 		Username: username,
 		Avatar:   toSqlString(avatar),
+		Status:   queries.UserstatusOffline,
 	}); err != nil {
 		return 0, err
 	}
@@ -422,15 +430,6 @@ func (db *HarmonyDB) AddForeignUser(homeServer string, userID, localUserID uint6
 		return 0, err
 	}
 	return userID, nil
-}
-
-// AddUser adds a user to the DB that contains a user ID, username, and avatar
-func (db *HarmonyDB) AddUser(userID uint64, username string, avatar string) error {
-	return db.queries.AddUser(ctx, queries.AddUserParams{
-		UserID:   userID,
-		Username: username,
-		Avatar:   toSqlString(avatar),
-	})
 }
 
 func (db *HarmonyDB) EmailExists(email string) bool {
@@ -547,4 +546,11 @@ func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, ac
 		return time.Time{}, err
 	}
 	return editedAt, nil
+}
+
+func (db *HarmonyDB) SetStatus(userID uint64, status queries.Userstatus) error {
+	return db.queries.SetStatus(ctx, queries.SetStatusParams{
+		Status: status,
+		UserID: userID,
+	})
 }

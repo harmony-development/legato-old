@@ -16,7 +16,7 @@ type LocationContext struct {
 	GuildID   *uint64
 	ChannelID *uint64
 	Message   *queries.Message
-	User      *queries.User
+	User      *queries.GetUserRow
 }
 
 // A HarmonyContext adds rate limiting and a user ID to an echo.Context

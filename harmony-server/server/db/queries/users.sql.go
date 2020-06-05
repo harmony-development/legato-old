@@ -54,19 +54,35 @@ func (q *Queries) AddLocalUser(ctx context.Context, arg AddLocalUserParams) erro
 	return err
 }
 
-const addUser = `-- name: AddUser :exec
-INSERT INTO Users (User_ID, Username, Avatar)
-VALUES ($1, $2, $3)
+const addProfile = `-- name: AddProfile :exec
+INSERT INTO Profiles(User_ID, Username, Avatar, Status)
+VALUES ($1, $2, $3, $4)
 `
 
-type AddUserParams struct {
+type AddProfileParams struct {
 	UserID   uint64         `json:"user_id"`
 	Username string         `json:"username"`
 	Avatar   sql.NullString `json:"avatar"`
+	Status   Userstatus     `json:"status"`
 }
 
-func (q *Queries) AddUser(ctx context.Context, arg AddUserParams) error {
-	_, err := q.exec(ctx, q.addUserStmt, addUser, arg.UserID, arg.Username, arg.Avatar)
+func (q *Queries) AddProfile(ctx context.Context, arg AddProfileParams) error {
+	_, err := q.exec(ctx, q.addProfileStmt, addProfile,
+		arg.UserID,
+		arg.Username,
+		arg.Avatar,
+		arg.Status,
+	)
+	return err
+}
+
+const addUser = `-- name: AddUser :exec
+INSERT INTO Users (User_ID)
+VALUES ($1)
+`
+
+func (q *Queries) AddUser(ctx context.Context, userID uint64) error {
+	_, err := q.exec(ctx, q.addUserStmt, addUser, userID)
 	return err
 }
 
@@ -85,7 +101,7 @@ func (q *Queries) EmailExists(ctx context.Context, email string) (uint64, error)
 
 const getAvatar = `-- name: GetAvatar :one
 SELECT Avatar
-FROM Users
+FROM Profiles
 WHERE User_ID = $1
 `
 
@@ -116,23 +132,38 @@ func (q *Queries) GetLocalUserID(ctx context.Context, arg GetLocalUserIDParams) 
 }
 
 const getUser = `-- name: GetUser :one
-SELECT User_ID, Username, Avatar
+SELECT Users.User_ID, Profiles.Username, Profiles.Avatar, Profiles.Status
 FROM Users
-WHERE User_ID = $1
+         INNER JOIN Profiles ON (Users.User_ID = Profiles.User_ID)
+WHERE Users.User_ID = $1
 `
 
-func (q *Queries) GetUser(ctx context.Context, userID uint64) (User, error) {
+type GetUserRow struct {
+	UserID   uint64         `json:"user_id"`
+	Username string         `json:"username"`
+	Avatar   sql.NullString `json:"avatar"`
+	Status   Userstatus     `json:"status"`
+}
+
+func (q *Queries) GetUser(ctx context.Context, userID uint64) (GetUserRow, error) {
 	row := q.queryRow(ctx, q.getUserStmt, getUser, userID)
-	var i User
-	err := row.Scan(&i.UserID, &i.Username, &i.Avatar)
+	var i GetUserRow
+	err := row.Scan(
+		&i.UserID,
+		&i.Username,
+		&i.Avatar,
+		&i.Status,
+	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT Users.User_ID, Local_Users.Email, Username, Avatar, Local_Users.Password
+SELECT Users.User_ID, Local_Users.Email, Profiles.Username, Profiles.Avatar, Profiles.Status, Local_Users.Password
 FROM Local_Users
          INNER JOIN Users
                     ON (Local_Users.User_ID = Users.User_ID)
+         INNER JOIN Profiles
+                    ON (Local_Users.User_ID = Profiles.User_ID)
 WHERE Local_Users.Email = $1
 `
 
@@ -141,6 +172,7 @@ type GetUserByEmailRow struct {
 	Email    string         `json:"email"`
 	Username string         `json:"username"`
 	Avatar   sql.NullString `json:"avatar"`
+	Status   Userstatus     `json:"status"`
 	Password []byte         `json:"password"`
 }
 
@@ -152,13 +184,30 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEm
 		&i.Email,
 		&i.Username,
 		&i.Avatar,
+		&i.Status,
 		&i.Password,
 	)
 	return i, err
 }
 
+const setStatus = `-- name: SetStatus :exec
+UPDATE Profiles
+SET Status=$1
+WHERE User_ID = $2
+`
+
+type SetStatusParams struct {
+	Status Userstatus `json:"status"`
+	UserID uint64     `json:"user_id"`
+}
+
+func (q *Queries) SetStatus(ctx context.Context, arg SetStatusParams) error {
+	_, err := q.exec(ctx, q.setStatusStmt, setStatus, arg.Status, arg.UserID)
+	return err
+}
+
 const updateAvatar = `-- name: UpdateAvatar :exec
-UPDATE Users
+UPDATE Profiles
 SET Avatar=$1
 WHERE User_ID = $2
 `
@@ -174,7 +223,7 @@ func (q *Queries) UpdateAvatar(ctx context.Context, arg UpdateAvatarParams) erro
 }
 
 const updateUsername = `-- name: UpdateUsername :exec
-UPDATE Users
+UPDATE Profiles
 SET Username=$1
 WHERE User_ID = $2
 `

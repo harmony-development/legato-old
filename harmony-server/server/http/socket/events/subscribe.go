@@ -2,12 +2,12 @@ package events
 
 import (
 	"encoding/json"
+	"harmony-server/server/db/queries"
+	"harmony-server/server/http/responses"
 	"sync"
 
 	"harmony-server/server/http/socket/client"
 	"harmony-server/server/state/guild"
-
-	"github.com/sirupsen/logrus"
 )
 
 type subscribeData struct {
@@ -18,23 +18,23 @@ type subscribeData struct {
 func (e Events) Subscribe(ws client.Client, event *client.Event, raw *json.RawMessage) {
 	var data subscribeData
 	if err := json.Unmarshal(*raw, &data); err != nil {
-		ws.SendError("bad request")
+		ws.SendError(responses.InvalidRequest)
 		return
 	}
 	userID, err := e.DB.SessionToUserID(data.Session)
 	if err != nil {
-		ws.SendError("invalid session")
+		ws.SendError(responses.InvalidSession)
 		return
 	}
 	ws.UserID = &userID
 	if !event.Limiter.Allow() {
-		ws.SendError("too many requests")
+		ws.SendError(responses.TooManyRequests)
 		return
 	}
 	guildIDs, err := e.DB.GuildsForUser(userID)
 	if err != nil {
-		ws.SendError("Unable to get guilds list")
-		logrus.Warnf("Error selecting guilds. Reason : %v", err)
+		ws.SendError(responses.UnknownError)
+		e.Logger.Exception(err)
 		return
 	}
 	for _, id := range guildIDs {
@@ -49,5 +49,9 @@ func (e Events) Subscribe(ws client.Client, event *client.Event, raw *json.RawMe
 		} else {
 			e.State.Guilds[id].AddClient(&userID, &ws)
 		}
+	}
+	if err := e.DB.SetStatus(userID, queries.UserstatusOnline); err != nil {
+		ws.SendError(responses.UnknownError)
+		e.Logger.Exception(err)
 	}
 }

@@ -68,5 +68,16 @@ func (h Handlers) MakeRoutes() []routing.Route {
 			Auth:     true,
 			Location: routing.LocationNone,
 		},
+		{
+			Path:    "/users/~/status",
+			Handler: h.StatusUpdate,
+			Method:  routing.PATCH,
+			RateLimit: &routing.RateLimit{
+				Duration: 5 * time.Second,
+				Burst:    4,
+			},
+			Auth:     true,
+			Location: routing.LocationNone,
+		},
 	}
 }

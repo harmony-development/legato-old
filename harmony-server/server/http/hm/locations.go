@@ -72,7 +72,7 @@ func (m *Middlewares) WithUser(handler echo.HandlerFunc) echo.HandlerFunc {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, "user ID in invalid form")
 		}
-		user, err := m.DB.GetUserByID(uint64(parsed))
+		user, err := m.DB.GetUserByID(parsed)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError)
 		}

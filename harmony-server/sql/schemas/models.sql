@@ -1,8 +1,7 @@
+CREATE TYPE UserStatus AS ENUM ('streaming', 'online', 'mobile', 'idle', 'offline');
 CREATE TABLE IF NOT EXISTS Users
 (
-    User_ID  BIGSERIAL   NOT NULL,
-    Username TEXT        NOT NULL,
-    Avatar   TEXT,
+    User_ID BIGSERIAL NOT NULL,
     PRIMARY KEY (User_ID)
 );
 CREATE TABLE IF NOT EXISTS Local_Users
@@ -19,6 +18,14 @@ CREATE TABLE IF NOT EXISTS Foreign_Users
     Home_Server   TEXT             NOT NULL,
     Local_User_ID BIGSERIAL UNIQUE NOT NULL,
     FOREIGN KEY (Local_User_ID) REFERENCES Users (User_ID) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS Profiles
+(
+    User_ID  BIGSERIAL   NOT NULL,
+    Username TEXT UNIQUE NOT NULL,
+    Avatar   TEXT,
+    Status   USERSTATUS  NOT NULL,
+    FOREIGN KEY (User_ID) REFERENCES Users (User_ID) ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS Sessions
 (
@@ -43,7 +50,7 @@ CREATE TABLE IF NOT EXISTS Guild_Members
 );
 CREATE TABLE IF NOT EXISTS Invites
 (
-    Invite_ID     TEXT      PRIMARY KEY UNIQUE,
+    Invite_ID     TEXT PRIMARY KEY UNIQUE,
     Uses          INTEGER   NOT NULL DEFAULT 0,
     Possible_Uses INTEGER            DEFAULT -1,
     Guild_ID      BIGSERIAL NOT NULL,

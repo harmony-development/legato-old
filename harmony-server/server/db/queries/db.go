@@ -37,6 +37,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.addMessageStmt, err = db.PrepareContext(ctx, addMessage); err != nil {
 		return nil, fmt.Errorf("error preparing query AddMessage: %w", err)
 	}
+	if q.addProfileStmt, err = db.PrepareContext(ctx, addProfile); err != nil {
+		return nil, fmt.Errorf("error preparing query AddProfile: %w", err)
+	}
 	if q.addSessionStmt, err = db.PrepareContext(ctx, addSession); err != nil {
 		return nil, fmt.Errorf("error preparing query AddSession: %w", err)
 	}
@@ -148,6 +151,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.setGuildPictureStmt, err = db.PrepareContext(ctx, setGuildPicture); err != nil {
 		return nil, fmt.Errorf("error preparing query SetGuildPicture: %w", err)
 	}
+	if q.setStatusStmt, err = db.PrepareContext(ctx, setStatus); err != nil {
+		return nil, fmt.Errorf("error preparing query SetStatus: %w", err)
+	}
 	if q.updateAvatarStmt, err = db.PrepareContext(ctx, updateAvatar); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateAvatar: %w", err)
 	}
@@ -194,6 +200,11 @@ func (q *Queries) Close() error {
 	if q.addMessageStmt != nil {
 		if cerr := q.addMessageStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing addMessageStmt: %w", cerr)
+		}
+	}
+	if q.addProfileStmt != nil {
+		if cerr := q.addProfileStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addProfileStmt: %w", cerr)
 		}
 	}
 	if q.addSessionStmt != nil {
@@ -381,6 +392,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing setGuildPictureStmt: %w", cerr)
 		}
 	}
+	if q.setStatusStmt != nil {
+		if cerr := q.setStatusStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing setStatusStmt: %w", cerr)
+		}
+	}
 	if q.updateAvatarStmt != nil {
 		if cerr := q.updateAvatarStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateAvatarStmt: %w", cerr)
@@ -455,6 +471,7 @@ type Queries struct {
 	addForeignUserStmt       *sql.Stmt
 	addLocalUserStmt         *sql.Stmt
 	addMessageStmt           *sql.Stmt
+	addProfileStmt           *sql.Stmt
 	addSessionStmt           *sql.Stmt
 	addUserStmt              *sql.Stmt
 	addUserToGuildStmt       *sql.Stmt
@@ -492,6 +509,7 @@ type Queries struct {
 	sessionToUserIDStmt      *sql.Stmt
 	setGuildNameStmt         *sql.Stmt
 	setGuildPictureStmt      *sql.Stmt
+	setStatusStmt            *sql.Stmt
 	updateAvatarStmt         *sql.Stmt
 	updateMessageActionsStmt *sql.Stmt
 	updateMessageContentStmt *sql.Stmt
@@ -509,6 +527,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		addForeignUserStmt:       q.addForeignUserStmt,
 		addLocalUserStmt:         q.addLocalUserStmt,
 		addMessageStmt:           q.addMessageStmt,
+		addProfileStmt:           q.addProfileStmt,
 		addSessionStmt:           q.addSessionStmt,
 		addUserStmt:              q.addUserStmt,
 		addUserToGuildStmt:       q.addUserToGuildStmt,
@@ -546,6 +565,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		sessionToUserIDStmt:      q.sessionToUserIDStmt,
 		setGuildNameStmt:         q.setGuildNameStmt,
 		setGuildPictureStmt:      q.setGuildPictureStmt,
+		setStatusStmt:            q.setStatusStmt,
 		updateAvatarStmt:         q.updateAvatarStmt,
 		updateMessageActionsStmt: q.updateMessageActionsStmt,
 		updateMessageContentStmt: q.updateMessageContentStmt,
