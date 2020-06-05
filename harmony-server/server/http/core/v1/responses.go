@@ -36,12 +36,17 @@ type ChannelCreateResponse struct {
 	ChannelName string `json:"channel_name"`
 }
 
+type MessageCreateResponse struct {
+	MessageID string `json:"message_id"`
+}
+
 type MessageListResponse struct {
 	Messages []Message `json:"messages"`
 }
 
 type LoginResponse struct {
-	Session string
+	UserID  string `json:"user_id"`
+	Session string `json:"session"`
 }
 
 type InviteCreateResponse struct {

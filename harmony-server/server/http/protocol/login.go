@@ -1,7 +1,8 @@
 package protocol
 
 import (
-	"harmony-server/server/http/core/v1"
+	v1 "harmony-server/server/http/core/v1"
+	"harmony-server/util"
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
@@ -65,7 +66,7 @@ func (h API) Login(c echo.Context) error {
 			h.Deps.Logger.Exception(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 		}
-		return ctx.JSON(http.StatusOK, v1.LoginResponse{Session: session})
+		return ctx.JSON(http.StatusOK, v1.LoginResponse{UserID: util.U64TS(localUserID), Session: session})
 	} else {
 		user, err := h.Deps.DB.GetUserByEmail(data.Email)
 		if err != nil {
@@ -79,6 +80,6 @@ func (h API) Login(c echo.Context) error {
 			h.Deps.Logger.Exception(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 		}
-		return ctx.JSON(http.StatusOK, v1.LoginResponse{Session: session})
+		return ctx.JSON(http.StatusOK, v1.LoginResponse{UserID: util.U64TS(user.UserID), Session: session})
 	}
 }

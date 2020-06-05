@@ -17,9 +17,9 @@ import (
 )
 
 type MessageData struct {
-	Content string `validate:"required"`
-	Embeds  []string
-	Actions []string
+	Content string   `json:"content" validate:"required_without=Embeds,Actions"`
+	Embeds  []string `json:"embeds" validate:"required_without=Content,Actions"`
+	Actions []string `json:"actions" validate:"required_without=Content,Embeds"`
 }
 
 // Message : Receive a message from a client.
@@ -126,5 +126,5 @@ pastTheForm:
 			Embeds:      rawEmbeds,
 		},
 	})
-	return nil
+	return c.JSON(http.StatusOK, MessageCreateResponse{util.U64TS(msg.MessageID)})
 }
