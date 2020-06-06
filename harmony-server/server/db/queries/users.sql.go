@@ -62,6 +62,7 @@ VALUES ($1, $2, $3, $4)
 type AddProfileParams struct {
 	UserID   uint64         `json:"user_id"`
 	Username string         `json:"username"`
+	Bio string              `json:"bio"`
 	Avatar   sql.NullString `json:"avatar"`
 	Status   Userstatus     `json:"status"`
 }
@@ -71,6 +72,7 @@ func (q *Queries) AddProfile(ctx context.Context, arg AddProfileParams) error {
 		arg.UserID,
 		arg.Username,
 		arg.Avatar,
+		arg.Bio,
 		arg.Status,
 	)
 	return err
@@ -141,6 +143,7 @@ WHERE Users.User_ID = $1
 type GetUserRow struct {
 	UserID   uint64         `json:"user_id"`
 	Username string         `json:"username"`
+	Bio string              `json:"bio"`
 	Avatar   sql.NullString `json:"avatar"`
 	Status   Userstatus     `json:"status"`
 }
@@ -151,6 +154,7 @@ func (q *Queries) GetUser(ctx context.Context, userID uint64) (GetUserRow, error
 	err := row.Scan(
 		&i.UserID,
 		&i.Username,
+		&i.Bio,
 		&i.Avatar,
 		&i.Status,
 	)

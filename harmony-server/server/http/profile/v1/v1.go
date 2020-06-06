@@ -58,6 +58,17 @@ func (h Handlers) MakeRoutes() []routing.Route {
 			Location: routing.LocationNone,
 		},
 		{
+			Path:    "/users/~/bio",
+			Handler: h.BioUpdate,
+			Method:  routing.PATCH,
+			RateLimit: &routing.RateLimit{
+				Duration: 10 * time.Second,
+				Burst:    2,
+			},
+			Auth:     true,
+			Location: routing.LocationNone,
+		},
+		{
 			Path:    "/users/~/username",
 			Handler: h.UsernameUpdate,
 			Method:  routing.PATCH,

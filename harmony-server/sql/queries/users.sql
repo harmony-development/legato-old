@@ -1,5 +1,5 @@
 -- name: GetUserByEmail :one
-SELECT Users.User_ID, Local_Users.Email, Profiles.Username, Profiles.Avatar, Profiles.Status, Local_Users.Password
+SELECT Users.User_ID, Local_Users.Email, Profiles.Username, Profiles.Avatar, Profiles.Bio, Profiles.Status, Local_Users.Password
 FROM Local_Users
          INNER JOIN Users
                     ON (Local_Users.User_ID = Users.User_ID)
@@ -12,7 +12,7 @@ INSERT INTO Users (User_ID)
 VALUES ($1);
 
 -- name: AddProfile :exec
-INSERT INTO Profiles(User_ID, Username, Avatar, Status)
+INSERT INTO Profiles(User_ID, Username, Avatar, Bio, Status)
 VALUES ($1, $2, $3, $4);
 
 -- name: AddLocalUser :exec
@@ -27,7 +27,7 @@ ON CONFLICT (Local_User_ID) DO UPDATE
 RETURNING Local_User_ID;
 
 -- name: GetUser :one
-SELECT Users.User_ID, Profiles.Username, Profiles.Avatar, Profiles.Status
+SELECT Users.User_ID, Profiles.Username, Profiles.Avatar, Profiles.Bio, Profiles.Status
 FROM Users
          INNER JOIN Profiles ON (Users.User_ID = Profiles.User_ID)
 WHERE Users.User_ID = $1;
@@ -61,4 +61,9 @@ WHERE User_ID = $1;
 -- name: SetStatus :exec
 UPDATE Profiles
 SET Status=$1
+WHERE User_ID = $2;
+
+-- name: SetBio :exec
+UPDATE Profiles
+SET Bio=$1
 WHERE User_ID = $2;

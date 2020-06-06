@@ -15,6 +15,7 @@ func (h Handlers) GetUser(c echo.Context) error {
 	return ctx.JSON(http.StatusOK, UserInfoResponse{
 		UserName:   user.Username,
 		UserAvatar: user.Avatar.String,
+		UserBio:    user.Bio,
 		UserStatus: user.Status,
 	})
 }
