@@ -1,7 +1,7 @@
 <h1 align=center>
  <a href="https://github.com/harmony-development"><img align=center width="15%" src="https://i.imgur.com/lx2RCZj.png" /></a>
+ <br>Harmony
 </h1>
-<h1 align=center>Harmony</h1>
 A free and open source communications platform.
 <br>Designed as an open source Discord replacement; with messaging, guilds, roles, voice chat and rich presence.
 <br>Join our <a href="https://discord.gg/HQ8Kt8m">project chat</a> for announcements, support and contribution.
