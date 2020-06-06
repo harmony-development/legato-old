@@ -32,6 +32,7 @@ type Token struct {
 	Target   string
 	Username string
 	Avatar   string
+	Bio      string
 }
 
 // New creates a new authenticator
@@ -58,12 +59,13 @@ func New(d *Dependencies) (*Manager, error) {
 	return m, nil
 }
 
-func (m Manager) MakeAuthToken(userID uint64, target, username string, avatar string) (string, error) {
+func (m Manager) MakeAuthToken(userID uint64, target, username string, avatar string, bio string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, &Token{
 		UserID:   userID,
 		Target:   target,
 		Username: username,
 		Avatar:   avatar,
+		Bio:      bio,
 	})
 	return token.SignedString(m.PrivKey)
 }
