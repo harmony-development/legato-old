@@ -17,20 +17,20 @@ type BioUpdateData struct {
 
 func (h Handlers) BioUpdate(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
-	data := ctx.Data.(UsernameUpdateData)
+	data := ctx.Data.(BioUpdateData)
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, responses.TooManyRequests)
 	}
 	for c := range h.Deps.State.UserUpdateListeners {
 		c.Send(&client.OutPacket{
 			Type: UserUpdateEventType,
-			Data: UsernameUpdateEvent{
+			Data: BioUpdateEvent{
 				UserID:   util.U64TS(ctx.UserID),
 				Bio: data.Bio,
 			},
 		})
 	}
-	if err := h.Deps.DB.UpdateUsername(ctx.UserID, data.Username); err != nil {
+	if err := h.Deps.DB.UpdateBio(ctx.UserID, data.Bio); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 	}
 	return ctx.NoContent(http.StatusOK)

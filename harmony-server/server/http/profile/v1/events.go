@@ -15,7 +15,7 @@ type AvatarUpdateEvent struct {
 
 type BioUpdateEvent struct {
 	UserID    string `json:"user_id"`
-	NewAvatar string `json:"bio"`
+	NewBio    string `json:"bio"`
 }
 
 
