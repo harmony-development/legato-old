@@ -75,54 +75,56 @@ type SentryConf struct {
 	Enabled          bool
 }
 
+var DefaultConf = Config{
+	Server: ServerConf{
+		Port:             ":2289",
+		Identity:         randstr.Hex(16), // this is what prevents people from using auth tokens on other instances
+		ImagePath:        "images",
+		GuildPicturePath: "guild-pictures",
+		PrivateKeyPath:   "harmony-key.pem",
+		PublicKeyPath:    "harmony-key.pub",
+		MaxAttachments:   1,
+		GetMessageCount:  30,
+		OwnerCacheMax:    5096,
+		SessionCacheMax:  5096,
+		SessionDuration:  48 * time.Hour,
+		LogErrors:        true,
+		SnowflakeStart:   0,
+		Avatar: Avatar{
+			Width:   256,
+			Height:  256,
+			Quality: 50,
+			Crop:    true,
+		},
+		UsernamePolicy: UsernamePolicy{
+			MinLength: 2,
+			MaxLength: 32,
+		},
+		PasswordPolicy: PasswordPolicy{
+			MinLength:  5,
+			MaxLength:  256,
+			MinLower:   1,
+			MinUpper:   1,
+			MinNumbers: 1,
+			MinSymbols: 0,
+		},
+	},
+	DB: DBConf{
+		Host:   "127.0.0.1",
+		Port:   5432,
+		SSL:    false,
+		Models: "sql/schemas/models.sql",
+	},
+	Sentry: SentryConf{
+		Dsn:              "",
+		AttachStacktrace: true,
+		Enabled:          false,
+	},
+}
+
 // Load reads a config file (JSON format)
 func Load() (*Config, error) {
-	defaultCFG := Config{
-		Server: ServerConf{
-			Port:             ":2289",
-			Identity:         randstr.Hex(16), // this is what prevents people from using auth tokens on other instances
-			ImagePath:        "images",
-			GuildPicturePath: "guild-pictures",
-			PrivateKeyPath:   "harmony-key.pem",
-			PublicKeyPath:    "harmony-key.pub",
-			MaxAttachments:   1,
-			GetMessageCount:  30,
-			OwnerCacheMax:    5096,
-			SessionCacheMax:  5096,
-			SessionDuration:  48 * time.Hour,
-			LogErrors:        true,
-			SnowflakeStart:   0,
-			Avatar: Avatar{
-				Width:   256,
-				Height:  256,
-				Quality: 50,
-				Crop:    true,
-			},
-			UsernamePolicy: UsernamePolicy{
-				MinLength: 2,
-				MaxLength: 32,
-			},
-			PasswordPolicy: PasswordPolicy{
-				MinLength:  5,
-				MaxLength:  256,
-				MinLower:   1,
-				MinUpper:   1,
-				MinNumbers: 1,
-				MinSymbols: 0,
-			},
-		},
-		DB: DBConf{
-			Host:   "127.0.0.1",
-			Port:   5432,
-			SSL:    false,
-			Models: "sql/schemas/models.sql",
-		},
-		Sentry: SentryConf{
-			Dsn:              "",
-			AttachStacktrace: true,
-			Enabled:          false,
-		},
-	}
+	defaultCFG := DefaultConf
 	viper.AddConfigPath(".")
 	viper.SetConfigName("config")
 	viper.SetConfigType("json")

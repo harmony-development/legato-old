@@ -18,13 +18,14 @@ import (
 type API struct {
 	*echo.Group
 	Deps *Dependencies
+	V1 *v1.Handlers
 }
 
 // Dependencies are items that an API needs to function
 type Dependencies struct {
-	Router         *routing.Router
+	Router         routing.IRouter
 	APIGroup       *echo.Group
-	DB             *db.HarmonyDB
+	DB             db.IHarmonyDB
 	Config         *config.Config
 	AuthManager    *auth.Manager
 	StorageManager *storage.Manager
@@ -40,7 +41,7 @@ func New(deps *Dependencies) *API {
 		Group: core,
 		Deps:  deps,
 	}
-	api.Deps.Router.BindRoutes(api.Group.Group("/v1"), v1.New(&v1.Dependencies{
+	V1 := v1.New(&v1.Dependencies{
 		DB:             api.Deps.DB,
 		Config:         api.Deps.Config,
 		AuthManager:    api.Deps.AuthManager,
@@ -48,6 +49,8 @@ func New(deps *Dependencies) *API {
 		Logger:         api.Deps.Logger,
 		State:          api.Deps.State,
 		Sonyflake:      api.Deps.Sonyflake,
-	}).MakeRoutes())
+	})
+	api.V1 = V1
+	api.Deps.Router.BindRoutes(api.Group.Group("/v1"), V1.MakeRoutes())
 	return api
 }

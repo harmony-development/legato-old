@@ -1,8 +1,6 @@
 package protocol
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/sony/sonyflake"
 	"harmony-server/server/auth"
 	"harmony-server/server/config"
 	"harmony-server/server/db"
@@ -10,6 +8,9 @@ import (
 	"harmony-server/server/http/socket"
 	"harmony-server/server/logger"
 	"time"
+
+	"github.com/labstack/echo/v4"
+	"github.com/sony/sonyflake"
 )
 
 type API struct {
@@ -21,7 +22,7 @@ type Dependencies struct {
 	Router      *routing.Router
 	APIGroup    *echo.Group
 	Socket      *socket.Handler
-	DB          *db.HarmonyDB
+	DB          db.IHarmonyDB
 	Logger      *logger.Logger
 	AuthManager *auth.Manager
 	Sonyflake   *sonyflake.Sonyflake

@@ -11,6 +11,7 @@ const (
 	InvalidRequest         = "invalid-request"
 	InsufficientPrivileges = "insufficient-privileges"
 	GuildNotFound          = "guild.not-found"
+	NotInGuild             = "guild.not-member"
 	UnknownError           = "unknown"
 )
 

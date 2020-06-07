@@ -8,7 +8,7 @@ import (
 
 // Events contains the events + their dependencies
 type Events struct {
-	DB     *db.HarmonyDB
+	DB     db.IHarmonyDB
 	State  *state.State
 	Logger *logger.Logger
 }

@@ -15,14 +15,14 @@ import (
 // Handler is an instance of the socket handler
 type Handler struct {
 	Upgrader *websocket.Upgrader
-	DB       *db.HarmonyDB
+	DB       db.IHarmonyDB
 	Logger   *logger.Logger
 	Bus      client.Bus
 	State    *state.State
 }
 
 type Dependencies struct {
-	DB     *db.HarmonyDB
+	DB     db.IHarmonyDB
 	Logger *logger.Logger
 	State  *state.State
 }

@@ -30,12 +30,12 @@ type HarmonyContext struct {
 
 // Middlewares contains middlewares for Harmony
 type Middlewares struct {
-	DB         *db.HarmonyDB
+	DB         db.IHarmonyDB
 	RateLimits map[string]map[string]*visitor
 	RateLock   sync.RWMutex
 }
 
-func (hc *HarmonyContext) VerifyOwner(db *db.HarmonyDB, guildID, userID uint64) error {
+func (hc *HarmonyContext) VerifyOwner(db db.IHarmonyDB, guildID, userID uint64) error {
 	owner, err := db.GetOwner(guildID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to verify ownership, please try again later")
@@ -47,7 +47,7 @@ func (hc *HarmonyContext) VerifyOwner(db *db.HarmonyDB, guildID, userID uint64) 
 }
 
 // New instantiates the middlewares for Harmony
-func New(db *db.HarmonyDB) *Middlewares {
+func New(db db.IHarmonyDB) *Middlewares {
 	m := &Middlewares{
 		DB:         db,
 		RateLimits: make(map[string]map[string]*visitor),

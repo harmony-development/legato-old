@@ -22,7 +22,7 @@ type Handlers struct {
 
 // Dependencies are the elements that CoreKit handlers need
 type Dependencies struct {
-	DB             *db.HarmonyDB
+	DB             db.IHarmonyDB
 	Config         *config.Config
 	AuthManager    *auth.Manager
 	StorageManager *storage.Manager

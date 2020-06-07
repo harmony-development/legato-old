@@ -2,6 +2,7 @@ package events
 
 import (
 	"encoding/json"
+	"harmony-server/server/http/responses"
 	"harmony-server/server/http/socket/client"
 )
 
@@ -19,23 +20,20 @@ func (e Events) SubscribeToGuild(ws client.Client, event *client.Event, raw *jso
 	}
 	userID, err := e.DB.SessionToUserID(data.Session)
 	if err != nil {
-		ws.SendError("invalid session")
+		ws.SendError(responses.InvalidSession)
 		return
 	}
 	if !event.Limiter.Allow() {
-		ws.SendError("too many subscription attempts, please try later")
+		ws.SendError(responses.TooManyRequests)
 		return
 	}
 	var count int
-	res, err := e.DB.Query("SELECT COUNT(*) FROM guildmembers INNER JOIN guilds ON guildmembers.guildid = guilds.guildid WHERE userid=$1 AND guilds.guildid=$2", userID, data.Guild)
+	inGuild, err := e.DB.UserInGuild(userID, data.Guild)
 	if err != nil {
-		ws.SendError("unable to subscribe to guild")
-		return
+		ws.SendError(err.Error())
 	}
-	err = res.Scan(&count)
-	if err != nil {
-		ws.SendError("unable to subscribe to guild")
-		return
+	if !inGuild {
+		ws.SendError(responses.NotInGuild)
 	}
 	if count == 1 {
 		e.State.Guilds[data.Guild].AddClient(&userID, &ws)

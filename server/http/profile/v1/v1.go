@@ -18,7 +18,7 @@ type Handlers struct {
 
 // Dependencies are the elements that ProfileKit handlers need
 type Dependencies struct {
-	DB             *db.HarmonyDB
+	DB             db.IHarmonyDB
 	Config         *config.Config
 	StorageManager *storage.Manager
 	Logger         *logger.Logger

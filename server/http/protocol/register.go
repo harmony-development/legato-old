@@ -2,6 +2,8 @@ package protocol
 
 import (
 	"harmony-server/server/http/core/v1"
+	"harmony-server/util"
+
 	"net/http"
 	"unicode"
 
@@ -65,7 +67,7 @@ func (h API) Register(c echo.Context) error {
 		h.Deps.Logger.Exception(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 	}
-	if !h.Deps.DB.EmailExists(data.Email) {
+	if h.Deps.DB.EmailExists(data.Email) {
 		return echo.NewHTTPError(http.StatusConflict, responses.AlreadyRegistered)
 	}
 	userID, err := h.Deps.Sonyflake.NextID()
@@ -81,7 +83,7 @@ func (h API) Register(c echo.Context) error {
 		h.Deps.Logger.Exception(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 	}
-	return ctx.JSON(http.StatusOK, v1.RegisterResponse{Session: session})
+	return ctx.JSON(http.StatusOK, v1.RegisterResponse{Session: session, UserID: util.U64TS(userID)})
 }
 
 type passwordStats struct {

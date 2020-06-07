@@ -44,6 +44,11 @@ type Route struct {
 	Permissions hm.Permission
 }
 
+type IRouter interface {
+	BindRoute(g *echo.Group, endpoint Route)
+	BindRoutes(g *echo.Group, endPoints []Route)
+}
+
 type Router struct {
 	Middlewares *hm.Middlewares
 }

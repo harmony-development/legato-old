@@ -34,7 +34,7 @@ type Server struct {
 
 // Dependencies are elements that a Server needs
 type Dependencies struct {
-	DB             *db.HarmonyDB
+	DB             db.IHarmonyDB
 	AuthManager    *auth.Manager
 	StorageManager *storage.Manager
 	Logger         *logger.Logger
@@ -65,7 +65,7 @@ func New(deps *Dependencies) *Server {
 		WaitForDelivery: false,
 	}))
 	s.Validator = &HarmonyValidator{
-		validator: validator.New(),
+		Validator: validator.New(),
 	}
 	m := hm.New(deps.DB)
 	s.Router = &routing.Router{Middlewares: m}

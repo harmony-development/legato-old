@@ -26,7 +26,7 @@ type Instance struct {
 	AuthManager    *auth.Manager
 	StorageManager *storage.Manager
 	Logger         *logger.Logger
-	DB             *db.HarmonyDB
+	DB             db.IHarmonyDB
 }
 
 // Start begins the instance server
