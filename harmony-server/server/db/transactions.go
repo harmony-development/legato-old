@@ -453,7 +453,7 @@ func (db *HarmonyDB) UpdateUsername(userID uint64, username string) error {
 
 func (db *HarmonyDB) UpdateBio(userID uint64, bio string) error {
 	return db.queries.UpdateBio(ctx, queries.UpdateBioParams{
-		Bio:    bio,
+		Bio:    toSqlString(ctx, bio),
 		UserID: userID,
 	})
 }
