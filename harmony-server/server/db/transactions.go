@@ -453,13 +453,13 @@ func (db *HarmonyDB) UpdateUsername(userID uint64, username string) error {
 
 func (db *HarmonyDB) UpdateBio(userID uint64, bio string) error {
 	return db.queries.UpdateBio(ctx, queries.UpdateBioParams{
-		Bio:    toSqlString(ctx, bio),
+		Bio:    toSqlString(bio),
 		UserID: userID,
 	})
 }
 
 func (db *HarmonyDB) GetAvatar(userID uint64) (sql.NullString, error) {
-	return db.queries.GetAvatar(userID)
+	return db.queries.GetAvatar(ctx, userID)
 }
 
 func (db *HarmonyDB) UpdateAvatar(userID uint64, avatar string) error {
