@@ -55,15 +55,15 @@ func (q *Queries) AddLocalUser(ctx context.Context, arg AddLocalUserParams) erro
 }
 
 const addProfile = `-- name: AddProfile :exec
-INSERT INTO Profiles(User_ID, Username, Avatar, Status)
-VALUES ($1, $2, $3, $4)
+INSERT INTO Profiles(User_ID, Username, Avatar, Bio, Status)
+VALUES ($1, $2, $3, $4, $5)
 `
 
 type AddProfileParams struct {
 	UserID   uint64         `json:"user_id"`
 	Username string         `json:"username"`
-	Bio string              `json:"bio"`
 	Avatar   sql.NullString `json:"avatar"`
+	Bio      sql.NullString `json:"bio"`
 	Status   Userstatus     `json:"status"`
 }
 
@@ -134,7 +134,7 @@ func (q *Queries) GetLocalUserID(ctx context.Context, arg GetLocalUserIDParams) 
 }
 
 const getUser = `-- name: GetUser :one
-SELECT Users.User_ID, Profiles.Username, Profiles.Avatar, Profiles.Status
+SELECT Users.User_ID, Profiles.Username, Profiles.Avatar, Profiles.Bio, Profiles.Status
 FROM Users
          INNER JOIN Profiles ON (Users.User_ID = Profiles.User_ID)
 WHERE Users.User_ID = $1
@@ -143,8 +143,8 @@ WHERE Users.User_ID = $1
 type GetUserRow struct {
 	UserID   uint64         `json:"user_id"`
 	Username string         `json:"username"`
-	Bio string              `json:"bio"`
 	Avatar   sql.NullString `json:"avatar"`
+	Bio      sql.NullString `json:"bio"`
 	Status   Userstatus     `json:"status"`
 }
 
@@ -154,15 +154,15 @@ func (q *Queries) GetUser(ctx context.Context, userID uint64) (GetUserRow, error
 	err := row.Scan(
 		&i.UserID,
 		&i.Username,
-		&i.Bio,
 		&i.Avatar,
+		&i.Bio,
 		&i.Status,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT Users.User_ID, Local_Users.Email, Profiles.Username, Profiles.Avatar, Profiles.Status, Local_Users.Password
+SELECT Users.User_ID, Local_Users.Email, Profiles.Username, Profiles.Avatar, Profiles.Bio, Profiles.Status, Local_Users.Password
 FROM Local_Users
          INNER JOIN Users
                     ON (Local_Users.User_ID = Users.User_ID)
@@ -176,6 +176,7 @@ type GetUserByEmailRow struct {
 	Email    string         `json:"email"`
 	Username string         `json:"username"`
 	Avatar   sql.NullString `json:"avatar"`
+	Bio      sql.NullString `json:"bio"`
 	Status   Userstatus     `json:"status"`
 	Password []byte         `json:"password"`
 }
@@ -188,6 +189,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEm
 		&i.Email,
 		&i.Username,
 		&i.Avatar,
+		&i.Bio,
 		&i.Status,
 		&i.Password,
 	)
@@ -223,6 +225,22 @@ type UpdateAvatarParams struct {
 
 func (q *Queries) UpdateAvatar(ctx context.Context, arg UpdateAvatarParams) error {
 	_, err := q.exec(ctx, q.updateAvatarStmt, updateAvatar, arg.Avatar, arg.UserID)
+	return err
+}
+
+const updateBio = `-- name: UpdateBio :exec
+UPDATE Profiles
+SET Bio=$1
+WHERE User_ID = $2
+`
+
+type UpdateBioParams struct {
+	Bio    sql.NullString `json:"bio"`
+	UserID uint64         `json:"user_id"`
+}
+
+func (q *Queries) UpdateBio(ctx context.Context, arg UpdateBioParams) error {
+	_, err := q.exec(ctx, q.updateBioStmt, updateBio, arg.Bio, arg.UserID)
 	return err
 }
 

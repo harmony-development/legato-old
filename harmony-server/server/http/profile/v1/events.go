@@ -14,10 +14,9 @@ type AvatarUpdateEvent struct {
 }
 
 type BioUpdateEvent struct {
-	UserID    string `json:"user_id"`
-	NewBio    string `json:"bio"`
+	UserID string `json:"user_id"`
+	Bio    string `json:"bio"`
 }
-
 
 // UsernameUpdateEvent is the data that will be sent to a client on a username update
 type UsernameUpdateEvent struct {

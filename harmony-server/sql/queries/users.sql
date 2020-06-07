@@ -13,7 +13,7 @@ VALUES ($1);
 
 -- name: AddProfile :exec
 INSERT INTO Profiles(User_ID, Username, Avatar, Bio, Status)
-VALUES ($1, $2, $3, $4);
+VALUES ($1, $2, $3, $4, $5);
 
 -- name: AddLocalUser :exec
 INSERT INTO Local_Users (User_ID, Email, Password, Instances)
@@ -63,7 +63,7 @@ UPDATE Profiles
 SET Status=$1
 WHERE User_ID = $2;
 
--- name: SetBio :exec
+-- name: UpdateBio :exec
 UPDATE Profiles
 SET Bio=$1
 WHERE User_ID = $2;

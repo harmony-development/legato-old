@@ -24,7 +24,7 @@ func (h API) Connect(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.InvalidRequest)
 	}
 	data := ctx.Data.(ConnectData)
-	token, err := h.Deps.AuthManager.MakeAuthToken(ctx.UserID, data.Target, user.Username, user.Avatar.String)
+	token, err := h.Deps.AuthManager.MakeAuthToken(ctx.UserID, data.Target, user.Username, user.Avatar.String, user.Bio)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 	}

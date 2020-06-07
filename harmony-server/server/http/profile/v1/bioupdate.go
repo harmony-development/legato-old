@@ -25,8 +25,8 @@ func (h Handlers) BioUpdate(c echo.Context) error {
 		c.Send(&client.OutPacket{
 			Type: UserUpdateEventType,
 			Data: BioUpdateEvent{
-				UserID:   util.U64TS(ctx.UserID),
-				Bio: data.Bio,
+				UserID: util.U64TS(ctx.UserID),
+				Bio:    data.Bio,
 			},
 		})
 	}

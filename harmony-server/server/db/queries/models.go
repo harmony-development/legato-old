@@ -17,6 +17,7 @@ const (
 	UserstatusMobile    Userstatus = "mobile"
 	UserstatusIdle      Userstatus = "idle"
 	UserstatusOffline   Userstatus = "offline"
+	UserstatusDnd       Userstatus = "dnd"
 )
 
 func (e *Userstatus) Scan(src interface{}) error {
@@ -95,6 +96,7 @@ type Profile struct {
 	UserID   uint64         `json:"user_id"`
 	Username string         `json:"username"`
 	Avatar   sql.NullString `json:"avatar"`
+	Bio      sql.NullString `json:"bio"`
 	Status   Userstatus     `json:"status"`
 }
 
