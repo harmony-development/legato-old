@@ -16,12 +16,13 @@ jobs:
     - name: Get dependencies
       run: |
         go get -v -t -d ./...
+        go get github.com/ory/go-acc
         sudo apt-get update
         sudo apt install libvips libvips-dev --fix-missing --no-install-recommends
     - name: Build
       run: go build -v .
     - name: Test
-      run: go-acc ./...
+      run: $HOME/go/bin/go-acc ./...
       continue-on-error: true
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1

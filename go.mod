@@ -11,6 +11,7 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/json-iterator/go v1.1.9 // indirect
+	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/echo/v4 v4.1.14
 	github.com/lib/pq v1.4.0
 	github.com/logrusorgru/aurora v0.0.0-20200102142835-e9ef32dff381

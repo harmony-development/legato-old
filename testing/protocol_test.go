@@ -15,7 +15,6 @@ import (
 	"harmony-server/server/config"
 	harmonyHttp "harmony-server/server/http"
 	v1 "harmony-server/server/http/core/v1"
-	"harmony-server/server/http/hm"
 	"harmony-server/server/http/protocol"
 	"harmony-server/server/http/routing"
 )
@@ -26,19 +25,15 @@ func TestRegister(t *testing.T) {
 		"username": "Maho Hiyajo",
 		"password": "Ex@mpl3_p@ssw0rd"
 	}`
-	middlewares := hm.New(&MockDB{})
-	e := echo.New()
-	apiGroup := e.Group("/api")
-	apiGroup.Use(middlewares.WithHarmony)
-
+	e, g, m, mockDB := setupBoilerplate()
 	protocol.New(&protocol.Dependencies{
 		Router: &routing.Router{
-			Middlewares: middlewares,
+			Middlewares: m,
 		},
-		APIGroup:  apiGroup,
+		APIGroup:  g,
 		Sonyflake: sonyflake.NewSonyflake(sonyflake.Settings{}),
 		Config:    &config.DefaultConf,
-		DB:        &MockDB{},
+		DB:        mockDB,
 	})
 	req := httptest.NewRequest(http.MethodPost, "/api/protocol/register", strings.NewReader(testData))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
