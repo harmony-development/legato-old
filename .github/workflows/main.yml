@@ -34,9 +34,4 @@ jobs:
       with:
         version: v1.26
       continue-on-error: true
-    - name: Discord Notification
-      env:
-        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-      uses: Ilshidur/action-discord@master
-      continue-on-error: true
       
