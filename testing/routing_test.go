@@ -32,7 +32,7 @@ var routeTests = []struct {
 		},
 		routing.Route{
 			Method:      routing.ANY,
-			Path:        "/any/",
+			Path:        "/any",
 			Auth:        false,
 			Schema:      struct{}{},
 			Location:    routing.LocationNone,
@@ -42,7 +42,7 @@ var routeTests = []struct {
 	},
 	{
 		func(t *testing.T, e *echo.Echo) {
-			req := httptest.NewRequest(http.MethodDelete, "/api/delete/42069/", strings.NewReader(`{}`))
+			req := httptest.NewRequest(http.MethodDelete, "/api/delete/42069", strings.NewReader(`{}`))
 			req.Header.Set(echo.HeaderAuthorization, "let me in")
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
@@ -53,7 +53,7 @@ var routeTests = []struct {
 		},
 		routing.Route{
 			Method:      routing.DELETE,
-			Path:        "/delete/:guild_id/",
+			Path:        "/delete/:guild_id",
 			Auth:        true,
 			Schema:      struct{}{},
 			Location:    routing.LocationGuild,
@@ -63,7 +63,7 @@ var routeTests = []struct {
 	},
 	{
 		func(t *testing.T, e *echo.Echo) {
-			req := httptest.NewRequest(http.MethodGet, "/api/get/42069/3264/", strings.NewReader(`{}`))
+			req := httptest.NewRequest(http.MethodGet, "/api/get/42069/3264", strings.NewReader(`{}`))
 			req.Header.Set(echo.HeaderAuthorization, "let me in")
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
@@ -74,7 +74,7 @@ var routeTests = []struct {
 		},
 		routing.Route{
 			Method:      routing.GET,
-			Path:        "/get/:guild_id/:channel_id/",
+			Path:        "/get/:guild_id/:channel_id",
 			Auth:        true,
 			Schema:      struct{}{},
 			Location:    routing.LocationGuildAndChannel,
@@ -84,7 +84,7 @@ var routeTests = []struct {
 	},
 	{
 		func(t *testing.T, e *echo.Echo) {
-			req := httptest.NewRequest(http.MethodPatch, "/api/patch/10239/", strings.NewReader(`{}`))
+			req := httptest.NewRequest(http.MethodPatch, "/api/patch/10239", strings.NewReader(`{}`))
 			req.Header.Set(echo.HeaderAuthorization, "let me in")
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
@@ -95,7 +95,7 @@ var routeTests = []struct {
 		},
 		routing.Route{
 			Method:      routing.PATCH,
-			Path:        "/patch/:user_id/",
+			Path:        "/patch/:user_id",
 			Auth:        true,
 			Schema:      struct{}{},
 			Location:    routing.LocationUser,
@@ -105,7 +105,7 @@ var routeTests = []struct {
 	},
 	{
 		func(t *testing.T, e *echo.Echo) {
-			req := httptest.NewRequest(http.MethodPost, "/api/post/10222/12314/43612/", strings.NewReader(`{}`))
+			req := httptest.NewRequest(http.MethodPost, "/api/post/10222/12314/43612", strings.NewReader(`{}`))
 			req.Header.Set(echo.HeaderAuthorization, "let me in")
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
@@ -116,7 +116,7 @@ var routeTests = []struct {
 		},
 		routing.Route{
 			Method:      routing.POST,
-			Path:        "/post/:guild_id/:channel_id/:message_id/",
+			Path:        "/post/:guild_id/:channel_id/:message_id",
 			Auth:        true,
 			Schema:      struct{}{},
 			Location:    routing.LocationGuildChannelAndMessage,
@@ -126,7 +126,7 @@ var routeTests = []struct {
 	},
 	{
 		func(t *testing.T, e *echo.Echo) {
-			req := httptest.NewRequest(http.MethodPut, "/api/put/", strings.NewReader(`{}`))
+			req := httptest.NewRequest(http.MethodPut, "/api/put", strings.NewReader(`{}`))
 			req.Header.Set(echo.HeaderAuthorization, "let me in")
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
@@ -137,7 +137,7 @@ var routeTests = []struct {
 		},
 		routing.Route{
 			Method:      routing.PUT,
-			Path:        "/put/",
+			Path:        "/put",
 			Auth:        true,
 			Schema:      struct{}{},
 			Location:    routing.LocationNone,

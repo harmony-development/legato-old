@@ -14,7 +14,7 @@ func setupBoilerplate() (*echo.Echo, *echo.Group, *hm.Middlewares, *MockDB, *rou
 	mockDB := &MockDB{}
 	m := hm.New(mockDB)
 	e := echo.New()
-	e.Pre(middleware.AddTrailingSlash())
+	e.Pre(middleware.RemoveTrailingSlash())
 	e.Validator = &http.HarmonyValidator{
 		Validator: validator.New(),
 	}
