@@ -1,4 +1,4 @@
-name: Go
+name: Harmony Build
 on: [push, pull_request]
 
 jobs:
@@ -30,9 +30,12 @@ jobs:
       with:
         name: harmony-server
         path: harmony-server
-    - name: golangci-lint
-      uses: golangci/golangci-lint-action@v1
-      with:
-        version: v1.26
-      continue-on-error: true
-      
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v1
+        with:
+          version: v1.26
