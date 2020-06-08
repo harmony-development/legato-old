@@ -81,7 +81,7 @@ func TestNullTimeTS(t *testing.T) {
 	for _, test := range nullTimeTSTests {
 		s := util.NullTimeTS(test.input)
 		if s != nil {
-			assert.Equal(t, *s, test.expected)
+			assert.Equal(t, *s, *test.expected)
 		} else {
 			assert.Equal(t, s, test.expected)
 		}
