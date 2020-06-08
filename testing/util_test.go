@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-playground/assert/v2"
+	"github.com/stretchr/testify/assert"
 )
 
 var u64tsTests = []struct {

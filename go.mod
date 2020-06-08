@@ -20,4 +20,5 @@ require (
 	golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9
 	golang.org/x/time v0.0.0-20200416051211-89c76fbcd5d1
 	gopkg.in/h2non/bimg.v1 v1.1.0
+	github.com/stretchr/testify v1.4.0
 )

@@ -32,7 +32,7 @@ var routeTests = []struct {
 		},
 		routing.Route{
 			Method:      routing.ANY,
-			Path:        "/any",
+			Path:        "/any/",
 			Auth:        false,
 			Schema:      struct{}{},
 			Location:    routing.LocationNone,
@@ -122,6 +122,27 @@ var routeTests = []struct {
 			Location:    routing.LocationGuildChannelAndMessage,
 			Handler:     routingTestHandler,
 			Permissions: hm.Owner,
+		},
+	},
+	{
+		func(t *testing.T, e *echo.Echo) {
+			req := httptest.NewRequest(http.MethodPut, "/api/put/", strings.NewReader(`{}`))
+			req.Header.Set(echo.HeaderAuthorization, "let me in")
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			rec := httptest.NewRecorder()
+			e.ServeHTTP(rec, req)
+			if assert.Equal(t, http.StatusOK, rec.Code) {
+				assert.Equal(t, len(strings.Split(rec.Body.String(), " ")), 1)
+			}
+		},
+		routing.Route{
+			Method:      routing.PUT,
+			Path:        "/put/",
+			Auth:        true,
+			Schema:      struct{}{},
+			Location:    routing.LocationNone,
+			Handler:     routingTestHandler,
+			Permissions: hm.NoPermission,
 		},
 	},
 }
