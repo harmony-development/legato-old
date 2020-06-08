@@ -23,7 +23,7 @@ func (db *MockDB) DeleteGuild(guildID uint64) error {
 }
 
 func (db *MockDB) GetOwner(guildID uint64) (uint64, error) {
-	panic("implement me")
+	return 1337, nil
 }
 
 func (db *MockDB) IsOwner(guildID uint64, userID uint64) (bool, error) {
@@ -71,7 +71,7 @@ func (db *MockDB) DeleteInvite(inviteID string) error {
 }
 
 func (db *MockDB) SessionToUserID(session string) (uint64, error) {
-	panic("implement me")
+	return 1337, nil
 }
 
 func (db *MockDB) UserInGuild(userID uint64, guildID uint64) (bool, error) {
@@ -131,7 +131,7 @@ func (db *MockDB) MembersInGuild(guildID uint64) ([]uint64, error) {
 }
 
 func (db *MockDB) GetMessage(messageID uint64) (queries.Message, error) {
-	panic("implement me")
+	return queries.Message{}, nil
 }
 
 func (db *MockDB) GetUserByEmail(email string) (queries.GetUserByEmailRow, error) {
@@ -139,7 +139,7 @@ func (db *MockDB) GetUserByEmail(email string) (queries.GetUserByEmailRow, error
 }
 
 func (db *MockDB) GetUserByID(userID uint64) (queries.GetUserRow, error) {
-	panic("implement me")
+	return queries.GetUserRow{}, nil
 }
 
 func (db *MockDB) AddSession(userID uint64, session string) error {
@@ -179,11 +179,11 @@ func (db *MockDB) UpdateAvatar(userID uint64, avatar string) error {
 }
 
 func (db *MockDB) HasGuildWithID(guildID uint64) (bool, error) {
-	panic("implement me")
+	return true, nil
 }
 
 func (db *MockDB) HasChannelWithID(guildID, channelID uint64) (bool, error) {
-	panic("implement me")
+	return true, nil
 }
 
 func (db *MockDB) AddFileHash(fileID string, hash []byte) error {
