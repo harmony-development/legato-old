@@ -1,4 +1,4 @@
-CREATE TYPE UserStatus AS ENUM ('streaming', 'online', 'mobile', 'idle', 'offline');
+CREATE TYPE IF NOT EXISTS UserStatus AS ENUM ('streaming', 'online', 'mobile', 'idle', 'offline');
 CREATE TABLE IF NOT EXISTS Users
 (
     User_ID BIGSERIAL NOT NULL,
