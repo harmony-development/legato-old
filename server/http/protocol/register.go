@@ -1,7 +1,7 @@
 package protocol
 
 import (
-	"harmony-server/server/http/core/v1"
+	v1 "harmony-server/server/http/core/v1"
 	"harmony-server/util"
 
 	"net/http"
@@ -26,12 +26,13 @@ func (h API) Register(c echo.Context) error {
 	data := ctx.Data.(RegisterData)
 	if len(data.Username) < h.Deps.Config.Server.UsernamePolicy.MinLength ||
 		len(data.Username) > h.Deps.Config.Server.UsernamePolicy.MaxLength {
-		return ctx.JSON(
+		resp := responses.UsernameLength(
+			h.Deps.Config.Server.UsernamePolicy.MinLength,
+			h.Deps.Config.Server.UsernamePolicy.MaxLength,
+		)
+		return c.JSON(
 			http.StatusNotAcceptable,
-			responses.UsernameLength(
-				h.Deps.Config.Server.UsernamePolicy.MinLength,
-				h.Deps.Config.Server.UsernamePolicy.MaxLength,
-			),
+			&resp,
 		)
 	}
 	if len(data.Password) < h.Deps.Config.Server.PasswordPolicy.MinLength ||

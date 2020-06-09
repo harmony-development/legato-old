@@ -7,9 +7,9 @@ import (
 	"net/http"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/h2non/bimg"
 	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
-	"gopkg.in/h2non/bimg.v1"
 
 	"harmony-server/server/http/hm"
 	"harmony-server/server/http/responses"

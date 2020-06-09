@@ -2,12 +2,27 @@ package testing
 
 import (
 	"database/sql"
+	"errors"
 	"time"
 
 	"harmony-server/server/db/queries"
 )
 
+type MockFlags struct {
+	GetOwnerError        bool
+	SessionToUserIDError bool
+	GetMessageError      bool
+	GetUserByIDError     bool
+	AddSessionError      bool
+	AddLocalUserError    bool
+	EmailExistsError     bool
+	HasGuildWithIDError  bool
+	HasChannelWithID     bool
+	CreateGuildError     bool
+}
+
 type MockDB struct {
+	Flags MockFlags
 }
 
 func (db *MockDB) Migrate() error {
@@ -23,6 +38,9 @@ func (db *MockDB) DeleteGuild(guildID uint64) error {
 }
 
 func (db *MockDB) GetOwner(guildID uint64) (uint64, error) {
+	if db.Flags.GetOwnerError {
+		return 0, errors.New("error getting owner")
+	}
 	return 1337, nil
 }
 
@@ -71,6 +89,9 @@ func (db *MockDB) DeleteInvite(inviteID string) error {
 }
 
 func (db *MockDB) SessionToUserID(session string) (uint64, error) {
+	if db.Flags.SessionToUserIDError {
+		return 0, errors.New("invalid session")
+	}
 	return 1337, nil
 }
 
@@ -131,6 +152,9 @@ func (db *MockDB) MembersInGuild(guildID uint64) ([]uint64, error) {
 }
 
 func (db *MockDB) GetMessage(messageID uint64) (queries.Message, error) {
+	if db.Flags.GetMessageError {
+		return queries.Message{}, errors.New("message doesn't exist")
+	}
 	return queries.Message{}, nil
 }
 
@@ -139,10 +163,16 @@ func (db *MockDB) GetUserByEmail(email string) (queries.GetUserByEmailRow, error
 }
 
 func (db *MockDB) GetUserByID(userID uint64) (queries.GetUserRow, error) {
+	if db.Flags.GetUserByIDError {
+		return queries.GetUserRow{}, errors.New("user doesn't exist")
+	}
 	return queries.GetUserRow{}, nil
 }
 
 func (db *MockDB) AddSession(userID uint64, session string) error {
+	if db.Flags.AddSessionError {
+		return errors.New("error adding session")
+	}
 	return nil
 }
 
@@ -151,6 +181,9 @@ func (db *MockDB) GetLocalUserForForeignUser(userID uint64, homeserver string) (
 }
 
 func (db *MockDB) AddLocalUser(userID uint64, email, username string, passwordHash []byte) error {
+	if db.Flags.AddLocalUserError {
+		return errors.New("error adding local user")
+	}
 	return nil
 }
 
@@ -159,6 +192,9 @@ func (db *MockDB) AddForeignUser(homeServer string, userID, localUserID uint64, 
 }
 
 func (db *MockDB) EmailExists(email string) bool {
+	if db.Flags.EmailExistsError {
+		return true
+	}
 	return false
 }
 
@@ -179,10 +215,16 @@ func (db *MockDB) UpdateAvatar(userID uint64, avatar string) error {
 }
 
 func (db *MockDB) HasGuildWithID(guildID uint64) (bool, error) {
+	if db.Flags.HasGuildWithIDError {
+		return false, errors.New("error checking if guild with id exists")
+	}
 	return true, nil
 }
 
 func (db *MockDB) HasChannelWithID(guildID, channelID uint64) (bool, error) {
+	if db.Flags.HasChannelWithID {
+		return false, errors.New("error checking if channel with id exists")
+	}
 	return true, nil
 }
 
@@ -208,6 +250,9 @@ func (db *MockDB) SetStatus(userID uint64, status queries.Userstatus) error {
 
 // CreateGuild creates a standard guild
 func (db *MockDB) CreateGuild(owner, id uint64, guildName string, picture string) (*queries.Guild, error) {
+	if db.Flags.CreateGuildError {
+		return nil, errors.New("create guild error")
+	}
 	return &queries.Guild{
 		OwnerID:    owner,
 		GuildID:    id,

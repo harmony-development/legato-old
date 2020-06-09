@@ -1,10 +1,10 @@
 package testing
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/labstack/echo/v4"
@@ -16,12 +16,60 @@ import (
 	"harmony-server/server/http/protocol"
 )
 
+var RegisterTests = RequestTestSet{
+	Path: "/api/protocol/register",
+	Type: http.MethodPost,
+	Tests: []RequestTest{
+		{
+			Data: map[string]interface{}{
+				"email":    "maho@amade.us",
+				"username": "Maho Hiyajo",
+				"password": "Ex@mpl3_p@ssw0rd",
+			},
+			Tester: func(t *testing.T, req *http.Request, rec *httptest.ResponseRecorder) {
+				assert.Equal(t, http.StatusOK, rec.Code)
+				var response v1.RegisterResponse
+				assert.NoError(t, json.Unmarshal(rec.Body.Bytes(), &response))
+				assert.NotEmpty(t, response.Session)
+				assert.NotEmpty(t, response.UserID)
+			},
+		},
+		{
+			Data: map[string]interface{}{
+				"email":    "maho",
+				"username": "Maho Hiyajo",
+				"password": "Ex@mpl3_p@ssw0rd",
+			},
+			Tester: func(t *testing.T, req *http.Request, rec *httptest.ResponseRecorder) {
+				assert.Equal(t, http.StatusBadRequest, rec.Code)
+			},
+		},
+		{
+			Data: map[string]interface{}{
+				"email":    "maho@amade.us",
+				"username": "_",
+				"password": "Ex@mpl3_p@ssw0rd",
+			},
+			Tester: func(t *testing.T, req *http.Request, rec *httptest.ResponseRecorder) {
+				assert.Equal(t, http.StatusNotAcceptable, rec.Result().StatusCode)
+				assert.NotEmpty(t, rec.Body.String())
+			},
+		},
+		{
+			Data: map[string]interface{}{
+				"email":    "maho@amade.us",
+				"username": "Maho Hiyajo",
+				"password": "no lol",
+			},
+			Tester: func(t *testing.T, req *http.Request, rec *httptest.ResponseRecorder) {
+				assert.Equal(t, http.StatusNotAcceptable, rec.Result().StatusCode)
+				assert.NotEmpty(t, rec.Body.String())
+			},
+		},
+	},
+}
+
 func TestRegister(t *testing.T) {
-	testData := `{
-		"email": "maho@amade.us",
-		"username": "Maho Hiyajo",
-		"password": "Ex@mpl3_p@ssw0rd"
-	}`
 	e, g, _, mockDB, router := setupBoilerplate()
 	protocol.New(&protocol.Dependencies{
 		Router:    router,
@@ -30,16 +78,13 @@ func TestRegister(t *testing.T) {
 		Config:    &config.DefaultConf,
 		DB:        mockDB,
 	})
-	req := httptest.NewRequest(http.MethodPost, "/api/protocol/register", strings.NewReader(testData))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec := httptest.NewRecorder()
-	e.ServeHTTP(rec, req)
-	if assert.Equal(t, http.StatusOK, rec.Code) {
-		var response v1.RegisterResponse
-		assert.NoError(t, json.Unmarshal(rec.Body.Bytes(), &response))
-		assert.NotEmpty(t, response.Session)
-		assert.NotEmpty(t, response.UserID)
-	} else {
-		t.Error(rec.Body.String())
+	for _, test := range RegisterTests.Tests {
+		body, err := json.Marshal(test.Data)
+		assert.NoError(t, err)
+		req := httptest.NewRequest(RegisterTests.Type, RegisterTests.Path, bytes.NewReader(body))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		e.ServeHTTP(rec, req)
+		test.Tester(t, req, rec)
 	}
 }

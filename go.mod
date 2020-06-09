@@ -8,6 +8,7 @@ require (
 	github.com/getsentry/sentry-go v0.6.1
 	github.com/go-playground/validator/v10 v10.3.0
 	github.com/gorilla/websocket v1.4.2
+	github.com/h2non/bimg v1.1.2
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/labstack/echo/v4 v4.1.16
 	github.com/lib/pq v1.7.0
@@ -22,11 +23,11 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.7.0
+	github.com/stretchr/testify v1.4.0
 	github.com/thanhpk/randstr v1.0.4
 	golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9
 	golang.org/x/net v0.0.0-20200602114024-627f9648deb9 // indirect
 	golang.org/x/sys v0.0.0-20200602225109-6fdc65e7d980 // indirect
 	golang.org/x/time v0.0.0-20200416051211-89c76fbcd5d1
-	gopkg.in/h2non/bimg.v1 v1.1.2
 	gopkg.in/ini.v1 v1.57.0 // indirect
 )
