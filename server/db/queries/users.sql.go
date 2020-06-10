@@ -87,16 +87,15 @@ func (q *Queries) AddUser(ctx context.Context, userID uint64) error {
 }
 
 const emailExists = `-- name: EmailExists :one
-SELECT User_ID
-FROM Local_Users
-WHERE Email = $1
+SELECT COUNT(*) FROM Local_Users
+  WHERE Email = $1
 `
 
-func (q *Queries) EmailExists(ctx context.Context, email string) (uint64, error) {
+func (q *Queries) EmailExists(ctx context.Context, email string) (int64, error) {
 	row := q.queryRow(ctx, q.emailExistsStmt, emailExists, email)
-	var user_id uint64
-	err := row.Scan(&user_id)
-	return user_id, err
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }
 
 const getAvatar = `-- name: GetAvatar :one

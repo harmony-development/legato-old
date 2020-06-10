@@ -432,9 +432,9 @@ func (db *HarmonyDB) AddForeignUser(homeServer string, userID, localUserID uint6
 	return userID, nil
 }
 
-func (db *HarmonyDB) EmailExists(email string) bool {
-	_, err := db.queries.EmailExists(ctx, email)
-	return err != nil
+func (db *HarmonyDB) EmailExists(email string) (bool, error) {
+	count, err := db.queries.EmailExists(ctx, email)
+	return count > 0, err
 }
 
 func (db *HarmonyDB) ExpireSessions() error {

@@ -68,7 +68,10 @@ func (h API) Register(c echo.Context) error {
 		h.Deps.Logger.Exception(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 	}
-	if h.Deps.DB.EmailExists(data.Email) {
+	exists, err := h.Deps.DB.EmailExists(data.Email)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	} else if exists {
 		return echo.NewHTTPError(http.StatusConflict, responses.AlreadyRegistered)
 	}
 	userID, err := h.Deps.Sonyflake.NextID()

@@ -39,9 +39,8 @@ WHERE User_ID = $1
   AND Home_Server = $2;
 
 -- name: EmailExists :one
-SELECT User_ID
-FROM Local_Users
-WHERE Email = $1;
+SELECT COUNT(*) FROM Local_Users
+  WHERE Email = $1;
 
 -- name: UpdateUsername :exec
 UPDATE Profiles

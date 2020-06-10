@@ -60,7 +60,7 @@ type IHarmonyDB interface {
 	GetLocalUserForForeignUser(userID uint64, homeserver string) (uint64, error)
 	AddLocalUser(userID uint64, email, username string, passwordHash []byte) error
 	AddForeignUser(homeServer string, userID, localUserID uint64, username, avatar string) (uint64, error)
-	EmailExists(email string) bool
+	EmailExists(email string) (bool, error)
 	ExpireSessions() error
 	UpdateUsername(userID uint64, username string) error
 	GetAvatar(userID uint64) (sql.NullString, error)
