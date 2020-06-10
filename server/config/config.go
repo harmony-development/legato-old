@@ -1,13 +1,13 @@
 package config
 
 import (
-	"github.com/fsnotify/fsnotify"
-	"github.com/logrusorgru/aurora"
 	"log"
 	"time"
 
+	"github.com/fsnotify/fsnotify"
+	"github.com/logrusorgru/aurora"
+
 	"github.com/spf13/viper"
-	"github.com/thanhpk/randstr"
 )
 
 // Config is the overall configuration for the auth service
@@ -21,7 +21,6 @@ type Config struct {
 type ServerConf struct {
 	SnowflakeStart   int64
 	Port             string
-	Identity         string
 	ImagePath        string
 	GuildPicturePath string
 	PublicKeyPath    string
@@ -78,7 +77,6 @@ type SentryConf struct {
 var DefaultConf = Config{
 	Server: ServerConf{
 		Port:             ":2289",
-		Identity:         randstr.Hex(16), // this is what prevents people from using auth tokens on other instances
 		ImagePath:        "images",
 		GuildPicturePath: "guild-pictures",
 		PrivateKeyPath:   "harmony-key.pem",
