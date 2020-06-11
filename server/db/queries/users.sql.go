@@ -63,7 +63,7 @@ type AddProfileParams struct {
 	UserID   uint64         `json:"user_id"`
 	Username string         `json:"username"`
 	Avatar   sql.NullString `json:"avatar"`
-	Status   Userstatus     `json:"status"`
+	Status   int16          `json:"status"`
 }
 
 func (q *Queries) AddProfile(ctx context.Context, arg AddProfileParams) error {
@@ -141,7 +141,7 @@ type GetUserRow struct {
 	UserID   uint64         `json:"user_id"`
 	Username string         `json:"username"`
 	Avatar   sql.NullString `json:"avatar"`
-	Status   Userstatus     `json:"status"`
+	Status   int16          `json:"status"`
 }
 
 func (q *Queries) GetUser(ctx context.Context, userID uint64) (GetUserRow, error) {
@@ -171,7 +171,7 @@ type GetUserByEmailRow struct {
 	Email    string         `json:"email"`
 	Username string         `json:"username"`
 	Avatar   sql.NullString `json:"avatar"`
-	Status   Userstatus     `json:"status"`
+	Status   int16          `json:"status"`
 	Password []byte         `json:"password"`
 }
 
@@ -196,8 +196,8 @@ WHERE User_ID = $2
 `
 
 type SetStatusParams struct {
-	Status Userstatus `json:"status"`
-	UserID uint64     `json:"user_id"`
+	Status int16  `json:"status"`
+	UserID uint64 `json:"user_id"`
 }
 
 func (q *Queries) SetStatus(ctx context.Context, arg SetStatusParams) error {

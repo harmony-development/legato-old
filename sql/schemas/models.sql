@@ -1,4 +1,3 @@
-CREATE TYPE IF NOT EXISTS UserStatus AS ENUM ('streaming', 'online', 'mobile', 'idle', 'offline');
 CREATE TABLE IF NOT EXISTS Users
 (
     User_ID BIGSERIAL NOT NULL,
@@ -24,7 +23,7 @@ CREATE TABLE IF NOT EXISTS Profiles
     User_ID  BIGSERIAL   NOT NULL,
     Username TEXT UNIQUE NOT NULL,
     Avatar   TEXT,
-    Status   USERSTATUS  NOT NULL,
+    Status   SMALLINT    NOT NULL,
     FOREIGN KEY (User_ID) REFERENCES Users (User_ID) ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS Sessions

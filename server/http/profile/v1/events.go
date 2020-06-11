@@ -1,6 +1,8 @@
 package v1
 
-import "harmony-server/server/db/queries"
+import (
+	"harmony-server/server/db"
+)
 
 const (
 	AvatarUpdateEventType = "avatar_update"
@@ -21,6 +23,6 @@ type UsernameUpdateEvent struct {
 
 // StatusUpdateEvent is the data that will be sent to a client on a user status update
 type StatusUpdateEvent struct {
-	UserID string             `json:"user_id"`
-	Status queries.Userstatus `json:"status"`
+	UserID string        `json:"user_id"`
+	Status db.UserStatus `json:"status"`
 }

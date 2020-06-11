@@ -2,7 +2,7 @@ package events
 
 import (
 	"encoding/json"
-	"harmony-server/server/db/queries"
+	"harmony-server/server/db"
 	"harmony-server/server/http/responses"
 	"sync"
 
@@ -50,7 +50,7 @@ func (e Events) Subscribe(ws client.Client, event *client.Event, raw *json.RawMe
 			e.State.Guilds[id].AddClient(&userID, &ws)
 		}
 	}
-	if err := e.DB.SetStatus(userID, queries.UserstatusOnline); err != nil {
+	if err := e.DB.SetStatus(userID, db.UserStatusOnline); err != nil {
 		ws.SendError(responses.UnknownError)
 		e.Logger.Exception(err)
 	}

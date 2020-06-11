@@ -72,7 +72,7 @@ type IHarmonyDB interface {
 	GetFileIDFromHash(hash []byte) (string, error)
 	GetGuildByID(guildID uint64) (queries.Guild, error)
 	UpdateMessage(messageID uint64, content *string, embeds, actions *[][]byte) (time.Time, error)
-	SetStatus(userID uint64, status queries.Userstatus) error
+	SetStatus(userID uint64, status UserStatus) error
 }
 
 // New creates a new DB connection

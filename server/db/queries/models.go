@@ -5,31 +5,8 @@ package queries
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"time"
 )
-
-type Userstatus string
-
-const (
-	UserstatusStreaming Userstatus = "streaming"
-	UserstatusOnline    Userstatus = "online"
-	UserstatusMobile    Userstatus = "mobile"
-	UserstatusIdle      Userstatus = "idle"
-	UserstatusOffline   Userstatus = "offline"
-)
-
-func (e *Userstatus) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = Userstatus(s)
-	case string:
-		*e = Userstatus(s)
-	default:
-		return fmt.Errorf("unsupported scan type for Userstatus: %T", src)
-	}
-	return nil
-}
 
 type Attachment struct {
 	MessageID  uint64 `json:"message_id"`
@@ -95,7 +72,7 @@ type Profile struct {
 	UserID   uint64         `json:"user_id"`
 	Username string         `json:"username"`
 	Avatar   sql.NullString `json:"avatar"`
-	Status   Userstatus     `json:"status"`
+	Status   int16          `json:"status"`
 }
 
 type Session struct {

@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"harmony-server/server/db/queries"
+	"harmony-server/server/db"
 	"harmony-server/server/http/hm"
 	"harmony-server/server/http/responses"
 	"harmony-server/server/http/socket/client"
@@ -12,7 +12,7 @@ import (
 )
 
 type StatusUpdateData struct {
-	Status queries.Userstatus `validate:"required"`
+	Status db.UserStatus `validate:"required"`
 }
 
 func (h Handlers) StatusUpdate(c echo.Context) error {

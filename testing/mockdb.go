@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"harmony-server/server/db"
 	"harmony-server/server/db/queries"
 )
 
@@ -241,7 +242,7 @@ func (db *MockDB) UpdateMessage(messageID uint64, content *string, embeds, actio
 	panic("implement me")
 }
 
-func (db *MockDB) SetStatus(userID uint64, status queries.Userstatus) error {
+func (db *MockDB) SetStatus(userID uint64, status db.UserStatus) error {
 	panic("implement me")
 }
 

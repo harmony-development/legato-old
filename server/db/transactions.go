@@ -388,7 +388,7 @@ func (db *HarmonyDB) AddLocalUser(userID uint64, email, username string, passwor
 		UserID:   userID,
 		Username: username,
 		Avatar:   sql.NullString{},
-		Status:   queries.UserstatusOffline,
+		Status:   UserStatusOffline,
 	}); err != nil {
 		return err
 	}
@@ -412,7 +412,7 @@ func (db *HarmonyDB) AddForeignUser(homeServer string, userID, localUserID uint6
 		UserID:   localUserID,
 		Username: username,
 		Avatar:   toSqlString(avatar),
-		Status:   queries.UserstatusOffline,
+		Status:   UserStatusOffline,
 	}); err != nil {
 		return 0, err
 	}
@@ -548,9 +548,9 @@ func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, ac
 	return editedAt, nil
 }
 
-func (db *HarmonyDB) SetStatus(userID uint64, status queries.Userstatus) error {
+func (db *HarmonyDB) SetStatus(userID uint64, status UserStatus) error {
 	return db.queries.SetStatus(ctx, queries.SetStatusParams{
-		Status: status,
+		Status: int16(status), // lol shut up it's an int16
 		UserID: userID,
 	})
 }

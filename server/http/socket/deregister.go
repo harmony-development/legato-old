@@ -1,7 +1,7 @@
 package socket
 
 import (
-	"harmony-server/server/db/queries"
+	"harmony-server/server/db"
 	"harmony-server/server/http/socket/client"
 
 	"github.com/sirupsen/logrus"
@@ -34,7 +34,7 @@ func (h Handler) Deregister(ws *client.Client) {
 			}
 		}
 	}
-	if err := h.DB.SetStatus(*ws.UserID, queries.UserstatusOffline); err != nil {
+	if err := h.DB.SetStatus(*ws.UserID, db.UserStatusOffline); err != nil {
 		h.Logger.Exception(err)
 		return
 	}
