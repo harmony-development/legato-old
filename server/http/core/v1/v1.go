@@ -274,7 +274,7 @@ func (h Handlers) MakeRoutes() []routing.Route {
 				Burst:    2,
 			},
 			Auth:     true,
-			Schema:   LeaveGuildData{},
+			Schema:   nil,
 			Location: routing.LocationGuild,
 		},
 	}
