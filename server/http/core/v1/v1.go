@@ -228,6 +228,7 @@ func (h Handlers) MakeRoutes() []routing.Route {
 				Burst:    20,
 			},
 			Auth:     true,
+			Schema:   nil,
 			Location: routing.LocationGuildChannelAndMessage,
 		},
 		{
