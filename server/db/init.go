@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"time"
@@ -95,7 +96,9 @@ func New(cfg *config.Config) (*HarmonyDB, error) {
 	if err = db.Migrate(); err != nil {
 		return nil, err
 	}
-	db.queries = queries.New(db)
+	if db.queries, err = queries.Prepare(context.Background(), db); err != nil {
+		return nil, err
+	}
 	if db.OwnerCache, err = lru.New(cfg.Server.OwnerCacheMax); err != nil {
 		return nil, err
 	}
