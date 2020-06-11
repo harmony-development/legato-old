@@ -7,7 +7,7 @@ A free and open source communications platform.
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/harmony-development/legato/Harmony%20Build?style=for-the-badge)
 ![Codecov](https://img.shields.io/codecov/c/gh/harmony-development/legato?style=for-the-badge)
-![Mom Made Pizza Rols](https://img.shields.io/badge/mom%20made-pizza%20roles-green?style=for-the-badge)
+![Mom Made Pizza Rolls](https://img.shields.io/badge/mom%20made-pizza%20rolls-green?style=for-the-badge)
 
 ## Screenshots
 
