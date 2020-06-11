@@ -221,6 +221,16 @@ func (h Handlers) MakeRoutes() []routing.Route {
 			Location: routing.LocationGuildChannelAndMessage,
 		},
 		{
+			Path:    "/guilds/:guild_id/channels/:channel_id/messages/:message_id",
+			Handler: h.DeleteMessage,
+			RateLimit: &routing.RateLimit{
+				Duration: 500 * time.Millisecond,
+				Burst:    20,
+			},
+			Auth:     true,
+			Location: routing.LocationGuildChannelAndMessage,
+		},
+		{
 			Path:    "/guilds/:guild_id/channels/:channel_id/messages/:message_id/trigger_action",
 			Handler: h.TriggerAction,
 			Method:  routing.POST,
