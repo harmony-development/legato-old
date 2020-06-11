@@ -1,15 +1,25 @@
 package main
 
 import (
+	"flag"
+	"harmony-server/cmd"
 	"harmony-server/server"
-	"os"
 
 	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	_ = os.Mkdir("./filestore", 0777)
 	logrus.SetLevel(logrus.DebugLevel)
+	var genKey bool
+	flag.BoolVar(&genKey, "genkey", false, "generates a key pair for federation")
+	flag.BoolVar(&genKey, "g", false, "generates a key pair for federation")
+	flag.Parse()
+
+	if genKey {
+		cmd.GenKeys()
+		return
+	}
+
 	s := new(server.Instance)
 	s.Start()
 }

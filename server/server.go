@@ -1,6 +1,7 @@
 package server
 
 import (
+	"os"
 	"sync"
 	"time"
 
@@ -31,6 +32,7 @@ type Instance struct {
 
 // Start begins the instance server
 func (inst Instance) Start() {
+	os.Mkdir("./filestore", 0777)
 	cfg, err := config.Load()
 	if err != nil {
 		logrus.Fatal("Unable to load config", err)
