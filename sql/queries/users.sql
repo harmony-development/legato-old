@@ -52,6 +52,11 @@ UPDATE Profiles
 SET Avatar=$1
 WHERE User_ID = $2;
 
+-- name: UpdateGuildList :exec
+UPDATE Profiles
+SET GuildList=$1
+WHERE User_ID = $2;
+
 -- name: GetAvatar :one
 SELECT Avatar
 FROM Profiles

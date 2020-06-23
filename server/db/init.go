@@ -64,6 +64,7 @@ type IHarmonyDB interface {
 	EmailExists(email string) (bool, error)
 	ExpireSessions() error
 	UpdateUsername(userID uint64, username string) error
+	UpdateGuildList(userID uint64, newList string) error
 	GetAvatar(userID uint64) (sql.NullString, error)
 	UpdateAvatar(userID uint64, avatar string) error
 	HasGuildWithID(guildID uint64) (bool, error)

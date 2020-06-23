@@ -157,6 +157,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.updateAvatarStmt, err = db.PrepareContext(ctx, updateAvatar); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateAvatar: %w", err)
 	}
+	if q.updateGuildListStmt, err = db.PrepareContext(ctx, updateGuildList); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateGuildList: %w", err)
+	}
 	if q.updateMessageActionsStmt, err = db.PrepareContext(ctx, updateMessageActions); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateMessageActions: %w", err)
 	}
@@ -402,6 +405,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing updateAvatarStmt: %w", cerr)
 		}
 	}
+	if q.updateGuildListStmt != nil {
+		if cerr := q.updateGuildListStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateGuildListStmt: %w", cerr)
+		}
+	}
 	if q.updateMessageActionsStmt != nil {
 		if cerr := q.updateMessageActionsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateMessageActionsStmt: %w", cerr)
@@ -511,6 +519,7 @@ type Queries struct {
 	setGuildPictureStmt      *sql.Stmt
 	setStatusStmt            *sql.Stmt
 	updateAvatarStmt         *sql.Stmt
+	updateGuildListStmt      *sql.Stmt
 	updateMessageActionsStmt *sql.Stmt
 	updateMessageContentStmt *sql.Stmt
 	updateMessageEmbedsStmt  *sql.Stmt
@@ -567,6 +576,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		setGuildPictureStmt:      q.setGuildPictureStmt,
 		setStatusStmt:            q.setStatusStmt,
 		updateAvatarStmt:         q.updateAvatarStmt,
+		updateGuildListStmt:      q.updateGuildListStmt,
 		updateMessageActionsStmt: q.updateMessageActionsStmt,
 		updateMessageContentStmt: q.updateMessageContentStmt,
 		updateMessageEmbedsStmt:  q.updateMessageEmbedsStmt,

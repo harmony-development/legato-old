@@ -462,6 +462,13 @@ func (db *HarmonyDB) UpdateAvatar(userID uint64, avatar string) error {
 	})
 }
 
+func (db *HarmonyDB) UpdateGuildList(userID uint64, guildList string) error {
+	return db.queries.UpdateGuildList(ctx, queries.UpdateGuildListParams{
+		UserID:    userID,
+		Guildlist: guildList,
+	})
+}
+
 func (db *HarmonyDB) HasGuildWithID(guildID uint64) (bool, error) {
 	count, err := db.queries.GuildWithIDExists(ctx, guildID)
 	return count, err

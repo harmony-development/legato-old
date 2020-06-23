@@ -212,6 +212,10 @@ func (db *MockDB) UpdateAvatar(userID uint64, avatar string) error {
 	panic("implement me")
 }
 
+func (db *MockDB) UpdateGuildList(userID uint64, guildList string) error {
+	panic("implement me")
+}
+
 func (db *MockDB) HasGuildWithID(guildID uint64) (bool, error) {
 	if db.Flags.HasGuildWithIDError {
 		return false, errors.New("error checking if guild with id exists")

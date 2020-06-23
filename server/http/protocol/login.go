@@ -71,7 +71,6 @@ func (h API) FederatedLogin(c echo.Context) error {
 func (h API) LocalLogin(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
 	data := ctx.Data.(LoginData)
-
 	user, err := h.Deps.DB.GetUserByEmail(data.Email)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, responses.InvalidEmail)

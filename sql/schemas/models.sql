@@ -20,10 +20,11 @@ CREATE TABLE IF NOT EXISTS Foreign_Users
 );
 CREATE TABLE IF NOT EXISTS Profiles
 (
-    User_ID  BIGSERIAL   NOT NULL,
-    Username TEXT UNIQUE NOT NULL,
-    Avatar   TEXT,
-    Status   SMALLINT    NOT NULL,
+    User_ID   BIGSERIAL   NOT NULL,
+    Username  TEXT UNIQUE NOT NULL,
+    Avatar    TEXT,
+    Status    SMALLINT    NOT NULL,
+    GuildList TEXT NOT NULL,
     FOREIGN KEY (User_ID) REFERENCES Users (User_ID) ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS Sessions

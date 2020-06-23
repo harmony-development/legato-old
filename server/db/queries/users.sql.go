@@ -221,6 +221,22 @@ func (q *Queries) UpdateAvatar(ctx context.Context, arg UpdateAvatarParams) erro
 	return err
 }
 
+const updateGuildList = `-- name: UpdateGuildList :exec
+UPDATE Profiles
+SET GuildList=$1
+WHERE User_ID = $2
+`
+
+type UpdateGuildListParams struct {
+	Guildlist string `json:"guildlist"`
+	UserID    uint64 `json:"user_id"`
+}
+
+func (q *Queries) UpdateGuildList(ctx context.Context, arg UpdateGuildListParams) error {
+	_, err := q.exec(ctx, q.updateGuildListStmt, updateGuildList, arg.Guildlist, arg.UserID)
+	return err
+}
+
 const updateUsername = `-- name: UpdateUsername :exec
 UPDATE Profiles
 SET Username=$1

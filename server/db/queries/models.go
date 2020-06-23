@@ -69,10 +69,11 @@ type Message struct {
 }
 
 type Profile struct {
-	UserID   uint64         `json:"user_id"`
-	Username string         `json:"username"`
-	Avatar   sql.NullString `json:"avatar"`
-	Status   int16          `json:"status"`
+	UserID    uint64         `json:"user_id"`
+	Username  string         `json:"username"`
+	Avatar    sql.NullString `json:"avatar"`
+	Status    int16          `json:"status"`
+	Guildlist string         `json:"guildlist"`
 }
 
 type Session struct {
