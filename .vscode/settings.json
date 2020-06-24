@@ -1,0 +1,15 @@
+{
+  "sqltools.connections": [
+    {
+      "askForPassword": false,
+      "database": "harmony",
+      "driver": "PostgreSQL",
+      "name": "Harmony",
+      "password": "password",
+      "port": 5432,
+      "previewLimit": 50,
+      "server": "localhost",
+      "username": "amadeus"
+    }
+  ]
+}

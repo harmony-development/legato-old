@@ -13,10 +13,9 @@ import (
 
 const addForeignUser = `-- name: AddForeignUser :one
 INSERT INTO Foreign_Users (User_ID, Home_Server, Local_User_ID)
-VALUES ($1, $2, $3)
-ON CONFLICT (Local_User_ID) DO UPDATE
-    SET Local_User_ID=Foreign_Users.Local_User_ID
-RETURNING Local_User_ID
+VALUES ($1, $2, $3) ON CONFLICT (Local_User_ID) DO
+UPDATE
+SET Local_User_ID = Foreign_Users.Local_User_ID RETURNING Local_User_ID
 `
 
 type AddForeignUserParams struct {
@@ -87,8 +86,9 @@ func (q *Queries) AddUser(ctx context.Context, userID uint64) error {
 }
 
 const emailExists = `-- name: EmailExists :one
-SELECT COUNT(*) FROM Local_Users
-  WHERE Email = $1
+SELECT COUNT(*)
+FROM Local_Users
+WHERE Email = $1
 `
 
 func (q *Queries) EmailExists(ctx context.Context, email string) (int64, error) {
@@ -131,17 +131,22 @@ func (q *Queries) GetLocalUserID(ctx context.Context, arg GetLocalUserIDParams) 
 }
 
 const getUser = `-- name: GetUser :one
-SELECT Users.User_ID, Profiles.Username, Profiles.Avatar, Profiles.Status
+SELECT Users.User_ID,
+  Profiles.Username,
+  Profiles.Avatar,
+  Profiles.Status,
+  Profiles.GuildList
 FROM Users
-         INNER JOIN Profiles ON (Users.User_ID = Profiles.User_ID)
+  INNER JOIN Profiles ON (Users.User_ID = Profiles.User_ID)
 WHERE Users.User_ID = $1
 `
 
 type GetUserRow struct {
-	UserID   uint64         `json:"user_id"`
-	Username string         `json:"username"`
-	Avatar   sql.NullString `json:"avatar"`
-	Status   int16          `json:"status"`
+	UserID    uint64         `json:"user_id"`
+	Username  string         `json:"username"`
+	Avatar    sql.NullString `json:"avatar"`
+	Status    int16          `json:"status"`
+	Guildlist string         `json:"guildlist"`
 }
 
 func (q *Queries) GetUser(ctx context.Context, userID uint64) (GetUserRow, error) {
@@ -152,17 +157,21 @@ func (q *Queries) GetUser(ctx context.Context, userID uint64) (GetUserRow, error
 		&i.Username,
 		&i.Avatar,
 		&i.Status,
+		&i.Guildlist,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT Users.User_ID, Local_Users.Email, Profiles.Username, Profiles.Avatar, Profiles.Status, Local_Users.Password
+SELECT Users.User_ID,
+  Local_Users.Email,
+  Profiles.Username,
+  Profiles.Avatar,
+  Profiles.Status,
+  Local_Users.Password
 FROM Local_Users
-         INNER JOIN Users
-                    ON (Local_Users.User_ID = Users.User_ID)
-         INNER JOIN Profiles
-                    ON (Local_Users.User_ID = Profiles.User_ID)
+  INNER JOIN Users ON (Local_Users.User_ID = Users.User_ID)
+  INNER JOIN Profiles ON (Local_Users.User_ID = Profiles.User_ID)
 WHERE Local_Users.Email = $1
 `
 
@@ -191,7 +200,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEm
 
 const setStatus = `-- name: SetStatus :exec
 UPDATE Profiles
-SET Status=$1
+SET Status = $1
 WHERE User_ID = $2
 `
 
@@ -207,7 +216,7 @@ func (q *Queries) SetStatus(ctx context.Context, arg SetStatusParams) error {
 
 const updateAvatar = `-- name: UpdateAvatar :exec
 UPDATE Profiles
-SET Avatar=$1
+SET Avatar = $1
 WHERE User_ID = $2
 `
 
@@ -223,7 +232,7 @@ func (q *Queries) UpdateAvatar(ctx context.Context, arg UpdateAvatarParams) erro
 
 const updateGuildList = `-- name: UpdateGuildList :exec
 UPDATE Profiles
-SET GuildList=$1
+SET GuildList = $1
 WHERE User_ID = $2
 `
 
@@ -239,7 +248,7 @@ func (q *Queries) UpdateGuildList(ctx context.Context, arg UpdateGuildListParams
 
 const updateUsername = `-- name: UpdateUsername :exec
 UPDATE Profiles
-SET Username=$1
+SET Username = $1
 WHERE User_ID = $2
 `
 
