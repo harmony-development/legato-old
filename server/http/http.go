@@ -67,7 +67,7 @@ func New(deps *Dependencies) *Server {
 	s.Validator = &HarmonyValidator{
 		Validator: validator.New(),
 	}
-	m := hm.New(deps.DB)
+	m := hm.New(deps.DB, deps.Logger)
 	s.Router = &routing.Router{Middlewares: m}
 	api := s.Group("/api")
 	api.Use(m.WithHarmony)

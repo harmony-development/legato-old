@@ -74,6 +74,7 @@ func (m *Middlewares) WithUser(handler echo.HandlerFunc) echo.HandlerFunc {
 		}
 		user, err := m.DB.GetUserByID(parsed)
 		if err != nil {
+			m.Logger.Exception(err)
 			return echo.NewHTTPError(http.StatusInternalServerError)
 		}
 		ctx.Location.User = &user

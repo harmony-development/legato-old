@@ -62,7 +62,6 @@ func (h API) FederatedLogin(c echo.Context) error {
 		}
 	}
 	if err := h.Deps.DB.AddSession(localUserID, session); err != nil {
-		h.Deps.Logger.Exception(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 	}
 	return ctx.JSON(http.StatusOK, v1.LoginResponse{UserID: util.U64TS(localUserID), Session: session})
@@ -80,7 +79,6 @@ func (h API) LocalLogin(c echo.Context) error {
 	}
 	session := randstr.Hex(16)
 	if err := h.Deps.DB.AddSession(user.UserID, session); err != nil {
-		h.Deps.Logger.Exception(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 	}
 	return ctx.JSON(http.StatusOK, v1.LoginResponse{UserID: util.U64TS(user.UserID), Session: session})

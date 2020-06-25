@@ -6,6 +6,7 @@ import (
 
 	"harmony-server/server/db"
 	"harmony-server/server/db/queries"
+	"harmony-server/server/logger"
 
 	"github.com/labstack/echo/v4"
 	"golang.org/x/time/rate"
@@ -31,6 +32,7 @@ type HarmonyContext struct {
 // Middlewares contains middlewares for Harmony
 type Middlewares struct {
 	DB         db.IHarmonyDB
+	Logger     *logger.Logger
 	RateLimits map[string]map[string]*visitor
 	RateLock   sync.RWMutex
 }
@@ -47,9 +49,10 @@ func (hc *HarmonyContext) VerifyOwner(db db.IHarmonyDB, guildID, userID uint64) 
 }
 
 // New instantiates the middlewares for Harmony
-func New(db db.IHarmonyDB) *Middlewares {
+func New(db db.IHarmonyDB, logger *logger.Logger) *Middlewares {
 	m := &Middlewares{
 		DB:         db,
+		Logger:     logger,
 		RateLimits: make(map[string]map[string]*visitor),
 	}
 	go m.RateCleanup()

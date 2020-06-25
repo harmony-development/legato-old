@@ -18,8 +18,8 @@ func (h Handlers) GetUser(c echo.Context) error {
 		UserStatus: db.UserStatus(user.Status),
 	}
 
-	if ctx.UserID == user.UserID {
-		response.GuildList = user.Guildlist
+	if ctx.UserID == user.UserID && user.Guildlist.Valid {
+		response.GuildList = user.Guildlist.String
 	}
 	return ctx.JSON(http.StatusOK, response)
 }

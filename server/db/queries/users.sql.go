@@ -146,7 +146,7 @@ type GetUserRow struct {
 	Username  string         `json:"username"`
 	Avatar    sql.NullString `json:"avatar"`
 	Status    int16          `json:"status"`
-	Guildlist string         `json:"guildlist"`
+	Guildlist sql.NullString `json:"guildlist"`
 }
 
 func (q *Queries) GetUser(ctx context.Context, userID uint64) (GetUserRow, error) {
@@ -237,8 +237,8 @@ WHERE User_ID = $2
 `
 
 type UpdateGuildListParams struct {
-	Guildlist string `json:"guildlist"`
-	UserID    uint64 `json:"user_id"`
+	Guildlist sql.NullString `json:"guildlist"`
+	UserID    uint64         `json:"user_id"`
 }
 
 func (q *Queries) UpdateGuildList(ctx context.Context, arg UpdateGuildListParams) error {

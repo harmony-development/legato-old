@@ -21,8 +21,19 @@ func New(cfg *config.Config) *Logger {
 	}
 }
 
+// CheckException logs an exception if it's defined
+func (l Logger) CheckException(err error) {
+	if err == nil {
+		return
+	}
+	l.Exception(err)
+}
+
 // Exception logs an exception
 func (l Logger) Exception(err error) {
+	if err == nil {
+		return
+	}
 	if l.Config.Sentry.Enabled {
 		sentry.CaptureException(errors.WithStack(err))
 	}
@@ -33,6 +44,6 @@ func (l Logger) Exception(err error) {
 
 // Fatal logs an exception and then aborts
 func (l Logger) Fatal(err error) {
-	l.Exception(err)
+	l.CheckException(err)
 	os.Exit(-1)
 }

@@ -73,7 +73,7 @@ type Profile struct {
 	Username  string         `json:"username"`
 	Avatar    sql.NullString `json:"avatar"`
 	Status    int16          `json:"status"`
-	Guildlist string         `json:"guildlist"`
+	Guildlist sql.NullString `json:"guildlist"`
 }
 
 type Session struct {

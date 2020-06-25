@@ -19,7 +19,6 @@ func (h Handlers) StatusUpdate(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
 	data := ctx.Data.(StatusUpdateData)
 	if err := h.Deps.DB.SetStatus(ctx.UserID, data.Status); err != nil {
-		h.Deps.Logger.Exception(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 	}
 	for c := range h.Deps.State.UserUpdateListeners {

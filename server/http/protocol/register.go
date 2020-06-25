@@ -79,12 +79,10 @@ func (h API) Register(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 	}
 	if err := h.Deps.DB.AddLocalUser(userID, data.Email, data.Username, hash); err != nil {
-		h.Deps.Logger.Exception(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 	}
 	session := randstr.Hex(16)
 	if err := h.Deps.DB.AddSession(userID, session); err != nil {
-		h.Deps.Logger.Exception(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 	}
 	return ctx.JSON(http.StatusOK, v1.RegisterResponse{Session: session, UserID: util.U64TS(userID)})

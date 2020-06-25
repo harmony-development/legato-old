@@ -35,6 +35,7 @@ var ctx = context.Background()
 // CreateGuild creates a standard guild
 func (db *HarmonyDB) CreateGuild(owner, id uint64, guildName string, picture string) (*queries.Guild, error) {
 	tx, err := db.Begin()
+	db.Logger.CheckException(err)
 	if err != nil {
 		return nil, err
 	}
@@ -45,6 +46,7 @@ func (db *HarmonyDB) CreateGuild(owner, id uint64, guildName string, picture str
 		GuildName:  guildName,
 		PictureUrl: picture,
 	})
+	db.Logger.CheckException(err)
 	if err != nil {
 		return nil, err
 	}
@@ -52,6 +54,7 @@ func (db *HarmonyDB) CreateGuild(owner, id uint64, guildName string, picture str
 		UserID:  owner,
 		GuildID: guild.GuildID,
 	})
+	db.Logger.CheckException(err)
 	if err != nil {
 		return nil, err
 	}
@@ -59,10 +62,12 @@ func (db *HarmonyDB) CreateGuild(owner, id uint64, guildName string, picture str
 		GuildID:     toSqlInt64(guild.GuildID),
 		ChannelName: "general",
 	})
+	db.Logger.CheckException(err)
 	if err != nil {
 		return nil, err
 	}
 	if err := tx.Commit(); err != nil {
+		db.Logger.CheckException(err)
 		return nil, err
 	}
 	return &guild, nil
@@ -70,17 +75,22 @@ func (db *HarmonyDB) CreateGuild(owner, id uint64, guildName string, picture str
 
 // DeleteGuild deletes a guild with an ID
 func (db *HarmonyDB) DeleteGuild(guildID uint64) error {
-	return db.queries.DeleteGuild(ctx, guildID)
+	err := db.queries.DeleteGuild(ctx, guildID)
+	db.Logger.CheckException(err)
+	return err
 }
 
 // GetOwner gets the owner of a guild
 func (db *HarmonyDB) GetOwner(guildID uint64) (uint64, error) {
-	return db.queries.GetGuildOwner(ctx, guildID)
+	owner, err := db.queries.GetGuildOwner(ctx, guildID)
+	db.Logger.CheckException(err)
+	return owner, err
 }
 
 // IsOwner returns whether the user is the guild owner
 func (db *HarmonyDB) IsOwner(guildID uint64, userID uint64) (bool, error) {
 	owner, err := db.GetOwner(guildID)
+	db.Logger.CheckException(err)
 	if err != nil {
 		return false, err
 	}
@@ -89,40 +99,49 @@ func (db *HarmonyDB) IsOwner(guildID uint64, userID uint64) (bool, error) {
 
 // AddInvite inserts a new invite to the DB
 func (db *HarmonyDB) CreateInvite(guildID uint64, possibleUses int32, name string) (queries.Invite, error) {
-	return db.queries.CreateGuildInvite(ctx, queries.CreateGuildInviteParams{
+	inv, err := db.queries.CreateGuildInvite(ctx, queries.CreateGuildInviteParams{
 		InviteID:     name,
 		PossibleUses: sql.NullInt32{Int32: possibleUses, Valid: true},
 		GuildID:      guildID,
 	})
+	db.Logger.CheckException(err)
+	return inv, err
 }
 
 // AddMemberToGuild adds a new member to a guild
 func (db *HarmonyDB) AddMemberToGuild(userID uint64, guildID uint64) error {
-	return db.queries.AddUserToGuild(ctx, queries.AddUserToGuildParams{
+	err := db.queries.AddUserToGuild(ctx, queries.AddUserToGuildParams{
 		UserID:  userID,
 		GuildID: guildID,
 	})
+	db.Logger.CheckException(err)
+	return err
 }
 
 // AddChannelToGuild adds a new channel to a guild
 func (db *HarmonyDB) AddChannelToGuild(guildID uint64, channelName string) (queries.Channel, error) {
-	return db.queries.CreateChannel(ctx, queries.CreateChannelParams{
+	channel, err := db.queries.CreateChannel(ctx, queries.CreateChannelParams{
 		GuildID:     toSqlInt64(guildID),
 		ChannelName: channelName,
 	})
+	db.Logger.CheckException(err)
+	return channel, err
 }
 
 // DeleteChannelFromGuild removes a channel from a guild
 func (db *HarmonyDB) DeleteChannelFromGuild(guildID, channelID uint64) error {
-	return db.queries.DeleteChannel(ctx, queries.DeleteChannelParams{
+	err := db.queries.DeleteChannel(ctx, queries.DeleteChannelParams{
 		GuildID:   toSqlInt64(guildID),
 		ChannelID: channelID,
 	})
+	db.Logger.CheckException(err)
+	return err
 }
 
 // AddMessage adds a message to a channel
 func (db *HarmonyDB) AddMessage(channelID, guildID, userID uint64, message string, attachments []string, embeds, actions [][]byte) (*queries.Message, error) {
 	tx, err := db.Begin()
+	db.Logger.CheckException(err)
 	if err != nil {
 		return nil, err
 	}
@@ -142,6 +161,7 @@ func (db *HarmonyDB) AddMessage(channelID, guildID, userID uint64, message strin
 		Embeds:    rawEmbeds,
 		Actions:   rawActions,
 	})
+	db.Logger.CheckException(err)
 	if err != nil {
 		return nil, err
 	}
@@ -151,10 +171,12 @@ func (db *HarmonyDB) AddMessage(channelID, guildID, userID uint64, message strin
 			Attachment: attachment,
 		}); err != nil {
 			_ = tx.Rollback()
+			db.Logger.CheckException(err)
 			return nil, err
 		}
 	}
 	if err := tx.Commit(); err != nil {
+		db.Logger.CheckException(err)
 		return nil, err
 	}
 	return &msg, nil
@@ -163,6 +185,7 @@ func (db *HarmonyDB) AddMessage(channelID, guildID, userID uint64, message strin
 // DeleteMessage deletes a message
 func (db *HarmonyDB) DeleteMessage(messageID uint64, channelID uint64, guildID uint64) error {
 	tx, err := db.Begin()
+	db.Logger.CheckException(err)
 	if err != nil {
 		return err
 	}
@@ -172,6 +195,7 @@ func (db *HarmonyDB) DeleteMessage(messageID uint64, channelID uint64, guildID u
 		ChannelID: channelID,
 		GuildID:   guildID,
 	})
+	db.Logger.CheckException(err)
 	if err != nil {
 		return err
 	}
@@ -179,6 +203,7 @@ func (db *HarmonyDB) DeleteMessage(messageID uint64, channelID uint64, guildID u
 		return tx.Rollback()
 	}
 	if err := tx.Commit(); err != nil {
+		db.Logger.CheckException(err)
 		return err
 	}
 	return nil
@@ -186,27 +211,35 @@ func (db *HarmonyDB) DeleteMessage(messageID uint64, channelID uint64, guildID u
 
 // GetMessageOwner gets the owner of a messageID
 func (db *HarmonyDB) GetMessageOwner(messageID uint64) (uint64, error) {
-	return db.queries.GetMessageAuthor(ctx, messageID)
+	owner, err := db.queries.GetMessageAuthor(ctx, messageID)
+	db.Logger.CheckException(err)
+	return owner, err
 }
 
 // InviteToGuild
 func (db *HarmonyDB) ResolveGuildID(inviteID string) (uint64, error) {
-	return db.queries.ResolveGuildID(ctx, inviteID)
+	id, err := db.queries.ResolveGuildID(ctx, inviteID)
+	db.Logger.CheckException(err)
+	return id, err
 }
 
 // IncrementInvite adds to the invite counter in a DB
 func (db *HarmonyDB) IncrementInvite(inviteID string) error {
-	return db.queries.IncrementInvite(ctx, inviteID)
+	err := db.queries.IncrementInvite(ctx, inviteID)
+	db.Logger.CheckException(err)
+	return err
 }
 
 // DeleteInvite removes an invite from the DB
 func (db *HarmonyDB) DeleteInvite(inviteID string) error {
 	tx, err := db.Begin()
+	db.Logger.CheckException(err)
 	if err != nil {
 		return err
 	}
 	tq := db.queries.WithTx(tx)
 	rows, err := tq.DeleteInvite(ctx, inviteID)
+	db.Logger.CheckException(err)
 	if err != nil {
 		return err
 	}
@@ -214,6 +247,7 @@ func (db *HarmonyDB) DeleteInvite(inviteID string) error {
 		return tx.Rollback()
 	}
 	if err := tx.Commit(); err != nil {
+		db.Logger.CheckException(err)
 		return err
 	}
 	return nil
@@ -224,7 +258,11 @@ func (db *HarmonyDB) SessionToUserID(session string) (uint64, error) {
 	userID, exists := db.SessionCache.Get(session)
 	s, ok := userID.(uint64)
 	if !exists || !ok {
-		return db.queries.SessionToUserID(ctx, session)
+		userID, err := db.queries.SessionToUserID(ctx, session)
+		if err != nil {
+			db.Logger.CheckException(err)
+		}
+		return userID, err
 	}
 	return s, nil
 }
@@ -235,58 +273,76 @@ func (db *HarmonyDB) UserInGuild(userID uint64, guildID uint64) (bool, error) {
 		UserID:  userID,
 		GuildID: guildID,
 	})
+	db.Logger.CheckException(err)
 	return id == userID, err
 }
 
 // GetAttachments gets attachments for a message
 func (db *HarmonyDB) GetAttachments(messageID uint64) ([]string, error) {
-	return db.queries.GetAttachments(ctx, messageID)
+	attachments, err := db.queries.GetAttachments(ctx, messageID)
+	db.Logger.CheckException(err)
+	return attachments, err
 }
 
 // GetMessageDate gets the date for a message
 func (db *HarmonyDB) GetMessageDate(messageID uint64) (time.Time, error) {
-	return db.queries.GetMessageDate(ctx, messageID)
+	msgDate, err := db.queries.GetMessageDate(ctx, messageID)
+	db.Logger.CheckException(err)
+	return msgDate, err
 }
 
 // GetMessages gets the newest messages from a guild
 func (db *HarmonyDB) GetMessages(guildID uint64, channelID uint64) ([]queries.Message, error) {
-	return db.GetMessagesBefore(guildID, channelID, time.Now())
+	msgs, err := db.GetMessagesBefore(guildID, channelID, time.Now())
+	db.Logger.CheckException(err)
+	return msgs, err
 }
 
 // GetMessagesBefore gets messages before a given message in a guild
 func (db *HarmonyDB) GetMessagesBefore(guildID uint64, channelID uint64, date time.Time) ([]queries.Message, error) {
-	return db.queries.GetMessages(ctx, queries.GetMessagesParams{
+	msgsBefore, err := db.queries.GetMessages(ctx, queries.GetMessagesParams{
 		Guildid:   guildID,
 		Channelid: channelID,
 		Before:    date,
 		Max:       int32(db.Config.Server.GetMessageCount),
 	})
+	db.Logger.CheckException(err)
+	return msgsBefore, err
 }
 
 // UpdateGuildName updates the guild name
 func (db *HarmonyDB) UpdateGuildName(guildID uint64, newName string) error {
-	return db.queries.SetGuildName(ctx, queries.SetGuildNameParams{
+	err := db.queries.SetGuildName(ctx, queries.SetGuildNameParams{
 		GuildName: newName,
 		GuildID:   guildID,
 	})
+	db.Logger.CheckException(err)
+	return err
 }
 
 // GetGuildPicture gets the picture for a given guild
 func (db *HarmonyDB) GetGuildPicture(guildID uint64) (string, error) {
-	return db.queries.GetGuildPicture(ctx, guildID)
+	pic, err := db.queries.GetGuildPicture(ctx, guildID)
+	if err != nil {
+		return "", err
+	}
+	return pic, err
 }
 
 // SetGuildPicture sets the picture for a given guild
 func (db *HarmonyDB) SetGuildPicture(guildID uint64, pictureURL string) error {
-	return db.queries.SetGuildPicture(ctx, queries.SetGuildPictureParams{
+	err := db.queries.SetGuildPicture(ctx, queries.SetGuildPictureParams{
 		GuildID:    guildID,
 		PictureUrl: pictureURL,
 	})
+	db.Logger.CheckException(err)
+	return err
 }
 
 // AddAttachments adds attachments to a message
 func (db *HarmonyDB) AddAttachments(messageID uint64, attachments []string) error {
 	tx, err := db.Begin()
+	db.Logger.CheckException(err)
 	if err != nil {
 		return err
 	}
@@ -298,24 +354,32 @@ func (db *HarmonyDB) AddAttachments(messageID uint64, attachments []string) erro
 		})
 		if err != nil {
 			_ = tx.Rollback()
+			db.Logger.CheckException(err)
 			return err
 		}
 	}
-	_ = tx.Commit()
+	if err := tx.Commit(); err != nil {
+		db.Logger.CheckException(err)
+		return err
+	}
 	return nil
 }
 
 // GetInvites gets open invites for a guild
 func (db *HarmonyDB) GetInvites(guildID uint64) ([]queries.Invite, error) {
-	return db.queries.OpenInvites(ctx, guildID)
+	invites, err := db.queries.OpenInvites(ctx, guildID)
+	db.Logger.CheckException(err)
+	return invites, err
 }
 
 // DeleteMember deletes a member from a guild
 func (db *HarmonyDB) DeleteMember(guildID, userID uint64) error {
-	return db.queries.RemoveUserFromGuild(ctx, queries.RemoveUserFromGuildParams{
+	err := db.queries.RemoveUserFromGuild(ctx, queries.RemoveUserFromGuildParams{
 		GuildID: guildID,
 		UserID:  userID,
 	})
+	db.Logger.CheckException(err)
+	return err
 }
 
 // GuildsForUser gets the guilds a user is in
@@ -369,6 +433,7 @@ func (db *HarmonyDB) GetLocalUserForForeignUser(userID uint64, homeserver string
 // AddLocalUser adds a user to the DB that contains login information (not foreign)
 func (db *HarmonyDB) AddLocalUser(userID uint64, email, username string, passwordHash []byte) error {
 	tx, err := db.Begin()
+	db.Logger.CheckException(err)
 	if err != nil {
 		return err
 	}
@@ -401,6 +466,7 @@ func (db *HarmonyDB) AddLocalUser(userID uint64, email, username string, passwor
 // AddForeignUser inserts
 func (db *HarmonyDB) AddForeignUser(homeServer string, userID, localUserID uint64, username, avatar string) (uint64, error) {
 	tx, err := db.Begin()
+	db.Logger.CheckException(err)
 	if err != nil {
 		return 0, err
 	}
@@ -465,7 +531,7 @@ func (db *HarmonyDB) UpdateAvatar(userID uint64, avatar string) error {
 func (db *HarmonyDB) UpdateGuildList(userID uint64, guildList string) error {
 	return db.queries.UpdateGuildList(ctx, queries.UpdateGuildListParams{
 		UserID:    userID,
-		Guildlist: guildList,
+		Guildlist: toSqlString(guildList),
 	})
 }
 
@@ -499,6 +565,7 @@ func (db *HarmonyDB) GetGuildByID(guildID uint64) (queries.Guild, error) {
 
 func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, actions *[][]byte) (time.Time, error) {
 	tx, err := db.Begin()
+	db.Logger.CheckException(err)
 	if err != nil {
 		return time.Time{}, err
 	}

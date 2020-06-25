@@ -8,6 +8,7 @@ import (
 
 	"harmony-server/server/config"
 	"harmony-server/server/db/queries"
+	"harmony-server/server/logger"
 
 	lru "github.com/hashicorp/golang-lru"
 	_ "github.com/lib/pq"
@@ -17,6 +18,7 @@ import (
 type HarmonyDB struct {
 	*sql.DB
 	queries      *queries.Queries
+	Logger       *logger.Logger
 	Config       *config.Config
 	OwnerCache   *lru.Cache
 	SessionCache *lru.Cache
@@ -77,9 +79,10 @@ type IHarmonyDB interface {
 }
 
 // New creates a new DB connection
-func New(cfg *config.Config) (*HarmonyDB, error) {
+func New(cfg *config.Config, logger *logger.Logger) (*HarmonyDB, error) {
 	db := &HarmonyDB{}
 	db.Config = cfg
+	db.Logger = logger
 	var err error
 	if db.DB, err = sql.Open("postgres", fmt.Sprintf("user=%v password=%v dbname=%v host=%v port=%v sslmode=%v",
 		cfg.DB.User,
