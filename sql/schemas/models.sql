@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS Local_Users (
     User_ID BIGSERIAL NOT NULL,
     Email TEXT UNIQUE NOT NULL,
     Password BYTEA NOT NULL,
-    Instances JSONB [],
     FOREIGN KEY (User_ID) REFERENCES Users (User_ID) ON DELETE CASCADE
 );
 

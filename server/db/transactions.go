@@ -442,18 +442,18 @@ func (db *HarmonyDB) AddLocalUser(userID uint64, email, username string, passwor
 		return err
 	}
 	if err := tq.AddLocalUser(ctx, queries.AddLocalUserParams{
-		UserID:    userID,
-		Email:     email,
-		Password:  passwordHash,
-		Instances: nil,
+		UserID:   userID,
+		Email:    email,
+		Password: passwordHash,
 	}); err != nil {
 		return err
 	}
 	if err := tq.AddProfile(ctx, queries.AddProfileParams{
-		UserID:   userID,
-		Username: username,
-		Avatar:   sql.NullString{},
-		Status:   UserStatusOffline,
+		UserID:    userID,
+		Username:  username,
+		Avatar:    sql.NullString{},
+		Status:    UserStatusOffline,
+		Guildlist: sql.NullString{},
 	}); err != nil {
 		return err
 	}

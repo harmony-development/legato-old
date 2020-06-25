@@ -32,7 +32,7 @@ type HarmonyContext struct {
 // Middlewares contains middlewares for Harmony
 type Middlewares struct {
 	DB         db.IHarmonyDB
-	Logger     *logger.Logger
+	Logger     logger.ILogger
 	RateLimits map[string]map[string]*visitor
 	RateLock   sync.RWMutex
 }
@@ -49,7 +49,7 @@ func (hc *HarmonyContext) VerifyOwner(db db.IHarmonyDB, guildID, userID uint64) 
 }
 
 // New instantiates the middlewares for Harmony
-func New(db db.IHarmonyDB, logger *logger.Logger) *Middlewares {
+func New(db db.IHarmonyDB, logger logger.ILogger) *Middlewares {
 	m := &Middlewares{
 		DB:         db,
 		Logger:     logger,

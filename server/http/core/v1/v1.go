@@ -26,7 +26,7 @@ type Dependencies struct {
 	Config         *config.Config
 	AuthManager    *auth.Manager
 	StorageManager *storage.Manager
-	Logger         *logger.Logger
+	Logger         logger.ILogger
 	State          *state.State
 	Sonyflake      *sonyflake.Sonyflake
 }

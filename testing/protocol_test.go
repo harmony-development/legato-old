@@ -70,13 +70,14 @@ var RegisterTests = RequestTestSet{
 }
 
 func TestRegister(t *testing.T) {
-	e, g, _, mockDB, router := setupBoilerplate()
+	e, g, _, mockDB, router, mockLogger := setupBoilerplate()
 	protocol.New(&protocol.Dependencies{
 		Router:    router,
 		APIGroup:  g,
 		Sonyflake: sonyflake.NewSonyflake(sonyflake.Settings{}),
 		Config:    &config.DefaultConf,
 		DB:        mockDB,
+		Logger:    mockLogger,
 	})
 	for _, test := range RegisterTests.Tests {
 		body, err := json.Marshal(test.Data)

@@ -23,7 +23,7 @@ type Dependencies struct {
 	APIGroup    *echo.Group
 	Socket      *socket.Handler
 	DB          db.IHarmonyDB
-	Logger      *logger.Logger
+	Logger      logger.ILogger
 	AuthManager *auth.Manager
 	Sonyflake   *sonyflake.Sonyflake
 	Config      *config.Config

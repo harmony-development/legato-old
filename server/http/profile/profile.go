@@ -25,7 +25,7 @@ type Dependencies struct {
 	DB             db.IHarmonyDB
 	Config         *config.Config
 	StorageManager *storage.Manager
-	Logger         *logger.Logger
+	Logger         logger.ILogger
 	State          *state.State
 }
 

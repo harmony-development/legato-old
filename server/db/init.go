@@ -18,7 +18,7 @@ import (
 type HarmonyDB struct {
 	*sql.DB
 	queries      *queries.Queries
-	Logger       *logger.Logger
+	Logger       logger.ILogger
 	Config       *config.Config
 	OwnerCache   *lru.Cache
 	SessionCache *lru.Cache
@@ -79,7 +79,7 @@ type IHarmonyDB interface {
 }
 
 // New creates a new DB connection
-func New(cfg *config.Config, logger *logger.Logger) (*HarmonyDB, error) {
+func New(cfg *config.Config, logger logger.ILogger) (*HarmonyDB, error) {
 	db := &HarmonyDB{}
 	db.Config = cfg
 	db.Logger = logger

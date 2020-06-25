@@ -16,14 +16,14 @@ import (
 type Handler struct {
 	Upgrader *websocket.Upgrader
 	DB       db.IHarmonyDB
-	Logger   *logger.Logger
+	Logger   logger.ILogger
 	Bus      client.Bus
 	State    *state.State
 }
 
 type Dependencies struct {
 	DB     db.IHarmonyDB
-	Logger *logger.Logger
+	Logger logger.ILogger
 	State  *state.State
 }
 

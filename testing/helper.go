@@ -25,11 +25,12 @@ type RequestTest struct {
 	Tester  func(t *testing.T, req *http.Request, rec *httptest.ResponseRecorder)
 }
 
-func setupBoilerplate() (*echo.Echo, *echo.Group, *hm.Middlewares, *MockDB, *routing.Router) {
+func setupBoilerplate() (*echo.Echo, *echo.Group, *hm.Middlewares, *MockDB, *routing.Router, MockLogger) {
 	mockDB := &MockDB{
 		Flags: MockFlags{},
 	}
-	m := hm.New(mockDB)
+	mockLogger := MockLogger{}
+	m := hm.New(mockDB, mockLogger)
 	e := echo.New()
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Validator = &harmony_http.HarmonyValidator{
@@ -38,5 +39,5 @@ func setupBoilerplate() (*echo.Echo, *echo.Group, *hm.Middlewares, *MockDB, *rou
 	e.Use(m.WithHarmony)
 	apiGroup := e.Group("/api")
 
-	return e, apiGroup, m, mockDB, &routing.Router{Middlewares: m}
+	return e, apiGroup, m, mockDB, &routing.Router{Middlewares: m}, mockLogger
 }

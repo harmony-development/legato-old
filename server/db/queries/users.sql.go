@@ -6,9 +6,6 @@ package queries
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
-
-	"github.com/lib/pq"
 )
 
 const addForeignUser = `-- name: AddForeignUser :one
@@ -32,37 +29,32 @@ func (q *Queries) AddForeignUser(ctx context.Context, arg AddForeignUserParams) 
 }
 
 const addLocalUser = `-- name: AddLocalUser :exec
-INSERT INTO Local_Users (User_ID, Email, Password, Instances)
-VALUES ($1, $2, $3, $4)
+INSERT INTO Local_Users (User_ID, Email, Password)
+VALUES ($1, $2, $3)
 `
 
 type AddLocalUserParams struct {
-	UserID    uint64            `json:"user_id"`
-	Email     string            `json:"email"`
-	Password  []byte            `json:"password"`
-	Instances []json.RawMessage `json:"instances"`
+	UserID   uint64 `json:"user_id"`
+	Email    string `json:"email"`
+	Password []byte `json:"password"`
 }
 
 func (q *Queries) AddLocalUser(ctx context.Context, arg AddLocalUserParams) error {
-	_, err := q.exec(ctx, q.addLocalUserStmt, addLocalUser,
-		arg.UserID,
-		arg.Email,
-		arg.Password,
-		pq.Array(arg.Instances),
-	)
+	_, err := q.exec(ctx, q.addLocalUserStmt, addLocalUser, arg.UserID, arg.Email, arg.Password)
 	return err
 }
 
 const addProfile = `-- name: AddProfile :exec
-INSERT INTO Profiles(User_ID, Username, Avatar, Status)
-VALUES ($1, $2, $3, $4)
+INSERT INTO Profiles(User_ID, Username, Avatar, Status, GuildList)
+VALUES ($1, $2, $3, $4, $5)
 `
 
 type AddProfileParams struct {
-	UserID   uint64         `json:"user_id"`
-	Username string         `json:"username"`
-	Avatar   sql.NullString `json:"avatar"`
-	Status   int16          `json:"status"`
+	UserID    uint64         `json:"user_id"`
+	Username  string         `json:"username"`
+	Avatar    sql.NullString `json:"avatar"`
+	Status    int16          `json:"status"`
+	Guildlist sql.NullString `json:"guildlist"`
 }
 
 func (q *Queries) AddProfile(ctx context.Context, arg AddProfileParams) error {
@@ -71,6 +63,7 @@ func (q *Queries) AddProfile(ctx context.Context, arg AddProfileParams) error {
 		arg.Username,
 		arg.Avatar,
 		arg.Status,
+		arg.Guildlist,
 	)
 	return err
 }

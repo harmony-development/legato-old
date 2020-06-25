@@ -50,10 +50,9 @@ type Invite struct {
 }
 
 type LocalUser struct {
-	UserID    uint64            `json:"user_id"`
-	Email     string            `json:"email"`
-	Password  []byte            `json:"password"`
-	Instances []json.RawMessage `json:"instances"`
+	UserID   uint64 `json:"user_id"`
+	Email    string `json:"email"`
+	Password []byte `json:"password"`
 }
 
 type Message struct {

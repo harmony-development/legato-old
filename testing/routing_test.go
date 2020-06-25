@@ -148,7 +148,7 @@ var routeTests = []struct {
 }
 
 func TestRouting(t *testing.T) {
-	e, g, _, _, router := setupBoilerplate()
+	e, g, _, _, router, _ := setupBoilerplate()
 	for _, test := range routeTests {
 		router.BindRoute(g, test.route)
 	}

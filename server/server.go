@@ -26,7 +26,7 @@ type Instance struct {
 	Config         *config.Config
 	AuthManager    *auth.Manager
 	StorageManager *storage.Manager
-	Logger         *logger.Logger
+	Logger         logger.ILogger
 	DB             db.IHarmonyDB
 }
 

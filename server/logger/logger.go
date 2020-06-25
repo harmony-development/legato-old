@@ -9,6 +9,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type ILogger interface {
+	CheckException(err error)
+	Exception(err error)
+	Fatal(err error)
+}
+
 // Logger is the Harmony logger
 type Logger struct {
 	Config *config.Config

@@ -10,5 +10,5 @@ import (
 type Events struct {
 	DB     db.IHarmonyDB
 	State  *state.State
-	Logger *logger.Logger
+	Logger logger.ILogger
 }

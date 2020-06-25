@@ -1,9 +1,10 @@
 package core
 
 import (
+	v1 "harmony-server/server/http/core/v1"
+
 	"github.com/labstack/echo/v4"
 	"github.com/sony/sonyflake"
-	v1 "harmony-server/server/http/core/v1"
 
 	"harmony-server/server/auth"
 	"harmony-server/server/config"
@@ -18,7 +19,7 @@ import (
 type API struct {
 	*echo.Group
 	Deps *Dependencies
-	V1 *v1.Handlers
+	V1   *v1.Handlers
 }
 
 // Dependencies are items that an API needs to function
@@ -29,7 +30,7 @@ type Dependencies struct {
 	Config         *config.Config
 	AuthManager    *auth.Manager
 	StorageManager *storage.Manager
-	Logger         *logger.Logger
+	Logger         logger.ILogger
 	State          *state.State
 	Sonyflake      *sonyflake.Sonyflake
 }

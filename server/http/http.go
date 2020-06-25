@@ -37,7 +37,7 @@ type Dependencies struct {
 	DB             db.IHarmonyDB
 	AuthManager    *auth.Manager
 	StorageManager *storage.Manager
-	Logger         *logger.Logger
+	Logger         logger.ILogger
 	State          *state.State
 	Config         *config.Config
 	Sonyflake      *sonyflake.Sonyflake

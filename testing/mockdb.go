@@ -193,7 +193,11 @@ func (db *MockDB) AddForeignUser(homeServer string, userID, localUserID uint64, 
 }
 
 func (db *MockDB) EmailExists(email string) (bool, error) {
-	return db.Flags.EmailExistsError, errors.New("email exists")
+	if db.Flags.EmailExistsError {
+		return db.Flags.EmailExistsError, errors.New("email exists")
+	} else {
+		return false, nil
+	}
 }
 
 func (db *MockDB) ExpireSessions() error {

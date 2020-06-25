@@ -70,6 +70,7 @@ func (h API) Register(c echo.Context) error {
 	}
 	exists, err := h.Deps.DB.EmailExists(data.Email)
 	if err != nil {
+		h.Deps.Logger.Exception(err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	} else if exists {
 		return echo.NewHTTPError(http.StatusConflict, responses.AlreadyRegistered)

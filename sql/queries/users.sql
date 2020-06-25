@@ -15,12 +15,12 @@ INSERT INTO Users (User_ID)
 VALUES ($1);
 
 -- name: AddProfile :exec
-INSERT INTO Profiles(User_ID, Username, Avatar, Status)
-VALUES ($1, $2, $3, $4);
+INSERT INTO Profiles(User_ID, Username, Avatar, Status, GuildList)
+VALUES ($1, $2, $3, $4, $5);
 
 -- name: AddLocalUser :exec
-INSERT INTO Local_Users (User_ID, Email, Password, Instances)
-VALUES ($1, $2, $3, $4);
+INSERT INTO Local_Users (User_ID, Email, Password)
+VALUES ($1, $2, $3);
 
 -- name: AddForeignUser :one
 INSERT INTO Foreign_Users (User_ID, Home_Server, Local_User_ID)
