@@ -14,6 +14,17 @@ type MemberListResponse struct {
 	Members []string `json:"members"`
 }
 
+type JoinedGuildsResponseGuild struct {
+	GuildID      string `json:"guild_id"`
+	GuildName    string `json:"guild_name"`
+	GuildOwner   string `json:"guild_owner"`
+	GuildPicture string `json:"guild_picture"`
+}
+
+type JoinedGuildsResponse struct {
+	Guilds []JoinedGuildsResponseGuild `json:"guilds"`
+}
+
 type ChannelListResponse struct {
 	Channels []Channel `json:"channels"`
 }

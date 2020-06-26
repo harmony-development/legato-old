@@ -144,6 +144,10 @@ func (db *MockDB) GuildsForUser(userID uint64) ([]uint64, error) {
 	panic("implement me")
 }
 
+func (db *MockDB) GuildsForUserWithData(userID uint64) ([]queries.Guild, error) {
+	panic("implement me")
+}
+
 func (db *MockDB) ChannelsForGuild(guildID uint64) ([]queries.Channel, error) {
 	panic("implement me")
 }

@@ -387,6 +387,21 @@ func (db *HarmonyDB) GuildsForUser(userID uint64) ([]uint64, error) {
 	return db.queries.GuildsForUser(ctx, userID)
 }
 
+// GuildsForUser gets the guilds a user is in with additional data
+func (db *HarmonyDB) GuildsForUserWithData(userID uint64) (ret []queries.Guild, err error) {
+	var data []queries.GuildsForUserWithDataRow
+	data, err = db.queries.GuildsForUserWithData(ctx, userID)
+	for _, guild := range data {
+		ret = append(ret, queries.Guild{
+			GuildID:    guild.GuildID,
+			OwnerID:    guild.OwnerID,
+			GuildName:  guild.GuildName,
+			PictureUrl: guild.PictureUrl,
+		})
+	}
+	return
+}
+
 // ChannelsForGuild gets the channels for a guild
 func (db *HarmonyDB) ChannelsForGuild(guildID uint64) ([]queries.Channel, error) {
 	return db.queries.GetChannels(ctx, toSqlInt64(guildID))

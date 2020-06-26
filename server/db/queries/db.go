@@ -127,6 +127,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.guildsForUserStmt, err = db.PrepareContext(ctx, guildsForUser); err != nil {
 		return nil, fmt.Errorf("error preparing query GuildsForUser: %w", err)
 	}
+	if q.guildsForUserWithDataStmt, err = db.PrepareContext(ctx, guildsForUserWithData); err != nil {
+		return nil, fmt.Errorf("error preparing query GuildsForUserWithData: %w", err)
+	}
 	if q.incrementInviteStmt, err = db.PrepareContext(ctx, incrementInvite); err != nil {
 		return nil, fmt.Errorf("error preparing query IncrementInvite: %w", err)
 	}
@@ -355,6 +358,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing guildsForUserStmt: %w", cerr)
 		}
 	}
+	if q.guildsForUserWithDataStmt != nil {
+		if cerr := q.guildsForUserWithDataStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing guildsForUserWithDataStmt: %w", cerr)
+		}
+	}
 	if q.incrementInviteStmt != nil {
 		if cerr := q.incrementInviteStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing incrementInviteStmt: %w", cerr)
@@ -472,115 +480,117 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                       DBTX
-	tx                       *sql.Tx
-	addAttachmentStmt        *sql.Stmt
-	addFileHashStmt          *sql.Stmt
-	addForeignUserStmt       *sql.Stmt
-	addLocalUserStmt         *sql.Stmt
-	addMessageStmt           *sql.Stmt
-	addProfileStmt           *sql.Stmt
-	addSessionStmt           *sql.Stmt
-	addUserStmt              *sql.Stmt
-	addUserToGuildStmt       *sql.Stmt
-	createChannelStmt        *sql.Stmt
-	createGuildStmt          *sql.Stmt
-	createGuildInviteStmt    *sql.Stmt
-	deleteChannelStmt        *sql.Stmt
-	deleteGuildStmt          *sql.Stmt
-	deleteInviteStmt         *sql.Stmt
-	deleteMessageStmt        *sql.Stmt
-	emailExistsStmt          *sql.Stmt
-	expireSessionsStmt       *sql.Stmt
-	getAttachmentsStmt       *sql.Stmt
-	getAvatarStmt            *sql.Stmt
-	getChannelsStmt          *sql.Stmt
-	getFileByHashStmt        *sql.Stmt
-	getGuildDataStmt         *sql.Stmt
-	getGuildMembersStmt      *sql.Stmt
-	getGuildOwnerStmt        *sql.Stmt
-	getGuildPictureStmt      *sql.Stmt
-	getLocalUserIDStmt       *sql.Stmt
-	getMessageStmt           *sql.Stmt
-	getMessageAuthorStmt     *sql.Stmt
-	getMessageDateStmt       *sql.Stmt
-	getMessagesStmt          *sql.Stmt
-	getUserStmt              *sql.Stmt
-	getUserByEmailStmt       *sql.Stmt
-	guildWithIDExistsStmt    *sql.Stmt
-	guildsForUserStmt        *sql.Stmt
-	incrementInviteStmt      *sql.Stmt
-	numChannelsWithIDStmt    *sql.Stmt
-	openInvitesStmt          *sql.Stmt
-	removeUserFromGuildStmt  *sql.Stmt
-	resolveGuildIDStmt       *sql.Stmt
-	sessionToUserIDStmt      *sql.Stmt
-	setGuildNameStmt         *sql.Stmt
-	setGuildPictureStmt      *sql.Stmt
-	setStatusStmt            *sql.Stmt
-	updateAvatarStmt         *sql.Stmt
-	updateGuildListStmt      *sql.Stmt
-	updateMessageActionsStmt *sql.Stmt
-	updateMessageContentStmt *sql.Stmt
-	updateMessageEmbedsStmt  *sql.Stmt
-	updateUsernameStmt       *sql.Stmt
-	userInGuildStmt          *sql.Stmt
+	db                        DBTX
+	tx                        *sql.Tx
+	addAttachmentStmt         *sql.Stmt
+	addFileHashStmt           *sql.Stmt
+	addForeignUserStmt        *sql.Stmt
+	addLocalUserStmt          *sql.Stmt
+	addMessageStmt            *sql.Stmt
+	addProfileStmt            *sql.Stmt
+	addSessionStmt            *sql.Stmt
+	addUserStmt               *sql.Stmt
+	addUserToGuildStmt        *sql.Stmt
+	createChannelStmt         *sql.Stmt
+	createGuildStmt           *sql.Stmt
+	createGuildInviteStmt     *sql.Stmt
+	deleteChannelStmt         *sql.Stmt
+	deleteGuildStmt           *sql.Stmt
+	deleteInviteStmt          *sql.Stmt
+	deleteMessageStmt         *sql.Stmt
+	emailExistsStmt           *sql.Stmt
+	expireSessionsStmt        *sql.Stmt
+	getAttachmentsStmt        *sql.Stmt
+	getAvatarStmt             *sql.Stmt
+	getChannelsStmt           *sql.Stmt
+	getFileByHashStmt         *sql.Stmt
+	getGuildDataStmt          *sql.Stmt
+	getGuildMembersStmt       *sql.Stmt
+	getGuildOwnerStmt         *sql.Stmt
+	getGuildPictureStmt       *sql.Stmt
+	getLocalUserIDStmt        *sql.Stmt
+	getMessageStmt            *sql.Stmt
+	getMessageAuthorStmt      *sql.Stmt
+	getMessageDateStmt        *sql.Stmt
+	getMessagesStmt           *sql.Stmt
+	getUserStmt               *sql.Stmt
+	getUserByEmailStmt        *sql.Stmt
+	guildWithIDExistsStmt     *sql.Stmt
+	guildsForUserStmt         *sql.Stmt
+	guildsForUserWithDataStmt *sql.Stmt
+	incrementInviteStmt       *sql.Stmt
+	numChannelsWithIDStmt     *sql.Stmt
+	openInvitesStmt           *sql.Stmt
+	removeUserFromGuildStmt   *sql.Stmt
+	resolveGuildIDStmt        *sql.Stmt
+	sessionToUserIDStmt       *sql.Stmt
+	setGuildNameStmt          *sql.Stmt
+	setGuildPictureStmt       *sql.Stmt
+	setStatusStmt             *sql.Stmt
+	updateAvatarStmt          *sql.Stmt
+	updateGuildListStmt       *sql.Stmt
+	updateMessageActionsStmt  *sql.Stmt
+	updateMessageContentStmt  *sql.Stmt
+	updateMessageEmbedsStmt   *sql.Stmt
+	updateUsernameStmt        *sql.Stmt
+	userInGuildStmt           *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                       tx,
-		tx:                       tx,
-		addAttachmentStmt:        q.addAttachmentStmt,
-		addFileHashStmt:          q.addFileHashStmt,
-		addForeignUserStmt:       q.addForeignUserStmt,
-		addLocalUserStmt:         q.addLocalUserStmt,
-		addMessageStmt:           q.addMessageStmt,
-		addProfileStmt:           q.addProfileStmt,
-		addSessionStmt:           q.addSessionStmt,
-		addUserStmt:              q.addUserStmt,
-		addUserToGuildStmt:       q.addUserToGuildStmt,
-		createChannelStmt:        q.createChannelStmt,
-		createGuildStmt:          q.createGuildStmt,
-		createGuildInviteStmt:    q.createGuildInviteStmt,
-		deleteChannelStmt:        q.deleteChannelStmt,
-		deleteGuildStmt:          q.deleteGuildStmt,
-		deleteInviteStmt:         q.deleteInviteStmt,
-		deleteMessageStmt:        q.deleteMessageStmt,
-		emailExistsStmt:          q.emailExistsStmt,
-		expireSessionsStmt:       q.expireSessionsStmt,
-		getAttachmentsStmt:       q.getAttachmentsStmt,
-		getAvatarStmt:            q.getAvatarStmt,
-		getChannelsStmt:          q.getChannelsStmt,
-		getFileByHashStmt:        q.getFileByHashStmt,
-		getGuildDataStmt:         q.getGuildDataStmt,
-		getGuildMembersStmt:      q.getGuildMembersStmt,
-		getGuildOwnerStmt:        q.getGuildOwnerStmt,
-		getGuildPictureStmt:      q.getGuildPictureStmt,
-		getLocalUserIDStmt:       q.getLocalUserIDStmt,
-		getMessageStmt:           q.getMessageStmt,
-		getMessageAuthorStmt:     q.getMessageAuthorStmt,
-		getMessageDateStmt:       q.getMessageDateStmt,
-		getMessagesStmt:          q.getMessagesStmt,
-		getUserStmt:              q.getUserStmt,
-		getUserByEmailStmt:       q.getUserByEmailStmt,
-		guildWithIDExistsStmt:    q.guildWithIDExistsStmt,
-		guildsForUserStmt:        q.guildsForUserStmt,
-		incrementInviteStmt:      q.incrementInviteStmt,
-		numChannelsWithIDStmt:    q.numChannelsWithIDStmt,
-		openInvitesStmt:          q.openInvitesStmt,
-		removeUserFromGuildStmt:  q.removeUserFromGuildStmt,
-		resolveGuildIDStmt:       q.resolveGuildIDStmt,
-		sessionToUserIDStmt:      q.sessionToUserIDStmt,
-		setGuildNameStmt:         q.setGuildNameStmt,
-		setGuildPictureStmt:      q.setGuildPictureStmt,
-		setStatusStmt:            q.setStatusStmt,
-		updateAvatarStmt:         q.updateAvatarStmt,
-		updateGuildListStmt:      q.updateGuildListStmt,
-		updateMessageActionsStmt: q.updateMessageActionsStmt,
-		updateMessageContentStmt: q.updateMessageContentStmt,
-		updateMessageEmbedsStmt:  q.updateMessageEmbedsStmt,
-		updateUsernameStmt:       q.updateUsernameStmt,
-		userInGuildStmt:          q.userInGuildStmt,
+		db:                        tx,
+		tx:                        tx,
+		addAttachmentStmt:         q.addAttachmentStmt,
+		addFileHashStmt:           q.addFileHashStmt,
+		addForeignUserStmt:        q.addForeignUserStmt,
+		addLocalUserStmt:          q.addLocalUserStmt,
+		addMessageStmt:            q.addMessageStmt,
+		addProfileStmt:            q.addProfileStmt,
+		addSessionStmt:            q.addSessionStmt,
+		addUserStmt:               q.addUserStmt,
+		addUserToGuildStmt:        q.addUserToGuildStmt,
+		createChannelStmt:         q.createChannelStmt,
+		createGuildStmt:           q.createGuildStmt,
+		createGuildInviteStmt:     q.createGuildInviteStmt,
+		deleteChannelStmt:         q.deleteChannelStmt,
+		deleteGuildStmt:           q.deleteGuildStmt,
+		deleteInviteStmt:          q.deleteInviteStmt,
+		deleteMessageStmt:         q.deleteMessageStmt,
+		emailExistsStmt:           q.emailExistsStmt,
+		expireSessionsStmt:        q.expireSessionsStmt,
+		getAttachmentsStmt:        q.getAttachmentsStmt,
+		getAvatarStmt:             q.getAvatarStmt,
+		getChannelsStmt:           q.getChannelsStmt,
+		getFileByHashStmt:         q.getFileByHashStmt,
+		getGuildDataStmt:          q.getGuildDataStmt,
+		getGuildMembersStmt:       q.getGuildMembersStmt,
+		getGuildOwnerStmt:         q.getGuildOwnerStmt,
+		getGuildPictureStmt:       q.getGuildPictureStmt,
+		getLocalUserIDStmt:        q.getLocalUserIDStmt,
+		getMessageStmt:            q.getMessageStmt,
+		getMessageAuthorStmt:      q.getMessageAuthorStmt,
+		getMessageDateStmt:        q.getMessageDateStmt,
+		getMessagesStmt:           q.getMessagesStmt,
+		getUserStmt:               q.getUserStmt,
+		getUserByEmailStmt:        q.getUserByEmailStmt,
+		guildWithIDExistsStmt:     q.guildWithIDExistsStmt,
+		guildsForUserStmt:         q.guildsForUserStmt,
+		guildsForUserWithDataStmt: q.guildsForUserWithDataStmt,
+		incrementInviteStmt:       q.incrementInviteStmt,
+		numChannelsWithIDStmt:     q.numChannelsWithIDStmt,
+		openInvitesStmt:           q.openInvitesStmt,
+		removeUserFromGuildStmt:   q.removeUserFromGuildStmt,
+		resolveGuildIDStmt:        q.resolveGuildIDStmt,
+		sessionToUserIDStmt:       q.sessionToUserIDStmt,
+		setGuildNameStmt:          q.setGuildNameStmt,
+		setGuildPictureStmt:       q.setGuildPictureStmt,
+		setStatusStmt:             q.setStatusStmt,
+		updateAvatarStmt:          q.updateAvatarStmt,
+		updateGuildListStmt:       q.updateGuildListStmt,
+		updateMessageActionsStmt:  q.updateMessageActionsStmt,
+		updateMessageContentStmt:  q.updateMessageContentStmt,
+		updateMessageEmbedsStmt:   q.updateMessageEmbedsStmt,
+		updateUsernameStmt:        q.updateUsernameStmt,
+		userInGuildStmt:           q.userInGuildStmt,
 	}
 }
