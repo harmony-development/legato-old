@@ -54,6 +54,7 @@ type IHarmonyDB interface {
 	GetInvites(guildID uint64) ([]queries.Invite, error)
 	DeleteMember(guildID, userID uint64) error
 	GuildsForUser(userID uint64) ([]uint64, error)
+	GuildsForUserWithData(userID uint64) ([]queries.Guild, error)
 	ChannelsForGuild(guildID uint64) ([]queries.Channel, error)
 	MembersInGuild(guildID uint64) ([]uint64, error)
 	GetMessage(messageID uint64) (queries.Message, error)

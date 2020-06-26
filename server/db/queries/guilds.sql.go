@@ -248,6 +248,52 @@ func (q *Queries) GuildsForUser(ctx context.Context, userID uint64) ([]uint64, e
 	return items, nil
 }
 
+const guildsForUserWithData = `-- name: GuildsForUserWithData :many
+SELECT user_id, guild_members.guild_id, guilds.guild_id, owner_id, guild_name, picture_url FROM Guild_Members
+    INNER JOIN guilds
+    ON Guild_Members.Guild_ID = Guilds.Guild_ID
+    WHERE User_ID = $1
+`
+
+type GuildsForUserWithDataRow struct {
+	UserID     uint64 `json:"user_id"`
+	GuildID    uint64 `json:"guild_id"`
+	GuildID_2  uint64 `json:"guild_id_2"`
+	OwnerID    uint64 `json:"owner_id"`
+	GuildName  string `json:"guild_name"`
+	PictureUrl string `json:"picture_url"`
+}
+
+func (q *Queries) GuildsForUserWithData(ctx context.Context, userID uint64) ([]GuildsForUserWithDataRow, error) {
+	rows, err := q.query(ctx, q.guildsForUserWithDataStmt, guildsForUserWithData, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GuildsForUserWithDataRow
+	for rows.Next() {
+		var i GuildsForUserWithDataRow
+		if err := rows.Scan(
+			&i.UserID,
+			&i.GuildID,
+			&i.GuildID_2,
+			&i.OwnerID,
+			&i.GuildName,
+			&i.PictureUrl,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const numChannelsWithID = `-- name: NumChannelsWithID :one
 SELECT COUNT(*) FROM Channels
     WHERE Guild_ID = $1

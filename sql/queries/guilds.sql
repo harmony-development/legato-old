@@ -72,6 +72,12 @@ SELECT Guilds.Guild_ID FROM Guild_Members
     ON Guild_Members.Guild_ID = Guilds.Guild_ID
     WHERE User_ID = $1;
 
+-- name: GuildsForUserWithData :many
+SELECT * FROM Guild_Members
+    INNER JOIN guilds
+    ON Guild_Members.Guild_ID = Guilds.Guild_ID
+    WHERE User_ID = $1;
+
 -- name: UserInGuild :one
 SELECT User_ID FROM Guild_Members
     WHERE User_ID = $1
