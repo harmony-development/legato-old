@@ -12,6 +12,7 @@ const (
 	InsufficientPrivileges = "insufficient-privileges"
 	GuildNotFound          = "guild.not-found"
 	NotInGuild             = "guild.not-member"
+	MetadataNotFound       = "user.metadata-not-found"
 	UnknownError           = "unknown"
 )
 

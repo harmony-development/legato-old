@@ -84,3 +84,9 @@ type Session struct {
 type User struct {
 	UserID uint64 `json:"user_id"`
 }
+
+type UserMetadatum struct {
+	UserID   uint64 `json:"user_id"`
+	AppID    string `json:"app_id"`
+	Metadata string `json:"metadata"`
+}

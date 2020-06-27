@@ -643,3 +643,12 @@ func (db *HarmonyDB) SetStatus(userID uint64, status UserStatus) error {
 		UserID: userID,
 	})
 }
+
+func (db *HarmonyDB) GetUserMetadata(userID uint64, appID string) (string, error) {
+	metadata, err := db.queries.GetUserMetadata(ctx, queries.GetUserMetadataParams{
+		UserID: userID,
+		AppID:  appID,
+	})
+	db.Logger.CheckException(err)
+	return metadata, err
+}

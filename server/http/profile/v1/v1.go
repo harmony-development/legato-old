@@ -69,23 +69,23 @@ func (h Handlers) MakeRoutes() []routing.Route {
 			Location: routing.LocationNone,
 		},
 		{
-			Path:    "/users/~/guildlist",
-			Handler: h.GuildListUpdate,
-			Method:  routing.PATCH,
-			RateLimit: &routing.RateLimit{
-				Duration: 3 * time.Second,
-				Burst:    8,
-			},
-			Auth:     true,
-			Location: routing.LocationNone,
-		},
-		{
 			Path:    "/users/~/status",
 			Handler: h.StatusUpdate,
 			Method:  routing.PATCH,
 			RateLimit: &routing.RateLimit{
 				Duration: 5 * time.Second,
 				Burst:    4,
+			},
+			Auth:     true,
+			Location: routing.LocationNone,
+		},
+		{
+			Path:    "/users/~/metadata",
+			Handler: h.GetUserMetadata,
+			Method:  routing.GET,
+			RateLimit: &routing.RateLimit{
+				Duration: 3 * time.Second,
+				Burst:    5,
 			},
 			Auth:     true,
 			Location: routing.LocationNone,

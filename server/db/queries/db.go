@@ -121,6 +121,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getUserByEmailStmt, err = db.PrepareContext(ctx, getUserByEmail); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUserByEmail: %w", err)
 	}
+	if q.getUserMetadataStmt, err = db.PrepareContext(ctx, getUserMetadata); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUserMetadata: %w", err)
+	}
 	if q.guildWithIDExistsStmt, err = db.PrepareContext(ctx, guildWithIDExists); err != nil {
 		return nil, fmt.Errorf("error preparing query GuildWithIDExists: %w", err)
 	}
@@ -348,6 +351,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getUserByEmailStmt: %w", cerr)
 		}
 	}
+	if q.getUserMetadataStmt != nil {
+		if cerr := q.getUserMetadataStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUserMetadataStmt: %w", cerr)
+		}
+	}
 	if q.guildWithIDExistsStmt != nil {
 		if cerr := q.guildWithIDExistsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing guildWithIDExistsStmt: %w", cerr)
@@ -515,6 +523,7 @@ type Queries struct {
 	getMessagesStmt           *sql.Stmt
 	getUserStmt               *sql.Stmt
 	getUserByEmailStmt        *sql.Stmt
+	getUserMetadataStmt       *sql.Stmt
 	guildWithIDExistsStmt     *sql.Stmt
 	guildsForUserStmt         *sql.Stmt
 	guildsForUserWithDataStmt *sql.Stmt
@@ -573,6 +582,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getMessagesStmt:           q.getMessagesStmt,
 		getUserStmt:               q.getUserStmt,
 		getUserByEmailStmt:        q.getUserByEmailStmt,
+		getUserMetadataStmt:       q.getUserMetadataStmt,
 		guildWithIDExistsStmt:     q.guildWithIDExistsStmt,
 		guildsForUserStmt:         q.guildsForUserStmt,
 		guildsForUserWithDataStmt: q.guildsForUserWithDataStmt,

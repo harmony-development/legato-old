@@ -73,3 +73,9 @@ WHERE User_ID = $1;
 UPDATE Profiles
 SET Status = $1
 WHERE User_ID = $2;
+
+-- name: GetUserMetadata :one
+SELECT Metadata
+FROM User_Metadata
+WHERE User_ID = $1
+  AND App_ID = $2;

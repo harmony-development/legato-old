@@ -191,6 +191,25 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEm
 	return i, err
 }
 
+const getUserMetadata = `-- name: GetUserMetadata :one
+SELECT Metadata
+FROM User_Metadata
+WHERE User_ID = $1
+  AND App_ID = $2
+`
+
+type GetUserMetadataParams struct {
+	UserID uint64 `json:"user_id"`
+	AppID  string `json:"app_id"`
+}
+
+func (q *Queries) GetUserMetadata(ctx context.Context, arg GetUserMetadataParams) (string, error) {
+	row := q.queryRow(ctx, q.getUserMetadataStmt, getUserMetadata, arg.UserID, arg.AppID)
+	var metadata string
+	err := row.Scan(&metadata)
+	return metadata, err
+}
+
 const setStatus = `-- name: SetStatus :exec
 UPDATE Profiles
 SET Status = $1

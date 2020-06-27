@@ -270,3 +270,7 @@ func (db *MockDB) CreateGuild(owner, id uint64, guildName string, picture string
 		PictureUrl: picture,
 	}, nil
 }
+
+func (db *MockDB) GetUserMetadata(userID uint64, appID string) (string, error) {
+	panic("implement me")
+}
