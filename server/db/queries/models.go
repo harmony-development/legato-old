@@ -19,6 +19,12 @@ type Channel struct {
 	ChannelName string        `json:"channel_name"`
 }
 
+type FederationNonce struct {
+	Nonce      string `json:"nonce"`
+	UserID     uint64 `json:"user_id"`
+	HomeServer string `json:"home_server"`
+}
+
 type File struct {
 	Hash   []byte `json:"hash"`
 	FileID string `json:"file_id"`
@@ -35,6 +41,13 @@ type Guild struct {
 	OwnerID    uint64 `json:"owner_id"`
 	GuildName  string `json:"guild_name"`
 	PictureUrl string `json:"picture_url"`
+}
+
+type GuildList struct {
+	UserID     uint64 `json:"user_id"`
+	GuildID    uint64 `json:"guild_id"`
+	HomeServer string `json:"home_server"`
+	Position   string `json:"position"`
 }
 
 type GuildMember struct {
@@ -68,11 +81,10 @@ type Message struct {
 }
 
 type Profile struct {
-	UserID    uint64         `json:"user_id"`
-	Username  string         `json:"username"`
-	Avatar    sql.NullString `json:"avatar"`
-	Status    int16          `json:"status"`
-	Guildlist sql.NullString `json:"guildlist"`
+	UserID   uint64         `json:"user_id"`
+	Username string         `json:"username"`
+	Avatar   sql.NullString `json:"avatar"`
+	Status   int16          `json:"status"`
 }
 
 type Session struct {

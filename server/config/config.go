@@ -19,21 +19,23 @@ type Config struct {
 
 // ServerConf is the servers configuration
 type ServerConf struct {
-	SnowflakeStart   int64
-	Port             string
-	ImagePath        string
-	GuildPicturePath string
-	PublicKeyPath    string
-	PrivateKeyPath   string
-	MaxAttachments   int
-	GetMessageCount  int
-	OwnerCacheMax    int
-	SessionCacheMax  int
-	SessionDuration  time.Duration
-	LogErrors        bool
-	Avatar           Avatar
-	UsernamePolicy   UsernamePolicy
-	PasswordPolicy   PasswordPolicy
+	SnowflakeStart                    int64
+	Port                              string
+	ImagePath                         string
+	GuildPicturePath                  string
+	PublicKeyPath                     string
+	PrivateKeyPath                    string
+	MaxAttachments                    int
+	GetMessageCount                   int
+	OwnerCacheMax                     int
+	SessionCacheMax                   int
+	SessionDuration                   time.Duration
+	LogErrors                         bool
+	NonceLength                       int
+	GuildLeaveNotificationQueueLength int
+	Avatar                            Avatar
+	UsernamePolicy                    UsernamePolicy
+	PasswordPolicy                    PasswordPolicy
 }
 
 type Avatar struct {
@@ -76,18 +78,20 @@ type SentryConf struct {
 
 var DefaultConf = Config{
 	Server: ServerConf{
-		Port:             ":2289",
-		ImagePath:        "images",
-		GuildPicturePath: "guild-pictures",
-		PrivateKeyPath:   "harmony-key.pem",
-		PublicKeyPath:    "harmony-key.pub",
-		MaxAttachments:   1,
-		GetMessageCount:  30,
-		OwnerCacheMax:    5096,
-		SessionCacheMax:  5096,
-		SessionDuration:  48 * time.Hour,
-		LogErrors:        true,
-		SnowflakeStart:   0,
+		Port:                              ":2289",
+		ImagePath:                         "images",
+		GuildPicturePath:                  "guild-pictures",
+		PrivateKeyPath:                    "harmony-key.pem",
+		PublicKeyPath:                     "harmony-key.pub",
+		MaxAttachments:                    1,
+		GetMessageCount:                   30,
+		OwnerCacheMax:                     5096,
+		SessionCacheMax:                   5096,
+		SessionDuration:                   48 * time.Hour,
+		LogErrors:                         true,
+		SnowflakeStart:                    0,
+		NonceLength:                       32,
+		GuildLeaveNotificationQueueLength: 64,
 		Avatar: Avatar{
 			Width:   256,
 			Height:  256,

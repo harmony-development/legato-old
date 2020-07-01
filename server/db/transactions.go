@@ -464,11 +464,10 @@ func (db *HarmonyDB) AddLocalUser(userID uint64, email, username string, passwor
 		return err
 	}
 	if err := tq.AddProfile(ctx, queries.AddProfileParams{
-		UserID:    userID,
-		Username:  username,
-		Avatar:    sql.NullString{},
-		Status:    UserStatusOffline,
-		Guildlist: sql.NullString{},
+		UserID:   userID,
+		Username: username,
+		Avatar:   sql.NullString{},
+		Status:   UserStatusOffline,
 	}); err != nil {
 		return err
 	}
@@ -540,13 +539,6 @@ func (db *HarmonyDB) UpdateAvatar(userID uint64, avatar string) error {
 	return db.queries.UpdateAvatar(ctx, queries.UpdateAvatarParams{
 		Avatar: toSqlString(avatar),
 		UserID: userID,
-	})
-}
-
-func (db *HarmonyDB) UpdateGuildList(userID uint64, guildList string) error {
-	return db.queries.UpdateGuildList(ctx, queries.UpdateGuildListParams{
-		UserID:    userID,
-		Guildlist: toSqlString(guildList),
 	})
 }
 
@@ -651,4 +643,111 @@ func (db *HarmonyDB) GetUserMetadata(userID uint64, appID string) (string, error
 	})
 	db.Logger.CheckException(err)
 	return metadata, err
+}
+
+func (db *HarmonyDB) GetNonceInfo(nonce string) (queries.GetNonceInfoRow, error) {
+	info, err := db.queries.GetNonceInfo(ctx, nonce)
+	db.Logger.CheckException(err)
+	return info, err
+}
+
+func (db *HarmonyDB) AddNonce(nonce string, userID uint64, homeServer string) error {
+	err := db.queries.AddNonce(ctx, queries.AddNonceParams{
+		Nonce:      nonce,
+		UserID:     userID,
+		HomeServer: homeServer,
+	})
+	db.Logger.CheckException(err)
+	return err
+}
+
+func (db *HarmonyDB) GetGuildList(userID uint64) ([]queries.GetGuildListRow, error) {
+	guilds, err := db.queries.GetGuildList(ctx, userID)
+	db.Logger.CheckException(err)
+	return guilds, err
+}
+
+func (db *HarmonyDB) GetGuildListPosition(userID, guildID uint64, homeServer string) (string, error) {
+	position, err := db.queries.GetGuildListPosition(ctx, queries.GetGuildListPositionParams{
+		UserID:     userID,
+		GuildID:    guildID,
+		HomeServer: homeServer,
+	})
+	db.Logger.CheckException(err)
+	return position, err
+}
+
+func (db *HarmonyDB) AddGuildToList(userID, guildID uint64, homeServer string) error {
+	pos, err := db.queries.GetLastGuildPositionInList(ctx, userID)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			pos = ""
+		} else {
+			db.Logger.Exception(err)
+			return err
+		}
+	}
+
+	err = db.queries.AddToGuildList(ctx, queries.AddToGuildListParams{
+		UserID:     userID,
+		GuildID:    guildID,
+		HomeServer: homeServer,
+		Position:   Rank(pos, ""),
+	})
+
+	db.Logger.CheckException(err)
+	return err
+}
+
+func (db *HarmonyDB) MoveGuild(userID uint64, guildID uint64, homeServer string, nextGuildID, prevGuildID uint64, nextHomeServer, prevHomeServer string) error {
+	nextPos, err := db.queries.GetGuildListPosition(ctx, queries.GetGuildListPositionParams{
+		UserID:     userID,
+		GuildID:    nextGuildID,
+		HomeServer: nextHomeServer,
+	})
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			nextPos = ""
+		} else {
+			db.Logger.Exception(err)
+			return err
+		}
+	}
+
+	prevPos, err := db.queries.GetGuildListPosition(ctx, queries.GetGuildListPositionParams{
+		UserID:     userID,
+		GuildID:    prevGuildID,
+		HomeServer: prevHomeServer,
+	})
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			nextPos = ""
+		} else {
+			db.Logger.Exception(err)
+			return err
+		}
+	}
+
+	err = db.queries.MoveGuild(ctx, queries.MoveGuildParams{
+		Position:   Rank(prevPos, nextPos),
+		GuildID:    guildID,
+		HomeServer: homeServer,
+	})
+
+	db.Logger.CheckException(err)
+
+	return err
+}
+
+func (db HarmonyDB) RemoveGuildFromList(userID, guildID uint64, homeServer string) error {
+	err := db.queries.RemoveGuildFromList(ctx, queries.RemoveGuildFromListParams{
+		UserID:     userID,
+		GuildID:    guildID,
+		HomeServer: homeServer,
+	})
+	db.Logger.CheckException(err)
+	return err
 }

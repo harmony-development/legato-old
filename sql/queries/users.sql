@@ -15,8 +15,8 @@ INSERT INTO Users (User_ID)
 VALUES ($1);
 
 -- name: AddProfile :exec
-INSERT INTO Profiles(User_ID, Username, Avatar, Status, GuildList)
-VALUES ($1, $2, $3, $4, $5);
+INSERT INTO Profiles(User_ID, Username, Avatar, Status)
+VALUES ($1, $2, $3, $4);
 
 -- name: AddLocalUser :exec
 INSERT INTO Local_Users (User_ID, Email, Password)
@@ -32,8 +32,7 @@ SET Local_User_ID = Foreign_Users.Local_User_ID RETURNING Local_User_ID;
 SELECT Users.User_ID,
   Profiles.Username,
   Profiles.Avatar,
-  Profiles.Status,
-  Profiles.GuildList
+  Profiles.Status
 FROM Users
   INNER JOIN Profiles ON (Users.User_ID = Profiles.User_ID)
 WHERE Users.User_ID = $1;
@@ -59,11 +58,6 @@ UPDATE Profiles
 SET Avatar = $1
 WHERE User_ID = $2;
 
--- name: UpdateGuildList :exec
-UPDATE Profiles
-SET GuildList = $1
-WHERE User_ID = $2;
-
 -- name: GetAvatar :one
 SELECT Avatar
 FROM Profiles
@@ -79,3 +73,41 @@ SELECT Metadata
 FROM User_Metadata
 WHERE User_ID = $1
   AND App_ID = $2;
+
+-- name: AddToGuildList :exec
+INSERT INTO Guild_List (User_ID, Guild_ID, Home_Server, Position)
+VALUES($1, $2, $3, $4);
+
+-- name: GetGuildListPosition :one
+SELECT Position
+FROM Guild_List
+WHERE User_ID = $1
+  AND Guild_ID = $2
+  AND Home_Server = $3;
+
+-- name: MoveGuild :exec
+UPDATE Guild_List
+SET Position = $1
+WHERE User_ID = $1
+  AND Guild_ID = $2
+  AND Home_Server = $3;
+
+-- name: RemoveGuildFromList :exec
+DELETE FROM Guild_List
+WHERE User_ID = $1
+  AND Guild_ID = $2
+  AND Home_Server = $3;
+
+-- name: GetGuildList :many
+SELECT Guild_ID,
+  Home_Server
+FROM Guild_List
+WHERE User_ID = $1
+ORDER BY Position;
+
+-- name: GetLastGuildPositionInList :one
+SELECT Position
+FROM Guild_List
+WHERE User_ID = $1
+ORDER BY Position
+LIMIT 1;

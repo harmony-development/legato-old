@@ -274,3 +274,27 @@ func (db *MockDB) CreateGuild(owner, id uint64, guildName string, picture string
 func (db *MockDB) GetUserMetadata(userID uint64, appID string) (string, error) {
 	panic("implement me")
 }
+
+func (db *MockDB) GetNonceInfo(nonce string) (queries.GetNonceInfoRow, error) {
+	panic("implement me")
+}
+
+func (db *MockDB) AddNonce(nonce string, userID uint64, homeServer string) error {
+	panic("implement me")
+}
+
+func (db *MockDB) GetGuildList(userID uint64) ([]queries.GetGuildListRow, error) {
+	panic("implement me")
+}
+func (db *MockDB) GetGuildListPosition(userID, guildID uint64, homeServer string) (string, error) {
+	panic("implement me")
+}
+func (db *MockDB) AddGuildToList(userID, guildID uint64, homeServer string) error {
+	panic("implement me")
+}
+func (db *MockDB) MoveGuild(userID uint64, guildID uint64, homeServer string, nextGuildID, prevGuildID uint64, nextHomeServer, prevHomeServer string) error {
+	panic("implement me")
+}
+func (db *MockDB) RemoveGuildFromList(userID, guildID uint64, homeServer string) error {
+	panic("implement me")
+}

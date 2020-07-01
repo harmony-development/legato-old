@@ -45,16 +45,15 @@ func (q *Queries) AddLocalUser(ctx context.Context, arg AddLocalUserParams) erro
 }
 
 const addProfile = `-- name: AddProfile :exec
-INSERT INTO Profiles(User_ID, Username, Avatar, Status, GuildList)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO Profiles(User_ID, Username, Avatar, Status)
+VALUES ($1, $2, $3, $4)
 `
 
 type AddProfileParams struct {
-	UserID    uint64         `json:"user_id"`
-	Username  string         `json:"username"`
-	Avatar    sql.NullString `json:"avatar"`
-	Status    int16          `json:"status"`
-	Guildlist sql.NullString `json:"guildlist"`
+	UserID   uint64         `json:"user_id"`
+	Username string         `json:"username"`
+	Avatar   sql.NullString `json:"avatar"`
+	Status   int16          `json:"status"`
 }
 
 func (q *Queries) AddProfile(ctx context.Context, arg AddProfileParams) error {
@@ -63,7 +62,28 @@ func (q *Queries) AddProfile(ctx context.Context, arg AddProfileParams) error {
 		arg.Username,
 		arg.Avatar,
 		arg.Status,
-		arg.Guildlist,
+	)
+	return err
+}
+
+const addToGuildList = `-- name: AddToGuildList :exec
+INSERT INTO Guild_List (User_ID, Guild_ID, Home_Server, Position)
+VALUES($1, $2, $3, $4)
+`
+
+type AddToGuildListParams struct {
+	UserID     uint64 `json:"user_id"`
+	GuildID    uint64 `json:"guild_id"`
+	HomeServer string `json:"home_server"`
+	Position   string `json:"position"`
+}
+
+func (q *Queries) AddToGuildList(ctx context.Context, arg AddToGuildListParams) error {
+	_, err := q.exec(ctx, q.addToGuildListStmt, addToGuildList,
+		arg.UserID,
+		arg.GuildID,
+		arg.HomeServer,
+		arg.Position,
 	)
 	return err
 }
@@ -104,6 +124,78 @@ func (q *Queries) GetAvatar(ctx context.Context, userID uint64) (sql.NullString,
 	return avatar, err
 }
 
+const getGuildList = `-- name: GetGuildList :many
+SELECT Guild_ID,
+  Home_Server
+FROM Guild_List
+WHERE User_ID = $1
+ORDER BY Position
+`
+
+type GetGuildListRow struct {
+	GuildID    uint64 `json:"guild_id"`
+	HomeServer string `json:"home_server"`
+}
+
+func (q *Queries) GetGuildList(ctx context.Context, userID uint64) ([]GetGuildListRow, error) {
+	rows, err := q.query(ctx, q.getGuildListStmt, getGuildList, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetGuildListRow
+	for rows.Next() {
+		var i GetGuildListRow
+		if err := rows.Scan(&i.GuildID, &i.HomeServer); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getGuildListPosition = `-- name: GetGuildListPosition :one
+SELECT Position
+FROM Guild_List
+WHERE User_ID = $1
+  AND Guild_ID = $2
+  AND Home_Server = $3
+`
+
+type GetGuildListPositionParams struct {
+	UserID     uint64 `json:"user_id"`
+	GuildID    uint64 `json:"guild_id"`
+	HomeServer string `json:"home_server"`
+}
+
+func (q *Queries) GetGuildListPosition(ctx context.Context, arg GetGuildListPositionParams) (string, error) {
+	row := q.queryRow(ctx, q.getGuildListPositionStmt, getGuildListPosition, arg.UserID, arg.GuildID, arg.HomeServer)
+	var position string
+	err := row.Scan(&position)
+	return position, err
+}
+
+const getLastGuildPositionInList = `-- name: GetLastGuildPositionInList :one
+SELECT Position
+FROM Guild_List
+WHERE User_ID = $1
+ORDER BY Position
+LIMIT 1
+`
+
+func (q *Queries) GetLastGuildPositionInList(ctx context.Context, userID uint64) (string, error) {
+	row := q.queryRow(ctx, q.getLastGuildPositionInListStmt, getLastGuildPositionInList, userID)
+	var position string
+	err := row.Scan(&position)
+	return position, err
+}
+
 const getLocalUserID = `-- name: GetLocalUserID :one
 SELECT Local_User_ID
 FROM Foreign_Users
@@ -127,19 +219,17 @@ const getUser = `-- name: GetUser :one
 SELECT Users.User_ID,
   Profiles.Username,
   Profiles.Avatar,
-  Profiles.Status,
-  Profiles.GuildList
+  Profiles.Status
 FROM Users
   INNER JOIN Profiles ON (Users.User_ID = Profiles.User_ID)
 WHERE Users.User_ID = $1
 `
 
 type GetUserRow struct {
-	UserID    uint64         `json:"user_id"`
-	Username  string         `json:"username"`
-	Avatar    sql.NullString `json:"avatar"`
-	Status    int16          `json:"status"`
-	Guildlist sql.NullString `json:"guildlist"`
+	UserID   uint64         `json:"user_id"`
+	Username string         `json:"username"`
+	Avatar   sql.NullString `json:"avatar"`
+	Status   int16          `json:"status"`
 }
 
 func (q *Queries) GetUser(ctx context.Context, userID uint64) (GetUserRow, error) {
@@ -150,7 +240,6 @@ func (q *Queries) GetUser(ctx context.Context, userID uint64) (GetUserRow, error
 		&i.Username,
 		&i.Avatar,
 		&i.Status,
-		&i.Guildlist,
 	)
 	return i, err
 }
@@ -210,6 +299,43 @@ func (q *Queries) GetUserMetadata(ctx context.Context, arg GetUserMetadataParams
 	return metadata, err
 }
 
+const moveGuild = `-- name: MoveGuild :exec
+UPDATE Guild_List
+SET Position = $1
+WHERE User_ID = $1
+  AND Guild_ID = $2
+  AND Home_Server = $3
+`
+
+type MoveGuildParams struct {
+	Position   string `json:"position"`
+	GuildID    uint64 `json:"guild_id"`
+	HomeServer string `json:"home_server"`
+}
+
+func (q *Queries) MoveGuild(ctx context.Context, arg MoveGuildParams) error {
+	_, err := q.exec(ctx, q.moveGuildStmt, moveGuild, arg.Position, arg.GuildID, arg.HomeServer)
+	return err
+}
+
+const removeGuildFromList = `-- name: RemoveGuildFromList :exec
+DELETE FROM Guild_List
+WHERE User_ID = $1
+  AND Guild_ID = $2
+  AND Home_Server = $3
+`
+
+type RemoveGuildFromListParams struct {
+	UserID     uint64 `json:"user_id"`
+	GuildID    uint64 `json:"guild_id"`
+	HomeServer string `json:"home_server"`
+}
+
+func (q *Queries) RemoveGuildFromList(ctx context.Context, arg RemoveGuildFromListParams) error {
+	_, err := q.exec(ctx, q.removeGuildFromListStmt, removeGuildFromList, arg.UserID, arg.GuildID, arg.HomeServer)
+	return err
+}
+
 const setStatus = `-- name: SetStatus :exec
 UPDATE Profiles
 SET Status = $1
@@ -239,22 +365,6 @@ type UpdateAvatarParams struct {
 
 func (q *Queries) UpdateAvatar(ctx context.Context, arg UpdateAvatarParams) error {
 	_, err := q.exec(ctx, q.updateAvatarStmt, updateAvatar, arg.Avatar, arg.UserID)
-	return err
-}
-
-const updateGuildList = `-- name: UpdateGuildList :exec
-UPDATE Profiles
-SET GuildList = $1
-WHERE User_ID = $2
-`
-
-type UpdateGuildListParams struct {
-	Guildlist sql.NullString `json:"guildlist"`
-	UserID    uint64         `json:"user_id"`
-}
-
-func (q *Queries) UpdateGuildList(ctx context.Context, arg UpdateGuildListParams) error {
-	_, err := q.exec(ctx, q.updateGuildListStmt, updateGuildList, arg.Guildlist, arg.UserID)
 	return err
 }
 

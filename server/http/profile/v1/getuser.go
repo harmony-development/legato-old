@@ -17,9 +17,5 @@ func (h Handlers) GetUser(c echo.Context) error {
 		UserAvatar: user.Avatar.String,
 		UserStatus: db.UserStatus(user.Status),
 	}
-
-	if ctx.UserID == user.UserID && user.Guildlist.Valid {
-		response.GuildList = user.Guildlist.String
-	}
 	return ctx.JSON(http.StatusOK, response)
 }

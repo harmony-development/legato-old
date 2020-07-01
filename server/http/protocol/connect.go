@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/thanhpk/randstr"
 
 	"harmony-server/server/http/hm"
 	"harmony-server/server/http/responses"
@@ -28,7 +29,10 @@ func (h API) Connect(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 	}
-	return ctx.JSON(http.StatusOK, map[string]string{
-		"token": token,
+	nonce := randstr.Base64(h.Deps.Config.Server.NonceLength)
+	h.Deps.DB.AddNonce(nonce, user.UserID, data.Target)
+	return ctx.JSON(http.StatusOK, ConnectResponse{
+		Token: token,
+		Nonce: nonce,
 	})
 }

@@ -67,7 +67,6 @@ type IHarmonyDB interface {
 	EmailExists(email string) (bool, error)
 	ExpireSessions() error
 	UpdateUsername(userID uint64, username string) error
-	UpdateGuildList(userID uint64, newList string) error
 	GetAvatar(userID uint64) (sql.NullString, error)
 	UpdateAvatar(userID uint64, avatar string) error
 	HasGuildWithID(guildID uint64) (bool, error)
@@ -78,6 +77,13 @@ type IHarmonyDB interface {
 	UpdateMessage(messageID uint64, content *string, embeds, actions *[][]byte) (time.Time, error)
 	SetStatus(userID uint64, status UserStatus) error
 	GetUserMetadata(userID uint64, appID string) (string, error)
+	GetNonceInfo(nonce string) (queries.GetNonceInfoRow, error)
+	AddNonce(nonce string, userID uint64, homeServer string) error
+	GetGuildList(userID uint64) ([]queries.GetGuildListRow, error)
+	GetGuildListPosition(userID, guildID uint64, homeServer string) (string, error)
+	AddGuildToList(userID, guildID uint64, homeServer string) error
+	MoveGuild(userID uint64, guildID uint64, homeServer string, nextGuildID, prevGuildID uint64, nextHomeServer, prevHomeServer string) error
+	RemoveGuildFromList(userID, guildID uint64, homeServer string) error
 }
 
 // New creates a new DB connection
