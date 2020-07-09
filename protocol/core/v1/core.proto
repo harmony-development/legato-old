@@ -6,37 +6,116 @@ package protocol.core.v1;
 
 option go_package = "core;corev1";
 
-message CreateGuildData { string guild_name = 1; }
+// CREATE
 
+message CreateGuildData { string guild_name = 1; }
 message CreateGuildResponse { string guild_id = 1; }
 
-message AddChannelData { string channel_name = 1; }
+message CreateInviteData {}
+message CreateInviteResponse {}
 
-message AddChannelResponse {
+message CreateChannelData { string channel_name = 1; }
+
+message CreateChannelResponse {
   uint64 guild_id = 1;
   uint64 channel_id = 2;
   uint64 channel_name = 3;
 }
 
+// READ
+
+message GetGuildData { uint64 guild_id = 1; }
+message GetGuildResponse {
+  string guild_name = 1;
+  uint64 guild_owner = 2;
+  string guild_picture = 3;
+}
+
+message GetGuildInvitesData { uint64 guild_id = 1; }
+message GetGuildInvitesResponse {
+  uint64 guild_id = 1;
+  uint64 invite_id = 2;
+  int32 possible_uses = 3;
+  int32 use_count = 4;
+}
+
+message GetGuildMembersData { uint64 guild_id = 1; }
+message GetGuildMembersResponse { repeated uint64 members = 1; }
+
+message GetGuildChannelsData { uint64 guild_id = 1; }
+message GetGuildChannelsResponse {
+  message Channel {
+    uint64 channel_id = 1;
+    string channel_name = 2;
+  }
+
+  repeated Channel channels = 1;
+}
+
+message GetChannelMessagesData { uint64 load_before_message = 1; }
+message GetChannelMessagesResponse {
+  message Message {
+    uint64 guild_id = 1;
+    uint64 channel_id = 2;
+    uint64 message_id = 3;
+    uint64 author_id = 4;
+    uint64 created_at = 5;
+    uint64 edited_at = 6;
+    string content = 7;
+  }
+  repeated Message messages = 1;
+}
+
+// UPDATE
+
+message UpdateGuildNameData {
+  uint64 guild_id = 1;
+  string new_guild_name = 2;
+}
+message UpdateGuildNameResponse { bool success = 1; }
+
+message UpdateMessageData { string content = 1; }
+message UpdateMessageResponse { bool success = 1; }
+
+// DELETE
+
+message DeleteGuildData { uint64 guild_id = 1; }
+message DeleteGuildResponse { bool success = 1; }
+
+message DeleteInviteData { string invite_code = 1; }
+message DeleteInviteResponse { bool success = 1; }
+
+message DeleteChannelData {
+  uint64 guild_id = 1;
+  uint64 channel_id = 2;
+}
+message DeleteChannelResponse { bool success = 1; }
+
+message DeleteMessageData {
+  uint64 guild_id = 1;
+  uint64 channel_id = 2;
+  uint64 message_id = 3;
+}
+message DeleteMessageResponse { bool success = 1; }
+
 service CoreService {
   rpc CreateGuild(CreateGuildData) returns (CreateGuildResponse) {}
-  rpc CreateInvite(google.protobuf.Empty) returns (google.protobuf.Empty) {}
-  rpc CreateChannel(AddChannelData) returns (AddChannelResponse) {}
+  rpc CreateInvite(CreateInviteData) returns (CreateInviteResponse) {}
+  rpc CreateChannel(CreateChannelData) returns (CreateChannelResponse) {}
 
-  rpc GetGuild(google.protobuf.Empty) returns (google.protobuf.Empty) {}
-  rpc GetGuildInvites(google.protobuf.Empty) returns (google.protobuf.Empty) {}
-  rpc GetGuildMembers(google.protobuf.Empty) returns (google.protobuf.Empty) {}
-  rpc GetGuildChannels(google.protobuf.Empty) returns (google.protobuf.Empty) {}
-  rpc GetChannelMessages(google.protobuf.Empty)
-      returns (google.protobuf.Empty) {}
+  rpc GetGuild(GetGuildData) returns (GetGuildResponse) {}
+  rpc GetGuildInvites(GetGuildInvitesData) returns (GetGuildInvitesResponse) {}
+  rpc GetGuildMembers(GetGuildMembersData) returns (GetGuildMembersResponse) {}
+  rpc GetGuildChannels(GetGuildChannelsData)
+      returns (GetGuildChannelsResponse) {}
+  rpc GetChannelMessages(GetChannelMessagesData)
+      returns (GetChannelMessagesResponse) {}
 
-  rpc UpdateGuildName(google.protobuf.Empty) returns (google.protobuf.Empty) {}
-  rpc UpdateGuildPicture(google.protobuf.Empty)
-      returns (google.protobuf.Empty) {}
-  rpc UpdateMessage(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+  rpc UpdateGuildName(UpdateGuildNameData) returns (UpdateGuildNameResponse) {}
+  rpc UpdateMessage(UpdateMessageData) returns (UpdateMessageResponse) {}
 
-  rpc DeleteGuild(google.protobuf.Empty) returns (google.protobuf.Empty) {}
-  rpc DeleteInvite(google.protobuf.Empty) returns (google.protobuf.Empty) {}
-  rpc DeleteChannel(google.protobuf.Empty) returns (google.protobuf.Empty) {}
-  rpc DeleteMessage(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+  rpc DeleteGuild(DeleteGuildData) returns (DeleteGuildResponse) {}
+  rpc DeleteInvite(DeleteInviteData) returns (DeleteInviteResponse) {}
+  rpc DeleteChannel(DeleteChannelData) returns (DeleteChannelResponse) {}
+  rpc DeleteMessage(DeleteMessageData) returns (DeleteMessageResponse) {}
 }
