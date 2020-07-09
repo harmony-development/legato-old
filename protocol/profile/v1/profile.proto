@@ -5,11 +5,11 @@ package protocol.profile.v1;
 option go_package = "profile;profilev1";
 
 enum UserStatus {
-  STREAMING = 0;
-  ONLINE = 1;
-  DO_NOT_DISTURB = 2;
-  IDLE = 3;
-  OFFLINE = 4;
+  USER_STATUS_ONLINE_UNSPECIFIED = 0;
+  USER_STATUS_STREAMING = 1;
+  USER_STATUS_DO_NOT_DISTURB = 2;
+  USER_STATUS_IDLE = 3;
+  USER_STATUS_OFFLINE = 4;
 }
 
 message GetUserRequest { uint64 user_id = 1; }
