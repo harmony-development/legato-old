@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+package protocol.core.v1;
+
+option go_package = "core;corev1";
+
+message CreateGuildData { string guild_name = 1; }
+
+message CreateGuildResponse { string guild_id = 1; }
+
+message AddChannelData { string channel_name = 1; }
+
+message AddChannelResponse {
+  uint64 guild_id = 1;
+  uint64 channel_id = 2;
+  uint64 channel_name = 3;
+}
+
+service CoreService {
+  rpc CreateGuild(CreateGuildData) returns (CreateGuildResponse) {}
+  rpc CreateInvite(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+  rpc CreateChannel(AddChannelData) returns (AddChannelResponse) {}
+
+  rpc GetGuild(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+  rpc GetGuildInvites(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+  rpc GetGuildMembers(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+  rpc GetGuildChannels(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+  rpc GetChannelMessages(google.protobuf.Empty)
+      returns (google.protobuf.Empty) {}
+
+  rpc UpdateGuildName(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+  rpc UpdateGuildPicture(google.protobuf.Empty)
+      returns (google.protobuf.Empty) {}
+  rpc UpdateMessage(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+
+  rpc DeleteGuild(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+  rpc DeleteInvite(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+  rpc DeleteChannel(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+  rpc DeleteMessage(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+}
