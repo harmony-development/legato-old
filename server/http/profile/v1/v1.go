@@ -13,7 +13,7 @@ import (
 
 // Handlers for ProfileKit
 type Handlers struct {
-	Deps *Dependencies
+	*Dependencies
 }
 
 // Dependencies are the elements that ProfileKit handlers need
@@ -28,7 +28,7 @@ type Dependencies struct {
 // New creates a new set of Handlers
 func New(deps *Dependencies) *Handlers {
 	return &Handlers{
-		Deps: deps,
+		Dependencies: deps,
 	}
 }
 
@@ -86,6 +86,17 @@ func (h Handlers) MakeRoutes() []routing.Route {
 			RateLimit: &routing.RateLimit{
 				Duration: 3 * time.Second,
 				Burst:    5,
+			},
+			Auth:     true,
+			Location: routing.LocationNone,
+		},
+		{
+			Path:    "/users/~/guild/move",
+			Handler: h.MoveGuild,
+			Method:  routing.PATCH,
+			RateLimit: &routing.RateLimit{
+				Duration: 500 * time.Millisecond,
+				Burst:    1,
 			},
 			Auth:     true,
 			Location: routing.LocationNone,

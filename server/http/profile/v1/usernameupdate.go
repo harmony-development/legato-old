@@ -21,7 +21,7 @@ func (h Handlers) UsernameUpdate(c echo.Context) error {
 	if !ctx.Limiter.Allow() {
 		return echo.NewHTTPError(http.StatusTooManyRequests, responses.TooManyRequests)
 	}
-	for c := range h.Deps.State.UserUpdateListeners {
+	for c := range h.State.UserUpdateListeners {
 		c.Send(&client.OutPacket{
 			Type: UserUpdateEventType,
 			Data: UsernameUpdateEvent{
@@ -30,7 +30,7 @@ func (h Handlers) UsernameUpdate(c echo.Context) error {
 			},
 		})
 	}
-	if err := h.Deps.DB.UpdateUsername(ctx.UserID, data.Username); err != nil {
+	if err := h.DB.UpdateUsername(ctx.UserID, data.Username); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 	}
 	return ctx.NoContent(http.StatusOK)

@@ -17,7 +17,7 @@ type GetUserMetadataData struct {
 func (h Handlers) GetUserMetadata(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
 	data := ctx.Data.(GetUserMetadataData)
-	meta, err := h.Deps.DB.GetUserMetadata(ctx.UserID, data.appID)
+	meta, err := h.DB.GetUserMetadata(ctx.UserID, data.appID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return echo.NewHTTPError(http.StatusNotFound, responses.MetadataNotFound)
