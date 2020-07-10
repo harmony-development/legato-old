@@ -2,9 +2,10 @@ package testing
 
 import (
 	"database/sql"
-	"harmony-server/util"
 	"testing"
 	"time"
+
+	"github.com/harmony-development/legato/util"
 
 	"github.com/stretchr/testify/assert"
 )

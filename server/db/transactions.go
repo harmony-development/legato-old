@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"harmony-server/server/db/queries"
+	"github.com/harmony-development/legato/server/db/queries"
 )
 
 func toSqlString(input string) sql.NullString {

@@ -10,7 +10,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 
-	"harmony-server/server/config"
+	"github.com/harmony-development/legato/server/config"
 )
 
 // Manager wraps logic for authentication

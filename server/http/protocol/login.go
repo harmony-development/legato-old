@@ -1,18 +1,19 @@
 package protocol
 
 import (
-	v1 "harmony-server/server/http/core/v1"
-	"harmony-server/util"
 	"net/http"
+
+	v1 "github.com/harmony-development/legato/server/http/core/v1"
+	"github.com/harmony-development/legato/util"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
 	"golang.org/x/crypto/bcrypt"
 
-	"harmony-server/server/auth"
-	"harmony-server/server/http/hm"
-	"harmony-server/server/http/responses"
+	"github.com/harmony-development/legato/server/auth"
+	"github.com/harmony-development/legato/server/http/hm"
+	"github.com/harmony-development/legato/server/http/responses"
 )
 
 type LoginData struct {

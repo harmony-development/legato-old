@@ -2,12 +2,13 @@ package events
 
 import (
 	"encoding/json"
-	"harmony-server/server/db"
-	"harmony-server/server/http/responses"
 	"sync"
 
-	"harmony-server/server/http/socket/client"
-	"harmony-server/server/state/guild"
+	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/http/responses"
+
+	"github.com/harmony-development/legato/server/http/socket/client"
+	"github.com/harmony-development/legato/server/state/guild"
 )
 
 type subscribeData struct {

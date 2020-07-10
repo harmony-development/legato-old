@@ -1,8 +1,9 @@
 package logger
 
 import (
-	"harmony-server/server/config"
 	"os"
+
+	"github.com/harmony-development/legato/server/config"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/pkg/errors"

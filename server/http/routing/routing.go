@@ -5,7 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"harmony-server/server/http/hm"
+	"github.com/harmony-development/legato/server/http/hm"
 )
 
 const (

@@ -1,8 +1,8 @@
 package http
 
 import (
-	"harmony-server/server/http/profile"
-	"harmony-server/server/http/protocol"
+	"github.com/harmony-development/legato/server/http/profile"
+	"github.com/harmony-development/legato/server/http/protocol"
 
 	sentryecho "github.com/getsentry/sentry-go/echo"
 	"github.com/go-playground/validator/v10"
@@ -10,16 +10,16 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sony/sonyflake"
 
-	"harmony-server/server/auth"
-	"harmony-server/server/config"
-	"harmony-server/server/db"
-	"harmony-server/server/http/core"
-	"harmony-server/server/http/hm"
-	"harmony-server/server/http/routing"
-	"harmony-server/server/http/socket"
-	"harmony-server/server/logger"
-	"harmony-server/server/state"
-	"harmony-server/server/storage"
+	"github.com/harmony-development/legato/server/auth"
+	"github.com/harmony-development/legato/server/config"
+	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/http/core"
+	"github.com/harmony-development/legato/server/http/hm"
+	"github.com/harmony-development/legato/server/http/routing"
+	"github.com/harmony-development/legato/server/http/socket"
+	"github.com/harmony-development/legato/server/logger"
+	"github.com/harmony-development/legato/server/state"
+	"github.com/harmony-development/legato/server/storage"
 )
 
 // Server is an instance of the HTTP server

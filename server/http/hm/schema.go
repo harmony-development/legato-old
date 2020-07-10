@@ -6,7 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"harmony-server/server/http/responses"
+	"github.com/harmony-development/legato/server/http/responses"
 )
 
 func (m *Middlewares) Schema(schema interface{}) echo.MiddlewareFunc {

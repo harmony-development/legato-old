@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"harmony-server/server/db"
-	"harmony-server/server/db/queries"
+	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/db/queries"
 )
 
 type MockFlags struct {

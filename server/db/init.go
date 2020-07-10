@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"time"
 
-	"harmony-server/server/config"
-	"harmony-server/server/db/queries"
-	"harmony-server/server/logger"
+	"github.com/harmony-development/legato/server/config"
+	"github.com/harmony-development/legato/server/db/queries"
+	"github.com/harmony-development/legato/server/logger"
 
 	lru "github.com/hashicorp/golang-lru"
 	_ "github.com/lib/pq"

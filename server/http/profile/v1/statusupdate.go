@@ -1,12 +1,13 @@
 package v1
 
 import (
-	"harmony-server/server/db"
-	"harmony-server/server/http/hm"
-	"harmony-server/server/http/responses"
-	"harmony-server/server/http/socket/client"
-	"harmony-server/util"
 	"net/http"
+
+	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/http/hm"
+	"github.com/harmony-development/legato/server/http/responses"
+	"github.com/harmony-development/legato/server/http/socket/client"
+	"github.com/harmony-development/legato/util"
 
 	"github.com/labstack/echo/v4"
 )

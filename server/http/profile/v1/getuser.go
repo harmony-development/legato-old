@@ -1,9 +1,10 @@
 package v1
 
 import (
-	"harmony-server/server/db"
-	"harmony-server/server/http/hm"
 	"net/http"
+
+	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/http/hm"
 
 	"github.com/labstack/echo/v4"
 )

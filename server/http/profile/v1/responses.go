@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"harmony-server/server/db"
+	"github.com/harmony-development/legato/server/db"
 )
 
 type UserInfoResponse struct {

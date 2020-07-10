@@ -1,13 +1,13 @@
 package profile
 
 import (
-	"harmony-server/server/config"
-	"harmony-server/server/db"
-	v1 "harmony-server/server/http/profile/v1"
-	"harmony-server/server/http/routing"
-	"harmony-server/server/logger"
-	"harmony-server/server/state"
-	"harmony-server/server/storage"
+	"github.com/harmony-development/legato/server/config"
+	"github.com/harmony-development/legato/server/db"
+	v1 "github.com/harmony-development/legato/server/http/profile/v1"
+	"github.com/harmony-development/legato/server/http/routing"
+	"github.com/harmony-development/legato/server/logger"
+	"github.com/harmony-development/legato/server/state"
+	"github.com/harmony-development/legato/server/storage"
 
 	"github.com/labstack/echo/v4"
 )

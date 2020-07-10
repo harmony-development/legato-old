@@ -11,10 +11,10 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/thanhpk/randstr"
 
-	"harmony-server/server/http/hm"
-	"harmony-server/server/http/responses"
-	"harmony-server/server/http/socket/client"
-	"harmony-server/util"
+	"github.com/harmony-development/legato/server/http/hm"
+	"github.com/harmony-development/legato/server/http/responses"
+	"github.com/harmony-development/legato/server/http/socket/client"
+	"github.com/harmony-development/legato/util"
 )
 
 func (h Handlers) AvatarUpdate(c echo.Context) error {

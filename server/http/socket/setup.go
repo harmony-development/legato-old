@@ -1,9 +1,10 @@
 package socket
 
 import (
-	"harmony-server/server/http/socket/client"
-	"harmony-server/server/http/socket/events"
 	"time"
+
+	"github.com/harmony-development/legato/server/http/socket/client"
+	"github.com/harmony-development/legato/server/http/socket/events"
 )
 
 // Setup sets up a Handler

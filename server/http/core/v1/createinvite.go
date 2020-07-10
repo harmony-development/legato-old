@@ -1,8 +1,9 @@
 package v1
 
 import (
-	"harmony-server/server/http/hm"
 	"net/http"
+
+	"github.com/harmony-development/legato/server/http/hm"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/labstack/echo/v4"

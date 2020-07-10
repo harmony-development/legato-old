@@ -1,13 +1,14 @@
 package protocol
 
 import (
-	"harmony-server/server/auth"
-	"harmony-server/server/config"
-	"harmony-server/server/db"
-	"harmony-server/server/http/routing"
-	"harmony-server/server/http/socket"
-	"harmony-server/server/logger"
 	"time"
+
+	"github.com/harmony-development/legato/server/auth"
+	"github.com/harmony-development/legato/server/config"
+	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/http/routing"
+	"github.com/harmony-development/legato/server/http/socket"
+	"github.com/harmony-development/legato/server/logger"
 
 	"github.com/labstack/echo/v4"
 	"github.com/sony/sonyflake"

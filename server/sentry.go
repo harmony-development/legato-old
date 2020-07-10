@@ -1,7 +1,7 @@
 package server
 
 import (
-	"harmony-server/server/config"
+	"github.com/harmony-development/legato/server/config"
 
 	"github.com/getsentry/sentry-go"
 )

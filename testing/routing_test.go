@@ -1,12 +1,13 @@
 package testing
 
 import (
-	"harmony-server/server/http/hm"
-	"harmony-server/server/http/routing"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/harmony-development/legato/server/http/hm"
+	"github.com/harmony-development/legato/server/http/routing"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"

@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"sync"
 
-	"harmony-server/server/db"
-	"harmony-server/server/http/socket/client"
-	"harmony-server/server/logger"
-	"harmony-server/server/state"
+	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/http/socket/client"
+	"github.com/harmony-development/legato/server/logger"
+	"github.com/harmony-development/legato/server/state"
 
 	"github.com/gorilla/websocket"
 )
