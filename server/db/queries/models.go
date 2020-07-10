@@ -19,12 +19,6 @@ type Channel struct {
 	ChannelName string        `json:"channel_name"`
 }
 
-type FederationNonce struct {
-	Nonce      string `json:"nonce"`
-	UserID     uint64 `json:"user_id"`
-	HomeServer string `json:"home_server"`
-}
-
 type File struct {
 	Hash   []byte `json:"hash"`
 	FileID string `json:"file_id"`

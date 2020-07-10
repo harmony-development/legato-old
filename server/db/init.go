@@ -77,8 +77,6 @@ type IHarmonyDB interface {
 	UpdateMessage(messageID uint64, content *string, embeds, actions *[][]byte) (time.Time, error)
 	SetStatus(userID uint64, status UserStatus) error
 	GetUserMetadata(userID uint64, appID string) (string, error)
-	GetNonceInfo(nonce string) (queries.GetNonceInfoRow, error)
-	AddNonce(nonce string, userID uint64, homeServer string) error
 	GetGuildList(userID uint64) ([]queries.GetGuildListRow, error)
 	GetGuildListPosition(userID, guildID uint64, homeServer string) (string, error)
 	AddGuildToList(userID, guildID uint64, homeServer string) error

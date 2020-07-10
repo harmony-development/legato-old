@@ -37,9 +37,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.addMessageStmt, err = db.PrepareContext(ctx, addMessage); err != nil {
 		return nil, fmt.Errorf("error preparing query AddMessage: %w", err)
 	}
-	if q.addNonceStmt, err = db.PrepareContext(ctx, addNonce); err != nil {
-		return nil, fmt.Errorf("error preparing query AddNonce: %w", err)
-	}
 	if q.addProfileStmt, err = db.PrepareContext(ctx, addProfile); err != nil {
 		return nil, fmt.Errorf("error preparing query AddProfile: %w", err)
 	}
@@ -129,9 +126,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getMessagesStmt, err = db.PrepareContext(ctx, getMessages); err != nil {
 		return nil, fmt.Errorf("error preparing query GetMessages: %w", err)
-	}
-	if q.getNonceInfoStmt, err = db.PrepareContext(ctx, getNonceInfo); err != nil {
-		return nil, fmt.Errorf("error preparing query GetNonceInfo: %w", err)
 	}
 	if q.getUserStmt, err = db.PrepareContext(ctx, getUser); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUser: %w", err)
@@ -230,11 +224,6 @@ func (q *Queries) Close() error {
 	if q.addMessageStmt != nil {
 		if cerr := q.addMessageStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing addMessageStmt: %w", cerr)
-		}
-	}
-	if q.addNonceStmt != nil {
-		if cerr := q.addNonceStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing addNonceStmt: %w", cerr)
 		}
 	}
 	if q.addProfileStmt != nil {
@@ -385,11 +374,6 @@ func (q *Queries) Close() error {
 	if q.getMessagesStmt != nil {
 		if cerr := q.getMessagesStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getMessagesStmt: %w", cerr)
-		}
-	}
-	if q.getNonceInfoStmt != nil {
-		if cerr := q.getNonceInfoStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getNonceInfoStmt: %w", cerr)
 		}
 	}
 	if q.getUserStmt != nil {
@@ -551,7 +535,6 @@ type Queries struct {
 	addForeignUserStmt             *sql.Stmt
 	addLocalUserStmt               *sql.Stmt
 	addMessageStmt                 *sql.Stmt
-	addNonceStmt                   *sql.Stmt
 	addProfileStmt                 *sql.Stmt
 	addSessionStmt                 *sql.Stmt
 	addToGuildListStmt             *sql.Stmt
@@ -582,7 +565,6 @@ type Queries struct {
 	getMessageAuthorStmt           *sql.Stmt
 	getMessageDateStmt             *sql.Stmt
 	getMessagesStmt                *sql.Stmt
-	getNonceInfoStmt               *sql.Stmt
 	getUserStmt                    *sql.Stmt
 	getUserByEmailStmt             *sql.Stmt
 	getUserMetadataStmt            *sql.Stmt
@@ -617,7 +599,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		addForeignUserStmt:             q.addForeignUserStmt,
 		addLocalUserStmt:               q.addLocalUserStmt,
 		addMessageStmt:                 q.addMessageStmt,
-		addNonceStmt:                   q.addNonceStmt,
 		addProfileStmt:                 q.addProfileStmt,
 		addSessionStmt:                 q.addSessionStmt,
 		addToGuildListStmt:             q.addToGuildListStmt,
@@ -648,7 +629,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getMessageAuthorStmt:           q.getMessageAuthorStmt,
 		getMessageDateStmt:             q.getMessageDateStmt,
 		getMessagesStmt:                q.getMessagesStmt,
-		getNonceInfoStmt:               q.getNonceInfoStmt,
 		getUserStmt:                    q.getUserStmt,
 		getUserByEmailStmt:             q.getUserByEmailStmt,
 		getUserMetadataStmt:            q.getUserMetadataStmt,

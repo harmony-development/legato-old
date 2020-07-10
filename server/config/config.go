@@ -31,7 +31,6 @@ type ServerConf struct {
 	SessionCacheMax                   int
 	SessionDuration                   time.Duration
 	LogErrors                         bool
-	NonceLength                       int
 	GuildLeaveNotificationQueueLength int
 	Avatar                            Avatar
 	UsernamePolicy                    UsernamePolicy
@@ -90,7 +89,6 @@ var DefaultConf = Config{
 		SessionDuration:                   48 * time.Hour,
 		LogErrors:                         true,
 		SnowflakeStart:                    0,
-		NonceLength:                       32,
 		GuildLeaveNotificationQueueLength: 64,
 		Avatar: Avatar{
 			Width:   256,

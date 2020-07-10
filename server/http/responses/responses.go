@@ -13,7 +13,6 @@ const (
 	GuildNotFound          = "guild.not-found"
 	NotInGuild             = "guild.not-member"
 	MetadataNotFound       = "user.metadata-not-found"
-	NonceNotFound          = "nonce-not-found"
 	UnknownError           = "unknown"
 )
 

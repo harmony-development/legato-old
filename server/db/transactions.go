@@ -645,22 +645,6 @@ func (db *HarmonyDB) GetUserMetadata(userID uint64, appID string) (string, error
 	return metadata, err
 }
 
-func (db *HarmonyDB) GetNonceInfo(nonce string) (queries.GetNonceInfoRow, error) {
-	info, err := db.queries.GetNonceInfo(ctx, nonce)
-	db.Logger.CheckException(err)
-	return info, err
-}
-
-func (db *HarmonyDB) AddNonce(nonce string, userID uint64, homeServer string) error {
-	err := db.queries.AddNonce(ctx, queries.AddNonceParams{
-		Nonce:      nonce,
-		UserID:     userID,
-		HomeServer: homeServer,
-	})
-	db.Logger.CheckException(err)
-	return err
-}
-
 func (db *HarmonyDB) GetGuildList(userID uint64) ([]queries.GetGuildListRow, error) {
 	guilds, err := db.queries.GetGuildList(ctx, userID)
 	db.Logger.CheckException(err)

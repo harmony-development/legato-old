@@ -275,14 +275,6 @@ func (db *MockDB) GetUserMetadata(userID uint64, appID string) (string, error) {
 	panic("implement me")
 }
 
-func (db *MockDB) GetNonceInfo(nonce string) (queries.GetNonceInfoRow, error) {
-	panic("implement me")
-}
-
-func (db *MockDB) AddNonce(nonce string, userID uint64, homeServer string) error {
-	panic("implement me")
-}
-
 func (db *MockDB) GetGuildList(userID uint64) ([]queries.GetGuildListRow, error) {
 	panic("implement me")
 }
