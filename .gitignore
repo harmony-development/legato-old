@@ -5,6 +5,7 @@ filestore
 harmony.db
 static
 harmony-server
+legato
 config.json
 harmony-key.pem
 harmony-key.pub
