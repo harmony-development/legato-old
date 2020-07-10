@@ -10,6 +10,7 @@ const (
 	TooManyRequests        = "too-many-requests"
 	InvalidRequest         = "invalid-request"
 	InsufficientPrivileges = "insufficient-privileges"
+	UserNotFound           = "user-not-found"
 	GuildNotFound          = "guild.not-found"
 	NotInGuild             = "guild.not-member"
 	MetadataNotFound       = "user.metadata-not-found"

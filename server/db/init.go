@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	profilev1 "harmony-server/gen/profile"
 	"harmony-server/server/config"
 	"harmony-server/server/db/queries"
 	"harmony-server/server/logger"
@@ -75,7 +76,7 @@ type IHarmonyDB interface {
 	GetFileIDFromHash(hash []byte) (string, error)
 	GetGuildByID(guildID uint64) (queries.Guild, error)
 	UpdateMessage(messageID uint64, content *string, embeds, actions *[][]byte) (time.Time, error)
-	SetStatus(userID uint64, status UserStatus) error
+	SetStatus(userID uint64, status profilev1.UserStatus) error
 	GetUserMetadata(userID uint64, appID string) (string, error)
 	GetNonceInfo(nonce string) (queries.GetNonceInfoRow, error)
 	AddNonce(nonce string, userID uint64, homeServer string) error
