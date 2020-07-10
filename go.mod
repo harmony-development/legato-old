@@ -7,6 +7,7 @@ require (
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/getsentry/sentry-go v0.6.1
 	github.com/go-playground/validator/v10 v10.3.0
+	github.com/golang/protobuf v1.4.1
 	github.com/gorilla/websocket v1.4.2
 	github.com/h2non/bimg v1.1.2
 	github.com/hashicorp/golang-lru v0.5.4
@@ -29,5 +30,7 @@ require (
 	golang.org/x/net v0.0.0-20200602114024-627f9648deb9 // indirect
 	golang.org/x/sys v0.0.0-20200602225109-6fdc65e7d980 // indirect
 	golang.org/x/time v0.0.0-20200416051211-89c76fbcd5d1
+	google.golang.org/grpc v1.27.0
+	google.golang.org/protobuf v1.25.0
 	gopkg.in/ini.v1 v1.57.0 // indirect
 )

@@ -8,10 +8,10 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/sony/sonyflake"
 
+	"harmony-server/server/api"
 	"harmony-server/server/auth"
 	"harmony-server/server/config"
 	"harmony-server/server/db"
-	"harmony-server/server/http"
 	"harmony-server/server/logger"
 	"harmony-server/server/state"
 	"harmony-server/server/state/guild"
@@ -20,8 +20,8 @@ import (
 
 // Instance is an instance of the harmony server
 type Instance struct {
+	API            *api.API
 	Sonyflake      *sonyflake.Sonyflake
-	Server         *http.Server
 	State          *state.State
 	Config         *config.Config
 	AuthManager    *auth.Manager
@@ -64,14 +64,6 @@ func (inst Instance) Start() {
 		Guilds:     make(map[uint64]*guild.Guild),
 		GuildsLock: &sync.RWMutex{},
 	}
-	inst.Server = http.New(&http.Dependencies{
-		DB:             inst.DB,
-		AuthManager:    inst.AuthManager,
-		StorageManager: inst.StorageManager,
-		Logger:         inst.Logger,
-		State:          inst.State,
-		Config:         inst.Config,
-		Sonyflake:      inst.Sonyflake,
-	})
-	logrus.Fatal(inst.Server.Start(inst.Config.Server.Port))
+	inst.API = api.New()
+	inst.Logger.CheckException(inst.API.Start(inst.Config.Server.Port))
 }
