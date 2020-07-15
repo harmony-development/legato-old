@@ -130,7 +130,7 @@ func (h Handlers) MakeRoutes() []routing.Route {
 			Schema:   AddGuildData{},
 		},
 		{
-			Path:    "/usrs/~/guilds",
+			Path:    "/users/~/guilds",
 			Handler: h.GetGuildList,
 			Method:  routing.GET,
 			RateLimit: &routing.RateLimit{
