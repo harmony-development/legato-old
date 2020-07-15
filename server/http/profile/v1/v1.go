@@ -67,6 +67,7 @@ func (h Handlers) MakeRoutes() []routing.Route {
 			},
 			Auth:     true,
 			Location: routing.LocationNone,
+			Schema:   UsernameUpdateData{},
 		},
 		{
 			Path:    "/users/~/status",
@@ -78,6 +79,7 @@ func (h Handlers) MakeRoutes() []routing.Route {
 			},
 			Auth:     true,
 			Location: routing.LocationNone,
+			Schema:   StatusUpdateData{},
 		},
 		{
 			Path:    "/users/~/metadata",
@@ -89,17 +91,43 @@ func (h Handlers) MakeRoutes() []routing.Route {
 			},
 			Auth:     true,
 			Location: routing.LocationNone,
+			Schema:   GetUserMetadataData{},
 		},
 		{
 			Path:    "/users/~/guild/move",
 			Handler: h.MoveGuild,
 			Method:  routing.PATCH,
 			RateLimit: &routing.RateLimit{
-				Duration: 500 * time.Millisecond,
-				Burst:    1,
+				Duration: 1 * time.Second,
+				Burst:    3,
 			},
 			Auth:     true,
 			Location: routing.LocationNone,
+			Schema:   MoveGuildData{},
+		},
+		{
+			Path:    "/users/~/guild/remove",
+			Handler: h.RemoveGuild,
+			Method:  routing.DELETE,
+			RateLimit: &routing.RateLimit{
+				Duration: 1 * time.Second,
+				Burst:    5,
+			},
+			Auth:     true,
+			Location: routing.LocationNone,
+			Schema:   RemoveGuildData{},
+		},
+		{
+			Path:    "/users/~/guild/add",
+			Handler: h.AddGuild,
+			Method:  routing.PUT,
+			RateLimit: &routing.RateLimit{
+				Duration: 1 * time.Second,
+				Burst:    5,
+			},
+			Auth:     true,
+			Location: routing.LocationNone,
+			Schema:   AddGuildData{},
 		},
 	}
 }
