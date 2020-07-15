@@ -244,17 +244,6 @@ func (h Handlers) MakeRoutes() []routing.Route {
 			Location: routing.LocationGuildChannelAndMessage,
 		},
 		{
-			Path:    "/users/~/guilds",
-			Handler: h.GetGuilds,
-			Method:  routing.GET,
-			RateLimit: &routing.RateLimit{
-				Duration: 5 * time.Second,
-				Burst:    5,
-			},
-			Auth:   true,
-			Schema: nil,
-		},
-		{
 			Path:    "/users/~/guilds/join",
 			Handler: h.JoinGuild,
 			Method:  routing.POST,

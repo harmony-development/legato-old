@@ -2,6 +2,7 @@ package v1
 
 import (
 	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/db/queries"
 )
 
 type UserInfoResponse struct {
@@ -13,4 +14,8 @@ type UserInfoResponse struct {
 
 type GetUserMetadataResponse struct {
 	Metadata string `json:"metadata"`
+}
+
+type GetGuildListResponse struct {
+	Guilds []queries.GetGuildListRow `json:"guilds"`
 }

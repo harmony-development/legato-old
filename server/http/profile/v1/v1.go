@@ -129,5 +129,16 @@ func (h Handlers) MakeRoutes() []routing.Route {
 			Location: routing.LocationNone,
 			Schema:   AddGuildData{},
 		},
+		{
+			Path:    "/usrs/~/guilds",
+			Handler: h.GetGuildList,
+			Method:  routing.GET,
+			RateLimit: &routing.RateLimit{
+				Duration: 1 * time.Second,
+				Burst:    3,
+			},
+			Auth:     true,
+			Location: routing.LocationNone,
+		},
 	}
 }
