@@ -1,8 +1,8 @@
 package protocol
 
 import (
-	v1 "harmony-server/server/http/core/v1"
-	"harmony-server/util"
+	v1 "github.com/harmony-development/legato/server/http/core/v1"
+	"github.com/harmony-development/legato/util"
 
 	"net/http"
 	"unicode"
@@ -11,8 +11,8 @@ import (
 	"github.com/thanhpk/randstr"
 	"golang.org/x/crypto/bcrypt"
 
-	"harmony-server/server/http/hm"
-	"harmony-server/server/http/responses"
+	"github.com/harmony-development/legato/server/http/hm"
+	"github.com/harmony-development/legato/server/http/responses"
 )
 
 type RegisterData struct {

@@ -3,8 +3,8 @@ package state
 import (
 	"sync"
 
-	"harmony-server/server/http/socket/client"
-	"harmony-server/server/state/guild"
+	"github.com/harmony-development/legato/server/http/socket/client"
+	"github.com/harmony-development/legato/server/state/guild"
 )
 
 // State contains the variables related to application state

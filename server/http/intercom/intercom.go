@@ -1,8 +1,8 @@
 package intercom
 
 import (
-	"harmony-server/server/config"
-	"harmony-server/server/logger"
+	"github.com/harmony-development/legato/server/config"
+	"github.com/harmony-development/legato/server/logger"
 )
 
 type IntercomManager struct {

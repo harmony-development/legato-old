@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"harmony-server/server/db"
+	profilev1 "github.com/harmony-development/legato/gen/profile"
 )
 
 const (
@@ -23,6 +23,6 @@ type UsernameUpdateEvent struct {
 
 // StatusUpdateEvent is the data that will be sent to a client on a user status update
 type StatusUpdateEvent struct {
-	UserID string        `json:"user_id"`
-	Status db.UserStatus `json:"status"`
+	UserID string               `json:"user_id"`
+	Status profilev1.UserStatus `json:"status"`
 }

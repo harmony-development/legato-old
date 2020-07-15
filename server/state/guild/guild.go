@@ -1,8 +1,9 @@
 package guild
 
 import (
-	"harmony-server/server/http/socket/client"
 	"sync"
+
+	"github.com/harmony-development/legato/server/http/socket/client"
 )
 
 // ClientArray is a thread-safe array of client connections

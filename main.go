@@ -2,8 +2,9 @@ package main
 
 import (
 	"flag"
-	"harmony-server/cmd"
-	"harmony-server/server"
+
+	"github.com/harmony-development/legato/cmd"
+	"github.com/harmony-development/legato/server"
 
 	"github.com/sirupsen/logrus"
 )

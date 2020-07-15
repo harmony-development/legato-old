@@ -1,9 +1,10 @@
 package v1
 
 import (
-	"harmony-server/server/db"
-	"harmony-server/server/http/hm"
 	"net/http"
+
+	profilev1 "github.com/harmony-development/legato/gen/profile"
+	"github.com/harmony-development/legato/server/http/hm"
 
 	"github.com/labstack/echo/v4"
 )
@@ -15,7 +16,7 @@ func (h Handlers) GetUser(c echo.Context) error {
 	response := UserInfoResponse{
 		UserName:   user.Username,
 		UserAvatar: user.Avatar.String,
-		UserStatus: db.UserStatus(user.Status),
+		UserStatus: profilev1.UserStatus(user.Status),
 	}
 	return ctx.JSON(http.StatusOK, response)
 }

@@ -1,7 +1,7 @@
 package core
 
 import (
-	v1 "harmony-server/server/api/core/v1"
+	v1 "github.com/harmony-development/legato/server/api/core/v1"
 )
 
 // Dependencies are the backend services this package needs

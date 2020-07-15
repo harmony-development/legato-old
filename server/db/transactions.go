@@ -8,7 +8,8 @@ import (
 	"encoding/json"
 	"time"
 
-	"harmony-server/server/db/queries"
+	profilev1 "github.com/harmony-development/legato/gen/profile"
+	"github.com/harmony-development/legato/server/db/queries"
 )
 
 func toSqlString(input string) sql.NullString {
@@ -467,7 +468,7 @@ func (db *HarmonyDB) AddLocalUser(userID uint64, email, username string, passwor
 		UserID:   userID,
 		Username: username,
 		Avatar:   sql.NullString{},
-		Status:   UserStatusOffline,
+		Status:   int16(profilev1.UserStatus_USER_STATUS_OFFLINE),
 	}); err != nil {
 		return err
 	}
@@ -492,7 +493,7 @@ func (db *HarmonyDB) AddForeignUser(homeServer string, userID, localUserID uint6
 		UserID:   localUserID,
 		Username: username,
 		Avatar:   toSqlString(avatar),
-		Status:   UserStatusOffline,
+		Status:   int16(profilev1.UserStatus_USER_STATUS_OFFLINE),
 	}); err != nil {
 		return 0, err
 	}
@@ -629,7 +630,7 @@ func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, ac
 	return editedAt, nil
 }
 
-func (db *HarmonyDB) SetStatus(userID uint64, status UserStatus) error {
+func (db *HarmonyDB) SetStatus(userID uint64, status profilev1.UserStatus) error {
 	return db.queries.SetStatus(ctx, queries.SetStatusParams{
 		Status: int16(status), // lol shut up it's an int16
 		UserID: userID,

@@ -31,8 +31,8 @@ jobs:
         uses: codecov/codecov-action@v1
       - uses: actions/upload-artifact@v2
         with:
-          name: harmony-server
-          path: harmony-server
+          name: legato
+          path: legato
   golangci:
     name: lint
     runs-on: ubuntu-latest

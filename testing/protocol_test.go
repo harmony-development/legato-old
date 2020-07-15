@@ -11,9 +11,9 @@ import (
 	"github.com/sony/sonyflake"
 	"github.com/stretchr/testify/assert"
 
-	"harmony-server/server/config"
-	v1 "harmony-server/server/http/core/v1"
-	"harmony-server/server/http/protocol"
+	"github.com/harmony-development/legato/server/config"
+	v1 "github.com/harmony-development/legato/server/http/core/v1"
+	"github.com/harmony-development/legato/server/http/protocol"
 )
 
 var RegisterTests = RequestTestSet{

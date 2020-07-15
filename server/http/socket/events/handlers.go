@@ -1,9 +1,9 @@
 package events
 
 import (
-	"harmony-server/server/db"
-	"harmony-server/server/logger"
-	"harmony-server/server/state"
+	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/logger"
+	"github.com/harmony-development/legato/server/state"
 )
 
 // Events contains the events + their dependencies

@@ -1,15 +1,16 @@
 package v1
 
 import (
+	"context"
 	"database/sql"
 	"errors"
-	profilev1 "harmony-server/gen/profile"
-	"harmony-server/server/api/middleware"
-	"harmony-server/server/http/responses"
+
+	profilev1 "github.com/harmony-development/legato/gen/profile"
+	"github.com/harmony-development/legato/server/http/responses"
 )
 
 // GetUser handles the protocol's GetUser request
-func (v1 *V1) GetUser(ctx *middleware.HarmonyContext, r *profilev1.GetUserRequest) (*profilev1.GetUserResponse, error) {
+func (v1 *V1) GetUser(c context.Context, r *profilev1.GetUserRequest) (*profilev1.GetUserResponse, error) {
 	res, err := v1.DB.GetUserByID(r.UserId)
 	if err != nil {
 		if err == sql.ErrNoRows {

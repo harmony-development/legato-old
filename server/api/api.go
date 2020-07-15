@@ -1,11 +1,12 @@
 package api
 
 import (
-	corev1 "harmony-server/gen/core"
-	profilev1 "harmony-server/gen/profile"
-	"harmony-server/server/api/core"
-	"harmony-server/server/api/profile"
 	"net"
+
+	corev1 "github.com/harmony-development/legato/gen/core"
+	profilev1 "github.com/harmony-development/legato/gen/profile"
+	"github.com/harmony-development/legato/server/api/core"
+	"github.com/harmony-development/legato/server/api/profile"
 
 	"google.golang.org/grpc"
 )

@@ -3,9 +3,9 @@ package v1
 import (
 	"net/http"
 
-	"harmony-server/server/http/hm"
-	"harmony-server/server/http/responses"
-	"harmony-server/util"
+	"github.com/harmony-development/legato/server/http/hm"
+	"github.com/harmony-development/legato/server/http/responses"
+	"github.com/harmony-development/legato/util"
 
 	"github.com/labstack/echo/v4"
 )

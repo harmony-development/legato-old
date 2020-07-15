@@ -1,12 +1,13 @@
 package testing
 
 import (
-	harmony_http "harmony-server/server/http"
-	"harmony-server/server/http/hm"
-	"harmony-server/server/http/routing"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	harmony_http "github.com/harmony-development/legato/server/http"
+	"github.com/harmony-development/legato/server/http/hm"
+	"github.com/harmony-development/legato/server/http/routing"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"

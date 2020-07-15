@@ -1,8 +1,8 @@
 package v1
 
 import (
-	"harmony-server/server/http/hm"
-	"harmony-server/util"
+	"github.com/harmony-development/legato/server/http/hm"
+	"github.com/harmony-development/legato/util"
 
 	"net/http"
 

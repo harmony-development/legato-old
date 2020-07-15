@@ -1,7 +1,7 @@
 package v1
 
 import (
-	corev1 "harmony-server/gen/core"
+	corev1 "github.com/harmony-development/legato/gen/core"
 )
 
 // V1 contains the gRPC handler for v1

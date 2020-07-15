@@ -5,7 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"harmony-server/server/http/responses"
+	"github.com/harmony-development/legato/server/http/responses"
 )
 
 // WithAuth checks for authentication

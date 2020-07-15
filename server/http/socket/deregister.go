@@ -1,8 +1,8 @@
 package socket
 
 import (
-	"harmony-server/server/db"
-	"harmony-server/server/http/socket/client"
+	profilev1 "github.com/harmony-development/legato/gen/profile"
+	"github.com/harmony-development/legato/server/http/socket/client"
 
 	"github.com/sirupsen/logrus"
 )
@@ -34,7 +34,7 @@ func (h Handler) Deregister(ws *client.Client) {
 			}
 		}
 	}
-	if err := h.DB.SetStatus(*ws.UserID, db.UserStatusOffline); err != nil {
+	if err := h.DB.SetStatus(*ws.UserID, profilev1.UserStatus_USER_STATUS_OFFLINE); err != nil {
 		h.Logger.Exception(err)
 		return
 	}

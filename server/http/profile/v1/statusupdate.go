@@ -1,18 +1,19 @@
 package v1
 
 import (
-	"harmony-server/server/db"
-	"harmony-server/server/http/hm"
-	"harmony-server/server/http/responses"
-	"harmony-server/server/http/socket/client"
-	"harmony-server/util"
 	"net/http"
+
+	profilev1 "github.com/harmony-development/legato/gen/profile"
+	"github.com/harmony-development/legato/server/http/hm"
+	"github.com/harmony-development/legato/server/http/responses"
+	"github.com/harmony-development/legato/server/http/socket/client"
+	"github.com/harmony-development/legato/util"
 
 	"github.com/labstack/echo/v4"
 )
 
 type StatusUpdateData struct {
-	Status db.UserStatus `validate:"required"`
+	Status profilev1.UserStatus `validate:"required"`
 }
 
 func (h Handlers) StatusUpdate(c echo.Context) error {

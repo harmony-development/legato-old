@@ -2,12 +2,13 @@ package events
 
 import (
 	"encoding/json"
-	"harmony-server/server/db"
-	"harmony-server/server/http/responses"
 	"sync"
 
-	"harmony-server/server/http/socket/client"
-	"harmony-server/server/state/guild"
+	profilev1 "github.com/harmony-development/legato/gen/profile"
+	"github.com/harmony-development/legato/server/http/responses"
+
+	"github.com/harmony-development/legato/server/http/socket/client"
+	"github.com/harmony-development/legato/server/state/guild"
 )
 
 type subscribeData struct {
@@ -50,7 +51,7 @@ func (e Events) Subscribe(ws client.Client, event *client.Event, raw *json.RawMe
 			e.State.Guilds[id].AddClient(&userID, &ws)
 		}
 	}
-	if err := e.DB.SetStatus(userID, db.UserStatusOnline); err != nil {
+	if err := e.DB.SetStatus(userID, profilev1.UserStatus_USER_STATUS_OFFLINE); err != nil {
 		ws.SendError(responses.UnknownError)
 		e.Logger.Exception(err)
 	}

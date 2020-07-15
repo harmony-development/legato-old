@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"sync"
 
-	"harmony-server/server/db"
-	"harmony-server/server/db/queries"
-	"harmony-server/server/logger"
+	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/db/queries"
+	"github.com/harmony-development/legato/server/logger"
 
 	"github.com/labstack/echo/v4"
 	"golang.org/x/time/rate"

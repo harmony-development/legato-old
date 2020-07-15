@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"harmony-server/server/db"
-	"harmony-server/server/db/queries"
+	profilev1 "github.com/harmony-development/legato/gen/profile"
+	"github.com/harmony-development/legato/server/db/queries"
 )
 
 type MockFlags struct {
@@ -254,7 +254,7 @@ func (db *MockDB) UpdateMessage(messageID uint64, content *string, embeds, actio
 	panic("implement me")
 }
 
-func (db *MockDB) SetStatus(userID uint64, status db.UserStatus) error {
+func (db *MockDB) SetStatus(userID uint64, status profilev1.UserStatus) error {
 	panic("implement me")
 }
 

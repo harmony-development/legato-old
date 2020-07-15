@@ -1,6 +1,6 @@
 package profile
 
-import v1 "harmony-server/server/api/profile/v1"
+import v1 "github.com/harmony-development/legato/server/api/profile/v1"
 
 // Dependencies are the backend services this package needs
 type Dependencies struct {

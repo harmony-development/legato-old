@@ -1,4 +1,4 @@
-module harmony-server
+module github.com/harmony-development/legato
 
 go 1.14
 

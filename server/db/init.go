@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"time"
 
-	profilev1 "harmony-server/gen/profile"
-	"harmony-server/server/config"
-	"harmony-server/server/db/queries"
-	"harmony-server/server/logger"
+	profilev1 "github.com/harmony-development/legato/gen/profile"
+	"github.com/harmony-development/legato/server/config"
+	"github.com/harmony-development/legato/server/db/queries"
+	"github.com/harmony-development/legato/server/logger"
 
 	lru "github.com/hashicorp/golang-lru"
 	_ "github.com/lib/pq"

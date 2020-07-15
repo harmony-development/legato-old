@@ -1,9 +1,9 @@
 package v1
 
 import (
-	profilev1 "harmony-server/gen/profile"
-	"harmony-server/server/db"
-	"harmony-server/server/logger"
+	profilev1 "github.com/harmony-development/legato/gen/profile"
+	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/logger"
 )
 
 // Dependencies contains the services that the profile service uses

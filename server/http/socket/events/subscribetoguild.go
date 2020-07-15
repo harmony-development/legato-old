@@ -2,8 +2,9 @@ package events
 
 import (
 	"encoding/json"
-	"harmony-server/server/http/responses"
-	"harmony-server/server/http/socket/client"
+
+	"github.com/harmony-development/legato/server/http/responses"
+	"github.com/harmony-development/legato/server/http/socket/client"
 )
 
 type subscribeToGuildData struct {
