@@ -10,12 +10,12 @@ import (
 )
 
 type MoveGuildData struct {
-	TargetGuild           string `validate:"required"`
-	TargetHomeserver      string `validate:"required"`
-	BeforeGuild           string `validate:"required"`
-	BeforeGuildHomeserver string `validate:"required"`
-	AfterGuild            string `validate:"required"`
-	AfterGuildHomeserver  string `validate:"required"`
+	TargetGuildID    string `validate:"required"`
+	TargetHomeserver string `validate:"required"`
+	BeforeGuildID    string `validate:"required"`
+	BeforeHomeserver string `validate:"required"`
+	AfterGuildID     string `validate:"required"`
+	AfterHomeserver  string `validate:"required"`
 }
 
 func (h Handlers) MoveGuild(c echo.Context) error {
@@ -24,20 +24,20 @@ func (h Handlers) MoveGuild(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusTooManyRequests, responses.TooManyRequests)
 	}
 	data := ctx.Data.(MoveGuildData)
-	targetGuild, err := strconv.ParseUint(data.TargetGuild, 10, 64)
+	targetGuild, err := strconv.ParseUint(data.TargetGuildID, 10, 64)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, responses.InvalidRequest)
 	}
-	beforeGuild, err := strconv.ParseUint(data.BeforeGuild, 10, 64)
+	beforeGuild, err := strconv.ParseUint(data.BeforeGuildID, 10, 64)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, responses.InvalidRequest)
 	}
-	afterGuild, err := strconv.ParseUint(data.AfterGuild, 10, 64)
+	afterGuild, err := strconv.ParseUint(data.AfterGuildID, 10, 64)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, responses.InvalidRequest)
 	}
 
-	if err := h.DB.MoveGuild(ctx.UserID, targetGuild, data.TargetHomeserver, beforeGuild, afterGuild, data.BeforeGuildHomeserver, data.AfterGuildHomeserver); err != nil {
+	if err := h.DB.MoveGuild(ctx.UserID, targetGuild, data.TargetHomeserver, beforeGuild, afterGuild, data.BeforeHomeserver, data.AfterHomeserver); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.UnknownError)
 	}
 	return ctx.NoContent(http.StatusOK)
