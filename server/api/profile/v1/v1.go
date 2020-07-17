@@ -15,5 +15,11 @@ type Dependencies struct {
 // V1 contains the gRPC handler for v1
 type V1 struct {
 	profilev1.UnimplementedProfileServiceServer
-	*Dependencies
+	Dependencies
+}
+
+func New(deps Dependencies) V1 {
+	return V1{
+		Dependencies: deps,
+	}
 }

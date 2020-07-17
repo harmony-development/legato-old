@@ -64,6 +64,10 @@ func (inst Instance) Start() {
 		Guilds:     make(map[uint64]*guild.Guild),
 		GuildsLock: &sync.RWMutex{},
 	}
-	inst.API = api.New()
+	inst.API = api.New(api.Dependencies{
+		Logger: inst.Logger,
+		DB:     inst.DB,
+	})
+	logrus.Info("Legato started")
 	inst.Logger.CheckException(inst.API.Start(inst.Config.Server.Port))
 }

@@ -50,3 +50,11 @@ type Middlewares struct {
 	// RateLimits is a map of IP rate limits for each RPC route
 	RateLimits map[string]map[string]visitor
 }
+
+func New(deps Dependencies) Middlewares {
+	return Middlewares{
+		Dependencies: deps,
+		RateLock:     new(sync.RWMutex),
+		RateLimits:   make(map[string]map[string]visitor),
+	}
+}

@@ -3,10 +3,11 @@ package v1
 import (
 	"context"
 	"database/sql"
-	"errors"
 
 	profilev1 "github.com/harmony-development/legato/gen/profile"
 	"github.com/harmony-development/legato/server/http/responses"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // GetUser handles the protocol's GetUser request
@@ -14,10 +15,10 @@ func (v1 *V1) GetUser(c context.Context, r *profilev1.GetUserRequest) (*profilev
 	res, err := v1.DB.GetUserByID(r.UserId)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, errors.New(responses.UserNotFound)
+			return nil, status.Error(codes.NotFound, responses.UserNotFound)
 		}
 		v1.Logger.Exception(err)
-		return nil, errors.New(responses.UnknownError)
+		return nil, status.Error(codes.Internal, responses.UnknownError)
 	}
 	return &profilev1.GetUserResponse{
 		UserName:   res.Username,

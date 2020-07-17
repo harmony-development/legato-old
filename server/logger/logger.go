@@ -2,11 +2,11 @@ package logger
 
 import (
 	"os"
+	"runtime/debug"
 
 	"github.com/harmony-development/legato/server/config"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -38,14 +38,11 @@ func (l Logger) CheckException(err error) {
 
 // Exception logs an exception
 func (l Logger) Exception(err error) {
-	if err == nil {
-		return
-	}
 	if l.Config.Sentry.Enabled {
-		sentry.CaptureException(errors.WithStack(err))
+		sentry.CaptureException(err)
 	}
 	if l.Config.Server.LogErrors {
-		logrus.Warn(err)
+		logrus.Warn(err, string(debug.Stack()))
 	}
 }
 
