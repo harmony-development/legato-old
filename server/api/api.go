@@ -10,6 +10,7 @@ import (
 	"github.com/harmony-development/legato/server/api/profile"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"google.golang.org/grpc"
 )
 
@@ -21,11 +22,12 @@ type API struct {
 
 // New creates a new API instance
 func New() *API {
-	middleware := middleware.Middlewares{}
+	m := middleware.Middlewares{}
 	return &API{
 		grpcServer: grpc.NewServer(grpc_middleware.WithUnaryServerChain(
-			middleware.HarmonyContextInterceptor,
-			middleware.RateLimitInterceptor,
+			m.HarmonyContextInterceptor,
+			grpc_recovery.UnaryServerInterceptor(grpc_recovery.WithRecoveryHandler(m.RecoveryFunc)),
+			m.RateLimitInterceptor,
 		)),
 	}
 }

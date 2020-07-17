@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/harmony-development/legato/server/logger"
 	"golang.org/x/time/rate"
 )
 
@@ -39,7 +40,12 @@ type HarmonyContext struct {
 	Limiter *rate.Limiter
 }
 
+type Dependencies struct {
+	Logger logger.ILogger
+}
+
 type Middlewares struct {
+	Dependencies
 	RateLock *sync.RWMutex
 	// RateLimits is a map of IP rate limits for each RPC route
 	RateLimits map[string]map[string]visitor
