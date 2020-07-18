@@ -1,0 +1,8 @@
+rule genprotos
+    command = ./genprotos.sh
+
+rule gobuild
+    command = go build
+
+build legato-protobuf: genprotos
+build legato-binary: gobuild
