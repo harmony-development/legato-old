@@ -6,6 +6,68 @@ package protocol.core.v1;
 
 option go_package = "core;corev1";
 
+// EMBEDS AND ACTIONS
+
+enum ActionType {
+  Normal = 0;
+  Primary = 1;
+  Destructive = 2;
+}
+
+enum ActionPresentation {
+  Button = 0;
+  Dropdown = 1;
+  Menu = 2;
+  SmallEntry = 3;
+  LargeEntr = 4;
+}
+
+enum FieldPresentation {
+  Data = 0;
+  CaptionedImage = 1;
+  Row = 2;
+}
+
+message Action {
+	string text = 1;
+	string url = 2;
+	string id = 3;
+	ActionType type = 4;
+	repeated Action children = 5;
+}
+
+message EmbedHeading {
+	string text = 1;
+	string subtext = 2;
+	string url = 3;
+	string icon = 4;
+}
+
+message EmbedField {
+	string title = 1;
+	string subtitle = 2;
+	string body = 3;
+
+	string image_url = 4;
+
+	FieldPresentation presentation = 5;
+
+	repeated Action actions = 6;
+}
+
+message Embed {
+	string title = 1;
+	string body = 2;
+
+	int64 color = 3;
+
+	optional EmbedHeading header = 4;
+	optional EmbedHeading footer = 5;
+
+	repeated EmbedField fields = 6;
+	repeated Action actions = 7;
+}
+
 // CREATE
 
 message CreateGuildRequest { string guild_name = 1; }
@@ -64,7 +126,9 @@ message GetChannelMessagesResponse {
     uint64 author_id = 4;
     uint64 created_at = 5;
     uint64 edited_at = 6;
-    string content = 7;
+		string content = 7;
+		repeated Embed embeds = 8;
+		repeated Action actions = 9;
   }
   repeated Message messages = 1;
 }
@@ -77,7 +141,11 @@ message UpdateGuildNameRequest {
 }
 message UpdateGuildNameResponse { bool success = 1; }
 
-message UpdateMessageRequest { string content = 1; }
+message UpdateMessageRequest {
+	string content = 1;
+	repeated Embed embeds = 2;
+	repeated Action actions = 3;
+}
 
 // DELETE
 
