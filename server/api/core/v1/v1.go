@@ -324,17 +324,50 @@ func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (
 }
 
 func (v1 *V1) DeleteGuild(c context.Context, r *corev1.DeleteGuildRequest) (*empty.Empty, error) {
-
+	ctx := c.(middleware.HarmonyContext)
+	err := v1.EnsureOwner(r.GuildId, ctx.UserID)
+	if err != nil {
+		return nil, err
+	}
+	err = v1.DB.DeleteGuild(r.GuildId)
+	if err != nil {
+		return nil, err
+	}
+	return &emptypb.Empty{}, nil
 }
 
 func (v1 *V1) DeleteInvite(c context.Context, r *corev1.DeleteInviteRequest) (*empty.Empty, error) {
-
+	ctx := c.(middleware.HarmonyContext)
+	err := v1.EnsureOwner(r.GuildId, ctx.UserID)
+	if err != nil {
+		return nil, err
+	}
+	if err := v1.DB.DeleteInvite(r.InviteId); err != nil {
+		return nil, err
+	}
+	return &emptypb.Empty{}, nil
 }
 
 func (v1 *V1) DeleteChannel(c context.Context, r *corev1.DeleteChannelRequest) (*empty.Empty, error) {
-
+	ctx := c.(middleware.HarmonyContext)
+	err := v1.EnsureOwner(r.GuildId, ctx.UserID)
+	if err != nil {
+		return nil, err
+	}
+	if err := v1.DB.DeleteChannelFromGuild(r.GuildId, r.ChannelId); err != nil {
+		return nil, err
+	}
+	return &emptypb.Empty{}, nil
 }
 
 func (v1 *V1) DeleteMessage(c context.Context, r *corev1.DeleteMessageRequest) (*empty.Empty, error) {
-
+	ctx := c.(middleware.HarmonyContext)
+	owner, err := v1.DB.GetMessageOwner(r.MessageId)
+	if err != nil {
+		return nil, err
+	}
+	if ctx.UserID != owner {
+		return nil, NoPermissionsError
+	}
+	return &emptypb.Empty{}, nil
 }

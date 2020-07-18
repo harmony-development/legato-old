@@ -180,7 +180,10 @@ message UpdateMessageRequest {
 
 message DeleteGuildRequest { uint64 guild_id = 1; }
 
-message DeleteInviteRequest { string invite_code = 1; }
+message DeleteInviteRequest {
+  uint64 guild_id = 1;
+  string invite_id = 2;
+}
 
 message DeleteChannelRequest {
   uint64 guild_id = 1;
