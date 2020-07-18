@@ -62,8 +62,8 @@ message Embed {
 
   int64 color = 3;
 
-  optional EmbedHeading header = 4;
-  optional EmbedHeading footer = 5;
+  EmbedHeading header = 4;
+  EmbedHeading footer = 5;
 
   repeated EmbedField fields = 6;
   repeated Action actions = 7;
@@ -73,14 +73,16 @@ message Embed {
 
 message CreateGuildRequest {
   string guild_name = 1 [ (validator.field) = {msg_exists : true} ];
+  string picture_url = 2;
 }
-message CreateGuildResponse { string guild_id = 1; }
+message CreateGuildResponse { uint64 guild_id = 1; }
 
 message CreateInviteRequest {
   string name = 1 [ (validator.field) = {msg_exists : true} ];
-  int32 possible_uses = 2 [ (validator.field) = {msg_exists : true} ];
+  uint64 for_guild = 2 [ (validator.field) = {msg_exists : true} ];
+  int32 possible_uses = 3;
 }
-message CreateInviteResponse { uint64 id = 1; }
+message CreateInviteResponse { string name = 1; }
 
 message CreateChannelRequest {
   uint64 guild_id = 1 [ (validator.field) = {msg_exists : true} ];

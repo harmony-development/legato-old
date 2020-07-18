@@ -9,3 +9,5 @@ legato
 config.json
 harmony-key.pem
 harmony-key.pub
+.ninja_deps
+.ninja_log

@@ -1,2 +1,12 @@
 #!/usr/bin/env bash
-./protoc_gen_go.sh --proto_path=protocol --plugin_name=go --plugin_out=gen --plugin_opt=plugins=grpc
+mkdir -p "gen"
+for dir in $(find "protocol" -name '*.proto' -print0 | xargs -0 -n1 dirname | sort | uniq); do
+  echo $(find "${dir}" -name '*.proto')
+  protoc --experimental_allow_proto3_optional \
+  --proto_path=protocol \
+  --proto_path=${GOPATH}/src \
+  --go_out=gen \
+  --go_opt="plugins=grpc" \
+  --validate_out="lang=go:gen" \
+  $(find "${dir}" -name '*.proto')
+done

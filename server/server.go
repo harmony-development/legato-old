@@ -65,8 +65,9 @@ func (inst Instance) Start() {
 		GuildsLock: &sync.RWMutex{},
 	}
 	inst.API = api.New(api.Dependencies{
-		Logger: inst.Logger,
-		DB:     inst.DB,
+		Logger:    inst.Logger,
+		DB:        inst.DB,
+		Sonyflake: inst.Sonyflake,
 	})
 	logrus.Info("Legato started")
 	inst.Logger.CheckException(inst.API.Start(inst.Config.Server.Port))
