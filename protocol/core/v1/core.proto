@@ -107,7 +107,7 @@ message GetGuildInvitesRequest {
 }
 message GetGuildInvitesResponse {
   message Invite {
-    uint64 invite_id = 1;
+    string invite_id = 1;
     int32 possible_uses = 2;
     int32 use_count = 3;
   }
