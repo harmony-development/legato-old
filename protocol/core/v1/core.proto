@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "google/protobuf/empty.proto";
+import "github.com/mwitkow/go-proto-validators/validator.proto";
 
 package protocol.core.v1;
 
@@ -29,85 +30,95 @@ enum FieldPresentation {
 }
 
 message Action {
-	string text = 1;
-	string url = 2;
-	string id = 3;
-	ActionType type = 4;
-	repeated Action children = 5;
+  string text = 1;
+  string url = 2;
+  string id = 3;
+  ActionType type = 4;
+  repeated Action children = 5;
 }
 
 message EmbedHeading {
-	string text = 1;
-	string subtext = 2;
-	string url = 3;
-	string icon = 4;
+  string text = 1;
+  string subtext = 2;
+  string url = 3;
+  string icon = 4;
 }
 
 message EmbedField {
-	string title = 1;
-	string subtitle = 2;
-	string body = 3;
+  string title = 1;
+  string subtitle = 2;
+  string body = 3;
 
-	string image_url = 4;
+  string image_url = 4;
 
-	FieldPresentation presentation = 5;
+  FieldPresentation presentation = 5;
 
-	repeated Action actions = 6;
+  repeated Action actions = 6;
 }
 
 message Embed {
-	string title = 1;
-	string body = 2;
+  string title = 1;
+  string body = 2;
 
-	int64 color = 3;
+  int64 color = 3;
 
-	optional EmbedHeading header = 4;
-	optional EmbedHeading footer = 5;
+  optional EmbedHeading header = 4;
+  optional EmbedHeading footer = 5;
 
-	repeated EmbedField fields = 6;
-	repeated Action actions = 7;
+  repeated EmbedField fields = 6;
+  repeated Action actions = 7;
 }
 
 // CREATE
 
-message CreateGuildRequest { string guild_name = 1; }
+message CreateGuildRequest {
+  string guild_name = 1 [ (validator.field) = {msg_exists : true} ];
+}
 message CreateGuildResponse { string guild_id = 1; }
 
 message CreateInviteRequest {
-  string name = 1;
-  int32 possible_uses = 2;
+  string name = 1 [ (validator.field) = {msg_exists : true} ];
+  int32 possible_uses = 2 [ (validator.field) = {msg_exists : true} ];
 }
 message CreateInviteResponse { uint64 id = 1; }
 
 message CreateChannelRequest {
-  uint64 guild_id = 1;
-  string channel_name = 2;
+  uint64 guild_id = 1 [ (validator.field) = {msg_exists : true} ];
+  string channel_name = 2 [ (validator.field) = {msg_exists : true} ];
 }
 message CreateChannelResponse { uint64 channel_id = 1; }
 
 // READ
 
-message GetGuildRequest { uint64 guild_id = 1; }
+message GetGuildRequest {
+  uint64 guild_id = 1 [ (validator.field) = {msg_exists : true} ];
+}
 message GetGuildResponse {
   string guild_name = 1;
   uint64 guild_owner = 2;
   string guild_picture = 3;
 }
 
-message GetGuildInvitesRequest { uint64 guild_id = 1; }
+message GetGuildInvitesRequest {
+  uint64 guild_id = 1 [ (validator.field) = {msg_exists : true} ];
+}
 message GetGuildInvitesResponse {
   message Invite {
-    uint64 invite_id = 2;
-    int32 possible_uses = 3;
-    int32 use_count = 4;
+    uint64 invite_id = 1;
+    int32 possible_uses = 2;
+    int32 use_count = 3;
   }
   repeated Invite invites = 1;
 }
 
-message GetGuildMembersRequest { uint64 guild_id = 1; }
+message GetGuildMembersRequest {
+  uint64 guild_id = 1 [ (validator.field) = {msg_exists : true} ];
+}
 message GetGuildMembersResponse { repeated uint64 members = 1; }
 
-message GetGuildChannelsRequest { uint64 guild_id = 1; }
+message GetGuildChannelsRequest {
+  uint64 guild_id = 1 [ (validator.field) = {msg_exists : true} ];
+}
 message GetGuildChannelsResponse {
   message Channel {
     uint64 channel_id = 1;
@@ -117,7 +128,9 @@ message GetGuildChannelsResponse {
   repeated Channel channels = 1;
 }
 
-message GetChannelMessagesRequest { uint64 load_before_message = 1; }
+message GetChannelMessagesRequest {
+  uint64 load_before_message = 1 [ (validator.field) = {msg_exists : true} ];
+}
 message GetChannelMessagesResponse {
   message Message {
     uint64 guild_id = 1;
@@ -126,9 +139,9 @@ message GetChannelMessagesResponse {
     uint64 author_id = 4;
     uint64 created_at = 5;
     uint64 edited_at = 6;
-		string content = 7;
-		repeated Embed embeds = 8;
-		repeated Action actions = 9;
+    string content = 7;
+    repeated Embed embeds = 8;
+    repeated Action actions = 9;
   }
   repeated Message messages = 1;
 }
@@ -136,26 +149,28 @@ message GetChannelMessagesResponse {
 // UPDATE
 
 message UpdateGuildNameRequest {
-  uint64 guild_id = 1;
-  string new_guild_name = 2;
+  uint64 guild_id = 1 [ (validator.field) = {msg_exists : true} ];
+  string new_guild_name = 2 [ (validator.field) = {msg_exists : true} ];
 }
 message UpdateGuildNameResponse { bool success = 1; }
 
 message UpdateMessageRequest {
-	string content = 1;
-	repeated Embed embeds = 2;
-	repeated Action actions = 3;
+  string content = 1 [ (validator.field) = {msg_exists : true} ];
+  repeated Embed embeds = 2;
+  repeated Action actions = 3;
 }
 
 // DELETE
 
-message DeleteGuildRequest { uint64 guild_id = 1; }
+message DeleteGuildRequest {
+  uint64 guild_id = 1 [ (validator.field) = {msg_exists : true} ];
+}
 
 message DeleteInviteRequest { string invite_code = 1; }
 
 message DeleteChannelRequest {
-  uint64 guild_id = 1;
-  uint64 channel_id = 2;
+  uint64 guild_id = 1 [ (validator.field) = {msg_exists : true} ];
+  uint64 channel_id = 2 [ (validator.field) = {msg_exists : true} ];
 }
 
 message DeleteMessageRequest {

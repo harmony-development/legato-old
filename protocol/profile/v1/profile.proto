@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "github.com/mwitkow/go-proto-validators/validator.proto";
+
 package protocol.profile.v1;
 
 option go_package = "profile;profilev1";
@@ -12,23 +14,27 @@ enum UserStatus {
   USER_STATUS_OFFLINE = 4;
 }
 
-message GetUserRequest { uint64 user_id = 1; }
+message GetUserRequest {
+  uint64 user_id = 1 [ (validator.field) = {msg_exists : true} ];
+}
 message GetUserResponse {
   string user_name = 1;
   string user_avatar = 2;
   UserStatus user_status = 3;
 }
 
-message GetUserMetadataRequest { string app_id = 1; }
+message GetUserMetadataRequest {
+  string app_id = 1 [ (validator.field) = {msg_exists : true} ];
+}
 message GetUserMetadataResponse { string metadata = 1; }
 
 message UsernameUpdateRequest {
-  string user_name = 2;
+  string user_name = 1 [ (validator.field) = {msg_exists : true} ];
 }
 message UsernameUpdateResponse { bool success = 1; }
 
 message StatusUpdateRequest {
-  UserStatus new_status = 2;
+  UserStatus new_status = 1 [ (validator.field) = {msg_exists : true} ];
 }
 message StatusUpdateResponse { bool success = 1; }
 
