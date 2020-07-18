@@ -2,7 +2,7 @@ rule genprotos
     command = ./genprotos.sh
 
 rule gobuild
-    command = go build
+    command = GO111MODULE=on go build
 
 build legato-protobuf: genprotos
 build legato-binary: gobuild

@@ -1,7 +1,8 @@
 syntax = "proto3";
 
 import "google/protobuf/empty.proto";
-import "github.com/mwitkow/go-proto-validators/validator.proto";
+import "validate/validate.proto";
+import "google/protobuf/timestamp.proto";
 
 package protocol.core.v1;
 
@@ -72,28 +73,28 @@ message Embed {
 // CREATE
 
 message CreateGuildRequest {
-  string guild_name = 1 [ (validator.field) = {msg_exists : true} ];
+  string guild_name = 1 [ (validate.rules).string.min_len = 1 ];
   string picture_url = 2;
 }
 message CreateGuildResponse { uint64 guild_id = 1; }
 
 message CreateInviteRequest {
-  string name = 1 [ (validator.field) = {msg_exists : true} ];
-  uint64 for_guild = 2 [ (validator.field) = {msg_exists : true} ];
+  string name = 1 [ (validate.rules).string.min_len = 1 ];
+  uint64 for_guild = 2 [ (validate.rules).uint64.gt = 0 ];
   int32 possible_uses = 3;
 }
 message CreateInviteResponse { string name = 1; }
 
 message CreateChannelRequest {
-  uint64 guild_id = 1 [ (validator.field) = {msg_exists : true} ];
-  string channel_name = 2 [ (validator.field) = {msg_exists : true} ];
+  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
+  string channel_name = 2 [ (validate.rules).string.min_len = 1 ];
 }
 message CreateChannelResponse { uint64 channel_id = 1; }
 
 // READ
 
 message GetGuildRequest {
-  uint64 guild_id = 1 [ (validator.field) = {msg_exists : true} ];
+  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
 }
 message GetGuildResponse {
   string guild_name = 1;
@@ -102,7 +103,7 @@ message GetGuildResponse {
 }
 
 message GetGuildInvitesRequest {
-  uint64 guild_id = 1 [ (validator.field) = {msg_exists : true} ];
+  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
 }
 message GetGuildInvitesResponse {
   message Invite {
@@ -114,12 +115,12 @@ message GetGuildInvitesResponse {
 }
 
 message GetGuildMembersRequest {
-  uint64 guild_id = 1 [ (validator.field) = {msg_exists : true} ];
+  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
 }
 message GetGuildMembersResponse { repeated uint64 members = 1; }
 
 message GetGuildChannelsRequest {
-  uint64 guild_id = 1 [ (validator.field) = {msg_exists : true} ];
+  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
 }
 message GetGuildChannelsResponse {
   message Channel {
@@ -131,7 +132,9 @@ message GetGuildChannelsResponse {
 }
 
 message GetChannelMessagesRequest {
-  uint64 load_before_message = 1 [ (validator.field) = {msg_exists : true} ];
+  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
+  uint64 channel_id = 2 [ (validate.rules).uint64.gt = 0 ];
+  uint64 before_message = 3;
 }
 message GetChannelMessagesResponse {
   message Message {
@@ -139,8 +142,8 @@ message GetChannelMessagesResponse {
     uint64 channel_id = 2;
     uint64 message_id = 3;
     uint64 author_id = 4;
-    uint64 created_at = 5;
-    uint64 edited_at = 6;
+    google.protobuf.Timestamp created_at = 5;
+    google.protobuf.Timestamp edited_at = 6;
     string content = 7;
     repeated Embed embeds = 8;
     repeated Action actions = 9;
@@ -151,13 +154,13 @@ message GetChannelMessagesResponse {
 // UPDATE
 
 message UpdateGuildNameRequest {
-  uint64 guild_id = 1 [ (validator.field) = {msg_exists : true} ];
-  string new_guild_name = 2 [ (validator.field) = {msg_exists : true} ];
+  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
+  string new_guild_name = 2 [ (validate.rules).string.min_len = 1 ];
 }
-message UpdateGuildNameResponse { bool success = 1; }
+message UpdateGuildNameResponse {}
 
 message UpdateMessageRequest {
-  string content = 1 [ (validator.field) = {msg_exists : true} ];
+  string content = 1 [ (validate.rules).string.min_len = 1 ];
   repeated Embed embeds = 2;
   repeated Action actions = 3;
 }
@@ -165,20 +168,20 @@ message UpdateMessageRequest {
 // DELETE
 
 message DeleteGuildRequest {
-  uint64 guild_id = 1 [ (validator.field) = {msg_exists : true} ];
+  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
 }
 
 message DeleteInviteRequest { string invite_code = 1; }
 
 message DeleteChannelRequest {
-  uint64 guild_id = 1 [ (validator.field) = {msg_exists : true} ];
-  uint64 channel_id = 2 [ (validator.field) = {msg_exists : true} ];
+  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
+  uint64 channel_id = 2 [ (validate.rules).uint64.gt = 0 ];
 }
 
 message DeleteMessageRequest {
-  uint64 guild_id = 1;
-  uint64 channel_id = 2;
-  uint64 message_id = 3;
+  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
+  uint64 channel_id = 2 [ (validate.rules).uint64.gt = 0 ];
+  uint64 message_id = 3 [ (validate.rules).uint64.gt = 0 ];
 }
 
 service CoreService {
