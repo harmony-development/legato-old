@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "validate/validate.proto";
+import "google/protobuf/empty.proto";
 
 package protocol.profile.v1;
 
@@ -31,18 +32,16 @@ message GetUserMetadataResponse { string metadata = 1; }
 message UsernameUpdateRequest {
   string user_name = 1 [ (validate.rules).string.min_len = 1 ];
 }
-message UsernameUpdateResponse { bool success = 1; }
 
 message StatusUpdateRequest {
   UserStatus new_status = 1 [ (validate.rules).enum.defined_only = true ];
 }
-message StatusUpdateResponse { bool success = 1; }
 
 service ProfileService {
   rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
   rpc GetUserMetadata(GetUserMetadataRequest)
       returns (GetUserMetadataResponse) {}
 
-  rpc UsernameUpdate(UsernameUpdateRequest) returns (UsernameUpdateResponse) {}
-  rpc StatusUpdate(StatusUpdateRequest) returns (StatusUpdateResponse) {}
+  rpc UsernameUpdate(UsernameUpdateRequest) returns (google.protobuf.Empty) {}
+  rpc StatusUpdate(StatusUpdateRequest) returns (google.protobuf.Empty) {}
 }

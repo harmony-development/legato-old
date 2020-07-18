@@ -135,10 +135,10 @@ func (v1 *V1) CreateChannel(c context.Context, r *corev1.CreateChannelRequest) (
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	if err := v1.EnsureOwner(r.GuildId, ctx.UserID); err != nil {
+	if err := v1.EnsureOwner(r.Location.GuildId, ctx.UserID); err != nil {
 		return nil, err
 	}
-	channel, err := v1.DB.AddChannelToGuild(r.GuildId, r.ChannelName)
+	channel, err := v1.DB.AddChannelToGuild(r.Location.GuildId, r.ChannelName)
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +151,7 @@ func (v1 *V1) GetGuild(c context.Context, r *corev1.GetGuildRequest) (*corev1.Ge
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	guild, err := v1.DB.GetGuildByID(r.GuildId)
+	guild, err := v1.DB.GetGuildByID(r.Location.GuildId)
 	if err != nil {
 		return nil, err
 	}
@@ -166,11 +166,11 @@ func (v1 *V1) GetGuildInvites(c context.Context, r *corev1.GetGuildInvitesReques
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	err := v1.EnsureOwner(r.GuildId, c.(middleware.HarmonyContext).UserID)
+	err := v1.EnsureOwner(r.Location.GuildId, c.(middleware.HarmonyContext).UserID)
 	if err != nil {
 		return nil, err
 	}
-	invites, err := v1.DB.GetInvites(r.GuildId)
+	invites, err := v1.DB.GetInvites(r.Location.GuildId)
 	if err != nil {
 		return nil, err
 	}
@@ -198,11 +198,11 @@ func (v1 *V1) GetGuildMembers(c context.Context, r *corev1.GetGuildMembersReques
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	err := v1.EnsureInGuild(r.GuildId, ctx.UserID)
+	err := v1.EnsureInGuild(r.Location.GuildId, ctx.UserID)
 	if err != nil {
 		return nil, err
 	}
-	members, err := v1.DB.MembersInGuild(r.GuildId)
+	members, err := v1.DB.MembersInGuild(r.Location.GuildId)
 	if err != nil {
 		return nil, err
 	}
@@ -216,11 +216,11 @@ func (v1 *V1) GetGuildChannels(c context.Context, r *corev1.GetGuildChannelsRequ
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	err := v1.EnsureInGuild(r.GuildId, ctx.UserID)
+	err := v1.EnsureInGuild(r.Location.GuildId, ctx.UserID)
 	if err != nil {
 		return nil, err
 	}
-	chans, err := v1.DB.ChannelsForGuild(r.GuildId)
+	chans, err := v1.DB.ChannelsForGuild(r.Location.GuildId)
 	if err != nil {
 		return nil, err
 	}
@@ -242,7 +242,7 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	err := v1.EnsureInGuild(r.GuildId, ctx.UserID)
+	err := v1.EnsureInGuild(r.Location.GuildId, ctx.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -252,9 +252,9 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 		if err != nil {
 			return nil, err
 		}
-		messages, err = v1.DB.GetMessagesBefore(r.GuildId, r.ChannelId, time)
+		messages, err = v1.DB.GetMessagesBefore(r.Location.GuildId, r.Location.ChannelId, time)
 	} else {
-		messages, err = v1.DB.GetMessages(r.GuildId, r.ChannelId)
+		messages, err = v1.DB.GetMessages(r.Location.GuildId, r.Location.ChannelId)
 	}
 	if err != nil && err != sql.ErrNoRows {
 		return nil, err
@@ -300,19 +300,19 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 	}, nil
 }
 
-func (v1 *V1) UpdateGuildName(c context.Context, r *corev1.UpdateGuildNameRequest) (*corev1.UpdateGuildNameResponse, error) {
+func (v1 *V1) UpdateGuildName(c context.Context, r *corev1.UpdateGuildNameRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	err := v1.EnsureOwner(r.GuildId, ctx.UserID)
+	err := v1.EnsureOwner(r.Location.GuildId, ctx.UserID)
 	if err != nil {
 		return nil, err
 	}
-	if err := v1.DB.UpdateGuildName(r.GuildId, r.NewGuildName); err != nil {
+	if err := v1.DB.UpdateGuildName(r.Location.GuildId, r.NewGuildName); err != nil {
 		return nil, err
 	}
-	return &corev1.UpdateGuildNameResponse{}, nil
+	return &empty.Empty{}, nil
 }
 
 func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (*empty.Empty, error) {
@@ -324,7 +324,7 @@ func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (
 		return nil, errors.New("bad request; nothing is being edited")
 	}
 
-	owner, err := v1.DB.GetMessageOwner(r.MessageId)
+	owner, err := v1.DB.GetMessageOwner(r.Location.MessageId)
 	if err != nil {
 		return nil, err
 	}
@@ -342,7 +342,7 @@ func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (
 		val := v1.ProtoToEmbeds(r.Embeds)
 		embeds = &val
 	}
-	_, err = v1.DB.UpdateMessage(r.MessageId, &r.Content, embeds, actions)
+	_, err = v1.DB.UpdateMessage(r.Location.MessageId, &r.Content, embeds, actions)
 	if err != nil {
 		return nil, err
 	}
@@ -354,11 +354,11 @@ func (v1 *V1) DeleteGuild(c context.Context, r *corev1.DeleteGuildRequest) (*emp
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	err := v1.EnsureOwner(r.GuildId, ctx.UserID)
+	err := v1.EnsureOwner(r.Location.GuildId, ctx.UserID)
 	if err != nil {
 		return nil, err
 	}
-	err = v1.DB.DeleteGuild(r.GuildId)
+	err = v1.DB.DeleteGuild(r.Location.GuildId)
 	if err != nil {
 		return nil, err
 	}
@@ -370,7 +370,7 @@ func (v1 *V1) DeleteInvite(c context.Context, r *corev1.DeleteInviteRequest) (*e
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	err := v1.EnsureOwner(r.GuildId, ctx.UserID)
+	err := v1.EnsureOwner(r.Location.GuildId, ctx.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -385,11 +385,11 @@ func (v1 *V1) DeleteChannel(c context.Context, r *corev1.DeleteChannelRequest) (
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	err := v1.EnsureOwner(r.GuildId, ctx.UserID)
+	err := v1.EnsureOwner(r.Location.GuildId, ctx.UserID)
 	if err != nil {
 		return nil, err
 	}
-	if err := v1.DB.DeleteChannelFromGuild(r.GuildId, r.ChannelId); err != nil {
+	if err := v1.DB.DeleteChannelFromGuild(r.Location.GuildId, r.Location.ChannelId); err != nil {
 		return nil, err
 	}
 	return &emptypb.Empty{}, nil
@@ -400,7 +400,7 @@ func (v1 *V1) DeleteMessage(c context.Context, r *corev1.DeleteMessageRequest) (
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	owner, err := v1.DB.GetMessageOwner(r.MessageId)
+	owner, err := v1.DB.GetMessageOwner(r.Location.MessageId)
 	if err != nil {
 		return nil, err
 	}

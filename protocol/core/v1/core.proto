@@ -8,6 +8,14 @@ package protocol.core.v1;
 
 option go_package = "core;corev1";
 
+// Location is a special type that is added in for RPCs that need to check
+// permissions
+message Location {
+  uint64 guild_id = 1;
+  uint64 channel_id = 2;
+  uint64 message_id = 3;
+}
+
 // EMBEDS AND ACTIONS
 
 enum ActionType {
@@ -86,7 +94,7 @@ message CreateInviteRequest {
 message CreateInviteResponse { string name = 1; }
 
 message CreateChannelRequest {
-  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
+  Location location = 1 [ (validate.rules).message.required = true ];
   string channel_name = 2 [ (validate.rules).string.min_len = 1 ];
 }
 message CreateChannelResponse { uint64 channel_id = 1; }
@@ -94,7 +102,7 @@ message CreateChannelResponse { uint64 channel_id = 1; }
 // READ
 
 message GetGuildRequest {
-  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
+  Location location = 1 [ (validate.rules).message.required = true ];
 }
 message GetGuildResponse {
   string guild_name = 1;
@@ -103,7 +111,7 @@ message GetGuildResponse {
 }
 
 message GetGuildInvitesRequest {
-  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
+  Location location = 1 [ (validate.rules).message.required = true ];
 }
 message GetGuildInvitesResponse {
   message Invite {
@@ -115,12 +123,12 @@ message GetGuildInvitesResponse {
 }
 
 message GetGuildMembersRequest {
-  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
+  Location location = 1 [ (validate.rules).message.required = true ];
 }
 message GetGuildMembersResponse { repeated uint64 members = 1; }
 
 message GetGuildChannelsRequest {
-  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
+  Location location = 1 [ (validate.rules).message.required = true ];
 }
 message GetGuildChannelsResponse {
   message Channel {
@@ -132,8 +140,7 @@ message GetGuildChannelsResponse {
 }
 
 message GetChannelMessagesRequest {
-  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
-  uint64 channel_id = 2 [ (validate.rules).uint64.gt = 0 ];
+  Location location = 1 [ (validate.rules).message.required = true ];
   uint64 before_message = 3;
 }
 message GetChannelMessagesResponse {
@@ -154,13 +161,12 @@ message GetChannelMessagesResponse {
 // UPDATE
 
 message UpdateGuildNameRequest {
-  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
+  Location location = 1 [ (validate.rules).message.required = true ];
   string new_guild_name = 2 [ (validate.rules).string.min_len = 1 ];
 }
-message UpdateGuildNameResponse {}
 
 message UpdateMessageRequest {
-  uint64 message_id = 1 [ (validate.rules).uint64.gt = 0 ];
+  Location location = 1 [ (validate.rules).message.required = true ];
   string content = 2;
   bool update_content = 3;
   repeated Embed embeds = 4;
@@ -172,23 +178,20 @@ message UpdateMessageRequest {
 // DELETE
 
 message DeleteGuildRequest {
-  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
+  Location location = 1 [ (validate.rules).message.required = true ];
 }
 
 message DeleteInviteRequest {
-  uint64 guild_id = 1;
+  Location location = 1 [ (validate.rules).message.required = true ];
   string invite_id = 2;
 }
 
 message DeleteChannelRequest {
-  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
-  uint64 channel_id = 2 [ (validate.rules).uint64.gt = 0 ];
+  Location location = 1 [ (validate.rules).message.required = true ];
 }
 
 message DeleteMessageRequest {
-  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
-  uint64 channel_id = 2 [ (validate.rules).uint64.gt = 0 ];
-  uint64 message_id = 3 [ (validate.rules).uint64.gt = 0 ];
+  Location location = 1 [ (validate.rules).message.required = true ];
 }
 
 service CoreService {
@@ -206,8 +209,7 @@ service CoreService {
   rpc GetChannelMessages(GetChannelMessagesRequest)
       returns (GetChannelMessagesResponse) {}
 
-  rpc UpdateGuildName(UpdateGuildNameRequest)
-      returns (UpdateGuildNameResponse) {}
+  rpc UpdateGuildName(UpdateGuildNameRequest) returns (google.protobuf.Empty) {}
   rpc UpdateMessage(UpdateMessageRequest) returns (google.protobuf.Empty) {}
 
   rpc DeleteGuild(DeleteGuildRequest) returns (google.protobuf.Empty) {}
