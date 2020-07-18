@@ -80,15 +80,20 @@ message CreateGuildResponse {
 
 message CreateInviteRequest {
   string name = 1;
-  optional int32 possible_uses = 2;
+  uint64 for_guild = 2;
+  optional int32 possible_uses = 3;
 }
-message CreateInviteResponse { uint64 id = 1; }
+message CreateInviteResponse {
+  string name = 1;
+}
 
 message CreateChannelRequest {
   uint64 guild_id = 1;
   string channel_name = 2;
 }
-message CreateChannelResponse { uint64 channel_id = 1; }
+message CreateChannelResponse {
+  uint64 channel_id = 1;
+}
 
 // READ
 
