@@ -23,13 +23,11 @@ message GetUserMetadataRequest { string app_id = 1; }
 message GetUserMetadataResponse { string metadata = 1; }
 
 message UsernameUpdateRequest {
-  uint64 user_id = 1;
   string user_name = 2;
 }
 message UsernameUpdateResponse { bool success = 1; }
 
 message StatusUpdateRequest {
-  uint64 user_id = 1;
   UserStatus new_status = 2;
 }
 message StatusUpdateResponse { bool success = 1; }

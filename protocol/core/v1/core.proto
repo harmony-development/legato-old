@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "google/protobuf/empty.proto";
+
 package protocol.core.v1;
 
 option go_package = "core;corev1";
@@ -9,16 +11,17 @@ option go_package = "core;corev1";
 message CreateGuildRequest { string guild_name = 1; }
 message CreateGuildResponse { string guild_id = 1; }
 
-message CreateInviteRequest {}
-message CreateInviteResponse {}
-
-message CreateChannelRequest { string channel_name = 1; }
-
-message CreateChannelResponse {
-  uint64 guild_id = 1;
-  uint64 channel_id = 2;
-  uint64 channel_name = 3;
+message CreateInviteRequest {
+  string name = 1;
+  int32 possible_uses = 2;
 }
+message CreateInviteResponse { uint64 id = 1; }
+
+message CreateChannelRequest {
+  uint64 guild_id = 1;
+  string channel_name = 2;
+}
+message CreateChannelResponse { uint64 channel_id = 1; }
 
 // READ
 
@@ -31,10 +34,12 @@ message GetGuildResponse {
 
 message GetGuildInvitesRequest { uint64 guild_id = 1; }
 message GetGuildInvitesResponse {
-  uint64 guild_id = 1;
-  uint64 invite_id = 2;
-  int32 possible_uses = 3;
-  int32 use_count = 4;
+  message Invite {
+    uint64 invite_id = 2;
+    int32 possible_uses = 3;
+    int32 use_count = 4;
+  }
+  repeated Invite invites = 1;
 }
 
 message GetGuildMembersRequest { uint64 guild_id = 1; }
@@ -73,28 +78,23 @@ message UpdateGuildNameRequest {
 message UpdateGuildNameResponse { bool success = 1; }
 
 message UpdateMessageRequest { string content = 1; }
-message UpdateMessageResponse { bool success = 1; }
 
 // DELETE
 
 message DeleteGuildRequest { uint64 guild_id = 1; }
-message DeleteGuildResponse { bool success = 1; }
 
 message DeleteInviteRequest { string invite_code = 1; }
-message DeleteInviteResponse { bool success = 1; }
 
 message DeleteChannelRequest {
   uint64 guild_id = 1;
   uint64 channel_id = 2;
 }
-message DeleteChannelResponse { bool success = 1; }
 
 message DeleteMessageRequest {
   uint64 guild_id = 1;
   uint64 channel_id = 2;
   uint64 message_id = 3;
 }
-message DeleteMessageResponse { bool success = 1; }
 
 service CoreService {
   rpc CreateGuild(CreateGuildRequest) returns (CreateGuildResponse) {}
@@ -113,10 +113,10 @@ service CoreService {
 
   rpc UpdateGuildName(UpdateGuildNameRequest)
       returns (UpdateGuildNameResponse) {}
-  rpc UpdateMessage(UpdateMessageRequest) returns (UpdateMessageResponse) {}
+  rpc UpdateMessage(UpdateMessageRequest) returns (google.protobuf.Empty) {}
 
-  rpc DeleteGuild(DeleteGuildRequest) returns (DeleteGuildResponse) {}
-  rpc DeleteInvite(DeleteInviteRequest) returns (DeleteInviteResponse) {}
-  rpc DeleteChannel(DeleteChannelRequest) returns (DeleteChannelResponse) {}
-  rpc DeleteMessage(DeleteMessageRequest) returns (DeleteMessageResponse) {}
+  rpc DeleteGuild(DeleteGuildRequest) returns (google.protobuf.Empty) {}
+  rpc DeleteInvite(DeleteInviteRequest) returns (google.protobuf.Empty) {}
+  rpc DeleteChannel(DeleteChannelRequest) returns (google.protobuf.Empty) {}
+  rpc DeleteMessage(DeleteMessageRequest) returns (google.protobuf.Empty) {}
 }
