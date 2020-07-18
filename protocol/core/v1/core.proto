@@ -167,9 +167,13 @@ message UpdateGuildNameRequest {
 message UpdateGuildNameResponse {}
 
 message UpdateMessageRequest {
-	string content = 1;
-	repeated Embed embeds = 2;
-	repeated Action actions = 3;
+  uint64 message_id = 1;
+  optional string content = 2;
+  bool update_content = 3;
+  repeated Embed embeds = 4;
+  bool update_embeds = 5;
+  repeated Action actions = 6;
+  bool update_actions = 7;
 }
 
 // DELETE
