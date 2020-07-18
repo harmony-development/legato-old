@@ -14,6 +14,7 @@ import (
 	"github.com/harmony-development/legato/server/db/queries"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/sony/sonyflake"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -56,17 +57,47 @@ func (v1 *V1) EnsureInGuild(guildID, userID uint64) error {
 	return nil
 }
 
+func (v1 *V1) ActionsToProto(msgs []json.RawMessage) (ret []*corev1.Action) {
+	for _, msg := range msgs {
+		var action *corev1.Action
+		json.Unmarshal([]byte(msg), &action)
+		ret = append(ret, action)
+	}
+	return
+}
+
+func (v1 *V1) ProtoToActions(msgs []*corev1.Action) (ret [][]byte) {
+	for _, msg := range msgs {
+		data, _ := json.Marshal(msg)
+		ret = append(ret, json.RawMessage(data))
+	}
+	return
+}
+
+func (v1 *V1) EmbedsToProto(embeds []json.RawMessage) (ret []*corev1.Embed) {
+	for _, embed := range embeds {
+		var action *corev1.Embed
+		json.Unmarshal([]byte(embed), &action)
+		ret = append(ret, action)
+	}
+	return
+}
+
+func (v1 *V1) ProtoToEmbeds(embeds []*corev1.Embed) (ret [][]byte) {
+	for _, embed := range embeds {
+		data, _ := json.Marshal(embed)
+		ret = append(ret, json.RawMessage(data))
+	}
+	return
+}
+
 func (v1 *V1) CreateGuild(c context.Context, r *corev1.CreateGuildRequest) (*corev1.CreateGuildResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 	guildID, err := v1.Sonyflake.NextID()
 	if err != nil {
 		return nil, err
 	}
-	str := ""
-	if r.PictureUrl != nil {
-		str = *r.PictureUrl
-	}
-	guild, err := v1.DB.CreateGuild(ctx.UserID, guildID, r.GuildName, str)
+	guild, err := v1.DB.CreateGuild(ctx.UserID, guildID, r.GuildName, r.PictureUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -81,8 +112,8 @@ func (v1 *V1) CreateInvite(c context.Context, r *corev1.CreateInviteRequest) (*c
 		return nil, err
 	}
 	inv := int32(-1)
-	if r.PossibleUses != nil {
-		inv = *r.PossibleUses
+	if r.PossibleUses != 0 {
+		inv = r.PossibleUses
 	}
 	invite, err := v1.DB.CreateInvite(r.ForGuild, inv, r.Name)
 	if err != nil {
@@ -192,8 +223,8 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 		return nil, err
 	}
 	var messages []queries.Message
-	if r.BeforeMessage != nil {
-		time, err := v1.DB.GetMessageDate(*r.BeforeMessage)
+	if r.BeforeMessage != 0 {
+		time, err := v1.DB.GetMessageDate(r.BeforeMessage)
 		if err != nil {
 			return nil, err
 		}
@@ -251,24 +282,88 @@ func (v1 *V1) UpdateGuildName(c context.Context, r *corev1.UpdateGuildNameReques
 	if err != nil {
 		return nil, err
 	}
+	if err := v1.DB.UpdateGuildName(r.GuildId, r.NewGuildName); err != nil {
+		return nil, err
+	}
+	return &corev1.UpdateGuildNameResponse{}, nil
 }
 
 func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (*empty.Empty, error) {
+	ctx := c.(middleware.HarmonyContext)
+	if !r.UpdateActions && !r.UpdateEmbeds && !r.UpdateContent {
+		return nil, errors.New("bad request; nothing is being edited")
+	}
 
+	owner, err := v1.DB.GetMessageOwner(r.MessageId)
+	if err != nil {
+		return nil, err
+	}
+	if owner != ctx.UserID {
+		return nil, NoPermissionsError
+	}
+
+	var actions *[][]byte
+	var embeds *[][]byte
+	if r.UpdateActions {
+		val := v1.ProtoToActions(r.Actions)
+		actions = &val
+	}
+	if r.UpdateEmbeds {
+		val := v1.ProtoToEmbeds(r.Embeds)
+		embeds = &val
+	}
+	_, err = v1.DB.UpdateMessage(r.MessageId, &r.Content, embeds, actions)
+	if err != nil {
+		return nil, err
+	}
+	return &emptypb.Empty{}, nil
 }
 
 func (v1 *V1) DeleteGuild(c context.Context, r *corev1.DeleteGuildRequest) (*empty.Empty, error) {
-
+	ctx := c.(middleware.HarmonyContext)
+	err := v1.EnsureOwner(r.GuildId, ctx.UserID)
+	if err != nil {
+		return nil, err
+	}
+	err = v1.DB.DeleteGuild(r.GuildId)
+	if err != nil {
+		return nil, err
+	}
+	return &emptypb.Empty{}, nil
 }
 
 func (v1 *V1) DeleteInvite(c context.Context, r *corev1.DeleteInviteRequest) (*empty.Empty, error) {
-
+	ctx := c.(middleware.HarmonyContext)
+	err := v1.EnsureOwner(r.GuildId, ctx.UserID)
+	if err != nil {
+		return nil, err
+	}
+	if err := v1.DB.DeleteInvite(r.InviteId); err != nil {
+		return nil, err
+	}
+	return &emptypb.Empty{}, nil
 }
 
 func (v1 *V1) DeleteChannel(c context.Context, r *corev1.DeleteChannelRequest) (*empty.Empty, error) {
-
+	ctx := c.(middleware.HarmonyContext)
+	err := v1.EnsureOwner(r.GuildId, ctx.UserID)
+	if err != nil {
+		return nil, err
+	}
+	if err := v1.DB.DeleteChannelFromGuild(r.GuildId, r.ChannelId); err != nil {
+		return nil, err
+	}
+	return &emptypb.Empty{}, nil
 }
 
 func (v1 *V1) DeleteMessage(c context.Context, r *corev1.DeleteMessageRequest) (*empty.Empty, error) {
-
+	ctx := c.(middleware.HarmonyContext)
+	owner, err := v1.DB.GetMessageOwner(r.MessageId)
+	if err != nil {
+		return nil, err
+	}
+	if ctx.UserID != owner {
+		return nil, NoPermissionsError
+	}
+	return &emptypb.Empty{}, nil
 }
