@@ -10,6 +10,7 @@ import (
 	"github.com/harmony-development/legato/server/api/profile"
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/logger"
+	"github.com/sony/sonyflake"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
@@ -18,8 +19,9 @@ import (
 )
 
 type Dependencies struct {
-	Logger logger.ILogger
-	DB     db.IHarmonyDB
+	Logger    logger.ILogger
+	DB        db.IHarmonyDB
+	Sonyflake *sonyflake.Sonyflake
 }
 
 // API contains the component of the server responsible for APIs
@@ -52,7 +54,11 @@ func (api API) Start(port string) error {
 	if err != nil {
 		return err
 	}
-	corev1.RegisterCoreServiceServer(api.grpcServer, core.New(&core.Dependencies{}).V1)
+	corev1.RegisterCoreServiceServer(api.grpcServer, core.New(&core.Dependencies{
+		DB:        api.DB,
+		Logger:    api.Logger,
+		Sonyflake: api.Sonyflake,
+	}).V1)
 	profilev1.RegisterProfileServiceServer(api.grpcServer, &profile.New(profile.Dependencies{
 		DB: api.DB,
 	}).V1)
