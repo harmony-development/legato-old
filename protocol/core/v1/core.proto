@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 
 package protocol.core.v1;
 
@@ -97,27 +98,37 @@ message CreateChannelResponse {
 
 // READ
 
-message GetGuildRequest { uint64 guild_id = 1; }
+message GetGuildRequest {
+  uint64 guild_id = 1;
+}
 message GetGuildResponse {
   string guild_name = 1;
   uint64 guild_owner = 2;
   string guild_picture = 3;
 }
 
-message GetGuildInvitesRequest { uint64 guild_id = 1; }
+message GetGuildInvitesRequest {
+  uint64 guild_id = 1;
+}
 message GetGuildInvitesResponse {
   message Invite {
-    uint64 invite_id = 2;
+    string invite_id = 2;
     int32 possible_uses = 3;
     int32 use_count = 4;
   }
   repeated Invite invites = 1;
 }
 
-message GetGuildMembersRequest { uint64 guild_id = 1; }
-message GetGuildMembersResponse { repeated uint64 members = 1; }
+message GetGuildMembersRequest {
+  uint64 guild_id = 1;
+}
+message GetGuildMembersResponse {
+  repeated uint64 members = 1;
+}
 
-message GetGuildChannelsRequest { uint64 guild_id = 1; }
+message GetGuildChannelsRequest {
+  uint64 guild_id = 1;
+}
 message GetGuildChannelsResponse {
   message Channel {
     uint64 channel_id = 1;
@@ -127,15 +138,19 @@ message GetGuildChannelsResponse {
   repeated Channel channels = 1;
 }
 
-message GetChannelMessagesRequest { uint64 load_before_message = 1; }
+message GetChannelMessagesRequest {
+  uint64 guild_id = 1;
+  uint64 channel_id = 2;
+  optional uint64 before_message = 3;
+}
 message GetChannelMessagesResponse {
   message Message {
     uint64 guild_id = 1;
     uint64 channel_id = 2;
     uint64 message_id = 3;
     uint64 author_id = 4;
-    uint64 created_at = 5;
-    uint64 edited_at = 6;
+    google.protobuf.Timestamp created_at = 5;
+    optional google.protobuf.Timestamp edited_at = 6;
 		string content = 7;
 		repeated Embed embeds = 8;
 		repeated Action actions = 9;
@@ -149,7 +164,7 @@ message UpdateGuildNameRequest {
   uint64 guild_id = 1;
   string new_guild_name = 2;
 }
-message UpdateGuildNameResponse { bool success = 1; }
+message UpdateGuildNameResponse {}
 
 message UpdateMessageRequest {
 	string content = 1;

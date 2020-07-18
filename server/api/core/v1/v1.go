@@ -2,18 +2,24 @@ package v1
 
 import (
 	"context"
+	"database/sql"
+	"encoding/json"
 	"errors"
 
+	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	corev1 "github.com/harmony-development/legato/gen/core"
 	"github.com/harmony-development/legato/server/api/middleware"
 	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/db/queries"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/sony/sonyflake"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 var (
 	NoPermissionsError = errors.New("No permissions")
+	NotInGuild         = errors.New("Not in guild")
 )
 
 // Dependencies are the backend services this package needs
@@ -37,6 +43,17 @@ func (v1 *V1) EnsureOwner(guildID, ownerID uint64) error {
 		return nil
 	}
 	return NoPermissionsError
+}
+
+func (v1 *V1) EnsureInGuild(guildID, userID uint64) error {
+	ok, err := v1.DB.UserInGuild(userID, guildID)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return NotInGuild
+	}
+	return nil
 }
 
 func (v1 *V1) CreateGuild(c context.Context, r *corev1.CreateGuildRequest) (*corev1.CreateGuildResponse, error) {
@@ -91,27 +108,149 @@ func (v1 *V1) CreateChannel(c context.Context, r *corev1.CreateChannelRequest) (
 }
 
 func (v1 *V1) GetGuild(c context.Context, r *corev1.GetGuildRequest) (*corev1.GetGuildResponse, error) {
-
+	guild, err := v1.DB.GetGuildByID(r.GuildId)
+	if err != nil {
+		return nil, err
+	}
+	return &corev1.GetGuildResponse{
+		GuildName:    guild.GuildName,
+		GuildOwner:   guild.OwnerID,
+		GuildPicture: guild.PictureUrl,
+	}, nil
 }
 
 func (v1 *V1) GetGuildInvites(c context.Context, r *corev1.GetGuildInvitesRequest) (*corev1.GetGuildInvitesResponse, error) {
-
+	err := v1.EnsureOwner(r.GuildId, c.(middleware.HarmonyContext).UserID)
+	if err != nil {
+		return nil, err
+	}
+	invites, err := v1.DB.GetInvites(r.GuildId)
+	if err != nil {
+		return nil, err
+	}
+	return &corev1.GetGuildInvitesResponse{
+		Invites: func() (ret []*corev1.GetGuildInvitesResponse_Invite) {
+			for _, inv := range invites {
+				ret = append(ret, &corev1.GetGuildInvitesResponse_Invite{
+					InviteId: inv.InviteID,
+					PossibleUses: func() int32 {
+						if inv.PossibleUses.Valid {
+							return inv.PossibleUses.Int32
+						}
+						return -1
+					}(),
+					UseCount: inv.Uses,
+				})
+			}
+			return
+		}(),
+	}, nil
 }
 
 func (v1 *V1) GetGuildMembers(c context.Context, r *corev1.GetGuildMembersRequest) (*corev1.GetGuildMembersResponse, error) {
-
+	ctx := c.(middleware.HarmonyContext)
+	err := v1.EnsureInGuild(r.GuildId, ctx.UserID)
+	if err != nil {
+		return nil, err
+	}
+	members, err := v1.DB.MembersInGuild(r.GuildId)
+	if err != nil {
+		return nil, err
+	}
+	return &corev1.GetGuildMembersResponse{
+		Members: members,
+	}, nil
 }
 
 func (v1 *V1) GetGuildChannels(c context.Context, r *corev1.GetGuildChannelsRequest) (*corev1.GetGuildChannelsResponse, error) {
-
+	ctx := c.(middleware.HarmonyContext)
+	err := v1.EnsureInGuild(r.GuildId, ctx.UserID)
+	if err != nil {
+		return nil, err
+	}
+	chans, err := v1.DB.ChannelsForGuild(r.GuildId)
+	if err != nil {
+		return nil, err
+	}
+	return &corev1.GetGuildChannelsResponse{
+		Channels: func() (ret []*corev1.GetGuildChannelsResponse_Channel) {
+			for _, channel := range chans {
+				ret = append(ret, &corev1.GetGuildChannelsResponse_Channel{
+					ChannelId:   channel.ChannelID,
+					ChannelName: channel.ChannelName,
+				})
+			}
+			return
+		}(),
+	}, nil
 }
 
 func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessagesRequest) (*corev1.GetChannelMessagesResponse, error) {
-
+	ctx := c.(middleware.HarmonyContext)
+	err := v1.EnsureInGuild(r.GuildId, ctx.UserID)
+	if err != nil {
+		return nil, err
+	}
+	var messages []queries.Message
+	if r.BeforeMessage != nil {
+		time, err := v1.DB.GetMessageDate(*r.BeforeMessage)
+		if err != nil {
+			return nil, err
+		}
+		messages, err = v1.DB.GetMessagesBefore(r.GuildId, r.ChannelId, time)
+	} else {
+		messages, err = v1.DB.GetMessages(r.GuildId, r.ChannelId)
+	}
+	if err != nil && err != sql.ErrNoRows {
+		return nil, err
+	}
+	return &corev1.GetChannelMessagesResponse{
+		Messages: func() (ret []*corev1.GetChannelMessagesResponse_Message) {
+			for _, message := range messages {
+				createdAt, _ := ptypes.TimestampProto(message.CreatedAt.UTC())
+				var editedAt *timestamppb.Timestamp
+				if message.EditedAt.Valid {
+					editedAt, _ = ptypes.TimestampProto(editedAt.AsTime().UTC())
+				}
+				var embeds []*corev1.Embed
+				var actions []*corev1.Action
+				for _, rawEmbed := range message.Embeds {
+					var embed corev1.Embed
+					if err := json.Unmarshal(rawEmbed, &embed); err != nil {
+						continue
+					}
+					embeds = append(embeds, &embed)
+				}
+				for _, rawAction := range message.Actions {
+					var action corev1.Action
+					if err := json.Unmarshal(rawAction, &action); err != nil {
+						continue
+					}
+					actions = append(actions, &action)
+				}
+				ret = append(ret, &corev1.GetChannelMessagesResponse_Message{
+					MessageId: message.MessageID,
+					GuildId:   message.GuildID,
+					ChannelId: message.ChannelID,
+					AuthorId:  message.UserID,
+					CreatedAt: createdAt,
+					EditedAt:  editedAt,
+					Content:   message.Content,
+					Embeds:    embeds,
+					Actions:   actions,
+				})
+			}
+			return
+		}(),
+	}, nil
 }
 
 func (v1 *V1) UpdateGuildName(c context.Context, r *corev1.UpdateGuildNameRequest) (*corev1.UpdateGuildNameResponse, error) {
-
+	ctx := c.(middleware.HarmonyContext)
+	err := v1.EnsureOwner(r.GuildId, ctx.UserID)
+	if err != nil {
+		return nil, err
+	}
 }
 
 func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (*empty.Empty, error) {
