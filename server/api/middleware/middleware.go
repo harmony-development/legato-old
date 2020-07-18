@@ -5,31 +5,48 @@ import (
 	"sync"
 	"time"
 
+	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/logger"
 	"golang.org/x/time/rate"
 )
 
-type Limit struct {
+type RateLimit struct {
 	Duration time.Duration
 	Burst    int
 }
 
-var limits = map[string]Limit{
+type RPCConfig struct {
+	RateLimit RateLimit
+	Auth      bool
+}
+
+var rpcConfigs = map[string]RPCConfig{
 	"/protocol.profile.v1.ProfileService/GetUser": {
-		Duration: 10 * time.Second,
-		Burst:    64,
+		RateLimit: RateLimit{
+			Duration: 10 * time.Second,
+			Burst:    64,
+		},
+		Auth: true,
 	},
 	"/protocol.profile.v1.ProfileService/GetUserMetadata": {
-		Duration: 1 * time.Second,
-		Burst:    4,
+		RateLimit: RateLimit{Duration: 1 * time.Second,
+			Burst: 4,
+		},
+		Auth: true,
 	},
 	"/protocol.profile.v1.ProfileService/UsernameUpdate": {
-		Duration: 5 * time.Minute,
-		Burst:    8,
+		RateLimit: RateLimit{
+			Duration: 5 * time.Minute,
+			Burst:    8,
+		},
+		Auth: true,
 	},
 	"/protocol.profile.v1.ProfileService/StatusUpdate": {
-		Duration: 5 * time.Second,
-		Burst:    4,
+		RateLimit: RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    4,
+		},
+		Auth: true,
 	},
 }
 
@@ -42,6 +59,7 @@ type HarmonyContext struct {
 
 type Dependencies struct {
 	Logger logger.ILogger
+	DB     db.IHarmonyDB
 }
 
 type Middlewares struct {

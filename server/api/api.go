@@ -33,11 +33,13 @@ type API struct {
 func New(deps Dependencies) *API {
 	m := middleware.New(middleware.Dependencies{
 		Logger: deps.Logger,
+		DB:     deps.DB,
 	})
 	return &API{
 		grpcServer: grpc.NewServer(grpc_middleware.WithUnaryServerChain(
 			m.HarmonyContextInterceptor,
 			grpc_recovery.UnaryServerInterceptor(grpc_recovery.WithRecoveryHandler(m.RecoveryFunc)),
+			m.AuthInterceptor,
 			m.RateLimitInterceptor,
 		)),
 		Dependencies: deps,

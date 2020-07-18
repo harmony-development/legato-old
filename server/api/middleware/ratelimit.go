@@ -32,9 +32,9 @@ func (m Middlewares) RateCleanup() {
 func (m Middlewares) RateLimitInterceptor(c context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	ctx := c.(HarmonyContext)
 	p, _ := peer.FromContext(c)
-	l, exists := limits[info.FullMethod]
+	l, exists := rpcConfigs[info.FullMethod]
 	if exists {
-		ctx.Limiter = m.GetVisitor(info.FullMethod, p.Addr.String(), l.Duration, l.Burst)
+		ctx.Limiter = m.GetVisitor(info.FullMethod, p.Addr.String(), l.RateLimit.Duration, l.RateLimit.Burst)
 	}
 
 	return handler(c, req)
