@@ -12,6 +12,9 @@ import (
 
 // GetUser handles the protocol's GetUser request
 func (v1 *V1) GetUser(c context.Context, r *profilev1.GetUserRequest) (*profilev1.GetUserResponse, error) {
+	if err := r.Validate(); err != nil {
+		return nil, err
+	}
 	res, err := v1.DB.GetUserByID(r.UserId)
 	if err != nil {
 		if err == sql.ErrNoRows {

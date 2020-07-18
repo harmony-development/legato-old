@@ -11,6 +11,9 @@ import (
 
 // GetUserMetadata handles the protocol's GetUserMetadata request
 func (v1 *V1) GetUserMetadata(ctx context.Context, r *profilev1.GetUserMetadataRequest) (*profilev1.GetUserMetadataResponse, error) {
+	if err := r.Validate(); err != nil {
+		return nil, err
+	}
 	meta, err := v1.DB.GetUserMetadata(0, r.AppId)
 	if err != nil {
 		if err == sql.ErrNoRows {

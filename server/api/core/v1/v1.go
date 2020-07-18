@@ -93,6 +93,9 @@ func (v1 *V1) ProtoToEmbeds(embeds []*corev1.Embed) (ret [][]byte) {
 
 func (v1 *V1) CreateGuild(c context.Context, r *corev1.CreateGuildRequest) (*corev1.CreateGuildResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
+	if err := r.Validate(); err != nil {
+		return nil, err
+	}
 	guildID, err := v1.Sonyflake.NextID()
 	if err != nil {
 		return nil, err
@@ -108,6 +111,9 @@ func (v1 *V1) CreateGuild(c context.Context, r *corev1.CreateGuildRequest) (*cor
 
 func (v1 *V1) CreateInvite(c context.Context, r *corev1.CreateInviteRequest) (*corev1.CreateInviteResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
+	if err := r.Validate(); err != nil {
+		return nil, err
+	}
 	if err := v1.EnsureOwner(r.ForGuild, ctx.UserID); err != nil {
 		return nil, err
 	}
@@ -126,6 +132,9 @@ func (v1 *V1) CreateInvite(c context.Context, r *corev1.CreateInviteRequest) (*c
 
 func (v1 *V1) CreateChannel(c context.Context, r *corev1.CreateChannelRequest) (*corev1.CreateChannelResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
+	if err := r.Validate(); err != nil {
+		return nil, err
+	}
 	if err := v1.EnsureOwner(r.GuildId, ctx.UserID); err != nil {
 		return nil, err
 	}
@@ -139,6 +148,9 @@ func (v1 *V1) CreateChannel(c context.Context, r *corev1.CreateChannelRequest) (
 }
 
 func (v1 *V1) GetGuild(c context.Context, r *corev1.GetGuildRequest) (*corev1.GetGuildResponse, error) {
+	if err := r.Validate(); err != nil {
+		return nil, err
+	}
 	guild, err := v1.DB.GetGuildByID(r.GuildId)
 	if err != nil {
 		return nil, err
@@ -151,6 +163,9 @@ func (v1 *V1) GetGuild(c context.Context, r *corev1.GetGuildRequest) (*corev1.Ge
 }
 
 func (v1 *V1) GetGuildInvites(c context.Context, r *corev1.GetGuildInvitesRequest) (*corev1.GetGuildInvitesResponse, error) {
+	if err := r.Validate(); err != nil {
+		return nil, err
+	}
 	err := v1.EnsureOwner(r.GuildId, c.(middleware.HarmonyContext).UserID)
 	if err != nil {
 		return nil, err
@@ -180,6 +195,9 @@ func (v1 *V1) GetGuildInvites(c context.Context, r *corev1.GetGuildInvitesReques
 
 func (v1 *V1) GetGuildMembers(c context.Context, r *corev1.GetGuildMembersRequest) (*corev1.GetGuildMembersResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
+	if err := r.Validate(); err != nil {
+		return nil, err
+	}
 	err := v1.EnsureInGuild(r.GuildId, ctx.UserID)
 	if err != nil {
 		return nil, err
@@ -195,6 +213,9 @@ func (v1 *V1) GetGuildMembers(c context.Context, r *corev1.GetGuildMembersReques
 
 func (v1 *V1) GetGuildChannels(c context.Context, r *corev1.GetGuildChannelsRequest) (*corev1.GetGuildChannelsResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
+	if err := r.Validate(); err != nil {
+		return nil, err
+	}
 	err := v1.EnsureInGuild(r.GuildId, ctx.UserID)
 	if err != nil {
 		return nil, err
@@ -218,6 +239,9 @@ func (v1 *V1) GetGuildChannels(c context.Context, r *corev1.GetGuildChannelsRequ
 
 func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessagesRequest) (*corev1.GetChannelMessagesResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
+	if err := r.Validate(); err != nil {
+		return nil, err
+	}
 	err := v1.EnsureInGuild(r.GuildId, ctx.UserID)
 	if err != nil {
 		return nil, err
@@ -278,6 +302,9 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 
 func (v1 *V1) UpdateGuildName(c context.Context, r *corev1.UpdateGuildNameRequest) (*corev1.UpdateGuildNameResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
+	if err := r.Validate(); err != nil {
+		return nil, err
+	}
 	err := v1.EnsureOwner(r.GuildId, ctx.UserID)
 	if err != nil {
 		return nil, err
@@ -290,6 +317,9 @@ func (v1 *V1) UpdateGuildName(c context.Context, r *corev1.UpdateGuildNameReques
 
 func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
+	if err := r.Validate(); err != nil {
+		return nil, err
+	}
 	if !r.UpdateActions && !r.UpdateEmbeds && !r.UpdateContent {
 		return nil, errors.New("bad request; nothing is being edited")
 	}
@@ -321,6 +351,9 @@ func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (
 
 func (v1 *V1) DeleteGuild(c context.Context, r *corev1.DeleteGuildRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
+	if err := r.Validate(); err != nil {
+		return nil, err
+	}
 	err := v1.EnsureOwner(r.GuildId, ctx.UserID)
 	if err != nil {
 		return nil, err
@@ -334,6 +367,9 @@ func (v1 *V1) DeleteGuild(c context.Context, r *corev1.DeleteGuildRequest) (*emp
 
 func (v1 *V1) DeleteInvite(c context.Context, r *corev1.DeleteInviteRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
+	if err := r.Validate(); err != nil {
+		return nil, err
+	}
 	err := v1.EnsureOwner(r.GuildId, ctx.UserID)
 	if err != nil {
 		return nil, err
@@ -346,6 +382,9 @@ func (v1 *V1) DeleteInvite(c context.Context, r *corev1.DeleteInviteRequest) (*e
 
 func (v1 *V1) DeleteChannel(c context.Context, r *corev1.DeleteChannelRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
+	if err := r.Validate(); err != nil {
+		return nil, err
+	}
 	err := v1.EnsureOwner(r.GuildId, ctx.UserID)
 	if err != nil {
 		return nil, err
@@ -358,6 +397,9 @@ func (v1 *V1) DeleteChannel(c context.Context, r *corev1.DeleteChannelRequest) (
 
 func (v1 *V1) DeleteMessage(c context.Context, r *corev1.DeleteMessageRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
+	if err := r.Validate(); err != nil {
+		return nil, err
+	}
 	owner, err := v1.DB.GetMessageOwner(r.MessageId)
 	if err != nil {
 		return nil, err

@@ -12,6 +12,9 @@ import (
 // StatusUpdate handles the protocol's StatusUpdate request
 func (v1 *V1) StatusUpdate(c context.Context, r *profilev1.StatusUpdateRequest) (*profilev1.StatusUpdateResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
+	if err := r.Validate(); err != nil {
+		return nil, err
+	}
 	if err := v1.DB.SetStatus(ctx.UserID, r.NewStatus); err != nil {
 		v1.Logger.Exception(err)
 		return nil, errors.New(responses.UnknownError)

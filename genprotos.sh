@@ -8,6 +8,6 @@ for dir in $(find "protocol" -name '*.proto' -print0 | xargs -0 -n1 dirname | so
   --proto_path=${GOPATH}/src/github.com/envoyproxy/protoc-gen-validate \
   --go_out=gen \
   --go_opt="plugins=grpc" \
-  --govalidators_out=gen \
+  --validate_out="lang=go:gen" \
   $(find "${dir}" -name '*.proto')
 done
