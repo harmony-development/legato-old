@@ -6,10 +6,14 @@ import (
 	"strconv"
 
 	corev1 "github.com/harmony-development/legato/gen/core"
+	foundationv1 "github.com/harmony-development/legato/gen/foundation"
 	profilev1 "github.com/harmony-development/legato/gen/profile"
 	"github.com/harmony-development/legato/server/api/core"
+	"github.com/harmony-development/legato/server/api/foundation"
 	"github.com/harmony-development/legato/server/api/middleware"
 	"github.com/harmony-development/legato/server/api/profile"
+	"github.com/harmony-development/legato/server/auth"
+	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/sony/sonyflake"
@@ -24,9 +28,11 @@ import (
 )
 
 type Dependencies struct {
-	Logger    logger.ILogger
-	DB        db.IHarmonyDB
-	Sonyflake *sonyflake.Sonyflake
+	Logger      logger.ILogger
+	DB          db.IHarmonyDB
+	Sonyflake   *sonyflake.Sonyflake
+	AuthManager *auth.Manager
+	Config      *config.Config
 }
 
 // API contains the component of the server responsible for APIs
@@ -90,6 +96,12 @@ func (api API) Start(cb chan error, port int) {
 	profilev1.RegisterProfileServiceServer(api.grpcServer, &profile.New(profile.Dependencies{
 		DB: api.DB,
 	}).V1)
+	foundationv1.RegisterFoundationServiceServer(api.grpcServer, foundation.New(&foundation.Dependencies{
+		DB:          api.DB,
+		Sonyflake:   api.Sonyflake,
+		AuthManager: api.AuthManager,
+		Config:      api.Config,
+	}))
 	reflection.Register(api.grpcServer)
 	go func() {
 		cb <- api.grpcServer.Serve(lis)

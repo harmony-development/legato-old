@@ -4,6 +4,7 @@ package responses
 
 const (
 	InvalidEmail           = "auth.invalid-email"
+	InvalidUsername        = "auth.invalid-username"
 	AlreadyRegistered      = "auth.already-registered"
 	InvalidPassword        = "auth.invalid-password"
 	InvalidSession         = "invalid-session"

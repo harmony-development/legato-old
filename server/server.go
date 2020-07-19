@@ -65,9 +65,11 @@ func (inst Instance) Start() {
 		GuildsLock: &sync.RWMutex{},
 	}
 	inst.API = api.New(api.Dependencies{
-		Logger:    inst.Logger,
-		DB:        inst.DB,
-		Sonyflake: inst.Sonyflake,
+		Logger:      inst.Logger,
+		DB:          inst.DB,
+		AuthManager: inst.AuthManager,
+		Sonyflake:   inst.Sonyflake,
+		Config:      inst.Config,
 	})
 	errCallback := make(chan error)
 	inst.API.Start(errCallback, inst.Config.Server.Port)
