@@ -12,5 +12,6 @@ rule gobuild
 
 build legato-sqlc: sqlc
 build legato-protobuf: genprotos
-build legato-submodules: updatesubmodules
-build legato-binary: gobuild legato-sqlc legato-protobuf legato-submodules
+build submodules: updatesubmodules
+build legato-binary: gobuild legato-sqlc legato-protobuf
+default legato-binary
