@@ -106,5 +106,7 @@ func (api API) Start(cb chan error, port int) {
 	go func() {
 		cb <- api.grpcServer.Serve(lis)
 	}()
-	cb <- api.grpcWebHTTPServer.Serve(webLis)
+	go func() {
+		cb <- api.grpcWebHTTPServer.Serve(webLis)
+	}()
 }
