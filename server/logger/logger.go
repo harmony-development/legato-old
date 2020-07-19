@@ -5,12 +5,15 @@ import (
 	"runtime/debug"
 
 	"github.com/harmony-development/legato/server/config"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/sirupsen/logrus"
 )
 
 type ILogger interface {
+	ErrorResponse(code codes.Code, err error, response string) error
 	CheckException(err error)
 	Exception(err error)
 	Fatal(err error)
@@ -34,6 +37,14 @@ func (l Logger) CheckException(err error) {
 		return
 	}
 	l.Exception(err)
+}
+
+func (l Logger) ErrorResponse(code codes.Code, err error, response string) error {
+	l.Exception(err)
+	if l.Config.Server.RespondWithErrors {
+		return status.Error(code, err.Error())
+	}
+	return status.Error(code, response)
 }
 
 // Exception logs an exception

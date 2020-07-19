@@ -31,6 +31,7 @@ type ServerConf struct {
 	SessionCacheMax                   int
 	SessionDuration                   time.Duration
 	LogErrors                         bool
+	RespondWithErrors                 bool
 	NonceLength                       int
 	GuildLeaveNotificationQueueLength int
 	Avatar                            Avatar
@@ -89,6 +90,7 @@ var DefaultConf = Config{
 		SessionCacheMax:                   5096,
 		SessionDuration:                   48 * time.Hour,
 		LogErrors:                         true,
+		RespondWithErrors:                 false,
 		SnowflakeStart:                    0,
 		NonceLength:                       32,
 		GuildLeaveNotificationQueueLength: 64,

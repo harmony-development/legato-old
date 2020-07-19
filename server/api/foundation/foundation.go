@@ -5,11 +5,13 @@ import (
 	"github.com/harmony-development/legato/server/auth"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/logger"
 	"github.com/sony/sonyflake"
 )
 
 type Dependencies struct {
 	DB          db.IHarmonyDB
+	Logger      logger.ILogger
 	AuthManager *auth.Manager
 	Sonyflake   *sonyflake.Sonyflake
 	Config      *config.Config
@@ -27,6 +29,7 @@ func New(deps *Dependencies) *Service {
 	foundation.V1 = &v1.V1{
 		Dependencies: v1.Dependencies{
 			DB:          deps.DB,
+			Logger:      deps.Logger,
 			AuthManager: deps.AuthManager,
 			Sonyflake:   deps.Sonyflake,
 			Config:      deps.Config,

@@ -14,7 +14,10 @@ import (
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/db/queries"
 	"github.com/harmony-development/legato/server/logger"
+	"github.com/harmony-development/legato/server/responses"
 	"github.com/sony/sonyflake"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -159,6 +162,9 @@ func init() {
 func (v1 *V1) GetGuild(c context.Context, r *corev1.GetGuildRequest) (*corev1.GetGuildResponse, error) {
 	guild, err := v1.DB.GetGuildByID(r.Location.GuildId)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, v1.Logger.ErrorResponse(codes.NotFound, err, responses.GuildNotFound)
+		}
 		return nil, err
 	}
 	return &corev1.GetGuildResponse{
@@ -396,7 +402,7 @@ func init() {
 func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
 	if !r.UpdateActions && !r.UpdateEmbeds && !r.UpdateContent {
-		return nil, errors.New("bad request; nothing is being edited")
+		return nil, status.Error(codes.InvalidArgument, responses.InvalidRequest)
 	}
 
 	owner, err := v1.DB.GetMessageOwner(r.Location.MessageId)
@@ -560,6 +566,9 @@ func (v1 *V1) JoinGuild(c context.Context, r *corev1.JoinGuildRequest) (*corev1.
 	ctx := c.(middleware.HarmonyContext)
 	guildID, err := v1.DB.ResolveGuildID(r.InviteId)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, v1.Logger.ErrorResponse(codes.NotFound, err, responses.GuildNotFound)
+		}
 		return nil, err
 	}
 	if err := v1.DB.AddMemberToGuild(ctx.UserID, guildID); err != nil {
@@ -599,7 +608,7 @@ func (v1 *V1) LeaveGuild(c context.Context, r *corev1.LeaveGuildRequest) (*empty
 	if isOwner, err := v1.DB.IsOwner(r.Location.GuildId, ctx.UserID); err != nil {
 		return nil, err
 	} else if isOwner {
-		return nil, errors.New("You cannot leave a guild you own")
+		return nil, status.Error(codes.FailedPrecondition, responses.InvalidRequest)
 	}
 	streamState.RemoveUserFromGuild(r.Location.GuildId, ctx.UserID)
 	streamState.BroadcastGuild(r.Location.GuildId, &corev1.GuildEvent{
@@ -680,7 +689,7 @@ func (v1 *V1) TriggerAction(c context.Context, r *corev1.TriggerActionRequest) (
 		return nil, err
 	}
 	if msg.ChannelID != r.Location.ChannelId || msg.GuildID != r.Location.GuildId {
-		return nil, errors.New("Invalid location")
+		return nil, status.Error(codes.InvalidArgument, responses.InvalidRequest)
 	}
 	for _, action := range v1.ActionsToProto(msg.Actions) {
 		if action.Id == r.ActionId {
@@ -696,7 +705,7 @@ func (v1 *V1) TriggerAction(c context.Context, r *corev1.TriggerActionRequest) (
 			return &emptypb.Empty{}, nil
 		}
 	}
-	return nil, errors.New("Invalid action ID")
+	return nil, status.Error(codes.InvalidArgument, responses.InvalidRequest)
 }
 
 func init() {

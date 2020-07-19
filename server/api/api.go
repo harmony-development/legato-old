@@ -56,10 +56,11 @@ func New(deps Dependencies) *API {
 	api.grpcServer = grpc.NewServer(grpc_middleware.WithUnaryServerChain(
 		m.HarmonyContextInterceptor,
 		grpc_recovery.UnaryServerInterceptor(grpc_recovery.WithRecoveryHandler(m.RecoveryFunc)),
+		m.RateLimitInterceptor,
 		m.ValidatorInterceptor,
 		m.AuthInterceptor,
 		m.LocationInterceptor,
-		m.RateLimitInterceptor,
+		m.ErrorInterceptor,
 	))
 	api.grpcWebServer = grpcweb.WrapServer(api.grpcServer)
 	api.grpcWebHTTPServer = &http.Server{
@@ -98,6 +99,7 @@ func (api API) Start(cb chan error, port int) {
 	}).V1)
 	foundationv1.RegisterFoundationServiceServer(api.grpcServer, foundation.New(&foundation.Dependencies{
 		DB:          api.DB,
+		Logger:      api.Logger,
 		Sonyflake:   api.Sonyflake,
 		AuthManager: api.AuthManager,
 		Config:      api.Config,

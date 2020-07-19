@@ -3,6 +3,7 @@ package v1
 import (
 	"context"
 	"crypto/x509"
+	"database/sql"
 	"encoding/pem"
 	"unicode"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/harmony-development/legato/server/auth"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/logger"
 	"github.com/harmony-development/legato/server/responses"
 	"github.com/sony/sonyflake"
 	"github.com/thanhpk/randstr"
@@ -22,6 +24,7 @@ import (
 
 type Dependencies struct {
 	DB          db.IHarmonyDB
+	Logger      logger.ILogger
 	AuthManager *auth.Manager
 	Sonyflake   *sonyflake.Sonyflake
 	Config      *config.Config
@@ -36,6 +39,9 @@ func (v1 *V1) Federate(c context.Context, r *foundationv1.FederateRequest) (*fou
 
 	user, err := v1.DB.GetUserByID(ctx.UserID)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, v1.Logger.ErrorResponse(codes.NotFound, err, "user not found")
+		}
 		return nil, err
 	}
 
