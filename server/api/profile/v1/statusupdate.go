@@ -8,7 +8,7 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	profilev1 "github.com/harmony-development/legato/gen/profile"
 	"github.com/harmony-development/legato/server/api/middleware"
-	"github.com/harmony-development/legato/server/http/responses"
+	"github.com/harmony-development/legato/server/responses"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 

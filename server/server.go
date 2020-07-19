@@ -2,7 +2,6 @@ package server
 
 import (
 	"os"
-	"sync"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -13,8 +12,6 @@ import (
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/logger"
-	"github.com/harmony-development/legato/server/state"
-	"github.com/harmony-development/legato/server/state/guild"
 	"github.com/harmony-development/legato/server/storage"
 )
 
@@ -22,7 +19,6 @@ import (
 type Instance struct {
 	API            *api.API
 	Sonyflake      *sonyflake.Sonyflake
-	State          *state.State
 	Config         *config.Config
 	AuthManager    *auth.Manager
 	StorageManager *storage.Manager
@@ -60,10 +56,7 @@ func (inst Instance) Start() {
 		GuildPicturePath:        inst.Config.Server.GuildPicturePath,
 	}
 	go inst.StorageManager.DeleteRoutine()
-	inst.State = &state.State{
-		Guilds:     make(map[uint64]*guild.Guild),
-		GuildsLock: &sync.RWMutex{},
-	}
+
 	inst.API = api.New(api.Dependencies{
 		Logger:      inst.Logger,
 		DB:          inst.DB,

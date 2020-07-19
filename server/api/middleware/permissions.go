@@ -4,7 +4,7 @@ import (
 	"context"
 
 	corev1 "github.com/harmony-development/legato/gen/core"
-	"github.com/harmony-development/legato/server/http/responses"
+	"github.com/harmony-development/legato/server/responses"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

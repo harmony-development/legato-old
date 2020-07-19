@@ -12,7 +12,7 @@ import (
 	"github.com/harmony-development/legato/server/auth"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
-	"github.com/harmony-development/legato/server/http/responses"
+	"github.com/harmony-development/legato/server/responses"
 	"github.com/sony/sonyflake"
 	"github.com/thanhpk/randstr"
 	"golang.org/x/crypto/bcrypt"

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"runtime/debug"
 
-	"github.com/harmony-development/legato/server/http/responses"
+	"github.com/harmony-development/legato/server/responses"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
