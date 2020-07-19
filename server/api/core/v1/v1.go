@@ -625,8 +625,18 @@ func init() {
 }
 
 func (v1 *V1) StreamGuildEvents(r *corev1.StreamGuildEventsRequest, s corev1.CoreService_StreamGuildEventsServer) error {
-	ctx := s.Context().(middleware.HarmonyContext)
-	streamState.Add(r.Location.GuildId, ctx.UserID, s)
+	userID, err := middleware.CheckAuth(v1.DB, s.Context())
+	if err != nil {
+		return err
+	}
+	ok, err := v1.DB.UserInGuild(userID, r.Location.GuildId)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return NotInGuild
+	}
+	streamState.Add(r.Location.GuildId, userID, s)
 	return nil
 }
 
@@ -643,8 +653,11 @@ func init() {
 }
 
 func (v1 *V1) StreamActionEvents(r *corev1.StreamActionEventsRequest, s corev1.CoreService_StreamActionEventsServer) error {
-	ctx := s.Context().(middleware.HarmonyContext)
-	streamState.AddAction(ctx.UserID, s)
+	userID, err := middleware.CheckAuth(v1.DB, s.Context())
+	if err != nil {
+		return err
+	}
+	streamState.AddAction(userID, s)
 	return nil
 }
 
