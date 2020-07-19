@@ -2,6 +2,7 @@ package v1
 
 import (
 	"context"
+	"time"
 
 	profilev1 "github.com/harmony-development/legato/gen/profile"
 	"github.com/harmony-development/legato/server/api/middleware"
@@ -10,6 +11,17 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Minute,
+			Burst:    8,
+		},
+		Auth:       true,
+		Permission: middleware.NoPermission,
+	}, "/protocol.profile.v1.ProfileService/UsernameUpdate")
+}
 
 // UsernameUpdate handles the protocol's UsernameUpdate request
 func (v1 *V1) UsernameUpdate(c context.Context, r *profilev1.UsernameUpdateRequest) (*emptypb.Empty, error) {

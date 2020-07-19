@@ -63,3 +63,11 @@ UPDATE Messages
       Edited_At = NOW()
   WHERE Message_ID = $1
 RETURNING Actions, Edited_At;
+
+-- name: MessageWithIDExists :one
+SELECT EXISTS (
+  SELECT 1 FROM Messages
+          WHERE Guild_ID = $1
+            AND Channel_ID = $2
+            AND Message_ID = $3
+);

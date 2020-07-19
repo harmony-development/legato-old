@@ -10,15 +10,52 @@ import (
 	"golang.org/x/time/rate"
 )
 
-type Permission int
+type Permission uint64
 
 const (
-	NoPermission = iota
+	NoPermission = 1 << iota
 	ModifyInvites
 	ModifyChannels
 	ModifyGuild
 	Owner
 )
+
+func (flag *Permission) Set(b Permission)     { *flag = b | *flag }
+func (flag *Permission) Clear(b Permission)   { *flag = b &^ *flag }
+func (flag *Permission) Toggle(b Permission)  { *flag = b ^ *flag }
+func (flag Permission) Has(b Permission) bool { return b&flag != 0 }
+func (flag Permission) HasAll(b ...Permission) bool {
+	for _, perm := range b {
+		if perm&flag == 0 {
+			return false
+		}
+	}
+	return true
+}
+func (flag Permission) HasAny(b ...Permission) bool {
+	for _, perm := range b {
+		if perm&flag != 0 {
+			return true
+		}
+	}
+	return false
+}
+
+type Location uint64
+
+const (
+	NoLocation = 1 << iota
+	GuildLocation
+	ChannelLocation
+	MessageLocation
+	JoinedLocation
+	AuthorLocation
+)
+
+func (flag *Location) Set(b Location)     { *flag = b | *flag }
+func (flag *Location) Clear(b Location)   { *flag = b &^ *flag }
+func (flag *Location) Toggle(b Location)  { *flag = b ^ *flag }
+func (flag Location) Has(b Location) bool { return b&flag != 0 }
 
 type RateLimit struct {
 	Duration time.Duration
@@ -29,40 +66,15 @@ type RPCConfig struct {
 	RateLimit  RateLimit
 	Auth       bool
 	Permission Permission
+	Location   Location
 }
 
-var rpcConfigs = map[string]RPCConfig{
-	"/protocol.profile.v1.ProfileService/GetUser": {
-		RateLimit: RateLimit{
-			Duration: 10 * time.Second,
-			Burst:    64,
-		},
-		Auth:       true,
-		Permission: NoPermission,
-	},
-	"/protocol.profile.v1.ProfileService/GetUserMetadata": {
-		RateLimit: RateLimit{Duration: 1 * time.Second,
-			Burst: 4,
-		},
-		Auth:       true,
-		Permission: NoPermission,
-	},
-	"/protocol.profile.v1.ProfileService/UsernameUpdate": {
-		RateLimit: RateLimit{
-			Duration: 5 * time.Minute,
-			Burst:    8,
-		},
-		Auth:       true,
-		Permission: NoPermission,
-	},
-	"/protocol.profile.v1.ProfileService/StatusUpdate": {
-		RateLimit: RateLimit{
-			Duration: 5 * time.Second,
-			Burst:    4,
-		},
-		Auth:       true,
-		Permission: NoPermission,
-	},
+var rpcConfigs = map[string]RPCConfig{}
+
+func RegisterRPCConfig(config RPCConfig, name ...string) {
+	for _, name := range name {
+		rpcConfigs[name] = config
+	}
 }
 
 // HarmonyContext contains a custom context for passing data from middleware to handlers

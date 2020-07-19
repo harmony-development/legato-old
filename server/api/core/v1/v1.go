@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"time"
 
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
@@ -33,28 +34,6 @@ type Dependencies struct {
 // V1 contains the gRPC handler for v1
 type V1 struct {
 	Dependencies
-}
-
-func (v1 *V1) EnsureOwner(guildID, ownerID uint64) error {
-	owner, err := v1.DB.GetOwner(guildID)
-	if err != nil {
-		return err
-	}
-	if owner == ownerID {
-		return nil
-	}
-	return NoPermissionsError
-}
-
-func (v1 *V1) EnsureInGuild(guildID, userID uint64) error {
-	ok, err := v1.DB.UserInGuild(userID, guildID)
-	if err != nil {
-		return err
-	}
-	if !ok {
-		return NotInGuild
-	}
-	return nil
 }
 
 func (v1 *V1) ActionsToProto(msgs []json.RawMessage) (ret []*corev1.Action) {
@@ -91,11 +70,19 @@ func (v1 *V1) ProtoToEmbeds(embeds []*corev1.Embed) (ret [][]byte) {
 	return
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    1,
+		},
+		Auth:       true,
+		Permission: middleware.NoPermission,
+	}, "/protocol.core.v1.CoreService/CreateGuild")
+}
+
 func (v1 *V1) CreateGuild(c context.Context, r *corev1.CreateGuildRequest) (*corev1.CreateGuildResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
-	if err := r.Validate(); err != nil {
-		return nil, err
-	}
 	guildID, err := v1.Sonyflake.NextID()
 	if err != nil {
 		return nil, err
@@ -109,14 +96,19 @@ func (v1 *V1) CreateGuild(c context.Context, r *corev1.CreateGuildRequest) (*cor
 	}, nil
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    5,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation | middleware.JoinedLocation,
+		Permission: middleware.ModifyInvites,
+	}, "/protocol.core.v1.CoreService/CreateInvite")
+}
+
 func (v1 *V1) CreateInvite(c context.Context, r *corev1.CreateInviteRequest) (*corev1.CreateInviteResponse, error) {
-	ctx := c.(middleware.HarmonyContext)
-	if err := r.Validate(); err != nil {
-		return nil, err
-	}
-	if err := v1.EnsureOwner(r.Location.GuildId, ctx.UserID); err != nil {
-		return nil, err
-	}
 	inv := int32(-1)
 	if r.PossibleUses != 0 {
 		inv = r.PossibleUses
@@ -130,14 +122,19 @@ func (v1 *V1) CreateInvite(c context.Context, r *corev1.CreateInviteRequest) (*c
 	}, nil
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    5,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation | middleware.JoinedLocation,
+		Permission: middleware.ModifyChannels,
+	}, "/protocol.core.v1.CoreService/CreateChannel")
+}
+
 func (v1 *V1) CreateChannel(c context.Context, r *corev1.CreateChannelRequest) (*corev1.CreateChannelResponse, error) {
-	ctx := c.(middleware.HarmonyContext)
-	if err := r.Validate(); err != nil {
-		return nil, err
-	}
-	if err := v1.EnsureOwner(r.Location.GuildId, ctx.UserID); err != nil {
-		return nil, err
-	}
 	channel, err := v1.DB.AddChannelToGuild(r.Location.GuildId, r.ChannelName)
 	if err != nil {
 		return nil, err
@@ -147,10 +144,19 @@ func (v1 *V1) CreateChannel(c context.Context, r *corev1.CreateChannelRequest) (
 	}, nil
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    15,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation | middleware.JoinedLocation,
+		Permission: middleware.NoPermission,
+	}, "/protocol.core.v1.CoreService/GetGuild")
+}
+
 func (v1 *V1) GetGuild(c context.Context, r *corev1.GetGuildRequest) (*corev1.GetGuildResponse, error) {
-	if err := r.Validate(); err != nil {
-		return nil, err
-	}
 	guild, err := v1.DB.GetGuildByID(r.Location.GuildId)
 	if err != nil {
 		return nil, err
@@ -162,14 +168,19 @@ func (v1 *V1) GetGuild(c context.Context, r *corev1.GetGuildRequest) (*corev1.Ge
 	}, nil
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    15,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation | middleware.JoinedLocation,
+		Permission: middleware.ModifyInvites,
+	}, "/protocol.core.v1.CoreService/GetGuildInvites")
+}
+
 func (v1 *V1) GetGuildInvites(c context.Context, r *corev1.GetGuildInvitesRequest) (*corev1.GetGuildInvitesResponse, error) {
-	if err := r.Validate(); err != nil {
-		return nil, err
-	}
-	err := v1.EnsureOwner(r.Location.GuildId, c.(middleware.HarmonyContext).UserID)
-	if err != nil {
-		return nil, err
-	}
 	invites, err := v1.DB.GetInvites(r.Location.GuildId)
 	if err != nil {
 		return nil, err
@@ -193,15 +204,19 @@ func (v1 *V1) GetGuildInvites(c context.Context, r *corev1.GetGuildInvitesReques
 	}, nil
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    15,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation | middleware.JoinedLocation,
+		Permission: middleware.NoPermission,
+	}, "/protocol.core.v1.CoreService/GetGuildMembers")
+}
+
 func (v1 *V1) GetGuildMembers(c context.Context, r *corev1.GetGuildMembersRequest) (*corev1.GetGuildMembersResponse, error) {
-	ctx := c.(middleware.HarmonyContext)
-	if err := r.Validate(); err != nil {
-		return nil, err
-	}
-	err := v1.EnsureInGuild(r.Location.GuildId, ctx.UserID)
-	if err != nil {
-		return nil, err
-	}
 	members, err := v1.DB.MembersInGuild(r.Location.GuildId)
 	if err != nil {
 		return nil, err
@@ -211,15 +226,19 @@ func (v1 *V1) GetGuildMembers(c context.Context, r *corev1.GetGuildMembersReques
 	}, nil
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    15,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation | middleware.JoinedLocation,
+		Permission: middleware.NoPermission,
+	}, "/protocol.core.v1.CoreService/GetGuildChannels")
+}
+
 func (v1 *V1) GetGuildChannels(c context.Context, r *corev1.GetGuildChannelsRequest) (*corev1.GetGuildChannelsResponse, error) {
-	ctx := c.(middleware.HarmonyContext)
-	if err := r.Validate(); err != nil {
-		return nil, err
-	}
-	err := v1.EnsureInGuild(r.Location.GuildId, ctx.UserID)
-	if err != nil {
-		return nil, err
-	}
 	chans, err := v1.DB.ChannelsForGuild(r.Location.GuildId)
 	if err != nil {
 		return nil, err
@@ -237,15 +256,20 @@ func (v1 *V1) GetGuildChannels(c context.Context, r *corev1.GetGuildChannelsRequ
 	}, nil
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
+		Permission: middleware.NoPermission,
+	}, "/protocol.core.v1.CoreService/GetChannelMessages")
+}
+
 func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessagesRequest) (*corev1.GetChannelMessagesResponse, error) {
-	ctx := c.(middleware.HarmonyContext)
-	if err := r.Validate(); err != nil {
-		return nil, err
-	}
-	err := v1.EnsureInGuild(r.Location.GuildId, ctx.UserID)
-	if err != nil {
-		return nil, err
-	}
+	var err error
 	var messages []queries.Message
 	if r.BeforeMessage != 0 {
 		time, err := v1.DB.GetMessageDate(r.BeforeMessage)
@@ -302,15 +326,19 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 	}, nil
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    2,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation | middleware.JoinedLocation,
+		Permission: middleware.ModifyGuild,
+	}, "/protocol.core.v1.CoreService/UpdateGuildName")
+}
+
 func (v1 *V1) UpdateGuildName(c context.Context, r *corev1.UpdateGuildNameRequest) (*empty.Empty, error) {
-	ctx := c.(middleware.HarmonyContext)
-	if err := r.Validate(); err != nil {
-		return nil, err
-	}
-	err := v1.EnsureOwner(r.Location.GuildId, ctx.UserID)
-	if err != nil {
-		return nil, err
-	}
 	if err := v1.DB.UpdateGuildName(r.Location.GuildId, r.NewGuildName); err != nil {
 		return nil, err
 	}
@@ -325,14 +353,19 @@ func (v1 *V1) UpdateGuildName(c context.Context, r *corev1.UpdateGuildNameReques
 	return &empty.Empty{}, nil
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    2,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
+		Permission: middleware.ModifyChannels,
+	}, "/protocol.core.v1.CoreService/UpdateChannelName")
+}
+
 func (v1 *V1) UpdateChannelName(c context.Context, r *corev1.UpdateChannelNameRequest) (*empty.Empty, error) {
-	ctx := c.(middleware.HarmonyContext)
-	if err := r.Validate(); err != nil {
-		return nil, err
-	}
-	if err := v1.EnsureOwner(r.Location.GuildId, ctx.UserID); err != nil {
-		return nil, err
-	}
 	if err := v1.DB.SetChannelName(r.Location.GuildId, r.Location.ChannelId, r.NewChannelName); err != nil {
 		return nil, err
 	}
@@ -348,11 +381,20 @@ func (v1 *V1) UpdateChannelName(c context.Context, r *corev1.UpdateChannelNameRe
 	return &emptypb.Empty{}, nil
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    2,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.MessageLocation | middleware.AuthorLocation,
+		Permission: middleware.NoPermission,
+	}, "/protocol.core.v1.CoreService/UpdateMessage")
+}
+
 func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
-	if err := r.Validate(); err != nil {
-		return nil, err
-	}
 	if !r.UpdateActions && !r.UpdateEmbeds && !r.UpdateContent {
 		return nil, errors.New("bad request; nothing is being edited")
 	}
@@ -397,16 +439,20 @@ func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (
 	return &emptypb.Empty{}, nil
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 15 * time.Second,
+			Burst:    1,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation,
+		Permission: middleware.Owner,
+	}, "/protocol.core.v1.CoreService/DeleteGuild")
+}
+
 func (v1 *V1) DeleteGuild(c context.Context, r *corev1.DeleteGuildRequest) (*empty.Empty, error) {
-	ctx := c.(middleware.HarmonyContext)
-	if err := r.Validate(); err != nil {
-		return nil, err
-	}
-	err := v1.EnsureOwner(r.Location.GuildId, ctx.UserID)
-	if err != nil {
-		return nil, err
-	}
-	err = v1.DB.DeleteGuild(r.Location.GuildId)
+	err := v1.DB.DeleteGuild(r.Location.GuildId)
 	if err != nil {
 		return nil, err
 	}
@@ -418,30 +464,38 @@ func (v1 *V1) DeleteGuild(c context.Context, r *corev1.DeleteGuildRequest) (*emp
 	return &emptypb.Empty{}, nil
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    5,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation,
+		Permission: middleware.ModifyInvites,
+	}, "/protocol.core.v1.CoreService/DeleteInvite")
+}
+
 func (v1 *V1) DeleteInvite(c context.Context, r *corev1.DeleteInviteRequest) (*empty.Empty, error) {
-	ctx := c.(middleware.HarmonyContext)
-	if err := r.Validate(); err != nil {
-		return nil, err
-	}
-	err := v1.EnsureOwner(r.Location.GuildId, ctx.UserID)
-	if err != nil {
-		return nil, err
-	}
 	if err := v1.DB.DeleteInvite(r.InviteId); err != nil {
 		return nil, err
 	}
 	return &emptypb.Empty{}, nil
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    5,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation | middleware.ChannelLocation,
+		Permission: middleware.ModifyChannels,
+	}, "/protocol.core.v1.CoreService/DeleteChannel")
+}
+
 func (v1 *V1) DeleteChannel(c context.Context, r *corev1.DeleteChannelRequest) (*empty.Empty, error) {
-	ctx := c.(middleware.HarmonyContext)
-	if err := r.Validate(); err != nil {
-		return nil, err
-	}
-	err := v1.EnsureOwner(r.Location.GuildId, ctx.UserID)
-	if err != nil {
-		return nil, err
-	}
 	if err := v1.DB.DeleteChannelFromGuild(r.Location.GuildId, r.Location.ChannelId); err != nil {
 		return nil, err
 	}
@@ -455,11 +509,20 @@ func (v1 *V1) DeleteChannel(c context.Context, r *corev1.DeleteChannelRequest) (
 	return &emptypb.Empty{}, nil
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    5,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.MessageLocation | middleware.AuthorLocation,
+		Permission: middleware.NoPermission,
+	}, "/protocol.core.v1.CoreService/DeleteMessage")
+}
+
 func (v1 *V1) DeleteMessage(c context.Context, r *corev1.DeleteMessageRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
-	if err := r.Validate(); err != nil {
-		return nil, err
-	}
 	owner, err := v1.DB.GetMessageOwner(r.Location.MessageId)
 	if err != nil {
 		return nil, err
@@ -479,6 +542,18 @@ func (v1 *V1) DeleteMessage(c context.Context, r *corev1.DeleteMessageRequest) (
 		},
 	})
 	return &emptypb.Empty{}, nil
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    5,
+		},
+		Auth:       true,
+		Location:   middleware.NoLocation,
+		Permission: middleware.NoPermission,
+	}, "/protocol.core.v1.CoreService/JoinGuild")
 }
 
 func (v1 *V1) JoinGuild(c context.Context, r *corev1.JoinGuildRequest) (*corev1.JoinGuildResponse, error) {
@@ -507,11 +582,20 @@ func (v1 *V1) JoinGuild(c context.Context, r *corev1.JoinGuildRequest) (*corev1.
 	}, nil
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    5,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation,
+		Permission: middleware.NoPermission,
+	}, "/protocol.core.v1.CoreService/LeaveGuild")
+}
+
 func (v1 *V1) LeaveGuild(c context.Context, r *corev1.LeaveGuildRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
-	if err := v1.EnsureInGuild(r.Location.GuildId, ctx.UserID); err != nil {
-		return nil, err
-	}
 	if isOwner, err := v1.DB.IsOwner(r.Location.GuildId, ctx.UserID); err != nil {
 		return nil, err
 	} else if isOwner {
@@ -528,20 +612,52 @@ func (v1 *V1) LeaveGuild(c context.Context, r *corev1.LeaveGuildRequest) (*empty
 	return &emptypb.Empty{}, nil
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    5,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation,
+		Permission: middleware.NoPermission,
+	}, "/protocol.core.v1.CoreService/StreamGuildEvents")
+}
+
 func (v1 *V1) StreamGuildEvents(r *corev1.StreamGuildEventsRequest, s corev1.CoreService_StreamGuildEventsServer) error {
 	ctx := s.Context().(middleware.HarmonyContext)
-	err := v1.EnsureInGuild(r.Location.GuildId, ctx.UserID)
-	if err != nil {
-		return err
-	}
 	streamState.Add(r.Location.GuildId, ctx.UserID, s)
 	return nil
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    5,
+		},
+		Auth:       true,
+		Location:   middleware.NoLocation,
+		Permission: middleware.NoPermission,
+	}, "/protocol.core.v1.CoreService/StreamActionEvents")
 }
 
 func (v1 *V1) StreamActionEvents(r *corev1.StreamActionEventsRequest, s corev1.CoreService_StreamActionEventsServer) error {
 	ctx := s.Context().(middleware.HarmonyContext)
 	streamState.AddAction(ctx.UserID, s)
 	return nil
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    20,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.MessageLocation,
+		Permission: middleware.NoPermission,
+	}, "/protocol.core.v1.CoreService/TriggerAction")
 }
 
 func (v1 *V1) TriggerAction(c context.Context, r *corev1.TriggerActionRequest) (*emptypb.Empty, error) {
@@ -570,11 +686,20 @@ func (v1 *V1) TriggerAction(c context.Context, r *corev1.TriggerActionRequest) (
 	return nil, errors.New("Invalid action ID")
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 1 * time.Second,
+			Burst:    1500,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation | middleware.ChannelLocation,
+		Permission: middleware.NoPermission,
+	}, "/protocol.core.v1.CoreService/SendMessage")
+}
+
 func (v1 *V1) SendMessage(c context.Context, r *corev1.SendMessageRequest) (*emptypb.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
-	if err := v1.EnsureInGuild(r.Message.Location.GuildId, ctx.UserID); err != nil {
-		return nil, err
-	}
 	msg, err := v1.DB.AddMessage(
 		r.Message.Location.ChannelId,
 		r.Message.Location.GuildId,

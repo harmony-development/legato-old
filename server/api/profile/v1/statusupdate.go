@@ -3,6 +3,7 @@ package v1
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	profilev1 "github.com/harmony-development/legato/gen/profile"
@@ -10,6 +11,17 @@ import (
 	"github.com/harmony-development/legato/server/http/responses"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    4,
+		},
+		Auth:       true,
+		Permission: middleware.NoPermission,
+	}, "/protocol.profile.v1.ProfileService/StatusUpdate")
+}
 
 // StatusUpdate handles the protocol's StatusUpdate request
 func (v1 *V1) StatusUpdate(c context.Context, r *profilev1.StatusUpdateRequest) (*empty.Empty, error) {

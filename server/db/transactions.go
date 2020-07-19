@@ -761,3 +761,11 @@ func (db HarmonyDB) RemoveGuildFromList(userID, guildID uint64, homeServer strin
 	db.Logger.CheckException(err)
 	return err
 }
+
+func (db HarmonyDB) HasMessageWithID(guildID, channelID, messageID uint64) (bool, error) {
+	return db.queries.MessageWithIDExists(ctx, queries.MessageWithIDExistsParams{
+		GuildID:   guildID,
+		ChannelID: channelID,
+		MessageID: messageID,
+	})
+}

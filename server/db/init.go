@@ -73,6 +73,7 @@ type IHarmonyDB interface {
 	UpdateAvatar(userID uint64, avatar string) error
 	HasGuildWithID(guildID uint64) (bool, error)
 	HasChannelWithID(guildID, channelID uint64) (bool, error)
+	HasMessageWithID(guildID, channelID, messageID uint64) (bool, error)
 	AddFileHash(fileID string, hash []byte) error
 	GetFileIDFromHash(hash []byte) (string, error)
 	GetGuildByID(guildID uint64) (queries.Guild, error)
