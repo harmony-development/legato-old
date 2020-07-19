@@ -114,14 +114,14 @@ func (v1 *V1) CreateInvite(c context.Context, r *corev1.CreateInviteRequest) (*c
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	if err := v1.EnsureOwner(r.ForGuild, ctx.UserID); err != nil {
+	if err := v1.EnsureOwner(r.Location.GuildId, ctx.UserID); err != nil {
 		return nil, err
 	}
 	inv := int32(-1)
 	if r.PossibleUses != 0 {
 		inv = r.PossibleUses
 	}
-	invite, err := v1.DB.CreateInvite(r.ForGuild, inv, r.Name)
+	invite, err := v1.DB.CreateInvite(r.Location.GuildId, inv, r.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -135,10 +135,10 @@ func (v1 *V1) CreateChannel(c context.Context, r *corev1.CreateChannelRequest) (
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	if err := v1.EnsureOwner(r.GuildId, ctx.UserID); err != nil {
+	if err := v1.EnsureOwner(r.Location.GuildId, ctx.UserID); err != nil {
 		return nil, err
 	}
-	channel, err := v1.DB.AddChannelToGuild(r.GuildId, r.ChannelName)
+	channel, err := v1.DB.AddChannelToGuild(r.Location.GuildId, r.ChannelName)
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +151,7 @@ func (v1 *V1) GetGuild(c context.Context, r *corev1.GetGuildRequest) (*corev1.Ge
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	guild, err := v1.DB.GetGuildByID(r.GuildId)
+	guild, err := v1.DB.GetGuildByID(r.Location.GuildId)
 	if err != nil {
 		return nil, err
 	}
@@ -166,11 +166,11 @@ func (v1 *V1) GetGuildInvites(c context.Context, r *corev1.GetGuildInvitesReques
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	err := v1.EnsureOwner(r.GuildId, c.(middleware.HarmonyContext).UserID)
+	err := v1.EnsureOwner(r.Location.GuildId, c.(middleware.HarmonyContext).UserID)
 	if err != nil {
 		return nil, err
 	}
-	invites, err := v1.DB.GetInvites(r.GuildId)
+	invites, err := v1.DB.GetInvites(r.Location.GuildId)
 	if err != nil {
 		return nil, err
 	}
@@ -198,11 +198,11 @@ func (v1 *V1) GetGuildMembers(c context.Context, r *corev1.GetGuildMembersReques
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	err := v1.EnsureInGuild(r.GuildId, ctx.UserID)
+	err := v1.EnsureInGuild(r.Location.GuildId, ctx.UserID)
 	if err != nil {
 		return nil, err
 	}
-	members, err := v1.DB.MembersInGuild(r.GuildId)
+	members, err := v1.DB.MembersInGuild(r.Location.GuildId)
 	if err != nil {
 		return nil, err
 	}
@@ -216,11 +216,11 @@ func (v1 *V1) GetGuildChannels(c context.Context, r *corev1.GetGuildChannelsRequ
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	err := v1.EnsureInGuild(r.GuildId, ctx.UserID)
+	err := v1.EnsureInGuild(r.Location.GuildId, ctx.UserID)
 	if err != nil {
 		return nil, err
 	}
-	chans, err := v1.DB.ChannelsForGuild(r.GuildId)
+	chans, err := v1.DB.ChannelsForGuild(r.Location.GuildId)
 	if err != nil {
 		return nil, err
 	}
@@ -242,7 +242,7 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	err := v1.EnsureInGuild(r.GuildId, ctx.UserID)
+	err := v1.EnsureInGuild(r.Location.GuildId, ctx.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -252,15 +252,15 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 		if err != nil {
 			return nil, err
 		}
-		messages, err = v1.DB.GetMessagesBefore(r.GuildId, r.ChannelId, time)
+		messages, err = v1.DB.GetMessagesBefore(r.Location.GuildId, r.ChannelId, time)
 	} else {
-		messages, err = v1.DB.GetMessages(r.GuildId, r.ChannelId)
+		messages, err = v1.DB.GetMessages(r.Location.GuildId, r.ChannelId)
 	}
 	if err != nil && err != sql.ErrNoRows {
 		return nil, err
 	}
 	return &corev1.GetChannelMessagesResponse{
-		Messages: func() (ret []*corev1.GetChannelMessagesResponse_Message) {
+		Messages: func() (ret []*corev1.Message) {
 			for _, message := range messages {
 				createdAt, _ := ptypes.TimestampProto(message.CreatedAt.UTC())
 				var editedAt *timestamppb.Timestamp
@@ -283,10 +283,12 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 					}
 					actions = append(actions, &action)
 				}
-				ret = append(ret, &corev1.GetChannelMessagesResponse_Message{
-					MessageId: message.MessageID,
-					GuildId:   message.GuildID,
-					ChannelId: message.ChannelID,
+				ret = append(ret, &corev1.Message{
+					Location: &corev1.Location{
+						MessageId: message.MessageID,
+						GuildId:   message.GuildID,
+						ChannelId: message.ChannelID,
+					},
 					AuthorId:  message.UserID,
 					CreatedAt: createdAt,
 					EditedAt:  editedAt,
@@ -305,14 +307,45 @@ func (v1 *V1) UpdateGuildName(c context.Context, r *corev1.UpdateGuildNameReques
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	err := v1.EnsureOwner(r.GuildId, ctx.UserID)
+	err := v1.EnsureOwner(r.Location.GuildId, ctx.UserID)
 	if err != nil {
 		return nil, err
 	}
-	if err := v1.DB.UpdateGuildName(r.GuildId, r.NewGuildName); err != nil {
+	if err := v1.DB.UpdateGuildName(r.Location.GuildId, r.NewGuildName); err != nil {
 		return nil, err
 	}
+	streamState.BroadcastGuild(r.Location.GuildId, &corev1.GuildEvent{
+		Event: &corev1.GuildEvent_EditedGuild{
+			EditedGuild: &corev1.GuildEvent_GuildUpdated{
+				Name:       r.NewGuildName,
+				UpdateName: true,
+			},
+		},
+	})
 	return &corev1.UpdateGuildNameResponse{}, nil
+}
+
+func (v1 *V1) UpdateChannelName(c context.Context, r *corev1.UpdateChannelNameRequest) (*empty.Empty, error) {
+	ctx := c.(middleware.HarmonyContext)
+	if err := r.Validate(); err != nil {
+		return nil, err
+	}
+	if err := v1.EnsureOwner(r.Location.GuildId, ctx.UserID); err != nil {
+		return nil, err
+	}
+	if err := v1.DB.SetChannelName(r.Location.GuildId, r.Location.ChannelId, r.NewChannelName); err != nil {
+		return nil, err
+	}
+	streamState.BroadcastGuild(r.Location.GuildId, &corev1.GuildEvent{
+		Event: &corev1.GuildEvent_EditedChannel{
+			EditedChannel: &corev1.GuildEvent_ChannelUpdated{
+				Location:   r.Location,
+				Name:       r.NewChannelName,
+				UpdateName: true,
+			},
+		},
+	})
+	return &emptypb.Empty{}, nil
 }
 
 func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (*empty.Empty, error) {
@@ -324,7 +357,7 @@ func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (
 		return nil, errors.New("bad request; nothing is being edited")
 	}
 
-	owner, err := v1.DB.GetMessageOwner(r.MessageId)
+	owner, err := v1.DB.GetMessageOwner(r.Location.MessageId)
 	if err != nil {
 		return nil, err
 	}
@@ -342,10 +375,25 @@ func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (
 		val := v1.ProtoToEmbeds(r.Embeds)
 		embeds = &val
 	}
-	_, err = v1.DB.UpdateMessage(r.MessageId, &r.Content, embeds, actions)
+	tiempo, err := v1.DB.UpdateMessage(r.Location.MessageId, &r.Content, embeds, actions)
 	if err != nil {
 		return nil, err
 	}
+	editedAt, _ := ptypes.TimestampProto(tiempo.UTC())
+	streamState.BroadcastGuild(r.Location.GuildId, &corev1.GuildEvent{
+		Event: &corev1.GuildEvent_EditedMessage{
+			EditedMessage: &corev1.GuildEvent_MessageUpdated{
+				Location:      r.Location,
+				Content:       r.Content,
+				UpdateContent: r.UpdateContent,
+				Embeds:        r.Embeds,
+				UpdateEmbeds:  r.UpdateEmbeds,
+				Actions:       r.Actions,
+				UpdateActions: r.UpdateActions,
+				EditedAt:      editedAt,
+			},
+		},
+	})
 	return &emptypb.Empty{}, nil
 }
 
@@ -354,14 +402,19 @@ func (v1 *V1) DeleteGuild(c context.Context, r *corev1.DeleteGuildRequest) (*emp
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	err := v1.EnsureOwner(r.GuildId, ctx.UserID)
+	err := v1.EnsureOwner(r.Location.GuildId, ctx.UserID)
 	if err != nil {
 		return nil, err
 	}
-	err = v1.DB.DeleteGuild(r.GuildId)
+	err = v1.DB.DeleteGuild(r.Location.GuildId)
 	if err != nil {
 		return nil, err
 	}
+	streamState.BroadcastGuild(r.Location.GuildId, &corev1.GuildEvent{
+		Event: &corev1.GuildEvent_DeletedGuild{
+			DeletedGuild: &corev1.GuildEvent_GuildDeleted{},
+		},
+	})
 	return &emptypb.Empty{}, nil
 }
 
@@ -370,7 +423,7 @@ func (v1 *V1) DeleteInvite(c context.Context, r *corev1.DeleteInviteRequest) (*e
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	err := v1.EnsureOwner(r.GuildId, ctx.UserID)
+	err := v1.EnsureOwner(r.Location.GuildId, ctx.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -385,13 +438,20 @@ func (v1 *V1) DeleteChannel(c context.Context, r *corev1.DeleteChannelRequest) (
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	err := v1.EnsureOwner(r.GuildId, ctx.UserID)
+	err := v1.EnsureOwner(r.Location.GuildId, ctx.UserID)
 	if err != nil {
 		return nil, err
 	}
-	if err := v1.DB.DeleteChannelFromGuild(r.GuildId, r.ChannelId); err != nil {
+	if err := v1.DB.DeleteChannelFromGuild(r.Location.GuildId, r.Location.ChannelId); err != nil {
 		return nil, err
 	}
+	streamState.BroadcastGuild(r.Location.GuildId, &corev1.GuildEvent{
+		Event: &corev1.GuildEvent_DeletedChannel{
+			DeletedChannel: &corev1.GuildEvent_ChannelDeleted{
+				Location: r.Location,
+			},
+		},
+	})
 	return &emptypb.Empty{}, nil
 }
 
@@ -400,12 +460,144 @@ func (v1 *V1) DeleteMessage(c context.Context, r *corev1.DeleteMessageRequest) (
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	owner, err := v1.DB.GetMessageOwner(r.MessageId)
+	owner, err := v1.DB.GetMessageOwner(r.Location.MessageId)
 	if err != nil {
 		return nil, err
 	}
 	if ctx.UserID != owner {
 		return nil, NoPermissionsError
 	}
+	streamState.BroadcastGuild(r.Location.GuildId, &corev1.GuildEvent{
+		Event: &corev1.GuildEvent_DeletedMessage{
+			DeletedMessage: &corev1.GuildEvent_MessageDeleted{
+				Location: &corev1.Location{
+					MessageId: r.Location.MessageId,
+					ChannelId: r.Location.ChannelId,
+					GuildId:   r.Location.GuildId,
+				},
+			},
+		},
+	})
+	return &emptypb.Empty{}, nil
+}
+
+func (v1 *V1) JoinGuild(c context.Context, r *corev1.JoinGuildRequest) (*corev1.JoinGuildResponse, error) {
+	ctx := c.(middleware.HarmonyContext)
+	guildID, err := v1.DB.ResolveGuildID(r.InviteId)
+	if err != nil {
+		return nil, err
+	}
+	if err := v1.DB.AddMemberToGuild(ctx.UserID, guildID); err != nil {
+		return nil, err
+	}
+	if err := v1.DB.IncrementInvite(r.InviteId); err != nil {
+		return nil, err
+	}
+	streamState.BroadcastGuild(guildID, &corev1.GuildEvent{
+		Event: &corev1.GuildEvent_JoinedMember{
+			JoinedMember: &corev1.GuildEvent_MemberJoined{
+				MemberId: ctx.UserID,
+			},
+		},
+	})
+	return &corev1.JoinGuildResponse{
+		Location: &corev1.Location{
+			GuildId: guildID,
+		},
+	}, nil
+}
+
+func (v1 *V1) LeaveGuild(c context.Context, r *corev1.LeaveGuildRequest) (*empty.Empty, error) {
+	ctx := c.(middleware.HarmonyContext)
+	if err := v1.EnsureInGuild(r.Location.GuildId, ctx.UserID); err != nil {
+		return nil, err
+	}
+	if isOwner, err := v1.DB.IsOwner(r.Location.GuildId, ctx.UserID); err != nil {
+		return nil, err
+	} else if isOwner {
+		return nil, errors.New("You cannot leave a guild you own")
+	}
+	streamState.RemoveUserFromGuild(r.Location.GuildId, ctx.UserID)
+	streamState.BroadcastGuild(r.Location.GuildId, &corev1.GuildEvent{
+		Event: &corev1.GuildEvent_LeftMember{
+			LeftMember: &corev1.GuildEvent_MemberLeft{
+				MemberId: ctx.UserID,
+			},
+		},
+	})
+	return &emptypb.Empty{}, nil
+}
+
+func (v1 *V1) StreamGuildEvents(r *corev1.StreamGuildEventsRequest, s corev1.CoreService_StreamGuildEventsServer) error {
+	ctx := s.Context().(middleware.HarmonyContext)
+	err := v1.EnsureInGuild(r.Location.GuildId, ctx.UserID)
+	if err != nil {
+		return err
+	}
+	streamState.Add(r.Location.GuildId, ctx.UserID, s)
+	return nil
+}
+
+func (v1 *V1) StreamActionEvents(r *corev1.StreamActionEventsRequest, s corev1.CoreService_StreamActionEventsServer) error {
+	ctx := s.Context().(middleware.HarmonyContext)
+	streamState.AddAction(ctx.UserID, s)
+	return nil
+}
+
+func (v1 *V1) TriggerAction(c context.Context, r *corev1.TriggerActionRequest) (*emptypb.Empty, error) {
+	ctx := c.(middleware.HarmonyContext)
+	msg, err := v1.DB.GetMessage(r.Location.MessageId)
+	if err != nil {
+		return nil, err
+	}
+	if msg.ChannelID != r.Location.ChannelId || msg.GuildID != r.Location.GuildId {
+		return nil, errors.New("Invalid location")
+	}
+	for _, action := range v1.ActionsToProto(msg.Actions) {
+		if action.Id == r.ActionId {
+			streamState.BroadcastAction(ctx.UserID, &corev1.ActionEvent{
+				Event: &corev1.ActionEvent_Action_{
+					Action: &corev1.ActionEvent_Action{
+						Location:   r.Location,
+						ActionData: r.ActionData,
+						ActionId:   r.ActionId,
+					},
+				},
+			})
+			return &emptypb.Empty{}, nil
+		}
+	}
+	return nil, errors.New("Invalid action ID")
+}
+
+func (v1 *V1) SendMessage(c context.Context, r *corev1.SendMessageRequest) (*emptypb.Empty, error) {
+	ctx := c.(middleware.HarmonyContext)
+	if err := v1.EnsureInGuild(r.Message.Location.GuildId, ctx.UserID); err != nil {
+		return nil, err
+	}
+	msg, err := v1.DB.AddMessage(
+		r.Message.Location.ChannelId,
+		r.Message.Location.GuildId,
+		ctx.UserID,
+		r.Message.Content,
+		r.Message.Attachments,
+		v1.ProtoToEmbeds(r.Message.Embeds),
+		v1.ProtoToActions(r.Message.Actions),
+	)
+	if err != nil {
+		return nil, err
+	}
+	message := r.Message
+	createdAt, _ := ptypes.TimestampProto(msg.CreatedAt.UTC())
+	message.CreatedAt = createdAt
+	message.Location.MessageId = msg.MessageID
+	message.AuthorId = ctx.UserID
+	streamState.BroadcastGuild(r.Message.Location.GuildId, &corev1.GuildEvent{
+		Event: &corev1.GuildEvent_SentMessage{
+			SentMessage: &corev1.GuildEvent_MessageSent{
+				Message: message,
+			},
+		},
+	})
 	return &emptypb.Empty{}, nil
 }

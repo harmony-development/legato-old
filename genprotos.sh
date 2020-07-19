@@ -4,7 +4,6 @@ for dir in $(find "protocol" -name '*.proto' -print0 | xargs -0 -n1 dirname | so
   echo $(find "${dir}" -name '*.proto')
   protoc --experimental_allow_proto3_optional \
   --proto_path=protocol \
-  --proto_path=$(go env GOPATH)/src/github.com/google/protobuf/src \
   --proto_path=$(go env GOPATH)/src/github.com/envoyproxy/protoc-gen-validate \
   --go_out=gen \
   --go_opt="plugins=grpc" \

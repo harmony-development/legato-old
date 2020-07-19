@@ -8,6 +8,14 @@ package protocol.core.v1;
 
 option go_package = "core;corev1";
 
+// Location is a special type that is added in for RPCs that need to check
+// permissions
+message Location {
+  uint64 guild_id = 1;
+  uint64 channel_id = 2;
+  uint64 message_id = 3;
+}
+
 // EMBEDS AND ACTIONS
 
 enum ActionType {
@@ -70,6 +78,19 @@ message Embed {
   repeated Action actions = 7;
 }
 
+// TYPES
+
+message Message {
+  Location location = 1;
+  uint64 author_id = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp edited_at = 4;
+  string content = 5;
+  repeated Embed embeds = 6;
+  repeated Action actions = 7;
+  repeated string attachments = 8;
+}
+
 // CREATE
 
 message CreateGuildRequest {
@@ -79,14 +100,14 @@ message CreateGuildRequest {
 message CreateGuildResponse { uint64 guild_id = 1; }
 
 message CreateInviteRequest {
-  string name = 1 [ (validate.rules).string.min_len = 1 ];
-  uint64 for_guild = 2 [ (validate.rules).uint64.gt = 0 ];
+  Location location = 1;
+  string name = 2 [ (validate.rules).string.min_len = 1 ];
   int32 possible_uses = 3;
 }
 message CreateInviteResponse { string name = 1; }
 
 message CreateChannelRequest {
-  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
+  Location location = 1;
   string channel_name = 2 [ (validate.rules).string.min_len = 1 ];
 }
 message CreateChannelResponse { uint64 channel_id = 1; }
@@ -94,7 +115,7 @@ message CreateChannelResponse { uint64 channel_id = 1; }
 // READ
 
 message GetGuildRequest {
-  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
+  Location location = 1;
 }
 message GetGuildResponse {
   string guild_name = 1;
@@ -103,7 +124,7 @@ message GetGuildResponse {
 }
 
 message GetGuildInvitesRequest {
-  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
+  Location location = 1;
 }
 message GetGuildInvitesResponse {
   message Invite {
@@ -115,12 +136,12 @@ message GetGuildInvitesResponse {
 }
 
 message GetGuildMembersRequest {
-  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
+  Location location = 1;
 }
 message GetGuildMembersResponse { repeated uint64 members = 1; }
 
 message GetGuildChannelsRequest {
-  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
+  Location location = 1;
 }
 message GetGuildChannelsResponse {
   message Channel {
@@ -132,63 +153,153 @@ message GetGuildChannelsResponse {
 }
 
 message GetChannelMessagesRequest {
-  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
+  Location location = 1;
   uint64 channel_id = 2 [ (validate.rules).uint64.gt = 0 ];
   uint64 before_message = 3;
 }
 message GetChannelMessagesResponse {
-  message Message {
-    uint64 guild_id = 1;
-    uint64 channel_id = 2;
-    uint64 message_id = 3;
-    uint64 author_id = 4;
-    google.protobuf.Timestamp created_at = 5;
-    google.protobuf.Timestamp edited_at = 6;
-    string content = 7;
-    repeated Embed embeds = 8;
-    repeated Action actions = 9;
-  }
   repeated Message messages = 1;
 }
 
 // UPDATE
 
 message UpdateGuildNameRequest {
-  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
+  Location location = 1;
   string new_guild_name = 2 [ (validate.rules).string.min_len = 1 ];
 }
-message UpdateGuildNameResponse {}
+
+message UpdateChannelNameRequest {
+  Location location = 1;
+  string new_channel_name = 2;
+}
 
 message UpdateMessageRequest {
-  uint64 message_id = 1 [ (validate.rules).uint64.gt = 0 ];
+  Location location = 1;
   string content = 2;
   bool update_content = 3;
   repeated Embed embeds = 4;
   bool update_embeds = 5;
   repeated Action actions = 6;
   bool update_actions = 7;
+  repeated string attachments = 8;
+  bool update_attachments = 9;
 }
 
 // DELETE
 
 message DeleteGuildRequest {
-  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
+  Location location = 1;
 }
 
 message DeleteInviteRequest {
-  uint64 guild_id = 1;
+  Location location = 1;
   string invite_id = 2;
 }
 
 message DeleteChannelRequest {
-  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
-  uint64 channel_id = 2 [ (validate.rules).uint64.gt = 0 ];
+  Location location = 1;
 }
 
 message DeleteMessageRequest {
-  uint64 guild_id = 1 [ (validate.rules).uint64.gt = 0 ];
-  uint64 channel_id = 2 [ (validate.rules).uint64.gt = 0 ];
-  uint64 message_id = 3 [ (validate.rules).uint64.gt = 0 ];
+  Location location = 1;
+}
+
+// STREAMS
+
+message StreamGuildEventsRequest {
+  Location location = 1;
+}
+
+message GuildEvent {
+  message MessageSent {
+    Message message = 1;
+  }
+  message MessageUpdated {
+    Location location = 1;
+    google.protobuf.Timestamp edited_at = 2;
+    string content = 3;
+    bool update_content = 4;
+    repeated Embed embeds = 5;
+    bool update_embeds = 6;
+    repeated Action actions = 7;
+    bool update_actions = 8;
+    repeated string attachments = 9;
+    bool update_attachments = 10;
+  }
+  message MessageDeleted {
+    Location location = 1;
+  }
+  message ChannelUpdated {
+    Location location = 1;
+    string name = 2;
+    bool update_name = 3;
+  }
+  message ChannelDeleted {
+    Location location = 1;
+  }
+  message GuildUpdated {
+    string name = 1;
+    bool update_name = 2;
+  }
+  message GuildDeleted {
+
+  }
+  message MemberJoined {
+    uint64 member_id = 1;
+  }
+  message MemberLeft {
+    uint64 member_id = 1;
+  }
+  oneof event {
+    MessageSent sent_message = 1;
+    MessageUpdated edited_message = 2;
+    MessageDeleted deleted_message = 3;
+    ChannelUpdated edited_channel = 4;
+    ChannelDeleted deleted_channel = 5;
+    GuildUpdated edited_guild = 6;
+    GuildDeleted deleted_guild = 7;
+    MemberJoined joined_member = 8;
+    MemberLeft left_member = 9;
+  }
+}
+
+message StreamActionEventsRequest {}
+
+message ActionEvent {
+  message Action {
+    Location location = 1;
+    string action_id = 2;
+    string action_data = 3;
+  }
+  oneof event {
+    Action action = 1;
+  }
+}
+
+// MEMBERSHIP
+
+message JoinGuildRequest {
+  string invite_id = 1;
+}
+message JoinGuildResponse {
+  Location location = 1;
+}
+
+message LeaveGuildRequest {
+  Location location = 1;
+}
+
+// TRIGGERS
+
+message TriggerActionRequest {
+  Location location = 1;
+  string action_id = 2;
+  string action_data = 3;
+}
+
+// SendMessage
+message SendMessageRequest {
+  Message message = 1;
 }
 
 service CoreService {
@@ -208,10 +319,21 @@ service CoreService {
 
   rpc UpdateGuildName(UpdateGuildNameRequest)
       returns (UpdateGuildNameResponse) {}
+  rpc UpdateChannelName(UpdateChannelNameRequest) returns (google.protobuf.Empty) {}
   rpc UpdateMessage(UpdateMessageRequest) returns (google.protobuf.Empty) {}
 
   rpc DeleteGuild(DeleteGuildRequest) returns (google.protobuf.Empty) {}
   rpc DeleteInvite(DeleteInviteRequest) returns (google.protobuf.Empty) {}
   rpc DeleteChannel(DeleteChannelRequest) returns (google.protobuf.Empty) {}
   rpc DeleteMessage(DeleteMessageRequest) returns (google.protobuf.Empty) {}
+
+  rpc JoinGuild(JoinGuildRequest) returns (JoinGuildResponse) {}
+  rpc LeaveGuild(LeaveGuildRequest) returns (google.protobuf.Empty) {}
+
+  rpc TriggerAction(TriggerActionRequest) returns (google.protobuf.Empty) {}
+
+  rpc SendMessage(SendMessageRequest) returns (google.protobuf.Empty) {}
+
+  rpc StreamGuildEvents(StreamGuildEventsRequest) returns (stream GuildEvent) {}
+  rpc StreamActionEvents(StreamActionEventsRequest) returns (stream ActionEvent) {}
 }

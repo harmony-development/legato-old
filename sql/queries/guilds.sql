@@ -35,6 +35,12 @@ INSERT INTO Channels (
 )
 RETURNING *;
 
+-- name: UpdateChannelName :exec
+UPDATE Channels
+      SET Channel_Name = $1
+    WHERE Guild_ID = $2
+      AND Channel_ID = $3;
+
 -- name: GetChannels :many
 SELECT * FROM Channels
     WHERE Guild_ID = $1;

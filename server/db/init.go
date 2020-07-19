@@ -33,6 +33,7 @@ type IHarmonyDB interface {
 	GetOwner(guildID uint64) (uint64, error)
 	IsOwner(guildID uint64, userID uint64) (bool, error)
 	CreateInvite(guildID uint64, possibleUses int32, name string) (queries.Invite, error)
+	SetChannelName(guildID, channelID uint64, name string) error
 	AddMemberToGuild(userID uint64, guildID uint64) error
 	AddChannelToGuild(guildID uint64, channelName string) (queries.Channel, error)
 	DeleteChannelFromGuild(guildID, channelID uint64) error
