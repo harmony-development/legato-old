@@ -9,4 +9,4 @@ rule gobuild
 
 build legato-sqlc: sqlc
 build legato-protobuf: genprotos
-build legato-binary: gobuild
+build legato-binary: gobuild legato-sqlc legato-protobuf
