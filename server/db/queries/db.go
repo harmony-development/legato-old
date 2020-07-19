@@ -154,6 +154,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.incrementInviteStmt, err = db.PrepareContext(ctx, incrementInvite); err != nil {
 		return nil, fmt.Errorf("error preparing query IncrementInvite: %w", err)
 	}
+	if q.messageWithIDExistsStmt, err = db.PrepareContext(ctx, messageWithIDExists); err != nil {
+		return nil, fmt.Errorf("error preparing query MessageWithIDExists: %w", err)
+	}
 	if q.moveGuildStmt, err = db.PrepareContext(ctx, moveGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query MoveGuild: %w", err)
 	}
@@ -430,6 +433,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing incrementInviteStmt: %w", cerr)
 		}
 	}
+	if q.messageWithIDExistsStmt != nil {
+		if cerr := q.messageWithIDExistsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing messageWithIDExistsStmt: %w", cerr)
+		}
+	}
 	if q.moveGuildStmt != nil {
 		if cerr := q.moveGuildStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing moveGuildStmt: %w", cerr)
@@ -598,6 +606,7 @@ type Queries struct {
 	guildsForUserStmt              *sql.Stmt
 	guildsForUserWithDataStmt      *sql.Stmt
 	incrementInviteStmt            *sql.Stmt
+	messageWithIDExistsStmt        *sql.Stmt
 	moveGuildStmt                  *sql.Stmt
 	numChannelsWithIDStmt          *sql.Stmt
 	openInvitesStmt                *sql.Stmt
@@ -665,6 +674,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		guildsForUserStmt:              q.guildsForUserStmt,
 		guildsForUserWithDataStmt:      q.guildsForUserWithDataStmt,
 		incrementInviteStmt:            q.incrementInviteStmt,
+		messageWithIDExistsStmt:        q.messageWithIDExistsStmt,
 		moveGuildStmt:                  q.moveGuildStmt,
 		numChannelsWithIDStmt:          q.numChannelsWithIDStmt,
 		openInvitesStmt:                q.openInvitesStmt,

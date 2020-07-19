@@ -38,6 +38,10 @@ func (db *MockDB) DeleteGuild(guildID uint64) error {
 	panic("implement me")
 }
 
+func (db *MockDB) HasMessageWithID(guildID, channelID, messageID uint64) (bool, error) {
+	panic("implement me")
+}
+
 func (db *MockDB) GetOwner(guildID uint64) (uint64, error) {
 	if db.Flags.GetOwnerError {
 		return 0, errors.New("error getting owner")

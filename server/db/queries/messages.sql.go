@@ -221,6 +221,28 @@ func (q *Queries) GetMessages(ctx context.Context, arg GetMessagesParams) ([]Mes
 	return items, nil
 }
 
+const messageWithIDExists = `-- name: MessageWithIDExists :one
+SELECT EXISTS (
+  SELECT 1 FROM Messages
+          WHERE Guild_ID = $1
+            AND Channel_ID = $2
+            AND Message_ID = $3
+)
+`
+
+type MessageWithIDExistsParams struct {
+	GuildID   uint64 `json:"guild_id"`
+	ChannelID uint64 `json:"channel_id"`
+	MessageID uint64 `json:"message_id"`
+}
+
+func (q *Queries) MessageWithIDExists(ctx context.Context, arg MessageWithIDExistsParams) (bool, error) {
+	row := q.queryRow(ctx, q.messageWithIDExistsStmt, messageWithIDExists, arg.GuildID, arg.ChannelID, arg.MessageID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const updateMessageActions = `-- name: UpdateMessageActions :one
 UPDATE Messages
   SET Actions = $2,

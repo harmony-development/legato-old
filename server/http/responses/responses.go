@@ -15,6 +15,14 @@ const (
 	NotInGuild             = "guild.not-member"
 	MetadataNotFound       = "user.metadata-not-found"
 	NonceNotFound          = "nonce-not-found"
+	MissingLocationGuild   = "missing-location-guild"
+	MissingLocationChannel = "missing-location-channel"
+	MissingLocationMessage = "missing-location-message"
+	BadLocationGuild       = "invalid-location-guild"
+	BadLocationChannel     = "invalid-location-channel"
+	BadLocationMessage     = "invalid-location-message"
+	InternalServerError    = "internal-server-error"
+	TeaPot                 = "i-am-a-teapot-and-will-not-serve-coffee"
 	UnknownError           = "unknown"
 )
 
