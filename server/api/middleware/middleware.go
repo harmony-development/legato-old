@@ -10,14 +10,25 @@ import (
 	"golang.org/x/time/rate"
 )
 
+type Permission int
+
+const (
+	NoPermission = iota
+	ModifyInvites
+	ModifyChannels
+	ModifyGuild
+	Owner
+)
+
 type RateLimit struct {
 	Duration time.Duration
 	Burst    int
 }
 
 type RPCConfig struct {
-	RateLimit RateLimit
-	Auth      bool
+	RateLimit  RateLimit
+	Auth       bool
+	Permission Permission
 }
 
 var rpcConfigs = map[string]RPCConfig{
@@ -26,27 +37,31 @@ var rpcConfigs = map[string]RPCConfig{
 			Duration: 10 * time.Second,
 			Burst:    64,
 		},
-		Auth: true,
+		Auth:       true,
+		Permission: NoPermission,
 	},
 	"/protocol.profile.v1.ProfileService/GetUserMetadata": {
 		RateLimit: RateLimit{Duration: 1 * time.Second,
 			Burst: 4,
 		},
-		Auth: true,
+		Auth:       true,
+		Permission: NoPermission,
 	},
 	"/protocol.profile.v1.ProfileService/UsernameUpdate": {
 		RateLimit: RateLimit{
 			Duration: 5 * time.Minute,
 			Burst:    8,
 		},
-		Auth: true,
+		Auth:       true,
+		Permission: NoPermission,
 	},
 	"/protocol.profile.v1.ProfileService/StatusUpdate": {
 		RateLimit: RateLimit{
 			Duration: 5 * time.Second,
 			Burst:    4,
 		},
-		Auth: true,
+		Auth:       true,
+		Permission: NoPermission,
 	},
 }
 

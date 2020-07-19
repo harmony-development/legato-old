@@ -69,6 +69,10 @@ func (inst Instance) Start() {
 		DB:        inst.DB,
 		Sonyflake: inst.Sonyflake,
 	})
+	errCallback := make(chan error)
+	inst.API.Start(errCallback, inst.Config.Server.Port)
 	logrus.Info("Legato started")
-	inst.Logger.CheckException(inst.API.Start(inst.Config.Server.Port))
+	err = <-errCallback
+	inst.Logger.CheckException(err)
+	return
 }

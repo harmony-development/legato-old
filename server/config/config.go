@@ -20,7 +20,7 @@ type Config struct {
 // ServerConf is the servers configuration
 type ServerConf struct {
 	SnowflakeStart                    int64
-	Port                              string
+	Port                              int
 	ImagePath                         string
 	GuildPicturePath                  string
 	PublicKeyPath                     string
@@ -78,7 +78,7 @@ type SentryConf struct {
 
 var DefaultConf = Config{
 	Server: ServerConf{
-		Port:                              ":2289",
+		Port:                              2289,
 		ImagePath:                         "images",
 		GuildPicturePath:                  "guild-pictures",
 		PrivateKeyPath:                    "harmony-key.pem",
