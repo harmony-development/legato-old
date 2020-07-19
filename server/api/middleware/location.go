@@ -11,6 +11,10 @@ import (
 )
 
 func (m Middlewares) LocationInterceptor(c context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	if GetRPCConfig(info.FullMethod).Location == NoLocation {
+		return handler(c, req)
+	}
+
 	ctx := c.(HarmonyContext)
 	location, ok := req.(interface{ GetLocation() *corev1.Location })
 	if !ok {

@@ -13,8 +13,8 @@ import (
 type Permission uint64
 
 const (
-	NoPermission = 1 << iota
-	ModifyInvites
+	NoPermission  = 0
+	ModifyInvites = 1 << iota
 	ModifyChannels
 	ModifyGuild
 	Owner
@@ -44,8 +44,8 @@ func (flag Permission) HasAny(b ...Permission) bool {
 type Location uint64
 
 const (
-	NoLocation = 1 << iota
-	GuildLocation
+	NoLocation    = 0
+	GuildLocation = 1 << iota
 	ChannelLocation
 	MessageLocation
 	JoinedLocation
@@ -75,6 +75,10 @@ func RegisterRPCConfig(config RPCConfig, name ...string) {
 	for _, name := range name {
 		rpcConfigs[name] = config
 	}
+}
+func GetRPCConfig(name string) RPCConfig {
+	val, _ := rpcConfigs[name]
+	return val
 }
 
 // HarmonyContext contains a custom context for passing data from middleware to handlers

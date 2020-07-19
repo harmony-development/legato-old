@@ -10,8 +10,11 @@ import (
 
 func (m Middlewares) ValidatorInterceptor(c context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	ctx := c.(HarmonyContext)
-	err := req.(interface{ Validate() error }).Validate()
-	if err != nil {
+	validator, ok := req.(interface{ Validate() error })
+	if !ok {
+		return handler(ctx, req)
+	}
+	if err := validator.Validate(); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	return handler(ctx, req)

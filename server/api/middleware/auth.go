@@ -11,10 +11,11 @@ import (
 )
 
 func (m Middlewares) AuthInterceptor(c context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	ctx := c.(HarmonyContext)
-	if !rpcConfigs[info.FullMethod].Auth {
-		return handler(ctx, req)
+	if !GetRPCConfig(info.FullMethod).Auth {
+		return handler(c, req)
 	}
+
+	ctx := c.(HarmonyContext)
 	headers, exists := metadata.FromIncomingContext(ctx)
 	if !exists {
 		return nil, status.Error(codes.Unauthenticated, responses.InvalidSession)
