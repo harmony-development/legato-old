@@ -360,6 +360,24 @@ func (q *Queries) SetGuildPicture(ctx context.Context, arg SetGuildPictureParams
 	return err
 }
 
+const updateChannelName = `-- name: UpdateChannelName :exec
+UPDATE Channels
+      SET Channel_Name = $1
+    WHERE Guild_ID = $2
+      AND Channel_ID = $3
+`
+
+type UpdateChannelNameParams struct {
+	ChannelName string        `json:"channel_name"`
+	GuildID     sql.NullInt64 `json:"guild_id"`
+	ChannelID   uint64        `json:"channel_id"`
+}
+
+func (q *Queries) UpdateChannelName(ctx context.Context, arg UpdateChannelNameParams) error {
+	_, err := q.exec(ctx, q.updateChannelNameStmt, updateChannelName, arg.ChannelName, arg.GuildID, arg.ChannelID)
+	return err
+}
+
 const userInGuild = `-- name: UserInGuild :one
 SELECT User_ID FROM Guild_Members
     WHERE User_ID = $1

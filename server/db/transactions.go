@@ -388,6 +388,15 @@ func (db *HarmonyDB) GuildsForUser(userID uint64) ([]uint64, error) {
 	return db.queries.GuildsForUser(ctx, userID)
 }
 
+// UpdateChannelName sets the name of a channel
+func (db *HarmonyDB) SetChannelName(guildID, channelID uint64, name string) error {
+	return db.queries.UpdateChannelName(ctx, queries.UpdateChannelNameParams{
+		ChannelName: name,
+		GuildID:     toSqlInt64(guildID),
+		ChannelID:   channelID,
+	})
+}
+
 // GuildsForUser gets the guilds a user is in with additional data
 func (db *HarmonyDB) GuildsForUserWithData(userID uint64) (ret []queries.Guild, err error) {
 	var data []queries.GuildsForUserWithDataRow

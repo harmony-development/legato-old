@@ -1,8 +1,12 @@
 rule genprotos
     command = ./genprotos.sh
 
+rule sqlc
+    command = sqlc generate
+
 rule gobuild
     command = GO111MODULE=on go build
 
+build legato-sqlc: sqlc
 build legato-protobuf: genprotos
 build legato-binary: gobuild

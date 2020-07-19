@@ -8,6 +8,7 @@ import (
 	profilev1 "github.com/harmony-development/legato/gen/profile"
 	"github.com/harmony-development/legato/server/api/middleware"
 	"github.com/harmony-development/legato/server/http/responses"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // StatusUpdate handles the protocol's StatusUpdate request
@@ -20,5 +21,5 @@ func (v1 *V1) StatusUpdate(c context.Context, r *profilev1.StatusUpdateRequest) 
 		v1.Logger.Exception(err)
 		return nil, errors.New(responses.UnknownError)
 	}
-	return &empty.Empty{}, nil
+	return &emptypb.Empty{}, nil
 }

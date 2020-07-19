@@ -167,6 +167,10 @@ func (db *MockDB) GetUserByEmail(email string) (queries.GetUserByEmailRow, error
 	panic("implement me")
 }
 
+func (db *MockDB) SetChannelName(guildID uint64, channelID uint64, name string) error {
+	panic("unimplemented")
+}
+
 func (db *MockDB) GetUserByID(userID uint64) (queries.GetUserRow, error) {
 	if db.Flags.GetUserByIDError {
 		return queries.GetUserRow{}, errors.New("user doesn't exist")
