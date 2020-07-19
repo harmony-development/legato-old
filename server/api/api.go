@@ -56,11 +56,11 @@ func New(deps Dependencies) *API {
 	api.grpcServer = grpc.NewServer(grpc_middleware.WithUnaryServerChain(
 		m.HarmonyContextInterceptor,
 		grpc_recovery.UnaryServerInterceptor(grpc_recovery.WithRecoveryHandler(m.RecoveryFunc)),
+		m.ErrorInterceptor,
 		m.RateLimitInterceptor,
 		m.ValidatorInterceptor,
 		m.AuthInterceptor,
 		m.LocationInterceptor,
-		m.ErrorInterceptor,
 	))
 	api.grpcWebServer = grpcweb.WrapServer(api.grpcServer)
 	api.grpcWebHTTPServer = &http.Server{
