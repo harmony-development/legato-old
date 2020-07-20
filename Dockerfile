@@ -17,6 +17,11 @@ COPY . .
 
 RUN GOOS=linux go build -a -installsuffix cgo -o legato .
 
+COPY ./docker/keygenerator.sh ./
+
+RUN chmod +x ./keygenerator.sh
+RUN ./keygenerator.sh
+
 EXPOSE 2289
 EXPOSE 2290
 EXPOSE 2291
