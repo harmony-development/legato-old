@@ -16,12 +16,14 @@ import (
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/logger"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sony/sonyflake"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -41,6 +43,7 @@ type API struct {
 	grpcServer        *grpc.Server
 	grpcWebServer     *grpcweb.WrappedGrpcServer
 	grpcWebHTTPServer *http.Server
+	prometheusServer  *http.Server
 	CoreKit           *core.Service
 }
 
@@ -53,15 +56,17 @@ func New(deps Dependencies) *API {
 		Logger: deps.Logger,
 		DB:     deps.DB,
 	})
-	api.grpcServer = grpc.NewServer(grpc_middleware.WithUnaryServerChain(
-		m.HarmonyContextInterceptor,
-		grpc_recovery.UnaryServerInterceptor(grpc_recovery.WithRecoveryHandler(m.RecoveryFunc)),
-		m.ErrorInterceptor,
-		m.RateLimitInterceptor,
-		m.ValidatorInterceptor,
-		m.AuthInterceptor,
-		m.LocationInterceptor,
-	))
+	api.grpcServer = grpc.NewServer(
+		grpc_middleware.WithUnaryServerChain(
+			m.HarmonyContextInterceptor,
+			grpc_recovery.UnaryServerInterceptor(grpc_recovery.WithRecoveryHandler(m.RecoveryFunc)),
+			grpc_prometheus.UnaryServerInterceptor,
+			m.ErrorInterceptor,
+			m.RateLimitInterceptor,
+			m.ValidatorInterceptor,
+			m.AuthInterceptor,
+			m.LocationInterceptor,
+		))
 	api.grpcWebServer = grpcweb.WrapServer(api.grpcServer)
 	api.grpcWebHTTPServer = &http.Server{
 		Handler: h2c.NewHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -79,6 +84,11 @@ func New(deps Dependencies) *API {
 			}
 		}), &http2.Server{}),
 	}
+	prometheusMux := http.NewServeMux()
+	prometheusMux.Handle("/metrics", promhttp.Handler())
+	api.prometheusServer = &http.Server{
+		Handler: prometheusMux,
+	}
 	return api
 }
 
@@ -86,6 +96,7 @@ func New(deps Dependencies) *API {
 func (api API) Start(cb chan error, port int) {
 	lis, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	webLis, err := net.Listen("tcp", ":"+strconv.Itoa(port+1))
+	promLis, err := net.Listen("tcp", ":"+strconv.Itoa(port+2))
 	if err != nil {
 		cb <- err
 	}
@@ -105,10 +116,14 @@ func (api API) Start(cb chan error, port int) {
 		Config:      api.Config,
 	}))
 	reflection.Register(api.grpcServer)
+	grpc_prometheus.Register(api.grpcServer)
 	go func() {
 		cb <- api.grpcServer.Serve(lis)
 	}()
 	go func() {
 		cb <- api.grpcWebHTTPServer.Serve(webLis)
+	}()
+	go func() {
+		cb <- api.prometheusServer.Serve(promLis)
 	}()
 }
