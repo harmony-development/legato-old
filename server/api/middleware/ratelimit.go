@@ -40,7 +40,7 @@ func (m Middlewares) RateLimitInterceptor(c context.Context, req interface{}, in
 	return handler(c, req)
 }
 
-func (m *Middlewares) GetVisitor(path string, ip string, duration time.Duration, burst int) *rate.Limiter {
+func (m *Middlewares) GetVisitor(path, ip string, duration time.Duration, burst int) *rate.Limiter {
 	m.RateLock.Lock()
 	defer m.RateLock.Unlock()
 	if _, exists := m.RateLimits[path]; !exists {

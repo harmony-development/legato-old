@@ -20,11 +20,11 @@ func GenKeys() {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	var privKeyPem = &pem.Block{
+	privKeyPem := &pem.Block{
 		Type:  "RSA PRIVATE KEY",
 		Bytes: x509.MarshalPKCS1PrivateKey(key),
 	}
-	var pubKeyPem = &pem.Block{
+	pubKeyPem := &pem.Block{
 		Type:  "RSA PUBLIC KEY",
 		Bytes: pubKeyBytes,
 	}

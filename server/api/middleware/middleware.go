@@ -32,6 +32,7 @@ func (flag Permission) HasAll(b ...Permission) bool {
 	}
 	return true
 }
+
 func (flag Permission) HasAny(b ...Permission) bool {
 	for _, perm := range b {
 		if perm&flag != 0 {
@@ -76,6 +77,7 @@ func RegisterRPCConfig(config RPCConfig, name ...string) {
 		rpcConfigs[name] = config
 	}
 }
+
 func GetRPCConfig(name string) RPCConfig {
 	val, _ := rpcConfigs[name]
 	return val
