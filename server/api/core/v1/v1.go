@@ -748,3 +748,26 @@ func (v1 *V1) SendMessage(c context.Context, r *corev1.SendMessageRequest) (*emp
 	})
 	return &emptypb.Empty{}, nil
 }
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		Location:   middleware.NoLocation,
+		Permission: middleware.NoPermission,
+	}, "/protocol.core.v1.CoreService/LocalGuilds")
+}
+
+func (v1 *V1) LocalGuilds(c context.Context, r *corev1.JoinedLocalGuildsRequest) (*corev1.JoinedLocalGuildsResponse, error) {
+	ctx := c.(middleware.HarmonyContext)
+	data, err := v1.DB.GuildsForUser(ctx.UserID)
+	if err != nil {
+		return nil, err
+	}
+	return &corev1.JoinedLocalGuildsResponse{
+		GuildId: data,
+	}, nil
+}
