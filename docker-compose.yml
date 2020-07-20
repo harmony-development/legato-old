@@ -1,4 +1,11 @@
 version: "3"
+volumes:
+  postgres_db: {}
+  prometheus_data: {}
+  grafana_data: {}
+networks:
+  legato:
+    driver: bridge
 services:
   app:
     container_name: legato
@@ -6,7 +13,9 @@ services:
     tty: true
     stdin_open: true
     ports:
-      - "2290:2289"
+      - 2289:2289
+      - 2290:2290
+      - 2291:2291
     restart: unless-stopped
     depends_on:
       - postgres-db
@@ -14,6 +23,8 @@ services:
       - legato
     links:
       - postgres-db
+    environment:
+      WAIT_HOSTS: postgres-db:5432
   postgres-db:
     image: postgres:latest
     container_name: legato_postgres_db
@@ -22,24 +33,39 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=harmony
     ports:
-      - "5433:5432"
+      - 5433:5432
     volumes:
       - postgres_db:/var/lib/postgresql/data
     networks:
       - legato
     logging:
       driver: none
-  grafana-monitor:
-    image: grafana/grafana:latest
-    container_name: grafana_monitor
+  prometheus:
+    image: prom/prometheus:v2.1.0
+    volumes:
+      - ./docker/prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
     ports:
-      - "1337:3000"
+      - 9090:9090
+    depends_on:
+      - app
+    networks:
+      - legato
     logging:
       driver: none
-volumes:
-  postgres_db:
-
-# Networks to be created to facilitate communication between containers
-networks:
-  legato:
-    driver: bridge
+    restart: always
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    user: "472"
+    ports:
+      - 1337:3000
+    depends_on:
+      - prometheus
+    networks:
+      - legato
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/provisioning/:/etc/grafana/provisioning/
+    logging:
+      driver: none

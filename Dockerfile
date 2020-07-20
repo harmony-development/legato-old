@@ -18,5 +18,11 @@ COPY . .
 RUN GOOS=linux go build -a -installsuffix cgo -o legato .
 
 EXPOSE 2289
+EXPOSE 2290
+EXPOSE 2291
 
-CMD [ "./legato", "echo started" ]
+ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.2.1/wait /wait
+RUN chmod +x /wait
+
+CMD [ "/wait" ]
+CMD [ "./legato" ]

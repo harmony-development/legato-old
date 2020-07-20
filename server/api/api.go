@@ -117,6 +117,7 @@ func (api API) Start(cb chan error, port int) {
 	}))
 	reflection.Register(api.grpcServer)
 	grpc_prometheus.Register(api.grpcServer)
+	grpc_prometheus.EnableHandlingTimeHistogram()
 	go func() {
 		cb <- api.grpcServer.Serve(lis)
 	}()
