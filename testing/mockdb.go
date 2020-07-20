@@ -49,7 +49,7 @@ func (db *MockDB) GetOwner(guildID uint64) (uint64, error) {
 	return 1337, nil
 }
 
-func (db *MockDB) IsOwner(guildID uint64, userID uint64) (bool, error) {
+func (db *MockDB) IsOwner(guildID, userID uint64) (bool, error) {
 	panic("implement me")
 }
 
@@ -57,7 +57,7 @@ func (db *MockDB) CreateInvite(guildID uint64, possibleUses int32, name string) 
 	panic("implement me")
 }
 
-func (db *MockDB) AddMemberToGuild(userID uint64, guildID uint64) error {
+func (db *MockDB) AddMemberToGuild(userID, guildID uint64) error {
 	panic("implement me")
 }
 
@@ -73,7 +73,7 @@ func (db *MockDB) AddMessage(channelID, guildID, userID uint64, message string, 
 	panic("implement me")
 }
 
-func (db *MockDB) DeleteMessage(messageID uint64, channelID uint64, guildID uint64) error {
+func (db *MockDB) DeleteMessage(messageID, channelID, guildID uint64) error {
 	panic("implement me")
 }
 
@@ -100,7 +100,7 @@ func (db *MockDB) SessionToUserID(session string) (uint64, error) {
 	return 1337, nil
 }
 
-func (db *MockDB) UserInGuild(userID uint64, guildID uint64) (bool, error) {
+func (db *MockDB) UserInGuild(userID, guildID uint64) (bool, error) {
 	panic("implement me")
 }
 
@@ -112,11 +112,11 @@ func (db *MockDB) GetMessageDate(messageID uint64) (time.Time, error) {
 	panic("implement me")
 }
 
-func (db *MockDB) GetMessages(guildID uint64, channelID uint64) ([]queries.Message, error) {
+func (db *MockDB) GetMessages(guildID, channelID uint64) ([]queries.Message, error) {
 	panic("implement me")
 }
 
-func (db *MockDB) GetMessagesBefore(guildID uint64, channelID uint64, date time.Time) ([]queries.Message, error) {
+func (db *MockDB) GetMessagesBefore(guildID, channelID uint64, date time.Time) ([]queries.Message, error) {
 	panic("implement me")
 }
 
@@ -171,7 +171,7 @@ func (db *MockDB) GetUserByEmail(email string) (queries.GetUserByEmailRow, error
 	panic("implement me")
 }
 
-func (db *MockDB) SetChannelName(guildID uint64, channelID uint64, name string) error {
+func (db *MockDB) SetChannelName(guildID, channelID uint64, name string) error {
 	panic("unimplemented")
 }
 
@@ -267,7 +267,7 @@ func (db *MockDB) SetStatus(userID uint64, status profilev1.UserStatus) error {
 }
 
 // CreateGuild creates a standard guild
-func (db *MockDB) CreateGuild(owner, id uint64, guildName string, picture string) (*queries.Guild, error) {
+func (db *MockDB) CreateGuild(owner, id uint64, guildName, picture string) (*queries.Guild, error) {
 	if db.Flags.CreateGuildError {
 		return nil, errors.New("create guild error")
 	}
@@ -294,15 +294,19 @@ func (db *MockDB) AddNonce(nonce string, userID uint64, homeServer string) error
 func (db *MockDB) GetGuildList(userID uint64) ([]queries.GetGuildListRow, error) {
 	panic("implement me")
 }
+
 func (db *MockDB) GetGuildListPosition(userID, guildID uint64, homeServer string) (string, error) {
 	panic("implement me")
 }
+
 func (db *MockDB) AddGuildToList(userID, guildID uint64, homeServer string) error {
 	panic("implement me")
 }
-func (db *MockDB) MoveGuild(userID uint64, guildID uint64, homeServer string, nextGuildID, prevGuildID uint64, nextHomeServer, prevHomeServer string) error {
+
+func (db *MockDB) MoveGuild(userID, guildID uint64, homeServer string, nextGuildID, prevGuildID uint64, nextHomeServer, prevHomeServer string) error {
 	panic("implement me")
 }
+
 func (db *MockDB) RemoveGuildFromList(userID, guildID uint64, homeServer string) error {
 	panic("implement me")
 }

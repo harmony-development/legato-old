@@ -61,15 +61,15 @@ func (m Manager) DeleteRoutine() {
 
 // AddImage writes an image to storage
 func (m Manager) AddImage(id string, image []byte) error {
-	return ioutil.WriteFile(path.Join(m.ImagePath, id), image, 0666)
+	return ioutil.WriteFile(path.Join(m.ImagePath, id), image, 0o666)
 }
 
 // AddGuildPicture adds an image for a guild to storage
 func (m Manager) AddGuildPicture(id string, image []byte) error {
-	return ioutil.WriteFile(path.Join(m.GuildPicturePath, id), image, 0666)
+	return ioutil.WriteFile(path.Join(m.GuildPicturePath, id), image, 0o666)
 }
 
 // AddAvatar adds an avatar for a user to storage
 func (m Manager) AddAvatar(id string, image []byte) error {
-	return ioutil.WriteFile(path.Join(m.AvatarPath, id), image, 0666)
+	return ioutil.WriteFile(path.Join(m.AvatarPath, id), image, 0o666)
 }

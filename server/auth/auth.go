@@ -58,7 +58,7 @@ func New(d *Dependencies) (*Manager, error) {
 	return m, nil
 }
 
-func (m Manager) MakeAuthToken(userID uint64, target, username string, avatar string) (string, error) {
+func (m Manager) MakeAuthToken(userID uint64, target, username, avatar string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, &Token{
 		UserID:   userID,
 		Target:   target,

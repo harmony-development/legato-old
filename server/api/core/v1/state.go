@@ -2,8 +2,10 @@ package v1
 
 import corev1 "github.com/harmony-development/legato/gen/core"
 
-type GuildID uint64
-type UserID uint64
+type (
+	GuildID uint64
+	UserID  uint64
+)
 
 type StreamState struct {
 	GuildState

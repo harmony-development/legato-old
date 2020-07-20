@@ -28,27 +28,27 @@ type HarmonyDB struct {
 type IHarmonyDB interface {
 	Migrate() error
 	SessionExpireRoutine()
-	CreateGuild(owner, id uint64, guildName string, picture string) (*queries.Guild, error)
+	CreateGuild(owner, id uint64, guildName, picture string) (*queries.Guild, error)
 	DeleteGuild(guildID uint64) error
 	GetOwner(guildID uint64) (uint64, error)
-	IsOwner(guildID uint64, userID uint64) (bool, error)
+	IsOwner(guildID, userID uint64) (bool, error)
 	CreateInvite(guildID uint64, possibleUses int32, name string) (queries.Invite, error)
 	SetChannelName(guildID, channelID uint64, name string) error
-	AddMemberToGuild(userID uint64, guildID uint64) error
+	AddMemberToGuild(userID, guildID uint64) error
 	AddChannelToGuild(guildID uint64, channelName string) (queries.Channel, error)
 	DeleteChannelFromGuild(guildID, channelID uint64) error
 	AddMessage(channelID, guildID, userID uint64, message string, attachments []string, embeds, actions [][]byte) (*queries.Message, error)
-	DeleteMessage(messageID uint64, channelID uint64, guildID uint64) error
+	DeleteMessage(messageID, channelID, guildID uint64) error
 	GetMessageOwner(messageID uint64) (uint64, error)
 	ResolveGuildID(inviteID string) (uint64, error)
 	IncrementInvite(inviteID string) error
 	DeleteInvite(inviteID string) error
 	SessionToUserID(session string) (uint64, error)
-	UserInGuild(userID uint64, guildID uint64) (bool, error)
+	UserInGuild(userID, guildID uint64) (bool, error)
 	GetAttachments(messageID uint64) ([]string, error)
 	GetMessageDate(messageID uint64) (time.Time, error)
-	GetMessages(guildID uint64, channelID uint64) ([]queries.Message, error)
-	GetMessagesBefore(guildID uint64, channelID uint64, date time.Time) ([]queries.Message, error)
+	GetMessages(guildID, channelID uint64) ([]queries.Message, error)
+	GetMessagesBefore(guildID, channelID uint64, date time.Time) ([]queries.Message, error)
 	UpdateGuildName(guildID uint64, newName string) error
 	GetGuildPicture(guildID uint64) (string, error)
 	SetGuildPicture(guildID uint64, pictureURL string) error
@@ -85,7 +85,7 @@ type IHarmonyDB interface {
 	GetGuildList(userID uint64) ([]queries.GetGuildListRow, error)
 	GetGuildListPosition(userID, guildID uint64, homeServer string) (string, error)
 	AddGuildToList(userID, guildID uint64, homeServer string) error
-	MoveGuild(userID uint64, guildID uint64, homeServer string, nextGuildID, prevGuildID uint64, nextHomeServer, prevHomeServer string) error
+	MoveGuild(userID, guildID uint64, homeServer string, nextGuildID, prevGuildID uint64, nextHomeServer, prevHomeServer string) error
 	RemoveGuildFromList(userID, guildID uint64, homeServer string) error
 }
 

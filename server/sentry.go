@@ -19,7 +19,6 @@ func ConnectSentry(cfg *config.Config) error {
 		Dsn:              cfg.Sentry.Dsn,
 		AttachStacktrace: cfg.Sentry.AttachStacktrace,
 	})
-
 	if err != nil {
 		return err
 	}

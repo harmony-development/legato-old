@@ -28,7 +28,7 @@ type Instance struct {
 
 // Start begins the instance server
 func (inst Instance) Start() {
-	_ = os.Mkdir("./filestore", 0777)
+	_ = os.Mkdir("./filestore", 0o777)
 	cfg, err := config.Load()
 	if err != nil {
 		logrus.Fatal("Unable to load config", err)

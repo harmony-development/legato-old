@@ -34,7 +34,7 @@ func (e *executor) Execute(f func() error) {
 var ctx = context.Background()
 
 // CreateGuild creates a standard guild
-func (db *HarmonyDB) CreateGuild(owner, id uint64, guildName string, picture string) (*queries.Guild, error) {
+func (db *HarmonyDB) CreateGuild(owner, id uint64, guildName, picture string) (*queries.Guild, error) {
 	tx, err := db.Begin()
 	db.Logger.CheckException(err)
 	if err != nil {
@@ -89,7 +89,7 @@ func (db *HarmonyDB) GetOwner(guildID uint64) (uint64, error) {
 }
 
 // IsOwner returns whether the user is the guild owner
-func (db *HarmonyDB) IsOwner(guildID uint64, userID uint64) (bool, error) {
+func (db *HarmonyDB) IsOwner(guildID, userID uint64) (bool, error) {
 	owner, err := db.GetOwner(guildID)
 	db.Logger.CheckException(err)
 	if err != nil {
@@ -110,7 +110,7 @@ func (db *HarmonyDB) CreateInvite(guildID uint64, possibleUses int32, name strin
 }
 
 // AddMemberToGuild adds a new member to a guild
-func (db *HarmonyDB) AddMemberToGuild(userID uint64, guildID uint64) error {
+func (db *HarmonyDB) AddMemberToGuild(userID, guildID uint64) error {
 	err := db.queries.AddUserToGuild(ctx, queries.AddUserToGuildParams{
 		UserID:  userID,
 		GuildID: guildID,
@@ -184,7 +184,7 @@ func (db *HarmonyDB) AddMessage(channelID, guildID, userID uint64, message strin
 }
 
 // DeleteMessage deletes a message
-func (db *HarmonyDB) DeleteMessage(messageID uint64, channelID uint64, guildID uint64) error {
+func (db *HarmonyDB) DeleteMessage(messageID, channelID, guildID uint64) error {
 	tx, err := db.Begin()
 	db.Logger.CheckException(err)
 	if err != nil {
@@ -269,7 +269,7 @@ func (db *HarmonyDB) SessionToUserID(session string) (uint64, error) {
 }
 
 // UserInGuild checks whether a user is in a guild
-func (db *HarmonyDB) UserInGuild(userID uint64, guildID uint64) (bool, error) {
+func (db *HarmonyDB) UserInGuild(userID, guildID uint64) (bool, error) {
 	id, err := db.queries.UserInGuild(ctx, queries.UserInGuildParams{
 		UserID:  userID,
 		GuildID: guildID,
@@ -293,14 +293,14 @@ func (db *HarmonyDB) GetMessageDate(messageID uint64) (time.Time, error) {
 }
 
 // GetMessages gets the newest messages from a guild
-func (db *HarmonyDB) GetMessages(guildID uint64, channelID uint64) ([]queries.Message, error) {
+func (db *HarmonyDB) GetMessages(guildID, channelID uint64) ([]queries.Message, error) {
 	msgs, err := db.GetMessagesBefore(guildID, channelID, time.Now())
 	db.Logger.CheckException(err)
 	return msgs, err
 }
 
 // GetMessagesBefore gets messages before a given message in a guild
-func (db *HarmonyDB) GetMessagesBefore(guildID uint64, channelID uint64, date time.Time) ([]queries.Message, error) {
+func (db *HarmonyDB) GetMessagesBefore(guildID, channelID uint64, date time.Time) ([]queries.Message, error) {
 	msgsBefore, err := db.queries.GetMessages(ctx, queries.GetMessagesParams{
 		Guildid:   guildID,
 		Channelid: channelID,
@@ -689,7 +689,6 @@ func (db *HarmonyDB) GetGuildListPosition(userID, guildID uint64, homeServer str
 
 func (db *HarmonyDB) AddGuildToList(userID, guildID uint64, homeServer string) error {
 	pos, err := db.queries.GetLastGuildPositionInList(ctx, userID)
-
 	if err != nil {
 		if err == sql.ErrNoRows {
 			pos = ""
@@ -710,13 +709,12 @@ func (db *HarmonyDB) AddGuildToList(userID, guildID uint64, homeServer string) e
 	return err
 }
 
-func (db *HarmonyDB) MoveGuild(userID uint64, guildID uint64, homeServer string, nextGuildID, prevGuildID uint64, nextHomeServer, prevHomeServer string) error {
+func (db *HarmonyDB) MoveGuild(userID, guildID uint64, homeServer string, nextGuildID, prevGuildID uint64, nextHomeServer, prevHomeServer string) error {
 	nextPos, err := db.queries.GetGuildListPosition(ctx, queries.GetGuildListPositionParams{
 		UserID:     userID,
 		GuildID:    nextGuildID,
 		HomeServer: nextHomeServer,
 	})
-
 	if err != nil {
 		if err == sql.ErrNoRows {
 			nextPos = ""
@@ -731,7 +729,6 @@ func (db *HarmonyDB) MoveGuild(userID uint64, guildID uint64, homeServer string,
 		GuildID:    prevGuildID,
 		HomeServer: prevHomeServer,
 	})
-
 	if err != nil {
 		if err == sql.ErrNoRows {
 			nextPos = ""

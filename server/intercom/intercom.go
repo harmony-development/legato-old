@@ -39,7 +39,7 @@ func (im IntercomManager) Connect(host string) (*grpc.ClientConn, error) {
 	return client, nil
 }
 
-func (im IntercomManager) OnConnectionEvict(key interface{}, value interface{}) {
+func (im IntercomManager) OnConnectionEvict(key, value interface{}) {
 	conn := value.(*grpc.ClientConn)
 	im.Logger.CheckException(conn.Close())
 }
