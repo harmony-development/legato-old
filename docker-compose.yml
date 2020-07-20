@@ -6,7 +6,7 @@ services:
     tty: true
     stdin_open: true
     ports:
-      - "2289:2289"
+      - "2290:2289"
     restart: unless-stopped
     depends_on:
       - postgres-db
@@ -22,11 +22,20 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=harmony
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_db:/var/lib/postgresql/data
     networks:
       - legato
+    logging:
+      driver: none
+  grafana-monitor:
+    image: grafana/grafana:latest
+    container_name: grafana_monitor
+    ports:
+      - "1337:3000"
+    logging:
+      driver: none
 volumes:
   postgres_db:
 

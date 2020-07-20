@@ -20,7 +20,7 @@ func main() {
 		cmd.GenKeys()
 		return
 	}
-
+	logrus.Info("Server starting")
 	s := new(server.Instance)
 	s.Start()
 }

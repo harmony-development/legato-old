@@ -16,3 +16,7 @@ RUN go mod download
 COPY . .
 
 RUN GOOS=linux go build -a -installsuffix cgo -o legato .
+
+EXPOSE 2289
+
+CMD [ "./legato", "echo started" ]
