@@ -15,7 +15,7 @@ RUN go mod download
 
 COPY . .
 
-RUN GOOS=linux go build -a -installsuffix cgo -o legato .
+RUN GOOS=linux GO111MODULE=on go build -a -installsuffix cgo -o legato .
 
 COPY ./docker/keygenerator.sh ./
 
