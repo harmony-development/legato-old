@@ -18,8 +18,6 @@ import (
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sony/sonyflake"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
@@ -67,22 +65,13 @@ func New(deps Dependencies) *API {
 			m.AuthInterceptor,
 			m.LocationInterceptor,
 		))
-	api.grpcWebServer = grpcweb.WrapServer(api.grpcServer)
+	api.grpcWebServer = grpcweb.WrapServer(api.grpcServer, grpcweb.WithOriginFunc(func(_ string) bool {
+		return true
+	}))
 	api.grpcWebHTTPServer = &http.Server{
-		Handler: h2c.NewHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if r.ProtoMajor == 2 {
-				api.grpcWebServer.ServeHTTP(w, r)
-			} else {
-				w.Header().Set("Access-Control-Allow-Origin", "*")
-				w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-				w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, X-User-Agent, X-Grpc-Web")
-				w.Header().Set("grpc-status", "")
-				w.Header().Set("grpc-message", "")
-				if api.grpcWebServer.IsGrpcWebRequest(r) {
-					api.grpcWebServer.ServeHTTP(w, r)
-				}
-			}
-		}), &http2.Server{}),
+		Handler: http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			api.grpcWebServer.ServeHTTP(resp, req)
+		}),
 	}
 	prometheusMux := http.NewServeMux()
 	prometheusMux.Handle("/metrics", promhttp.Handler())
