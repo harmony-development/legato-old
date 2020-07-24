@@ -17,9 +17,9 @@ func CheckAuth(database db.IHarmonyDB, c context.Context) (uint64, error) {
 		println("no header from incoming context")
 		return 0, status.Error(codes.Unauthenticated, responses.InvalidSession)
 	}
-	authHeader, exists := headers["authorization"]
+	authHeader, exists := headers["auth"]
 	if !exists {
-		println("no authorization header")
+		println("no auth header")
 		return 0, status.Error(codes.Unauthenticated, responses.InvalidSession)
 	}
 	session := authHeader[0]
