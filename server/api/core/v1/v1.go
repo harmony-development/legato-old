@@ -142,6 +142,17 @@ func (v1 *V1) CreateChannel(c context.Context, r *corev1.CreateChannelRequest) (
 	if err != nil {
 		return nil, err
 	}
+	r.Location.ChannelId = channel.ChannelID
+	streamState.BroadcastGuild(r.Location.GuildId, &corev1.GuildEvent{
+		Event: &corev1.GuildEvent_CreatedChannel{
+			CreatedChannel: &corev1.GuildEvent_ChannelCreated{
+				Location:   r.Location,
+				Name:       r.ChannelName,
+				PreviousId: r.PreviousId,
+				NextId:     r.NextId,
+			},
+		},
+	})
 	return &corev1.CreateChannelResponse{
 		ChannelId: channel.ChannelID,
 	}, nil

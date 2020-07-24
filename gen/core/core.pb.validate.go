@@ -2708,6 +2708,18 @@ func (m *GuildEvent) Validate() error {
 			}
 		}
 
+	case *GuildEvent_CreatedChannel:
+
+		if v, ok := interface{}(m.GetCreatedChannel()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return GuildEventValidationError{
+					field:  "CreatedChannel",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
 	case *GuildEvent_EditedChannel:
 
 		if v, ok := interface{}(m.GetEditedChannel()).(interface{ Validate() error }); ok {
@@ -3926,6 +3938,89 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = GuildEvent_MessageDeletedValidationError{}
+
+// Validate checks the field values on GuildEvent_ChannelCreated with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *GuildEvent_ChannelCreated) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return GuildEvent_ChannelCreatedValidationError{
+				field:  "Location",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for Name
+
+	// no validation rules for PreviousId
+
+	// no validation rules for NextId
+
+	return nil
+}
+
+// GuildEvent_ChannelCreatedValidationError is the validation error returned by
+// GuildEvent_ChannelCreated.Validate if the designated constraints aren't met.
+type GuildEvent_ChannelCreatedValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GuildEvent_ChannelCreatedValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GuildEvent_ChannelCreatedValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GuildEvent_ChannelCreatedValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GuildEvent_ChannelCreatedValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GuildEvent_ChannelCreatedValidationError) ErrorName() string {
+	return "GuildEvent_ChannelCreatedValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GuildEvent_ChannelCreatedValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGuildEvent_ChannelCreated.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GuildEvent_ChannelCreatedValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GuildEvent_ChannelCreatedValidationError{}
 
 // Validate checks the field values on GuildEvent_ChannelUpdated with the rules
 // defined in the proto definition for this message. If any rules are
