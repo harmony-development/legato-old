@@ -3963,6 +3963,8 @@ func (m *GuildEvent_ChannelCreated) Validate() error {
 
 	// no validation rules for NextId
 
+	// no validation rules for IsCategory
+
 	return nil
 }
 

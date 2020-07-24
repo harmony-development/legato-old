@@ -150,6 +150,7 @@ func (v1 *V1) CreateChannel(c context.Context, r *corev1.CreateChannelRequest) (
 				Name:       r.ChannelName,
 				PreviousId: r.PreviousId,
 				NextId:     r.NextId,
+				IsCategory: r.IsCategory,
 			},
 		},
 	})
