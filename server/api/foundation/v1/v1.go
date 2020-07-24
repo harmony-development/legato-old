@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"database/sql"
 	"encoding/pem"
+	"time"
 	"unicode"
 
 	"github.com/dgrijalva/jwt-go"
@@ -57,6 +58,17 @@ func (v1 *V1) Federate(c context.Context, r *foundationv1.FederateRequest) (*fou
 		Token: token,
 		Nonce: nonce,
 	}, nil
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 1 * time.Second,
+			Burst:    3,
+		},
+		Auth:       true,
+		Permission: middleware.NoPermission,
+	}, "/protocol.foundation.v1.FoundationService/Federate")
 }
 
 func (v1 *V1) Key(c context.Context, r *foundationv1.KeyRequest) (*foundationv1.KeyReply, error) {
