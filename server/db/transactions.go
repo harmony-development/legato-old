@@ -62,6 +62,7 @@ func (db *HarmonyDB) CreateGuild(owner, id uint64, guildName, picture string) (*
 	_, err = tq.CreateChannel(ctx, queries.CreateChannelParams{
 		GuildID:     toSqlInt64(guild.GuildID),
 		ChannelName: "general",
+		Position:    "",
 	})
 	db.Logger.CheckException(err)
 	if err != nil {
@@ -120,10 +121,16 @@ func (db *HarmonyDB) AddMemberToGuild(userID, guildID uint64) error {
 }
 
 // AddChannelToGuild adds a new channel to a guild
-func (db *HarmonyDB) AddChannelToGuild(guildID uint64, channelName string) (queries.Channel, error) {
+func (db *HarmonyDB) AddChannelToGuild(guildID uint64, channelName string, before, previous uint64, category bool) (queries.Channel, error) {
+	pos, err := db.GetChannelPositions(guildID, before, previous)
+	if err != nil {
+		return queries.Channel{}, err
+	}
 	channel, err := db.queries.CreateChannel(ctx, queries.CreateChannelParams{
 		GuildID:     toSqlInt64(guildID),
 		ChannelName: channelName,
+		Position:    pos,
+		Category:    category,
 	})
 	db.Logger.CheckException(err)
 	return channel, err
@@ -706,6 +713,54 @@ func (db *HarmonyDB) AddGuildToList(userID, guildID uint64, homeServer string) e
 	})
 
 	db.Logger.CheckException(err)
+	return err
+}
+
+func (db *HarmonyDB) GetChannelListPosition(guildID, channelID uint64) (string, error) {
+	position, err := db.queries.GetChannelPosition(ctx, queries.GetChannelPositionParams{
+		GuildID:   toSqlInt64(guildID),
+		ChannelID: channelID,
+	})
+	db.Logger.CheckException(err)
+	return position, err
+}
+
+func (db *HarmonyDB) GetChannelPositions(guildID, before, previous uint64) (pos string, retErr error) {
+	nextPos, err := db.queries.GetChannelPosition(ctx, queries.GetChannelPositionParams{
+		ChannelID: before,
+		GuildID:   toSqlInt64(guildID),
+	})
+	if err != nil && err != sql.ErrNoRows {
+		db.Logger.Exception(err)
+		retErr = err
+		return
+	}
+	prevPos, err := db.queries.GetChannelPosition(ctx, queries.GetChannelPositionParams{
+		ChannelID: previous,
+		GuildID:   toSqlInt64(guildID),
+	})
+	if err != nil {
+		db.Logger.Exception(err)
+		retErr = err
+		return
+	}
+	pos = Rank(prevPos, nextPos)
+	return
+}
+
+func (db *HarmonyDB) MoveChannel(guildID, channelID, previousID, nextID uint64) error {
+	pos, err := db.GetChannelPositions(guildID, previousID, nextID)
+	if err != nil {
+		return err
+	}
+	err = db.queries.MoveChannel(ctx, queries.MoveChannelParams{
+		Position:  pos,
+		ChannelID: channelID,
+		GuildID:   toSqlInt64(guildID),
+	})
+
+	db.Logger.CheckException(err)
+
 	return err
 }
 

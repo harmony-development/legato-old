@@ -29,22 +29,35 @@ func (q *Queries) AddUserToGuild(ctx context.Context, arg AddUserToGuildParams) 
 
 const createChannel = `-- name: CreateChannel :one
 INSERT INTO Channels (
-    Guild_ID, Channel_Name
+    Guild_ID, Channel_Name, Position, Category
 ) VALUES (
-    $1, $2
+    $1, $2, $3, $4
 )
-RETURNING channel_id, guild_id, channel_name
+RETURNING channel_id, guild_id, channel_name, position, category
 `
 
 type CreateChannelParams struct {
 	GuildID     sql.NullInt64 `json:"guild_id"`
 	ChannelName string        `json:"channel_name"`
+	Position    string        `json:"position"`
+	Category    bool          `json:"category"`
 }
 
 func (q *Queries) CreateChannel(ctx context.Context, arg CreateChannelParams) (Channel, error) {
-	row := q.queryRow(ctx, q.createChannelStmt, createChannel, arg.GuildID, arg.ChannelName)
+	row := q.queryRow(ctx, q.createChannelStmt, createChannel,
+		arg.GuildID,
+		arg.ChannelName,
+		arg.Position,
+		arg.Category,
+	)
 	var i Channel
-	err := row.Scan(&i.ChannelID, &i.GuildID, &i.ChannelName)
+	err := row.Scan(
+		&i.ChannelID,
+		&i.GuildID,
+		&i.ChannelName,
+		&i.Position,
+		&i.Category,
+	)
 	return i, err
 }
 
@@ -107,9 +120,29 @@ func (q *Queries) DeleteGuild(ctx context.Context, guildID uint64) error {
 	return err
 }
 
+const getChannelPosition = `-- name: GetChannelPosition :one
+SELECT Position
+FROM Channels
+WHERE Channel_ID = $1
+  AND Guild_ID = $2
+`
+
+type GetChannelPositionParams struct {
+	ChannelID uint64        `json:"channel_id"`
+	GuildID   sql.NullInt64 `json:"guild_id"`
+}
+
+func (q *Queries) GetChannelPosition(ctx context.Context, arg GetChannelPositionParams) (string, error) {
+	row := q.queryRow(ctx, q.getChannelPositionStmt, getChannelPosition, arg.ChannelID, arg.GuildID)
+	var position string
+	err := row.Scan(&position)
+	return position, err
+}
+
 const getChannels = `-- name: GetChannels :many
-SELECT channel_id, guild_id, channel_name FROM Channels
+SELECT channel_id, guild_id, channel_name, position, category FROM Channels
     WHERE Guild_ID = $1
+    ORDER BY Position
 `
 
 func (q *Queries) GetChannels(ctx context.Context, guildID sql.NullInt64) ([]Channel, error) {
@@ -121,7 +154,13 @@ func (q *Queries) GetChannels(ctx context.Context, guildID sql.NullInt64) ([]Cha
 	var items []Channel
 	for rows.Next() {
 		var i Channel
-		if err := rows.Scan(&i.ChannelID, &i.GuildID, &i.ChannelName); err != nil {
+		if err := rows.Scan(
+			&i.ChannelID,
+			&i.GuildID,
+			&i.ChannelName,
+			&i.Position,
+			&i.Category,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -292,6 +331,24 @@ func (q *Queries) GuildsForUserWithData(ctx context.Context, userID uint64) ([]G
 		return nil, err
 	}
 	return items, nil
+}
+
+const moveChannel = `-- name: MoveChannel :exec
+UPDATE Channels
+SET Position = $1
+WHERE Channel_ID = $2
+  AND Guild_ID = $3
+`
+
+type MoveChannelParams struct {
+	Position  string        `json:"position"`
+	ChannelID uint64        `json:"channel_id"`
+	GuildID   sql.NullInt64 `json:"guild_id"`
+}
+
+func (q *Queries) MoveChannel(ctx context.Context, arg MoveChannelParams) error {
+	_, err := q.exec(ctx, q.moveChannelStmt, moveChannel, arg.Position, arg.ChannelID, arg.GuildID)
+	return err
 }
 
 const numChannelsWithID = `-- name: NumChannelsWithID :one

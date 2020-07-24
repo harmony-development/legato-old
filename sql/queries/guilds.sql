@@ -29,9 +29,9 @@ DELETE FROM Guild_Members
 
 -- name: CreateChannel :one
 INSERT INTO Channels (
-    Guild_ID, Channel_Name
+    Guild_ID, Channel_Name, Position, Category
 ) VALUES (
-    $1, $2
+    $1, $2, $3, $4
 )
 RETURNING *;
 
@@ -43,7 +43,8 @@ UPDATE Channels
 
 -- name: GetChannels :many
 SELECT * FROM Channels
-    WHERE Guild_ID = $1;
+    WHERE Guild_ID = $1
+    ORDER BY Position;
 
 -- name: GetGuildOwner :one
 SELECT Owner_ID FROM GUILDS
@@ -99,3 +100,15 @@ SELECT EXISTS (
 SELECT COUNT(*) FROM Channels
     WHERE Guild_ID = $1
       AND Channel_ID = $2;
+
+-- name: GetChannelPosition :one
+SELECT Position
+FROM Channels
+WHERE Channel_ID = $1
+  AND Guild_ID = $2;
+
+-- name: MoveChannel :exec
+UPDATE Channels
+SET Position = $1
+WHERE Channel_ID = $2
+  AND Guild_ID = $3;

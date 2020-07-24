@@ -17,6 +17,8 @@ type Channel struct {
 	ChannelID   uint64        `json:"channel_id"`
 	GuildID     sql.NullInt64 `json:"guild_id"`
 	ChannelName string        `json:"channel_name"`
+	Position    string        `json:"position"`
+	Category    bool          `json:"category"`
 }
 
 type FederationNonce struct {

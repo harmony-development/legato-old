@@ -138,7 +138,7 @@ func init() {
 }
 
 func (v1 *V1) CreateChannel(c context.Context, r *corev1.CreateChannelRequest) (*corev1.CreateChannelResponse, error) {
-	channel, err := v1.DB.AddChannelToGuild(r.Location.GuildId, r.ChannelName)
+	channel, err := v1.DB.AddChannelToGuild(r.Location.GuildId, r.ChannelName, r.PreviousId, r.NextId, r.IsCategory)
 	if err != nil {
 		return nil, err
 	}
@@ -249,16 +249,15 @@ func (v1 *V1) GetGuildChannels(c context.Context, r *corev1.GetGuildChannelsRequ
 	if err != nil {
 		return nil, err
 	}
+	ret := []*corev1.GetGuildChannelsResponse_Channel{}
+	for _, channel := range chans {
+		ret = append(ret, &corev1.GetGuildChannelsResponse_Channel{
+			ChannelId:   channel.ChannelID,
+			ChannelName: channel.ChannelName,
+		})
+	}
 	return &corev1.GetGuildChannelsResponse{
-		Channels: func() (ret []*corev1.GetGuildChannelsResponse_Channel) {
-			for _, channel := range chans {
-				ret = append(ret, &corev1.GetGuildChannelsResponse_Channel{
-					ChannelId:   channel.ChannelID,
-					ChannelName: channel.ChannelName,
-				})
-			}
-			return
-		}(),
+		Channels: ret,
 	}, nil
 }
 
@@ -381,6 +380,35 @@ func (v1 *V1) UpdateChannelName(c context.Context, r *corev1.UpdateChannelNameRe
 				Location:   r.Location,
 				Name:       r.NewChannelName,
 				UpdateName: true,
+			},
+		},
+	})
+	return &emptypb.Empty{}, nil
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    2,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
+		Permission: middleware.ModifyChannels,
+	}, "/protocol.core.v1.CoreService/UpdateChannelOrder")
+}
+
+func (v1 *V1) UpdateChannelOrder(c context.Context, r *corev1.UpdateChannelOrderRequest) (*empty.Empty, error) {
+	if err := v1.DB.MoveChannel(r.Location.GuildId, r.Location.ChannelId, r.PreviousId, r.NextId); err != nil {
+		return nil, err
+	}
+	streamState.BroadcastGuild(r.Location.GuildId, &corev1.GuildEvent{
+		Event: &corev1.GuildEvent_EditedChannel{
+			EditedChannel: &corev1.GuildEvent_ChannelUpdated{
+				Location:    r.Location,
+				PreviousId:  r.PreviousId,
+				NextId:      r.NextId,
+				UpdateOrder: true,
 			},
 		},
 	})

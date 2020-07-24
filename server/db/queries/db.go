@@ -88,6 +88,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getAvatarStmt, err = db.PrepareContext(ctx, getAvatar); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAvatar: %w", err)
 	}
+	if q.getChannelPositionStmt, err = db.PrepareContext(ctx, getChannelPosition); err != nil {
+		return nil, fmt.Errorf("error preparing query GetChannelPosition: %w", err)
+	}
 	if q.getChannelsStmt, err = db.PrepareContext(ctx, getChannels); err != nil {
 		return nil, fmt.Errorf("error preparing query GetChannels: %w", err)
 	}
@@ -156,6 +159,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.messageWithIDExistsStmt, err = db.PrepareContext(ctx, messageWithIDExists); err != nil {
 		return nil, fmt.Errorf("error preparing query MessageWithIDExists: %w", err)
+	}
+	if q.moveChannelStmt, err = db.PrepareContext(ctx, moveChannel); err != nil {
+		return nil, fmt.Errorf("error preparing query MoveChannel: %w", err)
 	}
 	if q.moveGuildStmt, err = db.PrepareContext(ctx, moveGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query MoveGuild: %w", err)
@@ -323,6 +329,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getAvatarStmt: %w", cerr)
 		}
 	}
+	if q.getChannelPositionStmt != nil {
+		if cerr := q.getChannelPositionStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getChannelPositionStmt: %w", cerr)
+		}
+	}
 	if q.getChannelsStmt != nil {
 		if cerr := q.getChannelsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getChannelsStmt: %w", cerr)
@@ -436,6 +447,11 @@ func (q *Queries) Close() error {
 	if q.messageWithIDExistsStmt != nil {
 		if cerr := q.messageWithIDExistsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing messageWithIDExistsStmt: %w", cerr)
+		}
+	}
+	if q.moveChannelStmt != nil {
+		if cerr := q.moveChannelStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing moveChannelStmt: %w", cerr)
 		}
 	}
 	if q.moveGuildStmt != nil {
@@ -584,6 +600,7 @@ type Queries struct {
 	expireSessionsStmt             *sql.Stmt
 	getAttachmentsStmt             *sql.Stmt
 	getAvatarStmt                  *sql.Stmt
+	getChannelPositionStmt         *sql.Stmt
 	getChannelsStmt                *sql.Stmt
 	getFileByHashStmt              *sql.Stmt
 	getGuildDataStmt               *sql.Stmt
@@ -607,6 +624,7 @@ type Queries struct {
 	guildsForUserWithDataStmt      *sql.Stmt
 	incrementInviteStmt            *sql.Stmt
 	messageWithIDExistsStmt        *sql.Stmt
+	moveChannelStmt                *sql.Stmt
 	moveGuildStmt                  *sql.Stmt
 	numChannelsWithIDStmt          *sql.Stmt
 	openInvitesStmt                *sql.Stmt
@@ -652,6 +670,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		expireSessionsStmt:             q.expireSessionsStmt,
 		getAttachmentsStmt:             q.getAttachmentsStmt,
 		getAvatarStmt:                  q.getAvatarStmt,
+		getChannelPositionStmt:         q.getChannelPositionStmt,
 		getChannelsStmt:                q.getChannelsStmt,
 		getFileByHashStmt:              q.getFileByHashStmt,
 		getGuildDataStmt:               q.getGuildDataStmt,
@@ -675,6 +694,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		guildsForUserWithDataStmt:      q.guildsForUserWithDataStmt,
 		incrementInviteStmt:            q.incrementInviteStmt,
 		messageWithIDExistsStmt:        q.messageWithIDExistsStmt,
+		moveChannelStmt:                q.moveChannelStmt,
 		moveGuildStmt:                  q.moveGuildStmt,
 		numChannelsWithIDStmt:          q.numChannelsWithIDStmt,
 		openInvitesStmt:                q.openInvitesStmt,

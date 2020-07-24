@@ -35,7 +35,7 @@ type IHarmonyDB interface {
 	CreateInvite(guildID uint64, possibleUses int32, name string) (queries.Invite, error)
 	SetChannelName(guildID, channelID uint64, name string) error
 	AddMemberToGuild(userID, guildID uint64) error
-	AddChannelToGuild(guildID uint64, channelName string) (queries.Channel, error)
+	AddChannelToGuild(guildID uint64, channelName string, previous, next uint64, category bool) (queries.Channel, error)
 	DeleteChannelFromGuild(guildID, channelID uint64) error
 	AddMessage(channelID, guildID, userID uint64, message string, attachments []string, embeds, actions [][]byte) (*queries.Message, error)
 	DeleteMessage(messageID, channelID, guildID uint64) error
@@ -86,6 +86,8 @@ type IHarmonyDB interface {
 	GetGuildListPosition(userID, guildID uint64, homeServer string) (string, error)
 	AddGuildToList(userID, guildID uint64, homeServer string) error
 	MoveGuild(userID, guildID uint64, homeServer string, nextGuildID, prevGuildID uint64, nextHomeServer, prevHomeServer string) error
+	GetChannelListPosition(guildID, channelID uint64) (string, error)
+	MoveChannel(guildID, channelID, previousID, nextID uint64) error
 	RemoveGuildFromList(userID, guildID uint64, homeServer string) error
 }
 
