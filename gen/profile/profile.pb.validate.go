@@ -44,12 +44,7 @@ func (m *GetUserRequest) Validate() error {
 		return nil
 	}
 
-	if m.GetUserId() <= 0 {
-		return GetUserRequestValidationError{
-			field:  "UserId",
-			reason: "value must be greater than 0",
-		}
-	}
+	// no validation rules for UserId
 
 	return nil
 }
@@ -187,12 +182,7 @@ func (m *GetUserMetadataRequest) Validate() error {
 		return nil
 	}
 
-	if utf8.RuneCountInString(m.GetAppId()) < 1 {
-		return GetUserMetadataRequestValidationError{
-			field:  "AppId",
-			reason: "value length must be at least 1 runes",
-		}
-	}
+	// no validation rules for AppId
 
 	return nil
 }
@@ -330,12 +320,7 @@ func (m *UsernameUpdateRequest) Validate() error {
 		return nil
 	}
 
-	if utf8.RuneCountInString(m.GetUserName()) < 1 {
-		return UsernameUpdateRequestValidationError{
-			field:  "UserName",
-			reason: "value length must be at least 1 runes",
-		}
-	}
+	// no validation rules for UserName
 
 	return nil
 }
@@ -404,12 +389,7 @@ func (m *StatusUpdateRequest) Validate() error {
 		return nil
 	}
 
-	if _, ok := UserStatus_name[int32(m.GetNewStatus())]; !ok {
-		return StatusUpdateRequestValidationError{
-			field:  "NewStatus",
-			reason: "value must be one of the defined enum values",
-		}
-	}
+	// no validation rules for NewStatus
 
 	return nil
 }

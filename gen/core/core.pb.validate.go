@@ -611,12 +611,7 @@ func (m *CreateGuildRequest) Validate() error {
 		return nil
 	}
 
-	if utf8.RuneCountInString(m.GetGuildName()) < 1 {
-		return CreateGuildRequestValidationError{
-			field:  "GuildName",
-			reason: "value length must be at least 1 runes",
-		}
-	}
+	// no validation rules for GuildName
 
 	// no validation rules for PictureUrl
 
@@ -766,12 +761,7 @@ func (m *CreateInviteRequest) Validate() error {
 		}
 	}
 
-	if utf8.RuneCountInString(m.GetName()) < 1 {
-		return CreateInviteRequestValidationError{
-			field:  "Name",
-			reason: "value length must be at least 1 runes",
-		}
-	}
+	// no validation rules for Name
 
 	// no validation rules for PossibleUses
 
@@ -1077,13 +1067,6 @@ func (m *GetGuildRequest) Validate() error {
 		return nil
 	}
 
-	if m.GetLocation() == nil {
-		return GetGuildRequestValidationError{
-			field:  "Location",
-			reason: "value is required",
-		}
-	}
-
 	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return GetGuildRequestValidationError{
@@ -1228,13 +1211,6 @@ var _ interface {
 func (m *GetGuildInvitesRequest) Validate() error {
 	if m == nil {
 		return nil
-	}
-
-	if m.GetLocation() == nil {
-		return GetGuildInvitesRequestValidationError{
-			field:  "Location",
-			reason: "value is required",
-		}
 	}
 
 	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
@@ -1396,13 +1372,6 @@ func (m *GetGuildMembersRequest) Validate() error {
 		return nil
 	}
 
-	if m.GetLocation() == nil {
-		return GetGuildMembersRequestValidationError{
-			field:  "Location",
-			reason: "value is required",
-		}
-	}
-
 	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return GetGuildMembersRequestValidationError{
@@ -1545,13 +1514,6 @@ var _ interface {
 func (m *GetGuildChannelsRequest) Validate() error {
 	if m == nil {
 		return nil
-	}
-
-	if m.GetLocation() == nil {
-		return GetGuildChannelsRequestValidationError{
-			field:  "Location",
-			reason: "value is required",
-		}
 	}
 
 	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
@@ -1711,13 +1673,6 @@ var _ interface {
 func (m *GetChannelMessagesRequest) Validate() error {
 	if m == nil {
 		return nil
-	}
-
-	if m.GetLocation() == nil {
-		return GetChannelMessagesRequestValidationError{
-			field:  "Location",
-			reason: "value is required",
-		}
 	}
 
 	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
@@ -1881,13 +1836,6 @@ func (m *UpdateGuildNameRequest) Validate() error {
 		return nil
 	}
 
-	if m.GetLocation() == nil {
-		return UpdateGuildNameRequestValidationError{
-			field:  "Location",
-			reason: "value is required",
-		}
-	}
-
 	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return UpdateGuildNameRequestValidationError{
@@ -1898,12 +1846,7 @@ func (m *UpdateGuildNameRequest) Validate() error {
 		}
 	}
 
-	if utf8.RuneCountInString(m.GetNewGuildName()) < 1 {
-		return UpdateGuildNameRequestValidationError{
-			field:  "NewGuildName",
-			reason: "value length must be at least 1 runes",
-		}
-	}
+	// no validation rules for NewGuildName
 
 	return nil
 }
@@ -2132,13 +2075,6 @@ func (m *UpdateMessageRequest) Validate() error {
 		return nil
 	}
 
-	if m.GetLocation() == nil {
-		return UpdateMessageRequestValidationError{
-			field:  "Location",
-			reason: "value is required",
-		}
-	}
-
 	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return UpdateMessageRequestValidationError{
@@ -2256,13 +2192,6 @@ func (m *DeleteGuildRequest) Validate() error {
 		return nil
 	}
 
-	if m.GetLocation() == nil {
-		return DeleteGuildRequestValidationError{
-			field:  "Location",
-			reason: "value is required",
-		}
-	}
-
 	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return DeleteGuildRequestValidationError{
@@ -2338,13 +2267,6 @@ var _ interface {
 func (m *DeleteInviteRequest) Validate() error {
 	if m == nil {
 		return nil
-	}
-
-	if m.GetLocation() == nil {
-		return DeleteInviteRequestValidationError{
-			field:  "Location",
-			reason: "value is required",
-		}
 	}
 
 	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
@@ -2426,13 +2348,6 @@ func (m *DeleteChannelRequest) Validate() error {
 		return nil
 	}
 
-	if m.GetLocation() == nil {
-		return DeleteChannelRequestValidationError{
-			field:  "Location",
-			reason: "value is required",
-		}
-	}
-
 	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return DeleteChannelRequestValidationError{
@@ -2508,13 +2423,6 @@ var _ interface {
 func (m *DeleteMessageRequest) Validate() error {
 	if m == nil {
 		return nil
-	}
-
-	if m.GetLocation() == nil {
-		return DeleteMessageRequestValidationError{
-			field:  "Location",
-			reason: "value is required",
-		}
 	}
 
 	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
@@ -3443,14 +3351,46 @@ func (m *SendMessageRequest) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetMessage()).(interface{ Validate() error }); ok {
+	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return SendMessageRequestValidationError{
-				field:  "Message",
+				field:  "Location",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}
 		}
+	}
+
+	// no validation rules for Content
+
+	for idx, item := range m.GetActions() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return SendMessageRequestValidationError{
+					field:  fmt.Sprintf("Actions[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	for idx, item := range m.GetEmbeds() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return SendMessageRequestValidationError{
+					field:  fmt.Sprintf("Embeds[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
 	}
 
 	return nil
@@ -3597,6 +3537,8 @@ func (m *GetGuildChannelsResponse_Channel) Validate() error {
 	// no validation rules for ChannelId
 
 	// no validation rules for ChannelName
+
+	// no validation rules for IsCategory
 
 	return nil
 }

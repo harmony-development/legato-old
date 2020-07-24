@@ -266,6 +266,7 @@ func (v1 *V1) GetGuildChannels(c context.Context, r *corev1.GetGuildChannelsRequ
 		ret = append(ret, &corev1.GetGuildChannelsResponse_Channel{
 			ChannelId:   channel.ChannelID,
 			ChannelName: channel.ChannelName,
+			IsCategory:  channel.Category,
 		})
 	}
 	return &corev1.GetGuildChannelsResponse{
@@ -763,26 +764,33 @@ func init() {
 func (v1 *V1) SendMessage(c context.Context, r *corev1.SendMessageRequest) (*emptypb.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
 	msg, err := v1.DB.AddMessage(
-		r.Message.Location.ChannelId,
-		r.Message.Location.GuildId,
+		r.Location.ChannelId,
+		r.Location.GuildId,
 		ctx.UserID,
-		r.Message.Content,
-		r.Message.Attachments,
-		v1.ProtoToEmbeds(r.Message.Embeds),
-		v1.ProtoToActions(r.Message.Actions),
+		r.Content,
+		r.Attachments,
+		v1.ProtoToEmbeds(r.Embeds),
+		v1.ProtoToActions(r.Actions),
 	)
 	if err != nil {
 		return nil, err
 	}
-	message := r.Message
+	message := corev1.Message{
+		Location:    r.Location,
+		AuthorId:    ctx.UserID,
+		Content:     r.Content,
+		Attachments: r.Attachments,
+		Embeds:      r.Embeds,
+		Actions:     r.Actions,
+	}
 	createdAt, _ := ptypes.TimestampProto(msg.CreatedAt.UTC())
 	message.CreatedAt = createdAt
 	message.Location.MessageId = msg.MessageID
 	message.AuthorId = ctx.UserID
-	streamState.BroadcastGuild(r.Message.Location.GuildId, &corev1.GuildEvent{
+	streamState.BroadcastGuild(r.Location.GuildId, &corev1.GuildEvent{
 		Event: &corev1.GuildEvent_SentMessage{
 			SentMessage: &corev1.GuildEvent_MessageSent{
-				Message: message,
+				Message: &message,
 			},
 		},
 	})
