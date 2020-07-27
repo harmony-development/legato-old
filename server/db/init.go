@@ -55,8 +55,7 @@ type IHarmonyDB interface {
 	AddAttachments(messageID uint64, attachments []string) error
 	GetInvites(guildID uint64) ([]queries.Invite, error)
 	DeleteMember(guildID, userID uint64) error
-	GuildsForUser(userID uint64) ([]uint64, error)
-	GuildsForUserWithData(userID uint64) ([]queries.Guild, error)
+	GetLocalGuilds(userID uint64) ([]uint64, error)
 	ChannelsForGuild(guildID uint64) ([]queries.Channel, error)
 	MembersInGuild(guildID uint64) ([]uint64, error)
 	GetMessage(messageID uint64) (queries.Message, error)

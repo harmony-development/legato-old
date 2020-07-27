@@ -806,16 +806,23 @@ func init() {
 		Auth:       true,
 		Location:   middleware.NoLocation,
 		Permission: middleware.NoPermission,
-	}, "/protocol.core.v1.CoreService/LocalGuilds")
+	}, "/protocol.core.v1.CoreService/GetGuildList")
 }
 
-func (v1 *V1) LocalGuilds(c context.Context, r *corev1.JoinedLocalGuildsRequest) (*corev1.JoinedLocalGuildsResponse, error) {
+func (v1 *V1) GetGuildList(c context.Context, r *corev1.GetGuildListRequest) (*corev1.GetGuildListResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
-	data, err := v1.DB.GuildsForUser(ctx.UserID)
+	data, err := v1.DB.GetGuildList(ctx.UserID)
 	if err != nil {
 		return nil, err
 	}
-	return &corev1.JoinedLocalGuildsResponse{
-		GuildId: data,
+	var out []*corev1.GetGuildListResponse_GuildListEntry
+	for _, guildEntry := range data {
+		out = append(out, &corev1.GetGuildListResponse_GuildListEntry{
+			GuildId: guildEntry.GuildID,
+			Host:    guildEntry.HomeServer,
+		})
+	}
+	return &corev1.GetGuildListResponse{
+		Guilds: out,
 	}, nil
 }

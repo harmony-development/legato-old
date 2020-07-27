@@ -1059,6 +1059,155 @@ var _ interface {
 	ErrorName() string
 } = CreateChannelResponseValidationError{}
 
+// Validate checks the field values on GetGuildListRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *GetGuildListRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	return nil
+}
+
+// GetGuildListRequestValidationError is the validation error returned by
+// GetGuildListRequest.Validate if the designated constraints aren't met.
+type GetGuildListRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetGuildListRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetGuildListRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetGuildListRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetGuildListRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetGuildListRequestValidationError) ErrorName() string {
+	return "GetGuildListRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetGuildListRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetGuildListRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetGuildListRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetGuildListRequestValidationError{}
+
+// Validate checks the field values on GetGuildListResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *GetGuildListResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	for idx, item := range m.GetGuilds() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return GetGuildListResponseValidationError{
+					field:  fmt.Sprintf("Guilds[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// GetGuildListResponseValidationError is the validation error returned by
+// GetGuildListResponse.Validate if the designated constraints aren't met.
+type GetGuildListResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetGuildListResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetGuildListResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetGuildListResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetGuildListResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetGuildListResponseValidationError) ErrorName() string {
+	return "GetGuildListResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetGuildListResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetGuildListResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetGuildListResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetGuildListResponseValidationError{}
+
 // Validate checks the field values on GetGuildRequest with the rules defined
 // in the proto definition for this message. If any rules are violated, an
 // error is returned.
@@ -3128,140 +3277,6 @@ var _ interface {
 	ErrorName() string
 } = LeaveGuildRequestValidationError{}
 
-// Validate checks the field values on JoinedLocalGuildsRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
-func (m *JoinedLocalGuildsRequest) Validate() error {
-	if m == nil {
-		return nil
-	}
-
-	return nil
-}
-
-// JoinedLocalGuildsRequestValidationError is the validation error returned by
-// JoinedLocalGuildsRequest.Validate if the designated constraints aren't met.
-type JoinedLocalGuildsRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e JoinedLocalGuildsRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e JoinedLocalGuildsRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e JoinedLocalGuildsRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e JoinedLocalGuildsRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e JoinedLocalGuildsRequestValidationError) ErrorName() string {
-	return "JoinedLocalGuildsRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e JoinedLocalGuildsRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sJoinedLocalGuildsRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = JoinedLocalGuildsRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = JoinedLocalGuildsRequestValidationError{}
-
-// Validate checks the field values on JoinedLocalGuildsResponse with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
-func (m *JoinedLocalGuildsResponse) Validate() error {
-	if m == nil {
-		return nil
-	}
-
-	return nil
-}
-
-// JoinedLocalGuildsResponseValidationError is the validation error returned by
-// JoinedLocalGuildsResponse.Validate if the designated constraints aren't met.
-type JoinedLocalGuildsResponseValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e JoinedLocalGuildsResponseValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e JoinedLocalGuildsResponseValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e JoinedLocalGuildsResponseValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e JoinedLocalGuildsResponseValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e JoinedLocalGuildsResponseValidationError) ErrorName() string {
-	return "JoinedLocalGuildsResponseValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e JoinedLocalGuildsResponseValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sJoinedLocalGuildsResponse.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = JoinedLocalGuildsResponseValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = JoinedLocalGuildsResponseValidationError{}
-
 // Validate checks the field values on TriggerActionRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
@@ -3451,6 +3466,78 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = SendMessageRequestValidationError{}
+
+// Validate checks the field values on GetGuildListResponse_GuildListEntry with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, an error is returned.
+func (m *GetGuildListResponse_GuildListEntry) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for GuildId
+
+	// no validation rules for Host
+
+	return nil
+}
+
+// GetGuildListResponse_GuildListEntryValidationError is the validation error
+// returned by GetGuildListResponse_GuildListEntry.Validate if the designated
+// constraints aren't met.
+type GetGuildListResponse_GuildListEntryValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetGuildListResponse_GuildListEntryValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetGuildListResponse_GuildListEntryValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetGuildListResponse_GuildListEntryValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetGuildListResponse_GuildListEntryValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetGuildListResponse_GuildListEntryValidationError) ErrorName() string {
+	return "GetGuildListResponse_GuildListEntryValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetGuildListResponse_GuildListEntryValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetGuildListResponse_GuildListEntry.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetGuildListResponse_GuildListEntryValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetGuildListResponse_GuildListEntryValidationError{}
 
 // Validate checks the field values on GetGuildInvitesResponse_Invite with the
 // rules defined in the proto definition for this message. If any rules are

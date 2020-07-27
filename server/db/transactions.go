@@ -390,8 +390,8 @@ func (db *HarmonyDB) DeleteMember(guildID, userID uint64) error {
 	return err
 }
 
-// GuildsForUser gets the guilds a user is in
-func (db *HarmonyDB) GuildsForUser(userID uint64) ([]uint64, error) {
+// GetLocalGuilds gets the guilds a user is in
+func (db *HarmonyDB) GetLocalGuilds(userID uint64) ([]uint64, error) {
 	return db.queries.GuildsForUser(ctx, userID)
 }
 
@@ -402,21 +402,6 @@ func (db *HarmonyDB) SetChannelName(guildID, channelID uint64, name string) erro
 		GuildID:     toSqlInt64(guildID),
 		ChannelID:   channelID,
 	})
-}
-
-// GuildsForUser gets the guilds a user is in with additional data
-func (db *HarmonyDB) GuildsForUserWithData(userID uint64) (ret []queries.Guild, err error) {
-	var data []queries.GuildsForUserWithDataRow
-	data, err = db.queries.GuildsForUserWithData(ctx, userID)
-	for _, guild := range data {
-		ret = append(ret, queries.Guild{
-			GuildID:    guild.GuildID,
-			OwnerID:    guild.OwnerID,
-			GuildName:  guild.GuildName,
-			PictureUrl: guild.PictureUrl,
-		})
-	}
-	return
 }
 
 // ChannelsForGuild gets the channels for a guild

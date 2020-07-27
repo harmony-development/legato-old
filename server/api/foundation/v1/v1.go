@@ -90,6 +90,9 @@ func (v1 *V1) Key(c context.Context, r *foundationv1.KeyRequest) (*foundationv1.
 func (v1 *V1) LocalLogin(c context.Context, r *foundationv1.LoginRequest_Local) (*foundationv1.Session, error) {
 	user, err := v1.DB.GetUserByEmail(r.Email)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, status.Error(codes.NotFound, responses.InvalidEmail)
+		}
 		return nil, err
 	}
 	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(r.Password)); err != nil {
