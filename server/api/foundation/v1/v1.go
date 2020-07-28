@@ -95,7 +95,7 @@ func (v1 *V1) LocalLogin(c context.Context, r *foundationv1.LoginRequest_Local) 
 		}
 		return nil, err
 	}
-	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(r.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword(user.Password, r.Password); err != nil {
 		return nil, status.Error(codes.Unauthenticated, responses.InvalidPassword)
 	}
 	session := randstr.Hex(16)
