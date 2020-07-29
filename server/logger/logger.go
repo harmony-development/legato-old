@@ -40,7 +40,6 @@ func (l Logger) CheckException(err error) {
 }
 
 func (l Logger) ErrorResponse(code codes.Code, err error, response string) error {
-	l.Exception(err)
 	if l.Config.Server.RespondWithErrors {
 		return status.Error(code, err.Error())
 	}
