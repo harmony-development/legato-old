@@ -826,3 +826,46 @@ func (v1 *V1) GetGuildList(c context.Context, r *corev1.GetGuildListRequest) (*c
 		Guilds: out,
 	}, nil
 }
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		Local:      true,
+		Location:   middleware.NoLocation,
+		Permission: middleware.NoPermission,
+	}, "/protocol.core.v1.CoreService/AddGuildToGuildList")
+}
+
+func (v1 *V1) AddGuildToGuildList(c context.Context, r *corev1.AddGuildToGuildListRequest) (*corev1.AddGuildToGuildListResponse, error) {
+	ctx := c.(middleware.HarmonyContext)
+	err := v1.DB.AddGuildToList(ctx.UserID, r.GuildId, r.Homeserver)
+	if err != nil {
+		return nil, err
+	}
+	homeserverEventState.Broadcast(ctx.UserID, &corev1.HomeserverEvent{
+		Event: &corev1.HomeserverEvent_GuildAddedToList_{
+			GuildAddedToList: &corev1.HomeserverEvent_GuildAddedToList{
+				GuildId:    r.GuildId,
+				Homeserver: r.Homeserver,
+			},
+		},
+	})
+	return &corev1.AddGuildToGuildListResponse{}, nil
+}
+
+func (v1 *V1) StreamHomeserverEvents(r *corev1.StreamHomeserverEventsRequest, s corev1.CoreService_StreamHomeserverEventsServer) error {
+	userID, err := middleware.CheckAuth(v1.DB, s.Context())
+	if err != nil {
+		return err
+	}
+	err = v1.DB.UserIsLocal(userID)
+	if err != nil {
+		return err
+	}
+	homeserverEventState.Subscribe(userID, s)
+	return nil
+}

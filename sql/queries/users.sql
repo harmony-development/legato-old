@@ -111,3 +111,8 @@ FROM Guild_List
 WHERE User_ID = $1
 ORDER BY Position
 LIMIT 1;
+
+-- name: UserIsLocal :one
+SELECT EXISTS(
+  SELECT 1 FROM Local_Users WHERE User_ID = $1
+);
