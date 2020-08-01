@@ -14,7 +14,7 @@ func (m Middlewares) ErrorInterceptor(c context.Context, req interface{}, info *
 
 	resp, err := handler(ctx, req)
 	if err != nil {
-		if _, ok := status.FromError(err); !ok {
+		if _, ok := status.FromError(err); ok {
 			return nil, err
 		}
 		return nil, m.Logger.ErrorResponse(codes.Unknown, err, responses.UnknownError)
