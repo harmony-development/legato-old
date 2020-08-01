@@ -686,7 +686,7 @@ func (v1 *V1) StreamGuildEvents(r *corev1.StreamGuildEventsRequest, s corev1.Cor
 	if !ok {
 		return NotInGuild
 	}
-	streamState.Add(r.Location.GuildId, userID, s)
+	<-streamState.Add(r.Location.GuildId, userID, s)
 	return nil
 }
 
@@ -707,7 +707,7 @@ func (v1 *V1) StreamActionEvents(r *corev1.StreamActionEventsRequest, s corev1.C
 	if err != nil {
 		return err
 	}
-	streamState.AddAction(userID, s)
+	<-streamState.AddAction(userID, s)
 	return nil
 }
 
@@ -866,6 +866,6 @@ func (v1 *V1) StreamHomeserverEvents(r *corev1.StreamHomeserverEventsRequest, s 
 	if err != nil {
 		return err
 	}
-	homeserverEventState.Subscribe(userID, s)
+	<-homeserverEventState.Subscribe(userID, s)
 	return nil
 }

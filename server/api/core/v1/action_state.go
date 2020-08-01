@@ -7,11 +7,12 @@ import (
 )
 
 type ActionState struct {
-	actionEvents map[UserID][]corev1.CoreService_StreamActionEventsServer
+	actionChannels map[corev1.CoreService_StreamActionEventsServer]chan struct{}
+	actionEvents   map[UserID][]corev1.CoreService_StreamActionEventsServer
 	sync.Mutex
 }
 
-func (a *ActionState) AddAction(userID uint64, server corev1.CoreService_StreamActionEventsServer) {
+func (a *ActionState) AddAction(userID uint64, server corev1.CoreService_StreamActionEventsServer) chan struct{} {
 	a.Lock()
 	defer a.Unlock()
 
@@ -23,6 +24,8 @@ func (a *ActionState) AddAction(userID uint64, server corev1.CoreService_StreamA
 	val, _ := a.actionEvents[UserID(userID)]
 	val = append(val, server)
 	a.actionEvents[UserID(userID)] = val
+	a.actionChannels[server] = make(chan struct{})
+	return a.actionChannels[server]
 }
 
 func (a *ActionState) RemoveAction(userID uint64, server corev1.CoreService_StreamActionEventsServer) {
@@ -39,6 +42,8 @@ func (a *ActionState) RemoveAction(userID uint64, server corev1.CoreService_Stre
 		}
 	}
 	a.actionEvents[UserID(userID)] = val
+	close(a.actionChannels[server])
+	delete(a.actionChannels, server)
 }
 
 func (a *ActionState) BroadcastAction(userId uint64, action *corev1.ActionEvent) {

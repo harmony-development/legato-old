@@ -7,15 +7,17 @@ import (
 )
 
 type HomeserverEventState struct {
-	homeserverEvents map[UserID][]corev1.CoreService_StreamHomeserverEventsServer
+	homeserverChannels map[corev1.CoreService_StreamHomeserverEventsServer]chan struct{}
+	homeserverEvents   map[UserID][]corev1.CoreService_StreamHomeserverEventsServer
 	sync.Mutex
 }
 
 var homeserverEventState = HomeserverEventState{
-	homeserverEvents: map[UserID][]corev1.CoreService_StreamHomeserverEventsServer{},
+	homeserverChannels: map[corev1.CoreService_StreamHomeserverEventsServer]chan struct{}{},
+	homeserverEvents:   map[UserID][]corev1.CoreService_StreamHomeserverEventsServer{},
 }
 
-func (h *HomeserverEventState) Subscribe(userID uint64, s corev1.CoreService_StreamHomeserverEventsServer) {
+func (h *HomeserverEventState) Subscribe(userID uint64, s corev1.CoreService_StreamHomeserverEventsServer) chan struct{} {
 	h.Lock()
 	defer h.Unlock()
 
@@ -28,7 +30,9 @@ func (h *HomeserverEventState) Subscribe(userID uint64, s corev1.CoreService_Str
 		h.homeserverEvents[UserID(userID)] = []corev1.CoreService_StreamHomeserverEventsServer{}
 	}
 
+	h.homeserverChannels[s] = make(chan struct{})
 	h.homeserverEvents[UserID(userID)] = append(h.homeserverEvents[UserID(userID)], s)
+	return h.homeserverChannels[s]
 }
 
 func (h *HomeserverEventState) Unsubscribe(userID uint64, s corev1.CoreService_StreamHomeserverEventsServer) {
@@ -44,6 +48,8 @@ func (h *HomeserverEventState) Unsubscribe(userID uint64, s corev1.CoreService_S
 			break
 		}
 	}
+	close(h.homeserverChannels[s])
+	delete(h.homeserverChannels, s)
 	h.homeserverEvents[UserID(userID)] = val
 }
 

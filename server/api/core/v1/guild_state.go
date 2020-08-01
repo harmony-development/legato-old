@@ -7,12 +7,13 @@ import (
 )
 
 type GuildState struct {
-	guildEvents map[UserID]map[GuildID][]corev1.CoreService_StreamGuildEventsServer
-	subs        map[GuildID]map[UserID]struct{}
+	serverChannels map[corev1.CoreService_StreamGuildEventsServer]chan struct{}
+	guildEvents    map[UserID]map[GuildID][]corev1.CoreService_StreamGuildEventsServer
+	subs           map[GuildID]map[UserID]struct{}
 	sync.Mutex
 }
 
-func (s *GuildState) Add(guildID, userID uint64, server corev1.CoreService_StreamGuildEventsServer) {
+func (s *GuildState) Add(guildID, userID uint64, server corev1.CoreService_StreamGuildEventsServer) chan struct{} {
 	s.Lock()
 	defer s.Unlock()
 
@@ -30,12 +31,20 @@ func (s *GuildState) Add(guildID, userID uint64, server corev1.CoreService_Strea
 	val, _ := s.guildEvents[UserID(userID)][GuildID(guildID)]
 	val = append(val, server)
 	s.guildEvents[UserID(userID)][GuildID(guildID)] = val
+	s.serverChannels[server] = make(chan struct{})
+	return s.serverChannels[server]
 }
 
 func (s *GuildState) Remove(userID uint64) {
 	s.Lock()
 	defer s.Unlock()
 
+	for _, guild := range s.guildEvents[UserID(userID)] {
+		for _, serv := range guild {
+			close(s.serverChannels[serv])
+			delete(s.serverChannels, serv)
+		}
+	}
 	delete(s.guildEvents, UserID(userID))
 	s.SubRemoveUser(userID)
 }
@@ -47,6 +56,12 @@ func (s *GuildState) RemoveGuild(guildID uint64) {
 
 	if val, ok := s.subs[GuildID(guildID)]; ok {
 		for user := range val {
+			for _, guild := range s.guildEvents[user] {
+				for _, serv := range guild {
+					close(s.serverChannels[serv])
+					delete(s.serverChannels, serv)
+				}
+			}
 			delete(s.guildEvents[user], GuildID(guildID))
 		}
 	}
@@ -58,6 +73,10 @@ func (s *GuildState) RemoveUserFromGuild(userID, guildID uint64) {
 
 	s.SubRemoveUserFromGuild(userID, guildID)
 	if _, ok := s.guildEvents[UserID(userID)]; ok {
+		for _, serv := range s.guildEvents[UserID(userID)][GuildID(guildID)] {
+			close(s.serverChannels[serv])
+			delete(s.serverChannels, serv)
+		}
 		delete(s.guildEvents[UserID(userID)], GuildID(guildID))
 	}
 }
