@@ -806,3 +806,11 @@ func (db HarmonyDB) HasMessageWithID(guildID, channelID, messageID uint64) (bool
 		MessageID: messageID,
 	})
 }
+
+func (db HarmonyDB) UserIsLocal(userID uint64) error {
+	ok, err := db.queries.UserIsLocal(ctx, userID)
+	if err == nil && !ok {
+		err = ErrNotLocal
+	}
+	return err
+}

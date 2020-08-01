@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -14,6 +15,8 @@ import (
 	lru "github.com/hashicorp/golang-lru"
 	_ "github.com/lib/pq"
 )
+
+var ErrNotLocal = errors.New("User is not local")
 
 // HarmonyDB is a wrapper for the SQL HarmonyDB
 type HarmonyDB struct {
@@ -88,6 +91,7 @@ type IHarmonyDB interface {
 	GetChannelListPosition(guildID, channelID uint64) (string, error)
 	MoveChannel(guildID, channelID, previousID, nextID uint64) error
 	RemoveGuildFromList(userID, guildID uint64, homeServer string) error
+	UserIsLocal(userID uint64) error
 }
 
 // New creates a new DB connection

@@ -214,6 +214,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.userInGuildStmt, err = db.PrepareContext(ctx, userInGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query UserInGuild: %w", err)
 	}
+	if q.userIsLocalStmt, err = db.PrepareContext(ctx, userIsLocal); err != nil {
+		return nil, fmt.Errorf("error preparing query UserIsLocal: %w", err)
+	}
 	return &q, nil
 }
 
@@ -539,6 +542,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing userInGuildStmt: %w", cerr)
 		}
 	}
+	if q.userIsLocalStmt != nil {
+		if cerr := q.userIsLocalStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing userIsLocalStmt: %w", cerr)
+		}
+	}
 	return err
 }
 
@@ -642,6 +650,7 @@ type Queries struct {
 	updateMessageEmbedsStmt        *sql.Stmt
 	updateUsernameStmt             *sql.Stmt
 	userInGuildStmt                *sql.Stmt
+	userIsLocalStmt                *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
@@ -712,5 +721,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		updateMessageEmbedsStmt:        q.updateMessageEmbedsStmt,
 		updateUsernameStmt:             q.updateUsernameStmt,
 		userInGuildStmt:                q.userInGuildStmt,
+		userIsLocalStmt:                q.userIsLocalStmt,
 	}
 }

@@ -383,3 +383,16 @@ func (q *Queries) UpdateUsername(ctx context.Context, arg UpdateUsernameParams) 
 	_, err := q.exec(ctx, q.updateUsernameStmt, updateUsername, arg.Username, arg.UserID)
 	return err
 }
+
+const userIsLocal = `-- name: UserIsLocal :one
+SELECT EXISTS(
+  SELECT 1 FROM Local_Users WHERE User_ID = $1
+)
+`
+
+func (q *Queries) UserIsLocal(ctx context.Context, userID uint64) (bool, error) {
+	row := q.queryRow(ctx, q.userIsLocalStmt, userIsLocal, userID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
