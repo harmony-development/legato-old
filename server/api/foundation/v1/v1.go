@@ -115,7 +115,7 @@ func (v1 *V1) FederatedLogin(c context.Context, r *foundationv1.LoginRequest_Fed
 		return nil, err
 	}
 
-	pubKey, err := jwt.ParseRSAPublicKeyFromPEM(pem)
+	pubKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(pem))
 	if err != nil {
 		return nil, err
 	}

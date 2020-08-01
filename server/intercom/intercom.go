@@ -12,13 +12,13 @@ type Dependencies struct {
 	Logger logger.Logger
 }
 
-type IntercomManager struct {
+type Manager struct {
 	Dependencies
 	ForeignConnections *lru.Cache
 }
 
-func New(deps Dependencies) (*IntercomManager, error) {
-	manager := &IntercomManager{
+func New(deps Dependencies) (*Manager, error) {
+	manager := &Manager{
 		Dependencies: deps,
 	}
 
@@ -30,7 +30,7 @@ func New(deps Dependencies) (*IntercomManager, error) {
 	return manager, err
 }
 
-func (im IntercomManager) Connect(host string) (*grpc.ClientConn, error) {
+func (im Manager) Connect(host string) (*grpc.ClientConn, error) {
 	client, err := grpc.Dial(host, grpc.WithTimeout(15*time.Second))
 	if err != nil {
 		return nil, err
@@ -39,7 +39,16 @@ func (im IntercomManager) Connect(host string) (*grpc.ClientConn, error) {
 	return client, nil
 }
 
-func (im IntercomManager) OnConnectionEvict(key, value interface{}) {
+func (im Manager) GetOrConnect(host string) (*grpc.ClientConn, error) {
+	conn, exists := im.ForeignConnections.Get(host)
+	if exists {
+		return conn.(*grpc.ClientConn), nil
+	} else {
+		return im.Connect(host)
+	}
+}
+
+func (im Manager) OnConnectionEvict(key, value interface{}) {
 	conn := value.(*grpc.ClientConn)
 	im.Logger.CheckException(conn.Close())
 }

@@ -1,28 +1,29 @@
 package auth
 
 import (
+	"context"
 	"crypto/rsa"
 	"fmt"
 	"io/ioutil"
-	"net/http"
-	"net/url"
-	"path"
 
 	"github.com/dgrijalva/jwt-go"
 
+	foundationv1 "github.com/harmony-development/legato/gen/foundation"
 	"github.com/harmony-development/legato/server/config"
+	"github.com/harmony-development/legato/server/intercom"
 )
 
 // Manager wraps logic for authentication
 type Manager struct {
-	Dependencies *Dependencies
-	PrivKey      *rsa.PrivateKey
-	PubKey       *rsa.PublicKey
+	*Dependencies
+	PrivKey *rsa.PrivateKey
+	PubKey  *rsa.PublicKey
 }
 
 // Dependencies are items that an authentication manager needs
 type Dependencies struct {
-	Config *config.Config
+	Config          *config.Config
+	IntercomManager *intercom.Manager
 }
 
 // Token is the structure for an authentication JWT
@@ -68,23 +69,16 @@ func (m Manager) MakeAuthToken(userID uint64, target, username, avatar string) (
 	return token.SignedString(m.PrivKey)
 }
 
-// GetPublicKey gets the public key from a domain
-func (m Manager) GetPublicKey(domain string) ([]byte, error) {
-	u, err := url.Parse(domain)
+// GetPublicKey gets the public key from a host
+func (m Manager) GetPublicKey(host string) (string, error) {
+	conn, err := m.IntercomManager.GetOrConnect(host)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	u.Path = path.Join(u.Path, "/api/protocol/key")
-	resp, err := http.Get(u.String())
+	foundationClient := foundationv1.NewFoundationServiceClient(conn)
+	reply, err := foundationClient.Key(context.Background(), &foundationv1.KeyRequest{})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	if err := resp.Body.Close(); err != nil {
-		return nil, err
-	}
-	return body, nil
+	return reply.GetKey(), nil
 }
