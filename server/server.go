@@ -11,19 +11,21 @@ import (
 	"github.com/harmony-development/legato/server/auth"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/intercom"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/harmony-development/legato/server/storage"
 )
 
 // Instance is an instance of the harmony server
 type Instance struct {
-	API            *api.API
-	Sonyflake      *sonyflake.Sonyflake
-	Config         *config.Config
-	AuthManager    *auth.Manager
-	StorageManager *storage.Manager
-	Logger         logger.ILogger
-	DB             db.IHarmonyDB
+	API             *api.API
+	Sonyflake       *sonyflake.Sonyflake
+	Config          *config.Config
+	IntercomManager *intercom.Manager
+	AuthManager     *auth.Manager
+	StorageManager  *storage.Manager
+	Logger          logger.ILogger
+	DB              db.IHarmonyDB
 }
 
 // Start begins the instance server
@@ -45,10 +47,6 @@ func (inst Instance) Start() {
 	if err != nil {
 		inst.Logger.Fatal(err)
 	}
-	inst.AuthManager, err = auth.New(&auth.Dependencies{Config: cfg})
-	if err != nil {
-		inst.Logger.Fatal(err)
-	}
 	inst.StorageManager = &storage.Manager{
 		ImageDeleteQueue:        make(chan string, 512),
 		GuildPictureDeleteQueue: make(chan string, 512),
@@ -56,7 +54,16 @@ func (inst Instance) Start() {
 		GuildPicturePath:        inst.Config.Server.GuildPicturePath,
 	}
 	go inst.StorageManager.DeleteRoutine()
-
+	inst.IntercomManager, err = intercom.New(intercom.Dependencies{
+		Logger: inst.IntercomManager.Logger,
+	})
+	if err != nil {
+		inst.Logger.Fatal(err)
+	}
+	inst.AuthManager, err = auth.New(&auth.Dependencies{Config: cfg, IntercomManager: inst.IntercomManager})
+	if err != nil {
+		inst.Logger.Fatal(err)
+	}
 	inst.API = api.New(api.Dependencies{
 		Logger:      inst.Logger,
 		DB:          inst.DB,
