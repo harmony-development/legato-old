@@ -9,7 +9,7 @@ import (
 )
 
 type Dependencies struct {
-	Logger logger.Logger
+	Logger logger.ILogger
 }
 
 type Manager struct {

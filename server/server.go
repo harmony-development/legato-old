@@ -55,7 +55,7 @@ func (inst Instance) Start() {
 	}
 	go inst.StorageManager.DeleteRoutine()
 	inst.IntercomManager, err = intercom.New(intercom.Dependencies{
-		Logger: inst.IntercomManager.Logger,
+		Logger: inst.Logger,
 	})
 	if err != nil {
 		inst.Logger.Fatal(err)
