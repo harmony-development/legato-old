@@ -34,7 +34,7 @@ func (e *executor) Execute(f func() error) {
 var ctx = context.Background()
 
 // CreateGuild creates a standard guild
-func (db *HarmonyDB) CreateGuild(owner, id uint64, guildName, picture string) (*queries.Guild, error) {
+func (db *HarmonyDB) CreateGuild(owner, id, channelID uint64, guildName, picture string) (*queries.Guild, error) {
 	tx, err := db.Begin()
 	db.Logger.CheckException(err)
 	if err != nil {
@@ -61,6 +61,7 @@ func (db *HarmonyDB) CreateGuild(owner, id uint64, guildName, picture string) (*
 	}
 	_, err = tq.CreateChannel(ctx, queries.CreateChannelParams{
 		GuildID:     toSqlInt64(guild.GuildID),
+		ChannelID:   channelID,
 		ChannelName: "general",
 		Position:    "",
 	})

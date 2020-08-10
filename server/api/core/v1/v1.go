@@ -90,7 +90,11 @@ func (v1 *V1) CreateGuild(c context.Context, r *corev1.CreateGuildRequest) (*cor
 	if err != nil {
 		return nil, err
 	}
-	guild, err := v1.DB.CreateGuild(ctx.UserID, guildID, r.GuildName, r.PictureUrl)
+	channelID, err := v1.Sonyflake.NextID()
+	if err != nil {
+		return nil, err
+	}
+	guild, err := v1.DB.CreateGuild(ctx.UserID, guildID, channelID, r.GuildName, r.PictureUrl)
 	if err != nil {
 		return nil, err
 	}

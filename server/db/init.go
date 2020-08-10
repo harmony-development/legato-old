@@ -31,7 +31,7 @@ type HarmonyDB struct {
 type IHarmonyDB interface {
 	Migrate() error
 	SessionExpireRoutine()
-	CreateGuild(owner, id uint64, guildName, picture string) (*queries.Guild, error)
+	CreateGuild(owner, id, channelID uint64, guildName, picture string) (*queries.Guild, error)
 	DeleteGuild(guildID uint64) error
 	GetOwner(guildID uint64) (uint64, error)
 	IsOwner(guildID, userID uint64) (bool, error)

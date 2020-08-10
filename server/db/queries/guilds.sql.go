@@ -9,12 +9,8 @@ import (
 )
 
 const addUserToGuild = `-- name: AddUserToGuild :exec
-INSERT INTO Guild_Members (
-    User_ID, Guild_ID
-) VALUES (
-    $1, $2
-)
-ON CONFLICT DO NOTHING
+INSERT INTO Guild_Members (User_ID, Guild_ID)
+VALUES ($1, $2) ON CONFLICT DO NOTHING
 `
 
 type AddUserToGuildParams struct {
@@ -29,15 +25,18 @@ func (q *Queries) AddUserToGuild(ctx context.Context, arg AddUserToGuildParams) 
 
 const createChannel = `-- name: CreateChannel :one
 INSERT INTO Channels (
-    Guild_ID, Channel_Name, Position, Category
-) VALUES (
-    $1, $2, $3, $4
-)
-RETURNING channel_id, guild_id, channel_name, position, category
+        Guild_ID,
+        Channel_ID,
+        Channel_Name,
+        Position,
+        Category
+    )
+VALUES ($1, $2, $3, $4, $5) RETURNING channel_id, guild_id, channel_name, position, category
 `
 
 type CreateChannelParams struct {
 	GuildID     sql.NullInt64 `json:"guild_id"`
+	ChannelID   uint64        `json:"channel_id"`
 	ChannelName string        `json:"channel_name"`
 	Position    string        `json:"position"`
 	Category    bool          `json:"category"`
@@ -46,6 +45,7 @@ type CreateChannelParams struct {
 func (q *Queries) CreateChannel(ctx context.Context, arg CreateChannelParams) (Channel, error) {
 	row := q.queryRow(ctx, q.createChannelStmt, createChannel,
 		arg.GuildID,
+		arg.ChannelID,
 		arg.ChannelName,
 		arg.Position,
 		arg.Category,
@@ -63,11 +63,12 @@ func (q *Queries) CreateChannel(ctx context.Context, arg CreateChannelParams) (C
 
 const createGuild = `-- name: CreateGuild :one
 INSERT INTO Guilds (
-    Guild_ID, Owner_ID, Guild_Name, Picture_URL
-) VALUES (
-    $1, $2, $3, $4
-)
-RETURNING guild_id, owner_id, guild_name, picture_url
+        Guild_ID,
+        Owner_ID,
+        Guild_Name,
+        Picture_URL
+    )
+VALUES ($1, $2, $3, $4) RETURNING guild_id, owner_id, guild_name, picture_url
 `
 
 type CreateGuildParams struct {
@@ -96,7 +97,7 @@ func (q *Queries) CreateGuild(ctx context.Context, arg CreateGuildParams) (Guild
 
 const deleteChannel = `-- name: DeleteChannel :exec
 DELETE FROM Channels
-    WHERE Guild_ID = $1
+WHERE Guild_ID = $1
     AND Channel_ID = $2
 `
 
@@ -112,7 +113,7 @@ func (q *Queries) DeleteChannel(ctx context.Context, arg DeleteChannelParams) er
 
 const deleteGuild = `-- name: DeleteGuild :exec
 DELETE FROM Guilds
-    WHERE Guild_ID = $1
+WHERE Guild_ID = $1
 `
 
 func (q *Queries) DeleteGuild(ctx context.Context, guildID uint64) error {
@@ -124,7 +125,7 @@ const getChannelPosition = `-- name: GetChannelPosition :one
 SELECT Position
 FROM Channels
 WHERE Channel_ID = $1
-  AND Guild_ID = $2
+    AND Guild_ID = $2
 `
 
 type GetChannelPositionParams struct {
@@ -140,9 +141,10 @@ func (q *Queries) GetChannelPosition(ctx context.Context, arg GetChannelPosition
 }
 
 const getChannels = `-- name: GetChannels :many
-SELECT channel_id, guild_id, channel_name, position, category FROM Channels
-    WHERE Guild_ID = $1
-    ORDER BY Position
+SELECT channel_id, guild_id, channel_name, position, category
+FROM Channels
+WHERE Guild_ID = $1
+ORDER BY Position
 `
 
 func (q *Queries) GetChannels(ctx context.Context, guildID sql.NullInt64) ([]Channel, error) {
@@ -175,8 +177,9 @@ func (q *Queries) GetChannels(ctx context.Context, guildID sql.NullInt64) ([]Cha
 }
 
 const getGuildData = `-- name: GetGuildData :one
-SELECT guild_id, owner_id, guild_name, picture_url FROM Guilds
-    WHERE Guild_ID = $1
+SELECT guild_id, owner_id, guild_name, picture_url
+FROM Guilds
+WHERE Guild_ID = $1
 `
 
 func (q *Queries) GetGuildData(ctx context.Context, guildID uint64) (Guild, error) {
@@ -192,8 +195,9 @@ func (q *Queries) GetGuildData(ctx context.Context, guildID uint64) (Guild, erro
 }
 
 const getGuildMembers = `-- name: GetGuildMembers :many
-SELECT User_ID FROM Guild_Members
-    WHERE Guild_ID = $1
+SELECT User_ID
+FROM Guild_Members
+WHERE Guild_ID = $1
 `
 
 func (q *Queries) GetGuildMembers(ctx context.Context, guildID uint64) ([]uint64, error) {
@@ -220,8 +224,9 @@ func (q *Queries) GetGuildMembers(ctx context.Context, guildID uint64) ([]uint64
 }
 
 const getGuildOwner = `-- name: GetGuildOwner :one
-SELECT Owner_ID FROM GUILDS
-    WHERE Guild_ID = $1
+SELECT Owner_ID
+FROM GUILDS
+WHERE Guild_ID = $1
 `
 
 func (q *Queries) GetGuildOwner(ctx context.Context, guildID uint64) (uint64, error) {
@@ -232,8 +237,9 @@ func (q *Queries) GetGuildOwner(ctx context.Context, guildID uint64) (uint64, er
 }
 
 const getGuildPicture = `-- name: GetGuildPicture :one
-SELECT Picture_URL FROM Guilds
-    WHERE Guild_ID = $1
+SELECT Picture_URL
+FROM Guilds
+WHERE Guild_ID = $1
 `
 
 func (q *Queries) GetGuildPicture(ctx context.Context, guildID uint64) (string, error) {
@@ -245,9 +251,10 @@ func (q *Queries) GetGuildPicture(ctx context.Context, guildID uint64) (string, 
 
 const guildWithIDExists = `-- name: GuildWithIDExists :one
 SELECT EXISTS (
-    SELECT 1 FROM Guilds
-             WHERE Guild_ID = $1
-)
+        SELECT 1
+        FROM Guilds
+        WHERE Guild_ID = $1
+    )
 `
 
 func (q *Queries) GuildWithIDExists(ctx context.Context, guildID uint64) (bool, error) {
@@ -258,10 +265,10 @@ func (q *Queries) GuildWithIDExists(ctx context.Context, guildID uint64) (bool, 
 }
 
 const guildsForUser = `-- name: GuildsForUser :many
-SELECT Guilds.Guild_ID FROM Guild_Members
-    INNER JOIN guilds
-    ON Guild_Members.Guild_ID = Guilds.Guild_ID
-    WHERE User_ID = $1
+SELECT Guilds.Guild_ID
+FROM Guild_Members
+    INNER JOIN guilds ON Guild_Members.Guild_ID = Guilds.Guild_ID
+WHERE User_ID = $1
 `
 
 func (q *Queries) GuildsForUser(ctx context.Context, userID uint64) ([]uint64, error) {
@@ -288,10 +295,10 @@ func (q *Queries) GuildsForUser(ctx context.Context, userID uint64) ([]uint64, e
 }
 
 const guildsForUserWithData = `-- name: GuildsForUserWithData :many
-SELECT user_id, guild_members.guild_id, guilds.guild_id, owner_id, guild_name, picture_url FROM Guild_Members
-    INNER JOIN guilds
-    ON Guild_Members.Guild_ID = Guilds.Guild_ID
-    WHERE User_ID = $1
+SELECT user_id, guild_members.guild_id, guilds.guild_id, owner_id, guild_name, picture_url
+FROM Guild_Members
+    INNER JOIN guilds ON Guild_Members.Guild_ID = Guilds.Guild_ID
+WHERE User_ID = $1
 `
 
 type GuildsForUserWithDataRow struct {
@@ -337,7 +344,7 @@ const moveChannel = `-- name: MoveChannel :exec
 UPDATE Channels
 SET Position = $1
 WHERE Channel_ID = $2
-  AND Guild_ID = $3
+    AND Guild_ID = $3
 `
 
 type MoveChannelParams struct {
@@ -352,9 +359,10 @@ func (q *Queries) MoveChannel(ctx context.Context, arg MoveChannelParams) error 
 }
 
 const numChannelsWithID = `-- name: NumChannelsWithID :one
-SELECT COUNT(*) FROM Channels
-    WHERE Guild_ID = $1
-      AND Channel_ID = $2
+SELECT COUNT(*)
+FROM Channels
+WHERE Guild_ID = $1
+    AND Channel_ID = $2
 `
 
 type NumChannelsWithIDParams struct {
@@ -371,8 +379,8 @@ func (q *Queries) NumChannelsWithID(ctx context.Context, arg NumChannelsWithIDPa
 
 const removeUserFromGuild = `-- name: RemoveUserFromGuild :exec
 DELETE FROM Guild_Members
-    WHERE Guild_ID = $1
-      AND User_ID = $2
+WHERE Guild_ID = $1
+    AND User_ID = $2
 `
 
 type RemoveUserFromGuildParams struct {
@@ -387,8 +395,8 @@ func (q *Queries) RemoveUserFromGuild(ctx context.Context, arg RemoveUserFromGui
 
 const setGuildName = `-- name: SetGuildName :exec
 UPDATE Guilds
-    SET Guild_Name = $1
-    WHERE Guild_ID = $2
+SET Guild_Name = $1
+WHERE Guild_ID = $2
 `
 
 type SetGuildNameParams struct {
@@ -403,8 +411,8 @@ func (q *Queries) SetGuildName(ctx context.Context, arg SetGuildNameParams) erro
 
 const setGuildPicture = `-- name: SetGuildPicture :exec
 UPDATE Guilds
-    SET Picture_URL = $1
-    WHERE Guild_ID = $2
+SET Picture_URL = $1
+WHERE Guild_ID = $2
 `
 
 type SetGuildPictureParams struct {
@@ -419,9 +427,9 @@ func (q *Queries) SetGuildPicture(ctx context.Context, arg SetGuildPictureParams
 
 const updateChannelName = `-- name: UpdateChannelName :exec
 UPDATE Channels
-      SET Channel_Name = $1
-    WHERE Guild_ID = $2
-      AND Channel_ID = $3
+SET Channel_Name = $1
+WHERE Guild_ID = $2
+    AND Channel_ID = $3
 `
 
 type UpdateChannelNameParams struct {
@@ -436,8 +444,9 @@ func (q *Queries) UpdateChannelName(ctx context.Context, arg UpdateChannelNamePa
 }
 
 const userInGuild = `-- name: UserInGuild :one
-SELECT User_ID FROM Guild_Members
-    WHERE User_ID = $1
+SELECT User_ID
+FROM Guild_Members
+WHERE User_ID = $1
     AND Guild_ID = $2
 `
 
