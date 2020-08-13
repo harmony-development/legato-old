@@ -22,6 +22,9 @@ func (m Middlewares) LocationInterceptor(c context.Context, req interface{}, inf
 	}
 	loc := location.GetLocation()
 	locFlags := rpcConfigs[info.FullMethod].Location
+	if !locFlags.Has(NoLocation) && loc == nil {
+		return nil, status.Error(codes.FailedPrecondition, responses.MissingLocation)
+	}
 	if locFlags.Has(GuildLocation) {
 		if loc.GuildId == 0 {
 			return nil, status.Error(codes.InvalidArgument, responses.MissingLocationGuild)

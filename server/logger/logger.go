@@ -52,7 +52,7 @@ func (l Logger) Exception(err error) {
 		sentry.CaptureException(err)
 	}
 	if l.Config.Server.LogErrors {
-		logrus.Warn(err, string(debug.Stack()))
+		logrus.Warnf("%v %v", err, string(debug.Stack()))
 	}
 }
 

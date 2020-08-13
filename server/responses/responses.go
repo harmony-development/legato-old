@@ -16,6 +16,7 @@ const (
 	NotInGuild             = "guild.not-member"
 	MetadataNotFound       = "user.metadata-not-found"
 	NonceNotFound          = "nonce-not-found"
+	MissingLocation        = "missing-location"
 	MissingLocationGuild   = "missing-location-guild"
 	MissingLocationChannel = "missing-location-channel"
 	MissingLocationMessage = "missing-location-message"
