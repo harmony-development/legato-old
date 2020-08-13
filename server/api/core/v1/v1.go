@@ -767,10 +767,15 @@ func init() {
 
 func (v1 *V1) SendMessage(c context.Context, r *corev1.SendMessageRequest) (*emptypb.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
+	messageID, err := v1.Sonyflake.NextID()
+	if err != nil {
+		return nil, v1.Logger.ErrorResponse(codes.Unknown, err, responses.UnknownError)
+	}
 	msg, err := v1.DB.AddMessage(
 		r.Location.ChannelId,
 		r.Location.GuildId,
 		ctx.UserID,
+		messageID,
 		r.Content,
 		r.Attachments,
 		v1.ProtoToEmbeds(r.Embeds),

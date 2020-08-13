@@ -28,15 +28,24 @@ func (q *Queries) AddAttachment(ctx context.Context, arg AddAttachmentParams) er
 }
 
 const addMessage = `-- name: AddMessage :one
-INSERT INTO Messages (Guild_ID, Channel_ID, User_ID, Content, Embeds, Actions, Created_At)
-VALUES ($1, $2, $3, $4, $5, $6, NOW())
-RETURNING message_id, guild_id, channel_id, user_id, created_at, edited_at, content, embeds, actions
+INSERT INTO Messages (
+    Guild_ID,
+    Channel_ID,
+    User_ID,
+    Message_ID,
+    Content,
+    Embeds,
+    Actions,
+    Created_At
+  )
+VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) RETURNING message_id, guild_id, channel_id, user_id, created_at, edited_at, content, embeds, actions
 `
 
 type AddMessageParams struct {
 	GuildID   uint64            `json:"guild_id"`
 	ChannelID uint64            `json:"channel_id"`
 	UserID    uint64            `json:"user_id"`
+	MessageID uint64            `json:"message_id"`
 	Content   string            `json:"content"`
 	Embeds    []json.RawMessage `json:"embeds"`
 	Actions   []json.RawMessage `json:"actions"`
@@ -47,6 +56,7 @@ func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) (Message
 		arg.GuildID,
 		arg.ChannelID,
 		arg.UserID,
+		arg.MessageID,
 		arg.Content,
 		pq.Array(arg.Embeds),
 		pq.Array(arg.Actions),
@@ -67,8 +77,7 @@ func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) (Message
 }
 
 const deleteMessage = `-- name: DeleteMessage :execrows
-DELETE
-FROM Messages
+DELETE FROM Messages
 WHERE Message_ID = $1
   AND Channel_ID = $2
   AND Guild_ID = $3
@@ -223,11 +232,12 @@ func (q *Queries) GetMessages(ctx context.Context, arg GetMessagesParams) ([]Mes
 
 const messageWithIDExists = `-- name: MessageWithIDExists :one
 SELECT EXISTS (
-  SELECT 1 FROM Messages
-          WHERE Guild_ID = $1
-            AND Channel_ID = $2
-            AND Message_ID = $3
-)
+    SELECT 1
+    FROM Messages
+    WHERE Guild_ID = $1
+      AND Channel_ID = $2
+      AND Message_ID = $3
+  )
 `
 
 type MessageWithIDExistsParams struct {
@@ -245,10 +255,10 @@ func (q *Queries) MessageWithIDExists(ctx context.Context, arg MessageWithIDExis
 
 const updateMessageActions = `-- name: UpdateMessageActions :one
 UPDATE Messages
-  SET Actions = $2,
-      Edited_At = NOW()
-  WHERE Message_ID = $1
-RETURNING Actions, Edited_At
+SET Actions = $2,
+  Edited_At = NOW()
+WHERE Message_ID = $1 RETURNING Actions,
+  Edited_At
 `
 
 type UpdateMessageActionsParams struct {
@@ -270,10 +280,10 @@ func (q *Queries) UpdateMessageActions(ctx context.Context, arg UpdateMessageAct
 
 const updateMessageContent = `-- name: UpdateMessageContent :one
 UPDATE Messages
-  SET Content = $2,
-      Edited_At = NOW()
-  WHERE Message_ID = $1
-RETURNING Content, Edited_At
+SET Content = $2,
+  Edited_At = NOW()
+WHERE Message_ID = $1 RETURNING Content,
+  Edited_At
 `
 
 type UpdateMessageContentParams struct {
@@ -295,10 +305,10 @@ func (q *Queries) UpdateMessageContent(ctx context.Context, arg UpdateMessageCon
 
 const updateMessageEmbeds = `-- name: UpdateMessageEmbeds :one
 UPDATE Messages
-  SET Embeds = $2,
-      Edited_At = NOW()
-  WHERE Message_ID = $1
-RETURNING Embeds, Edited_At
+SET Embeds = $2,
+  Edited_At = NOW()
+WHERE Message_ID = $1 RETURNING Embeds,
+  Edited_At
 `
 
 type UpdateMessageEmbedsParams struct {
