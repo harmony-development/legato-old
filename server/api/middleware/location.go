@@ -30,7 +30,6 @@ func (m Middlewares) locationHandler(fullMethod string, ctx *HarmonyContext, req
 	if GetRPCConfig(fullMethod).Location == NoLocation {
 		return nil
 	}
-
 	location, ok := req.(interface{ GetLocation() *corev1.Location })
 	if !ok {
 		panic("location middleware used on message without a location")

@@ -93,7 +93,13 @@ func New(deps Dependencies) *API {
 // Start starts up the API on a specific port
 func (api API) Start(cb chan error, port int) {
 	lis, err := net.Listen("tcp", ":"+strconv.Itoa(port))
+	if err != nil {
+		cb <- err
+	}
 	webLis, err := net.Listen("tcp", ":"+strconv.Itoa(port+1))
+	if err != nil {
+		cb <- err
+	}
 	promLis, err := net.Listen("tcp", ":"+strconv.Itoa(port+2))
 	if err != nil {
 		cb <- err
