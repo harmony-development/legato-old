@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"database/sql"
 	"os"
 	"runtime/debug"
 
@@ -33,7 +34,7 @@ func New(cfg *config.Config) *Logger {
 
 // CheckException logs an exception if it's defined
 func (l Logger) CheckException(err error) {
-	if err == nil {
+	if err == nil || err == sql.ErrNoRows {
 		return
 	}
 	l.Exception(err)

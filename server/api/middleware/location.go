@@ -11,7 +11,8 @@ import (
 )
 
 func (m Middlewares) LocationInterceptor(c context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	if err := m.locationHandler(info.FullMethod, c.(HarmonyContext), req); err != nil {
+	ctx := c.(HarmonyContext)
+	if err := m.locationHandler(info.FullMethod, &ctx, req); err != nil {
 		return nil, err
 	}
 	return handler(c, req)
@@ -19,13 +20,13 @@ func (m Middlewares) LocationInterceptor(c context.Context, req interface{}, inf
 
 func (m Middlewares) LocationInterceptorStream(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 	wrappedStream := ss.(HarmonyWrappedServerStream)
-	if err := m.locationHandler(info.FullMethod, wrappedStream.WrappedContext, srv); err != nil {
+	if err := m.locationHandler(info.FullMethod, &wrappedStream.WrappedContext, srv); err != nil {
 		return err
 	}
 	return handler(srv, wrappedStream)
 }
 
-func (m Middlewares) locationHandler(fullMethod string, ctx HarmonyContext, req interface{}) error {
+func (m Middlewares) locationHandler(fullMethod string, ctx *HarmonyContext, req interface{}) error {
 	if GetRPCConfig(fullMethod).Location == NoLocation {
 		return nil
 	}

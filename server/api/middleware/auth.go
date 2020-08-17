@@ -12,7 +12,7 @@ import (
 
 func (m Middlewares) AuthInterceptor(c context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	ctx := c.(HarmonyContext)
-	if err := m.authHandler(info.FullMethod, ctx); err != nil {
+	if err := m.authHandler(info.FullMethod, &ctx); err != nil {
 		return nil, err
 	}
 	return handler(ctx, req)
@@ -20,13 +20,13 @@ func (m Middlewares) AuthInterceptor(c context.Context, req interface{}, info *g
 
 func (m Middlewares) AuthInterceptorStream(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 	wrappedStream := ss.(HarmonyWrappedServerStream)
-	if err := m.authHandler(info.FullMethod, wrappedStream.WrappedContext); err != nil {
+	if err := m.authHandler(info.FullMethod, &wrappedStream.WrappedContext); err != nil {
 		return err
 	}
 	return handler(srv, wrappedStream)
 }
 
-func (m Middlewares) authHandler(fullMethod string, ctx HarmonyContext) error {
+func (m Middlewares) authHandler(fullMethod string, ctx *HarmonyContext) error {
 	if !GetRPCConfig(fullMethod).Auth {
 		return nil
 	}
