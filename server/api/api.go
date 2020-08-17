@@ -64,6 +64,15 @@ func New(deps Dependencies) *API {
 			m.ValidatorInterceptor,
 			m.AuthInterceptor,
 			m.LocationInterceptor,
+		),
+		grpc_middleware.WithStreamServerChain(
+			grpc_recovery.StreamServerInterceptor(grpc_recovery.WithRecoveryHandler(m.RecoveryFunc)),
+			grpc_prometheus.StreamServerInterceptor,
+			m.HarmonyContextInterceptorStream,
+			m.ErrorInterceptorStream,
+			m.RateLimitStreamInterceptorStream,
+			m.AuthInterceptorStream,
+			m.LocationInterceptorStream,
 		))
 	api.grpcWebServer = grpcweb.WrapServer(api.grpcServer, grpcweb.WithOriginFunc(func(_ string) bool {
 		return true

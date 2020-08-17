@@ -40,6 +40,16 @@ func (m Middlewares) RateLimitInterceptor(c context.Context, req interface{}, in
 	return handler(c, req)
 }
 
+func (m Middlewares) RateLimitStreamInterceptorStream(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+	wrappedStream := ss.(HarmonyWrappedServerStream)
+	p, _ := peer.FromContext(wrappedStream.WrappedContext)
+	l, exists := rpcConfigs[info.FullMethod]
+	if exists {
+		wrappedStream.WrappedContext.Limiter = m.GetVisitor(info.FullMethod, p.Addr.String(), l.RateLimit.Duration, l.RateLimit.Burst)
+	}
+	return handler(srv, wrappedStream)
+}
+
 func (m *Middlewares) GetVisitor(path, ip string, duration time.Duration, burst int) *rate.Limiter {
 	m.RateLock.Lock()
 	defer m.RateLock.Unlock()

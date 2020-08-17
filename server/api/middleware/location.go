@@ -11,91 +11,105 @@ import (
 )
 
 func (m Middlewares) LocationInterceptor(c context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	if GetRPCConfig(info.FullMethod).Location == NoLocation {
-		return handler(c, req)
+	if err := m.locationHandler(info.FullMethod, c.(HarmonyContext), req); err != nil {
+		return nil, err
+	}
+	return handler(c, req)
+}
+
+func (m Middlewares) LocationInterceptorStream(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+	wrappedStream := ss.(HarmonyWrappedServerStream)
+	if err := m.locationHandler(info.FullMethod, wrappedStream.WrappedContext, srv); err != nil {
+		return err
+	}
+	return handler(srv, wrappedStream)
+}
+
+func (m Middlewares) locationHandler(fullMethod string, ctx HarmonyContext, req interface{}) error {
+	if GetRPCConfig(fullMethod).Location == NoLocation {
+		return nil
 	}
 
-	ctx := c.(HarmonyContext)
 	location, ok := req.(interface{ GetLocation() *corev1.Location })
 	if !ok {
 		panic("location middleware used on message without a location")
 	}
 	loc := location.GetLocation()
-	locFlags := rpcConfigs[info.FullMethod].Location
+	locFlags := rpcConfigs[fullMethod].Location
 	if !locFlags.Has(NoLocation) && loc == nil {
-		return nil, status.Error(codes.FailedPrecondition, responses.MissingLocation)
+		return status.Error(codes.FailedPrecondition, responses.MissingLocation)
 	}
 	if locFlags.Has(GuildLocation) {
 		if loc.GuildId == 0 {
-			return nil, status.Error(codes.InvalidArgument, responses.MissingLocationGuild)
+			return status.Error(codes.InvalidArgument, responses.MissingLocationGuild)
 		}
 		ok, err := m.DB.HasGuildWithID(loc.GuildId)
 		if err != nil {
-			return nil, status.Error(codes.Internal, responses.InternalServerError)
+			return status.Error(codes.Internal, responses.InternalServerError)
 		}
 		if !ok {
-			return nil, status.Error(codes.FailedPrecondition, responses.BadLocationGuild)
+			return status.Error(codes.FailedPrecondition, responses.BadLocationGuild)
 		}
 	}
 	if locFlags.Has(ChannelLocation) {
 		if loc.ChannelId == 0 {
-			return nil, status.Error(codes.InvalidArgument, responses.BadLocationChannel)
+			return status.Error(codes.InvalidArgument, responses.BadLocationChannel)
 		}
 		ok, err := m.DB.HasChannelWithID(loc.GuildId, loc.ChannelId)
 		if err != nil {
-			return nil, status.Error(codes.Internal, responses.InternalServerError)
+			return status.Error(codes.Internal, responses.InternalServerError)
 		}
 		if !ok {
-			return nil, status.Error(codes.FailedPrecondition, responses.BadLocationChannel)
+			return status.Error(codes.FailedPrecondition, responses.BadLocationChannel)
 		}
 	}
 	if locFlags.Has(MessageLocation) {
 		if loc.GuildId == 0 {
-			return nil, status.Error(codes.InvalidArgument, responses.MissingLocationGuild)
+			return status.Error(codes.InvalidArgument, responses.MissingLocationGuild)
 		}
 		if loc.ChannelId == 0 {
-			return nil, status.Error(codes.InvalidArgument, responses.BadLocationChannel)
+			return status.Error(codes.InvalidArgument, responses.BadLocationChannel)
 		}
 		if loc.MessageId == 0 {
-			return nil, status.Error(codes.InvalidArgument, responses.BadLocationMessage)
+			return status.Error(codes.InvalidArgument, responses.BadLocationMessage)
 		}
 		ok, err := m.DB.HasMessageWithID(loc.GuildId, loc.ChannelId, loc.MessageId)
 		if err != nil {
-			return nil, status.Error(codes.Internal, responses.InternalServerError)
+			return status.Error(codes.Internal, responses.InternalServerError)
 		}
 		if !ok {
-			return nil, status.Error(codes.FailedPrecondition, responses.BadLocationMessage)
+			return status.Error(codes.FailedPrecondition, responses.BadLocationMessage)
 		}
 	}
 	if locFlags.Has(JoinedLocation) {
 		if loc.GuildId == 0 {
-			return nil, status.Error(codes.InvalidArgument, responses.MissingLocationGuild)
+			return status.Error(codes.InvalidArgument, responses.MissingLocationGuild)
 		}
 		ok, err := m.DB.UserInGuild(ctx.UserID, loc.GuildId)
 		if err != nil {
-			return nil, status.Error(codes.Internal, responses.InternalServerError)
+			return status.Error(codes.Internal, responses.InternalServerError)
 		}
 		if !ok {
-			return nil, status.Error(codes.FailedPrecondition, responses.BadLocationGuild)
+			return status.Error(codes.FailedPrecondition, responses.BadLocationGuild)
 		}
 	}
 	if locFlags.Has(AuthorLocation) {
 		if loc.GuildId == 0 {
-			return nil, status.Error(codes.InvalidArgument, responses.MissingLocationGuild)
+			return status.Error(codes.InvalidArgument, responses.MissingLocationGuild)
 		}
 		if loc.ChannelId == 0 {
-			return nil, status.Error(codes.InvalidArgument, responses.BadLocationChannel)
+			return status.Error(codes.InvalidArgument, responses.BadLocationChannel)
 		}
 		if loc.MessageId == 0 {
-			return nil, status.Error(codes.InvalidArgument, responses.BadLocationMessage)
+			return status.Error(codes.InvalidArgument, responses.BadLocationMessage)
 		}
 		owner, err := m.DB.GetMessageOwner(loc.MessageId)
 		if err != nil {
-			return nil, status.Error(codes.Internal, responses.InternalServerError)
+			return status.Error(codes.Internal, responses.InternalServerError)
 		}
 		if owner != ctx.UserID {
-			return nil, status.Error(codes.PermissionDenied, responses.BadLocationMessage)
+			return status.Error(codes.PermissionDenied, responses.BadLocationMessage)
 		}
 	}
-	return handler(ctx, req)
+	return nil
 }

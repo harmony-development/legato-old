@@ -1,13 +1,11 @@
 package middleware
 
 import (
-	"context"
 	"sync"
 	"time"
 
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/logger"
-	"golang.org/x/time/rate"
 )
 
 type Permission uint64
@@ -82,13 +80,6 @@ func RegisterRPCConfig(config RPCConfig, name ...string) {
 func GetRPCConfig(name string) RPCConfig {
 	val, _ := rpcConfigs[name]
 	return val
-}
-
-// HarmonyContext contains a custom context for passing data from middleware to handlers
-type HarmonyContext struct {
-	context.Context
-	UserID  uint64
-	Limiter *rate.Limiter
 }
 
 type Dependencies struct {

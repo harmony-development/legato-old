@@ -679,10 +679,8 @@ func init() {
 }
 
 func (v1 *V1) StreamGuildEvents(r *corev1.StreamGuildEventsRequest, s corev1.CoreService_StreamGuildEventsServer) error {
-	userID, err := middleware.CheckAuth(v1.DB, s.Context())
-	if err != nil {
-		return err
-	}
+	wrappedStream := s.(middleware.IHarmonyWrappedServerStream)
+	userID := wrappedStream.GetWrappedContext().UserID
 	ok, err := v1.DB.UserInGuild(userID, r.Location.GuildId)
 	if err != nil {
 		return err
@@ -707,11 +705,8 @@ func init() {
 }
 
 func (v1 *V1) StreamActionEvents(r *corev1.StreamActionEventsRequest, s corev1.CoreService_StreamActionEventsServer) error {
-	userID, err := middleware.CheckAuth(v1.DB, s.Context())
-	if err != nil {
-		return err
-	}
-	<-streamState.AddAction(userID, s)
+	wrappedStream := s.(middleware.IHarmonyWrappedServerStream)
+	<-streamState.AddAction(wrappedStream.GetWrappedContext().UserID, s)
 	return nil
 }
 
@@ -867,12 +862,9 @@ func (v1 *V1) AddGuildToGuildList(c context.Context, r *corev1.AddGuildToGuildLi
 }
 
 func (v1 *V1) StreamHomeserverEvents(r *corev1.StreamHomeserverEventsRequest, s corev1.CoreService_StreamHomeserverEventsServer) error {
-	userID, err := middleware.CheckAuth(v1.DB, s.Context())
-	if err != nil {
-		return err
-	}
-	err = v1.DB.UserIsLocal(userID)
-	if err != nil {
+	wrappedStream := s.(middleware.IHarmonyWrappedServerStream)
+	userID := wrappedStream.GetWrappedContext().UserID
+	if err := v1.DB.UserIsLocal(userID); err != nil {
 		return err
 	}
 	<-homeserverEventState.Subscribe(userID, s)
