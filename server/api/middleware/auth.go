@@ -19,7 +19,7 @@ func (m Middlewares) AuthInterceptor(c context.Context, req interface{}, info *g
 }
 
 func (m Middlewares) AuthInterceptorStream(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-	wrappedStream := ss.(HarmonyWrappedServerStream)
+	wrappedStream := ss.(*HarmonyWrappedServerStream)
 	if err := m.authHandler(info.FullMethod, &wrappedStream.WrappedContext); err != nil {
 		return err
 	}

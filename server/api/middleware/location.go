@@ -12,21 +12,23 @@ import (
 
 func (m Middlewares) LocationInterceptor(c context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	ctx := c.(HarmonyContext)
-	if err := m.locationHandler(info.FullMethod, &ctx, req); err != nil {
+	if err := m.LocationHandler(info.FullMethod, ctx.UserID, req); err != nil {
 		return nil, err
 	}
 	return handler(c, req)
 }
 
 func (m Middlewares) LocationInterceptorStream(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-	wrappedStream := ss.(HarmonyWrappedServerStream)
-	if err := m.locationHandler(info.FullMethod, &wrappedStream.WrappedContext, srv); err != nil {
+	wrappedStream := ss.(*HarmonyWrappedServerStream)
+	println(2)
+	/* println(wrappedStream.WrappedContext.Request)
+	if err := m.LocationHandler(info.FullMethod, wrappedStream.WrappedContext.UserID, wrappedStream.WrappedContext.Request); err != nil {
 		return err
-	}
+	} */
 	return handler(srv, wrappedStream)
 }
 
-func (m Middlewares) locationHandler(fullMethod string, ctx *HarmonyContext, req interface{}) error {
+func (m Middlewares) LocationHandler(fullMethod string, userID uint64, req interface{}) error {
 	if GetRPCConfig(fullMethod).Location == NoLocation {
 		return nil
 	}
@@ -85,7 +87,7 @@ func (m Middlewares) locationHandler(fullMethod string, ctx *HarmonyContext, req
 		if loc.GuildId == 0 {
 			return status.Error(codes.InvalidArgument, responses.MissingLocationGuild)
 		}
-		ok, err := m.DB.UserInGuild(ctx.UserID, loc.GuildId)
+		ok, err := m.DB.UserInGuild(userID, loc.GuildId)
 		if err != nil {
 			return status.Error(codes.Internal, responses.InternalServerError)
 		}
@@ -107,7 +109,7 @@ func (m Middlewares) locationHandler(fullMethod string, ctx *HarmonyContext, req
 		if err != nil {
 			return status.Error(codes.Internal, responses.InternalServerError)
 		}
-		if owner != ctx.UserID {
+		if owner != userID {
 			return status.Error(codes.PermissionDenied, responses.BadLocationMessage)
 		}
 	}

@@ -10,6 +10,7 @@ import (
 // HarmonyContext contains a custom context for passing data from middleware to handlers
 type HarmonyContext struct {
 	context.Context
+	Request interface{}
 	UserID  uint64
 	Limiter *rate.Limiter
 }
@@ -27,6 +28,12 @@ func (ss HarmonyWrappedServerStream) GetWrappedContext() HarmonyContext {
 	return ss.WrappedContext
 }
 
+func (ss HarmonyWrappedServerStream) RecvMsg(m interface{}) error {
+	ss.WrappedContext.Request = m
+	println(1)
+	return ss.ServerStream.RecvMsg(m)
+}
+
 func (m Middlewares) HarmonyContextInterceptor(c context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	ctx := HarmonyContext{
 		Context: c,
@@ -35,7 +42,8 @@ func (m Middlewares) HarmonyContextInterceptor(c context.Context, req interface{
 }
 
 func (m Middlewares) HarmonyContextInterceptorStream(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-	return handler(srv, WrapServerStream(ss))
+	wrapped := WrapServerStream(ss)
+	return handler(srv, &wrapped)
 }
 
 func WrapServerStream(stream grpc.ServerStream) HarmonyWrappedServerStream {

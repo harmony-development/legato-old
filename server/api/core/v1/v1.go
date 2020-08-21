@@ -29,9 +29,10 @@ var (
 
 // Dependencies are the backend services this package needs
 type Dependencies struct {
-	DB        db.IHarmonyDB
-	Logger    logger.ILogger
-	Sonyflake *sonyflake.Sonyflake
+	DB          db.IHarmonyDB
+	Middlewares middleware.Middlewares
+	Logger      logger.ILogger
+	Sonyflake   *sonyflake.Sonyflake
 }
 
 // V1 contains the gRPC handler for v1
@@ -679,6 +680,8 @@ func init() {
 }
 
 func (v1 *V1) StreamGuildEvents(r *corev1.StreamGuildEventsRequest, s corev1.CoreService_StreamGuildEventsServer) error {
+	println(3)
+	return nil
 	wrappedStream := s.(middleware.IHarmonyWrappedServerStream)
 	userID := wrappedStream.GetWrappedContext().UserID
 	ok, err := v1.DB.UserInGuild(userID, r.Location.GuildId)

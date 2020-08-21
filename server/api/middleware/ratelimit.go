@@ -41,7 +41,7 @@ func (m Middlewares) RateLimitInterceptor(c context.Context, req interface{}, in
 }
 
 func (m Middlewares) RateLimitStreamInterceptorStream(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-	wrappedStream := ss.(HarmonyWrappedServerStream)
+	wrappedStream := ss.(*HarmonyWrappedServerStream)
 	p, _ := peer.FromContext(wrappedStream.WrappedContext)
 	l, exists := rpcConfigs[info.FullMethod]
 	if exists {

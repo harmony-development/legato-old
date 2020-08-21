@@ -2,6 +2,7 @@ package core
 
 import (
 	v1 "github.com/harmony-development/legato/server/api/core/v1"
+	"github.com/harmony-development/legato/server/api/middleware"
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/sony/sonyflake"
@@ -9,9 +10,10 @@ import (
 
 // Dependencies are the backend services this package needs
 type Dependencies struct {
-	DB        db.IHarmonyDB
-	Logger    logger.ILogger
-	Sonyflake *sonyflake.Sonyflake
+	DB          db.IHarmonyDB
+	Middlewares middleware.Middlewares
+	Logger      logger.ILogger
+	Sonyflake   *sonyflake.Sonyflake
 }
 
 // Service contains the core service
@@ -27,9 +29,10 @@ func New(deps *Dependencies) *Service {
 	}
 	core.V1 = &v1.V1{
 		Dependencies: v1.Dependencies{
-			DB:        deps.DB,
-			Logger:    deps.Logger,
-			Sonyflake: deps.Sonyflake,
+			DB:          deps.DB,
+			Middlewares: deps.Middlewares,
+			Logger:      deps.Logger,
+			Sonyflake:   deps.Sonyflake,
 		},
 	}
 	return core

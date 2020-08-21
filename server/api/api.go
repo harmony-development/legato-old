@@ -42,7 +42,8 @@ type API struct {
 	grpcWebServer     *grpcweb.WrappedGrpcServer
 	grpcWebHTTPServer *http.Server
 	prometheusServer  *http.Server
-	CoreKit           *core.Service
+	CoreService       *core.Service
+	Middlewares       middleware.Middlewares
 }
 
 // New creates a new API instance
@@ -54,6 +55,7 @@ func New(deps Dependencies) *API {
 		Logger: deps.Logger,
 		DB:     deps.DB,
 	})
+	api.Middlewares = m
 	api.grpcServer = grpc.NewServer(
 		grpc_middleware.WithUnaryServerChain(
 			m.HarmonyContextInterceptor,
@@ -105,9 +107,10 @@ func (api API) Start(cb chan error, port int) {
 		cb <- err
 	}
 	corev1.RegisterCoreServiceServer(api.grpcServer, core.New(&core.Dependencies{
-		DB:        api.DB,
-		Logger:    api.Logger,
-		Sonyflake: api.Sonyflake,
+		DB:          api.DB,
+		Middlewares: api.Middlewares,
+		Logger:      api.Logger,
+		Sonyflake:   api.Sonyflake,
 	}).V1)
 	profilev1.RegisterProfileServiceServer(api.grpcServer, &profile.New(profile.Dependencies{
 		DB: api.DB,
