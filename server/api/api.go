@@ -71,8 +71,6 @@ func New(deps Dependencies) *API {
 			m.HarmonyContextInterceptorStream,
 			m.ErrorInterceptorStream,
 			m.RateLimitStreamInterceptorStream,
-			m.AuthInterceptorStream,
-			m.LocationInterceptorStream,
 		))
 	api.grpcWebServer = grpcweb.WrapServer(api.grpcServer, grpcweb.WithOriginFunc(func(_ string) bool {
 		return true

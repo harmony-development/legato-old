@@ -4,6 +4,7 @@ import (
 	"context"
 
 	corev1 "github.com/harmony-development/legato/gen/core"
+	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/responses"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -12,24 +13,18 @@ import (
 
 func (m Middlewares) LocationInterceptor(c context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	ctx := c.(HarmonyContext)
-	if err := m.locationHandler(info.FullMethod, &ctx, req); err != nil {
+
+	if err := LocationHandler(m.DB, ctx, req, info.FullMethod, ctx.UserID); err != nil {
 		return nil, err
 	}
 	return handler(c, req)
 }
 
-func (m Middlewares) LocationInterceptorStream(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-	wrappedStream := ss.(HarmonyWrappedServerStream)
-	if err := m.locationHandler(info.FullMethod, &wrappedStream.WrappedContext, srv); err != nil {
-		return err
-	}
-	return handler(srv, wrappedStream)
-}
-
-func (m Middlewares) locationHandler(fullMethod string, ctx *HarmonyContext, req interface{}) error {
+func LocationHandler(database db.IHarmonyDB, c context.Context, req interface{}, fullMethod string, userID uint64) error {
 	if GetRPCConfig(fullMethod).Location == NoLocation {
 		return nil
 	}
+
 	location, ok := req.(interface{ GetLocation() *corev1.Location })
 	if !ok {
 		panic("location middleware used on message without a location")
@@ -43,7 +38,7 @@ func (m Middlewares) locationHandler(fullMethod string, ctx *HarmonyContext, req
 		if loc.GuildId == 0 {
 			return status.Error(codes.InvalidArgument, responses.MissingLocationGuild)
 		}
-		ok, err := m.DB.HasGuildWithID(loc.GuildId)
+		ok, err := database.HasGuildWithID(loc.GuildId)
 		if err != nil {
 			return status.Error(codes.Internal, responses.InternalServerError)
 		}
@@ -55,7 +50,7 @@ func (m Middlewares) locationHandler(fullMethod string, ctx *HarmonyContext, req
 		if loc.ChannelId == 0 {
 			return status.Error(codes.InvalidArgument, responses.BadLocationChannel)
 		}
-		ok, err := m.DB.HasChannelWithID(loc.GuildId, loc.ChannelId)
+		ok, err := database.HasChannelWithID(loc.GuildId, loc.ChannelId)
 		if err != nil {
 			return status.Error(codes.Internal, responses.InternalServerError)
 		}
@@ -73,7 +68,7 @@ func (m Middlewares) locationHandler(fullMethod string, ctx *HarmonyContext, req
 		if loc.MessageId == 0 {
 			return status.Error(codes.InvalidArgument, responses.BadLocationMessage)
 		}
-		ok, err := m.DB.HasMessageWithID(loc.GuildId, loc.ChannelId, loc.MessageId)
+		ok, err := database.HasMessageWithID(loc.GuildId, loc.ChannelId, loc.MessageId)
 		if err != nil {
 			return status.Error(codes.Internal, responses.InternalServerError)
 		}
@@ -85,7 +80,7 @@ func (m Middlewares) locationHandler(fullMethod string, ctx *HarmonyContext, req
 		if loc.GuildId == 0 {
 			return status.Error(codes.InvalidArgument, responses.MissingLocationGuild)
 		}
-		ok, err := m.DB.UserInGuild(ctx.UserID, loc.GuildId)
+		ok, err := database.UserInGuild(userID, loc.GuildId)
 		if err != nil {
 			return status.Error(codes.Internal, responses.InternalServerError)
 		}
@@ -103,11 +98,11 @@ func (m Middlewares) locationHandler(fullMethod string, ctx *HarmonyContext, req
 		if loc.MessageId == 0 {
 			return status.Error(codes.InvalidArgument, responses.BadLocationMessage)
 		}
-		owner, err := m.DB.GetMessageOwner(loc.MessageId)
+		owner, err := database.GetMessageOwner(loc.MessageId)
 		if err != nil {
 			return status.Error(codes.Internal, responses.InternalServerError)
 		}
-		if owner != ctx.UserID {
+		if owner != userID {
 			return status.Error(codes.PermissionDenied, responses.BadLocationMessage)
 		}
 	}
