@@ -678,15 +678,12 @@ func init() {
 	}, "/protocol.core.v1.CoreService/StreamGuildEvents")
 }
 
-// TODO (URGENT): make stream interceptors handle this!!
-const streamGuildEventsName string = "protocol.core.v1.CoreService/StreamGuildEvents"
-
 func (v1 *V1) StreamGuildEvents(r *corev1.StreamGuildEventsRequest, s corev1.CoreService_StreamGuildEventsServer) error {
 	userID, err := middleware.AuthHandler(v1.DB, s.Context())
 	if err != nil {
 		return err
 	}
-	if err := middleware.LocationHandler(v1.DB, s.Context(), r, streamGuildEventsName, userID); err != nil {
+	if err := middleware.LocationHandler(v1.DB, r, "/protocol.core.v1.CoreService/StreamGuildEvents", userID); err != nil {
 		return err
 	}
 	ok, err := v1.DB.UserInGuild(userID, r.Location.GuildId)

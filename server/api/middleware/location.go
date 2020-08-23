@@ -14,13 +14,13 @@ import (
 func (m Middlewares) LocationInterceptor(c context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	ctx := c.(HarmonyContext)
 
-	if err := LocationHandler(m.DB, ctx, req, info.FullMethod, ctx.UserID); err != nil {
+	if err := LocationHandler(m.DB, req, info.FullMethod, ctx.UserID); err != nil {
 		return nil, err
 	}
 	return handler(c, req)
 }
 
-func LocationHandler(database db.IHarmonyDB, c context.Context, req interface{}, fullMethod string, userID uint64) error {
+func LocationHandler(database db.IHarmonyDB, req interface{}, fullMethod string, userID uint64) error {
 	if GetRPCConfig(fullMethod).Location == NoLocation {
 		return nil
 	}
