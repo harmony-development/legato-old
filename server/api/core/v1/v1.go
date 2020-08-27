@@ -655,7 +655,7 @@ func (v1 *V1) LeaveGuild(c context.Context, r *corev1.LeaveGuildRequest) (*empty
 	} else if isOwner {
 		return nil, status.Error(codes.FailedPrecondition, responses.InvalidRequest)
 	}
-	streamState.RemoveUserFromGuild(r.Location.GuildId, ctx.UserID)
+	streamState.UnsubUserFromGuild(r.Location.GuildId, ctx.UserID)
 	streamState.BroadcastGuild(r.Location.GuildId, &corev1.GuildEvent{
 		Event: &corev1.GuildEvent_LeftMember{
 			LeftMember: &corev1.GuildEvent_MemberLeft{

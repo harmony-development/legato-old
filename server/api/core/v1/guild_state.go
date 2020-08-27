@@ -25,7 +25,7 @@ func (s *GuildState) Add(guildID, userID uint64, server corev1.CoreService_Strea
 
 	go func() {
 		<-server.Context().Done()
-		s.RemoveUserFromGuild(userID, guildID)
+		s.UnsubUserFromGuild(userID, guildID)
 	}()
 
 	val, _ := s.guildEvents[UserID(userID)][GuildID(guildID)]
@@ -67,7 +67,7 @@ func (s *GuildState) RemoveGuild(guildID uint64) {
 	}
 }
 
-func (s *GuildState) RemoveUserFromGuild(userID, guildID uint64) {
+func (s *GuildState) UnsubUserFromGuild(userID, guildID uint64) {
 	s.Lock()
 	defer s.Unlock()
 

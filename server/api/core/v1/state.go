@@ -14,10 +14,11 @@ type StreamState struct {
 
 var streamState = StreamState{
 	GuildState: GuildState{
-		guildEvents: map[UserID]map[GuildID][]corev1.CoreService_StreamGuildEventsServer{},
-		subs:        map[GuildID]map[UserID]struct{}{},
+		guildEvents:    make(map[UserID]map[GuildID][]corev1.CoreService_StreamGuildEventsServer),
+		serverChannels: make(map[corev1.CoreService_StreamGuildEventsServer]chan struct{}),
+		subs:           make(map[GuildID]map[UserID]struct{}),
 	},
 	ActionState: ActionState{
-		actionEvents: map[UserID][]corev1.CoreService_StreamActionEventsServer{},
+		actionEvents: make(map[UserID][]corev1.CoreService_StreamActionEventsServer),
 	},
 }
