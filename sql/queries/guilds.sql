@@ -31,9 +31,10 @@ INSERT INTO Channels (
         Channel_ID,
         Channel_Name,
         Position,
-        Category
+        Category,
+        IsVoice
     )
-VALUES ($1, $2, $3, $4, $5) RETURNING *;
+VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;
 
 -- name: UpdateChannelName :exec
 UPDATE Channels

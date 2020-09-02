@@ -29,9 +29,10 @@ INSERT INTO Channels (
         Channel_ID,
         Channel_Name,
         Position,
-        Category
+        Category,
+        IsVoice
     )
-VALUES ($1, $2, $3, $4, $5) RETURNING channel_id, guild_id, channel_name, position, category
+VALUES ($1, $2, $3, $4, $5, $6) RETURNING channel_id, guild_id, channel_name, position, category, isvoice
 `
 
 type CreateChannelParams struct {
@@ -40,6 +41,7 @@ type CreateChannelParams struct {
 	ChannelName string        `json:"channel_name"`
 	Position    string        `json:"position"`
 	Category    bool          `json:"category"`
+	Isvoice     bool          `json:"isvoice"`
 }
 
 func (q *Queries) CreateChannel(ctx context.Context, arg CreateChannelParams) (Channel, error) {
@@ -49,6 +51,7 @@ func (q *Queries) CreateChannel(ctx context.Context, arg CreateChannelParams) (C
 		arg.ChannelName,
 		arg.Position,
 		arg.Category,
+		arg.Isvoice,
 	)
 	var i Channel
 	err := row.Scan(
@@ -57,6 +60,7 @@ func (q *Queries) CreateChannel(ctx context.Context, arg CreateChannelParams) (C
 		&i.ChannelName,
 		&i.Position,
 		&i.Category,
+		&i.Isvoice,
 	)
 	return i, err
 }
@@ -141,7 +145,7 @@ func (q *Queries) GetChannelPosition(ctx context.Context, arg GetChannelPosition
 }
 
 const getChannels = `-- name: GetChannels :many
-SELECT channel_id, guild_id, channel_name, position, category
+SELECT channel_id, guild_id, channel_name, position, category, isvoice
 FROM Channels
 WHERE Guild_ID = $1
 ORDER BY Position
@@ -162,6 +166,7 @@ func (q *Queries) GetChannels(ctx context.Context, guildID sql.NullInt64) ([]Cha
 			&i.ChannelName,
 			&i.Position,
 			&i.Category,
+			&i.Isvoice,
 		); err != nil {
 			return nil, err
 		}

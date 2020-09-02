@@ -271,6 +271,7 @@ func (v1 *V1) GetGuildChannels(c context.Context, r *corev1.GetGuildChannelsRequ
 			ChannelId:   channel.ChannelID,
 			ChannelName: channel.ChannelName,
 			IsCategory:  channel.Category,
+			IsVoice:     channel.Isvoice,
 		})
 	}
 	return &corev1.GetGuildChannelsResponse{

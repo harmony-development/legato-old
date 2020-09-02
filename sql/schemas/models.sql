@@ -84,6 +84,7 @@ CREATE TABLE IF NOT EXISTS Channels (
     Channel_Name TEXT NOT NULL,
     Position TEXT NOT NULL,
     Category BOOLEAN NOT NULL,
+    IsVoice BOOLEAN NOT NULL,
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE
 );
 

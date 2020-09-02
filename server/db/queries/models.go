@@ -19,6 +19,7 @@ type Channel struct {
 	ChannelName string        `json:"channel_name"`
 	Position    string        `json:"position"`
 	Category    bool          `json:"category"`
+	Isvoice     bool          `json:"isvoice"`
 }
 
 type FederationNonce struct {
