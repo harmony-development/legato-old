@@ -11,6 +11,7 @@ import (
 	"github.com/harmony-development/legato/server/auth"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/http"
 	"github.com/harmony-development/legato/server/intercom"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/harmony-development/legato/server/storage"
@@ -71,6 +72,15 @@ func (inst Instance) Start() {
 		Sonyflake:   inst.Sonyflake,
 		Config:      inst.Config,
 	})
+
+	go func() {
+		http.New(http.Dependencies{
+			DB:     inst.DB,
+			Logger: inst.Logger,
+			Config: inst.Config,
+		}).Start(":2288")
+	}()
+
 	errCallback := make(chan error, 16)
 	inst.API.Start(errCallback, inst.Config.Server.Port)
 	logrus.Info("Legato started")

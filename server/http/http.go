@@ -5,16 +5,13 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/sony/sonyflake"
 
-	"github.com/harmony-development/legato/server/auth"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/http/hm"
 	"github.com/harmony-development/legato/server/http/routing"
 	"github.com/harmony-development/legato/server/http/webrtc"
 	"github.com/harmony-development/legato/server/logger"
-	"github.com/harmony-development/legato/server/storage"
 )
 
 // Server is an instance of the HTTP server
@@ -26,12 +23,9 @@ type Server struct {
 
 // Dependencies are elements that a Server needs
 type Dependencies struct {
-	DB             db.IHarmonyDB
-	AuthManager    *auth.Manager
-	StorageManager *storage.Manager
-	Logger         logger.ILogger
-	Config         *config.Config
-	Sonyflake      *sonyflake.Sonyflake
+	DB     db.IHarmonyDB
+	Logger logger.ILogger
+	Config *config.Config
 }
 
 // New creates a new HTTP server instance
@@ -58,7 +52,10 @@ func New(deps Dependencies) *Server {
 	api := s.Group("/api")
 	api.Use(m.WithHarmony)
 
-	webrtc.New(webrtc.Dependencies{})
+	webrtc.New(webrtc.Dependencies{
+		APIGroup: api,
+		Router:   s.Router,
+	})
 
 	return s
 }

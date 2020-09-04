@@ -34,14 +34,15 @@ func New(deps Dependencies) *API {
 
 	api.Router.BindRoutes(api.Group, []routing.Route{
 		{
-			Path:    "/sdp",
+			Path:    "/:guild_id/:channel_id/sdp",
 			Handler: api.SDPHandler,
 			Auth:    true,
 			RateLimit: &routing.RateLimit{
 				Duration: 3 * time.Second,
 				Burst:    6,
 			},
-			Method: routing.POST,
+			Location: routing.LocationGuildAndChannel,
+			Method:   routing.POST,
 		},
 	})
 	return api
