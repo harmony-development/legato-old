@@ -20,7 +20,7 @@ func (api API) SDPHandler(c echo.Context) error {
 	}
 
 	m := webrtc.MediaEngine{}
-	m.RegisterCodec(webrtc.NewRTPVP8Codec(webrtc.DefaultPayloadTypeVP8, 90000))
+	m.RegisterCodec(webrtc.NewRTPOpusCodec(webrtc.DefaultPayloadTypeOpus, 90000))
 
 	mediaAPI := webrtc.NewAPI(webrtc.WithMediaEngine(m))
 
@@ -34,7 +34,7 @@ func (api API) SDPHandler(c echo.Context) error {
 		fmt.Println("error making peer connection", err)
 		return ctx.NoContent(http.StatusInternalServerError)
 	}
-	if _, err := peerConnection.AddTransceiver(webrtc.RTPCodecTypeAudio); err != nil {
+	if _, err := peerConnection.AddTransceiverFromKind(webrtc.RTPCodecTypeAudio); err != nil {
 		fmt.Println("error adding transceiver", err)
 		return ctx.NoContent(http.StatusInternalServerError)
 	}
