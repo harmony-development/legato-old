@@ -726,7 +726,7 @@ func (db *HarmonyDB) GetChannelPositions(guildID, before, previous uint64) (pos 
 		ChannelID: previous,
 		GuildID:   toSqlInt64(guildID),
 	})
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		db.Logger.Exception(err)
 		retErr = err
 		return
