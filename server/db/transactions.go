@@ -127,8 +127,13 @@ func (db *HarmonyDB) AddChannelToGuild(guildID uint64, channelName string, befor
 	if err != nil {
 		return queries.Channel{}, err
 	}
+	chanID, err := db.Sonyflake.NextID()
+	if err != nil {
+		return queries.Channel{}, err
+	}
 	channel, err := db.queries.CreateChannel(ctx, queries.CreateChannelParams{
 		GuildID:     toSqlInt64(guildID),
+		ChannelID:   chanID,
 		ChannelName: channelName,
 		Position:    pos,
 		Category:    category,

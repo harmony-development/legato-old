@@ -44,7 +44,7 @@ func (inst Instance) Start() {
 		logrus.Fatal("Error connecting to sentry", err)
 	}
 	inst.Logger = logger.New(cfg)
-	inst.DB, err = db.New(inst.Config, inst.Logger)
+	inst.DB, err = db.New(inst.Config, inst.Logger, inst.Sonyflake)
 	if err != nil {
 		inst.Logger.Fatal(err)
 	}

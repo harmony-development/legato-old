@@ -23,7 +23,11 @@ func GenData() {
 		logrus.Fatal("Unable to load config", err)
 	}
 
-	database, err := db.New(cfg, logger.New(cfg))
+	sonyflake := sonyflake.NewSonyflake(sonyflake.Settings{
+		StartTime: time.Unix(cfg.Server.SnowflakeStart, 0),
+	})
+
+	database, err := db.New(cfg, logger.New(cfg), sonyflake)
 	if err != nil {
 		logrus.Fatal("Unable to connect to database", err)
 	}
@@ -32,10 +36,6 @@ func GenData() {
 	if err != nil {
 		logrus.Fatal("Unable to hash password", err)
 	}
-
-	sonyflake := sonyflake.NewSonyflake(sonyflake.Settings{
-		StartTime: time.Unix(cfg.Server.SnowflakeStart, 0),
-	})
 
 	userID, err := sonyflake.NextID()
 	if err != nil {

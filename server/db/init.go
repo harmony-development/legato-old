@@ -11,6 +11,7 @@ import (
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db/queries"
 	"github.com/harmony-development/legato/server/logger"
+	"github.com/sony/sonyflake"
 
 	lru "github.com/hashicorp/golang-lru"
 	_ "github.com/lib/pq"
@@ -26,6 +27,7 @@ type HarmonyDB struct {
 	Config       *config.Config
 	OwnerCache   *lru.Cache
 	SessionCache *lru.Cache
+	Sonyflake    *sonyflake.Sonyflake
 }
 
 type IHarmonyDB interface {
@@ -95,10 +97,11 @@ type IHarmonyDB interface {
 }
 
 // New creates a new DB connection
-func New(cfg *config.Config, logger logger.ILogger) (*HarmonyDB, error) {
+func New(cfg *config.Config, logger logger.ILogger, idgen *sonyflake.Sonyflake) (*HarmonyDB, error) {
 	db := &HarmonyDB{}
 	db.Config = cfg
 	db.Logger = logger
+	db.Sonyflake = idgen
 	var err error
 	if db.DB, err = sql.Open("postgres", fmt.Sprintf("user=%v password=%v dbname=%v host=%v port=%v sslmode=%v",
 		cfg.DB.User,
