@@ -20,7 +20,7 @@ func (api API) SDPHandler(c echo.Context) error {
 	}
 
 	m := webrtc.MediaEngine{}
-	m.RegisterCodec(webrtc.NewRTPOpusCodec(webrtc.DefaultPayloadTypeOpus, 90000))
+	m.RegisterCodec(webrtc.NewRTPOpusCodec(webrtc.DefaultPayloadTypeOpus, 48000))
 
 	mediaAPI := webrtc.NewAPI(webrtc.WithMediaEngine(m))
 
@@ -61,6 +61,7 @@ func (api API) SDPHandler(c echo.Context) error {
 // OnTrackStart handles when a track is being received from a peer
 func (api API) OnTrackStart(peerConnection *webrtc.PeerConnection) func(remoteTrack *webrtc.Track, receiver *webrtc.RTPReceiver) {
 	return func(remoteTrack *webrtc.Track, receiver *webrtc.RTPReceiver) {
+		fmt.Println("YOOOO")
 		_, err := peerConnection.NewTrack(remoteTrack.PayloadType(), remoteTrack.SSRC(), "audio", "useridhere")
 		if err != nil {
 			return
