@@ -17,6 +17,8 @@ type API struct {
 	*echo.Group
 	Dependencies
 	peerConnectionConfig webrtc.Configuration
+	// map of channelIDs to a map of userIDs to webrtc tracks
+	VoiceTracks map[uint64]map[uint64]*webrtc.Track
 }
 
 func New(deps Dependencies) *API {
@@ -30,6 +32,7 @@ func New(deps Dependencies) *API {
 				},
 			},
 		},
+		VoiceTracks: make(map[uint64]map[uint64]*webrtc.Track),
 	}
 
 	api.Router.BindRoutes(api.Group, []routing.Route{
