@@ -13,12 +13,18 @@ type Dependencies struct {
 	Router   routing.IRouter
 }
 
+type VoiceChannel struct {
+	Tracks map[uint64]*webrtc.Track
+	Peers  map[uint64]*webrtc.PeerConnection
+}
+
 type API struct {
 	*echo.Group
 	Dependencies
 	peerConnectionConfig webrtc.Configuration
-	// map of channelIDs to a map of userIDs to webrtc tracks
-	VoiceTracks map[uint64]map[uint64]*webrtc.Track
+	Engine               webrtc.MediaEngine
+	MediaAPI             *webrtc.API
+	VoiceChannels        map[uint64]*VoiceChannel
 }
 
 func New(deps Dependencies) *API {
@@ -32,8 +38,13 @@ func New(deps Dependencies) *API {
 				},
 			},
 		},
-		VoiceTracks: make(map[uint64]map[uint64]*webrtc.Track),
+		VoiceChannels: make(map[uint64]*VoiceChannel),
+		Engine:        webrtc.MediaEngine{},
 	}
+
+	api.Engine.RegisterCodec(webrtc.NewRTPOpusCodec(webrtc.DefaultPayloadTypeOpus, 48000))
+
+	api.MediaAPI = webrtc.NewAPI(webrtc.WithMediaEngine(api.Engine))
 
 	api.Router.BindRoutes(api.Group, []routing.Route{
 		{
