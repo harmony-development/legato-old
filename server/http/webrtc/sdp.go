@@ -58,14 +58,10 @@ func (api API) SDPHandler(c echo.Context) error {
 		return ctx.NoContent(http.StatusInternalServerError)
 	}
 
-	gatherComplete := webrtc.GatheringCompletePromise(peerConnection)
-
 	if err := peerConnection.SetLocalDescription(answer); err != nil {
 		fmt.Println("error setting local description", err)
 		return ctx.NoContent(http.StatusInternalServerError)
 	}
-
-	<-gatherComplete
 
 	if _, exists := api.VoiceChannels[*ctx.Location.ChannelID]; !exists {
 		api.VoiceChannels[*ctx.Location.ChannelID] = &VoiceChannel{
@@ -78,6 +74,7 @@ func (api API) SDPHandler(c echo.Context) error {
 		if _, err := peerConnection.AddTrack(api.VoiceChannels[*ctx.Location.ChannelID].Tracks[userID]); err != nil {
 			fmt.Println(err)
 		}
+		fmt.Println("add track!")
 	}
 
 	api.VoiceChannels[*ctx.Location.ChannelID].Peers[ctx.UserID] = peerConnection
@@ -99,13 +96,15 @@ func (api API) OnTrackStart(peerConnection *webrtc.PeerConnection, channelID, us
 				fmt.Println(err)
 			}
 		}
-		rtpBuf := make([]byte, 512)
+		rtpBuf := make([]byte, 1460)
 		for {
 			i, readErr := remoteTrack.Read(rtpBuf)
 			if readErr != nil {
 				fmt.Println(readErr)
 				return
 			}
+			fmt.Println(localTrack.ID())
+			fmt.Println(remoteTrack.ID())
 			if _, err = localTrack.Write(rtpBuf[:i]); err != nil && err != io.ErrClosedPipe {
 				fmt.Println("oops")
 				return
@@ -118,13 +117,16 @@ func (api API) OnTrackStart(peerConnection *webrtc.PeerConnection, channelID, us
 func (api API) OnICEConnectionStateChange(peerConnection *webrtc.PeerConnection, channelID, userID uint64) func(webrtc.ICEConnectionState) {
 	return func(state webrtc.ICEConnectionState) {
 		if state == webrtc.ICEConnectionStateDisconnected || state == webrtc.ICEConnectionStateClosed {
-			fmt.Println("disconnect", channelID, userID)
+			fmt.Println("disconnect", channelID, userID, state)
 			if err := peerConnection.Close(); err != nil {
 				fmt.Println(err)
 			}
-			delete(api.VoiceChannels[channelID].Tracks, userID)
-			if len(api.VoiceChannels[channelID].Tracks) == 0 {
-				delete(api.VoiceChannels, channelID)
+			if api.VoiceChannels[channelID] != nil {
+				delete(api.VoiceChannels[channelID].Tracks, userID)
+				delete(api.VoiceChannels[channelID].Peers, userID)
+				if len(api.VoiceChannels[channelID].Tracks) == 0 {
+					delete(api.VoiceChannels, channelID)
+				}
 			}
 		}
 	}

@@ -22,6 +22,7 @@ require (
 	github.com/mitchellh/mapstructure v1.3.2 // indirect
 	github.com/pelletier/go-toml v1.8.0 // indirect
 	github.com/pion/rtcp v1.2.3
+	github.com/pion/webrtc/v2 v2.2.25
 	github.com/pion/webrtc/v3 v3.0.0-beta.4
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v0.9.3
@@ -36,7 +37,6 @@ require (
 	github.com/thanhpk/randstr v1.0.4
 	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381
-	golang.org/x/sys v0.0.0-20200625212154-ddb9806d33ae // indirect
 	golang.org/x/text v0.3.3 // indirect
 	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
 	google.golang.org/genproto v0.0.0-20200715011427-11fb19a81f2c // indirect
