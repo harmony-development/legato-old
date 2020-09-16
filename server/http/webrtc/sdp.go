@@ -63,13 +63,6 @@ func (api API) SDPHandler(c echo.Context) error {
 		return ctx.NoContent(http.StatusInternalServerError)
 	}
 
-	if _, exists := api.VoiceChannels[*ctx.Location.ChannelID]; !exists {
-		api.VoiceChannels[*ctx.Location.ChannelID] = &VoiceChannel{
-			Tracks: make(map[uint64]*webrtc.Track),
-			Peers:  make(map[uint64]*webrtc.PeerConnection),
-		}
-	}
-
 	for userID := range api.VoiceChannels[*ctx.Location.ChannelID].Tracks {
 		if _, err := peerConnection.AddTrack(api.VoiceChannels[*ctx.Location.ChannelID].Tracks[userID]); err != nil {
 			fmt.Println(err)
