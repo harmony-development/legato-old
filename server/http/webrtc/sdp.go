@@ -40,7 +40,9 @@ func (api API) SDPHandler(c echo.Context) error {
 		fmt.Println("error making peer connection", err)
 		return ctx.NoContent(http.StatusInternalServerError)
 	}
-	if _, err := peerConnection.AddTransceiverFromKind(webrtc.RTPCodecTypeAudio); err != nil {
+	if _, err := peerConnection.AddTransceiverFromKind(webrtc.RTPCodecTypeAudio, webrtc.RtpTransceiverInit{
+		Direction: webrtc.RTPTransceiverDirectionSendrecv,
+	}); err != nil {
 		fmt.Println("error adding transceiver", err)
 		return ctx.NoContent(http.StatusInternalServerError)
 	}
@@ -88,6 +90,7 @@ func (api API) OnTrackStart(peerConnection *webrtc.PeerConnection, channelID, us
 			if _, err := api.VoiceChannels[channelID].Peers[userID].AddTrack(localTrack); err != nil {
 				fmt.Println(err)
 			}
+			fmt.Println("add track! (after track start)")
 		}
 		rtpBuf := make([]byte, 1460)
 		for {
@@ -96,10 +99,8 @@ func (api API) OnTrackStart(peerConnection *webrtc.PeerConnection, channelID, us
 				fmt.Println(readErr)
 				return
 			}
-			fmt.Println(localTrack.ID())
-			fmt.Println(remoteTrack.ID())
 			if _, err = localTrack.Write(rtpBuf[:i]); err != nil && err != io.ErrClosedPipe {
-				fmt.Println("oops")
+				fmt.Println(err)
 				return
 			}
 		}
