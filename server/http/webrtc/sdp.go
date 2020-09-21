@@ -41,7 +41,7 @@ func (api API) SDPHandler(c echo.Context) error {
 		return ctx.NoContent(http.StatusInternalServerError)
 	}
 	if _, err := peerConnection.AddTransceiverFromKind(webrtc.RTPCodecTypeAudio, webrtc.RtpTransceiverInit{
-		Direction: webrtc.RTPTransceiverDirectionSendrecv,
+		Direction: webrtc.RTPTransceiverDirectionRecvonly,
 	}); err != nil {
 		fmt.Println("error adding transceiver", err)
 		return ctx.NoContent(http.StatusInternalServerError)
