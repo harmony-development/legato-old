@@ -39,37 +39,23 @@ type V1 struct {
 	Dependencies
 }
 
-func (v1 *V1) ActionsToProto(msgs []json.RawMessage) (ret []*corev1.Action) {
-	for _, msg := range msgs {
-		var action *corev1.Action
-		json.Unmarshal([]byte(msg), &action)
-		ret = append(ret, action)
-	}
+func (v1 *V1) ActionsToProto(msgs json.RawMessage) (ret []*corev1.Action) {
+	json.Unmarshal([]byte(msgs), &ret)
 	return
 }
 
-func (v1 *V1) ProtoToActions(msgs []*corev1.Action) (ret [][]byte) {
-	for _, msg := range msgs {
-		data, _ := json.Marshal(msg)
-		ret = append(ret, json.RawMessage(data))
-	}
+func (v1 *V1) ProtoToActions(msgs []*corev1.Action) (ret []byte) {
+	ret, _ = json.Marshal(msgs)
 	return
 }
 
-func (v1 *V1) EmbedsToProto(embeds []json.RawMessage) (ret []*corev1.Embed) {
-	for _, embed := range embeds {
-		var action *corev1.Embed
-		json.Unmarshal([]byte(embed), &action)
-		ret = append(ret, action)
-	}
+func (v1 *V1) EmbedsToProto(embeds json.RawMessage) (ret []*corev1.Embed) {
+	json.Unmarshal([]byte(embeds), &ret)
 	return
 }
 
-func (v1 *V1) ProtoToEmbeds(embeds []*corev1.Embed) (ret [][]byte) {
-	for _, embed := range embeds {
-		data, _ := json.Marshal(embed)
-		ret = append(ret, json.RawMessage(data))
-	}
+func (v1 *V1) ProtoToEmbeds(embeds []*corev1.Embed) (ret []byte) {
+	ret, _ = json.Marshal(embeds)
 	return
 }
 
@@ -316,19 +302,11 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 				}
 				var embeds []*corev1.Embed
 				var actions []*corev1.Action
-				for _, rawEmbed := range message.Embeds {
-					var embed corev1.Embed
-					if err := json.Unmarshal(rawEmbed, &embed); err != nil {
-						continue
-					}
-					embeds = append(embeds, &embed)
+				if err := json.Unmarshal(message.Embeds, &embeds); err != nil {
+					continue
 				}
-				for _, rawAction := range message.Actions {
-					var action corev1.Action
-					if err := json.Unmarshal(rawAction, &action); err != nil {
-						continue
-					}
-					actions = append(actions, &action)
+				if err := json.Unmarshal(message.Actions, &actions); err != nil {
+					continue
 				}
 				ret = append(ret, &corev1.Message{
 					Location: &corev1.Location{
@@ -459,8 +437,8 @@ func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (
 		return nil, NoPermissionsError
 	}
 
-	var actions *[][]byte
-	var embeds *[][]byte
+	var actions *[]byte
+	var embeds *[]byte
 	if r.UpdateActions {
 		val := v1.ProtoToActions(r.Actions)
 		actions = &val

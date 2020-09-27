@@ -8,8 +8,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"time"
-
-	"github.com/lib/pq"
 )
 
 const addAttachment = `-- name: AddAttachment :exec
@@ -42,13 +40,13 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) RETURNING message_id, guild_id, chann
 `
 
 type AddMessageParams struct {
-	GuildID   uint64            `json:"guild_id"`
-	ChannelID uint64            `json:"channel_id"`
-	UserID    uint64            `json:"user_id"`
-	MessageID uint64            `json:"message_id"`
-	Content   string            `json:"content"`
-	Embeds    []json.RawMessage `json:"embeds"`
-	Actions   []json.RawMessage `json:"actions"`
+	GuildID   uint64          `json:"guild_id"`
+	ChannelID uint64          `json:"channel_id"`
+	UserID    uint64          `json:"user_id"`
+	MessageID uint64          `json:"message_id"`
+	Content   string          `json:"content"`
+	Embeds    json.RawMessage `json:"embeds"`
+	Actions   json.RawMessage `json:"actions"`
 }
 
 func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) (Message, error) {
@@ -58,8 +56,8 @@ func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) (Message
 		arg.UserID,
 		arg.MessageID,
 		arg.Content,
-		pq.Array(arg.Embeds),
-		pq.Array(arg.Actions),
+		arg.Embeds,
+		arg.Actions,
 	)
 	var i Message
 	err := row.Scan(
@@ -70,8 +68,8 @@ func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) (Message
 		&i.CreatedAt,
 		&i.EditedAt,
 		&i.Content,
-		pq.Array(&i.Embeds),
-		pq.Array(&i.Actions),
+		&i.Embeds,
+		&i.Actions,
 	)
 	return i, err
 }
@@ -143,8 +141,8 @@ func (q *Queries) GetMessage(ctx context.Context, messageID uint64) (Message, er
 		&i.CreatedAt,
 		&i.EditedAt,
 		&i.Content,
-		pq.Array(&i.Embeds),
-		pq.Array(&i.Actions),
+		&i.Embeds,
+		&i.Actions,
 	)
 	return i, err
 }
@@ -214,8 +212,8 @@ func (q *Queries) GetMessages(ctx context.Context, arg GetMessagesParams) ([]Mes
 			&i.CreatedAt,
 			&i.EditedAt,
 			&i.Content,
-			pq.Array(&i.Embeds),
-			pq.Array(&i.Actions),
+			&i.Embeds,
+			&i.Actions,
 		); err != nil {
 			return nil, err
 		}
@@ -262,19 +260,19 @@ WHERE Message_ID = $1 RETURNING Actions,
 `
 
 type UpdateMessageActionsParams struct {
-	MessageID uint64            `json:"message_id"`
-	Actions   []json.RawMessage `json:"actions"`
+	MessageID uint64          `json:"message_id"`
+	Actions   json.RawMessage `json:"actions"`
 }
 
 type UpdateMessageActionsRow struct {
-	Actions  []json.RawMessage `json:"actions"`
-	EditedAt sql.NullTime      `json:"edited_at"`
+	Actions  json.RawMessage `json:"actions"`
+	EditedAt sql.NullTime    `json:"edited_at"`
 }
 
 func (q *Queries) UpdateMessageActions(ctx context.Context, arg UpdateMessageActionsParams) (UpdateMessageActionsRow, error) {
-	row := q.queryRow(ctx, q.updateMessageActionsStmt, updateMessageActions, arg.MessageID, pq.Array(arg.Actions))
+	row := q.queryRow(ctx, q.updateMessageActionsStmt, updateMessageActions, arg.MessageID, arg.Actions)
 	var i UpdateMessageActionsRow
-	err := row.Scan(pq.Array(&i.Actions), &i.EditedAt)
+	err := row.Scan(&i.Actions, &i.EditedAt)
 	return i, err
 }
 
@@ -312,18 +310,18 @@ WHERE Message_ID = $1 RETURNING Embeds,
 `
 
 type UpdateMessageEmbedsParams struct {
-	MessageID uint64            `json:"message_id"`
-	Embeds    []json.RawMessage `json:"embeds"`
+	MessageID uint64          `json:"message_id"`
+	Embeds    json.RawMessage `json:"embeds"`
 }
 
 type UpdateMessageEmbedsRow struct {
-	Embeds   []json.RawMessage `json:"embeds"`
-	EditedAt sql.NullTime      `json:"edited_at"`
+	Embeds   json.RawMessage `json:"embeds"`
+	EditedAt sql.NullTime    `json:"edited_at"`
 }
 
 func (q *Queries) UpdateMessageEmbeds(ctx context.Context, arg UpdateMessageEmbedsParams) (UpdateMessageEmbedsRow, error) {
-	row := q.queryRow(ctx, q.updateMessageEmbedsStmt, updateMessageEmbeds, arg.MessageID, pq.Array(arg.Embeds))
+	row := q.queryRow(ctx, q.updateMessageEmbedsStmt, updateMessageEmbeds, arg.MessageID, arg.Embeds)
 	var i UpdateMessageEmbedsRow
-	err := row.Scan(pq.Array(&i.Embeds), &i.EditedAt)
+	err := row.Scan(&i.Embeds, &i.EditedAt)
 	return i, err
 }

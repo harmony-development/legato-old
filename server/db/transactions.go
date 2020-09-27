@@ -5,7 +5,6 @@ package db
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"time"
 
 	profilev1 "github.com/harmony-development/legato/gen/profile"
@@ -153,28 +152,21 @@ func (db *HarmonyDB) DeleteChannelFromGuild(guildID, channelID uint64) error {
 }
 
 // AddMessage adds a message to a channel
-func (db *HarmonyDB) AddMessage(channelID, guildID, userID, messageID uint64, message string, attachments []string, embeds, actions [][]byte) (*queries.Message, error) {
+func (db *HarmonyDB) AddMessage(channelID, guildID, userID, messageID uint64, message string, attachments []string, embeds, actions []byte) (*queries.Message, error) {
 	tx, err := db.Begin()
 	db.Logger.CheckException(err)
 	if err != nil {
 		return nil, err
 	}
 	tq := db.queries.WithTx(tx)
-	var rawEmbeds, rawActions []json.RawMessage
-	for _, embed := range embeds {
-		rawEmbeds = append(rawEmbeds, json.RawMessage(embed))
-	}
-	for _, action := range actions {
-		rawActions = append(rawActions, json.RawMessage(action))
-	}
 	msg, err := tq.AddMessage(ctx, queries.AddMessageParams{
 		GuildID:   guildID,
 		ChannelID: channelID,
 		UserID:    userID,
 		MessageID: messageID,
 		Content:   message,
-		Embeds:    rawEmbeds,
-		Actions:   rawActions,
+		Embeds:    embeds,
+		Actions:   actions,
 	})
 	db.Logger.CheckException(err)
 	if err != nil {
@@ -579,7 +571,7 @@ func (db *HarmonyDB) GetGuildByID(guildID uint64) (queries.Guild, error) {
 	return db.queries.GetGuildData(ctx, guildID)
 }
 
-func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, actions *[][]byte) (time.Time, error) {
+func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, actions *[]byte) (time.Time, error) {
 	tx, err := db.Begin()
 	db.Logger.CheckException(err)
 	if err != nil {
@@ -600,13 +592,9 @@ func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, ac
 	}
 	if embeds != nil {
 		e.Execute(func() error {
-			var rawEmbeds []json.RawMessage
-			for _, embed := range *embeds {
-				rawEmbeds = append(rawEmbeds, embed)
-			}
 			data, err := tq.UpdateMessageEmbeds(ctx, queries.UpdateMessageEmbedsParams{
 				MessageID: messageID,
-				Embeds:    rawEmbeds,
+				Embeds:    *embeds,
 			})
 			editedAt = data.EditedAt.Time
 			return err
@@ -614,13 +602,9 @@ func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, ac
 	}
 	if actions != nil {
 		e.Execute(func() error {
-			var rawActions []json.RawMessage
-			for _, action := range *actions {
-				rawActions = append(rawActions, action)
-			}
 			data, err := tq.UpdateMessageActions(ctx, queries.UpdateMessageActionsParams{
 				MessageID: messageID,
-				Actions:   rawActions,
+				Actions:   *actions,
 			})
 			editedAt = data.EditedAt.Time
 			return err

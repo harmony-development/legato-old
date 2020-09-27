@@ -72,15 +72,15 @@ type LocalUser struct {
 }
 
 type Message struct {
-	MessageID uint64            `json:"message_id"`
-	GuildID   uint64            `json:"guild_id"`
-	ChannelID uint64            `json:"channel_id"`
-	UserID    uint64            `json:"user_id"`
-	CreatedAt time.Time         `json:"created_at"`
-	EditedAt  sql.NullTime      `json:"edited_at"`
-	Content   string            `json:"content"`
-	Embeds    []json.RawMessage `json:"embeds"`
-	Actions   []json.RawMessage `json:"actions"`
+	MessageID uint64          `json:"message_id"`
+	GuildID   uint64          `json:"guild_id"`
+	ChannelID uint64          `json:"channel_id"`
+	UserID    uint64          `json:"user_id"`
+	CreatedAt time.Time       `json:"created_at"`
+	EditedAt  sql.NullTime    `json:"edited_at"`
+	Content   string          `json:"content"`
+	Embeds    json.RawMessage `json:"embeds"`
+	Actions   json.RawMessage `json:"actions"`
 }
 
 type Profile struct {
