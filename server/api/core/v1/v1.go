@@ -582,6 +582,9 @@ func (v1 *V1) DeleteMessage(c context.Context, r *corev1.DeleteMessageRequest) (
 	if ctx.UserID != owner {
 		return nil, NoPermissionsError
 	}
+	if err := v1.DB.DeleteMessage(r.Location.MessageId, r.Location.ChannelId, r.Location.GuildId); err != nil {
+		return nil, err
+	}
 	streamState.BroadcastGuild(r.Location.GuildId, &corev1.GuildEvent{
 		Event: &corev1.GuildEvent_DeletedMessage{
 			DeletedMessage: &corev1.GuildEvent_MessageDeleted{
