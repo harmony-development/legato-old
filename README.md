@@ -22,17 +22,15 @@ go build
 ```
 
 ## Usage
-To run server make sure to install:
-- go
-- postgres
+Make sure to install `postgres` database
 
 Make the following preparations:
-- Run command ```./legato -genkey``` to generate new server config
-- setup postgres user
-- update json config
+- Run command ```./legato``` for the first time to generate new json config
+- Run command ```./legato -genkey``` to generate new server key
+- setup `postgres` user
+- edit `DB` section inside json config to connect `postgres` database
 
-After all preparations run server:  
-```./legato```
+After all preparations run ```./legato``` again to start server
 
 ## Docker-compose
 Broke, WIP
