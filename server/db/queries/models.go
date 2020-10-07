@@ -81,6 +81,7 @@ type Message struct {
 	Content   string          `json:"content"`
 	Embeds    json.RawMessage `json:"embeds"`
 	Actions   json.RawMessage `json:"actions"`
+	ReplyToID sql.NullInt64   `json:"reply_to_id"`
 }
 
 type Profile struct {

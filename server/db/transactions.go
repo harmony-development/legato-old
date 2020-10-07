@@ -152,7 +152,7 @@ func (db *HarmonyDB) DeleteChannelFromGuild(guildID, channelID uint64) error {
 }
 
 // AddMessage adds a message to a channel
-func (db *HarmonyDB) AddMessage(channelID, guildID, userID, messageID uint64, message string, attachments []string, embeds, actions []byte) (*queries.Message, error) {
+func (db *HarmonyDB) AddMessage(channelID, guildID, userID, messageID uint64, message string, attachments []string, embeds, actions []byte, replyTo sql.NullInt64) (*queries.Message, error) {
 	tx, err := db.Begin()
 	db.Logger.CheckException(err)
 	if err != nil {
@@ -167,6 +167,7 @@ func (db *HarmonyDB) AddMessage(channelID, guildID, userID, messageID uint64, me
 		Content:   message,
 		Embeds:    embeds,
 		Actions:   actions,
+		ReplyToID: replyTo,
 	})
 	db.Logger.CheckException(err)
 	if err != nil {

@@ -7,9 +7,10 @@ INSERT INTO Messages (
     Content,
     Embeds,
     Actions,
-    Created_At
+    Created_At,
+    Reply_to_ID
   )
-VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) RETURNING *;
+VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), $8) RETURNING *;
 
 -- name: AddAttachment :exec
 INSERT INTO Attachments(Message_ID, Attachment)

@@ -759,6 +759,10 @@ func (v1 *V1) SendMessage(c context.Context, r *corev1.SendMessageRequest) (*emp
 		r.Attachments,
 		v1.ProtoToEmbeds(r.Embeds),
 		v1.ProtoToActions(r.Actions),
+		sql.NullInt64{
+			Int64: int64(r.InReplyTo),
+			Valid: r.InReplyTo != 0,
+		},
 	)
 	if err != nil {
 		return nil, err
@@ -770,6 +774,7 @@ func (v1 *V1) SendMessage(c context.Context, r *corev1.SendMessageRequest) (*emp
 		Attachments: r.Attachments,
 		Embeds:      r.Embeds,
 		Actions:     r.Actions,
+		InReplyTo:   r.InReplyTo,
 	}
 	createdAt, _ := ptypes.TimestampProto(msg.CreatedAt.UTC())
 	message.CreatedAt = createdAt

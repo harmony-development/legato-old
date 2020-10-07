@@ -34,9 +34,10 @@ INSERT INTO Messages (
     Content,
     Embeds,
     Actions,
-    Created_At
+    Created_At,
+    Reply_to_ID
   )
-VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) RETURNING message_id, guild_id, channel_id, user_id, created_at, edited_at, content, embeds, actions
+VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), $8) RETURNING message_id, guild_id, channel_id, user_id, created_at, edited_at, content, embeds, actions, reply_to_id
 `
 
 type AddMessageParams struct {
@@ -47,6 +48,7 @@ type AddMessageParams struct {
 	Content   string          `json:"content"`
 	Embeds    json.RawMessage `json:"embeds"`
 	Actions   json.RawMessage `json:"actions"`
+	ReplyToID sql.NullInt64   `json:"reply_to_id"`
 }
 
 func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) (Message, error) {
@@ -58,6 +60,7 @@ func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) (Message
 		arg.Content,
 		arg.Embeds,
 		arg.Actions,
+		arg.ReplyToID,
 	)
 	var i Message
 	err := row.Scan(
@@ -70,6 +73,7 @@ func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) (Message
 		&i.Content,
 		&i.Embeds,
 		&i.Actions,
+		&i.ReplyToID,
 	)
 	return i, err
 }
@@ -125,7 +129,7 @@ func (q *Queries) GetAttachments(ctx context.Context, messageID uint64) ([]strin
 }
 
 const getMessage = `-- name: GetMessage :one
-SELECT message_id, guild_id, channel_id, user_id, created_at, edited_at, content, embeds, actions
+SELECT message_id, guild_id, channel_id, user_id, created_at, edited_at, content, embeds, actions, reply_to_id
 FROM Messages
 WHERE Message_ID = $1
 `
@@ -143,6 +147,7 @@ func (q *Queries) GetMessage(ctx context.Context, messageID uint64) (Message, er
 		&i.Content,
 		&i.Embeds,
 		&i.Actions,
+		&i.ReplyToID,
 	)
 	return i, err
 }
@@ -174,7 +179,7 @@ func (q *Queries) GetMessageDate(ctx context.Context, messageID uint64) (time.Ti
 }
 
 const getMessages = `-- name: GetMessages :many
-SELECT message_id, guild_id, channel_id, user_id, created_at, edited_at, content, embeds, actions
+SELECT message_id, guild_id, channel_id, user_id, created_at, edited_at, content, embeds, actions, reply_to_id
 FROM Messages
 WHERE Guild_ID = $1
   AND Channel_ID = $2
@@ -214,6 +219,7 @@ func (q *Queries) GetMessages(ctx context.Context, arg GetMessagesParams) ([]Mes
 			&i.Content,
 			&i.Embeds,
 			&i.Actions,
+			&i.ReplyToID,
 		); err != nil {
 			return nil, err
 		}
