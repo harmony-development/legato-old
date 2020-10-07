@@ -9,16 +9,28 @@ A free and open source communications platform.
 ![Codecov](https://img.shields.io/codecov/c/gh/harmony-development/legato?style=for-the-badge)
 ![Mom Made Pizza Rolls](https://img.shields.io/badge/mom%20made-pizza%20rolls-green?style=for-the-badge)
 
-## Screenshots
+## Building
+Required dependecies:
+- go
+- libvips
+- libvips-dev
 
-### App preview
+Then run:
+```
+go get -v -t -d ./...
+go build
+```
 
-<img src="https://i.imgur.com/GHZN7BD.png" style="width:70%; text-align: center;">
+## Usage
+Make sure to install `postgres` database
 
-### Cool theming
+Make the following preparations:
+- Run command ```./legato``` for the first time to generate new json config
+- Run command ```./legato -genkey``` to generate new server key
+- setup `postgres` user
+- edit `DB` section inside json config to connect `postgres` database
 
-<img src="https://i.imgur.com/namHS1j.png" style="width:70%; text-align: center;">
+After all preparations run ```./legato``` again to start server
 
-### Login screen
-
-<img src="https://i.imgur.com/6YmxSDO.png" style="width:70%; text-align: center;">
+## Docker-compose
+Broke, WIP
