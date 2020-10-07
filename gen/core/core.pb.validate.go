@@ -1981,6 +1981,160 @@ var _ interface {
 	ErrorName() string
 } = GetChannelMessagesResponseValidationError{}
 
+// Validate checks the field values on GetMessageRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, an
+// error is returned.
+func (m *GetMessageRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return GetMessageRequestValidationError{
+				field:  "Location",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	return nil
+}
+
+// GetMessageRequestValidationError is the validation error returned by
+// GetMessageRequest.Validate if the designated constraints aren't met.
+type GetMessageRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetMessageRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetMessageRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetMessageRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetMessageRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetMessageRequestValidationError) ErrorName() string {
+	return "GetMessageRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetMessageRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetMessageRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetMessageRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetMessageRequestValidationError{}
+
+// Validate checks the field values on GetMessageResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *GetMessageResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if v, ok := interface{}(m.GetMessage()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return GetMessageResponseValidationError{
+				field:  "Message",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	return nil
+}
+
+// GetMessageResponseValidationError is the validation error returned by
+// GetMessageResponse.Validate if the designated constraints aren't met.
+type GetMessageResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetMessageResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetMessageResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetMessageResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetMessageResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetMessageResponseValidationError) ErrorName() string {
+	return "GetMessageResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetMessageResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetMessageResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetMessageResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetMessageResponseValidationError{}
+
 // Validate checks the field values on UpdateGuildNameRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.

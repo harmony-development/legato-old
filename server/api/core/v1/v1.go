@@ -274,6 +274,54 @@ func init() {
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
 		Permission: middleware.NoPermission,
+	}, "/protocol.core.v1.CoreService/GetMessage")
+}
+
+func (v1 *V1) GetMessage(c context.Context, r *corev1.GetMessageRequest) (*corev1.GetMessageResponse, error) {
+	message, err := v1.DB.GetMessage(r.Location.MessageId)
+	if err != nil {
+		return nil, err
+	}
+	createdAt, _ := ptypes.TimestampProto(message.CreatedAt.UTC())
+	var editedAt *timestamppb.Timestamp
+	if message.EditedAt.Valid {
+		editedAt, _ = ptypes.TimestampProto(editedAt.AsTime().UTC())
+	}
+	var embeds []*corev1.Embed
+	var actions []*corev1.Action
+	if err := json.Unmarshal(message.Embeds, &embeds); err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(message.Actions, &actions); err != nil {
+		return nil, err
+	}
+	return &corev1.GetMessageResponse{
+		Message: &corev1.Message{
+			Location: &corev1.Location{
+				MessageId: message.MessageID,
+				GuildId:   message.GuildID,
+				ChannelId: message.ChannelID,
+			},
+			AuthorId:  message.UserID,
+			CreatedAt: createdAt,
+			EditedAt:  editedAt,
+			Content:   message.Content,
+			Embeds:    embeds,
+			Actions:   actions,
+			InReplyTo: uint64(message.ReplyToID.Int64),
+		},
+	}, nil
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
+		Permission: middleware.NoPermission,
 	}, "/protocol.core.v1.CoreService/GetChannelMessages")
 }
 
@@ -320,6 +368,7 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 					Content:   message.Content,
 					Embeds:    embeds,
 					Actions:   actions,
+					InReplyTo: uint64(message.ReplyToID.Int64),
 				})
 			}
 			return
