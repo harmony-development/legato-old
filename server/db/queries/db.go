@@ -67,6 +67,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.deleteChannelStmt, err = db.PrepareContext(ctx, deleteChannel); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteChannel: %w", err)
 	}
+	if q.deleteFromGuildListStmt, err = db.PrepareContext(ctx, deleteFromGuildList); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteFromGuildList: %w", err)
+	}
 	if q.deleteGuildStmt, err = db.PrepareContext(ctx, deleteGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteGuild: %w", err)
 	}
@@ -295,6 +298,11 @@ func (q *Queries) Close() error {
 	if q.deleteChannelStmt != nil {
 		if cerr := q.deleteChannelStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteChannelStmt: %w", cerr)
+		}
+	}
+	if q.deleteFromGuildListStmt != nil {
+		if cerr := q.deleteFromGuildListStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteFromGuildListStmt: %w", cerr)
 		}
 	}
 	if q.deleteGuildStmt != nil {
@@ -601,6 +609,7 @@ type Queries struct {
 	createGuildStmt                *sql.Stmt
 	createGuildInviteStmt          *sql.Stmt
 	deleteChannelStmt              *sql.Stmt
+	deleteFromGuildListStmt        *sql.Stmt
 	deleteGuildStmt                *sql.Stmt
 	deleteInviteStmt               *sql.Stmt
 	deleteMessageStmt              *sql.Stmt
@@ -672,6 +681,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		createGuildStmt:                q.createGuildStmt,
 		createGuildInviteStmt:          q.createGuildInviteStmt,
 		deleteChannelStmt:              q.deleteChannelStmt,
+		deleteFromGuildListStmt:        q.deleteFromGuildListStmt,
 		deleteGuildStmt:                q.deleteGuildStmt,
 		deleteInviteStmt:               q.deleteInviteStmt,
 		deleteMessageStmt:              q.deleteMessageStmt,

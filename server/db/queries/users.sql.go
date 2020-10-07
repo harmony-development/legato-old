@@ -98,6 +98,24 @@ func (q *Queries) AddUser(ctx context.Context, userID uint64) error {
 	return err
 }
 
+const deleteFromGuildList = `-- name: DeleteFromGuildList :exec
+DELETE FROM Guild_List
+  WHERE User_ID = $1
+    AND Guild_ID = $2
+    AND Home_Server = $3
+`
+
+type DeleteFromGuildListParams struct {
+	UserID     uint64 `json:"user_id"`
+	GuildID    uint64 `json:"guild_id"`
+	HomeServer string `json:"home_server"`
+}
+
+func (q *Queries) DeleteFromGuildList(ctx context.Context, arg DeleteFromGuildListParams) error {
+	_, err := q.exec(ctx, q.deleteFromGuildListStmt, deleteFromGuildList, arg.UserID, arg.GuildID, arg.HomeServer)
+	return err
+}
+
 const emailExists = `-- name: EmailExists :one
 SELECT COUNT(*)
 FROM Local_Users

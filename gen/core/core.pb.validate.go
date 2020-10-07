@@ -3088,6 +3088,18 @@ func (m *HomeserverEvent) Validate() error {
 			}
 		}
 
+	case *HomeserverEvent_GuildRemovedFromList_:
+
+		if v, ok := interface{}(m.GetGuildRemovedFromList()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return HomeserverEventValidationError{
+					field:  "GuildRemovedFromList",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
 	}
 
 	return nil
@@ -3914,6 +3926,146 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = AddGuildToGuildListResponseValidationError{}
+
+// Validate checks the field values on RemoveGuildFromGuildListRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *RemoveGuildFromGuildListRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for GuildId
+
+	// no validation rules for Homeserver
+
+	return nil
+}
+
+// RemoveGuildFromGuildListRequestValidationError is the validation error
+// returned by RemoveGuildFromGuildListRequest.Validate if the designated
+// constraints aren't met.
+type RemoveGuildFromGuildListRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e RemoveGuildFromGuildListRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e RemoveGuildFromGuildListRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e RemoveGuildFromGuildListRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e RemoveGuildFromGuildListRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e RemoveGuildFromGuildListRequestValidationError) ErrorName() string {
+	return "RemoveGuildFromGuildListRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e RemoveGuildFromGuildListRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sRemoveGuildFromGuildListRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = RemoveGuildFromGuildListRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = RemoveGuildFromGuildListRequestValidationError{}
+
+// Validate checks the field values on RemoveGuildFromGuildListResponse with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, an error is returned.
+func (m *RemoveGuildFromGuildListResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	return nil
+}
+
+// RemoveGuildFromGuildListResponseValidationError is the validation error
+// returned by RemoveGuildFromGuildListResponse.Validate if the designated
+// constraints aren't met.
+type RemoveGuildFromGuildListResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e RemoveGuildFromGuildListResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e RemoveGuildFromGuildListResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e RemoveGuildFromGuildListResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e RemoveGuildFromGuildListResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e RemoveGuildFromGuildListResponseValidationError) ErrorName() string {
+	return "RemoveGuildFromGuildListResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e RemoveGuildFromGuildListResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sRemoveGuildFromGuildListResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = RemoveGuildFromGuildListResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = RemoveGuildFromGuildListResponseValidationError{}
 
 // Validate checks the field values on GetGuildListResponse_GuildListEntry with
 // the rules defined in the proto definition for this message. If any rules
