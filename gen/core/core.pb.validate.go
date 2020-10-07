@@ -121,6 +121,8 @@ func (m *Action) Validate() error {
 
 	// no validation rules for Type
 
+	// no validation rules for Presentation
+
 	for idx, item := range m.GetChildren() {
 		_, _ = idx, item
 
@@ -545,6 +547,8 @@ func (m *Message) Validate() error {
 		}
 
 	}
+
+	// no validation rules for InReplyTo
 
 	return nil
 }
@@ -3556,6 +3560,8 @@ func (m *SendMessageRequest) Validate() error {
 		}
 
 	}
+
+	// no validation rules for InReplyTo
 
 	return nil
 }
