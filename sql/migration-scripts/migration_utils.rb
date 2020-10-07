@@ -3,7 +3,7 @@
 require 'pg'
 require 'json'
 
-CURRENT_VERSION = 1
+CURRENT_VERSION = 2
 
 def get_config
     return JSON.parse(File.read("config.json"))
