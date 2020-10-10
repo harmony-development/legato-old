@@ -98,24 +98,6 @@ func (q *Queries) AddUser(ctx context.Context, userID uint64) error {
 	return err
 }
 
-const deleteFromGuildList = `-- name: DeleteFromGuildList :exec
-DELETE FROM Guild_List
-  WHERE User_ID = $1
-    AND Guild_ID = $2
-    AND Home_Server = $3
-`
-
-type DeleteFromGuildListParams struct {
-	UserID     uint64 `json:"user_id"`
-	GuildID    uint64 `json:"guild_id"`
-	HomeServer string `json:"home_server"`
-}
-
-func (q *Queries) DeleteFromGuildList(ctx context.Context, arg DeleteFromGuildListParams) error {
-	_, err := q.exec(ctx, q.deleteFromGuildListStmt, deleteFromGuildList, arg.UserID, arg.GuildID, arg.HomeServer)
-	return err
-}
-
 const emailExists = `-- name: EmailExists :one
 SELECT COUNT(*)
 FROM Local_Users
@@ -317,6 +299,36 @@ func (q *Queries) GetUserMetadata(ctx context.Context, arg GetUserMetadataParams
 	return metadata, err
 }
 
+const isIPWhitelisted = `-- name: IsIPWhitelisted :one
+SELECT EXISTS (
+    SELECT 1
+    FROM Rate_Limit_Whitelist_IP
+    WHERE IP = $1
+  )
+`
+
+func (q *Queries) IsIPWhitelisted(ctx context.Context, ip string) (bool, error) {
+	row := q.queryRow(ctx, q.isIPWhitelistedStmt, isIPWhitelisted, ip)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const isUserWhitelisted = `-- name: IsUserWhitelisted :one
+SELECT EXISTS (
+    SELECT 1
+    FROM Rate_Limit_Whitelist_User
+    WHERE User_ID = $1
+  )
+`
+
+func (q *Queries) IsUserWhitelisted(ctx context.Context, userID uint64) (bool, error) {
+	row := q.queryRow(ctx, q.isUserWhitelistedStmt, isUserWhitelisted, userID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const moveGuild = `-- name: MoveGuild :exec
 UPDATE Guild_List
 SET Position = $1
@@ -404,8 +416,10 @@ func (q *Queries) UpdateUsername(ctx context.Context, arg UpdateUsernameParams) 
 
 const userIsLocal = `-- name: UserIsLocal :one
 SELECT EXISTS(
-  SELECT 1 FROM Local_Users WHERE User_ID = $1
-)
+    SELECT 1
+    FROM Local_Users
+    WHERE User_ID = $1
+  )
 `
 
 func (q *Queries) UserIsLocal(ctx context.Context, userID uint64) (bool, error) {

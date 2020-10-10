@@ -91,6 +91,14 @@ type Profile struct {
 	Status   int16          `json:"status"`
 }
 
+type RateLimitWhitelistIp struct {
+	Ip string `json:"ip"`
+}
+
+type RateLimitWhitelistUser struct {
+	UserID uint64 `json:"user_id"`
+}
+
 type Session struct {
 	Session    string `json:"session"`
 	UserID     uint64 `json:"user_id"`

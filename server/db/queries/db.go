@@ -67,9 +67,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.deleteChannelStmt, err = db.PrepareContext(ctx, deleteChannel); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteChannel: %w", err)
 	}
-	if q.deleteFromGuildListStmt, err = db.PrepareContext(ctx, deleteFromGuildList); err != nil {
-		return nil, fmt.Errorf("error preparing query DeleteFromGuildList: %w", err)
-	}
 	if q.deleteGuildStmt, err = db.PrepareContext(ctx, deleteGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteGuild: %w", err)
 	}
@@ -159,6 +156,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.incrementInviteStmt, err = db.PrepareContext(ctx, incrementInvite); err != nil {
 		return nil, fmt.Errorf("error preparing query IncrementInvite: %w", err)
+	}
+	if q.isIPWhitelistedStmt, err = db.PrepareContext(ctx, isIPWhitelisted); err != nil {
+		return nil, fmt.Errorf("error preparing query IsIPWhitelisted: %w", err)
+	}
+	if q.isUserWhitelistedStmt, err = db.PrepareContext(ctx, isUserWhitelisted); err != nil {
+		return nil, fmt.Errorf("error preparing query IsUserWhitelisted: %w", err)
 	}
 	if q.messageWithIDExistsStmt, err = db.PrepareContext(ctx, messageWithIDExists); err != nil {
 		return nil, fmt.Errorf("error preparing query MessageWithIDExists: %w", err)
@@ -298,11 +301,6 @@ func (q *Queries) Close() error {
 	if q.deleteChannelStmt != nil {
 		if cerr := q.deleteChannelStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteChannelStmt: %w", cerr)
-		}
-	}
-	if q.deleteFromGuildListStmt != nil {
-		if cerr := q.deleteFromGuildListStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing deleteFromGuildListStmt: %w", cerr)
 		}
 	}
 	if q.deleteGuildStmt != nil {
@@ -453,6 +451,16 @@ func (q *Queries) Close() error {
 	if q.incrementInviteStmt != nil {
 		if cerr := q.incrementInviteStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing incrementInviteStmt: %w", cerr)
+		}
+	}
+	if q.isIPWhitelistedStmt != nil {
+		if cerr := q.isIPWhitelistedStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing isIPWhitelistedStmt: %w", cerr)
+		}
+	}
+	if q.isUserWhitelistedStmt != nil {
+		if cerr := q.isUserWhitelistedStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing isUserWhitelistedStmt: %w", cerr)
 		}
 	}
 	if q.messageWithIDExistsStmt != nil {
@@ -609,7 +617,6 @@ type Queries struct {
 	createGuildStmt                *sql.Stmt
 	createGuildInviteStmt          *sql.Stmt
 	deleteChannelStmt              *sql.Stmt
-	deleteFromGuildListStmt        *sql.Stmt
 	deleteGuildStmt                *sql.Stmt
 	deleteInviteStmt               *sql.Stmt
 	deleteMessageStmt              *sql.Stmt
@@ -640,6 +647,8 @@ type Queries struct {
 	guildsForUserStmt              *sql.Stmt
 	guildsForUserWithDataStmt      *sql.Stmt
 	incrementInviteStmt            *sql.Stmt
+	isIPWhitelistedStmt            *sql.Stmt
+	isUserWhitelistedStmt          *sql.Stmt
 	messageWithIDExistsStmt        *sql.Stmt
 	moveChannelStmt                *sql.Stmt
 	moveGuildStmt                  *sql.Stmt
@@ -681,7 +690,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		createGuildStmt:                q.createGuildStmt,
 		createGuildInviteStmt:          q.createGuildInviteStmt,
 		deleteChannelStmt:              q.deleteChannelStmt,
-		deleteFromGuildListStmt:        q.deleteFromGuildListStmt,
 		deleteGuildStmt:                q.deleteGuildStmt,
 		deleteInviteStmt:               q.deleteInviteStmt,
 		deleteMessageStmt:              q.deleteMessageStmt,
@@ -712,6 +720,8 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		guildsForUserStmt:              q.guildsForUserStmt,
 		guildsForUserWithDataStmt:      q.guildsForUserWithDataStmt,
 		incrementInviteStmt:            q.incrementInviteStmt,
+		isIPWhitelistedStmt:            q.isIPWhitelistedStmt,
+		isUserWhitelistedStmt:          q.isUserWhitelistedStmt,
 		messageWithIDExistsStmt:        q.messageWithIDExistsStmt,
 		moveChannelStmt:                q.moveChannelStmt,
 		moveGuildStmt:                  q.moveGuildStmt,
