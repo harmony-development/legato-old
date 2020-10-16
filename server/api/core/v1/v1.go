@@ -793,7 +793,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/SendMessage")
 }
 
-func (v1 *V1) SendMessage(c context.Context, r *corev1.SendMessageRequest) (*emptypb.Empty, error) {
+func (v1 *V1) SendMessage(c context.Context, r *corev1.SendMessageRequest) (*corev1.SendMessageResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 	messageID, err := v1.Sonyflake.NextID()
 	if err != nil {
@@ -836,7 +836,9 @@ func (v1 *V1) SendMessage(c context.Context, r *corev1.SendMessageRequest) (*emp
 			},
 		},
 	})
-	return &emptypb.Empty{}, nil
+	return &corev1.SendMessageResponse{
+		MessageId: messageID,
+	}, nil
 }
 
 func init() {
