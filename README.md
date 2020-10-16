@@ -33,4 +33,4 @@ Make the following preparations:
 After all preparations run ```./legato``` again to start server
 
 ## Docker-compose
-Broke, WIP
+See the [harmony-development/orchestration](https://github.com/harmony-development/orchestration) repo for more details on a docker-compose setup.
