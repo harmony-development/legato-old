@@ -365,10 +365,14 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 				}
 				var embeds []*corev1.Embed
 				var actions []*corev1.Action
+				var overrides *corev1.Override
 				if err := json.Unmarshal(message.Embeds, &embeds); err != nil {
 					continue
 				}
 				if err := json.Unmarshal(message.Actions, &actions); err != nil {
+					continue
+				}
+				if err := json.Unmarshal(message.Overrides, &overrides); err != nil {
 					continue
 				}
 				ret = append(ret, &corev1.Message{
@@ -383,6 +387,7 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 					Content:   message.Content,
 					Embeds:    embeds,
 					Actions:   actions,
+					Overrides: overrides,
 					InReplyTo: uint64(message.ReplyToID.Int64),
 				})
 			}
