@@ -61,6 +61,9 @@ func (v1 *V1) ProtoToEmbeds(embeds []*corev1.Embed) (ret []byte) {
 }
 
 func (v1 *V1) OverridesToProto(overrides []byte) (ret *corev1.Override) {
+	if len(overrides) == 0 {
+		return
+	}
 	ret = new(corev1.Override)
 	proto.Unmarshal(overrides, ret)
 	return
@@ -301,15 +304,18 @@ func (v1 *V1) GetMessage(c context.Context, r *corev1.GetMessageRequest) (*corev
 	}
 	var embeds []*corev1.Embed
 	var actions []*corev1.Action
-	override := new(corev1.Override)
+	var override *corev1.Override
 	if err := json.Unmarshal(message.Embeds, &embeds); err != nil {
 		return nil, err
 	}
 	if err := json.Unmarshal(message.Actions, &actions); err != nil {
 		return nil, err
 	}
-	if err := proto.Unmarshal(message.Overrides, override); err != nil {
-		return nil, err
+	if len(message.Overrides) > 0 {
+		override = new(corev1.Override)
+		if err := proto.Unmarshal(message.Overrides, override); err != nil {
+			return nil, err
+		}
 	}
 	return &corev1.GetMessageResponse{
 		Message: &corev1.Message{
@@ -367,15 +373,18 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 				}
 				var embeds []*corev1.Embed
 				var actions []*corev1.Action
-				overrides := new(corev1.Override)
+				var overrides *corev1.Override
 				if err := json.Unmarshal(message.Embeds, &embeds); err != nil {
 					continue
 				}
 				if err := json.Unmarshal(message.Actions, &actions); err != nil {
 					continue
 				}
-				if err := proto.Unmarshal(message.Overrides, overrides); err != nil {
-					continue
+				if len(message.Overrides) > 0 {
+					overrides = new(corev1.Override)
+					if err := proto.Unmarshal(message.Overrides, overrides); err != nil {
+						continue
+					}
 				}
 				ret = append(ret, &corev1.Message{
 					Location: &corev1.Location{
