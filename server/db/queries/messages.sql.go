@@ -50,7 +50,7 @@ type AddMessageParams struct {
 	Embeds    json.RawMessage `json:"embeds"`
 	Actions   json.RawMessage `json:"actions"`
 	ReplyToID sql.NullInt64   `json:"reply_to_id"`
-	Overrides json.RawMessage `json:"overrides"`
+	Overrides []byte          `json:"overrides"`
 }
 
 func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) (Message, error) {
@@ -345,8 +345,8 @@ WHERE Message_ID = $2
 `
 
 type UpdateMessageOverridesParams struct {
-	Overrides json.RawMessage `json:"overrides"`
-	MessageID uint64          `json:"message_id"`
+	Overrides []byte `json:"overrides"`
+	MessageID uint64 `json:"message_id"`
 }
 
 func (q *Queries) UpdateMessageOverrides(ctx context.Context, arg UpdateMessageOverridesParams) error {

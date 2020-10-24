@@ -7,6 +7,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	corev1 "github.com/harmony-development/legato/gen/core"
@@ -59,13 +60,14 @@ func (v1 *V1) ProtoToEmbeds(embeds []*corev1.Embed) (ret []byte) {
 	return
 }
 
-func (v1 *V1) OverridesToProto(overrides json.RawMessage) (ret *corev1.Override) {
-	json.Unmarshal(overrides, &ret)
+func (v1 *V1) OverridesToProto(overrides []byte) (ret *corev1.Override) {
+	ret = new(corev1.Override)
+	proto.Unmarshal(overrides, ret)
 	return
 }
 
 func (v1 *V1) ProtoToOverrides(overrides *corev1.Override) (ret []byte) {
-	ret, _ = json.Marshal(overrides)
+	ret, _ = proto.Marshal(overrides)
 	return
 }
 
@@ -299,14 +301,14 @@ func (v1 *V1) GetMessage(c context.Context, r *corev1.GetMessageRequest) (*corev
 	}
 	var embeds []*corev1.Embed
 	var actions []*corev1.Action
-	var override *corev1.Override
+	override := new(corev1.Override)
 	if err := json.Unmarshal(message.Embeds, &embeds); err != nil {
 		return nil, err
 	}
 	if err := json.Unmarshal(message.Actions, &actions); err != nil {
 		return nil, err
 	}
-	if err := json.Unmarshal(message.Overrides, &override); err != nil {
+	if err := proto.Unmarshal(message.Overrides, override); err != nil {
 		return nil, err
 	}
 	return &corev1.GetMessageResponse{
@@ -365,14 +367,14 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 				}
 				var embeds []*corev1.Embed
 				var actions []*corev1.Action
-				var overrides *corev1.Override
+				overrides := new(corev1.Override)
 				if err := json.Unmarshal(message.Embeds, &embeds); err != nil {
 					continue
 				}
 				if err := json.Unmarshal(message.Actions, &actions); err != nil {
 					continue
 				}
-				if err := json.Unmarshal(message.Overrides, &overrides); err != nil {
+				if err := proto.Unmarshal(message.Overrides, overrides); err != nil {
 					continue
 				}
 				ret = append(ret, &corev1.Message{

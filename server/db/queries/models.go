@@ -81,7 +81,7 @@ type Message struct {
 	Content   string          `json:"content"`
 	Embeds    json.RawMessage `json:"embeds"`
 	Actions   json.RawMessage `json:"actions"`
-	Overrides json.RawMessage `json:"overrides"`
+	Overrides []byte          `json:"overrides"`
 	ReplyToID sql.NullInt64   `json:"reply_to_id"`
 }
 
