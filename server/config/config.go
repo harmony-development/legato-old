@@ -66,6 +66,7 @@ type DBConf struct {
 	Port     int
 	User     string
 	Password string
+	DBName   string
 	Models   string
 	SSL      bool
 }
@@ -117,6 +118,7 @@ var DefaultConf = Config{
 		Host:   "127.0.0.1",
 		Port:   5432,
 		SSL:    false,
+		DBName: "harmony",
 		Models: "sql/schemas/models.sql",
 	},
 	Sentry: SentryConf{

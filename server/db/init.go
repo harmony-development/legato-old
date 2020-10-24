@@ -106,7 +106,7 @@ func New(cfg *config.Config, logger logger.ILogger, idgen *sonyflake.Sonyflake) 
 	if db.DB, err = sql.Open("postgres", fmt.Sprintf("user=%v password=%v dbname=%v host=%v port=%v sslmode=%v",
 		cfg.DB.User,
 		cfg.DB.Password,
-		"harmony",
+		cfg.DB.DBName,
 		cfg.DB.Host,
 		cfg.DB.Port,
 		map[bool]string{true: "enable", false: "disable"}[cfg.DB.SSL],

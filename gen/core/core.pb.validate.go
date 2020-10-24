@@ -106,6 +106,129 @@ var _ interface {
 	ErrorName() string
 } = LocationValidationError{}
 
+// Validate checks the field values on Override with the rules defined in the
+// proto definition for this message. If any rules are violated, an error is returned.
+func (m *Override) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Name
+
+	// no validation rules for Avatar
+
+	switch m.Reason.(type) {
+
+	case *Override_UserDefined:
+		// no validation rules for UserDefined
+
+	case *Override_Webhook:
+
+		if v, ok := interface{}(m.GetWebhook()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return OverrideValidationError{
+					field:  "Webhook",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *Override_SystemPlurality:
+
+		if v, ok := interface{}(m.GetSystemPlurality()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return OverrideValidationError{
+					field:  "SystemPlurality",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *Override_SystemMessage:
+
+		if v, ok := interface{}(m.GetSystemMessage()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return OverrideValidationError{
+					field:  "SystemMessage",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *Override_Bridge:
+
+		if v, ok := interface{}(m.GetBridge()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return OverrideValidationError{
+					field:  "Bridge",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// OverrideValidationError is the validation error returned by
+// Override.Validate if the designated constraints aren't met.
+type OverrideValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e OverrideValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e OverrideValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e OverrideValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e OverrideValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e OverrideValidationError) ErrorName() string { return "OverrideValidationError" }
+
+// Error satisfies the builtin error interface
+func (e OverrideValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sOverride.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = OverrideValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = OverrideValidationError{}
+
 // Validate checks the field values on Action with the rules defined in the
 // proto definition for this message. If any rules are violated, an error is returned.
 func (m *Action) Validate() error {
@@ -549,6 +672,16 @@ func (m *Message) Validate() error {
 	}
 
 	// no validation rules for InReplyTo
+
+	if v, ok := interface{}(m.GetOverrides()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return MessageValidationError{
+				field:  "Overrides",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
 
 	return nil
 }
@@ -3787,6 +3920,75 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = SendMessageRequestValidationError{}
+
+// Validate checks the field values on SendMessageResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *SendMessageResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for MessageId
+
+	return nil
+}
+
+// SendMessageResponseValidationError is the validation error returned by
+// SendMessageResponse.Validate if the designated constraints aren't met.
+type SendMessageResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e SendMessageResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e SendMessageResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e SendMessageResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e SendMessageResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e SendMessageResponseValidationError) ErrorName() string {
+	return "SendMessageResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e SendMessageResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sSendMessageResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = SendMessageResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = SendMessageResponseValidationError{}
 
 // Validate checks the field values on AddGuildToGuildListRequest with the
 // rules defined in the proto definition for this message. If any rules are
