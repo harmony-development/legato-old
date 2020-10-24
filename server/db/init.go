@@ -42,7 +42,7 @@ type IHarmonyDB interface {
 	AddMemberToGuild(userID, guildID uint64) error
 	AddChannelToGuild(guildID uint64, channelName string, previous, next uint64, category bool) (queries.Channel, error)
 	DeleteChannelFromGuild(guildID, channelID uint64) error
-	AddMessage(channelID, guildID, userID, messageID uint64, message string, attachments []string, embeds, actions []byte, replyTo sql.NullInt64) (*queries.Message, error)
+	AddMessage(channelID, guildID, userID, messageID uint64, message string, attachments []string, embeds, actions, overrides []byte, replyTo sql.NullInt64) (*queries.Message, error)
 	DeleteMessage(messageID, channelID, guildID uint64) error
 	GetMessageOwner(messageID uint64) (uint64, error)
 	ResolveGuildID(inviteID string) (uint64, error)
@@ -81,7 +81,7 @@ type IHarmonyDB interface {
 	AddFileHash(fileID string, hash []byte) error
 	GetFileIDFromHash(hash []byte) (string, error)
 	GetGuildByID(guildID uint64) (queries.Guild, error)
-	UpdateMessage(messageID uint64, content *string, embeds, actions *[]byte) (time.Time, error)
+	UpdateMessage(messageID uint64, content *string, embeds, actions, overrides *[]byte) (time.Time, error)
 	SetStatus(userID uint64, status profilev1.UserStatus) error
 	GetUserMetadata(userID uint64, appID string) (string, error)
 	GetNonceInfo(nonce string) (queries.GetNonceInfoRow, error)

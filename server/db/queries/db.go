@@ -214,6 +214,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.updateMessageEmbedsStmt, err = db.PrepareContext(ctx, updateMessageEmbeds); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateMessageEmbeds: %w", err)
 	}
+	if q.updateMessageOverridesStmt, err = db.PrepareContext(ctx, updateMessageOverrides); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateMessageOverrides: %w", err)
+	}
 	if q.updateUsernameStmt, err = db.PrepareContext(ctx, updateUsername); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateUsername: %w", err)
 	}
@@ -548,6 +551,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing updateMessageEmbedsStmt: %w", cerr)
 		}
 	}
+	if q.updateMessageOverridesStmt != nil {
+		if cerr := q.updateMessageOverridesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateMessageOverridesStmt: %w", cerr)
+		}
+	}
 	if q.updateUsernameStmt != nil {
 		if cerr := q.updateUsernameStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateUsernameStmt: %w", cerr)
@@ -666,6 +674,7 @@ type Queries struct {
 	updateMessageActionsStmt       *sql.Stmt
 	updateMessageContentStmt       *sql.Stmt
 	updateMessageEmbedsStmt        *sql.Stmt
+	updateMessageOverridesStmt     *sql.Stmt
 	updateUsernameStmt             *sql.Stmt
 	userInGuildStmt                *sql.Stmt
 	userIsLocalStmt                *sql.Stmt
@@ -739,6 +748,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		updateMessageActionsStmt:       q.updateMessageActionsStmt,
 		updateMessageContentStmt:       q.updateMessageContentStmt,
 		updateMessageEmbedsStmt:        q.updateMessageEmbedsStmt,
+		updateMessageOverridesStmt:     q.updateMessageOverridesStmt,
 		updateUsernameStmt:             q.updateUsernameStmt,
 		userInGuildStmt:                q.userInGuildStmt,
 		userIsLocalStmt:                q.userIsLocalStmt,

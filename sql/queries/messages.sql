@@ -8,9 +8,10 @@ INSERT INTO Messages (
     Embeds,
     Actions,
     Created_At,
-    Reply_to_ID
+    Reply_to_ID,
+    Overrides
   )
-VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), $8) RETURNING *;
+VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), $8, $9) RETURNING *;
 
 -- name: AddAttachment :exec
 INSERT INTO Attachments(Message_ID, Attachment)
@@ -71,6 +72,11 @@ SET Actions = $2,
   Edited_At = NOW()
 WHERE Message_ID = $1 RETURNING Actions,
   Edited_At;
+
+-- name: UpdateMessageOverrides :exec
+UPDATE Messages
+SET Overrides = $1
+WHERE Message_ID = $2;
 
 -- name: MessageWithIDExists :one
 SELECT EXISTS (

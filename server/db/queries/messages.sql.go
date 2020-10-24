@@ -35,9 +35,10 @@ INSERT INTO Messages (
     Embeds,
     Actions,
     Created_At,
-    Reply_to_ID
+    Reply_to_ID,
+    Overrides
   )
-VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), $8) RETURNING message_id, guild_id, channel_id, user_id, created_at, edited_at, content, embeds, actions, reply_to_id
+VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), $8, $9) RETURNING message_id, guild_id, channel_id, user_id, created_at, edited_at, content, embeds, actions, overrides, reply_to_id
 `
 
 type AddMessageParams struct {
@@ -49,6 +50,7 @@ type AddMessageParams struct {
 	Embeds    json.RawMessage `json:"embeds"`
 	Actions   json.RawMessage `json:"actions"`
 	ReplyToID sql.NullInt64   `json:"reply_to_id"`
+	Overrides json.RawMessage `json:"overrides"`
 }
 
 func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) (Message, error) {
@@ -61,6 +63,7 @@ func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) (Message
 		arg.Embeds,
 		arg.Actions,
 		arg.ReplyToID,
+		arg.Overrides,
 	)
 	var i Message
 	err := row.Scan(
@@ -73,6 +76,7 @@ func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) (Message
 		&i.Content,
 		&i.Embeds,
 		&i.Actions,
+		&i.Overrides,
 		&i.ReplyToID,
 	)
 	return i, err
@@ -129,7 +133,7 @@ func (q *Queries) GetAttachments(ctx context.Context, messageID uint64) ([]strin
 }
 
 const getMessage = `-- name: GetMessage :one
-SELECT message_id, guild_id, channel_id, user_id, created_at, edited_at, content, embeds, actions, reply_to_id
+SELECT message_id, guild_id, channel_id, user_id, created_at, edited_at, content, embeds, actions, overrides, reply_to_id
 FROM Messages
 WHERE Message_ID = $1
 `
@@ -147,6 +151,7 @@ func (q *Queries) GetMessage(ctx context.Context, messageID uint64) (Message, er
 		&i.Content,
 		&i.Embeds,
 		&i.Actions,
+		&i.Overrides,
 		&i.ReplyToID,
 	)
 	return i, err
@@ -179,7 +184,7 @@ func (q *Queries) GetMessageDate(ctx context.Context, messageID uint64) (time.Ti
 }
 
 const getMessages = `-- name: GetMessages :many
-SELECT message_id, guild_id, channel_id, user_id, created_at, edited_at, content, embeds, actions, reply_to_id
+SELECT message_id, guild_id, channel_id, user_id, created_at, edited_at, content, embeds, actions, overrides, reply_to_id
 FROM Messages
 WHERE Guild_ID = $1
   AND Channel_ID = $2
@@ -219,6 +224,7 @@ func (q *Queries) GetMessages(ctx context.Context, arg GetMessagesParams) ([]Mes
 			&i.Content,
 			&i.Embeds,
 			&i.Actions,
+			&i.Overrides,
 			&i.ReplyToID,
 		); err != nil {
 			return nil, err
@@ -330,4 +336,20 @@ func (q *Queries) UpdateMessageEmbeds(ctx context.Context, arg UpdateMessageEmbe
 	var i UpdateMessageEmbedsRow
 	err := row.Scan(&i.Embeds, &i.EditedAt)
 	return i, err
+}
+
+const updateMessageOverrides = `-- name: UpdateMessageOverrides :exec
+UPDATE Messages
+SET Overrides = $1
+WHERE Message_ID = $2
+`
+
+type UpdateMessageOverridesParams struct {
+	Overrides json.RawMessage `json:"overrides"`
+	MessageID uint64          `json:"message_id"`
+}
+
+func (q *Queries) UpdateMessageOverrides(ctx context.Context, arg UpdateMessageOverridesParams) error {
+	_, err := q.exec(ctx, q.updateMessageOverridesStmt, updateMessageOverrides, arg.Overrides, arg.MessageID)
+	return err
 }

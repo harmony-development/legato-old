@@ -152,7 +152,7 @@ func (db *HarmonyDB) DeleteChannelFromGuild(guildID, channelID uint64) error {
 }
 
 // AddMessage adds a message to a channel
-func (db *HarmonyDB) AddMessage(channelID, guildID, userID, messageID uint64, message string, attachments []string, embeds, actions []byte, replyTo sql.NullInt64) (*queries.Message, error) {
+func (db *HarmonyDB) AddMessage(channelID, guildID, userID, messageID uint64, message string, attachments []string, embeds, actions, overrides []byte, replyTo sql.NullInt64) (*queries.Message, error) {
 	tx, err := db.Begin()
 	db.Logger.CheckException(err)
 	if err != nil {
@@ -167,6 +167,7 @@ func (db *HarmonyDB) AddMessage(channelID, guildID, userID, messageID uint64, me
 		Content:   message,
 		Embeds:    embeds,
 		Actions:   actions,
+		Overrides: overrides,
 		ReplyToID: replyTo,
 	})
 	db.Logger.CheckException(err)
@@ -572,7 +573,7 @@ func (db *HarmonyDB) GetGuildByID(guildID uint64) (queries.Guild, error) {
 	return db.queries.GetGuildData(ctx, guildID)
 }
 
-func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, actions *[]byte) (time.Time, error) {
+func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, actions, overrides *[]byte) (time.Time, error) {
 	tx, err := db.Begin()
 	db.Logger.CheckException(err)
 	if err != nil {
@@ -609,6 +610,14 @@ func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, ac
 			})
 			editedAt = data.EditedAt.Time
 			return err
+		})
+	}
+	if overrides != nil {
+		e.Execute(func() error {
+			return tq.UpdateMessageOverrides(ctx, queries.UpdateMessageOverridesParams{
+				MessageID: messageID,
+				Overrides: *overrides,
+			})
 		})
 	}
 	if e.err != nil {

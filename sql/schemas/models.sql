@@ -98,6 +98,7 @@ CREATE TABLE IF NOT EXISTS Messages (
     Content TEXT NOT NULL,
     Embeds jsonb,
     Actions jsonb,
+    Overrides jsonb,
     Reply_To_ID BIGINT DEFAULT 0,
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE,
     FOREIGN KEY (Channel_ID) REFERENCES Channels (Channel_ID) ON DELETE CASCADE

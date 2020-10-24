@@ -2565,6 +2565,18 @@ func (m *UpdateMessageRequest) Validate() error {
 
 	// no validation rules for UpdateAttachments
 
+	if v, ok := interface{}(m.GetOverrides()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UpdateMessageRequestValidationError{
+				field:  "Overrides",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for UpdateOverrides
+
 	return nil
 }
 
@@ -3862,6 +3874,16 @@ func (m *SendMessageRequest) Validate() error {
 
 	// no validation rules for InReplyTo
 
+	if v, ok := interface{}(m.GetOverrides()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return SendMessageRequestValidationError{
+				field:  "Overrides",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -4635,6 +4657,18 @@ func (m *GuildEvent_MessageUpdated) Validate() error {
 	// no validation rules for UpdateActions
 
 	// no validation rules for UpdateAttachments
+
+	if v, ok := interface{}(m.GetOverrides()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return GuildEvent_MessageUpdatedValidationError{
+				field:  "Overrides",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for UpdateOverrides
 
 	return nil
 }
