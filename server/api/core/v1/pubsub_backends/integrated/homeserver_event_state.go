@@ -1,4 +1,4 @@
-package v1
+package integrated
 
 import (
 	"sync"
@@ -6,17 +6,21 @@ import (
 	corev1 "github.com/harmony-development/legato/gen/core"
 )
 
+// HomeserverEventState ...
 type HomeserverEventState struct {
 	homeserverChannels map[corev1.CoreService_StreamHomeserverEventsServer]chan struct{}
-	homeserverEvents   map[UserID][]corev1.CoreService_StreamHomeserverEventsServer
+	homeserverEvents   map[_userID][]corev1.CoreService_StreamHomeserverEventsServer
 	sync.Mutex
 }
 
-var homeserverEventState = HomeserverEventState{
-	homeserverChannels: map[corev1.CoreService_StreamHomeserverEventsServer]chan struct{}{},
-	homeserverEvents:   map[UserID][]corev1.CoreService_StreamHomeserverEventsServer{},
+// Initialize the homeserver event state
+func (h *HomeserverEventState) Initialize() *HomeserverEventState {
+	h.homeserverChannels = make(map[corev1.CoreService_StreamHomeserverEventsServer]chan struct{})
+	h.homeserverEvents = make(map[_userID][]corev1.CoreService_StreamHomeserverEventsServer)
+	return h
 }
 
+// Subscribe ...
 func (h *HomeserverEventState) Subscribe(userID uint64, s corev1.CoreService_StreamHomeserverEventsServer) chan struct{} {
 	h.Lock()
 	defer h.Unlock()
@@ -26,20 +30,21 @@ func (h *HomeserverEventState) Subscribe(userID uint64, s corev1.CoreService_Str
 		h.Unsubscribe(userID, s)
 	}()
 
-	if _, ok := h.homeserverEvents[UserID(userID)]; !ok {
-		h.homeserverEvents[UserID(userID)] = []corev1.CoreService_StreamHomeserverEventsServer{}
+	if _, ok := h.homeserverEvents[_userID(userID)]; !ok {
+		h.homeserverEvents[_userID(userID)] = []corev1.CoreService_StreamHomeserverEventsServer{}
 	}
 
 	h.homeserverChannels[s] = make(chan struct{})
-	h.homeserverEvents[UserID(userID)] = append(h.homeserverEvents[UserID(userID)], s)
+	h.homeserverEvents[_userID(userID)] = append(h.homeserverEvents[_userID(userID)], s)
 	return h.homeserverChannels[s]
 }
 
+// Unsubscribe ...
 func (h *HomeserverEventState) Unsubscribe(userID uint64, s corev1.CoreService_StreamHomeserverEventsServer) {
 	h.Lock()
 	defer h.Unlock()
 
-	val, _ := h.homeserverEvents[UserID(userID)]
+	val, _ := h.homeserverEvents[_userID(userID)]
 	for idx, serv := range val {
 		if serv == s {
 			val[idx] = val[len(val)-1]
@@ -50,14 +55,15 @@ func (h *HomeserverEventState) Unsubscribe(userID uint64, s corev1.CoreService_S
 	}
 	close(h.homeserverChannels[s])
 	delete(h.homeserverChannels, s)
-	h.homeserverEvents[UserID(userID)] = val
+	h.homeserverEvents[_userID(userID)] = val
 }
 
+// Broadcast ...
 func (h *HomeserverEventState) Broadcast(userID uint64, e *corev1.HomeserverEvent) {
 	h.Lock()
 	defer h.Unlock()
 
-	val, _ := h.homeserverEvents[UserID(userID)]
+	val, _ := h.homeserverEvents[_userID(userID)]
 	for _, serv := range val {
 		serv.Send(e)
 	}
