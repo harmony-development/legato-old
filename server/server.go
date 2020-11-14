@@ -1,9 +1,13 @@
 package server
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"net"
+	stdlibHTTP "net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -85,11 +89,17 @@ func (inst Instance) Start() {
 	multiplexer := cmux.New(listener)
 
 	grpcListener := multiplexer.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
-	grpcWebListener := multiplexer.Match(
-		cmux.HTTP1HeaderField("content-type", "application/grpc-web"),
-		cmux.HTTP1HeaderField("Sec-Websocket-Protocol", "grpc-websockets"),
-	)
 	prometheusListener := multiplexer.Match(cmux.HTTP1HeaderFieldPrefix("User-Agent", "Prometheus"))
+	grpcWebListener := multiplexer.Match(
+		func(i io.Reader) bool {
+			req, err := stdlibHTTP.ReadRequest(bufio.NewReader(i))
+			if err != nil {
+				return false
+			}
+
+			return strings.Contains(req.Header.Get("Access-Control-Request-Headers"), "x-grpc-web") || req.Header.Get("x-grpc-web") == "1"
+		},
+	)
 	httpListener := multiplexer.Match(cmux.HTTP1Fast())
 
 	grp := new(errgroup.Group)
