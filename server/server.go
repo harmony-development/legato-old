@@ -1,11 +1,14 @@
 package server
 
 import (
+	"fmt"
+	"net"
 	"os"
 	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/sony/sonyflake"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/harmony-development/legato/server/api"
 	"github.com/harmony-development/legato/server/auth"
@@ -15,6 +18,7 @@ import (
 	"github.com/harmony-development/legato/server/intercom"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/harmony-development/legato/server/storage"
+	"github.com/soheilhy/cmux"
 )
 
 // Instance is an instance of the harmony server
@@ -73,22 +77,39 @@ func (inst Instance) Start() {
 		Config:      inst.Config,
 	})
 
-	go func() {
-		http.New(http.Dependencies{
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", inst.Config.Server.Port))
+	if err != nil {
+		inst.Logger.Fatal(err)
+	}
+
+	multiplexer := cmux.New(listener)
+
+	grpcListener := multiplexer.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
+	grpcWebListener := multiplexer.Match(
+		cmux.HTTP1HeaderField("content-type", "application/grpc-web"),
+		cmux.HTTP1HeaderField("Sec-Websocket-Protocol", "grpc-websockets"),
+	)
+	prometheusListener := multiplexer.Match(cmux.HTTP1HeaderFieldPrefix("User-Agent", "Prometheus"))
+	httpListener := multiplexer.Match(cmux.HTTP1Fast())
+
+	grp := new(errgroup.Group)
+	grp.Go(func() error {
+		httpServer := http.New(http.Dependencies{
 			DB:     inst.DB,
 			Logger: inst.Logger,
 			Config: inst.Config,
-		}).Start(":2288")
-	}()
-
-	errCallback := make(chan error, 16)
-	inst.API.Start(errCallback, inst.Config.Server.Port)
-	logrus.Info("Legato started")
-	for {
-		err, exists := <-errCallback
-		if !exists {
-			return
-		}
+		})
+		err := httpServer.Server.Serve(httpListener)
 		inst.Logger.CheckException(err)
-	}
+		return err
+	})
+	grp.Go(func() error {
+		return inst.API.Start(grpcListener, grpcWebListener, prometheusListener)
+	})
+	grp.Go(func() error {
+		return multiplexer.Serve()
+	})
+
+	logrus.Info("Legato started")
+	grp.Wait()
 }
