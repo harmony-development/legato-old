@@ -21,8 +21,7 @@ type Config struct {
 type ServerConf struct {
 	SnowflakeStart                    int64
 	Port                              int
-	ImagePath                         string
-	GuildPicturePath                  string
+	FlatfileMediaPath                 string
 	PublicKeyPath                     string
 	PrivateKeyPath                    string
 	MaxAttachments                    int
@@ -81,8 +80,7 @@ type SentryConf struct {
 var DefaultConf = Config{
 	Server: ServerConf{
 		Port:                              2289,
-		ImagePath:                         "images",
-		GuildPicturePath:                  "guild-pictures",
+		FlatfileMediaPath:                 "media",
 		PrivateKeyPath:                    "harmony-key.pem",
 		PublicKeyPath:                     "harmony-key.pub",
 		MaxAttachments:                    1,

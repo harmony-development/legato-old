@@ -19,9 +19,9 @@ import (
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/http"
+	"github.com/harmony-development/legato/server/http/attachments/backend/flatfile"
 	"github.com/harmony-development/legato/server/intercom"
 	"github.com/harmony-development/legato/server/logger"
-	"github.com/harmony-development/legato/server/storage"
 	"github.com/soheilhy/cmux"
 )
 
@@ -32,7 +32,6 @@ type Instance struct {
 	Config          *config.Config
 	IntercomManager *intercom.Manager
 	AuthManager     *auth.Manager
-	StorageManager  *storage.Manager
 	Logger          logger.ILogger
 	DB              db.IHarmonyDB
 }
@@ -56,13 +55,6 @@ func (inst Instance) Start() {
 	if err != nil {
 		inst.Logger.Fatal(err)
 	}
-	inst.StorageManager = &storage.Manager{
-		ImageDeleteQueue:        make(chan string, 512),
-		GuildPictureDeleteQueue: make(chan string, 512),
-		ImagePath:               inst.Config.Server.ImagePath,
-		GuildPicturePath:        inst.Config.Server.GuildPicturePath,
-	}
-	go inst.StorageManager.DeleteRoutine()
 	inst.IntercomManager, err = intercom.New(intercom.Dependencies{
 		Logger: inst.Logger,
 	})
@@ -105,9 +97,10 @@ func (inst Instance) Start() {
 	grp := new(errgroup.Group)
 	grp.Go(func() error {
 		httpServer := http.New(http.Dependencies{
-			DB:     inst.DB,
-			Logger: inst.Logger,
-			Config: inst.Config,
+			DB:             inst.DB,
+			Logger:         inst.Logger,
+			Config:         inst.Config,
+			StorageBackend: &flatfile.Backend{},
 		})
 		err := httpServer.Server.Serve(httpListener)
 		inst.Logger.CheckException(err)

@@ -8,6 +8,8 @@ import (
 
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/http/attachments"
+	"github.com/harmony-development/legato/server/http/attachments/backend"
 	"github.com/harmony-development/legato/server/http/hm"
 	"github.com/harmony-development/legato/server/http/routing"
 	"github.com/harmony-development/legato/server/http/webrtc"
@@ -23,9 +25,10 @@ type Server struct {
 
 // Dependencies are elements that a Server needs
 type Dependencies struct {
-	DB     db.IHarmonyDB
-	Logger logger.ILogger
-	Config *config.Config
+	DB             db.IHarmonyDB
+	Logger         logger.ILogger
+	Config         *config.Config
+	StorageBackend backend.AttachmentBackend
 }
 
 // New creates a new HTTP server instance
@@ -49,12 +52,21 @@ func New(deps Dependencies) *Server {
 	}
 	m := hm.New(deps.DB, deps.Logger)
 	s.Router = &routing.Router{Middlewares: m}
-	api := s.Group("/api")
-	api.Use(m.WithHarmony)
 
+	harmony := s.Group("/_harmony")
+	harmony.Use(m.WithHarmony)
+
+	webrtcGrp := harmony.Group("/webrtc")
 	webrtc.New(webrtc.Dependencies{
-		APIGroup: api,
+		APIGroup: webrtcGrp,
 		Router:   s.Router,
+	})
+
+	attachmentsGrp := harmony.Group("/media")
+	attachments.New(attachments.Dependencies{
+		APIGroup:    attachmentsGrp,
+		Router:      s.Router,
+		FileBackend: s.StorageBackend,
 	})
 
 	return s
