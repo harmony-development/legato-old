@@ -2,8 +2,10 @@ package attachments
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/harmony-development/legato/server/http/attachments/backend"
@@ -25,7 +27,8 @@ type API struct {
 }
 
 type UploadData struct {
-	Filename string `validate:"required"`
+	Filename    string `validate:"required"`
+	ContentType string `validate:"required"`
 }
 
 type UploadResponse struct {
@@ -36,7 +39,7 @@ func (a *API) UploadHandler(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
 	data := ctx.Data.(UploadData)
 
-	if data.Filename == "" {
+	if data.Filename == "" || data.ContentType == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, responses.MissingFilename)
 	}
 
@@ -45,21 +48,34 @@ func (a *API) UploadHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	files, ok := form.File["file"]
-	if !ok || len(files) < 1 {
-		return echo.NewHTTPError(http.StatusBadRequest, responses.MissingFiles)
-	} else if len(files) > 1 {
-		return echo.NewHTTPError(http.StatusBadRequest, responses.TooManyFiles)
+	var handle io.Reader
+
+	storedFiles, ok := form.Value["file"]
+	if ok {
+		if len(storedFiles) < 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, responses.MissingFiles)
+		} else if len(storedFiles) > 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, responses.TooManyFiles)
+		}
+
+		handle = strings.NewReader(storedFiles[0])
+	} else {
+		files, ok := form.File["file"]
+		if !ok || len(files) < 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, responses.MissingFiles)
+		} else if len(files) > 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, responses.TooManyFiles)
+		}
+
+		file := files[0]
+
+		handle, err = file.Open()
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError)
+		}
 	}
 
-	file := files[0]
-
-	handle, err := file.Open()
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
-	}
-
-	id, err := a.FileBackend.SaveFile(data.Filename, c.Request().Header.Get("Content-Type"), handle)
+	id, err := a.FileBackend.SaveFile(data.Filename, data.ContentType, handle)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}

@@ -97,10 +97,14 @@ func (inst Instance) Start() {
 	grp := new(errgroup.Group)
 	grp.Go(func() error {
 		httpServer := http.New(http.Dependencies{
-			DB:             inst.DB,
-			Logger:         inst.Logger,
-			Config:         inst.Config,
-			StorageBackend: &flatfile.Backend{},
+			DB:     inst.DB,
+			Logger: inst.Logger,
+			Config: inst.Config,
+			StorageBackend: &flatfile.Backend{
+				Dependencies: flatfile.Dependencies{
+					Config: inst.Config,
+				},
+			},
 		})
 		err := httpServer.Server.Serve(httpListener)
 		inst.Logger.CheckException(err)

@@ -1,6 +1,7 @@
 .idea/
 .env
 vendor
+flatfile
 filestore
 harmony.db
 static
