@@ -29,7 +29,7 @@ type API struct {
 
 func New(deps Dependencies) *API {
 	api := &API{
-		Group:        deps.APIGroup.Group("/webrtc"),
+		Group:        deps.APIGroup,
 		Dependencies: deps,
 		peerConnectionConfig: webrtc.Configuration{
 			ICEServers: []webrtc.ICEServer{

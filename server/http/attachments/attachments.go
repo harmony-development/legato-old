@@ -99,7 +99,7 @@ func (a *API) DownloadHandler(c echo.Context) error {
 
 func New(deps Dependencies) *API {
 	api := &API{
-		Group:        deps.APIGroup.Group("/webrtc"),
+		Group:        deps.APIGroup,
 		Dependencies: deps,
 	}
 
