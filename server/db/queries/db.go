@@ -22,9 +22,6 @@ func New(db DBTX) *Queries {
 func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	q := Queries{db: db}
 	var err error
-	if q.addAttachmentStmt, err = db.PrepareContext(ctx, addAttachment); err != nil {
-		return nil, fmt.Errorf("error preparing query AddAttachment: %w", err)
-	}
 	if q.addFileHashStmt, err = db.PrepareContext(ctx, addFileHash); err != nil {
 		return nil, fmt.Errorf("error preparing query AddFileHash: %w", err)
 	}
@@ -81,9 +78,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.expireSessionsStmt, err = db.PrepareContext(ctx, expireSessions); err != nil {
 		return nil, fmt.Errorf("error preparing query ExpireSessions: %w", err)
-	}
-	if q.getAttachmentsStmt, err = db.PrepareContext(ctx, getAttachments); err != nil {
-		return nil, fmt.Errorf("error preparing query GetAttachments: %w", err)
 	}
 	if q.getAvatarStmt, err = db.PrepareContext(ctx, getAvatar); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAvatar: %w", err)
@@ -231,11 +225,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 
 func (q *Queries) Close() error {
 	var err error
-	if q.addAttachmentStmt != nil {
-		if cerr := q.addAttachmentStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing addAttachmentStmt: %w", cerr)
-		}
-	}
 	if q.addFileHashStmt != nil {
 		if cerr := q.addFileHashStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing addFileHashStmt: %w", cerr)
@@ -329,11 +318,6 @@ func (q *Queries) Close() error {
 	if q.expireSessionsStmt != nil {
 		if cerr := q.expireSessionsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing expireSessionsStmt: %w", cerr)
-		}
-	}
-	if q.getAttachmentsStmt != nil {
-		if cerr := q.getAttachmentsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getAttachmentsStmt: %w", cerr)
 		}
 	}
 	if q.getAvatarStmt != nil {
@@ -610,7 +594,6 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 type Queries struct {
 	db                             DBTX
 	tx                             *sql.Tx
-	addAttachmentStmt              *sql.Stmt
 	addFileHashStmt                *sql.Stmt
 	addForeignUserStmt             *sql.Stmt
 	addLocalUserStmt               *sql.Stmt
@@ -630,7 +613,6 @@ type Queries struct {
 	deleteMessageStmt              *sql.Stmt
 	emailExistsStmt                *sql.Stmt
 	expireSessionsStmt             *sql.Stmt
-	getAttachmentsStmt             *sql.Stmt
 	getAvatarStmt                  *sql.Stmt
 	getChannelPositionStmt         *sql.Stmt
 	getChannelsStmt                *sql.Stmt
@@ -684,7 +666,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
 		db:                             tx,
 		tx:                             tx,
-		addAttachmentStmt:              q.addAttachmentStmt,
 		addFileHashStmt:                q.addFileHashStmt,
 		addForeignUserStmt:             q.addForeignUserStmt,
 		addLocalUserStmt:               q.addLocalUserStmt,
@@ -704,7 +685,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		deleteMessageStmt:              q.deleteMessageStmt,
 		emailExistsStmt:                q.emailExistsStmt,
 		expireSessionsStmt:             q.expireSessionsStmt,
-		getAttachmentsStmt:             q.getAttachmentsStmt,
 		getAvatarStmt:                  q.getAvatarStmt,
 		getChannelPositionStmt:         q.getChannelPositionStmt,
 		getChannelsStmt:                q.getChannelsStmt,

@@ -50,14 +50,12 @@ type IHarmonyDB interface {
 	DeleteInvite(inviteID string) error
 	SessionToUserID(session string) (uint64, error)
 	UserInGuild(userID, guildID uint64) (bool, error)
-	GetAttachments(messageID uint64) ([]string, error)
 	GetMessageDate(messageID uint64) (time.Time, error)
 	GetMessages(guildID, channelID uint64) ([]queries.Message, error)
 	GetMessagesBefore(guildID, channelID uint64, date time.Time) ([]queries.Message, error)
 	UpdateGuildName(guildID uint64, newName string) error
 	GetGuildPicture(guildID uint64) (string, error)
 	SetGuildPicture(guildID uint64, pictureURL string) error
-	AddAttachments(messageID uint64, attachments []string) error
 	GetInvites(guildID uint64) ([]queries.Invite, error)
 	DeleteMember(guildID, userID uint64) error
 	GetLocalGuilds(userID uint64) ([]uint64, error)

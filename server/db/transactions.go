@@ -160,29 +160,20 @@ func (db *HarmonyDB) AddMessage(channelID, guildID, userID, messageID uint64, me
 	}
 	tq := db.queries.WithTx(tx)
 	msg, err := tq.AddMessage(ctx, queries.AddMessageParams{
-		GuildID:   guildID,
-		ChannelID: channelID,
-		UserID:    userID,
-		MessageID: messageID,
-		Content:   message,
-		Embeds:    embeds,
-		Actions:   actions,
-		Overrides: overrides,
-		ReplyToID: replyTo,
+		GuildID:     guildID,
+		ChannelID:   channelID,
+		UserID:      userID,
+		MessageID:   messageID,
+		Content:     message,
+		Embeds:      embeds,
+		Actions:     actions,
+		Overrides:   overrides,
+		Attachments: attachments,
+		ReplyToID:   replyTo,
 	})
 	db.Logger.CheckException(err)
 	if err != nil {
 		return nil, err
-	}
-	for _, attachment := range attachments {
-		if err := tq.AddAttachment(ctx, queries.AddAttachmentParams{
-			MessageID:  msg.MessageID,
-			Attachment: attachment,
-		}); err != nil {
-			_ = tx.Rollback()
-			db.Logger.CheckException(err)
-			return nil, err
-		}
 	}
 	if err := tx.Commit(); err != nil {
 		db.Logger.CheckException(err)
@@ -286,13 +277,6 @@ func (db *HarmonyDB) UserInGuild(userID, guildID uint64) (bool, error) {
 	return id == userID, err
 }
 
-// GetAttachments gets attachments for a message
-func (db *HarmonyDB) GetAttachments(messageID uint64) ([]string, error) {
-	attachments, err := db.queries.GetAttachments(ctx, messageID)
-	db.Logger.CheckException(err)
-	return attachments, err
-}
-
 // GetMessageDate gets the date for a message
 func (db *HarmonyDB) GetMessageDate(messageID uint64) (time.Time, error) {
 	msgDate, err := db.queries.GetMessageDate(ctx, messageID)
@@ -346,32 +330,6 @@ func (db *HarmonyDB) SetGuildPicture(guildID uint64, pictureURL string) error {
 	})
 	db.Logger.CheckException(err)
 	return err
-}
-
-// AddAttachments adds attachments to a message
-func (db *HarmonyDB) AddAttachments(messageID uint64, attachments []string) error {
-	tx, err := db.Begin()
-	db.Logger.CheckException(err)
-	if err != nil {
-		return err
-	}
-	withTX := db.queries.WithTx(tx)
-	for _, a := range attachments {
-		err = withTX.AddAttachment(ctx, queries.AddAttachmentParams{
-			MessageID:  messageID,
-			Attachment: a,
-		})
-		if err != nil {
-			_ = tx.Rollback()
-			db.Logger.CheckException(err)
-			return err
-		}
-	}
-	if err := tx.Commit(); err != nil {
-		db.Logger.CheckException(err)
-		return err
-	}
-	return nil
 }
 
 // GetInvites gets open invites for a guild
