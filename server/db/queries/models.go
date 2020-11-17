@@ -13,11 +13,6 @@ type AcquiredEmotePack struct {
 	UserID uint64 `json:"user_id"`
 }
 
-type Attachment struct {
-	MessageID  uint64 `json:"message_id"`
-	Attachment string `json:"attachment"`
-}
-
 type Channel struct {
 	ChannelID   uint64        `json:"channel_id"`
 	GuildID     sql.NullInt64 `json:"guild_id"`
@@ -89,17 +84,18 @@ type LocalUser struct {
 }
 
 type Message struct {
-	MessageID uint64          `json:"message_id"`
-	GuildID   uint64          `json:"guild_id"`
-	ChannelID uint64          `json:"channel_id"`
-	UserID    uint64          `json:"user_id"`
-	CreatedAt time.Time       `json:"created_at"`
-	EditedAt  sql.NullTime    `json:"edited_at"`
-	Content   string          `json:"content"`
-	Embeds    json.RawMessage `json:"embeds"`
-	Actions   json.RawMessage `json:"actions"`
-	Overrides []byte          `json:"overrides"`
-	ReplyToID sql.NullInt64   `json:"reply_to_id"`
+	MessageID   uint64          `json:"message_id"`
+	GuildID     uint64          `json:"guild_id"`
+	ChannelID   uint64          `json:"channel_id"`
+	UserID      uint64          `json:"user_id"`
+	CreatedAt   time.Time       `json:"created_at"`
+	EditedAt    sql.NullTime    `json:"edited_at"`
+	Content     string          `json:"content"`
+	Embeds      json.RawMessage `json:"embeds"`
+	Actions     json.RawMessage `json:"actions"`
+	Overrides   []byte          `json:"overrides"`
+	ReplyToID   sql.NullInt64   `json:"reply_to_id"`
+	Attachments []string        `json:"attachments"`
 }
 
 type Profile struct {

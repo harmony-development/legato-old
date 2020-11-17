@@ -25,9 +25,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.acquireEmotePackStmt, err = db.PrepareContext(ctx, acquireEmotePack); err != nil {
 		return nil, fmt.Errorf("error preparing query AcquireEmotePack: %w", err)
 	}
-	if q.addAttachmentStmt, err = db.PrepareContext(ctx, addAttachment); err != nil {
-		return nil, fmt.Errorf("error preparing query AddAttachment: %w", err)
-	}
 	if q.addEmoteToPackStmt, err = db.PrepareContext(ctx, addEmoteToPack); err != nil {
 		return nil, fmt.Errorf("error preparing query AddEmoteToPack: %w", err)
 	}
@@ -99,9 +96,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.expireSessionsStmt, err = db.PrepareContext(ctx, expireSessions); err != nil {
 		return nil, fmt.Errorf("error preparing query ExpireSessions: %w", err)
-	}
-	if q.getAttachmentsStmt, err = db.PrepareContext(ctx, getAttachments); err != nil {
-		return nil, fmt.Errorf("error preparing query GetAttachments: %w", err)
 	}
 	if q.getAvatarStmt, err = db.PrepareContext(ctx, getAvatar); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAvatar: %w", err)
@@ -263,11 +257,6 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing acquireEmotePackStmt: %w", cerr)
 		}
 	}
-	if q.addAttachmentStmt != nil {
-		if cerr := q.addAttachmentStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing addAttachmentStmt: %w", cerr)
-		}
-	}
 	if q.addEmoteToPackStmt != nil {
 		if cerr := q.addEmoteToPackStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing addEmoteToPackStmt: %w", cerr)
@@ -386,11 +375,6 @@ func (q *Queries) Close() error {
 	if q.expireSessionsStmt != nil {
 		if cerr := q.expireSessionsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing expireSessionsStmt: %w", cerr)
-		}
-	}
-	if q.getAttachmentsStmt != nil {
-		if cerr := q.getAttachmentsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getAttachmentsStmt: %w", cerr)
 		}
 	}
 	if q.getAvatarStmt != nil {
@@ -683,7 +667,6 @@ type Queries struct {
 	db                             DBTX
 	tx                             *sql.Tx
 	acquireEmotePackStmt           *sql.Stmt
-	addAttachmentStmt              *sql.Stmt
 	addEmoteToPackStmt             *sql.Stmt
 	addFileHashStmt                *sql.Stmt
 	addForeignUserStmt             *sql.Stmt
@@ -708,7 +691,6 @@ type Queries struct {
 	dequipEmotePackStmt            *sql.Stmt
 	emailExistsStmt                *sql.Stmt
 	expireSessionsStmt             *sql.Stmt
-	getAttachmentsStmt             *sql.Stmt
 	getAvatarStmt                  *sql.Stmt
 	getChannelPositionStmt         *sql.Stmt
 	getChannelsStmt                *sql.Stmt
@@ -766,7 +748,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		db:                             tx,
 		tx:                             tx,
 		acquireEmotePackStmt:           q.acquireEmotePackStmt,
-		addAttachmentStmt:              q.addAttachmentStmt,
 		addEmoteToPackStmt:             q.addEmoteToPackStmt,
 		addFileHashStmt:                q.addFileHashStmt,
 		addForeignUserStmt:             q.addForeignUserStmt,
@@ -791,7 +772,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		dequipEmotePackStmt:            q.dequipEmotePackStmt,
 		emailExistsStmt:                q.emailExistsStmt,
 		expireSessionsStmt:             q.expireSessionsStmt,
-		getAttachmentsStmt:             q.getAttachmentsStmt,
 		getAvatarStmt:                  q.getAvatarStmt,
 		getChannelPositionStmt:         q.getChannelPositionStmt,
 		getChannelsStmt:                q.getChannelsStmt,

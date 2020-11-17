@@ -100,14 +100,9 @@ CREATE TABLE IF NOT EXISTS Messages (
     Actions jsonb,
     Overrides bytea,
     Reply_To_ID BIGINT DEFAULT 0,
+    Attachments text[],
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE,
     FOREIGN KEY (Channel_ID) REFERENCES Channels (Channel_ID) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS Attachments (
-    Message_ID BIGSERIAL NOT NULL,
-    Attachment TEXT NOT NULL,
-    FOREIGN KEY (Message_ID) REFERENCES Messages (Message_ID) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Files (
