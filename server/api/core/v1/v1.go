@@ -983,3 +983,98 @@ func (v1 *V1) StreamHomeserverEvents(r *corev1.StreamHomeserverEventsRequest, s 
 	<-v1.PubSub.Homeserver.Subscribe(userID, s)
 	return nil
 }
+
+func (v1 *V1) CreateEmotePack(c context.Context, r *corev1.CreateEmotePackRequest) (*corev1.CreateEmotePackResponse, error) {
+	ctx := c.(middleware.HarmonyContext)
+
+	packID, err := v1.Sonyflake.NextID()
+	if err != nil {
+		return nil, err
+	}
+
+	if err := v1.DB.CreateEmotePack(ctx.UserID, packID, r.PackName); err != nil {
+		return nil, err
+	}
+
+	return &corev1.CreateEmotePackResponse{
+		PackId: packID,
+	}, nil
+}
+
+func (v1 *V1) AddEmoteToPack(c context.Context, r *corev1.AddEmoteToPackRequest) (*empty.Empty, error) {
+	ctx := c.(middleware.HarmonyContext)
+
+	if isOwner, err := v1.DB.IsPackOwner(ctx.UserID, r.PackId); err != nil {
+		return nil, err
+	} else if !isOwner {
+		return nil, status.Error(codes.PermissionDenied, responses.InsufficientPrivileges)
+	}
+	if err := v1.DB.AddEmoteToPack(r.PackId, r.ImageId, r.Name); err != nil {
+		return nil, err
+	}
+	return &empty.Empty{}, nil
+}
+
+func (v1 *V1) DeleteEmoteFromPack(c context.Context, r *corev1.DeleteEmoteFromPackRequest) (*empty.Empty, error) {
+	ctx := c.(middleware.HarmonyContext)
+
+	if isOwner, err := v1.DB.IsPackOwner(ctx.UserID, r.PackId); err != nil {
+		return nil, err
+	} else if !isOwner {
+		return nil, status.Error(codes.PermissionDenied, responses.InsufficientPrivileges)
+	}
+	if err := v1.DB.DeleteEmoteFromPack(r.PackId, r.ImageId); err != nil {
+		return nil, err
+	}
+	return &empty.Empty{}, nil
+}
+
+func (v1 *V1) DeleteEmotePack(c context.Context, r *corev1.DeleteEmotePackRequest) (*empty.Empty, error) {
+	ctx := c.(middleware.HarmonyContext)
+
+	if isOwner, err := v1.DB.IsPackOwner(ctx.UserID, r.PackId); err != nil {
+		return nil, err
+	} else if !isOwner {
+		return nil, status.Error(codes.PermissionDenied, responses.InsufficientPrivileges)
+	}
+	if err := v1.DB.DeleteEmotePack(r.PackId); err != nil {
+		return nil, err
+	}
+	return &empty.Empty{}, nil
+}
+
+func (v1 *V1) GetEmotePacks(c context.Context, r *corev1.GetEmotePacksRequest) (*corev1.GetEmotePacksResponse, error) {
+	ctx := c.(middleware.HarmonyContext)
+	packs, err := v1.DB.GetEmotePacks(ctx.UserID)
+	if err != nil {
+		return nil, err
+	}
+	outPacks := []*corev1.GetEmotePacksResponse_EmotePack{}
+	for _, pack := range packs {
+		outPacks = append(outPacks, &corev1.GetEmotePacksResponse_EmotePack{
+			PackId:    pack.PackID,
+			PackOwner: pack.UserID,
+			PackName:  pack.PackName,
+		})
+	}
+	return &corev1.GetEmotePacksResponse{
+		Packs: outPacks,
+	}, nil
+}
+
+func (v1 *V1) GetEmotePackEmotes(c context.Context, r *corev1.GetEmotePackEmotesRequest) (*corev1.GetEmotePackEmotesResponse, error) {
+	emotes, err := v1.DB.GetEmotePackEmotes(r.PackId)
+	if err != nil {
+		return nil, err
+	}
+	outEmotes := []*corev1.GetEmotePackEmotesResponse_Emote{}
+	for _, emote := range emotes {
+		outEmotes = append(outEmotes, &corev1.GetEmotePackEmotesResponse_Emote{
+			ImageId: emote.ImageID,
+			Name:    emote.EmoteName,
+		})
+	}
+	return &corev1.GetEmotePackEmotesResponse{
+		Emotes: outEmotes,
+	}, nil
+}

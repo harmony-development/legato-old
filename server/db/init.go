@@ -94,6 +94,13 @@ type IHarmonyDB interface {
 	MoveChannel(guildID, channelID, previousID, nextID uint64) error
 	RemoveGuildFromList(userID, guildID uint64, homeServer string) error
 	UserIsLocal(userID uint64) error
+	CreateEmotePack(userID, packID uint64, packName string) error
+	IsPackOwner(userID, packID uint64) (bool, error)
+	AddEmoteToPack(packID uint64, imageID string, name string) error
+	DeleteEmoteFromPack(packID uint64, imageID string) error
+	DeleteEmotePack(packID uint64) error
+	GetEmotePacks(userID uint64) ([]queries.GetEmotePacksRow, error)
+	GetEmotePackEmotes(packID uint64) ([]queries.GetEmotePackEmotesRow, error)
 }
 
 // New creates a new DB connection

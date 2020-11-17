@@ -8,6 +8,11 @@ import (
 	"time"
 )
 
+type AcquiredEmotePack struct {
+	PackID uint64 `json:"pack_id"`
+	UserID uint64 `json:"user_id"`
+}
+
 type Attachment struct {
 	MessageID  uint64 `json:"message_id"`
 	Attachment string `json:"attachment"`
@@ -20,6 +25,18 @@ type Channel struct {
 	Position    string        `json:"position"`
 	Category    bool          `json:"category"`
 	Isvoice     bool          `json:"isvoice"`
+}
+
+type EmotePack struct {
+	PackID   uint64 `json:"pack_id"`
+	PackName string `json:"pack_name"`
+	UserID   uint64 `json:"user_id"`
+}
+
+type EmotePackEmote struct {
+	PackID    uint64 `json:"pack_id"`
+	ImageID   string `json:"image_id"`
+	EmoteName string `json:"emote_name"`
 }
 
 type FederationNonce struct {

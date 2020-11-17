@@ -1196,6 +1196,144 @@ var _ interface {
 	ErrorName() string
 } = CreateChannelResponseValidationError{}
 
+// Validate checks the field values on CreateEmotePackRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *CreateEmotePackRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for PackName
+
+	return nil
+}
+
+// CreateEmotePackRequestValidationError is the validation error returned by
+// CreateEmotePackRequest.Validate if the designated constraints aren't met.
+type CreateEmotePackRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CreateEmotePackRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CreateEmotePackRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CreateEmotePackRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CreateEmotePackRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CreateEmotePackRequestValidationError) ErrorName() string {
+	return "CreateEmotePackRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CreateEmotePackRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCreateEmotePackRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CreateEmotePackRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CreateEmotePackRequestValidationError{}
+
+// Validate checks the field values on CreateEmotePackResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *CreateEmotePackResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for PackId
+
+	return nil
+}
+
+// CreateEmotePackResponseValidationError is the validation error returned by
+// CreateEmotePackResponse.Validate if the designated constraints aren't met.
+type CreateEmotePackResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CreateEmotePackResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CreateEmotePackResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CreateEmotePackResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CreateEmotePackResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CreateEmotePackResponseValidationError) ErrorName() string {
+	return "CreateEmotePackResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CreateEmotePackResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCreateEmotePackResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CreateEmotePackResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CreateEmotePackResponseValidationError{}
+
 // Validate checks the field values on GetGuildListRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
@@ -2268,6 +2406,306 @@ var _ interface {
 	ErrorName() string
 } = GetMessageResponseValidationError{}
 
+// Validate checks the field values on GetEmotePacksRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *GetEmotePacksRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	return nil
+}
+
+// GetEmotePacksRequestValidationError is the validation error returned by
+// GetEmotePacksRequest.Validate if the designated constraints aren't met.
+type GetEmotePacksRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetEmotePacksRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetEmotePacksRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetEmotePacksRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetEmotePacksRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetEmotePacksRequestValidationError) ErrorName() string {
+	return "GetEmotePacksRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetEmotePacksRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetEmotePacksRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetEmotePacksRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetEmotePacksRequestValidationError{}
+
+// Validate checks the field values on GetEmotePacksResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *GetEmotePacksResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	for idx, item := range m.GetPacks() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return GetEmotePacksResponseValidationError{
+					field:  fmt.Sprintf("Packs[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// GetEmotePacksResponseValidationError is the validation error returned by
+// GetEmotePacksResponse.Validate if the designated constraints aren't met.
+type GetEmotePacksResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetEmotePacksResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetEmotePacksResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetEmotePacksResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetEmotePacksResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetEmotePacksResponseValidationError) ErrorName() string {
+	return "GetEmotePacksResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetEmotePacksResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetEmotePacksResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetEmotePacksResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetEmotePacksResponseValidationError{}
+
+// Validate checks the field values on GetEmotePackEmotesRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *GetEmotePackEmotesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for PackId
+
+	return nil
+}
+
+// GetEmotePackEmotesRequestValidationError is the validation error returned by
+// GetEmotePackEmotesRequest.Validate if the designated constraints aren't met.
+type GetEmotePackEmotesRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetEmotePackEmotesRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetEmotePackEmotesRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetEmotePackEmotesRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetEmotePackEmotesRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetEmotePackEmotesRequestValidationError) ErrorName() string {
+	return "GetEmotePackEmotesRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetEmotePackEmotesRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetEmotePackEmotesRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetEmotePackEmotesRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetEmotePackEmotesRequestValidationError{}
+
+// Validate checks the field values on GetEmotePackEmotesResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *GetEmotePackEmotesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	for idx, item := range m.GetEmotes() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return GetEmotePackEmotesResponseValidationError{
+					field:  fmt.Sprintf("Emotes[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// GetEmotePackEmotesResponseValidationError is the validation error returned
+// by GetEmotePackEmotesResponse.Validate if the designated constraints aren't met.
+type GetEmotePackEmotesResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetEmotePackEmotesResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetEmotePackEmotesResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetEmotePackEmotesResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetEmotePackEmotesResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetEmotePackEmotesResponseValidationError) ErrorName() string {
+	return "GetEmotePackEmotesResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetEmotePackEmotesResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetEmotePackEmotesResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetEmotePackEmotesResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetEmotePackEmotesResponseValidationError{}
+
 // Validate checks the field values on UpdateGuildNameRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
@@ -2636,6 +3074,79 @@ var _ interface {
 	ErrorName() string
 } = UpdateMessageRequestValidationError{}
 
+// Validate checks the field values on AddEmoteToPackRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *AddEmoteToPackRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for PackId
+
+	// no validation rules for ImageId
+
+	// no validation rules for Name
+
+	return nil
+}
+
+// AddEmoteToPackRequestValidationError is the validation error returned by
+// AddEmoteToPackRequest.Validate if the designated constraints aren't met.
+type AddEmoteToPackRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AddEmoteToPackRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AddEmoteToPackRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AddEmoteToPackRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AddEmoteToPackRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AddEmoteToPackRequestValidationError) ErrorName() string {
+	return "AddEmoteToPackRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e AddEmoteToPackRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAddEmoteToPackRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AddEmoteToPackRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AddEmoteToPackRequestValidationError{}
+
 // Validate checks the field values on DeleteGuildRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
@@ -2945,6 +3456,146 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = DeleteMessageRequestValidationError{}
+
+// Validate checks the field values on DeleteEmoteFromPackRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *DeleteEmoteFromPackRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for PackId
+
+	// no validation rules for ImageId
+
+	return nil
+}
+
+// DeleteEmoteFromPackRequestValidationError is the validation error returned
+// by DeleteEmoteFromPackRequest.Validate if the designated constraints aren't met.
+type DeleteEmoteFromPackRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DeleteEmoteFromPackRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DeleteEmoteFromPackRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DeleteEmoteFromPackRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DeleteEmoteFromPackRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DeleteEmoteFromPackRequestValidationError) ErrorName() string {
+	return "DeleteEmoteFromPackRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DeleteEmoteFromPackRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDeleteEmoteFromPackRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DeleteEmoteFromPackRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DeleteEmoteFromPackRequestValidationError{}
+
+// Validate checks the field values on DeleteEmotePackRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *DeleteEmotePackRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for PackId
+
+	return nil
+}
+
+// DeleteEmotePackRequestValidationError is the validation error returned by
+// DeleteEmotePackRequest.Validate if the designated constraints aren't met.
+type DeleteEmotePackRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DeleteEmotePackRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DeleteEmotePackRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DeleteEmotePackRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DeleteEmotePackRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DeleteEmotePackRequestValidationError) ErrorName() string {
+	return "DeleteEmotePackRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DeleteEmotePackRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDeleteEmotePackRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DeleteEmotePackRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DeleteEmotePackRequestValidationError{}
 
 // Validate checks the field values on StreamGuildEventsRequest with the rules
 // defined in the proto definition for this message. If any rules are
@@ -4512,6 +5163,152 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = GetGuildChannelsResponse_ChannelValidationError{}
+
+// Validate checks the field values on GetEmotePacksResponse_EmotePack with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *GetEmotePacksResponse_EmotePack) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for PackId
+
+	// no validation rules for PackOwner
+
+	// no validation rules for PackName
+
+	return nil
+}
+
+// GetEmotePacksResponse_EmotePackValidationError is the validation error
+// returned by GetEmotePacksResponse_EmotePack.Validate if the designated
+// constraints aren't met.
+type GetEmotePacksResponse_EmotePackValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetEmotePacksResponse_EmotePackValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetEmotePacksResponse_EmotePackValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetEmotePacksResponse_EmotePackValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetEmotePacksResponse_EmotePackValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetEmotePacksResponse_EmotePackValidationError) ErrorName() string {
+	return "GetEmotePacksResponse_EmotePackValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetEmotePacksResponse_EmotePackValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetEmotePacksResponse_EmotePack.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetEmotePacksResponse_EmotePackValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetEmotePacksResponse_EmotePackValidationError{}
+
+// Validate checks the field values on GetEmotePackEmotesResponse_Emote with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, an error is returned.
+func (m *GetEmotePackEmotesResponse_Emote) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for ImageId
+
+	// no validation rules for Name
+
+	return nil
+}
+
+// GetEmotePackEmotesResponse_EmoteValidationError is the validation error
+// returned by GetEmotePackEmotesResponse_Emote.Validate if the designated
+// constraints aren't met.
+type GetEmotePackEmotesResponse_EmoteValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetEmotePackEmotesResponse_EmoteValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetEmotePackEmotesResponse_EmoteValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetEmotePackEmotesResponse_EmoteValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetEmotePackEmotesResponse_EmoteValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetEmotePackEmotesResponse_EmoteValidationError) ErrorName() string {
+	return "GetEmotePackEmotesResponse_EmoteValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetEmotePackEmotesResponse_EmoteValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetEmotePackEmotesResponse_Emote.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetEmotePackEmotesResponse_EmoteValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetEmotePackEmotesResponse_EmoteValidationError{}
 
 // Validate checks the field values on GuildEvent_MessageSent with the rules
 // defined in the proto definition for this message. If any rules are
