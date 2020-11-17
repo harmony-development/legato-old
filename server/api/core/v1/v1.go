@@ -1045,6 +1045,15 @@ func (v1 *V1) DeleteEmotePack(c context.Context, r *corev1.DeleteEmotePackReques
 	return &empty.Empty{}, nil
 }
 
+func (v1 *V1) DequipEmotePack(c context.Context, r *corev1.DequipEmotePackRequest) (*empty.Empty, error) {
+	ctx := c.(middleware.HarmonyContext)
+
+	if err := v1.DB.DequipEmotePack(ctx.UserID, r.PackId); err != nil {
+		return nil, err
+	}
+	return &empty.Empty{}, nil
+}
+
 func (v1 *V1) GetEmotePacks(c context.Context, r *corev1.GetEmotePacksRequest) (*corev1.GetEmotePacksResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 	packs, err := v1.DB.GetEmotePacks(ctx.UserID)

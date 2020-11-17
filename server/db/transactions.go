@@ -831,3 +831,10 @@ func (db HarmonyDB) GetEmotePacks(userID uint64) ([]queries.GetEmotePacksRow, er
 func (db HarmonyDB) GetEmotePackEmotes(packID uint64) ([]queries.GetEmotePackEmotesRow, error) {
 	return db.queries.GetEmotePackEmotes(ctx, packID)
 }
+
+func (db HarmonyDB) DequipEmotePack(userID, packID uint64) error {
+	return db.queries.DequipEmotePack(ctx, queries.DequipEmotePackParams{
+		PackID: packID,
+		UserID: userID,
+	})
+}

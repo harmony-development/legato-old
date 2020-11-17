@@ -99,6 +99,7 @@ type IHarmonyDB interface {
 	DeleteEmotePack(packID uint64) error
 	GetEmotePacks(userID uint64) ([]queries.GetEmotePacksRow, error)
 	GetEmotePackEmotes(packID uint64) ([]queries.GetEmotePackEmotesRow, error)
+	DequipEmotePack(userID, packID uint64) error
 }
 
 // New creates a new DB connection
