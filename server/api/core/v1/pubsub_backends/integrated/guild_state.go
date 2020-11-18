@@ -8,29 +8,29 @@ import (
 
 // GuildState is the state of a guild
 type GuildState struct {
-	serverChannels map[corev1.CoreService_StreamGuildEventsServer]chan struct{}
-	guildEvents    map[_userID]map[_guildID][]corev1.CoreService_StreamGuildEventsServer
+	serverChannels map[corev1.CoreService_StreamEventsServer]chan struct{}
+	guildEvents    map[_userID]map[_guildID][]corev1.CoreService_StreamEventsServer
 	subs           map[_guildID]map[_userID]struct{}
 	sync.Mutex
 }
 
 // Initialize the guild state
 func (s *GuildState) Initialize() *GuildState {
-	s.serverChannels = make(map[corev1.CoreService_StreamGuildEventsServer]chan struct{})
-	s.guildEvents = make(map[_userID]map[_guildID][]corev1.CoreService_StreamGuildEventsServer)
+	s.serverChannels = make(map[corev1.CoreService_StreamEventsServer]chan struct{})
+	s.guildEvents = make(map[_userID]map[_guildID][]corev1.CoreService_StreamEventsServer)
 	s.subs = make(map[_guildID]map[_userID]struct{})
 	return s
 }
 
 // Subscribe ...
-func (s *GuildState) Subscribe(guildID, userID uint64, server corev1.CoreService_StreamGuildEventsServer) chan struct{} {
+func (s *GuildState) Subscribe(guildID, userID uint64, server corev1.CoreService_StreamEventsServer) chan struct{} {
 	s.Lock()
 	defer s.Unlock()
 
 	s.subAdd(guildID, userID)
 
 	if _, ok := s.guildEvents[_userID(userID)]; !ok {
-		s.guildEvents[_userID(userID)] = map[_guildID][]corev1.CoreService_StreamGuildEventsServer{}
+		s.guildEvents[_userID(userID)] = map[_guildID][]corev1.CoreService_StreamEventsServer{}
 	}
 
 	go func() {
@@ -95,7 +95,7 @@ func (s *GuildState) UnsubscribeUserFromGuild(userID, guildID uint64) {
 }
 
 // Broadcast ...
-func (s *GuildState) Broadcast(guildID uint64, event *corev1.GuildEvent) {
+func (s *GuildState) Broadcast(guildID uint64, event *corev1.Event) {
 	s.Lock()
 	defer s.Unlock()
 

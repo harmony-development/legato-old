@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"io"
 	"time"
 
 	"github.com/golang/protobuf/proto"
@@ -149,9 +150,9 @@ func (v1 *V1) CreateChannel(c context.Context, r *corev1.CreateChannelRequest) (
 		return nil, err
 	}
 	r.Location.ChannelId = channel.ChannelID
-	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.GuildEvent{
-		Event: &corev1.GuildEvent_CreatedChannel{
-			CreatedChannel: &corev1.GuildEvent_ChannelCreated{
+	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.Event{
+		Event: &corev1.Event_CreatedChannel{
+			CreatedChannel: &corev1.Event_ChannelCreated{
 				Location:   r.Location,
 				Name:       r.ChannelName,
 				PreviousId: r.PreviousId,
@@ -426,9 +427,9 @@ func (v1 *V1) UpdateGuildName(c context.Context, r *corev1.UpdateGuildNameReques
 	if err := v1.DB.UpdateGuildName(r.Location.GuildId, r.NewGuildName); err != nil {
 		return nil, err
 	}
-	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.GuildEvent{
-		Event: &corev1.GuildEvent_EditedGuild{
-			EditedGuild: &corev1.GuildEvent_GuildUpdated{
+	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.Event{
+		Event: &corev1.Event_EditedGuild{
+			EditedGuild: &corev1.Event_GuildUpdated{
 				Name:       r.NewGuildName,
 				UpdateName: true,
 			},
@@ -453,9 +454,9 @@ func (v1 *V1) UpdateChannelName(c context.Context, r *corev1.UpdateChannelNameRe
 	if err := v1.DB.SetChannelName(r.Location.GuildId, r.Location.ChannelId, r.NewChannelName); err != nil {
 		return nil, err
 	}
-	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.GuildEvent{
-		Event: &corev1.GuildEvent_EditedChannel{
-			EditedChannel: &corev1.GuildEvent_ChannelUpdated{
+	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.Event{
+		Event: &corev1.Event_EditedChannel{
+			EditedChannel: &corev1.Event_ChannelUpdated{
 				Location:   r.Location,
 				Name:       r.NewChannelName,
 				UpdateName: true,
@@ -481,9 +482,9 @@ func (v1 *V1) UpdateChannelOrder(c context.Context, r *corev1.UpdateChannelOrder
 	if err := v1.DB.MoveChannel(r.Location.GuildId, r.Location.ChannelId, r.PreviousId, r.NextId); err != nil {
 		return nil, err
 	}
-	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.GuildEvent{
-		Event: &corev1.GuildEvent_EditedChannel{
-			EditedChannel: &corev1.GuildEvent_ChannelUpdated{
+	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.Event{
+		Event: &corev1.Event_EditedChannel{
+			EditedChannel: &corev1.Event_ChannelUpdated{
 				Location:    r.Location,
 				PreviousId:  r.PreviousId,
 				NextId:      r.NextId,
@@ -540,9 +541,9 @@ func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (
 		return nil, err
 	}
 	editedAt, _ := ptypes.TimestampProto(tiempo.UTC())
-	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.GuildEvent{
-		Event: &corev1.GuildEvent_EditedMessage{
-			EditedMessage: &corev1.GuildEvent_MessageUpdated{
+	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.Event{
+		Event: &corev1.Event_EditedMessage{
+			EditedMessage: &corev1.Event_MessageUpdated{
 				Location:      r.Location,
 				Content:       r.Content,
 				UpdateContent: r.UpdateContent,
@@ -575,9 +576,9 @@ func (v1 *V1) DeleteGuild(c context.Context, r *corev1.DeleteGuildRequest) (*emp
 	if err != nil {
 		return nil, err
 	}
-	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.GuildEvent{
-		Event: &corev1.GuildEvent_DeletedGuild{
-			DeletedGuild: &corev1.GuildEvent_GuildDeleted{},
+	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.Event{
+		Event: &corev1.Event_DeletedGuild{
+			DeletedGuild: &corev1.Event_GuildDeleted{},
 		},
 	})
 	return &emptypb.Empty{}, nil
@@ -618,9 +619,9 @@ func (v1 *V1) DeleteChannel(c context.Context, r *corev1.DeleteChannelRequest) (
 	if err := v1.DB.DeleteChannelFromGuild(r.Location.GuildId, r.Location.ChannelId); err != nil {
 		return nil, err
 	}
-	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.GuildEvent{
-		Event: &corev1.GuildEvent_DeletedChannel{
-			DeletedChannel: &corev1.GuildEvent_ChannelDeleted{
+	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.Event{
+		Event: &corev1.Event_DeletedChannel{
+			DeletedChannel: &corev1.Event_ChannelDeleted{
 				Location: r.Location,
 			},
 		},
@@ -649,9 +650,9 @@ func (v1 *V1) DeleteMessage(c context.Context, r *corev1.DeleteMessageRequest) (
 	if ctx.UserID != owner {
 		return nil, NoPermissionsError
 	}
-	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.GuildEvent{
-		Event: &corev1.GuildEvent_DeletedMessage{
-			DeletedMessage: &corev1.GuildEvent_MessageDeleted{
+	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.Event{
+		Event: &corev1.Event_DeletedMessage{
+			DeletedMessage: &corev1.Event_MessageDeleted{
 				Location: &corev1.Location{
 					MessageId: r.Location.MessageId,
 					ChannelId: r.Location.ChannelId,
@@ -690,9 +691,9 @@ func (v1 *V1) JoinGuild(c context.Context, r *corev1.JoinGuildRequest) (*corev1.
 	if err := v1.DB.IncrementInvite(r.InviteId); err != nil {
 		return nil, err
 	}
-	v1.PubSub.Guild.Broadcast(guildID, &corev1.GuildEvent{
-		Event: &corev1.GuildEvent_JoinedMember{
-			JoinedMember: &corev1.GuildEvent_MemberJoined{
+	v1.PubSub.Guild.Broadcast(guildID, &corev1.Event{
+		Event: &corev1.Event_JoinedMember{
+			JoinedMember: &corev1.Event_MemberJoined{
 				MemberId: ctx.UserID,
 			},
 		},
@@ -724,9 +725,9 @@ func (v1 *V1) LeaveGuild(c context.Context, r *corev1.LeaveGuildRequest) (*empty
 		return nil, status.Error(codes.FailedPrecondition, responses.InvalidRequest)
 	}
 	v1.PubSub.Guild.UnsubscribeUserFromGuild(r.Location.GuildId, ctx.UserID)
-	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.GuildEvent{
-		Event: &corev1.GuildEvent_LeftMember{
-			LeftMember: &corev1.GuildEvent_MemberLeft{
+	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.Event{
+		Event: &corev1.Event_LeftMember{
+			LeftMember: &corev1.Event_MemberLeft{
 				MemberId: ctx.UserID,
 			},
 		},
@@ -743,44 +744,46 @@ func init() {
 		Auth:       true,
 		Location:   middleware.GuildLocation,
 		Permission: middleware.NoPermission,
-	}, "/protocol.core.v1.CoreService/StreamGuildEvents")
+	}, "/protocol.core.v1.CoreService/StreamEvents")
 }
 
-func (v1 *V1) StreamGuildEvents(r *corev1.StreamGuildEventsRequest, s corev1.CoreService_StreamGuildEventsServer) error {
+func (v1 *V1) StreamEvents(s corev1.CoreService_StreamEventsServer) error {
 	userID, err := middleware.AuthHandler(v1.DB, s.Context())
 	if err != nil {
 		return err
 	}
-	if err := middleware.LocationHandler(v1.DB, r, "/protocol.core.v1.CoreService/StreamGuildEvents", userID); err != nil {
-		return err
+	for {
+		in, err := s.Recv()
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		switch x := in.Request.(type) {
+		case *corev1.StreamEventsRequest_SubscribeToGuild_:
+			if err := middleware.LocationHandler(v1.DB, x.SubscribeToGuild, "/protocol.core.v1.CoreService/StreamGuildEvents", userID); err != nil {
+				break
+			}
+			ok, err := v1.DB.UserInGuild(userID, x.SubscribeToGuild.Location.GuildId)
+			if err != nil {
+				break
+			}
+			if !ok {
+				break
+			}
+			<-v1.PubSub.Guild.Subscribe(x.SubscribeToGuild.Location.GuildId, userID, s)
+			return nil
+		case *corev1.StreamEventsRequest_SubscribeToActions_:
+			<-v1.PubSub.Actions.Subscribe(userID, s)
+		case *corev1.StreamEventsRequest_SubscribeToHomeserverEvents_:
+			err = v1.DB.UserIsLocal(userID)
+			if err != nil {
+				break
+			}
+			<-v1.PubSub.Homeserver.Subscribe(userID, s)
+		}
 	}
-	ok, err := v1.DB.UserInGuild(userID, r.Location.GuildId)
-	if err != nil {
-		return err
-	}
-	if !ok {
-		return NotInGuild
-	}
-	<-v1.PubSub.Guild.Subscribe(r.Location.GuildId, userID, s)
-	return nil
-}
-
-func init() {
-	middleware.RegisterRPCConfig(middleware.RPCConfig{
-		RateLimit: middleware.RateLimit{
-			Duration: 5 * time.Second,
-			Burst:    5,
-		},
-		Auth:       true,
-		Location:   middleware.NoLocation,
-		Permission: middleware.NoPermission,
-	}, "/protocol.core.v1.CoreService/StreamActionEvents")
-}
-
-func (v1 *V1) StreamActionEvents(r *corev1.StreamActionEventsRequest, s corev1.CoreService_StreamActionEventsServer) error {
-	wrappedStream := s.(middleware.IHarmonyWrappedServerStream)
-	<-v1.PubSub.Actions.Subscribe(wrappedStream.GetWrappedContext().UserID, s)
-	return nil
 }
 
 func init() {
@@ -806,9 +809,9 @@ func (v1 *V1) TriggerAction(c context.Context, r *corev1.TriggerActionRequest) (
 	}
 	for _, action := range v1.ActionsToProto(msg.Actions) {
 		if action.Id == r.ActionId {
-			v1.PubSub.Actions.Broadcast(ctx.UserID, &corev1.ActionEvent{
-				Event: &corev1.ActionEvent_Action_{
-					Action: &corev1.ActionEvent_Action{
+			v1.PubSub.Actions.Broadcast(ctx.UserID, &corev1.Event{
+				Event: &corev1.Event_ActionPerformed_{
+					ActionPerformed: &corev1.Event_ActionPerformed{
 						Location:   r.Location,
 						ActionData: r.ActionData,
 						ActionId:   r.ActionId,
@@ -871,9 +874,9 @@ func (v1 *V1) SendMessage(c context.Context, r *corev1.SendMessageRequest) (*cor
 	message.CreatedAt = createdAt
 	message.Location.MessageId = msg.MessageID
 	message.AuthorId = ctx.UserID
-	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.GuildEvent{
-		Event: &corev1.GuildEvent_SentMessage{
-			SentMessage: &corev1.GuildEvent_MessageSent{
+	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.Event{
+		Event: &corev1.Event_SentMessage{
+			SentMessage: &corev1.Event_MessageSent{
 				Message: &message,
 			},
 		},
@@ -932,9 +935,9 @@ func (v1 *V1) AddGuildToGuildList(c context.Context, r *corev1.AddGuildToGuildLi
 	if err != nil {
 		return nil, err
 	}
-	v1.PubSub.Homeserver.Broadcast(ctx.UserID, &corev1.HomeserverEvent{
-		Event: &corev1.HomeserverEvent_GuildAddedToList_{
-			GuildAddedToList: &corev1.HomeserverEvent_GuildAddedToList{
+	v1.PubSub.Homeserver.Broadcast(ctx.UserID, &corev1.Event{
+		Event: &corev1.Event_GuildAddedToList_{
+			GuildAddedToList: &corev1.Event_GuildAddedToList{
 				GuildId:    r.GuildId,
 				Homeserver: r.Homeserver,
 			},
@@ -962,28 +965,15 @@ func (v1 *V1) RemoveGuildFromGuildList(c context.Context, r *corev1.RemoveGuildF
 	if err != nil {
 		return nil, err
 	}
-	v1.PubSub.Homeserver.Broadcast(ctx.UserID, &corev1.HomeserverEvent{
-		Event: &corev1.HomeserverEvent_GuildRemovedFromList_{
-			GuildRemovedFromList: &corev1.HomeserverEvent_GuildRemovedFromList{
+	v1.PubSub.Homeserver.Broadcast(ctx.UserID, &corev1.Event{
+		Event: &corev1.Event_GuildRemovedFromList_{
+			GuildRemovedFromList: &corev1.Event_GuildRemovedFromList{
 				GuildId:    r.GuildId,
 				Homeserver: r.Homeserver,
 			},
 		},
 	})
 	return &corev1.RemoveGuildFromGuildListResponse{}, nil
-}
-
-func (v1 *V1) StreamHomeserverEvents(r *corev1.StreamHomeserverEventsRequest, s corev1.CoreService_StreamHomeserverEventsServer) error {
-	userID, err := middleware.AuthHandler(v1.DB, s.Context())
-	if err != nil {
-		return err
-	}
-	err = v1.DB.UserIsLocal(userID)
-	if err != nil {
-		return err
-	}
-	<-v1.PubSub.Homeserver.Subscribe(userID, s)
-	return nil
 }
 
 func (v1 *V1) CreateEmotePack(c context.Context, r *corev1.CreateEmotePackRequest) (*corev1.CreateEmotePackResponse, error) {

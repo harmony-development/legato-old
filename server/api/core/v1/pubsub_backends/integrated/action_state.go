@@ -8,20 +8,20 @@ import (
 
 // ActionState is the manager of action pub/sub
 type ActionState struct {
-	actionChannels map[corev1.CoreService_StreamActionEventsServer]chan struct{}
-	actionEvents   map[_userID][]corev1.CoreService_StreamActionEventsServer
+	actionChannels map[corev1.CoreService_StreamEventsServer]chan struct{}
+	actionEvents   map[_userID][]corev1.CoreService_StreamEventsServer
 	sync.Mutex
 }
 
 // Initialize the action state
 func (a *ActionState) Initialize() *ActionState {
-	a.actionChannels = make(map[corev1.CoreService_StreamActionEventsServer]chan struct{})
-	a.actionEvents = make(map[_userID][]corev1.CoreService_StreamActionEventsServer)
+	a.actionChannels = make(map[corev1.CoreService_StreamEventsServer]chan struct{})
+	a.actionEvents = make(map[_userID][]corev1.CoreService_StreamEventsServer)
 	return a
 }
 
 // Subscribe subscribes
-func (a *ActionState) Subscribe(userID uint64, server corev1.CoreService_StreamActionEventsServer) chan struct{} {
+func (a *ActionState) Subscribe(userID uint64, server corev1.CoreService_StreamEventsServer) chan struct{} {
 	a.Lock()
 	defer a.Unlock()
 
@@ -38,7 +38,7 @@ func (a *ActionState) Subscribe(userID uint64, server corev1.CoreService_StreamA
 }
 
 // Unsubscribe unsubscribes
-func (a *ActionState) Unsubscribe(userID uint64, server corev1.CoreService_StreamActionEventsServer) {
+func (a *ActionState) Unsubscribe(userID uint64, server corev1.CoreService_StreamEventsServer) {
 	a.Lock()
 	defer a.Unlock()
 
@@ -57,7 +57,7 @@ func (a *ActionState) Unsubscribe(userID uint64, server corev1.CoreService_Strea
 }
 
 // Broadcast broadcasts
-func (a *ActionState) Broadcast(userID uint64, action *corev1.ActionEvent) {
+func (a *ActionState) Broadcast(userID uint64, action *corev1.Event) {
 	val, _ := a.actionEvents[_userID(userID)]
 	for _, serv := range val {
 		serv.Send(action)

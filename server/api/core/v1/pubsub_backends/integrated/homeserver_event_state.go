@@ -8,20 +8,20 @@ import (
 
 // HomeserverEventState ...
 type HomeserverEventState struct {
-	homeserverChannels map[corev1.CoreService_StreamHomeserverEventsServer]chan struct{}
-	homeserverEvents   map[_userID][]corev1.CoreService_StreamHomeserverEventsServer
+	homeserverChannels map[corev1.CoreService_StreamEventsServer]chan struct{}
+	homeserverEvents   map[_userID][]corev1.CoreService_StreamEventsServer
 	sync.Mutex
 }
 
 // Initialize the homeserver event state
 func (h *HomeserverEventState) Initialize() *HomeserverEventState {
-	h.homeserverChannels = make(map[corev1.CoreService_StreamHomeserverEventsServer]chan struct{})
-	h.homeserverEvents = make(map[_userID][]corev1.CoreService_StreamHomeserverEventsServer)
+	h.homeserverChannels = make(map[corev1.CoreService_StreamEventsServer]chan struct{})
+	h.homeserverEvents = make(map[_userID][]corev1.CoreService_StreamEventsServer)
 	return h
 }
 
 // Subscribe ...
-func (h *HomeserverEventState) Subscribe(userID uint64, s corev1.CoreService_StreamHomeserverEventsServer) chan struct{} {
+func (h *HomeserverEventState) Subscribe(userID uint64, s corev1.CoreService_StreamEventsServer) chan struct{} {
 	h.Lock()
 	defer h.Unlock()
 
@@ -31,7 +31,7 @@ func (h *HomeserverEventState) Subscribe(userID uint64, s corev1.CoreService_Str
 	}()
 
 	if _, ok := h.homeserverEvents[_userID(userID)]; !ok {
-		h.homeserverEvents[_userID(userID)] = []corev1.CoreService_StreamHomeserverEventsServer{}
+		h.homeserverEvents[_userID(userID)] = []corev1.CoreService_StreamEventsServer{}
 	}
 
 	h.homeserverChannels[s] = make(chan struct{})
@@ -40,7 +40,7 @@ func (h *HomeserverEventState) Subscribe(userID uint64, s corev1.CoreService_Str
 }
 
 // Unsubscribe ...
-func (h *HomeserverEventState) Unsubscribe(userID uint64, s corev1.CoreService_StreamHomeserverEventsServer) {
+func (h *HomeserverEventState) Unsubscribe(userID uint64, s corev1.CoreService_StreamEventsServer) {
 	h.Lock()
 	defer h.Unlock()
 
@@ -59,7 +59,7 @@ func (h *HomeserverEventState) Unsubscribe(userID uint64, s corev1.CoreService_S
 }
 
 // Broadcast ...
-func (h *HomeserverEventState) Broadcast(userID uint64, e *corev1.HomeserverEvent) {
+func (h *HomeserverEventState) Broadcast(userID uint64, e *corev1.Event) {
 	h.Lock()
 	defer h.Unlock()
 

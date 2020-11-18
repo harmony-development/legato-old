@@ -3666,30 +3666,60 @@ var _ interface {
 	ErrorName() string
 } = DequipEmotePackRequestValidationError{}
 
-// Validate checks the field values on StreamGuildEventsRequest with the rules
+// Validate checks the field values on StreamEventsRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
-func (m *StreamGuildEventsRequest) Validate() error {
+func (m *StreamEventsRequest) Validate() error {
 	if m == nil {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return StreamGuildEventsRequestValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
+	switch m.Request.(type) {
+
+	case *StreamEventsRequest_SubscribeToGuild_:
+
+		if v, ok := interface{}(m.GetSubscribeToGuild()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return StreamEventsRequestValidationError{
+					field:  "SubscribeToGuild",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
 			}
 		}
+
+	case *StreamEventsRequest_SubscribeToActions_:
+
+		if v, ok := interface{}(m.GetSubscribeToActions()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return StreamEventsRequestValidationError{
+					field:  "SubscribeToActions",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *StreamEventsRequest_SubscribeToHomeserverEvents_:
+
+		if v, ok := interface{}(m.GetSubscribeToHomeserverEvents()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return StreamEventsRequestValidationError{
+					field:  "SubscribeToHomeserverEvents",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
 	}
 
 	return nil
 }
 
-// StreamGuildEventsRequestValidationError is the validation error returned by
-// StreamGuildEventsRequest.Validate if the designated constraints aren't met.
-type StreamGuildEventsRequestValidationError struct {
+// StreamEventsRequestValidationError is the validation error returned by
+// StreamEventsRequest.Validate if the designated constraints aren't met.
+type StreamEventsRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -3697,24 +3727,24 @@ type StreamGuildEventsRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e StreamGuildEventsRequestValidationError) Field() string { return e.field }
+func (e StreamEventsRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e StreamGuildEventsRequestValidationError) Reason() string { return e.reason }
+func (e StreamEventsRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e StreamGuildEventsRequestValidationError) Cause() error { return e.cause }
+func (e StreamEventsRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e StreamGuildEventsRequestValidationError) Key() bool { return e.key }
+func (e StreamEventsRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e StreamGuildEventsRequestValidationError) ErrorName() string {
-	return "StreamGuildEventsRequestValidationError"
+func (e StreamEventsRequestValidationError) ErrorName() string {
+	return "StreamEventsRequestValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e StreamGuildEventsRequestValidationError) Error() string {
+func (e StreamEventsRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -3726,14 +3756,14 @@ func (e StreamGuildEventsRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sStreamGuildEventsRequest.%s: %s%s",
+		"invalid %sStreamEventsRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = StreamGuildEventsRequestValidationError{}
+var _ error = StreamEventsRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -3741,22 +3771,58 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = StreamGuildEventsRequestValidationError{}
+} = StreamEventsRequestValidationError{}
 
-// Validate checks the field values on GuildEvent with the rules defined in the
+// Validate checks the field values on Event with the rules defined in the
 // proto definition for this message. If any rules are violated, an error is returned.
-func (m *GuildEvent) Validate() error {
+func (m *Event) Validate() error {
 	if m == nil {
 		return nil
 	}
 
 	switch m.Event.(type) {
 
-	case *GuildEvent_SentMessage:
+	case *Event_GuildAddedToList_:
+
+		if v, ok := interface{}(m.GetGuildAddedToList()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return EventValidationError{
+					field:  "GuildAddedToList",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *Event_GuildRemovedFromList_:
+
+		if v, ok := interface{}(m.GetGuildRemovedFromList()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return EventValidationError{
+					field:  "GuildRemovedFromList",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *Event_ActionPerformed_:
+
+		if v, ok := interface{}(m.GetActionPerformed()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return EventValidationError{
+					field:  "ActionPerformed",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *Event_SentMessage:
 
 		if v, ok := interface{}(m.GetSentMessage()).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return GuildEventValidationError{
+				return EventValidationError{
 					field:  "SentMessage",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -3764,11 +3830,11 @@ func (m *GuildEvent) Validate() error {
 			}
 		}
 
-	case *GuildEvent_EditedMessage:
+	case *Event_EditedMessage:
 
 		if v, ok := interface{}(m.GetEditedMessage()).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return GuildEventValidationError{
+				return EventValidationError{
 					field:  "EditedMessage",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -3776,11 +3842,11 @@ func (m *GuildEvent) Validate() error {
 			}
 		}
 
-	case *GuildEvent_DeletedMessage:
+	case *Event_DeletedMessage:
 
 		if v, ok := interface{}(m.GetDeletedMessage()).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return GuildEventValidationError{
+				return EventValidationError{
 					field:  "DeletedMessage",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -3788,11 +3854,11 @@ func (m *GuildEvent) Validate() error {
 			}
 		}
 
-	case *GuildEvent_CreatedChannel:
+	case *Event_CreatedChannel:
 
 		if v, ok := interface{}(m.GetCreatedChannel()).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return GuildEventValidationError{
+				return EventValidationError{
 					field:  "CreatedChannel",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -3800,11 +3866,11 @@ func (m *GuildEvent) Validate() error {
 			}
 		}
 
-	case *GuildEvent_EditedChannel:
+	case *Event_EditedChannel:
 
 		if v, ok := interface{}(m.GetEditedChannel()).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return GuildEventValidationError{
+				return EventValidationError{
 					field:  "EditedChannel",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -3812,11 +3878,11 @@ func (m *GuildEvent) Validate() error {
 			}
 		}
 
-	case *GuildEvent_DeletedChannel:
+	case *Event_DeletedChannel:
 
 		if v, ok := interface{}(m.GetDeletedChannel()).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return GuildEventValidationError{
+				return EventValidationError{
 					field:  "DeletedChannel",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -3824,11 +3890,11 @@ func (m *GuildEvent) Validate() error {
 			}
 		}
 
-	case *GuildEvent_EditedGuild:
+	case *Event_EditedGuild:
 
 		if v, ok := interface{}(m.GetEditedGuild()).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return GuildEventValidationError{
+				return EventValidationError{
 					field:  "EditedGuild",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -3836,11 +3902,11 @@ func (m *GuildEvent) Validate() error {
 			}
 		}
 
-	case *GuildEvent_DeletedGuild:
+	case *Event_DeletedGuild:
 
 		if v, ok := interface{}(m.GetDeletedGuild()).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return GuildEventValidationError{
+				return EventValidationError{
 					field:  "DeletedGuild",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -3848,11 +3914,11 @@ func (m *GuildEvent) Validate() error {
 			}
 		}
 
-	case *GuildEvent_JoinedMember:
+	case *Event_JoinedMember:
 
 		if v, ok := interface{}(m.GetJoinedMember()).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return GuildEventValidationError{
+				return EventValidationError{
 					field:  "JoinedMember",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -3860,11 +3926,11 @@ func (m *GuildEvent) Validate() error {
 			}
 		}
 
-	case *GuildEvent_LeftMember:
+	case *Event_LeftMember:
 
 		if v, ok := interface{}(m.GetLeftMember()).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return GuildEventValidationError{
+				return EventValidationError{
 					field:  "LeftMember",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -3877,9 +3943,9 @@ func (m *GuildEvent) Validate() error {
 	return nil
 }
 
-// GuildEventValidationError is the validation error returned by
-// GuildEvent.Validate if the designated constraints aren't met.
-type GuildEventValidationError struct {
+// EventValidationError is the validation error returned by Event.Validate if
+// the designated constraints aren't met.
+type EventValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -3887,22 +3953,22 @@ type GuildEventValidationError struct {
 }
 
 // Field function returns field value.
-func (e GuildEventValidationError) Field() string { return e.field }
+func (e EventValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e GuildEventValidationError) Reason() string { return e.reason }
+func (e EventValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e GuildEventValidationError) Cause() error { return e.cause }
+func (e EventValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e GuildEventValidationError) Key() bool { return e.key }
+func (e EventValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e GuildEventValidationError) ErrorName() string { return "GuildEventValidationError" }
+func (e EventValidationError) ErrorName() string { return "EventValidationError" }
 
 // Error satisfies the builtin error interface
-func (e GuildEventValidationError) Error() string {
+func (e EventValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -3914,14 +3980,14 @@ func (e GuildEventValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sGuildEvent.%s: %s%s",
+		"invalid %sEvent.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = GuildEventValidationError{}
+var _ error = EventValidationError{}
 
 var _ interface {
 	Field() string
@@ -3929,316 +3995,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = GuildEventValidationError{}
-
-// Validate checks the field values on HomeserverEvent with the rules defined
-// in the proto definition for this message. If any rules are violated, an
-// error is returned.
-func (m *HomeserverEvent) Validate() error {
-	if m == nil {
-		return nil
-	}
-
-	switch m.Event.(type) {
-
-	case *HomeserverEvent_GuildAddedToList_:
-
-		if v, ok := interface{}(m.GetGuildAddedToList()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return HomeserverEventValidationError{
-					field:  "GuildAddedToList",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	case *HomeserverEvent_GuildRemovedFromList_:
-
-		if v, ok := interface{}(m.GetGuildRemovedFromList()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return HomeserverEventValidationError{
-					field:  "GuildRemovedFromList",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
-	return nil
-}
-
-// HomeserverEventValidationError is the validation error returned by
-// HomeserverEvent.Validate if the designated constraints aren't met.
-type HomeserverEventValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e HomeserverEventValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e HomeserverEventValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e HomeserverEventValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e HomeserverEventValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e HomeserverEventValidationError) ErrorName() string { return "HomeserverEventValidationError" }
-
-// Error satisfies the builtin error interface
-func (e HomeserverEventValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sHomeserverEvent.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = HomeserverEventValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = HomeserverEventValidationError{}
-
-// Validate checks the field values on StreamHomeserverEventsRequest with the
-// rules defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
-func (m *StreamHomeserverEventsRequest) Validate() error {
-	if m == nil {
-		return nil
-	}
-
-	return nil
-}
-
-// StreamHomeserverEventsRequestValidationError is the validation error
-// returned by StreamHomeserverEventsRequest.Validate if the designated
-// constraints aren't met.
-type StreamHomeserverEventsRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e StreamHomeserverEventsRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e StreamHomeserverEventsRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e StreamHomeserverEventsRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e StreamHomeserverEventsRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e StreamHomeserverEventsRequestValidationError) ErrorName() string {
-	return "StreamHomeserverEventsRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e StreamHomeserverEventsRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sStreamHomeserverEventsRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = StreamHomeserverEventsRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = StreamHomeserverEventsRequestValidationError{}
-
-// Validate checks the field values on StreamActionEventsRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
-func (m *StreamActionEventsRequest) Validate() error {
-	if m == nil {
-		return nil
-	}
-
-	return nil
-}
-
-// StreamActionEventsRequestValidationError is the validation error returned by
-// StreamActionEventsRequest.Validate if the designated constraints aren't met.
-type StreamActionEventsRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e StreamActionEventsRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e StreamActionEventsRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e StreamActionEventsRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e StreamActionEventsRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e StreamActionEventsRequestValidationError) ErrorName() string {
-	return "StreamActionEventsRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e StreamActionEventsRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sStreamActionEventsRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = StreamActionEventsRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = StreamActionEventsRequestValidationError{}
-
-// Validate checks the field values on ActionEvent with the rules defined in
-// the proto definition for this message. If any rules are violated, an error
-// is returned.
-func (m *ActionEvent) Validate() error {
-	if m == nil {
-		return nil
-	}
-
-	switch m.Event.(type) {
-
-	case *ActionEvent_Action_:
-
-		if v, ok := interface{}(m.GetAction()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return ActionEventValidationError{
-					field:  "Action",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
-	return nil
-}
-
-// ActionEventValidationError is the validation error returned by
-// ActionEvent.Validate if the designated constraints aren't met.
-type ActionEventValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e ActionEventValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e ActionEventValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e ActionEventValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e ActionEventValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e ActionEventValidationError) ErrorName() string { return "ActionEventValidationError" }
-
-// Error satisfies the builtin error interface
-func (e ActionEventValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sActionEvent.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = ActionEventValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = ActionEventValidationError{}
+} = EventValidationError{}
 
 // Validate checks the field values on JoinGuildRequest with the rules defined
 // in the proto definition for this message. If any rules are violated, an
@@ -5379,18 +5136,18 @@ var _ interface {
 	ErrorName() string
 } = GetEmotePackEmotesResponse_EmoteValidationError{}
 
-// Validate checks the field values on GuildEvent_MessageSent with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
-func (m *GuildEvent_MessageSent) Validate() error {
+// Validate checks the field values on StreamEventsRequest_SubscribeToGuild
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, an error is returned.
+func (m *StreamEventsRequest_SubscribeToGuild) Validate() error {
 	if m == nil {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetMessage()).(interface{ Validate() error }); ok {
+	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return GuildEvent_MessageSentValidationError{
-				field:  "Message",
+			return StreamEventsRequest_SubscribeToGuildValidationError{
+				field:  "Location",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}
@@ -5400,9 +5157,10 @@ func (m *GuildEvent_MessageSent) Validate() error {
 	return nil
 }
 
-// GuildEvent_MessageSentValidationError is the validation error returned by
-// GuildEvent_MessageSent.Validate if the designated constraints aren't met.
-type GuildEvent_MessageSentValidationError struct {
+// StreamEventsRequest_SubscribeToGuildValidationError is the validation error
+// returned by StreamEventsRequest_SubscribeToGuild.Validate if the designated
+// constraints aren't met.
+type StreamEventsRequest_SubscribeToGuildValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -5410,24 +5168,24 @@ type GuildEvent_MessageSentValidationError struct {
 }
 
 // Field function returns field value.
-func (e GuildEvent_MessageSentValidationError) Field() string { return e.field }
+func (e StreamEventsRequest_SubscribeToGuildValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e GuildEvent_MessageSentValidationError) Reason() string { return e.reason }
+func (e StreamEventsRequest_SubscribeToGuildValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e GuildEvent_MessageSentValidationError) Cause() error { return e.cause }
+func (e StreamEventsRequest_SubscribeToGuildValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e GuildEvent_MessageSentValidationError) Key() bool { return e.key }
+func (e StreamEventsRequest_SubscribeToGuildValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e GuildEvent_MessageSentValidationError) ErrorName() string {
-	return "GuildEvent_MessageSentValidationError"
+func (e StreamEventsRequest_SubscribeToGuildValidationError) ErrorName() string {
+	return "StreamEventsRequest_SubscribeToGuildValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e GuildEvent_MessageSentValidationError) Error() string {
+func (e StreamEventsRequest_SubscribeToGuildValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -5439,14 +5197,14 @@ func (e GuildEvent_MessageSentValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sGuildEvent_MessageSent.%s: %s%s",
+		"invalid %sStreamEventsRequest_SubscribeToGuild.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = GuildEvent_MessageSentValidationError{}
+var _ error = StreamEventsRequest_SubscribeToGuildValidationError{}
 
 var _ interface {
 	Field() string
@@ -5454,19 +5212,238 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = GuildEvent_MessageSentValidationError{}
+} = StreamEventsRequest_SubscribeToGuildValidationError{}
 
-// Validate checks the field values on GuildEvent_MessageUpdated with the rules
+// Validate checks the field values on StreamEventsRequest_SubscribeToActions
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, an error is returned.
+func (m *StreamEventsRequest_SubscribeToActions) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	return nil
+}
+
+// StreamEventsRequest_SubscribeToActionsValidationError is the validation
+// error returned by StreamEventsRequest_SubscribeToActions.Validate if the
+// designated constraints aren't met.
+type StreamEventsRequest_SubscribeToActionsValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e StreamEventsRequest_SubscribeToActionsValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e StreamEventsRequest_SubscribeToActionsValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e StreamEventsRequest_SubscribeToActionsValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e StreamEventsRequest_SubscribeToActionsValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e StreamEventsRequest_SubscribeToActionsValidationError) ErrorName() string {
+	return "StreamEventsRequest_SubscribeToActionsValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e StreamEventsRequest_SubscribeToActionsValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sStreamEventsRequest_SubscribeToActions.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = StreamEventsRequest_SubscribeToActionsValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = StreamEventsRequest_SubscribeToActionsValidationError{}
+
+// Validate checks the field values on
+// StreamEventsRequest_SubscribeToHomeserverEvents with the rules defined in
+// the proto definition for this message. If any rules are violated, an error
+// is returned.
+func (m *StreamEventsRequest_SubscribeToHomeserverEvents) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	return nil
+}
+
+// StreamEventsRequest_SubscribeToHomeserverEventsValidationError is the
+// validation error returned by
+// StreamEventsRequest_SubscribeToHomeserverEvents.Validate if the designated
+// constraints aren't met.
+type StreamEventsRequest_SubscribeToHomeserverEventsValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e StreamEventsRequest_SubscribeToHomeserverEventsValidationError) Field() string {
+	return e.field
+}
+
+// Reason function returns reason value.
+func (e StreamEventsRequest_SubscribeToHomeserverEventsValidationError) Reason() string {
+	return e.reason
+}
+
+// Cause function returns cause value.
+func (e StreamEventsRequest_SubscribeToHomeserverEventsValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e StreamEventsRequest_SubscribeToHomeserverEventsValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e StreamEventsRequest_SubscribeToHomeserverEventsValidationError) ErrorName() string {
+	return "StreamEventsRequest_SubscribeToHomeserverEventsValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e StreamEventsRequest_SubscribeToHomeserverEventsValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sStreamEventsRequest_SubscribeToHomeserverEvents.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = StreamEventsRequest_SubscribeToHomeserverEventsValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = StreamEventsRequest_SubscribeToHomeserverEventsValidationError{}
+
+// Validate checks the field values on Event_MessageSent with the rules defined
+// in the proto definition for this message. If any rules are violated, an
+// error is returned.
+func (m *Event_MessageSent) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if v, ok := interface{}(m.GetMessage()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return Event_MessageSentValidationError{
+				field:  "Message",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	return nil
+}
+
+// Event_MessageSentValidationError is the validation error returned by
+// Event_MessageSent.Validate if the designated constraints aren't met.
+type Event_MessageSentValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e Event_MessageSentValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e Event_MessageSentValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e Event_MessageSentValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e Event_MessageSentValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e Event_MessageSentValidationError) ErrorName() string {
+	return "Event_MessageSentValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e Event_MessageSentValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sEvent_MessageSent.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = Event_MessageSentValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = Event_MessageSentValidationError{}
+
+// Validate checks the field values on Event_MessageUpdated with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
-func (m *GuildEvent_MessageUpdated) Validate() error {
+func (m *Event_MessageUpdated) Validate() error {
 	if m == nil {
 		return nil
 	}
 
 	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return GuildEvent_MessageUpdatedValidationError{
+			return Event_MessageUpdatedValidationError{
 				field:  "Location",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -5476,7 +5453,7 @@ func (m *GuildEvent_MessageUpdated) Validate() error {
 
 	if v, ok := interface{}(m.GetEditedAt()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return GuildEvent_MessageUpdatedValidationError{
+			return Event_MessageUpdatedValidationError{
 				field:  "EditedAt",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -5493,7 +5470,7 @@ func (m *GuildEvent_MessageUpdated) Validate() error {
 
 		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return GuildEvent_MessageUpdatedValidationError{
+				return Event_MessageUpdatedValidationError{
 					field:  fmt.Sprintf("Embeds[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -5510,7 +5487,7 @@ func (m *GuildEvent_MessageUpdated) Validate() error {
 
 		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return GuildEvent_MessageUpdatedValidationError{
+				return Event_MessageUpdatedValidationError{
 					field:  fmt.Sprintf("Actions[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -5526,7 +5503,7 @@ func (m *GuildEvent_MessageUpdated) Validate() error {
 
 	if v, ok := interface{}(m.GetOverrides()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return GuildEvent_MessageUpdatedValidationError{
+			return Event_MessageUpdatedValidationError{
 				field:  "Overrides",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -5539,9 +5516,9 @@ func (m *GuildEvent_MessageUpdated) Validate() error {
 	return nil
 }
 
-// GuildEvent_MessageUpdatedValidationError is the validation error returned by
-// GuildEvent_MessageUpdated.Validate if the designated constraints aren't met.
-type GuildEvent_MessageUpdatedValidationError struct {
+// Event_MessageUpdatedValidationError is the validation error returned by
+// Event_MessageUpdated.Validate if the designated constraints aren't met.
+type Event_MessageUpdatedValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -5549,24 +5526,24 @@ type GuildEvent_MessageUpdatedValidationError struct {
 }
 
 // Field function returns field value.
-func (e GuildEvent_MessageUpdatedValidationError) Field() string { return e.field }
+func (e Event_MessageUpdatedValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e GuildEvent_MessageUpdatedValidationError) Reason() string { return e.reason }
+func (e Event_MessageUpdatedValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e GuildEvent_MessageUpdatedValidationError) Cause() error { return e.cause }
+func (e Event_MessageUpdatedValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e GuildEvent_MessageUpdatedValidationError) Key() bool { return e.key }
+func (e Event_MessageUpdatedValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e GuildEvent_MessageUpdatedValidationError) ErrorName() string {
-	return "GuildEvent_MessageUpdatedValidationError"
+func (e Event_MessageUpdatedValidationError) ErrorName() string {
+	return "Event_MessageUpdatedValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e GuildEvent_MessageUpdatedValidationError) Error() string {
+func (e Event_MessageUpdatedValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -5578,14 +5555,14 @@ func (e GuildEvent_MessageUpdatedValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sGuildEvent_MessageUpdated.%s: %s%s",
+		"invalid %sEvent_MessageUpdated.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = GuildEvent_MessageUpdatedValidationError{}
+var _ error = Event_MessageUpdatedValidationError{}
 
 var _ interface {
 	Field() string
@@ -5593,19 +5570,19 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = GuildEvent_MessageUpdatedValidationError{}
+} = Event_MessageUpdatedValidationError{}
 
-// Validate checks the field values on GuildEvent_MessageDeleted with the rules
+// Validate checks the field values on Event_MessageDeleted with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
-func (m *GuildEvent_MessageDeleted) Validate() error {
+func (m *Event_MessageDeleted) Validate() error {
 	if m == nil {
 		return nil
 	}
 
 	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return GuildEvent_MessageDeletedValidationError{
+			return Event_MessageDeletedValidationError{
 				field:  "Location",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -5616,9 +5593,9 @@ func (m *GuildEvent_MessageDeleted) Validate() error {
 	return nil
 }
 
-// GuildEvent_MessageDeletedValidationError is the validation error returned by
-// GuildEvent_MessageDeleted.Validate if the designated constraints aren't met.
-type GuildEvent_MessageDeletedValidationError struct {
+// Event_MessageDeletedValidationError is the validation error returned by
+// Event_MessageDeleted.Validate if the designated constraints aren't met.
+type Event_MessageDeletedValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -5626,24 +5603,24 @@ type GuildEvent_MessageDeletedValidationError struct {
 }
 
 // Field function returns field value.
-func (e GuildEvent_MessageDeletedValidationError) Field() string { return e.field }
+func (e Event_MessageDeletedValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e GuildEvent_MessageDeletedValidationError) Reason() string { return e.reason }
+func (e Event_MessageDeletedValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e GuildEvent_MessageDeletedValidationError) Cause() error { return e.cause }
+func (e Event_MessageDeletedValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e GuildEvent_MessageDeletedValidationError) Key() bool { return e.key }
+func (e Event_MessageDeletedValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e GuildEvent_MessageDeletedValidationError) ErrorName() string {
-	return "GuildEvent_MessageDeletedValidationError"
+func (e Event_MessageDeletedValidationError) ErrorName() string {
+	return "Event_MessageDeletedValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e GuildEvent_MessageDeletedValidationError) Error() string {
+func (e Event_MessageDeletedValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -5655,14 +5632,14 @@ func (e GuildEvent_MessageDeletedValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sGuildEvent_MessageDeleted.%s: %s%s",
+		"invalid %sEvent_MessageDeleted.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = GuildEvent_MessageDeletedValidationError{}
+var _ error = Event_MessageDeletedValidationError{}
 
 var _ interface {
 	Field() string
@@ -5670,19 +5647,19 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = GuildEvent_MessageDeletedValidationError{}
+} = Event_MessageDeletedValidationError{}
 
-// Validate checks the field values on GuildEvent_ChannelCreated with the rules
+// Validate checks the field values on Event_ChannelCreated with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
-func (m *GuildEvent_ChannelCreated) Validate() error {
+func (m *Event_ChannelCreated) Validate() error {
 	if m == nil {
 		return nil
 	}
 
 	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return GuildEvent_ChannelCreatedValidationError{
+			return Event_ChannelCreatedValidationError{
 				field:  "Location",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -5701,9 +5678,9 @@ func (m *GuildEvent_ChannelCreated) Validate() error {
 	return nil
 }
 
-// GuildEvent_ChannelCreatedValidationError is the validation error returned by
-// GuildEvent_ChannelCreated.Validate if the designated constraints aren't met.
-type GuildEvent_ChannelCreatedValidationError struct {
+// Event_ChannelCreatedValidationError is the validation error returned by
+// Event_ChannelCreated.Validate if the designated constraints aren't met.
+type Event_ChannelCreatedValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -5711,24 +5688,24 @@ type GuildEvent_ChannelCreatedValidationError struct {
 }
 
 // Field function returns field value.
-func (e GuildEvent_ChannelCreatedValidationError) Field() string { return e.field }
+func (e Event_ChannelCreatedValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e GuildEvent_ChannelCreatedValidationError) Reason() string { return e.reason }
+func (e Event_ChannelCreatedValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e GuildEvent_ChannelCreatedValidationError) Cause() error { return e.cause }
+func (e Event_ChannelCreatedValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e GuildEvent_ChannelCreatedValidationError) Key() bool { return e.key }
+func (e Event_ChannelCreatedValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e GuildEvent_ChannelCreatedValidationError) ErrorName() string {
-	return "GuildEvent_ChannelCreatedValidationError"
+func (e Event_ChannelCreatedValidationError) ErrorName() string {
+	return "Event_ChannelCreatedValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e GuildEvent_ChannelCreatedValidationError) Error() string {
+func (e Event_ChannelCreatedValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -5740,14 +5717,14 @@ func (e GuildEvent_ChannelCreatedValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sGuildEvent_ChannelCreated.%s: %s%s",
+		"invalid %sEvent_ChannelCreated.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = GuildEvent_ChannelCreatedValidationError{}
+var _ error = Event_ChannelCreatedValidationError{}
 
 var _ interface {
 	Field() string
@@ -5755,19 +5732,19 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = GuildEvent_ChannelCreatedValidationError{}
+} = Event_ChannelCreatedValidationError{}
 
-// Validate checks the field values on GuildEvent_ChannelUpdated with the rules
+// Validate checks the field values on Event_ChannelUpdated with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
-func (m *GuildEvent_ChannelUpdated) Validate() error {
+func (m *Event_ChannelUpdated) Validate() error {
 	if m == nil {
 		return nil
 	}
 
 	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return GuildEvent_ChannelUpdatedValidationError{
+			return Event_ChannelUpdatedValidationError{
 				field:  "Location",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -5788,9 +5765,9 @@ func (m *GuildEvent_ChannelUpdated) Validate() error {
 	return nil
 }
 
-// GuildEvent_ChannelUpdatedValidationError is the validation error returned by
-// GuildEvent_ChannelUpdated.Validate if the designated constraints aren't met.
-type GuildEvent_ChannelUpdatedValidationError struct {
+// Event_ChannelUpdatedValidationError is the validation error returned by
+// Event_ChannelUpdated.Validate if the designated constraints aren't met.
+type Event_ChannelUpdatedValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -5798,24 +5775,24 @@ type GuildEvent_ChannelUpdatedValidationError struct {
 }
 
 // Field function returns field value.
-func (e GuildEvent_ChannelUpdatedValidationError) Field() string { return e.field }
+func (e Event_ChannelUpdatedValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e GuildEvent_ChannelUpdatedValidationError) Reason() string { return e.reason }
+func (e Event_ChannelUpdatedValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e GuildEvent_ChannelUpdatedValidationError) Cause() error { return e.cause }
+func (e Event_ChannelUpdatedValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e GuildEvent_ChannelUpdatedValidationError) Key() bool { return e.key }
+func (e Event_ChannelUpdatedValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e GuildEvent_ChannelUpdatedValidationError) ErrorName() string {
-	return "GuildEvent_ChannelUpdatedValidationError"
+func (e Event_ChannelUpdatedValidationError) ErrorName() string {
+	return "Event_ChannelUpdatedValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e GuildEvent_ChannelUpdatedValidationError) Error() string {
+func (e Event_ChannelUpdatedValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -5827,14 +5804,14 @@ func (e GuildEvent_ChannelUpdatedValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sGuildEvent_ChannelUpdated.%s: %s%s",
+		"invalid %sEvent_ChannelUpdated.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = GuildEvent_ChannelUpdatedValidationError{}
+var _ error = Event_ChannelUpdatedValidationError{}
 
 var _ interface {
 	Field() string
@@ -5842,19 +5819,19 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = GuildEvent_ChannelUpdatedValidationError{}
+} = Event_ChannelUpdatedValidationError{}
 
-// Validate checks the field values on GuildEvent_ChannelDeleted with the rules
+// Validate checks the field values on Event_ChannelDeleted with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
-func (m *GuildEvent_ChannelDeleted) Validate() error {
+func (m *Event_ChannelDeleted) Validate() error {
 	if m == nil {
 		return nil
 	}
 
 	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return GuildEvent_ChannelDeletedValidationError{
+			return Event_ChannelDeletedValidationError{
 				field:  "Location",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -5865,9 +5842,9 @@ func (m *GuildEvent_ChannelDeleted) Validate() error {
 	return nil
 }
 
-// GuildEvent_ChannelDeletedValidationError is the validation error returned by
-// GuildEvent_ChannelDeleted.Validate if the designated constraints aren't met.
-type GuildEvent_ChannelDeletedValidationError struct {
+// Event_ChannelDeletedValidationError is the validation error returned by
+// Event_ChannelDeleted.Validate if the designated constraints aren't met.
+type Event_ChannelDeletedValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -5875,24 +5852,24 @@ type GuildEvent_ChannelDeletedValidationError struct {
 }
 
 // Field function returns field value.
-func (e GuildEvent_ChannelDeletedValidationError) Field() string { return e.field }
+func (e Event_ChannelDeletedValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e GuildEvent_ChannelDeletedValidationError) Reason() string { return e.reason }
+func (e Event_ChannelDeletedValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e GuildEvent_ChannelDeletedValidationError) Cause() error { return e.cause }
+func (e Event_ChannelDeletedValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e GuildEvent_ChannelDeletedValidationError) Key() bool { return e.key }
+func (e Event_ChannelDeletedValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e GuildEvent_ChannelDeletedValidationError) ErrorName() string {
-	return "GuildEvent_ChannelDeletedValidationError"
+func (e Event_ChannelDeletedValidationError) ErrorName() string {
+	return "Event_ChannelDeletedValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e GuildEvent_ChannelDeletedValidationError) Error() string {
+func (e Event_ChannelDeletedValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -5904,14 +5881,14 @@ func (e GuildEvent_ChannelDeletedValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sGuildEvent_ChannelDeleted.%s: %s%s",
+		"invalid %sEvent_ChannelDeleted.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = GuildEvent_ChannelDeletedValidationError{}
+var _ error = Event_ChannelDeletedValidationError{}
 
 var _ interface {
 	Field() string
@@ -5919,12 +5896,12 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = GuildEvent_ChannelDeletedValidationError{}
+} = Event_ChannelDeletedValidationError{}
 
-// Validate checks the field values on GuildEvent_GuildUpdated with the rules
+// Validate checks the field values on Event_GuildUpdated with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
-func (m *GuildEvent_GuildUpdated) Validate() error {
+func (m *Event_GuildUpdated) Validate() error {
 	if m == nil {
 		return nil
 	}
@@ -5936,9 +5913,9 @@ func (m *GuildEvent_GuildUpdated) Validate() error {
 	return nil
 }
 
-// GuildEvent_GuildUpdatedValidationError is the validation error returned by
-// GuildEvent_GuildUpdated.Validate if the designated constraints aren't met.
-type GuildEvent_GuildUpdatedValidationError struct {
+// Event_GuildUpdatedValidationError is the validation error returned by
+// Event_GuildUpdated.Validate if the designated constraints aren't met.
+type Event_GuildUpdatedValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -5946,24 +5923,24 @@ type GuildEvent_GuildUpdatedValidationError struct {
 }
 
 // Field function returns field value.
-func (e GuildEvent_GuildUpdatedValidationError) Field() string { return e.field }
+func (e Event_GuildUpdatedValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e GuildEvent_GuildUpdatedValidationError) Reason() string { return e.reason }
+func (e Event_GuildUpdatedValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e GuildEvent_GuildUpdatedValidationError) Cause() error { return e.cause }
+func (e Event_GuildUpdatedValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e GuildEvent_GuildUpdatedValidationError) Key() bool { return e.key }
+func (e Event_GuildUpdatedValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e GuildEvent_GuildUpdatedValidationError) ErrorName() string {
-	return "GuildEvent_GuildUpdatedValidationError"
+func (e Event_GuildUpdatedValidationError) ErrorName() string {
+	return "Event_GuildUpdatedValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e GuildEvent_GuildUpdatedValidationError) Error() string {
+func (e Event_GuildUpdatedValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -5975,14 +5952,14 @@ func (e GuildEvent_GuildUpdatedValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sGuildEvent_GuildUpdated.%s: %s%s",
+		"invalid %sEvent_GuildUpdated.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = GuildEvent_GuildUpdatedValidationError{}
+var _ error = Event_GuildUpdatedValidationError{}
 
 var _ interface {
 	Field() string
@@ -5990,12 +5967,12 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = GuildEvent_GuildUpdatedValidationError{}
+} = Event_GuildUpdatedValidationError{}
 
-// Validate checks the field values on GuildEvent_GuildDeleted with the rules
+// Validate checks the field values on Event_GuildDeleted with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
-func (m *GuildEvent_GuildDeleted) Validate() error {
+func (m *Event_GuildDeleted) Validate() error {
 	if m == nil {
 		return nil
 	}
@@ -6003,9 +5980,9 @@ func (m *GuildEvent_GuildDeleted) Validate() error {
 	return nil
 }
 
-// GuildEvent_GuildDeletedValidationError is the validation error returned by
-// GuildEvent_GuildDeleted.Validate if the designated constraints aren't met.
-type GuildEvent_GuildDeletedValidationError struct {
+// Event_GuildDeletedValidationError is the validation error returned by
+// Event_GuildDeleted.Validate if the designated constraints aren't met.
+type Event_GuildDeletedValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -6013,24 +5990,24 @@ type GuildEvent_GuildDeletedValidationError struct {
 }
 
 // Field function returns field value.
-func (e GuildEvent_GuildDeletedValidationError) Field() string { return e.field }
+func (e Event_GuildDeletedValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e GuildEvent_GuildDeletedValidationError) Reason() string { return e.reason }
+func (e Event_GuildDeletedValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e GuildEvent_GuildDeletedValidationError) Cause() error { return e.cause }
+func (e Event_GuildDeletedValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e GuildEvent_GuildDeletedValidationError) Key() bool { return e.key }
+func (e Event_GuildDeletedValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e GuildEvent_GuildDeletedValidationError) ErrorName() string {
-	return "GuildEvent_GuildDeletedValidationError"
+func (e Event_GuildDeletedValidationError) ErrorName() string {
+	return "Event_GuildDeletedValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e GuildEvent_GuildDeletedValidationError) Error() string {
+func (e Event_GuildDeletedValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -6042,14 +6019,14 @@ func (e GuildEvent_GuildDeletedValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sGuildEvent_GuildDeleted.%s: %s%s",
+		"invalid %sEvent_GuildDeleted.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = GuildEvent_GuildDeletedValidationError{}
+var _ error = Event_GuildDeletedValidationError{}
 
 var _ interface {
 	Field() string
@@ -6057,81 +6034,12 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = GuildEvent_GuildDeletedValidationError{}
+} = Event_GuildDeletedValidationError{}
 
-// Validate checks the field values on GuildEvent_MemberJoined with the rules
+// Validate checks the field values on Event_MemberJoined with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
-func (m *GuildEvent_MemberJoined) Validate() error {
-	if m == nil {
-		return nil
-	}
-
-	// no validation rules for MemberId
-
-	return nil
-}
-
-// GuildEvent_MemberJoinedValidationError is the validation error returned by
-// GuildEvent_MemberJoined.Validate if the designated constraints aren't met.
-type GuildEvent_MemberJoinedValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e GuildEvent_MemberJoinedValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e GuildEvent_MemberJoinedValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e GuildEvent_MemberJoinedValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e GuildEvent_MemberJoinedValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e GuildEvent_MemberJoinedValidationError) ErrorName() string {
-	return "GuildEvent_MemberJoinedValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e GuildEvent_MemberJoinedValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sGuildEvent_MemberJoined.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = GuildEvent_MemberJoinedValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = GuildEvent_MemberJoinedValidationError{}
-
-// Validate checks the field values on GuildEvent_MemberLeft with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
-func (m *GuildEvent_MemberLeft) Validate() error {
+func (m *Event_MemberJoined) Validate() error {
 	if m == nil {
 		return nil
 	}
@@ -6141,9 +6049,9 @@ func (m *GuildEvent_MemberLeft) Validate() error {
 	return nil
 }
 
-// GuildEvent_MemberLeftValidationError is the validation error returned by
-// GuildEvent_MemberLeft.Validate if the designated constraints aren't met.
-type GuildEvent_MemberLeftValidationError struct {
+// Event_MemberJoinedValidationError is the validation error returned by
+// Event_MemberJoined.Validate if the designated constraints aren't met.
+type Event_MemberJoinedValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -6151,24 +6059,24 @@ type GuildEvent_MemberLeftValidationError struct {
 }
 
 // Field function returns field value.
-func (e GuildEvent_MemberLeftValidationError) Field() string { return e.field }
+func (e Event_MemberJoinedValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e GuildEvent_MemberLeftValidationError) Reason() string { return e.reason }
+func (e Event_MemberJoinedValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e GuildEvent_MemberLeftValidationError) Cause() error { return e.cause }
+func (e Event_MemberJoinedValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e GuildEvent_MemberLeftValidationError) Key() bool { return e.key }
+func (e Event_MemberJoinedValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e GuildEvent_MemberLeftValidationError) ErrorName() string {
-	return "GuildEvent_MemberLeftValidationError"
+func (e Event_MemberJoinedValidationError) ErrorName() string {
+	return "Event_MemberJoinedValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e GuildEvent_MemberLeftValidationError) Error() string {
+func (e Event_MemberJoinedValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -6180,14 +6088,14 @@ func (e GuildEvent_MemberLeftValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sGuildEvent_MemberLeft.%s: %s%s",
+		"invalid %sEvent_MemberJoined.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = GuildEvent_MemberLeftValidationError{}
+var _ error = Event_MemberJoinedValidationError{}
 
 var _ interface {
 	Field() string
@@ -6195,12 +6103,79 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = GuildEvent_MemberLeftValidationError{}
+} = Event_MemberJoinedValidationError{}
 
-// Validate checks the field values on HomeserverEvent_GuildAddedToList with
-// the rules defined in the proto definition for this message. If any rules
-// are violated, an error is returned.
-func (m *HomeserverEvent_GuildAddedToList) Validate() error {
+// Validate checks the field values on Event_MemberLeft with the rules defined
+// in the proto definition for this message. If any rules are violated, an
+// error is returned.
+func (m *Event_MemberLeft) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for MemberId
+
+	return nil
+}
+
+// Event_MemberLeftValidationError is the validation error returned by
+// Event_MemberLeft.Validate if the designated constraints aren't met.
+type Event_MemberLeftValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e Event_MemberLeftValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e Event_MemberLeftValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e Event_MemberLeftValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e Event_MemberLeftValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e Event_MemberLeftValidationError) ErrorName() string { return "Event_MemberLeftValidationError" }
+
+// Error satisfies the builtin error interface
+func (e Event_MemberLeftValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sEvent_MemberLeft.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = Event_MemberLeftValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = Event_MemberLeftValidationError{}
+
+// Validate checks the field values on Event_GuildAddedToList with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *Event_GuildAddedToList) Validate() error {
 	if m == nil {
 		return nil
 	}
@@ -6212,10 +6187,9 @@ func (m *HomeserverEvent_GuildAddedToList) Validate() error {
 	return nil
 }
 
-// HomeserverEvent_GuildAddedToListValidationError is the validation error
-// returned by HomeserverEvent_GuildAddedToList.Validate if the designated
-// constraints aren't met.
-type HomeserverEvent_GuildAddedToListValidationError struct {
+// Event_GuildAddedToListValidationError is the validation error returned by
+// Event_GuildAddedToList.Validate if the designated constraints aren't met.
+type Event_GuildAddedToListValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -6223,24 +6197,24 @@ type HomeserverEvent_GuildAddedToListValidationError struct {
 }
 
 // Field function returns field value.
-func (e HomeserverEvent_GuildAddedToListValidationError) Field() string { return e.field }
+func (e Event_GuildAddedToListValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e HomeserverEvent_GuildAddedToListValidationError) Reason() string { return e.reason }
+func (e Event_GuildAddedToListValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e HomeserverEvent_GuildAddedToListValidationError) Cause() error { return e.cause }
+func (e Event_GuildAddedToListValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e HomeserverEvent_GuildAddedToListValidationError) Key() bool { return e.key }
+func (e Event_GuildAddedToListValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e HomeserverEvent_GuildAddedToListValidationError) ErrorName() string {
-	return "HomeserverEvent_GuildAddedToListValidationError"
+func (e Event_GuildAddedToListValidationError) ErrorName() string {
+	return "Event_GuildAddedToListValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e HomeserverEvent_GuildAddedToListValidationError) Error() string {
+func (e Event_GuildAddedToListValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -6252,14 +6226,14 @@ func (e HomeserverEvent_GuildAddedToListValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sHomeserverEvent_GuildAddedToList.%s: %s%s",
+		"invalid %sEvent_GuildAddedToList.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = HomeserverEvent_GuildAddedToListValidationError{}
+var _ error = Event_GuildAddedToListValidationError{}
 
 var _ interface {
 	Field() string
@@ -6267,12 +6241,12 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = HomeserverEvent_GuildAddedToListValidationError{}
+} = Event_GuildAddedToListValidationError{}
 
-// Validate checks the field values on HomeserverEvent_GuildRemovedFromList
-// with the rules defined in the proto definition for this message. If any
-// rules are violated, an error is returned.
-func (m *HomeserverEvent_GuildRemovedFromList) Validate() error {
+// Validate checks the field values on Event_GuildRemovedFromList with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *Event_GuildRemovedFromList) Validate() error {
 	if m == nil {
 		return nil
 	}
@@ -6284,10 +6258,9 @@ func (m *HomeserverEvent_GuildRemovedFromList) Validate() error {
 	return nil
 }
 
-// HomeserverEvent_GuildRemovedFromListValidationError is the validation error
-// returned by HomeserverEvent_GuildRemovedFromList.Validate if the designated
-// constraints aren't met.
-type HomeserverEvent_GuildRemovedFromListValidationError struct {
+// Event_GuildRemovedFromListValidationError is the validation error returned
+// by Event_GuildRemovedFromList.Validate if the designated constraints aren't met.
+type Event_GuildRemovedFromListValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -6295,24 +6268,24 @@ type HomeserverEvent_GuildRemovedFromListValidationError struct {
 }
 
 // Field function returns field value.
-func (e HomeserverEvent_GuildRemovedFromListValidationError) Field() string { return e.field }
+func (e Event_GuildRemovedFromListValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e HomeserverEvent_GuildRemovedFromListValidationError) Reason() string { return e.reason }
+func (e Event_GuildRemovedFromListValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e HomeserverEvent_GuildRemovedFromListValidationError) Cause() error { return e.cause }
+func (e Event_GuildRemovedFromListValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e HomeserverEvent_GuildRemovedFromListValidationError) Key() bool { return e.key }
+func (e Event_GuildRemovedFromListValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e HomeserverEvent_GuildRemovedFromListValidationError) ErrorName() string {
-	return "HomeserverEvent_GuildRemovedFromListValidationError"
+func (e Event_GuildRemovedFromListValidationError) ErrorName() string {
+	return "Event_GuildRemovedFromListValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e HomeserverEvent_GuildRemovedFromListValidationError) Error() string {
+func (e Event_GuildRemovedFromListValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -6324,14 +6297,14 @@ func (e HomeserverEvent_GuildRemovedFromListValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sHomeserverEvent_GuildRemovedFromList.%s: %s%s",
+		"invalid %sEvent_GuildRemovedFromList.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = HomeserverEvent_GuildRemovedFromListValidationError{}
+var _ error = Event_GuildRemovedFromListValidationError{}
 
 var _ interface {
 	Field() string
@@ -6339,19 +6312,19 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = HomeserverEvent_GuildRemovedFromListValidationError{}
+} = Event_GuildRemovedFromListValidationError{}
 
-// Validate checks the field values on ActionEvent_Action with the rules
+// Validate checks the field values on Event_ActionPerformed with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
-func (m *ActionEvent_Action) Validate() error {
+func (m *Event_ActionPerformed) Validate() error {
 	if m == nil {
 		return nil
 	}
 
 	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return ActionEvent_ActionValidationError{
+			return Event_ActionPerformedValidationError{
 				field:  "Location",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -6366,9 +6339,9 @@ func (m *ActionEvent_Action) Validate() error {
 	return nil
 }
 
-// ActionEvent_ActionValidationError is the validation error returned by
-// ActionEvent_Action.Validate if the designated constraints aren't met.
-type ActionEvent_ActionValidationError struct {
+// Event_ActionPerformedValidationError is the validation error returned by
+// Event_ActionPerformed.Validate if the designated constraints aren't met.
+type Event_ActionPerformedValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -6376,24 +6349,24 @@ type ActionEvent_ActionValidationError struct {
 }
 
 // Field function returns field value.
-func (e ActionEvent_ActionValidationError) Field() string { return e.field }
+func (e Event_ActionPerformedValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e ActionEvent_ActionValidationError) Reason() string { return e.reason }
+func (e Event_ActionPerformedValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e ActionEvent_ActionValidationError) Cause() error { return e.cause }
+func (e Event_ActionPerformedValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e ActionEvent_ActionValidationError) Key() bool { return e.key }
+func (e Event_ActionPerformedValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e ActionEvent_ActionValidationError) ErrorName() string {
-	return "ActionEvent_ActionValidationError"
+func (e Event_ActionPerformedValidationError) ErrorName() string {
+	return "Event_ActionPerformedValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e ActionEvent_ActionValidationError) Error() string {
+func (e Event_ActionPerformedValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -6405,14 +6378,14 @@ func (e ActionEvent_ActionValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sActionEvent_Action.%s: %s%s",
+		"invalid %sEvent_ActionPerformed.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = ActionEvent_ActionValidationError{}
+var _ error = Event_ActionPerformedValidationError{}
 
 var _ interface {
 	Field() string
@@ -6420,4 +6393,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = ActionEvent_ActionValidationError{}
+} = Event_ActionPerformedValidationError{}
