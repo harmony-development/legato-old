@@ -153,6 +153,7 @@ func (v1 *V1) CreateChannel(c context.Context, r *corev1.CreateChannelRequest) (
 	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.Event{
 		Event: &corev1.Event_CreatedChannel{
 			CreatedChannel: &corev1.Event_ChannelCreated{
+				GuildId:    r.Location.GuildId,
 				Location:   r.Location,
 				Name:       r.ChannelName,
 				PreviousId: r.PreviousId,
@@ -430,6 +431,7 @@ func (v1 *V1) UpdateGuildName(c context.Context, r *corev1.UpdateGuildNameReques
 	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.Event{
 		Event: &corev1.Event_EditedGuild{
 			EditedGuild: &corev1.Event_GuildUpdated{
+				GuildId:    r.Location.GuildId,
 				Name:       r.NewGuildName,
 				UpdateName: true,
 			},
@@ -457,6 +459,7 @@ func (v1 *V1) UpdateChannelName(c context.Context, r *corev1.UpdateChannelNameRe
 	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.Event{
 		Event: &corev1.Event_EditedChannel{
 			EditedChannel: &corev1.Event_ChannelUpdated{
+				GuildId:    r.Location.GuildId,
 				Location:   r.Location,
 				Name:       r.NewChannelName,
 				UpdateName: true,
@@ -485,6 +488,7 @@ func (v1 *V1) UpdateChannelOrder(c context.Context, r *corev1.UpdateChannelOrder
 	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.Event{
 		Event: &corev1.Event_EditedChannel{
 			EditedChannel: &corev1.Event_ChannelUpdated{
+				GuildId:     r.Location.GuildId,
 				Location:    r.Location,
 				PreviousId:  r.PreviousId,
 				NextId:      r.NextId,
@@ -544,6 +548,7 @@ func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (
 	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.Event{
 		Event: &corev1.Event_EditedMessage{
 			EditedMessage: &corev1.Event_MessageUpdated{
+				GuildId:       r.Location.GuildId,
 				Location:      r.Location,
 				Content:       r.Content,
 				UpdateContent: r.UpdateContent,
@@ -578,7 +583,9 @@ func (v1 *V1) DeleteGuild(c context.Context, r *corev1.DeleteGuildRequest) (*emp
 	}
 	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.Event{
 		Event: &corev1.Event_DeletedGuild{
-			DeletedGuild: &corev1.Event_GuildDeleted{},
+			DeletedGuild: &corev1.Event_GuildDeleted{
+				GuildId: r.Location.GuildId,
+			},
 		},
 	})
 	return &emptypb.Empty{}, nil
@@ -622,6 +629,7 @@ func (v1 *V1) DeleteChannel(c context.Context, r *corev1.DeleteChannelRequest) (
 	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.Event{
 		Event: &corev1.Event_DeletedChannel{
 			DeletedChannel: &corev1.Event_ChannelDeleted{
+				GuildId:  r.Location.GuildId,
 				Location: r.Location,
 			},
 		},
@@ -694,6 +702,7 @@ func (v1 *V1) JoinGuild(c context.Context, r *corev1.JoinGuildRequest) (*corev1.
 	v1.PubSub.Guild.Broadcast(guildID, &corev1.Event{
 		Event: &corev1.Event_JoinedMember{
 			JoinedMember: &corev1.Event_MemberJoined{
+				GuildId:  guildID,
 				MemberId: ctx.UserID,
 			},
 		},
@@ -729,6 +738,7 @@ func (v1 *V1) LeaveGuild(c context.Context, r *corev1.LeaveGuildRequest) (*empty
 		Event: &corev1.Event_LeftMember{
 			LeftMember: &corev1.Event_MemberLeft{
 				MemberId: ctx.UserID,
+				GuildId:  r.Location.GuildId,
 			},
 		},
 	})
@@ -877,6 +887,7 @@ func (v1 *V1) SendMessage(c context.Context, r *corev1.SendMessageRequest) (*cor
 	v1.PubSub.Guild.Broadcast(r.Location.GuildId, &corev1.Event{
 		Event: &corev1.Event_SentMessage{
 			SentMessage: &corev1.Event_MessageSent{
+				GuildId: r.Location.GuildId,
 				Message: &message,
 			},
 		},

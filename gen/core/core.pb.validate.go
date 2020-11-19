@@ -5364,6 +5364,8 @@ func (m *Event_MessageSent) Validate() error {
 		return nil
 	}
 
+	// no validation rules for GuildId
+
 	if v, ok := interface{}(m.GetMessage()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return Event_MessageSentValidationError{
@@ -5440,6 +5442,8 @@ func (m *Event_MessageUpdated) Validate() error {
 	if m == nil {
 		return nil
 	}
+
+	// no validation rules for GuildId
 
 	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
@@ -5580,6 +5584,8 @@ func (m *Event_MessageDeleted) Validate() error {
 		return nil
 	}
 
+	// no validation rules for GuildId
+
 	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return Event_MessageDeletedValidationError{
@@ -5656,6 +5662,8 @@ func (m *Event_ChannelCreated) Validate() error {
 	if m == nil {
 		return nil
 	}
+
+	// no validation rules for GuildId
 
 	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
@@ -5741,6 +5749,8 @@ func (m *Event_ChannelUpdated) Validate() error {
 	if m == nil {
 		return nil
 	}
+
+	// no validation rules for GuildId
 
 	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
@@ -5829,6 +5839,8 @@ func (m *Event_ChannelDeleted) Validate() error {
 		return nil
 	}
 
+	// no validation rules for GuildId
+
 	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return Event_ChannelDeletedValidationError{
@@ -5906,6 +5918,8 @@ func (m *Event_GuildUpdated) Validate() error {
 		return nil
 	}
 
+	// no validation rules for GuildId
+
 	// no validation rules for Name
 
 	// no validation rules for UpdateName
@@ -5977,6 +5991,8 @@ func (m *Event_GuildDeleted) Validate() error {
 		return nil
 	}
 
+	// no validation rules for GuildId
+
 	return nil
 }
 
@@ -6046,6 +6062,8 @@ func (m *Event_MemberJoined) Validate() error {
 
 	// no validation rules for MemberId
 
+	// no validation rules for GuildId
+
 	return nil
 }
 
@@ -6114,6 +6132,8 @@ func (m *Event_MemberLeft) Validate() error {
 	}
 
 	// no validation rules for MemberId
+
+	// no validation rules for GuildId
 
 	return nil
 }
