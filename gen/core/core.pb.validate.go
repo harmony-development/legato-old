@@ -36,76 +36,6 @@ var (
 // define the regex for a UUID once up-front
 var _core_uuidPattern = regexp.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 
-// Validate checks the field values on Location with the rules defined in the
-// proto definition for this message. If any rules are violated, an error is returned.
-func (m *Location) Validate() error {
-	if m == nil {
-		return nil
-	}
-
-	// no validation rules for GuildId
-
-	// no validation rules for ChannelId
-
-	// no validation rules for MessageId
-
-	return nil
-}
-
-// LocationValidationError is the validation error returned by
-// Location.Validate if the designated constraints aren't met.
-type LocationValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e LocationValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e LocationValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e LocationValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e LocationValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e LocationValidationError) ErrorName() string { return "LocationValidationError" }
-
-// Error satisfies the builtin error interface
-func (e LocationValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sLocation.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = LocationValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = LocationValidationError{}
-
 // Validate checks the field values on Override with the rules defined in the
 // proto definition for this message. If any rules are violated, an error is returned.
 func (m *Override) Validate() error {
@@ -607,15 +537,11 @@ func (m *Message) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return MessageValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for GuildId
+
+	// no validation rules for ChannelId
+
+	// no validation rules for MessageId
 
 	// no validation rules for AuthorId
 
@@ -888,15 +814,7 @@ func (m *CreateInviteRequest) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return CreateInviteRequestValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for GuildId
 
 	// no validation rules for Name
 
@@ -1038,22 +956,7 @@ func (m *CreateChannelRequest) Validate() error {
 		return nil
 	}
 
-	if m.GetLocation() == nil {
-		return CreateChannelRequestValidationError{
-			field:  "Location",
-			reason: "value is required",
-		}
-	}
-
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return CreateChannelRequestValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for GuildId
 
 	if utf8.RuneCountInString(m.GetChannelName()) < 1 {
 		return CreateChannelRequestValidationError{
@@ -1491,15 +1394,7 @@ func (m *GetGuildRequest) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return GetGuildRequestValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for GuildId
 
 	return nil
 }
@@ -1637,15 +1532,7 @@ func (m *GetGuildInvitesRequest) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return GetGuildInvitesRequestValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for GuildId
 
 	return nil
 }
@@ -1796,15 +1683,7 @@ func (m *GetGuildMembersRequest) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return GetGuildMembersRequestValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for GuildId
 
 	return nil
 }
@@ -1940,15 +1819,7 @@ func (m *GetGuildChannelsRequest) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return GetGuildChannelsRequestValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for GuildId
 
 	return nil
 }
@@ -2099,15 +1970,9 @@ func (m *GetChannelMessagesRequest) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return GetChannelMessagesRequestValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for GuildId
+
+	// no validation rules for ChannelId
 
 	// no validation rules for BeforeMessage
 
@@ -2260,15 +2125,11 @@ func (m *GetMessageRequest) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return GetMessageRequestValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for GuildId
+
+	// no validation rules for ChannelId
+
+	// no validation rules for MessageId
 
 	return nil
 }
@@ -2714,15 +2575,7 @@ func (m *UpdateGuildNameRequest) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return UpdateGuildNameRequestValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for GuildId
 
 	// no validation rules for NewGuildName
 
@@ -2793,15 +2646,9 @@ func (m *UpdateChannelNameRequest) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return UpdateChannelNameRequestValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for GuildId
+
+	// no validation rules for ChannelId
 
 	// no validation rules for NewChannelName
 
@@ -2872,15 +2719,9 @@ func (m *UpdateChannelOrderRequest) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return UpdateChannelOrderRequestValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for GuildId
+
+	// no validation rules for ChannelId
 
 	// no validation rules for PreviousId
 
@@ -2953,15 +2794,11 @@ func (m *UpdateMessageRequest) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return UpdateMessageRequestValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for GuildId
+
+	// no validation rules for ChannelId
+
+	// no validation rules for MessageId
 
 	// no validation rules for Content
 
@@ -3155,15 +2992,7 @@ func (m *DeleteGuildRequest) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return DeleteGuildRequestValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for GuildId
 
 	return nil
 }
@@ -3232,15 +3061,7 @@ func (m *DeleteInviteRequest) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return DeleteInviteRequestValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for GuildId
 
 	// no validation rules for InviteId
 
@@ -3311,15 +3132,9 @@ func (m *DeleteChannelRequest) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return DeleteChannelRequestValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for GuildId
+
+	// no validation rules for ChannelId
 
 	return nil
 }
@@ -3388,15 +3203,11 @@ func (m *DeleteMessageRequest) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return DeleteMessageRequestValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for GuildId
+
+	// no validation rules for ChannelId
+
+	// no validation rules for MessageId
 
 	return nil
 }
@@ -4072,15 +3883,7 @@ func (m *JoinGuildResponse) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return JoinGuildResponseValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for GuildId
 
 	return nil
 }
@@ -4149,15 +3952,7 @@ func (m *LeaveGuildRequest) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return LeaveGuildRequestValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for GuildId
 
 	return nil
 }
@@ -4226,15 +4021,11 @@ func (m *TriggerActionRequest) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return TriggerActionRequestValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for GuildId
+
+	// no validation rules for ChannelId
+
+	// no validation rules for MessageId
 
 	// no validation rules for ActionId
 
@@ -4307,15 +4098,9 @@ func (m *SendMessageRequest) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return SendMessageRequestValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for GuildId
+
+	// no validation rules for ChannelId
 
 	// no validation rules for Content
 
@@ -5144,15 +4929,7 @@ func (m *StreamEventsRequest_SubscribeToGuild) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return StreamEventsRequest_SubscribeToGuildValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for GuildId
 
 	return nil
 }
@@ -5445,15 +5222,9 @@ func (m *Event_MessageUpdated) Validate() error {
 
 	// no validation rules for GuildId
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return Event_MessageUpdatedValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for ChannelId
+
+	// no validation rules for MessageId
 
 	if v, ok := interface{}(m.GetEditedAt()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
@@ -5586,15 +5357,9 @@ func (m *Event_MessageDeleted) Validate() error {
 
 	// no validation rules for GuildId
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return Event_MessageDeletedValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for ChannelId
+
+	// no validation rules for MessageId
 
 	return nil
 }
@@ -5665,15 +5430,7 @@ func (m *Event_ChannelCreated) Validate() error {
 
 	// no validation rules for GuildId
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return Event_ChannelCreatedValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for ChannelId
 
 	// no validation rules for Name
 
@@ -5752,15 +5509,7 @@ func (m *Event_ChannelUpdated) Validate() error {
 
 	// no validation rules for GuildId
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return Event_ChannelUpdatedValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for ChannelId
 
 	// no validation rules for Name
 
@@ -5841,15 +5590,7 @@ func (m *Event_ChannelDeleted) Validate() error {
 
 	// no validation rules for GuildId
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return Event_ChannelDeletedValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for ChannelId
 
 	return nil
 }
@@ -6342,15 +6083,11 @@ func (m *Event_ActionPerformed) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetLocation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return Event_ActionPerformedValidationError{
-				field:  "Location",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for GuildId
+
+	// no validation rules for ChannelId
+
+	// no validation rules for MessageId
 
 	// no validation rules for ActionId
 
