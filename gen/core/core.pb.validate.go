@@ -5141,8 +5141,6 @@ func (m *Event_MessageSent) Validate() error {
 		return nil
 	}
 
-	// no validation rules for GuildId
-
 	if v, ok := interface{}(m.GetMessage()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return Event_MessageSentValidationError{
