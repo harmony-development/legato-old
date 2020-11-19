@@ -88,8 +88,7 @@ func (inst Instance) Start() {
 			if err != nil {
 				return false
 			}
-
-			return strings.Contains(req.Header.Get("Access-Control-Request-Headers"), "x-grpc-web") || req.Header.Get("x-grpc-web") == "1"
+			return strings.Contains(req.Header.Get("Access-Control-Request-Headers"), "x-grpc-web") || req.Header.Get("x-grpc-web") == "1" || req.Header.Get("Sec-Websocket-Protocol") == "grpc-websockets"
 		},
 	)
 	httpListener := multiplexer.Match(cmux.HTTP1Fast())
