@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/responses"
@@ -37,6 +38,7 @@ func AuthHandler(database db.IHarmonyDB, c context.Context) (uint64, error) {
 	}
 	authHeader, exists := headers["auth"]
 	if !exists {
+		fmt.Println(headers)
 		println("no auth header")
 		return 0, status.Error(codes.Unauthenticated, responses.InvalidSession)
 	}

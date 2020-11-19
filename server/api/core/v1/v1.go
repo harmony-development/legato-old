@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"time"
 
@@ -765,17 +766,19 @@ func (v1 *V1) StreamEvents(s corev1.CoreService_StreamEventsServer) error {
 		switch x := in.Request.(type) {
 		case *corev1.StreamEventsRequest_SubscribeToGuild_:
 			if err := middleware.LocationHandler(v1.DB, x.SubscribeToGuild, "/protocol.core.v1.CoreService/StreamGuildEvents", userID); err != nil {
+				fmt.Println(err)
 				break
 			}
 			ok, err := v1.DB.UserInGuild(userID, x.SubscribeToGuild.GuildId)
 			if err != nil {
+				fmt.Println(err)
 				break
 			}
 			if !ok {
+				fmt.Println("user not in guild")
 				break
 			}
 			<-v1.PubSub.Guild.Subscribe(x.SubscribeToGuild.GuildId, userID, s)
-			return nil
 		case *corev1.StreamEventsRequest_SubscribeToActions_:
 			<-v1.PubSub.Actions.Subscribe(userID, s)
 		case *corev1.StreamEventsRequest_SubscribeToHomeserverEvents_:
