@@ -74,7 +74,7 @@ func New(deps Dependencies) *API {
 		))
 	api.grpcWebServer = grpcweb.WrapServer(api.grpcServer, grpcweb.WithOriginFunc(func(_ string) bool {
 		return true
-	}))
+	}), grpcweb.WithWebsockets(true))
 	api.grpcWebHTTPServer = &http.Server{
 		Handler: http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 			api.grpcWebServer.ServeHTTP(resp, req)
