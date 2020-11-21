@@ -778,15 +778,15 @@ func (v1 *V1) StreamEvents(s corev1.CoreService_StreamEventsServer) error {
 				fmt.Println("user not in guild")
 				break
 			}
-			<-v1.PubSub.Guild.Subscribe(x.SubscribeToGuild.GuildId, userID, s)
+			v1.PubSub.Guild.Subscribe(x.SubscribeToGuild.GuildId, userID, s)
 		case *corev1.StreamEventsRequest_SubscribeToActions_:
-			<-v1.PubSub.Actions.Subscribe(userID, s)
+			v1.PubSub.Actions.Subscribe(userID, s)
 		case *corev1.StreamEventsRequest_SubscribeToHomeserverEvents_:
 			err = v1.DB.UserIsLocal(userID)
 			if err != nil {
 				break
 			}
-			<-v1.PubSub.Homeserver.Subscribe(userID, s)
+			v1.PubSub.Homeserver.Subscribe(userID, s)
 		}
 	}
 }
