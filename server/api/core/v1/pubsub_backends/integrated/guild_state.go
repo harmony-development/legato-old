@@ -37,7 +37,6 @@ func (s *GuildState) Subscribe(guildID, userID uint64, server corev1.CoreService
 		<-server.Context().Done()
 		s.UnsubscribeUserFromGuild(userID, guildID)
 	}()
-
 	val, _ := s.guildEvents[_userID(userID)][_guildID(guildID)]
 	val = append(val, server)
 	s.guildEvents[_userID(userID)][_guildID(guildID)] = val
@@ -70,8 +69,10 @@ func (s *GuildState) UnsubscribeGuild(guildID uint64) {
 		for user := range val {
 			for _, guild := range s.guildEvents[user] {
 				for _, serv := range guild {
-					close(s.serverChannels[serv])
-					delete(s.serverChannels, serv)
+					if _, ok := s.serverChannels[serv]; ok {
+						close(s.serverChannels[serv])
+						delete(s.serverChannels, serv)
+					}
 				}
 			}
 			delete(s.guildEvents[user], _guildID(guildID))
@@ -87,8 +88,10 @@ func (s *GuildState) UnsubscribeUserFromGuild(userID, guildID uint64) {
 	s.subRemoveUserFromGuild(userID, guildID)
 	if _, ok := s.guildEvents[_userID(userID)]; ok {
 		for _, serv := range s.guildEvents[_userID(userID)][_guildID(guildID)] {
-			close(s.serverChannels[serv])
-			delete(s.serverChannels, serv)
+			if _, ok := s.serverChannels[serv]; ok {
+				close(s.serverChannels[serv])
+				delete(s.serverChannels, serv)
+			}
 		}
 		delete(s.guildEvents[_userID(userID)], _guildID(guildID))
 	}
