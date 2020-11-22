@@ -130,8 +130,14 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getGuildOwnerStmt, err = db.PrepareContext(ctx, getGuildOwner); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGuildOwner: %w", err)
 	}
+	if q.getGuildPermsStmt, err = db.PrepareContext(ctx, getGuildPerms); err != nil {
+		return nil, fmt.Errorf("error preparing query GetGuildPerms: %w", err)
+	}
 	if q.getGuildPictureStmt, err = db.PrepareContext(ctx, getGuildPicture); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGuildPicture: %w", err)
+	}
+	if q.getGuildRolesStmt, err = db.PrepareContext(ctx, getGuildRoles); err != nil {
+		return nil, fmt.Errorf("error preparing query GetGuildRoles: %w", err)
 	}
 	if q.getLastGuildPositionInListStmt, err = db.PrepareContext(ctx, getLastGuildPositionInList); err != nil {
 		return nil, fmt.Errorf("error preparing query GetLastGuildPositionInList: %w", err)
@@ -214,8 +220,14 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.setGuildNameStmt, err = db.PrepareContext(ctx, setGuildName); err != nil {
 		return nil, fmt.Errorf("error preparing query SetGuildName: %w", err)
 	}
+	if q.setGuildPermsStmt, err = db.PrepareContext(ctx, setGuildPerms); err != nil {
+		return nil, fmt.Errorf("error preparing query SetGuildPerms: %w", err)
+	}
 	if q.setGuildPictureStmt, err = db.PrepareContext(ctx, setGuildPicture); err != nil {
 		return nil, fmt.Errorf("error preparing query SetGuildPicture: %w", err)
+	}
+	if q.setGuildRolesStmt, err = db.PrepareContext(ctx, setGuildRoles); err != nil {
+		return nil, fmt.Errorf("error preparing query SetGuildRoles: %w", err)
 	}
 	if q.setStatusStmt, err = db.PrepareContext(ctx, setStatus); err != nil {
 		return nil, fmt.Errorf("error preparing query SetStatus: %w", err)
@@ -432,9 +444,19 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getGuildOwnerStmt: %w", cerr)
 		}
 	}
+	if q.getGuildPermsStmt != nil {
+		if cerr := q.getGuildPermsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getGuildPermsStmt: %w", cerr)
+		}
+	}
 	if q.getGuildPictureStmt != nil {
 		if cerr := q.getGuildPictureStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getGuildPictureStmt: %w", cerr)
+		}
+	}
+	if q.getGuildRolesStmt != nil {
+		if cerr := q.getGuildRolesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getGuildRolesStmt: %w", cerr)
 		}
 	}
 	if q.getLastGuildPositionInListStmt != nil {
@@ -572,9 +594,19 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing setGuildNameStmt: %w", cerr)
 		}
 	}
+	if q.setGuildPermsStmt != nil {
+		if cerr := q.setGuildPermsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing setGuildPermsStmt: %w", cerr)
+		}
+	}
 	if q.setGuildPictureStmt != nil {
 		if cerr := q.setGuildPictureStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing setGuildPictureStmt: %w", cerr)
+		}
+	}
+	if q.setGuildRolesStmt != nil {
+		if cerr := q.setGuildRolesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing setGuildRolesStmt: %w", cerr)
 		}
 	}
 	if q.setStatusStmt != nil {
@@ -702,7 +734,9 @@ type Queries struct {
 	getGuildListPositionStmt       *sql.Stmt
 	getGuildMembersStmt            *sql.Stmt
 	getGuildOwnerStmt              *sql.Stmt
+	getGuildPermsStmt              *sql.Stmt
 	getGuildPictureStmt            *sql.Stmt
+	getGuildRolesStmt              *sql.Stmt
 	getLastGuildPositionInListStmt *sql.Stmt
 	getLocalUserIDStmt             *sql.Stmt
 	getMessageStmt                 *sql.Stmt
@@ -730,7 +764,9 @@ type Queries struct {
 	resolveGuildIDStmt             *sql.Stmt
 	sessionToUserIDStmt            *sql.Stmt
 	setGuildNameStmt               *sql.Stmt
+	setGuildPermsStmt              *sql.Stmt
 	setGuildPictureStmt            *sql.Stmt
+	setGuildRolesStmt              *sql.Stmt
 	setStatusStmt                  *sql.Stmt
 	updateAvatarStmt               *sql.Stmt
 	updateChannelNameStmt          *sql.Stmt
@@ -783,7 +819,9 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getGuildListPositionStmt:       q.getGuildListPositionStmt,
 		getGuildMembersStmt:            q.getGuildMembersStmt,
 		getGuildOwnerStmt:              q.getGuildOwnerStmt,
+		getGuildPermsStmt:              q.getGuildPermsStmt,
 		getGuildPictureStmt:            q.getGuildPictureStmt,
+		getGuildRolesStmt:              q.getGuildRolesStmt,
 		getLastGuildPositionInListStmt: q.getLastGuildPositionInListStmt,
 		getLocalUserIDStmt:             q.getLocalUserIDStmt,
 		getMessageStmt:                 q.getMessageStmt,
@@ -811,7 +849,9 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		resolveGuildIDStmt:             q.resolveGuildIDStmt,
 		sessionToUserIDStmt:            q.sessionToUserIDStmt,
 		setGuildNameStmt:               q.setGuildNameStmt,
+		setGuildPermsStmt:              q.setGuildPermsStmt,
 		setGuildPictureStmt:            q.setGuildPictureStmt,
+		setGuildRolesStmt:              q.setGuildRolesStmt,
 		setStatusStmt:                  q.setStatusStmt,
 		updateAvatarStmt:               q.updateAvatarStmt,
 		updateChannelNameStmt:          q.updateChannelNameStmt,

@@ -90,13 +90,13 @@ type Check struct {
 }
 
 type TestingData struct {
-	Roles []RoleID
+	Roles []uint64
 	Check []Check
 }
 
 var Yeet = map[string]TestingData{
 	"jan Pontajosi": {
-		Roles: []RoleID{BonkRole, MoyaiRole},
+		Roles: []uint64{uint64(BonkRole), uint64(MoyaiRole)},
 		Check: []Check{
 			{
 				Node:     "chat.chat",
@@ -106,7 +106,7 @@ var Yeet = map[string]TestingData{
 		},
 	},
 	"Blusky": {
-		Roles: []RoleID{MoyaiRole},
+		Roles: []uint64{uint64(MoyaiRole)},
 		Check: []Check{
 			{
 				Node:     "chat.chat",
@@ -126,7 +126,7 @@ var Yeet = map[string]TestingData{
 		},
 	},
 	"Some Random Joe": {
-		Roles: []RoleID{},
+		Roles: []uint64{},
 		Check: []Check{
 			{
 				Node:     "chat.chat",

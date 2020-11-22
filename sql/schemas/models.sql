@@ -60,7 +60,9 @@ CREATE TABLE IF NOT EXISTS Guilds (
     Guild_ID BIGSERIAL PRIMARY KEY NOT NULL,
     Owner_ID BIGSERIAL NOT NULL,
     Guild_Name TEXT NOT NULL,
-    Picture_URL TEXT NOT NULL
+    Picture_URL TEXT NOT NULL,
+    Roles bytea[],
+    Permissions bytea
 );
 
 CREATE TABLE IF NOT EXISTS Guild_Members (

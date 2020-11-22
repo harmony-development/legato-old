@@ -13,6 +13,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	corev1 "github.com/harmony-development/legato/gen/core"
+	"github.com/harmony-development/legato/server/api/core/v1/permissions"
 	"github.com/harmony-development/legato/server/api/middleware"
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/db/queries"
@@ -26,8 +27,10 @@ import (
 )
 
 var (
-	NoPermissionsError = errors.New("No permissions")
-	NotInGuild         = errors.New("Not in guild")
+	// ErrNoPermissions : you're not authenticated to do this
+	ErrNoPermissions = errors.New("No permissions")
+	// ErrNotInGuild : you're not in the guild
+	ErrNotInGuild = errors.New("Not in guild")
 )
 
 // Dependencies are the backend services this package needs
@@ -36,6 +39,7 @@ type Dependencies struct {
 	Logger    logger.ILogger
 	Sonyflake *sonyflake.Sonyflake
 	PubSub    SubscriptionManager
+	Perms     *permissions.Manager
 }
 
 // V1 contains the gRPC handler for v1
@@ -43,26 +47,31 @@ type V1 struct {
 	Dependencies
 }
 
+// ActionsToProto is a utility function
 func (v1 *V1) ActionsToProto(msgs json.RawMessage) (ret []*corev1.Action) {
 	json.Unmarshal([]byte(msgs), &ret)
 	return
 }
 
+// ProtoToActions is a utility function
 func (v1 *V1) ProtoToActions(msgs []*corev1.Action) (ret []byte) {
 	ret, _ = json.Marshal(msgs)
 	return
 }
 
+// EmbedsToProto is a utility function
 func (v1 *V1) EmbedsToProto(embeds json.RawMessage) (ret []*corev1.Embed) {
 	json.Unmarshal([]byte(embeds), &ret)
 	return
 }
 
+// ProtoToEmbeds is a utility function
 func (v1 *V1) ProtoToEmbeds(embeds []*corev1.Embed) (ret []byte) {
 	ret, _ = json.Marshal(embeds)
 	return
 }
 
+// OverridesToProto is a utility function
 func (v1 *V1) OverridesToProto(overrides []byte) (ret *corev1.Override) {
 	if len(overrides) == 0 {
 		return
@@ -72,6 +81,7 @@ func (v1 *V1) OverridesToProto(overrides []byte) (ret *corev1.Override) {
 	return
 }
 
+// ProtoToOverrides is a utility function
 func (v1 *V1) ProtoToOverrides(overrides *corev1.Override) (ret []byte) {
 	ret, _ = proto.Marshal(overrides)
 	return
@@ -88,6 +98,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/CreateGuild")
 }
 
+// CreateGuild implements the CreateGuild RPC
 func (v1 *V1) CreateGuild(c context.Context, r *corev1.CreateGuildRequest) (*corev1.CreateGuildResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 	guildID, err := v1.Sonyflake.NextID()
@@ -119,6 +130,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/CreateInvite")
 }
 
+// CreateInvite implements the CreateInvite RPC
 func (v1 *V1) CreateInvite(c context.Context, r *corev1.CreateInviteRequest) (*corev1.CreateInviteResponse, error) {
 	inv := int32(-1)
 	if r.PossibleUses != 0 {
@@ -145,6 +157,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/CreateChannel")
 }
 
+// CreateChannel implements the CreateChannel RPC
 func (v1 *V1) CreateChannel(c context.Context, r *corev1.CreateChannelRequest) (*corev1.CreateChannelResponse, error) {
 	channel, err := v1.DB.AddChannelToGuild(r.GuildId, r.ChannelName, r.PreviousId, r.NextId, r.IsCategory)
 	if err != nil {
@@ -179,6 +192,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/GetGuild")
 }
 
+// GetGuild implements the GetGuild RPC
 func (v1 *V1) GetGuild(c context.Context, r *corev1.GetGuildRequest) (*corev1.GetGuildResponse, error) {
 	guild, err := v1.DB.GetGuildByID(r.GuildId)
 	if err != nil {
@@ -206,6 +220,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/GetGuildInvites")
 }
 
+// GetGuildInvites implements the GetGuildInvites RPC
 func (v1 *V1) GetGuildInvites(c context.Context, r *corev1.GetGuildInvitesRequest) (*corev1.GetGuildInvitesResponse, error) {
 	invites, err := v1.DB.GetInvites(r.GuildId)
 	if err != nil {
@@ -242,6 +257,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/GetGuildMembers")
 }
 
+// GetGuildMembers implements the GetGuildMembers RPC
 func (v1 *V1) GetGuildMembers(c context.Context, r *corev1.GetGuildMembersRequest) (*corev1.GetGuildMembersResponse, error) {
 	members, err := v1.DB.MembersInGuild(r.GuildId)
 	if err != nil {
@@ -264,6 +280,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/GetGuildChannels")
 }
 
+// GetGuildChannels implements the GetGuildChannels RPC
 func (v1 *V1) GetGuildChannels(c context.Context, r *corev1.GetGuildChannelsRequest) (*corev1.GetGuildChannelsResponse, error) {
 	chans, err := v1.DB.ChannelsForGuild(r.GuildId)
 	if err != nil {
@@ -295,6 +312,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/GetMessage")
 }
 
+// GetMessage implements the GetMessage RPC
 func (v1 *V1) GetMessage(c context.Context, r *corev1.GetMessageRequest) (*corev1.GetMessageResponse, error) {
 	message, err := v1.DB.GetMessage(r.MessageId)
 	if err != nil {
@@ -350,6 +368,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/GetChannelMessages")
 }
 
+// GetChannelMessages implements the GetChannelMessages RPC
 func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessagesRequest) (*corev1.GetChannelMessagesResponse, error) {
 	var err error
 	var messages []queries.Message
@@ -420,6 +439,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/UpdateGuildName")
 }
 
+// UpdateGuildName implements the UpdateGuildName RPC
 func (v1 *V1) UpdateGuildName(c context.Context, r *corev1.UpdateGuildNameRequest) (*empty.Empty, error) {
 	if err := v1.DB.UpdateGuildName(r.GuildId, r.NewGuildName); err != nil {
 		return nil, err
@@ -448,6 +468,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/UpdateChannelName")
 }
 
+// UpdateChannelName implements the UpdateChannelName RPC
 func (v1 *V1) UpdateChannelName(c context.Context, r *corev1.UpdateChannelNameRequest) (*empty.Empty, error) {
 	if err := v1.DB.SetChannelName(r.GuildId, r.ChannelId, r.NewChannelName); err != nil {
 		return nil, err
@@ -477,6 +498,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/UpdateChannelOrder")
 }
 
+// UpdateChannelOrder implements the UpdateChannelOrder RPC
 func (v1 *V1) UpdateChannelOrder(c context.Context, r *corev1.UpdateChannelOrderRequest) (*empty.Empty, error) {
 	if err := v1.DB.MoveChannel(r.GuildId, r.ChannelId, r.PreviousId, r.NextId); err != nil {
 		return nil, err
@@ -507,6 +529,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/UpdateMessage")
 }
 
+// UpdateMessage implements the UpdateMessage RPC
 func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
 	if !r.UpdateActions && !r.UpdateEmbeds && !r.UpdateContent && !r.UpdateOverrides {
@@ -518,7 +541,7 @@ func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (
 		return nil, err
 	}
 	if owner != ctx.UserID {
-		return nil, NoPermissionsError
+		return nil, ErrNoPermissions
 	}
 
 	var actions *[]byte
@@ -573,6 +596,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/DeleteGuild")
 }
 
+// DeleteGuild implements the DeleteGuild RPC
 func (v1 *V1) DeleteGuild(c context.Context, r *corev1.DeleteGuildRequest) (*empty.Empty, error) {
 	err := v1.DB.DeleteGuild(r.GuildId)
 	if err != nil {
@@ -600,6 +624,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/DeleteInvite")
 }
 
+// DeleteInvite implements the DeleteInvite RPC
 func (v1 *V1) DeleteInvite(c context.Context, r *corev1.DeleteInviteRequest) (*empty.Empty, error) {
 	if err := v1.DB.DeleteInvite(r.InviteId); err != nil {
 		return nil, err
@@ -619,6 +644,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/DeleteChannel")
 }
 
+// DeleteChannel implements the DeleteChannel RPC
 func (v1 *V1) DeleteChannel(c context.Context, r *corev1.DeleteChannelRequest) (*empty.Empty, error) {
 	if err := v1.DB.DeleteChannelFromGuild(r.GuildId, r.ChannelId); err != nil {
 		return nil, err
@@ -646,6 +672,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/DeleteMessage")
 }
 
+// DeleteMessage implements the DeleteMessage RPC
 func (v1 *V1) DeleteMessage(c context.Context, r *corev1.DeleteMessageRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
 	owner, err := v1.DB.GetMessageOwner(r.MessageId)
@@ -653,7 +680,7 @@ func (v1 *V1) DeleteMessage(c context.Context, r *corev1.DeleteMessageRequest) (
 		return nil, err
 	}
 	if ctx.UserID != owner {
-		return nil, NoPermissionsError
+		return nil, ErrNoPermissions
 	}
 	v1.PubSub.Guild.Broadcast(r.GuildId, &corev1.Event{
 		Event: &corev1.Event_DeletedMessage{
@@ -679,6 +706,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/JoinGuild")
 }
 
+// JoinGuild implements the JoinGuild RPC
 func (v1 *V1) JoinGuild(c context.Context, r *corev1.JoinGuildRequest) (*corev1.JoinGuildResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 	guildID, err := v1.DB.ResolveGuildID(r.InviteId)
@@ -719,6 +747,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/LeaveGuild")
 }
 
+// LeaveGuild implements the LeaveGuild RPC
 func (v1 *V1) LeaveGuild(c context.Context, r *corev1.LeaveGuildRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
 	if isOwner, err := v1.DB.IsOwner(r.GuildId, ctx.UserID); err != nil {
@@ -750,6 +779,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/StreamEvents")
 }
 
+// StreamEvents implements the StreamEvents RPC
 func (v1 *V1) StreamEvents(s corev1.CoreService_StreamEventsServer) error {
 	userID, err := middleware.AuthHandler(v1.DB, s.Context())
 	if err != nil {
@@ -843,6 +873,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/SendMessage")
 }
 
+// SendMessage implements the SendMessage RPC
 func (v1 *V1) SendMessage(c context.Context, r *corev1.SendMessageRequest) (*corev1.SendMessageResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 	messageID, err := v1.Sonyflake.NextID()
@@ -906,6 +937,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/GetGuildList")
 }
 
+// GetGuildList implements the GetGuildList RPC
 func (v1 *V1) GetGuildList(c context.Context, r *corev1.GetGuildListRequest) (*corev1.GetGuildListResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 	data, err := v1.DB.GetGuildList(ctx.UserID)
@@ -937,6 +969,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/AddGuildToGuildList")
 }
 
+// AddGuildToGuildList implements the AddGuildToGuildList RPC
 func (v1 *V1) AddGuildToGuildList(c context.Context, r *corev1.AddGuildToGuildListRequest) (*corev1.AddGuildToGuildListResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 	err := v1.DB.AddGuildToList(ctx.UserID, r.GuildId, r.Homeserver)
@@ -967,6 +1000,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/RemoveGuildFromGuildList")
 }
 
+// RemoveGuildFromGuildList implements the RemoveGuildFromGuildList RPC
 func (v1 *V1) RemoveGuildFromGuildList(c context.Context, r *corev1.RemoveGuildFromGuildListRequest) (*corev1.RemoveGuildFromGuildListResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 	err := v1.DB.RemoveGuildFromList(ctx.UserID, r.GuildId, r.Homeserver)
@@ -984,6 +1018,7 @@ func (v1 *V1) RemoveGuildFromGuildList(c context.Context, r *corev1.RemoveGuildF
 	return &corev1.RemoveGuildFromGuildListResponse{}, nil
 }
 
+// CreateEmotePack implements the CreateEmotePack RPC
 func (v1 *V1) CreateEmotePack(c context.Context, r *corev1.CreateEmotePackRequest) (*corev1.CreateEmotePackResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 
@@ -1001,6 +1036,7 @@ func (v1 *V1) CreateEmotePack(c context.Context, r *corev1.CreateEmotePackReques
 	}, nil
 }
 
+// AddEmoteToPack implements the AddEmoteToPack RPC
 func (v1 *V1) AddEmoteToPack(c context.Context, r *corev1.AddEmoteToPackRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
 
@@ -1015,6 +1051,7 @@ func (v1 *V1) AddEmoteToPack(c context.Context, r *corev1.AddEmoteToPackRequest)
 	return &empty.Empty{}, nil
 }
 
+// DeleteEmoteFromPack implements the DeleteEmoteFromPack RPC
 func (v1 *V1) DeleteEmoteFromPack(c context.Context, r *corev1.DeleteEmoteFromPackRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
 
@@ -1029,6 +1066,7 @@ func (v1 *V1) DeleteEmoteFromPack(c context.Context, r *corev1.DeleteEmoteFromPa
 	return &empty.Empty{}, nil
 }
 
+// DeleteEmotePack implements the DeleteEmotePack RPC
 func (v1 *V1) DeleteEmotePack(c context.Context, r *corev1.DeleteEmotePackRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
 
@@ -1043,6 +1081,7 @@ func (v1 *V1) DeleteEmotePack(c context.Context, r *corev1.DeleteEmotePackReques
 	return &empty.Empty{}, nil
 }
 
+// DequipEmotePack implements the DequipEmotePack RPC
 func (v1 *V1) DequipEmotePack(c context.Context, r *corev1.DequipEmotePackRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
 
@@ -1052,6 +1091,7 @@ func (v1 *V1) DequipEmotePack(c context.Context, r *corev1.DequipEmotePackReques
 	return &empty.Empty{}, nil
 }
 
+// GetEmotePacks implements the GetEmotePacks RPC
 func (v1 *V1) GetEmotePacks(c context.Context, r *corev1.GetEmotePacksRequest) (*corev1.GetEmotePacksResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 	packs, err := v1.DB.GetEmotePacks(ctx.UserID)
@@ -1071,6 +1111,7 @@ func (v1 *V1) GetEmotePacks(c context.Context, r *corev1.GetEmotePacksRequest) (
 	}, nil
 }
 
+// GetEmotePackEmotes implements the GetEmotePackEmotes RPC
 func (v1 *V1) GetEmotePackEmotes(c context.Context, r *corev1.GetEmotePackEmotesRequest) (*corev1.GetEmotePackEmotesResponse, error) {
 	emotes, err := v1.DB.GetEmotePackEmotes(r.PackId)
 	if err != nil {
@@ -1086,4 +1127,50 @@ func (v1 *V1) GetEmotePackEmotes(c context.Context, r *corev1.GetEmotePackEmotes
 	return &corev1.GetEmotePackEmotesResponse{
 		Emotes: outEmotes,
 	}, nil
+}
+
+// AddGuildRole implements the AddGuildRole RPC
+func (v1 *V1) AddGuildRole(c context.Context, r *corev1.AddGuildRoleRequest) (*corev1.AddGuildRoleResponse, error) {
+	roleID, err := v1.Sonyflake.NextID()
+	if err != nil {
+		return nil, err
+	}
+
+	r.Role.RoleId = roleID
+	err = v1.DB.AddRoleToGuild(r.GuildId, r.Role)
+	if err != nil {
+		return nil, err
+	}
+
+	return &corev1.AddGuildRoleResponse{
+		RoleId: roleID,
+	}, nil
+}
+
+// DeleteGuildRole implements the DeleteGuildRole RPC
+func (v1 *V1) DeleteGuildRole(c context.Context, r *corev1.DeleteGuildRoleRequest) (*empty.Empty, error) {
+	return &empty.Empty{}, v1.DB.RemoveRoleFromGuild(r.GuildId, r.RoleId)
+}
+
+// GetGuildRoles implements the GetGuildRoles RPC
+func (v1 *V1) GetGuildRoles(c context.Context, r *corev1.GetGuildRolesRequest) (*corev1.GetGuildRolesResponse, error) {
+	roles, err := v1.DB.GetGuildRoles(r.GuildId)
+	return &corev1.GetGuildRolesResponse{
+		Roles: roles,
+	}, err
+}
+
+// SetPermissions implements the SetPermissions RPC
+func (v1 *V1) SetPermissions(c context.Context, r *corev1.SetPermissionsRequest) (*empty.Empty, error) {
+	return &emptypb.Empty{}, v1.Perms.SetPermissions(r.Perms.Permissions, r.GuildId, r.ChannelId, r.RoleId)
+}
+
+// GetPermissions implements the GetPermissions RPC
+func (v1 *V1) GetPermissions(c context.Context, r *corev1.GetPermissionsRequest) (*corev1.GetPermissionsResponse, error) {
+	panic("unimplemented")
+}
+
+// QueryHasPermission implements the QueryHasPermission RPC
+func (v1 *V1) QueryHasPermission(c context.Context, r *corev1.QueryPermissionsRequest) (*corev1.QueryPermissionsResponse, error) {
+	panic("unimplemented")
 }

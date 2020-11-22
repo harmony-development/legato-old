@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	corev1 "github.com/harmony-development/legato/gen/core"
 	profilev1 "github.com/harmony-development/legato/gen/profile"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db/queries"
@@ -100,6 +101,11 @@ type IHarmonyDB interface {
 	GetEmotePacks(userID uint64) ([]queries.GetEmotePacksRow, error)
 	GetEmotePackEmotes(packID uint64) ([]queries.GetEmotePackEmotesRow, error)
 	DequipEmotePack(userID, packID uint64) error
+	AddRoleToGuild(guildID uint64, role *corev1.Role) error
+	RemoveRoleFromGuild(guildID, roleID uint64) error
+	GetGuildRoles(guildID uint64) ([]*corev1.Role, error)
+	SetGuildPermissions(guildID uint64, data []byte) error
+	GetGuildPermissions(guildID uint64) (data []byte, err error)
 }
 
 // New creates a new DB connection

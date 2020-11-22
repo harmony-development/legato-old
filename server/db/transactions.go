@@ -7,8 +7,10 @@ import (
 	"database/sql"
 	"time"
 
+	corev1 "github.com/harmony-development/legato/gen/core"
 	profilev1 "github.com/harmony-development/legato/gen/profile"
 	"github.com/harmony-development/legato/server/db/queries"
+	"google.golang.org/protobuf/proto"
 )
 
 func toSqlString(input string) sql.NullString {
@@ -837,4 +839,77 @@ func (db HarmonyDB) DequipEmotePack(userID, packID uint64) error {
 		PackID: packID,
 		UserID: userID,
 	})
+}
+
+func (db HarmonyDB) AddRoleToGuild(guildID uint64, role *corev1.Role) error {
+	data, err := db.queries.GetGuildRoles(ctx, guildID)
+	if err != nil {
+		return err
+	}
+
+	marshalled, err := proto.Marshal(role)
+	if err != nil {
+		return err
+	}
+
+	data = append(data, marshalled)
+	return db.queries.SetGuildRoles(ctx, queries.SetGuildRolesParams{
+		Roles:   data,
+		GuildID: guildID,
+	})
+}
+
+func (db HarmonyDB) RemoveRoleFromGuild(guildID, roleID uint64) error {
+	data, err := db.queries.GetGuildRoles(ctx, guildID)
+	if err != nil {
+		return err
+	}
+
+	var items [][]byte
+
+	for _, item := range data {
+		role := new(corev1.Role)
+		err = proto.Unmarshal(item, role)
+		if err != nil {
+			return err
+		}
+
+		if role.RoleId != roleID {
+			items = append(items, item)
+		}
+	}
+
+	return db.queries.SetGuildRoles(ctx, queries.SetGuildRolesParams{
+		Roles:   items,
+		GuildID: guildID,
+	})
+}
+
+func (db HarmonyDB) GetGuildRoles(guildID uint64) (ret []*corev1.Role, err error) {
+	data, err := db.queries.GetGuildRoles(ctx, guildID)
+	if err != nil {
+		return
+	}
+
+	for _, item := range data {
+		role := new(corev1.Role)
+		err = proto.Unmarshal(item, role)
+		if err != nil {
+			return
+		}
+		ret = append(ret, role)
+	}
+
+	return
+}
+
+func (db HarmonyDB) SetGuildPermissions(guildID uint64, data []byte) error {
+	return db.queries.SetGuildPerms(ctx, queries.SetGuildPermsParams{
+		Permissions: data,
+		GuildID:     guildID,
+	})
+}
+
+func (db HarmonyDB) GetGuildPermissions(guildID uint64) (data []byte, err error) {
+	return db.queries.GetGuildPerms(ctx, guildID)
 }

@@ -52,10 +52,12 @@ type ForeignUser struct {
 }
 
 type Guild struct {
-	GuildID    uint64 `json:"guild_id"`
-	OwnerID    uint64 `json:"owner_id"`
-	GuildName  string `json:"guild_name"`
-	PictureUrl string `json:"picture_url"`
+	GuildID     uint64   `json:"guild_id"`
+	OwnerID     uint64   `json:"owner_id"`
+	GuildName   string   `json:"guild_name"`
+	PictureUrl  string   `json:"picture_url"`
+	Roles       [][]byte `json:"roles"`
+	Permissions []byte   `json:"permissions"`
 }
 
 type GuildList struct {

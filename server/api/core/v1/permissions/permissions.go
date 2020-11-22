@@ -83,27 +83,13 @@ type GuildState struct {
 // Check whether the user with the given roles has the permission to do something
 // in the given channel ID. userRoles should have the most important roles first
 // and the least important ones last.
-func (g GuildState) Check(permission string, userRoles []RoleID, in ChannelID) bool {
-	userRoles = append(userRoles, Everyone)
+func (g GuildState) Check(permission string, userRoles []uint64, in ChannelID) bool {
+	userRoles = append(userRoles, uint64(Everyone))
 
-	if channelData, ok := g.Channels[in]; ok {
-		for _, role := range userRoles {
-			nodes, _ := channelData[role]
-			for _, node := range nodes {
-				if node.Glob.Match(permission) {
-					if node.Mode == Allow {
-						return true
-					}
-					return false
-				}
-			}
-		}
-	}
-
-	if category, ok := g.Categories[in]; ok {
-		if channelData, ok := g.Channels[category]; ok {
+	if in != 0 {
+		if channelData, ok := g.Channels[in]; ok {
 			for _, role := range userRoles {
-				nodes, _ := channelData[role]
+				nodes, _ := channelData[RoleID(role)]
 				for _, node := range nodes {
 					if node.Glob.Match(permission) {
 						if node.Mode == Allow {
@@ -114,10 +100,26 @@ func (g GuildState) Check(permission string, userRoles []RoleID, in ChannelID) b
 				}
 			}
 		}
+
+		if category, ok := g.Categories[in]; ok {
+			if channelData, ok := g.Channels[category]; ok {
+				for _, role := range userRoles {
+					nodes, _ := channelData[RoleID(role)]
+					for _, node := range nodes {
+						if node.Glob.Match(permission) {
+							if node.Mode == Allow {
+								return true
+							}
+							return false
+						}
+					}
+				}
+			}
+		}
 	}
 
 	for _, role := range userRoles {
-		nodes, _ := g.Roles[role]
+		nodes, _ := g.Roles[RoleID(role)]
 		for _, node := range nodes {
 			if node.Glob.Match(permission) {
 				if node.Mode == Allow {
