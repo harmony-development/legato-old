@@ -3,6 +3,7 @@ module github.com/harmony-development/legato
 go 1.14
 
 require (
+	github.com/alecthomas/repr v0.0.0-20201103221029-55c485bd663f
 	github.com/desertbit/timer v0.0.0-20180107155436-c41aec40b27f // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/envoyproxy/protoc-gen-validate v0.1.0
@@ -14,6 +15,7 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
+	github.com/hackebrot/go-repr v0.1.0
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/improbable-eng/grpc-web v0.13.0
 	github.com/labstack/echo/v4 v4.1.11
