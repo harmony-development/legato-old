@@ -80,7 +80,7 @@ func (inst Instance) Start() {
 
 	multiplexer := cmux.New(listener)
 
-	grpcListener := multiplexer.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
+	grpcListener := multiplexer.Match(cmux.HTTP2())
 	prometheusListener := multiplexer.Match(cmux.HTTP1HeaderFieldPrefix("User-Agent", "Prometheus"))
 	grpcWebListener := multiplexer.Match(
 		func(i io.Reader) bool {
