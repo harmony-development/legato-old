@@ -1,12 +1,15 @@
 package logger
 
 import (
+	"context"
 	"database/sql"
 	"os"
 	"runtime/debug"
 
 	"github.com/harmony-development/legato/server/config"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/status"
 
 	"github.com/getsentry/sentry-go"
@@ -17,6 +20,7 @@ type ILogger interface {
 	ErrorResponse(code codes.Code, err error, response string) error
 	CheckException(err error)
 	Exception(err error)
+	Request(c context.Context, req interface{}, info *grpc.UnaryServerInfo)
 	Fatal(err error)
 }
 
@@ -61,4 +65,15 @@ func (l Logger) Exception(err error) {
 func (l Logger) Fatal(err error) {
 	l.CheckException(err)
 	os.Exit(-1)
+}
+
+func (l Logger) Request(c context.Context, req interface{}, info *grpc.UnaryServerInfo) {
+	if l.Config.Server.LogRequests {
+		p, ok := peer.FromContext(c)
+		ip := ""
+		if ok {
+			ip = p.Addr.String()
+		}
+		logrus.Info("[", info.FullMethod, "] FROM ", ip)
+	}
 }

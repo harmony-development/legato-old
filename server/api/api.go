@@ -64,6 +64,7 @@ func New(deps Dependencies) *API {
 			m.ValidatorInterceptor,
 			m.AuthInterceptor,
 			m.LocationInterceptor,
+			m.LoggingInterceptor,
 		),
 		grpc_middleware.WithStreamServerChain(
 			grpc_recovery.StreamServerInterceptor(grpc_recovery.WithRecoveryHandler(m.RecoveryFunc)),
