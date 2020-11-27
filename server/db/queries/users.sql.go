@@ -299,6 +299,36 @@ func (q *Queries) GetUserMetadata(ctx context.Context, arg GetUserMetadataParams
 	return metadata, err
 }
 
+const isIPWhitelisted = `-- name: IsIPWhitelisted :one
+SELECT EXISTS (
+    SELECT 1
+    FROM Rate_Limit_Whitelist_IP
+    WHERE IP = $1
+  )
+`
+
+func (q *Queries) IsIPWhitelisted(ctx context.Context, ip string) (bool, error) {
+	row := q.queryRow(ctx, q.isIPWhitelistedStmt, isIPWhitelisted, ip)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const isUserWhitelisted = `-- name: IsUserWhitelisted :one
+SELECT EXISTS (
+    SELECT 1
+    FROM Rate_Limit_Whitelist_User
+    WHERE User_ID = $1
+  )
+`
+
+func (q *Queries) IsUserWhitelisted(ctx context.Context, userID uint64) (bool, error) {
+	row := q.queryRow(ctx, q.isUserWhitelistedStmt, isUserWhitelisted, userID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const moveGuild = `-- name: MoveGuild :exec
 UPDATE Guild_List
 SET Position = $1
@@ -386,8 +416,10 @@ func (q *Queries) UpdateUsername(ctx context.Context, arg UpdateUsernameParams) 
 
 const userIsLocal = `-- name: UserIsLocal :one
 SELECT EXISTS(
-  SELECT 1 FROM Local_Users WHERE User_ID = $1
-)
+    SELECT 1
+    FROM Local_Users
+    WHERE User_ID = $1
+  )
 `
 
 func (q *Queries) UserIsLocal(ctx context.Context, userID uint64) (bool, error) {

@@ -1,20 +1,28 @@
 package server
 
 import (
+	"bufio"
+	"fmt"
+	"io"
+	"net"
+	stdlibHTTP "net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/sony/sonyflake"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/harmony-development/legato/server/api"
 	"github.com/harmony-development/legato/server/auth"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/http"
+	"github.com/harmony-development/legato/server/http/attachments/backend/flatfile"
 	"github.com/harmony-development/legato/server/intercom"
 	"github.com/harmony-development/legato/server/logger"
-	"github.com/harmony-development/legato/server/storage"
+	"github.com/soheilhy/cmux"
 )
 
 // Instance is an instance of the harmony server
@@ -24,7 +32,6 @@ type Instance struct {
 	Config          *config.Config
 	IntercomManager *intercom.Manager
 	AuthManager     *auth.Manager
-	StorageManager  *storage.Manager
 	Logger          logger.ILogger
 	DB              db.IHarmonyDB
 }
@@ -48,13 +55,6 @@ func (inst Instance) Start() {
 	if err != nil {
 		inst.Logger.Fatal(err)
 	}
-	inst.StorageManager = &storage.Manager{
-		ImageDeleteQueue:        make(chan string, 512),
-		GuildPictureDeleteQueue: make(chan string, 512),
-		ImagePath:               inst.Config.Server.ImagePath,
-		GuildPicturePath:        inst.Config.Server.GuildPicturePath,
-	}
-	go inst.StorageManager.DeleteRoutine()
 	inst.IntercomManager, err = intercom.New(intercom.Dependencies{
 		Logger: inst.Logger,
 	})
@@ -73,22 +73,49 @@ func (inst Instance) Start() {
 		Config:      inst.Config,
 	})
 
-	go func() {
-		http.New(http.Dependencies{
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", inst.Config.Server.Port))
+	if err != nil {
+		inst.Logger.Fatal(err)
+	}
+
+	multiplexer := cmux.New(listener)
+
+	grpcListener := multiplexer.Match(cmux.HTTP2())
+	prometheusListener := multiplexer.Match(cmux.HTTP1HeaderFieldPrefix("User-Agent", "Prometheus"))
+	grpcWebListener := multiplexer.Match(
+		func(i io.Reader) bool {
+			req, err := stdlibHTTP.ReadRequest(bufio.NewReader(i))
+			if err != nil {
+				return false
+			}
+			return strings.Contains(req.Header.Get("Access-Control-Request-Headers"), "x-grpc-web") || req.Header.Get("x-grpc-web") == "1" || req.Header.Get("Sec-Websocket-Protocol") == "grpc-websockets"
+		},
+	)
+	httpListener := multiplexer.Match(cmux.HTTP1Fast())
+
+	grp := new(errgroup.Group)
+	grp.Go(func() error {
+		httpServer := http.New(http.Dependencies{
 			DB:     inst.DB,
 			Logger: inst.Logger,
 			Config: inst.Config,
-		}).Start(":2288")
-	}()
-
-	errCallback := make(chan error, 16)
-	inst.API.Start(errCallback, inst.Config.Server.Port)
-	logrus.Info("Legato started")
-	for {
-		err, exists := <-errCallback
-		if !exists {
-			return
-		}
+			StorageBackend: &flatfile.Backend{
+				Dependencies: flatfile.Dependencies{
+					Config: inst.Config,
+				},
+			},
+		})
+		err := httpServer.Server.Serve(httpListener)
 		inst.Logger.CheckException(err)
-	}
+		return err
+	})
+	grp.Go(func() error {
+		return inst.API.Start(grpcListener, grpcWebListener, prometheusListener)
+	})
+	grp.Go(func() error {
+		return multiplexer.Serve()
+	})
+
+	logrus.Info("Legato started")
+	grp.Wait()
 }

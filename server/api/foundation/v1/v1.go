@@ -21,6 +21,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type Dependencies struct {
@@ -246,4 +247,8 @@ func (v1 *V1) Register(c context.Context, r *foundationv1.RegisterRequest) (*fou
 		UserId:       userID,
 		SessionToken: session,
 	}, nil
+}
+
+func (v1 *V1) GetConfig(c context.Context, r *emptypb.Empty) (*foundationv1.GetConfigResponse, error) {
+	return nil, nil
 }

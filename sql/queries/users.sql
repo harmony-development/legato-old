@@ -114,5 +114,21 @@ LIMIT 1;
 
 -- name: UserIsLocal :one
 SELECT EXISTS(
-  SELECT 1 FROM Local_Users WHERE User_ID = $1
-);
+    SELECT 1
+    FROM Local_Users
+    WHERE User_ID = $1
+  );
+
+-- name: IsIPWhitelisted :one
+SELECT EXISTS (
+    SELECT 1
+    FROM Rate_Limit_Whitelist_IP
+    WHERE IP = $1
+  );
+
+-- name: IsUserWhitelisted :one
+SELECT EXISTS (
+    SELECT 1
+    FROM Rate_Limit_Whitelist_User
+    WHERE User_ID = $1
+  );

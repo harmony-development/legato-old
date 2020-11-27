@@ -5,11 +5,15 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"time"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	corev1 "github.com/harmony-development/legato/gen/core"
+	"github.com/harmony-development/legato/server/api/core/v1/permissions"
 	"github.com/harmony-development/legato/server/api/middleware"
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/db/queries"
@@ -23,8 +27,10 @@ import (
 )
 
 var (
-	NoPermissionsError = errors.New("No permissions")
-	NotInGuild         = errors.New("Not in guild")
+	// ErrNoPermissions : you're not authenticated to do this
+	ErrNoPermissions = errors.New("No permissions")
+	// ErrNotInGuild : you're not in the guild
+	ErrNotInGuild = errors.New("Not in guild")
 )
 
 // Dependencies are the backend services this package needs
@@ -32,6 +38,8 @@ type Dependencies struct {
 	DB        db.IHarmonyDB
 	Logger    logger.ILogger
 	Sonyflake *sonyflake.Sonyflake
+	PubSub    SubscriptionManager
+	Perms     *permissions.Manager
 }
 
 // V1 contains the gRPC handler for v1
@@ -39,37 +47,43 @@ type V1 struct {
 	Dependencies
 }
 
-func (v1 *V1) ActionsToProto(msgs []json.RawMessage) (ret []*corev1.Action) {
-	for _, msg := range msgs {
-		var action *corev1.Action
-		json.Unmarshal([]byte(msg), &action)
-		ret = append(ret, action)
-	}
+// ActionsToProto is a utility function
+func (v1 *V1) ActionsToProto(msgs json.RawMessage) (ret []*corev1.Action) {
+	json.Unmarshal([]byte(msgs), &ret)
 	return
 }
 
-func (v1 *V1) ProtoToActions(msgs []*corev1.Action) (ret [][]byte) {
-	for _, msg := range msgs {
-		data, _ := json.Marshal(msg)
-		ret = append(ret, json.RawMessage(data))
-	}
+// ProtoToActions is a utility function
+func (v1 *V1) ProtoToActions(msgs []*corev1.Action) (ret []byte) {
+	ret, _ = json.Marshal(msgs)
 	return
 }
 
-func (v1 *V1) EmbedsToProto(embeds []json.RawMessage) (ret []*corev1.Embed) {
-	for _, embed := range embeds {
-		var action *corev1.Embed
-		json.Unmarshal([]byte(embed), &action)
-		ret = append(ret, action)
-	}
+// EmbedsToProto is a utility function
+func (v1 *V1) EmbedsToProto(embeds json.RawMessage) (ret []*corev1.Embed) {
+	json.Unmarshal([]byte(embeds), &ret)
 	return
 }
 
-func (v1 *V1) ProtoToEmbeds(embeds []*corev1.Embed) (ret [][]byte) {
-	for _, embed := range embeds {
-		data, _ := json.Marshal(embed)
-		ret = append(ret, json.RawMessage(data))
+// ProtoToEmbeds is a utility function
+func (v1 *V1) ProtoToEmbeds(embeds []*corev1.Embed) (ret []byte) {
+	ret, _ = json.Marshal(embeds)
+	return
+}
+
+// OverridesToProto is a utility function
+func (v1 *V1) OverridesToProto(overrides []byte) (ret *corev1.Override) {
+	if len(overrides) == 0 {
+		return
 	}
+	ret = new(corev1.Override)
+	proto.Unmarshal(overrides, ret)
+	return
+}
+
+// ProtoToOverrides is a utility function
+func (v1 *V1) ProtoToOverrides(overrides *corev1.Override) (ret []byte) {
+	ret, _ = proto.Marshal(overrides)
 	return
 }
 
@@ -84,6 +98,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/CreateGuild")
 }
 
+// CreateGuild implements the CreateGuild RPC
 func (v1 *V1) CreateGuild(c context.Context, r *corev1.CreateGuildRequest) (*corev1.CreateGuildResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 	guildID, err := v1.Sonyflake.NextID()
@@ -115,12 +130,13 @@ func init() {
 	}, "/protocol.core.v1.CoreService/CreateInvite")
 }
 
+// CreateInvite implements the CreateInvite RPC
 func (v1 *V1) CreateInvite(c context.Context, r *corev1.CreateInviteRequest) (*corev1.CreateInviteResponse, error) {
 	inv := int32(-1)
 	if r.PossibleUses != 0 {
 		inv = r.PossibleUses
 	}
-	invite, err := v1.DB.CreateInvite(r.Location.GuildId, inv, r.Name)
+	invite, err := v1.DB.CreateInvite(r.GuildId, inv, r.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -141,16 +157,17 @@ func init() {
 	}, "/protocol.core.v1.CoreService/CreateChannel")
 }
 
+// CreateChannel implements the CreateChannel RPC
 func (v1 *V1) CreateChannel(c context.Context, r *corev1.CreateChannelRequest) (*corev1.CreateChannelResponse, error) {
-	channel, err := v1.DB.AddChannelToGuild(r.Location.GuildId, r.ChannelName, r.PreviousId, r.NextId, r.IsCategory)
+	channel, err := v1.DB.AddChannelToGuild(r.GuildId, r.ChannelName, r.PreviousId, r.NextId, r.IsCategory)
 	if err != nil {
 		return nil, err
 	}
-	r.Location.ChannelId = channel.ChannelID
-	streamState.BroadcastGuild(r.Location.GuildId, &corev1.GuildEvent{
-		Event: &corev1.GuildEvent_CreatedChannel{
-			CreatedChannel: &corev1.GuildEvent_ChannelCreated{
-				Location:   r.Location,
+	v1.PubSub.Guild.Broadcast(r.GuildId, &corev1.Event{
+		Event: &corev1.Event_CreatedChannel{
+			CreatedChannel: &corev1.Event_ChannelCreated{
+				GuildId:    r.GuildId,
+				ChannelId:  channel.ChannelID,
 				Name:       r.ChannelName,
 				PreviousId: r.PreviousId,
 				NextId:     r.NextId,
@@ -175,8 +192,9 @@ func init() {
 	}, "/protocol.core.v1.CoreService/GetGuild")
 }
 
+// GetGuild implements the GetGuild RPC
 func (v1 *V1) GetGuild(c context.Context, r *corev1.GetGuildRequest) (*corev1.GetGuildResponse, error) {
-	guild, err := v1.DB.GetGuildByID(r.Location.GuildId)
+	guild, err := v1.DB.GetGuildByID(r.GuildId)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, v1.Logger.ErrorResponse(codes.NotFound, err, responses.GuildNotFound)
@@ -202,8 +220,9 @@ func init() {
 	}, "/protocol.core.v1.CoreService/GetGuildInvites")
 }
 
+// GetGuildInvites implements the GetGuildInvites RPC
 func (v1 *V1) GetGuildInvites(c context.Context, r *corev1.GetGuildInvitesRequest) (*corev1.GetGuildInvitesResponse, error) {
-	invites, err := v1.DB.GetInvites(r.Location.GuildId)
+	invites, err := v1.DB.GetInvites(r.GuildId)
 	if err != nil {
 		return nil, err
 	}
@@ -238,8 +257,9 @@ func init() {
 	}, "/protocol.core.v1.CoreService/GetGuildMembers")
 }
 
+// GetGuildMembers implements the GetGuildMembers RPC
 func (v1 *V1) GetGuildMembers(c context.Context, r *corev1.GetGuildMembersRequest) (*corev1.GetGuildMembersResponse, error) {
-	members, err := v1.DB.MembersInGuild(r.Location.GuildId)
+	members, err := v1.DB.MembersInGuild(r.GuildId)
 	if err != nil {
 		return nil, err
 	}
@@ -260,8 +280,9 @@ func init() {
 	}, "/protocol.core.v1.CoreService/GetGuildChannels")
 }
 
+// GetGuildChannels implements the GetGuildChannels RPC
 func (v1 *V1) GetGuildChannels(c context.Context, r *corev1.GetGuildChannelsRequest) (*corev1.GetGuildChannelsResponse, error) {
-	chans, err := v1.DB.ChannelsForGuild(r.Location.GuildId)
+	chans, err := v1.DB.ChannelsForGuild(r.GuildId)
 	if err != nil {
 		return nil, err
 	}
@@ -288,9 +309,66 @@ func init() {
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
 		Permission: middleware.NoPermission,
+	}, "/protocol.core.v1.CoreService/GetMessage")
+}
+
+// GetMessage implements the GetMessage RPC
+func (v1 *V1) GetMessage(c context.Context, r *corev1.GetMessageRequest) (*corev1.GetMessageResponse, error) {
+	message, err := v1.DB.GetMessage(r.MessageId)
+	if err != nil {
+		return nil, err
+	}
+	createdAt, _ := ptypes.TimestampProto(message.CreatedAt.UTC())
+	var editedAt *timestamppb.Timestamp
+	if message.EditedAt.Valid {
+		editedAt, _ = ptypes.TimestampProto(editedAt.AsTime().UTC())
+	}
+	var embeds []*corev1.Embed
+	var actions []*corev1.Action
+	var override *corev1.Override
+	if err := json.Unmarshal(message.Embeds, &embeds); err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(message.Actions, &actions); err != nil {
+		return nil, err
+	}
+	if len(message.Overrides) > 0 {
+		override = new(corev1.Override)
+		if err := proto.Unmarshal(message.Overrides, override); err != nil {
+			return nil, err
+		}
+	}
+	return &corev1.GetMessageResponse{
+		Message: &corev1.Message{
+			GuildId:     message.GuildID,
+			ChannelId:   message.ChannelID,
+			MessageId:   message.MessageID,
+			AuthorId:    message.UserID,
+			CreatedAt:   createdAt,
+			EditedAt:    editedAt,
+			Content:     message.Content,
+			Embeds:      embeds,
+			Attachments: message.Attachments,
+			Actions:     actions,
+			Overrides:   override,
+			InReplyTo:   uint64(message.ReplyToID.Int64),
+		},
+	}, nil
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
+		Permission: middleware.NoPermission,
 	}, "/protocol.core.v1.CoreService/GetChannelMessages")
 }
 
+// GetChannelMessages implements the GetChannelMessages RPC
 func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessagesRequest) (*corev1.GetChannelMessagesResponse, error) {
 	var err error
 	var messages []queries.Message
@@ -299,9 +377,9 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 		if err != nil {
 			return nil, err
 		}
-		messages, err = v1.DB.GetMessagesBefore(r.Location.GuildId, r.Location.ChannelId, time)
+		messages, err = v1.DB.GetMessagesBefore(r.GuildId, r.ChannelId, time)
 	} else {
-		messages, err = v1.DB.GetMessages(r.Location.GuildId, r.Location.ChannelId)
+		messages, err = v1.DB.GetMessages(r.GuildId, r.ChannelId)
 	}
 	if err != nil && err != sql.ErrNoRows {
 		return nil, err
@@ -316,32 +394,32 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 				}
 				var embeds []*corev1.Embed
 				var actions []*corev1.Action
-				for _, rawEmbed := range message.Embeds {
-					var embed corev1.Embed
-					if err := json.Unmarshal(rawEmbed, &embed); err != nil {
-						continue
-					}
-					embeds = append(embeds, &embed)
+				var overrides *corev1.Override
+				if err := json.Unmarshal(message.Embeds, &embeds); err != nil {
+					continue
 				}
-				for _, rawAction := range message.Actions {
-					var action corev1.Action
-					if err := json.Unmarshal(rawAction, &action); err != nil {
+				if err := json.Unmarshal(message.Actions, &actions); err != nil {
+					continue
+				}
+				if len(message.Overrides) > 0 {
+					overrides = new(corev1.Override)
+					if err := proto.Unmarshal(message.Overrides, overrides); err != nil {
 						continue
 					}
-					actions = append(actions, &action)
 				}
 				ret = append(ret, &corev1.Message{
-					Location: &corev1.Location{
-						MessageId: message.MessageID,
-						GuildId:   message.GuildID,
-						ChannelId: message.ChannelID,
-					},
-					AuthorId:  message.UserID,
-					CreatedAt: createdAt,
-					EditedAt:  editedAt,
-					Content:   message.Content,
-					Embeds:    embeds,
-					Actions:   actions,
+					GuildId:     message.GuildID,
+					ChannelId:   message.ChannelID,
+					MessageId:   message.MessageID,
+					AuthorId:    message.UserID,
+					CreatedAt:   createdAt,
+					EditedAt:    editedAt,
+					Content:     message.Content,
+					Attachments: message.Attachments,
+					Embeds:      embeds,
+					Actions:     actions,
+					Overrides:   overrides,
+					InReplyTo:   uint64(message.ReplyToID.Int64),
 				})
 			}
 			return
@@ -361,13 +439,15 @@ func init() {
 	}, "/protocol.core.v1.CoreService/UpdateGuildName")
 }
 
+// UpdateGuildName implements the UpdateGuildName RPC
 func (v1 *V1) UpdateGuildName(c context.Context, r *corev1.UpdateGuildNameRequest) (*empty.Empty, error) {
-	if err := v1.DB.UpdateGuildName(r.Location.GuildId, r.NewGuildName); err != nil {
+	if err := v1.DB.UpdateGuildName(r.GuildId, r.NewGuildName); err != nil {
 		return nil, err
 	}
-	streamState.BroadcastGuild(r.Location.GuildId, &corev1.GuildEvent{
-		Event: &corev1.GuildEvent_EditedGuild{
-			EditedGuild: &corev1.GuildEvent_GuildUpdated{
+	v1.PubSub.Guild.Broadcast(r.GuildId, &corev1.Event{
+		Event: &corev1.Event_EditedGuild{
+			EditedGuild: &corev1.Event_GuildUpdated{
+				GuildId:    r.GuildId,
 				Name:       r.NewGuildName,
 				UpdateName: true,
 			},
@@ -388,14 +468,16 @@ func init() {
 	}, "/protocol.core.v1.CoreService/UpdateChannelName")
 }
 
+// UpdateChannelName implements the UpdateChannelName RPC
 func (v1 *V1) UpdateChannelName(c context.Context, r *corev1.UpdateChannelNameRequest) (*empty.Empty, error) {
-	if err := v1.DB.SetChannelName(r.Location.GuildId, r.Location.ChannelId, r.NewChannelName); err != nil {
+	if err := v1.DB.SetChannelName(r.GuildId, r.ChannelId, r.NewChannelName); err != nil {
 		return nil, err
 	}
-	streamState.BroadcastGuild(r.Location.GuildId, &corev1.GuildEvent{
-		Event: &corev1.GuildEvent_EditedChannel{
-			EditedChannel: &corev1.GuildEvent_ChannelUpdated{
-				Location:   r.Location,
+	v1.PubSub.Guild.Broadcast(r.GuildId, &corev1.Event{
+		Event: &corev1.Event_EditedChannel{
+			EditedChannel: &corev1.Event_ChannelUpdated{
+				GuildId:    r.GuildId,
+				ChannelId:  r.ChannelId,
 				Name:       r.NewChannelName,
 				UpdateName: true,
 			},
@@ -416,14 +498,16 @@ func init() {
 	}, "/protocol.core.v1.CoreService/UpdateChannelOrder")
 }
 
+// UpdateChannelOrder implements the UpdateChannelOrder RPC
 func (v1 *V1) UpdateChannelOrder(c context.Context, r *corev1.UpdateChannelOrderRequest) (*empty.Empty, error) {
-	if err := v1.DB.MoveChannel(r.Location.GuildId, r.Location.ChannelId, r.PreviousId, r.NextId); err != nil {
+	if err := v1.DB.MoveChannel(r.GuildId, r.ChannelId, r.PreviousId, r.NextId); err != nil {
 		return nil, err
 	}
-	streamState.BroadcastGuild(r.Location.GuildId, &corev1.GuildEvent{
-		Event: &corev1.GuildEvent_EditedChannel{
-			EditedChannel: &corev1.GuildEvent_ChannelUpdated{
-				Location:    r.Location,
+	v1.PubSub.Guild.Broadcast(r.GuildId, &corev1.Event{
+		Event: &corev1.Event_EditedChannel{
+			EditedChannel: &corev1.Event_ChannelUpdated{
+				GuildId:     r.GuildId,
+				ChannelId:   r.ChannelId,
 				PreviousId:  r.PreviousId,
 				NextId:      r.NextId,
 				UpdateOrder: true,
@@ -445,22 +529,24 @@ func init() {
 	}, "/protocol.core.v1.CoreService/UpdateMessage")
 }
 
+// UpdateMessage implements the UpdateMessage RPC
 func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
-	if !r.UpdateActions && !r.UpdateEmbeds && !r.UpdateContent {
+	if !r.UpdateActions && !r.UpdateEmbeds && !r.UpdateContent && !r.UpdateOverrides {
 		return nil, status.Error(codes.InvalidArgument, responses.InvalidRequest)
 	}
 
-	owner, err := v1.DB.GetMessageOwner(r.Location.MessageId)
+	owner, err := v1.DB.GetMessageOwner(r.MessageId)
 	if err != nil {
 		return nil, err
 	}
 	if owner != ctx.UserID {
-		return nil, NoPermissionsError
+		return nil, ErrNoPermissions
 	}
 
-	var actions *[][]byte
-	var embeds *[][]byte
+	var actions *[]byte
+	var embeds *[]byte
+	var overrides *[]byte
 	if r.UpdateActions {
 		val := v1.ProtoToActions(r.Actions)
 		actions = &val
@@ -469,21 +555,28 @@ func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (
 		val := v1.ProtoToEmbeds(r.Embeds)
 		embeds = &val
 	}
-	tiempo, err := v1.DB.UpdateMessage(r.Location.MessageId, &r.Content, embeds, actions)
+	if r.UpdateOverrides {
+		val := v1.ProtoToOverrides(r.Overrides)
+		overrides = &val
+	}
+	tiempo, err := v1.DB.UpdateMessage(r.MessageId, &r.Content, embeds, actions, overrides)
 	if err != nil {
 		return nil, err
 	}
 	editedAt, _ := ptypes.TimestampProto(tiempo.UTC())
-	streamState.BroadcastGuild(r.Location.GuildId, &corev1.GuildEvent{
-		Event: &corev1.GuildEvent_EditedMessage{
-			EditedMessage: &corev1.GuildEvent_MessageUpdated{
-				Location:      r.Location,
+	v1.PubSub.Guild.Broadcast(r.GuildId, &corev1.Event{
+		Event: &corev1.Event_EditedMessage{
+			EditedMessage: &corev1.Event_MessageUpdated{
+				GuildId:       r.GuildId,
+				ChannelId:     r.ChannelId,
+				MessageId:     r.MessageId,
 				Content:       r.Content,
 				UpdateContent: r.UpdateContent,
 				Embeds:        r.Embeds,
 				UpdateEmbeds:  r.UpdateEmbeds,
 				Actions:       r.Actions,
 				UpdateActions: r.UpdateActions,
+				Overrides:     r.Overrides,
 				EditedAt:      editedAt,
 			},
 		},
@@ -503,14 +596,17 @@ func init() {
 	}, "/protocol.core.v1.CoreService/DeleteGuild")
 }
 
+// DeleteGuild implements the DeleteGuild RPC
 func (v1 *V1) DeleteGuild(c context.Context, r *corev1.DeleteGuildRequest) (*empty.Empty, error) {
-	err := v1.DB.DeleteGuild(r.Location.GuildId)
+	err := v1.DB.DeleteGuild(r.GuildId)
 	if err != nil {
 		return nil, err
 	}
-	streamState.BroadcastGuild(r.Location.GuildId, &corev1.GuildEvent{
-		Event: &corev1.GuildEvent_DeletedGuild{
-			DeletedGuild: &corev1.GuildEvent_GuildDeleted{},
+	v1.PubSub.Guild.Broadcast(r.GuildId, &corev1.Event{
+		Event: &corev1.Event_DeletedGuild{
+			DeletedGuild: &corev1.Event_GuildDeleted{
+				GuildId: r.GuildId,
+			},
 		},
 	})
 	return &emptypb.Empty{}, nil
@@ -528,6 +624,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/DeleteInvite")
 }
 
+// DeleteInvite implements the DeleteInvite RPC
 func (v1 *V1) DeleteInvite(c context.Context, r *corev1.DeleteInviteRequest) (*empty.Empty, error) {
 	if err := v1.DB.DeleteInvite(r.InviteId); err != nil {
 		return nil, err
@@ -547,14 +644,16 @@ func init() {
 	}, "/protocol.core.v1.CoreService/DeleteChannel")
 }
 
+// DeleteChannel implements the DeleteChannel RPC
 func (v1 *V1) DeleteChannel(c context.Context, r *corev1.DeleteChannelRequest) (*empty.Empty, error) {
-	if err := v1.DB.DeleteChannelFromGuild(r.Location.GuildId, r.Location.ChannelId); err != nil {
+	if err := v1.DB.DeleteChannelFromGuild(r.GuildId, r.ChannelId); err != nil {
 		return nil, err
 	}
-	streamState.BroadcastGuild(r.Location.GuildId, &corev1.GuildEvent{
-		Event: &corev1.GuildEvent_DeletedChannel{
-			DeletedChannel: &corev1.GuildEvent_ChannelDeleted{
-				Location: r.Location,
+	v1.PubSub.Guild.Broadcast(r.GuildId, &corev1.Event{
+		Event: &corev1.Event_DeletedChannel{
+			DeletedChannel: &corev1.Event_ChannelDeleted{
+				GuildId:   r.GuildId,
+				ChannelId: r.ChannelId,
 			},
 		},
 	})
@@ -573,26 +672,22 @@ func init() {
 	}, "/protocol.core.v1.CoreService/DeleteMessage")
 }
 
+// DeleteMessage implements the DeleteMessage RPC
 func (v1 *V1) DeleteMessage(c context.Context, r *corev1.DeleteMessageRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
-	owner, err := v1.DB.GetMessageOwner(r.Location.MessageId)
+	owner, err := v1.DB.GetMessageOwner(r.MessageId)
 	if err != nil {
 		return nil, err
 	}
 	if ctx.UserID != owner {
-		return nil, NoPermissionsError
+		return nil, ErrNoPermissions
 	}
-	if err := v1.DB.DeleteMessage(r.Location.MessageId, r.Location.ChannelId, r.Location.GuildId); err != nil {
-		return nil, err
-	}
-	streamState.BroadcastGuild(r.Location.GuildId, &corev1.GuildEvent{
-		Event: &corev1.GuildEvent_DeletedMessage{
-			DeletedMessage: &corev1.GuildEvent_MessageDeleted{
-				Location: &corev1.Location{
-					MessageId: r.Location.MessageId,
-					ChannelId: r.Location.ChannelId,
-					GuildId:   r.Location.GuildId,
-				},
+	v1.PubSub.Guild.Broadcast(r.GuildId, &corev1.Event{
+		Event: &corev1.Event_DeletedMessage{
+			DeletedMessage: &corev1.Event_MessageDeleted{
+				GuildId:   r.GuildId,
+				ChannelId: r.ChannelId,
+				MessageId: r.MessageId,
 			},
 		},
 	})
@@ -611,6 +706,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/JoinGuild")
 }
 
+// JoinGuild implements the JoinGuild RPC
 func (v1 *V1) JoinGuild(c context.Context, r *corev1.JoinGuildRequest) (*corev1.JoinGuildResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 	guildID, err := v1.DB.ResolveGuildID(r.InviteId)
@@ -626,17 +722,16 @@ func (v1 *V1) JoinGuild(c context.Context, r *corev1.JoinGuildRequest) (*corev1.
 	if err := v1.DB.IncrementInvite(r.InviteId); err != nil {
 		return nil, err
 	}
-	streamState.BroadcastGuild(guildID, &corev1.GuildEvent{
-		Event: &corev1.GuildEvent_JoinedMember{
-			JoinedMember: &corev1.GuildEvent_MemberJoined{
+	v1.PubSub.Guild.Broadcast(guildID, &corev1.Event{
+		Event: &corev1.Event_JoinedMember{
+			JoinedMember: &corev1.Event_MemberJoined{
+				GuildId:  guildID,
 				MemberId: ctx.UserID,
 			},
 		},
 	})
 	return &corev1.JoinGuildResponse{
-		Location: &corev1.Location{
-			GuildId: guildID,
-		},
+		GuildId: guildID,
 	}, nil
 }
 
@@ -652,18 +747,20 @@ func init() {
 	}, "/protocol.core.v1.CoreService/LeaveGuild")
 }
 
+// LeaveGuild implements the LeaveGuild RPC
 func (v1 *V1) LeaveGuild(c context.Context, r *corev1.LeaveGuildRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
-	if isOwner, err := v1.DB.IsOwner(r.Location.GuildId, ctx.UserID); err != nil {
+	if isOwner, err := v1.DB.IsOwner(r.GuildId, ctx.UserID); err != nil {
 		return nil, err
 	} else if isOwner {
 		return nil, status.Error(codes.FailedPrecondition, responses.InvalidRequest)
 	}
-	streamState.UnsubUserFromGuild(r.Location.GuildId, ctx.UserID)
-	streamState.BroadcastGuild(r.Location.GuildId, &corev1.GuildEvent{
-		Event: &corev1.GuildEvent_LeftMember{
-			LeftMember: &corev1.GuildEvent_MemberLeft{
+	v1.PubSub.Guild.UnsubscribeUserFromGuild(r.GuildId, ctx.UserID)
+	v1.PubSub.Guild.Broadcast(r.GuildId, &corev1.Event{
+		Event: &corev1.Event_LeftMember{
+			LeftMember: &corev1.Event_MemberLeft{
 				MemberId: ctx.UserID,
+				GuildId:  r.GuildId,
 			},
 		},
 	})
@@ -679,44 +776,49 @@ func init() {
 		Auth:       true,
 		Location:   middleware.GuildLocation,
 		Permission: middleware.NoPermission,
-	}, "/protocol.core.v1.CoreService/StreamGuildEvents")
+	}, "/protocol.core.v1.CoreService/StreamEvents")
 }
 
-func (v1 *V1) StreamGuildEvents(r *corev1.StreamGuildEventsRequest, s corev1.CoreService_StreamGuildEventsServer) error {
+// StreamEvents implements the StreamEvents RPC
+func (v1 *V1) StreamEvents(s corev1.CoreService_StreamEventsServer) error {
 	userID, err := middleware.AuthHandler(v1.DB, s.Context())
 	if err != nil {
 		return err
 	}
-	if err := middleware.LocationHandler(v1.DB, r, "/protocol.core.v1.CoreService/StreamGuildEvents", userID); err != nil {
-		return err
+	for {
+		in, err := s.Recv()
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		switch x := in.Request.(type) {
+		case *corev1.StreamEventsRequest_SubscribeToGuild_:
+			if err := middleware.LocationHandler(v1.DB, x.SubscribeToGuild, "/protocol.core.v1.CoreService/StreamGuildEvents", userID); err != nil {
+				fmt.Println(err)
+				break
+			}
+			ok, err := v1.DB.UserInGuild(userID, x.SubscribeToGuild.GuildId)
+			if err != nil {
+				fmt.Println(err)
+				break
+			}
+			if !ok {
+				fmt.Println("user not in guild")
+				break
+			}
+			v1.PubSub.Guild.Subscribe(x.SubscribeToGuild.GuildId, userID, s)
+		case *corev1.StreamEventsRequest_SubscribeToActions_:
+			v1.PubSub.Actions.Subscribe(userID, s)
+		case *corev1.StreamEventsRequest_SubscribeToHomeserverEvents_:
+			err = v1.DB.UserIsLocal(userID)
+			if err != nil {
+				break
+			}
+			v1.PubSub.Homeserver.Subscribe(userID, s)
+		}
 	}
-	ok, err := v1.DB.UserInGuild(userID, r.Location.GuildId)
-	if err != nil {
-		return err
-	}
-	if !ok {
-		return NotInGuild
-	}
-	<-streamState.Add(r.Location.GuildId, userID, s)
-	return nil
-}
-
-func init() {
-	middleware.RegisterRPCConfig(middleware.RPCConfig{
-		RateLimit: middleware.RateLimit{
-			Duration: 5 * time.Second,
-			Burst:    5,
-		},
-		Auth:       true,
-		Location:   middleware.NoLocation,
-		Permission: middleware.NoPermission,
-	}, "/protocol.core.v1.CoreService/StreamActionEvents")
-}
-
-func (v1 *V1) StreamActionEvents(r *corev1.StreamActionEventsRequest, s corev1.CoreService_StreamActionEventsServer) error {
-	wrappedStream := s.(middleware.IHarmonyWrappedServerStream)
-	<-streamState.AddAction(wrappedStream.GetWrappedContext().UserID, s)
-	return nil
 }
 
 func init() {
@@ -733,19 +835,21 @@ func init() {
 
 func (v1 *V1) TriggerAction(c context.Context, r *corev1.TriggerActionRequest) (*emptypb.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
-	msg, err := v1.DB.GetMessage(r.Location.MessageId)
+	msg, err := v1.DB.GetMessage(r.MessageId)
 	if err != nil {
 		return nil, err
 	}
-	if msg.ChannelID != r.Location.ChannelId || msg.GuildID != r.Location.GuildId {
+	if msg.ChannelID != r.ChannelId || msg.GuildID != r.GuildId {
 		return nil, status.Error(codes.InvalidArgument, responses.InvalidRequest)
 	}
 	for _, action := range v1.ActionsToProto(msg.Actions) {
 		if action.Id == r.ActionId {
-			streamState.BroadcastAction(ctx.UserID, &corev1.ActionEvent{
-				Event: &corev1.ActionEvent_Action_{
-					Action: &corev1.ActionEvent_Action{
-						Location:   r.Location,
+			v1.PubSub.Actions.Broadcast(ctx.UserID, &corev1.Event{
+				Event: &corev1.Event_ActionPerformed_{
+					ActionPerformed: &corev1.Event_ActionPerformed{
+						GuildId:    r.GuildId,
+						ChannelId:  r.ChannelId,
+						MessageId:  r.MessageId,
 						ActionData: r.ActionData,
 						ActionId:   r.ActionId,
 					},
@@ -769,45 +873,56 @@ func init() {
 	}, "/protocol.core.v1.CoreService/SendMessage")
 }
 
-func (v1 *V1) SendMessage(c context.Context, r *corev1.SendMessageRequest) (*emptypb.Empty, error) {
+// SendMessage implements the SendMessage RPC
+func (v1 *V1) SendMessage(c context.Context, r *corev1.SendMessageRequest) (*corev1.SendMessageResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 	messageID, err := v1.Sonyflake.NextID()
 	if err != nil {
 		return nil, v1.Logger.ErrorResponse(codes.Unknown, err, responses.UnknownError)
 	}
 	msg, err := v1.DB.AddMessage(
-		r.Location.ChannelId,
-		r.Location.GuildId,
+		r.ChannelId,
+		r.GuildId,
 		ctx.UserID,
 		messageID,
 		r.Content,
 		r.Attachments,
 		v1.ProtoToEmbeds(r.Embeds),
 		v1.ProtoToActions(r.Actions),
+		v1.ProtoToOverrides(r.Overrides),
+		sql.NullInt64{
+			Int64: int64(r.InReplyTo),
+			Valid: r.InReplyTo != 0,
+		},
 	)
 	if err != nil {
 		return nil, err
 	}
 	message := corev1.Message{
-		Location:    r.Location,
+		GuildId:     r.GuildId,
+		ChannelId:   r.ChannelId,
+		MessageId:   messageID,
 		AuthorId:    ctx.UserID,
 		Content:     r.Content,
 		Attachments: r.Attachments,
 		Embeds:      r.Embeds,
 		Actions:     r.Actions,
+		Overrides:   r.Overrides,
+		InReplyTo:   r.InReplyTo,
 	}
 	createdAt, _ := ptypes.TimestampProto(msg.CreatedAt.UTC())
 	message.CreatedAt = createdAt
-	message.Location.MessageId = msg.MessageID
 	message.AuthorId = ctx.UserID
-	streamState.BroadcastGuild(r.Location.GuildId, &corev1.GuildEvent{
-		Event: &corev1.GuildEvent_SentMessage{
-			SentMessage: &corev1.GuildEvent_MessageSent{
+	v1.PubSub.Guild.Broadcast(r.GuildId, &corev1.Event{
+		Event: &corev1.Event_SentMessage{
+			SentMessage: &corev1.Event_MessageSent{
 				Message: &message,
 			},
 		},
 	})
-	return &emptypb.Empty{}, nil
+	return &corev1.SendMessageResponse{
+		MessageId: messageID,
+	}, nil
 }
 
 func init() {
@@ -822,6 +937,7 @@ func init() {
 	}, "/protocol.core.v1.CoreService/GetGuildList")
 }
 
+// GetGuildList implements the GetGuildList RPC
 func (v1 *V1) GetGuildList(c context.Context, r *corev1.GetGuildListRequest) (*corev1.GetGuildListResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 	data, err := v1.DB.GetGuildList(ctx.UserID)
@@ -853,15 +969,16 @@ func init() {
 	}, "/protocol.core.v1.CoreService/AddGuildToGuildList")
 }
 
+// AddGuildToGuildList implements the AddGuildToGuildList RPC
 func (v1 *V1) AddGuildToGuildList(c context.Context, r *corev1.AddGuildToGuildListRequest) (*corev1.AddGuildToGuildListResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 	err := v1.DB.AddGuildToList(ctx.UserID, r.GuildId, r.Homeserver)
 	if err != nil {
 		return nil, err
 	}
-	homeserverEventState.Broadcast(ctx.UserID, &corev1.HomeserverEvent{
-		Event: &corev1.HomeserverEvent_GuildAddedToList_{
-			GuildAddedToList: &corev1.HomeserverEvent_GuildAddedToList{
+	v1.PubSub.Homeserver.Broadcast(ctx.UserID, &corev1.Event{
+		Event: &corev1.Event_GuildAddedToList_{
+			GuildAddedToList: &corev1.Event_GuildAddedToList{
 				GuildId:    r.GuildId,
 				Homeserver: r.Homeserver,
 			},
@@ -870,12 +987,190 @@ func (v1 *V1) AddGuildToGuildList(c context.Context, r *corev1.AddGuildToGuildLi
 	return &corev1.AddGuildToGuildListResponse{}, nil
 }
 
-func (v1 *V1) StreamHomeserverEvents(r *corev1.StreamHomeserverEventsRequest, s corev1.CoreService_StreamHomeserverEventsServer) error {
-	wrappedStream := s.(middleware.IHarmonyWrappedServerStream)
-	userID := wrappedStream.GetWrappedContext().UserID
-	if err := v1.DB.UserIsLocal(userID); err != nil {
-		return err
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		Local:      true,
+		Location:   middleware.NoLocation,
+		Permission: middleware.NoPermission,
+	}, "/protocol.core.v1.CoreService/RemoveGuildFromGuildList")
+}
+
+// RemoveGuildFromGuildList implements the RemoveGuildFromGuildList RPC
+func (v1 *V1) RemoveGuildFromGuildList(c context.Context, r *corev1.RemoveGuildFromGuildListRequest) (*corev1.RemoveGuildFromGuildListResponse, error) {
+	ctx := c.(middleware.HarmonyContext)
+	err := v1.DB.RemoveGuildFromList(ctx.UserID, r.GuildId, r.Homeserver)
+	if err != nil {
+		return nil, err
 	}
-	<-homeserverEventState.Subscribe(userID, s)
-	return nil
+	v1.PubSub.Homeserver.Broadcast(ctx.UserID, &corev1.Event{
+		Event: &corev1.Event_GuildRemovedFromList_{
+			GuildRemovedFromList: &corev1.Event_GuildRemovedFromList{
+				GuildId:    r.GuildId,
+				Homeserver: r.Homeserver,
+			},
+		},
+	})
+	return &corev1.RemoveGuildFromGuildListResponse{}, nil
+}
+
+// CreateEmotePack implements the CreateEmotePack RPC
+func (v1 *V1) CreateEmotePack(c context.Context, r *corev1.CreateEmotePackRequest) (*corev1.CreateEmotePackResponse, error) {
+	ctx := c.(middleware.HarmonyContext)
+
+	packID, err := v1.Sonyflake.NextID()
+	if err != nil {
+		return nil, err
+	}
+
+	if err := v1.DB.CreateEmotePack(ctx.UserID, packID, r.PackName); err != nil {
+		return nil, err
+	}
+
+	return &corev1.CreateEmotePackResponse{
+		PackId: packID,
+	}, nil
+}
+
+// AddEmoteToPack implements the AddEmoteToPack RPC
+func (v1 *V1) AddEmoteToPack(c context.Context, r *corev1.AddEmoteToPackRequest) (*empty.Empty, error) {
+	ctx := c.(middleware.HarmonyContext)
+
+	if isOwner, err := v1.DB.IsPackOwner(ctx.UserID, r.PackId); err != nil {
+		return nil, err
+	} else if !isOwner {
+		return nil, status.Error(codes.PermissionDenied, responses.InsufficientPrivileges)
+	}
+	if err := v1.DB.AddEmoteToPack(r.PackId, r.ImageId, r.Name); err != nil {
+		return nil, err
+	}
+	return &empty.Empty{}, nil
+}
+
+// DeleteEmoteFromPack implements the DeleteEmoteFromPack RPC
+func (v1 *V1) DeleteEmoteFromPack(c context.Context, r *corev1.DeleteEmoteFromPackRequest) (*empty.Empty, error) {
+	ctx := c.(middleware.HarmonyContext)
+
+	if isOwner, err := v1.DB.IsPackOwner(ctx.UserID, r.PackId); err != nil {
+		return nil, err
+	} else if !isOwner {
+		return nil, status.Error(codes.PermissionDenied, responses.InsufficientPrivileges)
+	}
+	if err := v1.DB.DeleteEmoteFromPack(r.PackId, r.ImageId); err != nil {
+		return nil, err
+	}
+	return &empty.Empty{}, nil
+}
+
+// DeleteEmotePack implements the DeleteEmotePack RPC
+func (v1 *V1) DeleteEmotePack(c context.Context, r *corev1.DeleteEmotePackRequest) (*empty.Empty, error) {
+	ctx := c.(middleware.HarmonyContext)
+
+	if isOwner, err := v1.DB.IsPackOwner(ctx.UserID, r.PackId); err != nil {
+		return nil, err
+	} else if !isOwner {
+		return nil, status.Error(codes.PermissionDenied, responses.InsufficientPrivileges)
+	}
+	if err := v1.DB.DeleteEmotePack(r.PackId); err != nil {
+		return nil, err
+	}
+	return &empty.Empty{}, nil
+}
+
+// DequipEmotePack implements the DequipEmotePack RPC
+func (v1 *V1) DequipEmotePack(c context.Context, r *corev1.DequipEmotePackRequest) (*empty.Empty, error) {
+	ctx := c.(middleware.HarmonyContext)
+
+	if err := v1.DB.DequipEmotePack(ctx.UserID, r.PackId); err != nil {
+		return nil, err
+	}
+	return &empty.Empty{}, nil
+}
+
+// GetEmotePacks implements the GetEmotePacks RPC
+func (v1 *V1) GetEmotePacks(c context.Context, r *corev1.GetEmotePacksRequest) (*corev1.GetEmotePacksResponse, error) {
+	ctx := c.(middleware.HarmonyContext)
+	packs, err := v1.DB.GetEmotePacks(ctx.UserID)
+	if err != nil {
+		return nil, err
+	}
+	outPacks := []*corev1.GetEmotePacksResponse_EmotePack{}
+	for _, pack := range packs {
+		outPacks = append(outPacks, &corev1.GetEmotePacksResponse_EmotePack{
+			PackId:    pack.PackID,
+			PackOwner: pack.UserID,
+			PackName:  pack.PackName,
+		})
+	}
+	return &corev1.GetEmotePacksResponse{
+		Packs: outPacks,
+	}, nil
+}
+
+// GetEmotePackEmotes implements the GetEmotePackEmotes RPC
+func (v1 *V1) GetEmotePackEmotes(c context.Context, r *corev1.GetEmotePackEmotesRequest) (*corev1.GetEmotePackEmotesResponse, error) {
+	emotes, err := v1.DB.GetEmotePackEmotes(r.PackId)
+	if err != nil {
+		return nil, err
+	}
+	outEmotes := []*corev1.GetEmotePackEmotesResponse_Emote{}
+	for _, emote := range emotes {
+		outEmotes = append(outEmotes, &corev1.GetEmotePackEmotesResponse_Emote{
+			ImageId: emote.ImageID,
+			Name:    emote.EmoteName,
+		})
+	}
+	return &corev1.GetEmotePackEmotesResponse{
+		Emotes: outEmotes,
+	}, nil
+}
+
+// AddGuildRole implements the AddGuildRole RPC
+func (v1 *V1) AddGuildRole(c context.Context, r *corev1.AddGuildRoleRequest) (*corev1.AddGuildRoleResponse, error) {
+	roleID, err := v1.Sonyflake.NextID()
+	if err != nil {
+		return nil, err
+	}
+
+	r.Role.RoleId = roleID
+	err = v1.DB.AddRoleToGuild(r.GuildId, r.Role)
+	if err != nil {
+		return nil, err
+	}
+
+	return &corev1.AddGuildRoleResponse{
+		RoleId: roleID,
+	}, nil
+}
+
+// DeleteGuildRole implements the DeleteGuildRole RPC
+func (v1 *V1) DeleteGuildRole(c context.Context, r *corev1.DeleteGuildRoleRequest) (*empty.Empty, error) {
+	return &empty.Empty{}, v1.DB.RemoveRoleFromGuild(r.GuildId, r.RoleId)
+}
+
+// GetGuildRoles implements the GetGuildRoles RPC
+func (v1 *V1) GetGuildRoles(c context.Context, r *corev1.GetGuildRolesRequest) (*corev1.GetGuildRolesResponse, error) {
+	roles, err := v1.DB.GetGuildRoles(r.GuildId)
+	return &corev1.GetGuildRolesResponse{
+		Roles: roles,
+	}, err
+}
+
+// SetPermissions implements the SetPermissions RPC
+func (v1 *V1) SetPermissions(c context.Context, r *corev1.SetPermissionsRequest) (*empty.Empty, error) {
+	return &emptypb.Empty{}, v1.Perms.SetPermissions(r.Perms.Permissions, r.GuildId, r.ChannelId, r.RoleId)
+}
+
+// GetPermissions implements the GetPermissions RPC
+func (v1 *V1) GetPermissions(c context.Context, r *corev1.GetPermissionsRequest) (*corev1.GetPermissionsResponse, error) {
+	return &corev1.GetPermissionsResponse{Perms: &corev1.PermissionList{Permissions: v1.Perms.GetPermissions(r.GuildId, r.ChannelId, r.RoleId)}}, nil
+}
+
+// QueryHasPermission implements the QueryHasPermission RPC
+func (v1 *V1) QueryHasPermission(c context.Context, r *corev1.QueryPermissionsRequest) (*corev1.QueryPermissionsResponse, error) {
+	panic("unimplemented")
 }

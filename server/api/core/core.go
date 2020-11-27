@@ -2,6 +2,7 @@ package core
 
 import (
 	v1 "github.com/harmony-development/legato/server/api/core/v1"
+	"github.com/harmony-development/legato/server/api/core/v1/pubsub_backends/integrated"
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/sony/sonyflake"
@@ -30,6 +31,11 @@ func New(deps *Dependencies) *Service {
 			DB:        deps.DB,
 			Logger:    deps.Logger,
 			Sonyflake: deps.Sonyflake,
+			PubSub: v1.SubscriptionManager{
+				Actions:    (&integrated.ActionState{}).Initialize(),
+				Guild:      (&integrated.GuildState{}).Initialize(),
+				Homeserver: (&integrated.HomeserverEventState{}).Initialize(),
+			},
 		},
 	}
 	return core

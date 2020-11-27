@@ -21,8 +21,7 @@ type Config struct {
 type ServerConf struct {
 	SnowflakeStart                    int64
 	Port                              int
-	ImagePath                         string
-	GuildPicturePath                  string
+	FlatfileMediaPath                 string
 	PublicKeyPath                     string
 	PrivateKeyPath                    string
 	MaxAttachments                    int
@@ -31,6 +30,7 @@ type ServerConf struct {
 	SessionCacheMax                   int
 	SessionDuration                   time.Duration
 	LogErrors                         bool
+	LogRequests                       bool
 	RespondWithErrors                 bool
 	NonceLength                       int
 	GuildLeaveNotificationQueueLength int
@@ -66,6 +66,7 @@ type DBConf struct {
 	Port     int
 	User     string
 	Password string
+	DBName   string
 	Models   string
 	SSL      bool
 }
@@ -80,8 +81,7 @@ type SentryConf struct {
 var DefaultConf = Config{
 	Server: ServerConf{
 		Port:                              2289,
-		ImagePath:                         "images",
-		GuildPicturePath:                  "guild-pictures",
+		FlatfileMediaPath:                 "media",
 		PrivateKeyPath:                    "harmony-key.pem",
 		PublicKeyPath:                     "harmony-key.pub",
 		MaxAttachments:                    1,
@@ -90,6 +90,7 @@ var DefaultConf = Config{
 		SessionCacheMax:                   5096,
 		SessionDuration:                   48 * time.Hour,
 		LogErrors:                         true,
+		LogRequests:                       true,
 		RespondWithErrors:                 false,
 		SnowflakeStart:                    0,
 		NonceLength:                       32,
@@ -117,6 +118,7 @@ var DefaultConf = Config{
 		Host:   "127.0.0.1",
 		Port:   5432,
 		SSL:    false,
+		DBName: "harmony",
 		Models: "sql/schemas/models.sql",
 	},
 	Sentry: SentryConf{

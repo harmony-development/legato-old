@@ -1,6 +1,7 @@
 .idea/
 .env
 vendor
+flatfile
 filestore
 harmony.db
 static
@@ -11,3 +12,4 @@ harmony-key.pem
 harmony-key.pub
 .ninja_deps
 .ninja_log
+.version.json

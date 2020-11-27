@@ -60,7 +60,9 @@ CREATE TABLE IF NOT EXISTS Guilds (
     Guild_ID BIGSERIAL PRIMARY KEY NOT NULL,
     Owner_ID BIGSERIAL NOT NULL,
     Guild_Name TEXT NOT NULL,
-    Picture_URL TEXT NOT NULL
+    Picture_URL TEXT NOT NULL,
+    Roles bytea[],
+    Permissions bytea
 );
 
 CREATE TABLE IF NOT EXISTS Guild_Members (
@@ -96,19 +98,45 @@ CREATE TABLE IF NOT EXISTS Messages (
     Created_At TIMESTAMP NOT NULL,
     Edited_At TIMESTAMP,
     Content TEXT NOT NULL,
-    Embeds jsonb [],
-    Actions jsonb [],
+    Embeds jsonb,
+    Actions jsonb,
+    Overrides bytea,
+    Reply_To_ID BIGINT DEFAULT 0,
+    Attachments text[],
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE,
     FOREIGN KEY (Channel_ID) REFERENCES Channels (Channel_ID) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS Attachments (
-    Message_ID BIGSERIAL NOT NULL,
-    Attachment TEXT NOT NULL,
-    FOREIGN KEY (Message_ID) REFERENCES Messages (Message_ID) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Files (
     Hash BYTEA PRIMARY KEY NOT NULL,
     File_ID TEXT NOT NULL
-)
+);
+
+CREATE TABLE IF NOT EXISTS Rate_Limit_Whitelist_IP (IP TEXT NOT NULL PRIMARY KEY);
+
+CREATE TABLE IF NOT EXISTS Rate_Limit_Whitelist_User (
+    User_ID BIGSERIAL NOT NULL,
+    FOREIGN KEY (User_ID) REFERENCES Users (User_ID) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Emote_Packs (
+    Pack_ID BIGSERIAL NOT NULL,
+    Pack_Name TEXT NOT NULL,
+    User_ID BIGSERIAL NOT NULL,
+    PRIMARY KEY (Pack_ID),
+    FOREIGN KEY (User_ID) REFERENCES Users (User_ID) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Emote_Pack_Emotes (
+    Pack_ID BIGSERIAL NOT NULL,
+    Image_ID TEXT NOT NULL,
+    Emote_Name TEXT NOT NULL,
+    FOREIGN KEY (Pack_ID) REFERENCES Emote_Packs (Pack_ID) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Acquired_Emote_Packs (
+    Pack_ID BIGSERIAL NOT NULL,
+    User_ID BIGSERIAL NOT NULL,
+    FOREIGN KEY (Pack_ID) REFERENCES Emote_Packs (Pack_ID) ON DELETE CASCADE,
+    FOREIGN KEY (User_ID) REFERENCES Users (User_ID) ON DELETE CASCADE
+);

@@ -7,13 +7,12 @@ INSERT INTO Messages (
     Content,
     Embeds,
     Actions,
-    Created_At
+    Created_At,
+    Reply_to_ID,
+    Overrides,
+    Attachments
   )
-VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) RETURNING *;
-
--- name: AddAttachment :exec
-INSERT INTO Attachments(Message_ID, Attachment)
-VALUES ($1, $2);
+VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), $8, $9, $10) RETURNING *;
 
 -- name: DeleteMessage :execrows
 DELETE FROM Messages
@@ -29,11 +28,6 @@ WHERE Message_ID = $1;
 -- name: GetMessage :one
 SELECT *
 FROM Messages
-WHERE Message_ID = $1;
-
--- name: GetAttachments :many
-SELECT Attachment
-FROM Attachments
 WHERE Message_ID = $1;
 
 -- name: GetMessageDate :one
@@ -70,6 +64,11 @@ SET Actions = $2,
   Edited_At = NOW()
 WHERE Message_ID = $1 RETURNING Actions,
   Edited_At;
+
+-- name: UpdateMessageOverrides :exec
+UPDATE Messages
+SET Overrides = $1
+WHERE Message_ID = $2;
 
 -- name: MessageWithIDExists :one
 SELECT EXISTS (

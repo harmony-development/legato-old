@@ -3,7 +3,6 @@ package api
 import (
 	"net"
 	"net/http"
-	"strconv"
 
 	corev1 "github.com/harmony-development/legato/gen/core"
 	foundationv1 "github.com/harmony-development/legato/gen/foundation"
@@ -18,6 +17,7 @@ import (
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sony/sonyflake"
+	"golang.org/x/sync/errgroup"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
@@ -64,6 +64,7 @@ func New(deps Dependencies) *API {
 			m.ValidatorInterceptor,
 			m.AuthInterceptor,
 			m.LocationInterceptor,
+			m.LoggingInterceptor,
 		),
 		grpc_middleware.WithStreamServerChain(
 			grpc_recovery.StreamServerInterceptor(grpc_recovery.WithRecoveryHandler(m.RecoveryFunc)),
@@ -73,6 +74,8 @@ func New(deps Dependencies) *API {
 			m.RateLimitStreamInterceptorStream,
 		))
 	api.grpcWebServer = grpcweb.WrapServer(api.grpcServer, grpcweb.WithOriginFunc(func(_ string) bool {
+		return true
+	}), grpcweb.WithWebsockets(true), grpcweb.WithWebsocketOriginFunc(func(req *http.Request) bool {
 		return true
 	}))
 	api.grpcWebHTTPServer = &http.Server{
@@ -85,23 +88,7 @@ func New(deps Dependencies) *API {
 	api.prometheusServer = &http.Server{
 		Handler: prometheusMux,
 	}
-	return api
-}
 
-// Start starts up the API on a specific port
-func (api API) Start(cb chan error, port int) {
-	lis, err := net.Listen("tcp", ":"+strconv.Itoa(port))
-	if err != nil {
-		cb <- err
-	}
-	webLis, err := net.Listen("tcp", ":"+strconv.Itoa(port+1))
-	if err != nil {
-		cb <- err
-	}
-	promLis, err := net.Listen("tcp", ":"+strconv.Itoa(port+2))
-	if err != nil {
-		cb <- err
-	}
 	corev1.RegisterCoreServiceServer(api.grpcServer, core.New(&core.Dependencies{
 		DB:        api.DB,
 		Logger:    api.Logger,
@@ -120,13 +107,29 @@ func (api API) Start(cb chan error, port int) {
 	reflection.Register(api.grpcServer)
 	grpc_prometheus.Register(api.grpcServer)
 	grpc_prometheus.EnableHandlingTimeHistogram()
-	go func() {
-		cb <- api.grpcServer.Serve(lis)
-	}()
-	go func() {
-		cb <- api.grpcWebHTTPServer.Serve(webLis)
-	}()
-	go func() {
-		cb <- api.prometheusServer.Serve(promLis)
-	}()
+
+	return api
+}
+
+// Start starts up the API on a specific port
+func (api API) Start(grpcListener, grpcWebListener, prometheusListener net.Listener) error {
+	errGrp := errgroup.Group{}
+
+	errGrp.Go(func() error {
+		err := api.grpcServer.Serve(grpcListener)
+		api.Logger.CheckException(err)
+		return err
+	})
+	errGrp.Go(func() error {
+		err := api.grpcWebHTTPServer.Serve(grpcWebListener)
+		api.Logger.CheckException(err)
+		return err
+	})
+	errGrp.Go(func() error {
+		err := api.prometheusServer.Serve(prometheusListener)
+		api.Logger.CheckException(err)
+		return err
+	})
+
+	return errGrp.Wait()
 }

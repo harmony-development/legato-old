@@ -5,11 +5,12 @@ package db
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"time"
 
+	corev1 "github.com/harmony-development/legato/gen/core"
 	profilev1 "github.com/harmony-development/legato/gen/profile"
 	"github.com/harmony-development/legato/server/db/queries"
+	"google.golang.org/protobuf/proto"
 )
 
 func toSqlString(input string) sql.NullString {
@@ -153,42 +154,28 @@ func (db *HarmonyDB) DeleteChannelFromGuild(guildID, channelID uint64) error {
 }
 
 // AddMessage adds a message to a channel
-func (db *HarmonyDB) AddMessage(channelID, guildID, userID, messageID uint64, message string, attachments []string, embeds, actions [][]byte) (*queries.Message, error) {
+func (db *HarmonyDB) AddMessage(channelID, guildID, userID, messageID uint64, message string, attachments []string, embeds, actions, overrides []byte, replyTo sql.NullInt64) (*queries.Message, error) {
 	tx, err := db.Begin()
 	db.Logger.CheckException(err)
 	if err != nil {
 		return nil, err
 	}
 	tq := db.queries.WithTx(tx)
-	var rawEmbeds, rawActions []json.RawMessage
-	for _, embed := range embeds {
-		rawEmbeds = append(rawEmbeds, json.RawMessage(embed))
-	}
-	for _, action := range actions {
-		rawActions = append(rawActions, json.RawMessage(action))
-	}
 	msg, err := tq.AddMessage(ctx, queries.AddMessageParams{
-		GuildID:   guildID,
-		ChannelID: channelID,
-		UserID:    userID,
-		MessageID: messageID,
-		Content:   message,
-		Embeds:    rawEmbeds,
-		Actions:   rawActions,
+		GuildID:     guildID,
+		ChannelID:   channelID,
+		UserID:      userID,
+		MessageID:   messageID,
+		Content:     message,
+		Embeds:      embeds,
+		Actions:     actions,
+		Overrides:   overrides,
+		Attachments: attachments,
+		ReplyToID:   replyTo,
 	})
 	db.Logger.CheckException(err)
 	if err != nil {
 		return nil, err
-	}
-	for _, attachment := range attachments {
-		if err := tq.AddAttachment(ctx, queries.AddAttachmentParams{
-			MessageID:  msg.MessageID,
-			Attachment: attachment,
-		}); err != nil {
-			_ = tx.Rollback()
-			db.Logger.CheckException(err)
-			return nil, err
-		}
 	}
 	if err := tx.Commit(); err != nil {
 		db.Logger.CheckException(err)
@@ -292,13 +279,6 @@ func (db *HarmonyDB) UserInGuild(userID, guildID uint64) (bool, error) {
 	return id == userID, err
 }
 
-// GetAttachments gets attachments for a message
-func (db *HarmonyDB) GetAttachments(messageID uint64) ([]string, error) {
-	attachments, err := db.queries.GetAttachments(ctx, messageID)
-	db.Logger.CheckException(err)
-	return attachments, err
-}
-
 // GetMessageDate gets the date for a message
 func (db *HarmonyDB) GetMessageDate(messageID uint64) (time.Time, error) {
 	msgDate, err := db.queries.GetMessageDate(ctx, messageID)
@@ -352,32 +332,6 @@ func (db *HarmonyDB) SetGuildPicture(guildID uint64, pictureURL string) error {
 	})
 	db.Logger.CheckException(err)
 	return err
-}
-
-// AddAttachments adds attachments to a message
-func (db *HarmonyDB) AddAttachments(messageID uint64, attachments []string) error {
-	tx, err := db.Begin()
-	db.Logger.CheckException(err)
-	if err != nil {
-		return err
-	}
-	withTX := db.queries.WithTx(tx)
-	for _, a := range attachments {
-		err = withTX.AddAttachment(ctx, queries.AddAttachmentParams{
-			MessageID:  messageID,
-			Attachment: a,
-		})
-		if err != nil {
-			_ = tx.Rollback()
-			db.Logger.CheckException(err)
-			return err
-		}
-	}
-	if err := tx.Commit(); err != nil {
-		db.Logger.CheckException(err)
-		return err
-	}
-	return nil
 }
 
 // GetInvites gets open invites for a guild
@@ -579,7 +533,7 @@ func (db *HarmonyDB) GetGuildByID(guildID uint64) (queries.Guild, error) {
 	return db.queries.GetGuildData(ctx, guildID)
 }
 
-func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, actions *[][]byte) (time.Time, error) {
+func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, actions, overrides *[]byte) (time.Time, error) {
 	tx, err := db.Begin()
 	db.Logger.CheckException(err)
 	if err != nil {
@@ -600,13 +554,9 @@ func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, ac
 	}
 	if embeds != nil {
 		e.Execute(func() error {
-			var rawEmbeds []json.RawMessage
-			for _, embed := range *embeds {
-				rawEmbeds = append(rawEmbeds, embed)
-			}
 			data, err := tq.UpdateMessageEmbeds(ctx, queries.UpdateMessageEmbedsParams{
 				MessageID: messageID,
-				Embeds:    rawEmbeds,
+				Embeds:    *embeds,
 			})
 			editedAt = data.EditedAt.Time
 			return err
@@ -614,16 +564,20 @@ func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, ac
 	}
 	if actions != nil {
 		e.Execute(func() error {
-			var rawActions []json.RawMessage
-			for _, action := range *actions {
-				rawActions = append(rawActions, action)
-			}
 			data, err := tq.UpdateMessageActions(ctx, queries.UpdateMessageActionsParams{
 				MessageID: messageID,
-				Actions:   rawActions,
+				Actions:   *actions,
 			})
 			editedAt = data.EditedAt.Time
 			return err
+		})
+	}
+	if overrides != nil {
+		e.Execute(func() error {
+			return tq.UpdateMessageOverrides(ctx, queries.UpdateMessageOverridesParams{
+				MessageID: messageID,
+				Overrides: *overrides,
+			})
 		})
 	}
 	if e.err != nil {
@@ -820,4 +774,142 @@ func (db HarmonyDB) UserIsLocal(userID uint64) error {
 		err = ErrNotLocal
 	}
 	return err
+}
+
+func (db HarmonyDB) CreateEmotePack(userID, packID uint64, packName string) error {
+	err := db.queries.CreateEmotePack(ctx, queries.CreateEmotePackParams{
+		UserID:   userID,
+		PackID:   packID,
+		PackName: packName,
+	})
+	db.Logger.CheckException(err)
+	return err
+}
+
+func (db HarmonyDB) IsPackOwner(userID, packID uint64) (bool, error) {
+	owner, err := db.queries.GetPackOwner(ctx, packID)
+	if err != nil {
+		return false, err
+	}
+	return owner == userID, nil
+}
+
+func (db HarmonyDB) AddEmoteToPack(packID uint64, imageID string, name string) error {
+	err := db.queries.AddEmoteToPack(ctx, queries.AddEmoteToPackParams{
+		PackID:    packID,
+		ImageID:   imageID,
+		EmoteName: name,
+	})
+	db.Logger.CheckException(err)
+	return err
+}
+
+func (db HarmonyDB) DeleteEmoteFromPack(packID uint64, imageID string) error {
+	err := db.queries.DeleteEmoteFromPack(ctx, queries.DeleteEmoteFromPackParams{
+		PackID:  packID,
+		ImageID: imageID,
+	})
+	db.Logger.CheckException(err)
+	return err
+}
+
+func (db HarmonyDB) DeleteEmotePack(packID uint64) error {
+	err := db.queries.DeleteEmotePack(ctx, queries.DeleteEmotePackParams{
+		PackID: packID,
+	})
+	db.Logger.CheckException(err)
+	return err
+}
+
+func (db HarmonyDB) GetEmotePacks(userID uint64) ([]queries.GetEmotePacksRow, error) {
+	emotes, err := db.queries.GetEmotePacks(ctx, userID)
+	if err != nil {
+		db.Logger.CheckException(err)
+		return nil, err
+	}
+	return emotes, nil
+}
+
+func (db HarmonyDB) GetEmotePackEmotes(packID uint64) ([]queries.GetEmotePackEmotesRow, error) {
+	return db.queries.GetEmotePackEmotes(ctx, packID)
+}
+
+func (db HarmonyDB) DequipEmotePack(userID, packID uint64) error {
+	return db.queries.DequipEmotePack(ctx, queries.DequipEmotePackParams{
+		PackID: packID,
+		UserID: userID,
+	})
+}
+
+func (db HarmonyDB) AddRoleToGuild(guildID uint64, role *corev1.Role) error {
+	data, err := db.queries.GetGuildRoles(ctx, guildID)
+	if err != nil {
+		return err
+	}
+
+	marshalled, err := proto.Marshal(role)
+	if err != nil {
+		return err
+	}
+
+	data = append(data, marshalled)
+	return db.queries.SetGuildRoles(ctx, queries.SetGuildRolesParams{
+		Roles:   data,
+		GuildID: guildID,
+	})
+}
+
+func (db HarmonyDB) RemoveRoleFromGuild(guildID, roleID uint64) error {
+	data, err := db.queries.GetGuildRoles(ctx, guildID)
+	if err != nil {
+		return err
+	}
+
+	var items [][]byte
+
+	for _, item := range data {
+		role := new(corev1.Role)
+		err = proto.Unmarshal(item, role)
+		if err != nil {
+			return err
+		}
+
+		if role.RoleId != roleID {
+			items = append(items, item)
+		}
+	}
+
+	return db.queries.SetGuildRoles(ctx, queries.SetGuildRolesParams{
+		Roles:   items,
+		GuildID: guildID,
+	})
+}
+
+func (db HarmonyDB) GetGuildRoles(guildID uint64) (ret []*corev1.Role, err error) {
+	data, err := db.queries.GetGuildRoles(ctx, guildID)
+	if err != nil {
+		return
+	}
+
+	for _, item := range data {
+		role := new(corev1.Role)
+		err = proto.Unmarshal(item, role)
+		if err != nil {
+			return
+		}
+		ret = append(ret, role)
+	}
+
+	return
+}
+
+func (db HarmonyDB) SetGuildPermissions(guildID uint64, data []byte) error {
+	return db.queries.SetGuildPerms(ctx, queries.SetGuildPermsParams{
+		Permissions: data,
+		GuildID:     guildID,
+	})
+}
+
+func (db HarmonyDB) GetGuildPermissions(guildID uint64) (data []byte, err error) {
+	return db.queries.GetGuildPerms(ctx, guildID)
 }

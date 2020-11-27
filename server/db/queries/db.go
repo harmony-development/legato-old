@@ -22,8 +22,11 @@ func New(db DBTX) *Queries {
 func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	q := Queries{db: db}
 	var err error
-	if q.addAttachmentStmt, err = db.PrepareContext(ctx, addAttachment); err != nil {
-		return nil, fmt.Errorf("error preparing query AddAttachment: %w", err)
+	if q.acquireEmotePackStmt, err = db.PrepareContext(ctx, acquireEmotePack); err != nil {
+		return nil, fmt.Errorf("error preparing query AcquireEmotePack: %w", err)
+	}
+	if q.addEmoteToPackStmt, err = db.PrepareContext(ctx, addEmoteToPack); err != nil {
+		return nil, fmt.Errorf("error preparing query AddEmoteToPack: %w", err)
 	}
 	if q.addFileHashStmt, err = db.PrepareContext(ctx, addFileHash); err != nil {
 		return nil, fmt.Errorf("error preparing query AddFileHash: %w", err)
@@ -58,6 +61,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.createChannelStmt, err = db.PrepareContext(ctx, createChannel); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateChannel: %w", err)
 	}
+	if q.createEmotePackStmt, err = db.PrepareContext(ctx, createEmotePack); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateEmotePack: %w", err)
+	}
 	if q.createGuildStmt, err = db.PrepareContext(ctx, createGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateGuild: %w", err)
 	}
@@ -66,6 +72,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.deleteChannelStmt, err = db.PrepareContext(ctx, deleteChannel); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteChannel: %w", err)
+	}
+	if q.deleteEmoteFromPackStmt, err = db.PrepareContext(ctx, deleteEmoteFromPack); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteEmoteFromPack: %w", err)
+	}
+	if q.deleteEmotePackStmt, err = db.PrepareContext(ctx, deleteEmotePack); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteEmotePack: %w", err)
 	}
 	if q.deleteGuildStmt, err = db.PrepareContext(ctx, deleteGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteGuild: %w", err)
@@ -76,14 +88,14 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.deleteMessageStmt, err = db.PrepareContext(ctx, deleteMessage); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteMessage: %w", err)
 	}
+	if q.dequipEmotePackStmt, err = db.PrepareContext(ctx, dequipEmotePack); err != nil {
+		return nil, fmt.Errorf("error preparing query DequipEmotePack: %w", err)
+	}
 	if q.emailExistsStmt, err = db.PrepareContext(ctx, emailExists); err != nil {
 		return nil, fmt.Errorf("error preparing query EmailExists: %w", err)
 	}
 	if q.expireSessionsStmt, err = db.PrepareContext(ctx, expireSessions); err != nil {
 		return nil, fmt.Errorf("error preparing query ExpireSessions: %w", err)
-	}
-	if q.getAttachmentsStmt, err = db.PrepareContext(ctx, getAttachments); err != nil {
-		return nil, fmt.Errorf("error preparing query GetAttachments: %w", err)
 	}
 	if q.getAvatarStmt, err = db.PrepareContext(ctx, getAvatar); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAvatar: %w", err)
@@ -93,6 +105,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getChannelsStmt, err = db.PrepareContext(ctx, getChannels); err != nil {
 		return nil, fmt.Errorf("error preparing query GetChannels: %w", err)
+	}
+	if q.getEmotePackEmotesStmt, err = db.PrepareContext(ctx, getEmotePackEmotes); err != nil {
+		return nil, fmt.Errorf("error preparing query GetEmotePackEmotes: %w", err)
+	}
+	if q.getEmotePacksStmt, err = db.PrepareContext(ctx, getEmotePacks); err != nil {
+		return nil, fmt.Errorf("error preparing query GetEmotePacks: %w", err)
 	}
 	if q.getFileByHashStmt, err = db.PrepareContext(ctx, getFileByHash); err != nil {
 		return nil, fmt.Errorf("error preparing query GetFileByHash: %w", err)
@@ -112,8 +130,14 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getGuildOwnerStmt, err = db.PrepareContext(ctx, getGuildOwner); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGuildOwner: %w", err)
 	}
+	if q.getGuildPermsStmt, err = db.PrepareContext(ctx, getGuildPerms); err != nil {
+		return nil, fmt.Errorf("error preparing query GetGuildPerms: %w", err)
+	}
 	if q.getGuildPictureStmt, err = db.PrepareContext(ctx, getGuildPicture); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGuildPicture: %w", err)
+	}
+	if q.getGuildRolesStmt, err = db.PrepareContext(ctx, getGuildRoles); err != nil {
+		return nil, fmt.Errorf("error preparing query GetGuildRoles: %w", err)
 	}
 	if q.getLastGuildPositionInListStmt, err = db.PrepareContext(ctx, getLastGuildPositionInList); err != nil {
 		return nil, fmt.Errorf("error preparing query GetLastGuildPositionInList: %w", err)
@@ -136,6 +160,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getNonceInfoStmt, err = db.PrepareContext(ctx, getNonceInfo); err != nil {
 		return nil, fmt.Errorf("error preparing query GetNonceInfo: %w", err)
 	}
+	if q.getPackOwnerStmt, err = db.PrepareContext(ctx, getPackOwner); err != nil {
+		return nil, fmt.Errorf("error preparing query GetPackOwner: %w", err)
+	}
 	if q.getUserStmt, err = db.PrepareContext(ctx, getUser); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUser: %w", err)
 	}
@@ -156,6 +183,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.incrementInviteStmt, err = db.PrepareContext(ctx, incrementInvite); err != nil {
 		return nil, fmt.Errorf("error preparing query IncrementInvite: %w", err)
+	}
+	if q.isIPWhitelistedStmt, err = db.PrepareContext(ctx, isIPWhitelisted); err != nil {
+		return nil, fmt.Errorf("error preparing query IsIPWhitelisted: %w", err)
+	}
+	if q.isUserWhitelistedStmt, err = db.PrepareContext(ctx, isUserWhitelisted); err != nil {
+		return nil, fmt.Errorf("error preparing query IsUserWhitelisted: %w", err)
 	}
 	if q.messageWithIDExistsStmt, err = db.PrepareContext(ctx, messageWithIDExists); err != nil {
 		return nil, fmt.Errorf("error preparing query MessageWithIDExists: %w", err)
@@ -187,8 +220,14 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.setGuildNameStmt, err = db.PrepareContext(ctx, setGuildName); err != nil {
 		return nil, fmt.Errorf("error preparing query SetGuildName: %w", err)
 	}
+	if q.setGuildPermsStmt, err = db.PrepareContext(ctx, setGuildPerms); err != nil {
+		return nil, fmt.Errorf("error preparing query SetGuildPerms: %w", err)
+	}
 	if q.setGuildPictureStmt, err = db.PrepareContext(ctx, setGuildPicture); err != nil {
 		return nil, fmt.Errorf("error preparing query SetGuildPicture: %w", err)
+	}
+	if q.setGuildRolesStmt, err = db.PrepareContext(ctx, setGuildRoles); err != nil {
+		return nil, fmt.Errorf("error preparing query SetGuildRoles: %w", err)
 	}
 	if q.setStatusStmt, err = db.PrepareContext(ctx, setStatus); err != nil {
 		return nil, fmt.Errorf("error preparing query SetStatus: %w", err)
@@ -208,6 +247,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.updateMessageEmbedsStmt, err = db.PrepareContext(ctx, updateMessageEmbeds); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateMessageEmbeds: %w", err)
 	}
+	if q.updateMessageOverridesStmt, err = db.PrepareContext(ctx, updateMessageOverrides); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateMessageOverrides: %w", err)
+	}
 	if q.updateUsernameStmt, err = db.PrepareContext(ctx, updateUsername); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateUsername: %w", err)
 	}
@@ -222,9 +264,14 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 
 func (q *Queries) Close() error {
 	var err error
-	if q.addAttachmentStmt != nil {
-		if cerr := q.addAttachmentStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing addAttachmentStmt: %w", cerr)
+	if q.acquireEmotePackStmt != nil {
+		if cerr := q.acquireEmotePackStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing acquireEmotePackStmt: %w", cerr)
+		}
+	}
+	if q.addEmoteToPackStmt != nil {
+		if cerr := q.addEmoteToPackStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addEmoteToPackStmt: %w", cerr)
 		}
 	}
 	if q.addFileHashStmt != nil {
@@ -282,6 +329,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing createChannelStmt: %w", cerr)
 		}
 	}
+	if q.createEmotePackStmt != nil {
+		if cerr := q.createEmotePackStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createEmotePackStmt: %w", cerr)
+		}
+	}
 	if q.createGuildStmt != nil {
 		if cerr := q.createGuildStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing createGuildStmt: %w", cerr)
@@ -295,6 +347,16 @@ func (q *Queries) Close() error {
 	if q.deleteChannelStmt != nil {
 		if cerr := q.deleteChannelStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteChannelStmt: %w", cerr)
+		}
+	}
+	if q.deleteEmoteFromPackStmt != nil {
+		if cerr := q.deleteEmoteFromPackStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteEmoteFromPackStmt: %w", cerr)
+		}
+	}
+	if q.deleteEmotePackStmt != nil {
+		if cerr := q.deleteEmotePackStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteEmotePackStmt: %w", cerr)
 		}
 	}
 	if q.deleteGuildStmt != nil {
@@ -312,6 +374,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing deleteMessageStmt: %w", cerr)
 		}
 	}
+	if q.dequipEmotePackStmt != nil {
+		if cerr := q.dequipEmotePackStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing dequipEmotePackStmt: %w", cerr)
+		}
+	}
 	if q.emailExistsStmt != nil {
 		if cerr := q.emailExistsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing emailExistsStmt: %w", cerr)
@@ -320,11 +387,6 @@ func (q *Queries) Close() error {
 	if q.expireSessionsStmt != nil {
 		if cerr := q.expireSessionsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing expireSessionsStmt: %w", cerr)
-		}
-	}
-	if q.getAttachmentsStmt != nil {
-		if cerr := q.getAttachmentsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getAttachmentsStmt: %w", cerr)
 		}
 	}
 	if q.getAvatarStmt != nil {
@@ -340,6 +402,16 @@ func (q *Queries) Close() error {
 	if q.getChannelsStmt != nil {
 		if cerr := q.getChannelsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getChannelsStmt: %w", cerr)
+		}
+	}
+	if q.getEmotePackEmotesStmt != nil {
+		if cerr := q.getEmotePackEmotesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getEmotePackEmotesStmt: %w", cerr)
+		}
+	}
+	if q.getEmotePacksStmt != nil {
+		if cerr := q.getEmotePacksStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getEmotePacksStmt: %w", cerr)
 		}
 	}
 	if q.getFileByHashStmt != nil {
@@ -372,9 +444,19 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getGuildOwnerStmt: %w", cerr)
 		}
 	}
+	if q.getGuildPermsStmt != nil {
+		if cerr := q.getGuildPermsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getGuildPermsStmt: %w", cerr)
+		}
+	}
 	if q.getGuildPictureStmt != nil {
 		if cerr := q.getGuildPictureStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getGuildPictureStmt: %w", cerr)
+		}
+	}
+	if q.getGuildRolesStmt != nil {
+		if cerr := q.getGuildRolesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getGuildRolesStmt: %w", cerr)
 		}
 	}
 	if q.getLastGuildPositionInListStmt != nil {
@@ -412,6 +494,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getNonceInfoStmt: %w", cerr)
 		}
 	}
+	if q.getPackOwnerStmt != nil {
+		if cerr := q.getPackOwnerStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getPackOwnerStmt: %w", cerr)
+		}
+	}
 	if q.getUserStmt != nil {
 		if cerr := q.getUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getUserStmt: %w", cerr)
@@ -445,6 +532,16 @@ func (q *Queries) Close() error {
 	if q.incrementInviteStmt != nil {
 		if cerr := q.incrementInviteStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing incrementInviteStmt: %w", cerr)
+		}
+	}
+	if q.isIPWhitelistedStmt != nil {
+		if cerr := q.isIPWhitelistedStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing isIPWhitelistedStmt: %w", cerr)
+		}
+	}
+	if q.isUserWhitelistedStmt != nil {
+		if cerr := q.isUserWhitelistedStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing isUserWhitelistedStmt: %w", cerr)
 		}
 	}
 	if q.messageWithIDExistsStmt != nil {
@@ -497,9 +594,19 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing setGuildNameStmt: %w", cerr)
 		}
 	}
+	if q.setGuildPermsStmt != nil {
+		if cerr := q.setGuildPermsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing setGuildPermsStmt: %w", cerr)
+		}
+	}
 	if q.setGuildPictureStmt != nil {
 		if cerr := q.setGuildPictureStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing setGuildPictureStmt: %w", cerr)
+		}
+	}
+	if q.setGuildRolesStmt != nil {
+		if cerr := q.setGuildRolesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing setGuildRolesStmt: %w", cerr)
 		}
 	}
 	if q.setStatusStmt != nil {
@@ -530,6 +637,11 @@ func (q *Queries) Close() error {
 	if q.updateMessageEmbedsStmt != nil {
 		if cerr := q.updateMessageEmbedsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateMessageEmbedsStmt: %w", cerr)
+		}
+	}
+	if q.updateMessageOverridesStmt != nil {
+		if cerr := q.updateMessageOverridesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateMessageOverridesStmt: %w", cerr)
 		}
 	}
 	if q.updateUsernameStmt != nil {
@@ -586,7 +698,8 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 type Queries struct {
 	db                             DBTX
 	tx                             *sql.Tx
-	addAttachmentStmt              *sql.Stmt
+	acquireEmotePackStmt           *sql.Stmt
+	addEmoteToPackStmt             *sql.Stmt
 	addFileHashStmt                *sql.Stmt
 	addForeignUserStmt             *sql.Stmt
 	addLocalUserStmt               *sql.Stmt
@@ -598,25 +711,32 @@ type Queries struct {
 	addUserStmt                    *sql.Stmt
 	addUserToGuildStmt             *sql.Stmt
 	createChannelStmt              *sql.Stmt
+	createEmotePackStmt            *sql.Stmt
 	createGuildStmt                *sql.Stmt
 	createGuildInviteStmt          *sql.Stmt
 	deleteChannelStmt              *sql.Stmt
+	deleteEmoteFromPackStmt        *sql.Stmt
+	deleteEmotePackStmt            *sql.Stmt
 	deleteGuildStmt                *sql.Stmt
 	deleteInviteStmt               *sql.Stmt
 	deleteMessageStmt              *sql.Stmt
+	dequipEmotePackStmt            *sql.Stmt
 	emailExistsStmt                *sql.Stmt
 	expireSessionsStmt             *sql.Stmt
-	getAttachmentsStmt             *sql.Stmt
 	getAvatarStmt                  *sql.Stmt
 	getChannelPositionStmt         *sql.Stmt
 	getChannelsStmt                *sql.Stmt
+	getEmotePackEmotesStmt         *sql.Stmt
+	getEmotePacksStmt              *sql.Stmt
 	getFileByHashStmt              *sql.Stmt
 	getGuildDataStmt               *sql.Stmt
 	getGuildListStmt               *sql.Stmt
 	getGuildListPositionStmt       *sql.Stmt
 	getGuildMembersStmt            *sql.Stmt
 	getGuildOwnerStmt              *sql.Stmt
+	getGuildPermsStmt              *sql.Stmt
 	getGuildPictureStmt            *sql.Stmt
+	getGuildRolesStmt              *sql.Stmt
 	getLastGuildPositionInListStmt *sql.Stmt
 	getLocalUserIDStmt             *sql.Stmt
 	getMessageStmt                 *sql.Stmt
@@ -624,6 +744,7 @@ type Queries struct {
 	getMessageDateStmt             *sql.Stmt
 	getMessagesStmt                *sql.Stmt
 	getNonceInfoStmt               *sql.Stmt
+	getPackOwnerStmt               *sql.Stmt
 	getUserStmt                    *sql.Stmt
 	getUserByEmailStmt             *sql.Stmt
 	getUserMetadataStmt            *sql.Stmt
@@ -631,6 +752,8 @@ type Queries struct {
 	guildsForUserStmt              *sql.Stmt
 	guildsForUserWithDataStmt      *sql.Stmt
 	incrementInviteStmt            *sql.Stmt
+	isIPWhitelistedStmt            *sql.Stmt
+	isUserWhitelistedStmt          *sql.Stmt
 	messageWithIDExistsStmt        *sql.Stmt
 	moveChannelStmt                *sql.Stmt
 	moveGuildStmt                  *sql.Stmt
@@ -641,13 +764,16 @@ type Queries struct {
 	resolveGuildIDStmt             *sql.Stmt
 	sessionToUserIDStmt            *sql.Stmt
 	setGuildNameStmt               *sql.Stmt
+	setGuildPermsStmt              *sql.Stmt
 	setGuildPictureStmt            *sql.Stmt
+	setGuildRolesStmt              *sql.Stmt
 	setStatusStmt                  *sql.Stmt
 	updateAvatarStmt               *sql.Stmt
 	updateChannelNameStmt          *sql.Stmt
 	updateMessageActionsStmt       *sql.Stmt
 	updateMessageContentStmt       *sql.Stmt
 	updateMessageEmbedsStmt        *sql.Stmt
+	updateMessageOverridesStmt     *sql.Stmt
 	updateUsernameStmt             *sql.Stmt
 	userInGuildStmt                *sql.Stmt
 	userIsLocalStmt                *sql.Stmt
@@ -657,7 +783,8 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
 		db:                             tx,
 		tx:                             tx,
-		addAttachmentStmt:              q.addAttachmentStmt,
+		acquireEmotePackStmt:           q.acquireEmotePackStmt,
+		addEmoteToPackStmt:             q.addEmoteToPackStmt,
 		addFileHashStmt:                q.addFileHashStmt,
 		addForeignUserStmt:             q.addForeignUserStmt,
 		addLocalUserStmt:               q.addLocalUserStmt,
@@ -669,25 +796,32 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		addUserStmt:                    q.addUserStmt,
 		addUserToGuildStmt:             q.addUserToGuildStmt,
 		createChannelStmt:              q.createChannelStmt,
+		createEmotePackStmt:            q.createEmotePackStmt,
 		createGuildStmt:                q.createGuildStmt,
 		createGuildInviteStmt:          q.createGuildInviteStmt,
 		deleteChannelStmt:              q.deleteChannelStmt,
+		deleteEmoteFromPackStmt:        q.deleteEmoteFromPackStmt,
+		deleteEmotePackStmt:            q.deleteEmotePackStmt,
 		deleteGuildStmt:                q.deleteGuildStmt,
 		deleteInviteStmt:               q.deleteInviteStmt,
 		deleteMessageStmt:              q.deleteMessageStmt,
+		dequipEmotePackStmt:            q.dequipEmotePackStmt,
 		emailExistsStmt:                q.emailExistsStmt,
 		expireSessionsStmt:             q.expireSessionsStmt,
-		getAttachmentsStmt:             q.getAttachmentsStmt,
 		getAvatarStmt:                  q.getAvatarStmt,
 		getChannelPositionStmt:         q.getChannelPositionStmt,
 		getChannelsStmt:                q.getChannelsStmt,
+		getEmotePackEmotesStmt:         q.getEmotePackEmotesStmt,
+		getEmotePacksStmt:              q.getEmotePacksStmt,
 		getFileByHashStmt:              q.getFileByHashStmt,
 		getGuildDataStmt:               q.getGuildDataStmt,
 		getGuildListStmt:               q.getGuildListStmt,
 		getGuildListPositionStmt:       q.getGuildListPositionStmt,
 		getGuildMembersStmt:            q.getGuildMembersStmt,
 		getGuildOwnerStmt:              q.getGuildOwnerStmt,
+		getGuildPermsStmt:              q.getGuildPermsStmt,
 		getGuildPictureStmt:            q.getGuildPictureStmt,
+		getGuildRolesStmt:              q.getGuildRolesStmt,
 		getLastGuildPositionInListStmt: q.getLastGuildPositionInListStmt,
 		getLocalUserIDStmt:             q.getLocalUserIDStmt,
 		getMessageStmt:                 q.getMessageStmt,
@@ -695,6 +829,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getMessageDateStmt:             q.getMessageDateStmt,
 		getMessagesStmt:                q.getMessagesStmt,
 		getNonceInfoStmt:               q.getNonceInfoStmt,
+		getPackOwnerStmt:               q.getPackOwnerStmt,
 		getUserStmt:                    q.getUserStmt,
 		getUserByEmailStmt:             q.getUserByEmailStmt,
 		getUserMetadataStmt:            q.getUserMetadataStmt,
@@ -702,6 +837,8 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		guildsForUserStmt:              q.guildsForUserStmt,
 		guildsForUserWithDataStmt:      q.guildsForUserWithDataStmt,
 		incrementInviteStmt:            q.incrementInviteStmt,
+		isIPWhitelistedStmt:            q.isIPWhitelistedStmt,
+		isUserWhitelistedStmt:          q.isUserWhitelistedStmt,
 		messageWithIDExistsStmt:        q.messageWithIDExistsStmt,
 		moveChannelStmt:                q.moveChannelStmt,
 		moveGuildStmt:                  q.moveGuildStmt,
@@ -712,13 +849,16 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		resolveGuildIDStmt:             q.resolveGuildIDStmt,
 		sessionToUserIDStmt:            q.sessionToUserIDStmt,
 		setGuildNameStmt:               q.setGuildNameStmt,
+		setGuildPermsStmt:              q.setGuildPermsStmt,
 		setGuildPictureStmt:            q.setGuildPictureStmt,
+		setGuildRolesStmt:              q.setGuildRolesStmt,
 		setStatusStmt:                  q.setStatusStmt,
 		updateAvatarStmt:               q.updateAvatarStmt,
 		updateChannelNameStmt:          q.updateChannelNameStmt,
 		updateMessageActionsStmt:       q.updateMessageActionsStmt,
 		updateMessageContentStmt:       q.updateMessageContentStmt,
 		updateMessageEmbedsStmt:        q.updateMessageEmbedsStmt,
+		updateMessageOverridesStmt:     q.updateMessageOverridesStmt,
 		updateUsernameStmt:             q.updateUsernameStmt,
 		userInGuildStmt:                q.userInGuildStmt,
 		userIsLocalStmt:                q.userIsLocalStmt,

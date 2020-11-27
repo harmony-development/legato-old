@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	corev1 "github.com/harmony-development/legato/gen/core"
 	profilev1 "github.com/harmony-development/legato/gen/profile"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db/queries"
@@ -42,7 +43,7 @@ type IHarmonyDB interface {
 	AddMemberToGuild(userID, guildID uint64) error
 	AddChannelToGuild(guildID uint64, channelName string, previous, next uint64, category bool) (queries.Channel, error)
 	DeleteChannelFromGuild(guildID, channelID uint64) error
-	AddMessage(channelID, guildID, userID, messageID uint64, message string, attachments []string, embeds, actions [][]byte) (*queries.Message, error)
+	AddMessage(channelID, guildID, userID, messageID uint64, message string, attachments []string, embeds, actions, overrides []byte, replyTo sql.NullInt64) (*queries.Message, error)
 	DeleteMessage(messageID, channelID, guildID uint64) error
 	GetMessageOwner(messageID uint64) (uint64, error)
 	ResolveGuildID(inviteID string) (uint64, error)
@@ -50,14 +51,12 @@ type IHarmonyDB interface {
 	DeleteInvite(inviteID string) error
 	SessionToUserID(session string) (uint64, error)
 	UserInGuild(userID, guildID uint64) (bool, error)
-	GetAttachments(messageID uint64) ([]string, error)
 	GetMessageDate(messageID uint64) (time.Time, error)
 	GetMessages(guildID, channelID uint64) ([]queries.Message, error)
 	GetMessagesBefore(guildID, channelID uint64, date time.Time) ([]queries.Message, error)
 	UpdateGuildName(guildID uint64, newName string) error
 	GetGuildPicture(guildID uint64) (string, error)
 	SetGuildPicture(guildID uint64, pictureURL string) error
-	AddAttachments(messageID uint64, attachments []string) error
 	GetInvites(guildID uint64) ([]queries.Invite, error)
 	DeleteMember(guildID, userID uint64) error
 	GetLocalGuilds(userID uint64) ([]uint64, error)
@@ -81,7 +80,7 @@ type IHarmonyDB interface {
 	AddFileHash(fileID string, hash []byte) error
 	GetFileIDFromHash(hash []byte) (string, error)
 	GetGuildByID(guildID uint64) (queries.Guild, error)
-	UpdateMessage(messageID uint64, content *string, embeds, actions *[][]byte) (time.Time, error)
+	UpdateMessage(messageID uint64, content *string, embeds, actions, overrides *[]byte) (time.Time, error)
 	SetStatus(userID uint64, status profilev1.UserStatus) error
 	GetUserMetadata(userID uint64, appID string) (string, error)
 	GetNonceInfo(nonce string) (queries.GetNonceInfoRow, error)
@@ -94,6 +93,19 @@ type IHarmonyDB interface {
 	MoveChannel(guildID, channelID, previousID, nextID uint64) error
 	RemoveGuildFromList(userID, guildID uint64, homeServer string) error
 	UserIsLocal(userID uint64) error
+	CreateEmotePack(userID, packID uint64, packName string) error
+	IsPackOwner(userID, packID uint64) (bool, error)
+	AddEmoteToPack(packID uint64, imageID string, name string) error
+	DeleteEmoteFromPack(packID uint64, imageID string) error
+	DeleteEmotePack(packID uint64) error
+	GetEmotePacks(userID uint64) ([]queries.GetEmotePacksRow, error)
+	GetEmotePackEmotes(packID uint64) ([]queries.GetEmotePackEmotesRow, error)
+	DequipEmotePack(userID, packID uint64) error
+	AddRoleToGuild(guildID uint64, role *corev1.Role) error
+	RemoveRoleFromGuild(guildID, roleID uint64) error
+	GetGuildRoles(guildID uint64) ([]*corev1.Role, error)
+	SetGuildPermissions(guildID uint64, data []byte) error
+	GetGuildPermissions(guildID uint64) (data []byte, err error)
 }
 
 // New creates a new DB connection
@@ -106,7 +118,7 @@ func New(cfg *config.Config, logger logger.ILogger, idgen *sonyflake.Sonyflake) 
 	if db.DB, err = sql.Open("postgres", fmt.Sprintf("user=%v password=%v dbname=%v host=%v port=%v sslmode=%v",
 		cfg.DB.User,
 		cfg.DB.Password,
-		"harmony",
+		cfg.DB.DBName,
 		cfg.DB.Host,
 		cfg.DB.Port,
 		map[bool]string{true: "enable", false: "disable"}[cfg.DB.SSL],

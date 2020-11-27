@@ -8,9 +8,9 @@ import (
 	"time"
 )
 
-type Attachment struct {
-	MessageID  uint64 `json:"message_id"`
-	Attachment string `json:"attachment"`
+type AcquiredEmotePack struct {
+	PackID uint64 `json:"pack_id"`
+	UserID uint64 `json:"user_id"`
 }
 
 type Channel struct {
@@ -20,6 +20,18 @@ type Channel struct {
 	Position    string        `json:"position"`
 	Category    bool          `json:"category"`
 	Isvoice     bool          `json:"isvoice"`
+}
+
+type EmotePack struct {
+	PackID   uint64 `json:"pack_id"`
+	PackName string `json:"pack_name"`
+	UserID   uint64 `json:"user_id"`
+}
+
+type EmotePackEmote struct {
+	PackID    uint64 `json:"pack_id"`
+	ImageID   string `json:"image_id"`
+	EmoteName string `json:"emote_name"`
 }
 
 type FederationNonce struct {
@@ -40,10 +52,12 @@ type ForeignUser struct {
 }
 
 type Guild struct {
-	GuildID    uint64 `json:"guild_id"`
-	OwnerID    uint64 `json:"owner_id"`
-	GuildName  string `json:"guild_name"`
-	PictureUrl string `json:"picture_url"`
+	GuildID     uint64   `json:"guild_id"`
+	OwnerID     uint64   `json:"owner_id"`
+	GuildName   string   `json:"guild_name"`
+	PictureUrl  string   `json:"picture_url"`
+	Roles       [][]byte `json:"roles"`
+	Permissions []byte   `json:"permissions"`
 }
 
 type GuildList struct {
@@ -72,15 +86,18 @@ type LocalUser struct {
 }
 
 type Message struct {
-	MessageID uint64            `json:"message_id"`
-	GuildID   uint64            `json:"guild_id"`
-	ChannelID uint64            `json:"channel_id"`
-	UserID    uint64            `json:"user_id"`
-	CreatedAt time.Time         `json:"created_at"`
-	EditedAt  sql.NullTime      `json:"edited_at"`
-	Content   string            `json:"content"`
-	Embeds    []json.RawMessage `json:"embeds"`
-	Actions   []json.RawMessage `json:"actions"`
+	MessageID   uint64          `json:"message_id"`
+	GuildID     uint64          `json:"guild_id"`
+	ChannelID   uint64          `json:"channel_id"`
+	UserID      uint64          `json:"user_id"`
+	CreatedAt   time.Time       `json:"created_at"`
+	EditedAt    sql.NullTime    `json:"edited_at"`
+	Content     string          `json:"content"`
+	Embeds      json.RawMessage `json:"embeds"`
+	Actions     json.RawMessage `json:"actions"`
+	Overrides   []byte          `json:"overrides"`
+	ReplyToID   sql.NullInt64   `json:"reply_to_id"`
+	Attachments []string        `json:"attachments"`
 }
 
 type Profile struct {
@@ -88,6 +105,14 @@ type Profile struct {
 	Username string         `json:"username"`
 	Avatar   sql.NullString `json:"avatar"`
 	Status   int16          `json:"status"`
+}
+
+type RateLimitWhitelistIp struct {
+	Ip string `json:"ip"`
+}
+
+type RateLimitWhitelistUser struct {
+	UserID uint64 `json:"user_id"`
 }
 
 type Session struct {

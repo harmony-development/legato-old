@@ -3,7 +3,6 @@ package middleware
 import (
 	"context"
 
-	corev1 "github.com/harmony-development/legato/gen/core"
 	"github.com/harmony-development/legato/server/responses"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -16,13 +15,15 @@ func (m Middlewares) GuildPermissionInterceptor(c context.Context, req interface
 	}
 
 	ctx := c.(HarmonyContext)
-	location, ok := req.(interface{ GetLocation() *corev1.Location })
+	location, ok := req.(interface {
+		GetGuildId() uint64
+	})
 	if !ok {
 		panic("guild permission middleware used on message without a location")
 	}
-	loc := location.GetLocation()
+	guildID := location.GetGuildId()
 	if rpcConfigs[info.FullMethod].Permission.HasAny(ModifyInvites, ModifyChannels, ModifyGuild, Owner) {
-		owner, err := m.DB.GetOwner(loc.GuildId)
+		owner, err := m.DB.GetOwner(guildID)
 		if err != nil {
 			return nil, status.Error(codes.Internal, responses.InternalServerError)
 		}
