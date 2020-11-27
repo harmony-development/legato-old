@@ -46,6 +46,6 @@ jobs:
           sudo apt update
           sudo apt install libvips libvips-dev --fix-missing --no-install-recommends
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v1
+        uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.26
+          version: v1.29
