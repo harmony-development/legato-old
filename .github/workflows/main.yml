@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Install dependencies
         run: |
-          sudo apt install libvips libvips-dev --fix-missing --no-install-recommends
+          sudo apt-get install libvips libvips-dev --fix-missing --no-install-recommends
           go get github.com/ory/go-acc
       - name: Get project libraries
         run: go get -v -t -d ./...
