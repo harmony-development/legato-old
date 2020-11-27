@@ -68,6 +68,50 @@ func (p *Manager) Check(permission string, userRoles []uint64, inGuild uint64, i
 	return state.Check(permission, userRoles, ChannelID(inChannel))
 }
 
+func (p *Manager) GetPermissions(forGuild, forChannel, forRole uint64) (ret []*corev1.Permission) {
+	var guild *GuildState
+
+	if !p.states.Contains(forGuild) {
+		guild = p.obtainGuild(forGuild)
+	} else {
+		intf, _ := p.states.Get(forGuild)
+		guild = intf.(*GuildState)
+	}
+
+	if forChannel == 0 {
+		data := guild.Roles[RoleID(forRole)]
+		for _, node := range data {
+			ret = append(ret, &corev1.Permission{
+				Matches: node.Glob.s,
+				Mode: func() corev1.Permission_Mode {
+					if node.Mode == Allow {
+						return corev1.Permission_Allow
+					}
+					return corev1.Permission_Deny
+				}(),
+			})
+		}
+	} else {
+		if _, ok := guild.Channels[ChannelID(forChannel)]; !ok {
+			return
+		}
+		data := guild.Channels[ChannelID(forChannel)][RoleID(forRole)]
+		for _, node := range data {
+			ret = append(ret, &corev1.Permission{
+				Matches: node.Glob.s,
+				Mode: func() corev1.Permission_Mode {
+					if node.Mode == Allow {
+						return corev1.Permission_Allow
+					}
+					return corev1.Permission_Deny
+				}(),
+			})
+		}
+	}
+
+	return
+}
+
 func (p *Manager) SetPermissions(permissions []*corev1.Permission, forGuild, forChannel, forRole uint64) error {
 	var guild *GuildState
 

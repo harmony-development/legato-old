@@ -1167,7 +1167,7 @@ func (v1 *V1) SetPermissions(c context.Context, r *corev1.SetPermissionsRequest)
 
 // GetPermissions implements the GetPermissions RPC
 func (v1 *V1) GetPermissions(c context.Context, r *corev1.GetPermissionsRequest) (*corev1.GetPermissionsResponse, error) {
-	panic("unimplemented")
+	return &corev1.GetPermissionsResponse{Perms: &corev1.PermissionList{Permissions: v1.Perms.GetPermissions(r.GuildId, r.ChannelId, r.RoleId)}}, nil
 }
 
 // QueryHasPermission implements the QueryHasPermission RPC
