@@ -70,6 +70,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.createGuildInviteStmt, err = db.PrepareContext(ctx, createGuildInvite); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateGuildInvite: %w", err)
 	}
+	if q.createRoleStmt, err = db.PrepareContext(ctx, createRole); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateRole: %w", err)
+	}
 	if q.deleteChannelStmt, err = db.PrepareContext(ctx, deleteChannel); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteChannel: %w", err)
 	}
@@ -87,6 +90,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.deleteMessageStmt, err = db.PrepareContext(ctx, deleteMessage); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteMessage: %w", err)
+	}
+	if q.deleteRoleStmt, err = db.PrepareContext(ctx, deleteRole); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteRole: %w", err)
 	}
 	if q.dequipEmotePackStmt, err = db.PrepareContext(ctx, dequipEmotePack); err != nil {
 		return nil, fmt.Errorf("error preparing query DequipEmotePack: %w", err)
@@ -130,14 +136,8 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getGuildOwnerStmt, err = db.PrepareContext(ctx, getGuildOwner); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGuildOwner: %w", err)
 	}
-	if q.getGuildPermsStmt, err = db.PrepareContext(ctx, getGuildPerms); err != nil {
-		return nil, fmt.Errorf("error preparing query GetGuildPerms: %w", err)
-	}
 	if q.getGuildPictureStmt, err = db.PrepareContext(ctx, getGuildPicture); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGuildPicture: %w", err)
-	}
-	if q.getGuildRolesStmt, err = db.PrepareContext(ctx, getGuildRoles); err != nil {
-		return nil, fmt.Errorf("error preparing query GetGuildRoles: %w", err)
 	}
 	if q.getLastGuildPositionInListStmt, err = db.PrepareContext(ctx, getLastGuildPositionInList); err != nil {
 		return nil, fmt.Errorf("error preparing query GetLastGuildPositionInList: %w", err)
@@ -162,6 +162,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getPackOwnerStmt, err = db.PrepareContext(ctx, getPackOwner); err != nil {
 		return nil, fmt.Errorf("error preparing query GetPackOwner: %w", err)
+	}
+	if q.getPermissionsStmt, err = db.PrepareContext(ctx, getPermissions); err != nil {
+		return nil, fmt.Errorf("error preparing query GetPermissions: %w", err)
+	}
+	if q.getRolesForGuildStmt, err = db.PrepareContext(ctx, getRolesForGuild); err != nil {
+		return nil, fmt.Errorf("error preparing query GetRolesForGuild: %w", err)
 	}
 	if q.getUserStmt, err = db.PrepareContext(ctx, getUser); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUser: %w", err)
@@ -214,20 +220,20 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.resolveGuildIDStmt, err = db.PrepareContext(ctx, resolveGuildID); err != nil {
 		return nil, fmt.Errorf("error preparing query ResolveGuildID: %w", err)
 	}
+	if q.rolesForUserStmt, err = db.PrepareContext(ctx, rolesForUser); err != nil {
+		return nil, fmt.Errorf("error preparing query RolesForUser: %w", err)
+	}
 	if q.sessionToUserIDStmt, err = db.PrepareContext(ctx, sessionToUserID); err != nil {
 		return nil, fmt.Errorf("error preparing query SessionToUserID: %w", err)
 	}
 	if q.setGuildNameStmt, err = db.PrepareContext(ctx, setGuildName); err != nil {
 		return nil, fmt.Errorf("error preparing query SetGuildName: %w", err)
 	}
-	if q.setGuildPermsStmt, err = db.PrepareContext(ctx, setGuildPerms); err != nil {
-		return nil, fmt.Errorf("error preparing query SetGuildPerms: %w", err)
-	}
 	if q.setGuildPictureStmt, err = db.PrepareContext(ctx, setGuildPicture); err != nil {
 		return nil, fmt.Errorf("error preparing query SetGuildPicture: %w", err)
 	}
-	if q.setGuildRolesStmt, err = db.PrepareContext(ctx, setGuildRoles); err != nil {
-		return nil, fmt.Errorf("error preparing query SetGuildRoles: %w", err)
+	if q.setPermissionsStmt, err = db.PrepareContext(ctx, setPermissions); err != nil {
+		return nil, fmt.Errorf("error preparing query SetPermissions: %w", err)
 	}
 	if q.setStatusStmt, err = db.PrepareContext(ctx, setStatus); err != nil {
 		return nil, fmt.Errorf("error preparing query SetStatus: %w", err)
@@ -344,6 +350,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing createGuildInviteStmt: %w", cerr)
 		}
 	}
+	if q.createRoleStmt != nil {
+		if cerr := q.createRoleStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createRoleStmt: %w", cerr)
+		}
+	}
 	if q.deleteChannelStmt != nil {
 		if cerr := q.deleteChannelStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteChannelStmt: %w", cerr)
@@ -372,6 +383,11 @@ func (q *Queries) Close() error {
 	if q.deleteMessageStmt != nil {
 		if cerr := q.deleteMessageStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteMessageStmt: %w", cerr)
+		}
+	}
+	if q.deleteRoleStmt != nil {
+		if cerr := q.deleteRoleStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteRoleStmt: %w", cerr)
 		}
 	}
 	if q.dequipEmotePackStmt != nil {
@@ -444,19 +460,9 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getGuildOwnerStmt: %w", cerr)
 		}
 	}
-	if q.getGuildPermsStmt != nil {
-		if cerr := q.getGuildPermsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getGuildPermsStmt: %w", cerr)
-		}
-	}
 	if q.getGuildPictureStmt != nil {
 		if cerr := q.getGuildPictureStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getGuildPictureStmt: %w", cerr)
-		}
-	}
-	if q.getGuildRolesStmt != nil {
-		if cerr := q.getGuildRolesStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getGuildRolesStmt: %w", cerr)
 		}
 	}
 	if q.getLastGuildPositionInListStmt != nil {
@@ -497,6 +503,16 @@ func (q *Queries) Close() error {
 	if q.getPackOwnerStmt != nil {
 		if cerr := q.getPackOwnerStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getPackOwnerStmt: %w", cerr)
+		}
+	}
+	if q.getPermissionsStmt != nil {
+		if cerr := q.getPermissionsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getPermissionsStmt: %w", cerr)
+		}
+	}
+	if q.getRolesForGuildStmt != nil {
+		if cerr := q.getRolesForGuildStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getRolesForGuildStmt: %w", cerr)
 		}
 	}
 	if q.getUserStmt != nil {
@@ -584,6 +600,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing resolveGuildIDStmt: %w", cerr)
 		}
 	}
+	if q.rolesForUserStmt != nil {
+		if cerr := q.rolesForUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing rolesForUserStmt: %w", cerr)
+		}
+	}
 	if q.sessionToUserIDStmt != nil {
 		if cerr := q.sessionToUserIDStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing sessionToUserIDStmt: %w", cerr)
@@ -594,19 +615,14 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing setGuildNameStmt: %w", cerr)
 		}
 	}
-	if q.setGuildPermsStmt != nil {
-		if cerr := q.setGuildPermsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing setGuildPermsStmt: %w", cerr)
-		}
-	}
 	if q.setGuildPictureStmt != nil {
 		if cerr := q.setGuildPictureStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing setGuildPictureStmt: %w", cerr)
 		}
 	}
-	if q.setGuildRolesStmt != nil {
-		if cerr := q.setGuildRolesStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing setGuildRolesStmt: %w", cerr)
+	if q.setPermissionsStmt != nil {
+		if cerr := q.setPermissionsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing setPermissionsStmt: %w", cerr)
 		}
 	}
 	if q.setStatusStmt != nil {
@@ -714,12 +730,14 @@ type Queries struct {
 	createEmotePackStmt            *sql.Stmt
 	createGuildStmt                *sql.Stmt
 	createGuildInviteStmt          *sql.Stmt
+	createRoleStmt                 *sql.Stmt
 	deleteChannelStmt              *sql.Stmt
 	deleteEmoteFromPackStmt        *sql.Stmt
 	deleteEmotePackStmt            *sql.Stmt
 	deleteGuildStmt                *sql.Stmt
 	deleteInviteStmt               *sql.Stmt
 	deleteMessageStmt              *sql.Stmt
+	deleteRoleStmt                 *sql.Stmt
 	dequipEmotePackStmt            *sql.Stmt
 	emailExistsStmt                *sql.Stmt
 	expireSessionsStmt             *sql.Stmt
@@ -734,9 +752,7 @@ type Queries struct {
 	getGuildListPositionStmt       *sql.Stmt
 	getGuildMembersStmt            *sql.Stmt
 	getGuildOwnerStmt              *sql.Stmt
-	getGuildPermsStmt              *sql.Stmt
 	getGuildPictureStmt            *sql.Stmt
-	getGuildRolesStmt              *sql.Stmt
 	getLastGuildPositionInListStmt *sql.Stmt
 	getLocalUserIDStmt             *sql.Stmt
 	getMessageStmt                 *sql.Stmt
@@ -745,6 +761,8 @@ type Queries struct {
 	getMessagesStmt                *sql.Stmt
 	getNonceInfoStmt               *sql.Stmt
 	getPackOwnerStmt               *sql.Stmt
+	getPermissionsStmt             *sql.Stmt
+	getRolesForGuildStmt           *sql.Stmt
 	getUserStmt                    *sql.Stmt
 	getUserByEmailStmt             *sql.Stmt
 	getUserMetadataStmt            *sql.Stmt
@@ -762,11 +780,11 @@ type Queries struct {
 	removeGuildFromListStmt        *sql.Stmt
 	removeUserFromGuildStmt        *sql.Stmt
 	resolveGuildIDStmt             *sql.Stmt
+	rolesForUserStmt               *sql.Stmt
 	sessionToUserIDStmt            *sql.Stmt
 	setGuildNameStmt               *sql.Stmt
-	setGuildPermsStmt              *sql.Stmt
 	setGuildPictureStmt            *sql.Stmt
-	setGuildRolesStmt              *sql.Stmt
+	setPermissionsStmt             *sql.Stmt
 	setStatusStmt                  *sql.Stmt
 	updateAvatarStmt               *sql.Stmt
 	updateChannelNameStmt          *sql.Stmt
@@ -799,12 +817,14 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		createEmotePackStmt:            q.createEmotePackStmt,
 		createGuildStmt:                q.createGuildStmt,
 		createGuildInviteStmt:          q.createGuildInviteStmt,
+		createRoleStmt:                 q.createRoleStmt,
 		deleteChannelStmt:              q.deleteChannelStmt,
 		deleteEmoteFromPackStmt:        q.deleteEmoteFromPackStmt,
 		deleteEmotePackStmt:            q.deleteEmotePackStmt,
 		deleteGuildStmt:                q.deleteGuildStmt,
 		deleteInviteStmt:               q.deleteInviteStmt,
 		deleteMessageStmt:              q.deleteMessageStmt,
+		deleteRoleStmt:                 q.deleteRoleStmt,
 		dequipEmotePackStmt:            q.dequipEmotePackStmt,
 		emailExistsStmt:                q.emailExistsStmt,
 		expireSessionsStmt:             q.expireSessionsStmt,
@@ -819,9 +839,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getGuildListPositionStmt:       q.getGuildListPositionStmt,
 		getGuildMembersStmt:            q.getGuildMembersStmt,
 		getGuildOwnerStmt:              q.getGuildOwnerStmt,
-		getGuildPermsStmt:              q.getGuildPermsStmt,
 		getGuildPictureStmt:            q.getGuildPictureStmt,
-		getGuildRolesStmt:              q.getGuildRolesStmt,
 		getLastGuildPositionInListStmt: q.getLastGuildPositionInListStmt,
 		getLocalUserIDStmt:             q.getLocalUserIDStmt,
 		getMessageStmt:                 q.getMessageStmt,
@@ -830,6 +848,8 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getMessagesStmt:                q.getMessagesStmt,
 		getNonceInfoStmt:               q.getNonceInfoStmt,
 		getPackOwnerStmt:               q.getPackOwnerStmt,
+		getPermissionsStmt:             q.getPermissionsStmt,
+		getRolesForGuildStmt:           q.getRolesForGuildStmt,
 		getUserStmt:                    q.getUserStmt,
 		getUserByEmailStmt:             q.getUserByEmailStmt,
 		getUserMetadataStmt:            q.getUserMetadataStmt,
@@ -847,11 +867,11 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		removeGuildFromListStmt:        q.removeGuildFromListStmt,
 		removeUserFromGuildStmt:        q.removeUserFromGuildStmt,
 		resolveGuildIDStmt:             q.resolveGuildIDStmt,
+		rolesForUserStmt:               q.rolesForUserStmt,
 		sessionToUserIDStmt:            q.sessionToUserIDStmt,
 		setGuildNameStmt:               q.setGuildNameStmt,
-		setGuildPermsStmt:              q.setGuildPermsStmt,
 		setGuildPictureStmt:            q.setGuildPictureStmt,
-		setGuildRolesStmt:              q.setGuildRolesStmt,
+		setPermissionsStmt:             q.setPermissionsStmt,
 		setStatusStmt:                  q.setStatusStmt,
 		updateAvatarStmt:               q.updateAvatarStmt,
 		updateChannelNameStmt:          q.updateChannelNameStmt,

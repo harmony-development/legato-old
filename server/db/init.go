@@ -31,6 +31,17 @@ type HarmonyDB struct {
 	Sonyflake    *sonyflake.Sonyflake
 }
 
+type PermissionsNode struct {
+	Node  string
+	Allow bool
+}
+
+type PermissionsData struct {
+	Roles      map[uint64][]PermissionsNode
+	Categories map[uint64][]uint64
+	Channels   map[uint64]map[uint64][]PermissionsNode
+}
+
 type IHarmonyDB interface {
 	Migrate() error
 	SessionExpireRoutine()
@@ -104,8 +115,10 @@ type IHarmonyDB interface {
 	AddRoleToGuild(guildID uint64, role *corev1.Role) error
 	RemoveRoleFromGuild(guildID, roleID uint64) error
 	GetGuildRoles(guildID uint64) ([]*corev1.Role, error)
-	SetGuildPermissions(guildID uint64, data []byte) error
-	GetGuildPermissions(guildID uint64) (data []byte, err error)
+	SetPermissions(guildID uint64, channelID uint64, roleID uint64, permissions []PermissionsNode) error
+	GetPermissions(guildID uint64, channelID uint64, roleID uint64) (permissions []PermissionsNode, err error)
+	GetPermissionsData(guildID uint64) (PermissionsData, error)
+	RolesForUser(guildID, userID uint64) ([]uint64, error)
 }
 
 // New creates a new DB connection

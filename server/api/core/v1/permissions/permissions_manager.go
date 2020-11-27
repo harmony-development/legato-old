@@ -1,8 +1,6 @@
 package permissions
 
 import (
-	"encoding/json"
-
 	corev1 "github.com/harmony-development/legato/gen/core"
 	"github.com/harmony-development/legato/server/db"
 	lru "github.com/hashicorp/golang-lru"
@@ -30,29 +28,72 @@ func NewManager(db db.IHarmonyDB) Manager {
 }
 
 func (p *Manager) saveGuild(guild uint64, data *GuildState) {
-	item, err := json.Marshal(data)
-	if err != nil {
-		panic(err)
+	for channel, cdata := range data.Channels {
+		for role, rdata := range cdata {
+			p.db.SetPermissions(guild, uint64(channel), uint64(role), func() (ret []db.PermissionsNode) {
+				for _, perm := range rdata {
+					ret = append(ret, db.PermissionsNode{
+						Node:  perm.Glob.s,
+						Allow: perm.Mode == Allow,
+					})
+				}
+				return
+			}())
+		}
 	}
 
-	err = p.db.SetGuildPermissions(guild, item)
-	if err != nil {
-		panic(err)
+	for role, rdata := range data.Roles {
+		p.db.SetPermissions(guild, 0, uint64(role), func() (ret []db.PermissionsNode) {
+			for _, perm := range rdata {
+				ret = append(ret, db.PermissionsNode{
+					Node:  perm.Glob.s,
+					Allow: perm.Mode == Allow,
+				})
+			}
+			return
+		}())
 	}
 }
 
 func (p *Manager) obtainGuild(guild uint64) *GuildState {
-	data, err := p.db.GetGuildPermissions(guild)
+	data, err := p.db.GetPermissionsData(guild)
 	if err != nil {
 		panic(err)
 	}
+
 	gs := new(GuildState)
 	gs.Categories = make(map[ChannelID]ChannelID)
 	gs.Roles = make(map[RoleID][]PermissionNode)
 	gs.Channels = make(map[ChannelID]map[RoleID][]PermissionNode)
-	err = json.Unmarshal(data, gs)
-	if err != nil {
-		panic(err)
+
+	dbToManager := func(nodes []db.PermissionsNode) (ret []PermissionNode) {
+		for _, node := range nodes {
+			ret = append(ret, PermissionNode{
+				Glob: MustGlob(node.Node),
+				Mode: func() Mode {
+					if node.Allow {
+						return Allow
+					}
+					return Deny
+				}(),
+			})
+		}
+		return
+	}
+
+	for id, category := range data.Categories {
+		for _, channel := range category {
+			gs.Categories[ChannelID(channel)] = ChannelID(id)
+		}
+	}
+	for channelID, channel := range data.Channels {
+		gs.Channels[ChannelID(channelID)] = make(map[RoleID][]PermissionNode)
+		for roleID, role := range channel {
+			gs.Channels[ChannelID(channelID)][RoleID(roleID)] = dbToManager(role)
+		}
+	}
+	for roleID, role := range data.Roles {
+		gs.Roles[RoleID(roleID)] = dbToManager(role)
 	}
 
 	return gs

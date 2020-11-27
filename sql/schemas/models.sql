@@ -60,9 +60,44 @@ CREATE TABLE IF NOT EXISTS Guilds (
     Guild_ID BIGSERIAL PRIMARY KEY NOT NULL,
     Owner_ID BIGSERIAL NOT NULL,
     Guild_Name TEXT NOT NULL,
-    Picture_URL TEXT NOT NULL,
-    Roles bytea[],
-    Permissions bytea
+    Picture_URL TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Roles (
+    Guild_ID BIGSERIAL NOT NULL,
+    Role_ID BIGSERIAL NOT NULL,
+    Name TEXT NOT NULL,
+    Color INTEGER NOT NULL,
+    Hoist BOOLEAN NOT NULL,
+    Pingable BOOLEAN NOT NULL,
+    FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE,
+    PRIMARY KEY (Role_ID)
+);
+
+CREATE TABLE IF NOT EXISTS Roles_Members (
+    Guild_ID BIGSERIAL NOT NULL,
+    Role_ID BIGSERIAL NOT NULL,
+    Member_ID BIGSERIAL NOT NULL,
+    FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Role_ID) REFERENCES Roles (Role_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Member_ID) REFERENCES Users (User_ID) ON DELETE CASCADE,
+    PRIMARY KEY (Guild_ID, Role_ID, Member_ID)
+);
+
+CREATE TYPE PermissionsNode AS (
+    Node TEXT,
+    Allow BOOLEAN
+);
+
+CREATE TABLE IF NOT EXISTS Permissions (
+    Guild_ID BIGSERIAL NOT NULL,
+    Channel_ID BIGINT,
+    Role_ID BIGSERIAL NOT NULL,
+    Nodes PermissionsNode[] NOT NULL,
+    FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Role_ID) REFERENCES Roles (Role_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Channel_ID) REFERENCES Channels (Channel_ID) ON DELETE CASCADE,
+    PRIMARY KEY (Guild_ID, Channel_ID, Role_ID)
 );
 
 CREATE TABLE IF NOT EXISTS Guild_Members (
