@@ -67,6 +67,7 @@ func New(deps Dependencies) *API {
 			m.ValidatorInterceptor,
 			m.AuthInterceptor,
 			m.LocationInterceptor,
+			m.GuildPermissionInterceptor,
 			m.LoggingInterceptor,
 		),
 		grpc_middleware.WithStreamServerChain(
