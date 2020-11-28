@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS Permissions (
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE,
     FOREIGN KEY (Role_ID) REFERENCES Roles (Role_ID) ON DELETE CASCADE,
     FOREIGN KEY (Channel_ID) REFERENCES Channels (Channel_ID) ON DELETE CASCADE,
-    PRIMARY KEY (Guild_ID, Channel_ID, Role_ID)
+    UNIQUE (Guild_ID, Channel_ID, Role_ID)
 );
 }
 end
