@@ -13,28 +13,36 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go 1.x
+      - 
+        name: Set up Go 1.x
         uses: actions/setup-go@v2
         with:
           go-version: ^1.13
         id: go
-      - name: Check out code into the Go module directory
+      - 
+        name: Check out code into the Go module directory
         uses: actions/checkout@v2
-      - name: Install dependencies
+      - 
+        name: Install dependencies
         run: |
           sudo apt update
           sudo apt install libvips libvips-dev --fix-missing --no-install-recommends
           go get github.com/ory/go-acc
-      - name: Get project libraries
+      - 
+        name: Get project libraries
         run: go get -v -t -d ./...
-      - name: Build
+      - 
+        name: Build
         run: go build -v .
-      - name: Test
+      - 
+        name: Test
         run: $HOME/go/bin/go-acc ./...
         continue-on-error: true
-      - name: Upload coverage to Codecov
+      - 
+        name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
-      - uses: actions/upload-artifact@v2
+      - 
+        uses: actions/upload-artifact@v2
         with:
           name: legato
           path: legato
@@ -42,12 +50,15 @@ jobs:
     name: lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Install Dependencies
+      - 
+        uses: actions/checkout@v2
+      - 
+        name: Install Dependencies
         run: |
           sudo apt update
           sudo apt install libvips libvips-dev --fix-missing --no-install-recommends
-      - name: golangci-lint
+      - 
+        name: golangci-lint
         uses: golangci/golangci-lint-action@v2
         with:
           version: v1.29
