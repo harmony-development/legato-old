@@ -109,7 +109,7 @@ func (p *Manager) Check(permission string, userRoles []uint64, inGuild uint64, i
 		p.states.Add(inGuild, p.obtainGuild(inGuild))
 	}
 	data, _ := p.states.Get(inGuild)
-	state := data.(GuildState)
+	state := data.(*GuildState)
 	return state.Check(permission, userRoles, ChannelID(inChannel))
 }
 
