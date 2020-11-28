@@ -85,6 +85,24 @@ func (q *Queries) GetPermissions(ctx context.Context, arg GetPermissionsParams) 
 	return nodes, err
 }
 
+const getPermissionsWithoutChannel = `-- name: GetPermissionsWithoutChannel :one
+SELECT Nodes FROM Permissions
+    WHERE Guild_ID = $1
+      AND Role_ID = $2
+`
+
+type GetPermissionsWithoutChannelParams struct {
+	GuildID uint64 `json:"guild_id"`
+	RoleID  uint64 `json:"role_id"`
+}
+
+func (q *Queries) GetPermissionsWithoutChannel(ctx context.Context, arg GetPermissionsWithoutChannelParams) ([]string, error) {
+	row := q.queryRow(ctx, q.getPermissionsWithoutChannelStmt, getPermissionsWithoutChannel, arg.GuildID, arg.RoleID)
+	var nodes []string
+	err := row.Scan(pq.Array(&nodes))
+	return nodes, err
+}
+
 const getRolesForGuild = `-- name: GetRolesForGuild :many
 SELECT guild_id, role_id, name, color, hoist, pingable FROM Roles
     WHERE Guild_ID = $1
@@ -159,7 +177,7 @@ INSERT INTO Permissions (
     Guild_ID, Channel_ID, Role_ID, Nodes
 ) VALUES (
     $1, $2, $3, $4
-) ON CONFLICT DO UPDATE SET Nodes = EXCLUDED.Nodes
+) ON CONFLICT (Guild_ID, Channel_ID, Role_ID) DO UPDATE SET Nodes = EXCLUDED.Nodes
 `
 
 type SetPermissionsParams struct {

@@ -886,26 +886,88 @@ func (db HarmonyDB) SetPermissions(guildID uint64, channelID uint64, roleID uint
 	})
 }
 
-func (db HarmonyDB) GetPermissions(guildID uint64, channelID uint64, roleID uint64) (permissions []PermissionsNode, err error) {
-	data, _ := db.queries.GetPermissions(ctx, queries.GetPermissionsParams{
-		GuildID: guildID,
-		ChannelID: sql.NullInt64{
-			Int64: int64(channelID),
-			Valid: channelID != 0,
-		},
-		RoleID: roleID,
-	})
-	for _, item := range data {
-		println(item)
+func dbToPermissionsNodes(s []string) (ret []PermissionsNode) {
+	for _, item := range s {
+		node := PermissionsNode{}
+		node.Deserialize(item)
+		ret = append(ret, node)
 	}
+	return
+}
+
+func (db HarmonyDB) GetPermissions(guildID uint64, channelID uint64, roleID uint64) (permissions []PermissionsNode, err error) {
+	var data []string
+
+	if channelID == 0 {
+		data, err = db.queries.GetPermissionsWithoutChannel(ctx, queries.GetPermissionsWithoutChannelParams{
+			GuildID: guildID,
+			RoleID:  roleID,
+		})
+	} else {
+		data, err = db.queries.GetPermissions(ctx, queries.GetPermissionsParams{
+			GuildID: guildID,
+			ChannelID: sql.NullInt64{
+				Int64: int64(channelID),
+				Valid: true,
+			},
+			RoleID: roleID,
+		})
+	}
+
+	if err != nil && err != sql.ErrNoRows {
+		return
+	}
+
+	permissions = dbToPermissionsNodes(data)
+
 	return
 }
 
 func (db HarmonyDB) GetPermissionsData(guildID uint64) (ret PermissionsData, err error) {
 	ret.Roles = make(map[uint64][]PermissionsNode)
+
+	roles, err := db.queries.GetRolesForGuild(ctx, guildID)
+	if err != nil && err != sql.ErrNoRows {
+		return
+	}
+
+	for _, role := range roles {
+		perms, err := db.GetPermissions(guildID, 0, role.RoleID)
+		if err != nil && err != sql.ErrNoRows {
+			return PermissionsData{}, err
+		}
+		ret.Roles[role.RoleID] = perms
+	}
+
 	ret.Categories = make(map[uint64][]uint64)
+	chans, err := db.ChannelsForGuild(guildID)
+	if err != nil {
+		return
+	}
+
+	cat := uint64(0)
+	for _, channel := range chans {
+		if channel.Category {
+			cat = channel.ChannelID
+		} else if cat != 0 {
+			data, _ := ret.Categories[cat]
+			ret.Categories[cat] = append(data, channel.ChannelID)
+		}
+	}
+
 	ret.Channels = make(map[uint64]map[uint64][]PermissionsNode)
-	panic("unimplemented")
+	for _, channel := range chans {
+		ret.Channels[channel.ChannelID] = make(map[uint64][]PermissionsNode)
+		for _, role := range roles {
+			perms, err := db.GetPermissions(guildID, channel.ChannelID, role.RoleID)
+			if err != nil {
+				return PermissionsData{}, err
+			}
+			ret.Channels[channel.ChannelID][role.RoleID] = perms
+		}
+	}
+
+	return
 }
 
 func (db HarmonyDB) RolesForUser(guildID, userID uint64) (ret []uint64, err error) {
