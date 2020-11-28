@@ -13,8 +13,8 @@ type Manager struct {
 }
 
 // NewManager creates a new permissions manager
-func NewManager(db db.IHarmonyDB) Manager {
-	man := Manager{
+func NewManager(db db.IHarmonyDB) *Manager {
+	man := &Manager{
 		db: db,
 	}
 	cache, err := lru.NewWithEvict(50_000, func(key, value interface{}) {

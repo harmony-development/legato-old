@@ -18,8 +18,7 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    4,
 		},
-		Auth:       true,
-		Permission: middleware.NoPermission,
+		Auth: true,
 	}, "/protocol.profile.v1.ProfileService/StatusUpdate")
 }
 

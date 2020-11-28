@@ -67,8 +67,7 @@ func init() {
 			Duration: 1 * time.Second,
 			Burst:    3,
 		},
-		Auth:       true,
-		Permission: middleware.NoPermission,
+		Auth: true,
 	}, "/protocol.foundation.v1.FoundationService/Federate")
 }
 

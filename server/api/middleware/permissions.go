@@ -10,8 +10,22 @@ import (
 )
 
 func (m Middlewares) GuildPermissionInterceptor(c context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	if GetRPCConfig(info.FullMethod).Permission == NoPermission {
-		return handler(c, req)
+	if GetRPCConfig(info.FullMethod).Permission == "" {
+		ctx := c.(HarmonyContext)
+		if GetRPCConfig(info.FullMethod).WantsRoles {
+			location, ok := req.(interface {
+				GetGuildId() uint64
+			})
+			if !ok {
+				panic("wants roles middleware used on message without a location")
+			}
+			roles, err := m.DB.RolesForUser(location.GetGuildId(), ctx.UserID)
+			if err != nil {
+				return nil, status.Error(codes.Internal, responses.InternalServerError)
+			}
+			ctx.UserRoles = roles
+		}
+		return handler(ctx, req)
 	}
 
 	ctx := c.(HarmonyContext)
@@ -22,14 +36,31 @@ func (m Middlewares) GuildPermissionInterceptor(c context.Context, req interface
 		panic("guild permission middleware used on message without a location")
 	}
 	guildID := location.GetGuildId()
-	if rpcConfigs[info.FullMethod].Permission.HasAny(ModifyInvites, ModifyChannels, ModifyGuild, Owner) {
-		owner, err := m.DB.GetOwner(guildID)
-		if err != nil {
-			return nil, status.Error(codes.Internal, responses.InternalServerError)
-		}
-		if owner != ctx.UserID {
-			return nil, status.Error(codes.PermissionDenied, responses.InsufficientPrivileges)
-		}
+	owner, err := m.DB.GetOwner(guildID)
+	if err != nil {
+		return nil, status.Error(codes.Internal, responses.InternalServerError)
 	}
+	if owner == ctx.UserID {
+		return handler(c, req)
+	}
+
+	channelID := uint64(0)
+	channelLocation, ok := req.(interface {
+		GetChannelId() uint64
+	})
+	if ok {
+		channelID = channelLocation.GetChannelId()
+	}
+
+	roles, err := m.DB.RolesForUser(guildID, ctx.UserID)
+	if err != nil {
+		return nil, status.Error(codes.Internal, responses.InternalServerError)
+	}
+	ctx.UserRoles = roles
+
+	if !m.Perms.Check(GetRPCConfig(info.FullMethod).Permission, roles, guildID, channelID) {
+		return nil, status.Error(codes.PermissionDenied, responses.InsufficientPrivileges)
+	}
+
 	return handler(ctx, req)
 }

@@ -4,41 +4,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/harmony-development/legato/server/api/core/v1/permissions"
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/logger"
 )
-
-type Permission uint64
-
-const (
-	NoPermission  = 0
-	ModifyInvites = 1 << iota
-	ModifyChannels
-	ModifyGuild
-	Owner
-)
-
-func (flag *Permission) Set(b Permission)     { *flag = b | *flag }
-func (flag *Permission) Clear(b Permission)   { *flag = b &^ *flag }
-func (flag *Permission) Toggle(b Permission)  { *flag = b ^ *flag }
-func (flag Permission) Has(b Permission) bool { return b&flag != 0 }
-func (flag Permission) HasAll(b ...Permission) bool {
-	for _, perm := range b {
-		if perm&flag == 0 {
-			return false
-		}
-	}
-	return true
-}
-
-func (flag Permission) HasAny(b ...Permission) bool {
-	for _, perm := range b {
-		if perm&flag != 0 {
-			return true
-		}
-	}
-	return false
-}
 
 type Location uint64
 
@@ -65,7 +34,8 @@ type RPCConfig struct {
 	RateLimit  RateLimit
 	Auth       bool
 	Local      bool
-	Permission Permission
+	Permission string
+	WantsRoles bool
 	Location   Location
 }
 
@@ -84,6 +54,7 @@ func GetRPCConfig(name string) RPCConfig {
 type Dependencies struct {
 	Logger logger.ILogger
 	DB     db.IHarmonyDB
+	Perms  *permissions.Manager
 }
 
 type Middlewares struct {

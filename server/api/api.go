@@ -8,6 +8,7 @@ import (
 	foundationv1 "github.com/harmony-development/legato/gen/foundation"
 	profilev1 "github.com/harmony-development/legato/gen/profile"
 	"github.com/harmony-development/legato/server/api/core"
+	"github.com/harmony-development/legato/server/api/core/v1/permissions"
 	"github.com/harmony-development/legato/server/api/foundation"
 	"github.com/harmony-development/legato/server/api/middleware"
 	"github.com/harmony-development/legato/server/api/profile"
@@ -33,6 +34,7 @@ type Dependencies struct {
 	Sonyflake   *sonyflake.Sonyflake
 	AuthManager *auth.Manager
 	Config      *config.Config
+	Permissions *permissions.Manager
 }
 
 // API contains the component of the server responsible for APIs
@@ -53,6 +55,7 @@ func New(deps Dependencies) *API {
 	m := middleware.New(middleware.Dependencies{
 		Logger: deps.Logger,
 		DB:     deps.DB,
+		Perms:  api.Permissions,
 	})
 	api.grpcServer = grpc.NewServer(
 		grpc_middleware.WithUnaryServerChain(
@@ -93,6 +96,7 @@ func New(deps Dependencies) *API {
 		DB:        api.DB,
 		Logger:    api.Logger,
 		Sonyflake: api.Sonyflake,
+		Perms:     api.Permissions,
 	}).V1)
 	profilev1.RegisterProfileServiceServer(api.grpcServer, &profile.New(profile.Dependencies{
 		DB: api.DB,

@@ -93,8 +93,7 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    1,
 		},
-		Auth:       true,
-		Permission: middleware.NoPermission,
+		Auth: true,
 	}, "/protocol.core.v1.CoreService/CreateGuild")
 }
 
@@ -126,7 +125,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.JoinedLocation,
-		Permission: middleware.ModifyInvites,
+		Permission: "invites.manage.create",
 	}, "/protocol.core.v1.CoreService/CreateInvite")
 }
 
@@ -153,7 +152,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.JoinedLocation,
-		Permission: middleware.ModifyChannels,
+		Permission: "channels.manage.create",
 	}, "/protocol.core.v1.CoreService/CreateChannel")
 }
 
@@ -186,9 +185,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    15,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation | middleware.JoinedLocation,
-		Permission: middleware.NoPermission,
+		Auth:     true,
+		Location: middleware.GuildLocation | middleware.JoinedLocation,
 	}, "/protocol.core.v1.CoreService/GetGuild")
 }
 
@@ -216,7 +214,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.JoinedLocation,
-		Permission: middleware.ModifyInvites,
+		Permission: "invites.view",
 	}, "/protocol.core.v1.CoreService/GetGuildInvites")
 }
 
@@ -251,9 +249,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    15,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation | middleware.JoinedLocation,
-		Permission: middleware.NoPermission,
+		Auth:     true,
+		Location: middleware.GuildLocation | middleware.JoinedLocation,
 	}, "/protocol.core.v1.CoreService/GetGuildMembers")
 }
 
@@ -276,7 +273,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.JoinedLocation,
-		Permission: middleware.NoPermission,
+		WantsRoles: true,
 	}, "/protocol.core.v1.CoreService/GetGuildChannels")
 }
 
@@ -287,13 +284,16 @@ func (v1 *V1) GetGuildChannels(c context.Context, r *corev1.GetGuildChannelsRequ
 		return nil, err
 	}
 	ret := []*corev1.GetGuildChannelsResponse_Channel{}
+	roles := c.(middleware.HarmonyContext).UserRoles
 	for _, channel := range chans {
-		ret = append(ret, &corev1.GetGuildChannelsResponse_Channel{
-			ChannelId:   channel.ChannelID,
-			ChannelName: channel.ChannelName,
-			IsCategory:  channel.Category,
-			IsVoice:     channel.Isvoice,
-		})
+		if v1.Perms.Check("messages.view", roles, r.GuildId, channel.ChannelID) {
+			ret = append(ret, &corev1.GetGuildChannelsResponse_Channel{
+				ChannelId:   channel.ChannelID,
+				ChannelName: channel.ChannelName,
+				IsCategory:  channel.Category,
+				IsVoice:     channel.Isvoice,
+			})
+		}
 	}
 	return &corev1.GetGuildChannelsResponse{
 		Channels: ret,
@@ -308,7 +308,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
-		Permission: middleware.NoPermission,
+		Permission: "messages.view",
 	}, "/protocol.core.v1.CoreService/GetMessage")
 }
 
@@ -364,7 +364,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
-		Permission: middleware.NoPermission,
+		Permission: "messages.view",
 	}, "/protocol.core.v1.CoreService/GetChannelMessages")
 }
 
@@ -435,7 +435,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.JoinedLocation,
-		Permission: middleware.ModifyGuild,
+		Permission: "guild.manage.change-name",
 	}, "/protocol.core.v1.CoreService/UpdateGuildName")
 }
 
@@ -464,7 +464,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
-		Permission: middleware.ModifyChannels,
+		Permission: "channels.manage.change-name",
 	}, "/protocol.core.v1.CoreService/UpdateChannelName")
 }
 
@@ -494,7 +494,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
-		Permission: middleware.ModifyChannels,
+		Permission: "channels.manage.move",
 	}, "/protocol.core.v1.CoreService/UpdateChannelOrder")
 }
 
@@ -525,7 +525,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.MessageLocation | middleware.AuthorLocation,
-		Permission: middleware.NoPermission,
+		Permission: "messages.send",
 	}, "/protocol.core.v1.CoreService/UpdateMessage")
 }
 
@@ -592,7 +592,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation,
-		Permission: middleware.Owner,
+		Permission: "guild.manage.delete",
 	}, "/protocol.core.v1.CoreService/DeleteGuild")
 }
 
@@ -620,7 +620,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation,
-		Permission: middleware.ModifyInvites,
+		Permission: "invites.manage.delete",
 	}, "/protocol.core.v1.CoreService/DeleteInvite")
 }
 
@@ -640,7 +640,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.ChannelLocation,
-		Permission: middleware.ModifyChannels,
+		Permission: "channels.manage.delete",
 	}, "/protocol.core.v1.CoreService/DeleteChannel")
 }
 
@@ -667,8 +667,8 @@ func init() {
 			Burst:    5,
 		},
 		Auth:       true,
-		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.MessageLocation | middleware.AuthorLocation,
-		Permission: middleware.NoPermission,
+		WantsRoles: true,
+		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.MessageLocation,
 	}, "/protocol.core.v1.CoreService/DeleteMessage")
 }
 
@@ -679,7 +679,7 @@ func (v1 *V1) DeleteMessage(c context.Context, r *corev1.DeleteMessageRequest) (
 	if err != nil {
 		return nil, err
 	}
-	if ctx.UserID != owner {
+	if ctx.UserID != owner && !v1.Perms.Check("messages.manage.delete", ctx.UserRoles, r.GuildId, r.ChannelId) {
 		return nil, ErrNoPermissions
 	}
 	v1.PubSub.Guild.Broadcast(r.GuildId, &corev1.Event{
@@ -700,9 +700,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    5,
 		},
-		Auth:       true,
-		Location:   middleware.NoLocation,
-		Permission: middleware.NoPermission,
+		Auth:     true,
+		Location: middleware.NoLocation,
 	}, "/protocol.core.v1.CoreService/JoinGuild")
 }
 
@@ -741,9 +740,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    5,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation,
-		Permission: middleware.NoPermission,
+		Auth:     true,
+		Location: middleware.GuildLocation,
 	}, "/protocol.core.v1.CoreService/LeaveGuild")
 }
 
@@ -773,9 +771,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    5,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation,
-		Permission: middleware.NoPermission,
+		Auth:     true,
+		Location: middleware.GuildLocation,
 	}, "/protocol.core.v1.CoreService/StreamEvents")
 }
 
@@ -829,7 +826,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.MessageLocation,
-		Permission: middleware.NoPermission,
+		Permission: "actions.trigger",
 	}, "/protocol.core.v1.CoreService/TriggerAction")
 }
 
@@ -869,7 +866,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.ChannelLocation,
-		Permission: middleware.NoPermission,
+		Permission: "messages.send",
 	}, "/protocol.core.v1.CoreService/SendMessage")
 }
 
@@ -931,9 +928,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    10,
 		},
-		Auth:       true,
-		Location:   middleware.NoLocation,
-		Permission: middleware.NoPermission,
+		Auth:     true,
+		Location: middleware.NoLocation,
 	}, "/protocol.core.v1.CoreService/GetGuildList")
 }
 
@@ -962,10 +958,9 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    10,
 		},
-		Auth:       true,
-		Local:      true,
-		Location:   middleware.NoLocation,
-		Permission: middleware.NoPermission,
+		Auth:     true,
+		Local:    true,
+		Location: middleware.NoLocation,
 	}, "/protocol.core.v1.CoreService/AddGuildToGuildList")
 }
 
@@ -993,10 +988,9 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    10,
 		},
-		Auth:       true,
-		Local:      true,
-		Location:   middleware.NoLocation,
-		Permission: middleware.NoPermission,
+		Auth:     true,
+		Local:    true,
+		Location: middleware.NoLocation,
 	}, "/protocol.core.v1.CoreService/RemoveGuildFromGuildList")
 }
 
@@ -1129,6 +1123,18 @@ func (v1 *V1) GetEmotePackEmotes(c context.Context, r *corev1.GetEmotePackEmotes
 	}, nil
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation,
+		Permission: "roles.manage.create",
+	}, "/protocol.core.v1.CoreService/AddGuildRole")
+}
+
 // AddGuildRole implements the AddGuildRole RPC
 func (v1 *V1) AddGuildRole(c context.Context, r *corev1.AddGuildRoleRequest) (*corev1.AddGuildRoleResponse, error) {
 	roleID, err := v1.Sonyflake.NextID()
@@ -1147,9 +1153,33 @@ func (v1 *V1) AddGuildRole(c context.Context, r *corev1.AddGuildRoleRequest) (*c
 	}, nil
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation,
+		Permission: "roles.manage.delete",
+	}, "/protocol.core.v1.CoreService/AddGuildRole")
+}
+
 // DeleteGuildRole implements the DeleteGuildRole RPC
 func (v1 *V1) DeleteGuildRole(c context.Context, r *corev1.DeleteGuildRoleRequest) (*empty.Empty, error) {
 	return &empty.Empty{}, v1.DB.RemoveRoleFromGuild(r.GuildId, r.RoleId)
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation,
+		Permission: "roles.get",
+	}, "/protocol.core.v1.CoreService/GetGuildRoles")
 }
 
 // GetGuildRoles implements the GetGuildRoles RPC
@@ -1160,9 +1190,33 @@ func (v1 *V1) GetGuildRoles(c context.Context, r *corev1.GetGuildRolesRequest) (
 	}, err
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation,
+		Permission: "permissions.manage.set",
+	}, "/protocol.core.v1.CoreService/SetPermissions")
+}
+
 // SetPermissions implements the SetPermissions RPC
 func (v1 *V1) SetPermissions(c context.Context, r *corev1.SetPermissionsRequest) (*empty.Empty, error) {
 	return &emptypb.Empty{}, v1.Perms.SetPermissions(r.Perms.Permissions, r.GuildId, r.ChannelId, r.RoleId)
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation,
+		Permission: "permissions.manage.get",
+	}, "/protocol.core.v1.CoreService/GetPermissions")
 }
 
 // GetPermissions implements the GetPermissions RPC
@@ -1170,10 +1224,24 @@ func (v1 *V1) GetPermissions(c context.Context, r *corev1.GetPermissionsRequest)
 	return &corev1.GetPermissionsResponse{Perms: &corev1.PermissionList{Permissions: v1.Perms.GetPermissions(r.GuildId, r.ChannelId, r.RoleId)}}, nil
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		WantsRoles: true,
+		Location:   middleware.GuildLocation,
+	}, "/protocol.core.v1.CoreService/QueryHasPermission")
+}
+
 // QueryHasPermission implements the QueryHasPermission RPC
 func (v1 *V1) QueryHasPermission(c context.Context, r *corev1.QueryPermissionsRequest) (*corev1.QueryPermissionsResponse, error) {
 	if r.As == 0 {
 		r.As = c.(middleware.HarmonyContext).UserID
+	} else if !v1.Perms.Check("permissions.query", c.(middleware.HarmonyContext).UserRoles, r.GuildId, r.ChannelId) {
+		return nil, ErrNoPermissions
 	}
 	roles, err := v1.DB.RolesForUser(r.GuildId, r.As)
 	if err != nil {

@@ -15,6 +15,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/harmony-development/legato/server/api"
+	"github.com/harmony-development/legato/server/api/core/v1/permissions"
 	"github.com/harmony-development/legato/server/auth"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
@@ -71,6 +72,7 @@ func (inst Instance) Start() {
 		AuthManager: inst.AuthManager,
 		Sonyflake:   inst.Sonyflake,
 		Config:      inst.Config,
+		Permissions: permissions.NewManager(inst.DB),
 	})
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", inst.Config.Server.Port))
