@@ -976,3 +976,41 @@ func (db HarmonyDB) RolesForUser(guildID, userID uint64) (ret []uint64, err erro
 		MemberID: userID,
 	})
 }
+
+func (db HarmonyDB) ManageRoles(guildID, userID uint64, addRoles, removeRoles []uint64) error {
+	tx, err := db.Begin()
+	db.Logger.CheckException(err)
+	if err != nil {
+		return err
+	}
+
+	quer := db.queries.WithTx(tx)
+
+	for _, add := range addRoles {
+		err = quer.AddUserToRole(ctx, queries.AddUserToRoleParams{
+			GuildID:  guildID,
+			MemberID: userID,
+			RoleID:   add,
+		})
+		if err != nil {
+			return err
+		}
+	}
+	for _, remove := range removeRoles {
+		err = quer.RemoveUserFromRole(ctx, queries.RemoveUserFromRoleParams{
+			GuildID:  guildID,
+			MemberID: userID,
+			RoleID:   remove,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	if err = tx.Commit(); err != nil {
+		db.Logger.CheckException(err)
+		return err
+	}
+
+	return nil
+}

@@ -1262,3 +1262,54 @@ func (v1 *V1) QueryHasPermission(c context.Context, r *corev1.QueryPermissionsRe
 		Ok: owner == r.As || v1.Perms.Check(r.CheckFor, roles, r.GuildId, r.ChannelId),
 	}, nil
 }
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation,
+		Permission: "roles.users.manage",
+	}, "/protocol.core.v1.CoreService/ManageUserRoles")
+}
+
+func (v1 *V1) ManageUserRoles(c context.Context, r *corev1.ManageUserRolesRequest) (*empty.Empty, error) {
+	return &empty.Empty{}, v1.DB.ManageRoles(r.GuildId, r.UserId, r.GiveRoleIds, r.TakeRoleIds)
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		WantsRoles: true,
+		Location:   middleware.GuildLocation,
+	}, "/protocol.core.v1.CoreService/GetUserRoles")
+}
+
+func (v1 *V1) GetUserRoles(c context.Context, r *corev1.GetUserRolesRequest) (*corev1.GetUserRolesResponse, error) {
+	ctx := c.(middleware.HarmonyContext)
+
+	if r.UserId == 0 {
+		return &corev1.GetUserRolesResponse{
+			Roles: ctx.UserRoles,
+		}, nil
+	}
+
+	if !(ctx.IsOwner || v1.Perms.Check("roles.users.get", ctx.UserRoles, r.GuildId, 0)) {
+		return nil, ErrNoPermissions
+	}
+
+	roles, err := v1.DB.RolesForUser(r.GuildId, r.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &corev1.GetUserRolesResponse{
+		Roles: roles,
+	}, nil
+}

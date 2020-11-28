@@ -10,6 +10,25 @@ import (
 	"github.com/lib/pq"
 )
 
+const addUserToRole = `-- name: AddUserToRole :exec
+INSERT INTO Roles_Members (
+    Guild_ID, Role_ID, Member_ID
+) VALUES (
+    $1, $2, $3
+) ON CONFLICT DO NOTHING
+`
+
+type AddUserToRoleParams struct {
+	GuildID  uint64 `json:"guild_id"`
+	RoleID   uint64 `json:"role_id"`
+	MemberID uint64 `json:"member_id"`
+}
+
+func (q *Queries) AddUserToRole(ctx context.Context, arg AddUserToRoleParams) error {
+	_, err := q.exec(ctx, q.addUserToRoleStmt, addUserToRole, arg.GuildID, arg.RoleID, arg.MemberID)
+	return err
+}
+
 const createRole = `-- name: CreateRole :one
 INSERT INTO Roles (
     Guild_ID, Role_ID, Name, Color, Hoist, Pingable
@@ -136,6 +155,24 @@ func (q *Queries) GetRolesForGuild(ctx context.Context, guildID uint64) ([]Role,
 		return nil, err
 	}
 	return items, nil
+}
+
+const removeUserFromRole = `-- name: RemoveUserFromRole :exec
+DELETE FROM Roles_Members
+    WHERE Guild_ID = $1
+      AND Role_ID = $2
+      AND Member_ID = $3
+`
+
+type RemoveUserFromRoleParams struct {
+	GuildID  uint64 `json:"guild_id"`
+	RoleID   uint64 `json:"role_id"`
+	MemberID uint64 `json:"member_id"`
+}
+
+func (q *Queries) RemoveUserFromRole(ctx context.Context, arg RemoveUserFromRoleParams) error {
+	_, err := q.exec(ctx, q.removeUserFromRoleStmt, removeUserFromRole, arg.GuildID, arg.RoleID, arg.MemberID)
+	return err
 }
 
 const rolesForUser = `-- name: RolesForUser :many

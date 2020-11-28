@@ -58,6 +58,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.addUserToGuildStmt, err = db.PrepareContext(ctx, addUserToGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query AddUserToGuild: %w", err)
 	}
+	if q.addUserToRoleStmt, err = db.PrepareContext(ctx, addUserToRole); err != nil {
+		return nil, fmt.Errorf("error preparing query AddUserToRole: %w", err)
+	}
 	if q.createChannelStmt, err = db.PrepareContext(ctx, createChannel); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateChannel: %w", err)
 	}
@@ -220,6 +223,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.removeUserFromGuildStmt, err = db.PrepareContext(ctx, removeUserFromGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query RemoveUserFromGuild: %w", err)
 	}
+	if q.removeUserFromRoleStmt, err = db.PrepareContext(ctx, removeUserFromRole); err != nil {
+		return nil, fmt.Errorf("error preparing query RemoveUserFromRole: %w", err)
+	}
 	if q.resolveGuildIDStmt, err = db.PrepareContext(ctx, resolveGuildID); err != nil {
 		return nil, fmt.Errorf("error preparing query ResolveGuildID: %w", err)
 	}
@@ -331,6 +337,11 @@ func (q *Queries) Close() error {
 	if q.addUserToGuildStmt != nil {
 		if cerr := q.addUserToGuildStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing addUserToGuildStmt: %w", cerr)
+		}
+	}
+	if q.addUserToRoleStmt != nil {
+		if cerr := q.addUserToRoleStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addUserToRoleStmt: %w", cerr)
 		}
 	}
 	if q.createChannelStmt != nil {
@@ -603,6 +614,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing removeUserFromGuildStmt: %w", cerr)
 		}
 	}
+	if q.removeUserFromRoleStmt != nil {
+		if cerr := q.removeUserFromRoleStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing removeUserFromRoleStmt: %w", cerr)
+		}
+	}
 	if q.resolveGuildIDStmt != nil {
 		if cerr := q.resolveGuildIDStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing resolveGuildIDStmt: %w", cerr)
@@ -734,6 +750,7 @@ type Queries struct {
 	addToGuildListStmt               *sql.Stmt
 	addUserStmt                      *sql.Stmt
 	addUserToGuildStmt               *sql.Stmt
+	addUserToRoleStmt                *sql.Stmt
 	createChannelStmt                *sql.Stmt
 	createEmotePackStmt              *sql.Stmt
 	createGuildStmt                  *sql.Stmt
@@ -788,6 +805,7 @@ type Queries struct {
 	openInvitesStmt                  *sql.Stmt
 	removeGuildFromListStmt          *sql.Stmt
 	removeUserFromGuildStmt          *sql.Stmt
+	removeUserFromRoleStmt           *sql.Stmt
 	resolveGuildIDStmt               *sql.Stmt
 	rolesForUserStmt                 *sql.Stmt
 	sessionToUserIDStmt              *sql.Stmt
@@ -822,6 +840,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		addToGuildListStmt:               q.addToGuildListStmt,
 		addUserStmt:                      q.addUserStmt,
 		addUserToGuildStmt:               q.addUserToGuildStmt,
+		addUserToRoleStmt:                q.addUserToRoleStmt,
 		createChannelStmt:                q.createChannelStmt,
 		createEmotePackStmt:              q.createEmotePackStmt,
 		createGuildStmt:                  q.createGuildStmt,
@@ -876,6 +895,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		openInvitesStmt:                  q.openInvitesStmt,
 		removeGuildFromListStmt:          q.removeGuildFromListStmt,
 		removeUserFromGuildStmt:          q.removeUserFromGuildStmt,
+		removeUserFromRoleStmt:           q.removeUserFromRoleStmt,
 		resolveGuildIDStmt:               q.resolveGuildIDStmt,
 		rolesForUserStmt:                 q.rolesForUserStmt,
 		sessionToUserIDStmt:              q.sessionToUserIDStmt,

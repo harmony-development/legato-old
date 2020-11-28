@@ -20,6 +20,19 @@ SELECT Role_ID FROM Roles_Members
     WHERE Guild_ID = $1
       AND Member_ID = $2;
 
+-- name: AddUserToRole :exec
+INSERT INTO Roles_Members (
+    Guild_ID, Role_ID, Member_ID
+) VALUES (
+    $1, $2, $3
+) ON CONFLICT DO NOTHING;
+
+-- name: RemoveUserFromRole :exec
+DELETE FROM Roles_Members
+    WHERE Guild_ID = $1
+      AND Role_ID = $2
+      AND Member_ID = $3;
+
 -- name: SetPermissions :exec
 INSERT INTO Permissions (
     Guild_ID, Channel_ID, Role_ID, Nodes

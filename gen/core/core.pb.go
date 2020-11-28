@@ -4541,6 +4541,179 @@ func (x *DeleteGuildRoleRequest) GetRoleId() uint64 {
 	return 0
 }
 
+type ManageUserRolesRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	GuildId     uint64   `protobuf:"varint,1,opt,name=guild_id,json=guildId,proto3" json:"guild_id,omitempty"`
+	UserId      uint64   `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	GiveRoleIds []uint64 `protobuf:"varint,3,rep,packed,name=give_role_ids,json=giveRoleIds,proto3" json:"give_role_ids,omitempty"`
+	TakeRoleIds []uint64 `protobuf:"varint,4,rep,packed,name=take_role_ids,json=takeRoleIds,proto3" json:"take_role_ids,omitempty"`
+}
+
+func (x *ManageUserRolesRequest) Reset() {
+	*x = ManageUserRolesRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_core_v1_core_proto_msgTypes[69]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ManageUserRolesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ManageUserRolesRequest) ProtoMessage() {}
+
+func (x *ManageUserRolesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_v1_core_proto_msgTypes[69]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ManageUserRolesRequest.ProtoReflect.Descriptor instead.
+func (*ManageUserRolesRequest) Descriptor() ([]byte, []int) {
+	return file_core_v1_core_proto_rawDescGZIP(), []int{69}
+}
+
+func (x *ManageUserRolesRequest) GetGuildId() uint64 {
+	if x != nil {
+		return x.GuildId
+	}
+	return 0
+}
+
+func (x *ManageUserRolesRequest) GetUserId() uint64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *ManageUserRolesRequest) GetGiveRoleIds() []uint64 {
+	if x != nil {
+		return x.GiveRoleIds
+	}
+	return nil
+}
+
+func (x *ManageUserRolesRequest) GetTakeRoleIds() []uint64 {
+	if x != nil {
+		return x.TakeRoleIds
+	}
+	return nil
+}
+
+type GetUserRolesRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	GuildId uint64 `protobuf:"varint,1,opt,name=guild_id,json=guildId,proto3" json:"guild_id,omitempty"`
+	UserId  uint64 `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+}
+
+func (x *GetUserRolesRequest) Reset() {
+	*x = GetUserRolesRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_core_v1_core_proto_msgTypes[70]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetUserRolesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserRolesRequest) ProtoMessage() {}
+
+func (x *GetUserRolesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_v1_core_proto_msgTypes[70]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserRolesRequest.ProtoReflect.Descriptor instead.
+func (*GetUserRolesRequest) Descriptor() ([]byte, []int) {
+	return file_core_v1_core_proto_rawDescGZIP(), []int{70}
+}
+
+func (x *GetUserRolesRequest) GetGuildId() uint64 {
+	if x != nil {
+		return x.GuildId
+	}
+	return 0
+}
+
+func (x *GetUserRolesRequest) GetUserId() uint64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+type GetUserRolesResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Roles []uint64 `protobuf:"varint,1,rep,packed,name=roles,proto3" json:"roles,omitempty"`
+}
+
+func (x *GetUserRolesResponse) Reset() {
+	*x = GetUserRolesResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_core_v1_core_proto_msgTypes[71]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetUserRolesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserRolesResponse) ProtoMessage() {}
+
+func (x *GetUserRolesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_core_v1_core_proto_msgTypes[71]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserRolesResponse.ProtoReflect.Descriptor instead.
+func (*GetUserRolesResponse) Descriptor() ([]byte, []int) {
+	return file_core_v1_core_proto_rawDescGZIP(), []int{71}
+}
+
+func (x *GetUserRolesResponse) GetRoles() []uint64 {
+	if x != nil {
+		return x.Roles
+	}
+	return nil
+}
+
 type GetGuildListResponse_GuildListEntry struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -4553,7 +4726,7 @@ type GetGuildListResponse_GuildListEntry struct {
 func (x *GetGuildListResponse_GuildListEntry) Reset() {
 	*x = GetGuildListResponse_GuildListEntry{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_core_v1_core_proto_msgTypes[69]
+		mi := &file_core_v1_core_proto_msgTypes[72]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4566,7 +4739,7 @@ func (x *GetGuildListResponse_GuildListEntry) String() string {
 func (*GetGuildListResponse_GuildListEntry) ProtoMessage() {}
 
 func (x *GetGuildListResponse_GuildListEntry) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_core_proto_msgTypes[69]
+	mi := &file_core_v1_core_proto_msgTypes[72]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4609,7 +4782,7 @@ type GetGuildInvitesResponse_Invite struct {
 func (x *GetGuildInvitesResponse_Invite) Reset() {
 	*x = GetGuildInvitesResponse_Invite{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_core_v1_core_proto_msgTypes[70]
+		mi := &file_core_v1_core_proto_msgTypes[73]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4622,7 +4795,7 @@ func (x *GetGuildInvitesResponse_Invite) String() string {
 func (*GetGuildInvitesResponse_Invite) ProtoMessage() {}
 
 func (x *GetGuildInvitesResponse_Invite) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_core_proto_msgTypes[70]
+	mi := &file_core_v1_core_proto_msgTypes[73]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4673,7 +4846,7 @@ type GetGuildChannelsResponse_Channel struct {
 func (x *GetGuildChannelsResponse_Channel) Reset() {
 	*x = GetGuildChannelsResponse_Channel{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_core_v1_core_proto_msgTypes[71]
+		mi := &file_core_v1_core_proto_msgTypes[74]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4686,7 +4859,7 @@ func (x *GetGuildChannelsResponse_Channel) String() string {
 func (*GetGuildChannelsResponse_Channel) ProtoMessage() {}
 
 func (x *GetGuildChannelsResponse_Channel) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_core_proto_msgTypes[71]
+	mi := &file_core_v1_core_proto_msgTypes[74]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4743,7 +4916,7 @@ type GetEmotePacksResponse_EmotePack struct {
 func (x *GetEmotePacksResponse_EmotePack) Reset() {
 	*x = GetEmotePacksResponse_EmotePack{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_core_v1_core_proto_msgTypes[72]
+		mi := &file_core_v1_core_proto_msgTypes[75]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4756,7 +4929,7 @@ func (x *GetEmotePacksResponse_EmotePack) String() string {
 func (*GetEmotePacksResponse_EmotePack) ProtoMessage() {}
 
 func (x *GetEmotePacksResponse_EmotePack) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_core_proto_msgTypes[72]
+	mi := &file_core_v1_core_proto_msgTypes[75]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4805,7 +4978,7 @@ type GetEmotePackEmotesResponse_Emote struct {
 func (x *GetEmotePackEmotesResponse_Emote) Reset() {
 	*x = GetEmotePackEmotesResponse_Emote{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_core_v1_core_proto_msgTypes[73]
+		mi := &file_core_v1_core_proto_msgTypes[76]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4818,7 +4991,7 @@ func (x *GetEmotePackEmotesResponse_Emote) String() string {
 func (*GetEmotePackEmotesResponse_Emote) ProtoMessage() {}
 
 func (x *GetEmotePackEmotesResponse_Emote) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_core_proto_msgTypes[73]
+	mi := &file_core_v1_core_proto_msgTypes[76]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4859,7 +5032,7 @@ type StreamEventsRequest_SubscribeToGuild struct {
 func (x *StreamEventsRequest_SubscribeToGuild) Reset() {
 	*x = StreamEventsRequest_SubscribeToGuild{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_core_v1_core_proto_msgTypes[74]
+		mi := &file_core_v1_core_proto_msgTypes[77]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4872,7 +5045,7 @@ func (x *StreamEventsRequest_SubscribeToGuild) String() string {
 func (*StreamEventsRequest_SubscribeToGuild) ProtoMessage() {}
 
 func (x *StreamEventsRequest_SubscribeToGuild) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_core_proto_msgTypes[74]
+	mi := &file_core_v1_core_proto_msgTypes[77]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4904,7 +5077,7 @@ type StreamEventsRequest_SubscribeToActions struct {
 func (x *StreamEventsRequest_SubscribeToActions) Reset() {
 	*x = StreamEventsRequest_SubscribeToActions{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_core_v1_core_proto_msgTypes[75]
+		mi := &file_core_v1_core_proto_msgTypes[78]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4917,7 +5090,7 @@ func (x *StreamEventsRequest_SubscribeToActions) String() string {
 func (*StreamEventsRequest_SubscribeToActions) ProtoMessage() {}
 
 func (x *StreamEventsRequest_SubscribeToActions) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_core_proto_msgTypes[75]
+	mi := &file_core_v1_core_proto_msgTypes[78]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4942,7 +5115,7 @@ type StreamEventsRequest_SubscribeToHomeserverEvents struct {
 func (x *StreamEventsRequest_SubscribeToHomeserverEvents) Reset() {
 	*x = StreamEventsRequest_SubscribeToHomeserverEvents{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_core_v1_core_proto_msgTypes[76]
+		mi := &file_core_v1_core_proto_msgTypes[79]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4955,7 +5128,7 @@ func (x *StreamEventsRequest_SubscribeToHomeserverEvents) String() string {
 func (*StreamEventsRequest_SubscribeToHomeserverEvents) ProtoMessage() {}
 
 func (x *StreamEventsRequest_SubscribeToHomeserverEvents) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_core_proto_msgTypes[76]
+	mi := &file_core_v1_core_proto_msgTypes[79]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4982,7 +5155,7 @@ type Event_MessageSent struct {
 func (x *Event_MessageSent) Reset() {
 	*x = Event_MessageSent{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_core_v1_core_proto_msgTypes[77]
+		mi := &file_core_v1_core_proto_msgTypes[80]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4995,7 +5168,7 @@ func (x *Event_MessageSent) String() string {
 func (*Event_MessageSent) ProtoMessage() {}
 
 func (x *Event_MessageSent) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_core_proto_msgTypes[77]
+	mi := &file_core_v1_core_proto_msgTypes[80]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5042,7 +5215,7 @@ type Event_MessageUpdated struct {
 func (x *Event_MessageUpdated) Reset() {
 	*x = Event_MessageUpdated{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_core_v1_core_proto_msgTypes[78]
+		mi := &file_core_v1_core_proto_msgTypes[81]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -5055,7 +5228,7 @@ func (x *Event_MessageUpdated) String() string {
 func (*Event_MessageUpdated) ProtoMessage() {}
 
 func (x *Event_MessageUpdated) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_core_proto_msgTypes[78]
+	mi := &file_core_v1_core_proto_msgTypes[81]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5182,7 +5355,7 @@ type Event_MessageDeleted struct {
 func (x *Event_MessageDeleted) Reset() {
 	*x = Event_MessageDeleted{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_core_v1_core_proto_msgTypes[79]
+		mi := &file_core_v1_core_proto_msgTypes[82]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -5195,7 +5368,7 @@ func (x *Event_MessageDeleted) String() string {
 func (*Event_MessageDeleted) ProtoMessage() {}
 
 func (x *Event_MessageDeleted) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_core_proto_msgTypes[79]
+	mi := &file_core_v1_core_proto_msgTypes[82]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5248,7 +5421,7 @@ type Event_ChannelCreated struct {
 func (x *Event_ChannelCreated) Reset() {
 	*x = Event_ChannelCreated{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_core_v1_core_proto_msgTypes[80]
+		mi := &file_core_v1_core_proto_msgTypes[83]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -5261,7 +5434,7 @@ func (x *Event_ChannelCreated) String() string {
 func (*Event_ChannelCreated) ProtoMessage() {}
 
 func (x *Event_ChannelCreated) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_core_proto_msgTypes[80]
+	mi := &file_core_v1_core_proto_msgTypes[83]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5336,7 +5509,7 @@ type Event_ChannelUpdated struct {
 func (x *Event_ChannelUpdated) Reset() {
 	*x = Event_ChannelUpdated{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_core_v1_core_proto_msgTypes[81]
+		mi := &file_core_v1_core_proto_msgTypes[84]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -5349,7 +5522,7 @@ func (x *Event_ChannelUpdated) String() string {
 func (*Event_ChannelUpdated) ProtoMessage() {}
 
 func (x *Event_ChannelUpdated) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_core_proto_msgTypes[81]
+	mi := &file_core_v1_core_proto_msgTypes[84]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5426,7 +5599,7 @@ type Event_ChannelDeleted struct {
 func (x *Event_ChannelDeleted) Reset() {
 	*x = Event_ChannelDeleted{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_core_v1_core_proto_msgTypes[82]
+		mi := &file_core_v1_core_proto_msgTypes[85]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -5439,7 +5612,7 @@ func (x *Event_ChannelDeleted) String() string {
 func (*Event_ChannelDeleted) ProtoMessage() {}
 
 func (x *Event_ChannelDeleted) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_core_proto_msgTypes[82]
+	mi := &file_core_v1_core_proto_msgTypes[85]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5482,7 +5655,7 @@ type Event_GuildUpdated struct {
 func (x *Event_GuildUpdated) Reset() {
 	*x = Event_GuildUpdated{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_core_v1_core_proto_msgTypes[83]
+		mi := &file_core_v1_core_proto_msgTypes[86]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -5495,7 +5668,7 @@ func (x *Event_GuildUpdated) String() string {
 func (*Event_GuildUpdated) ProtoMessage() {}
 
 func (x *Event_GuildUpdated) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_core_proto_msgTypes[83]
+	mi := &file_core_v1_core_proto_msgTypes[86]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5543,7 +5716,7 @@ type Event_GuildDeleted struct {
 func (x *Event_GuildDeleted) Reset() {
 	*x = Event_GuildDeleted{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_core_v1_core_proto_msgTypes[84]
+		mi := &file_core_v1_core_proto_msgTypes[87]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -5556,7 +5729,7 @@ func (x *Event_GuildDeleted) String() string {
 func (*Event_GuildDeleted) ProtoMessage() {}
 
 func (x *Event_GuildDeleted) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_core_proto_msgTypes[84]
+	mi := &file_core_v1_core_proto_msgTypes[87]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5591,7 +5764,7 @@ type Event_MemberJoined struct {
 func (x *Event_MemberJoined) Reset() {
 	*x = Event_MemberJoined{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_core_v1_core_proto_msgTypes[85]
+		mi := &file_core_v1_core_proto_msgTypes[88]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -5604,7 +5777,7 @@ func (x *Event_MemberJoined) String() string {
 func (*Event_MemberJoined) ProtoMessage() {}
 
 func (x *Event_MemberJoined) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_core_proto_msgTypes[85]
+	mi := &file_core_v1_core_proto_msgTypes[88]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5646,7 +5819,7 @@ type Event_MemberLeft struct {
 func (x *Event_MemberLeft) Reset() {
 	*x = Event_MemberLeft{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_core_v1_core_proto_msgTypes[86]
+		mi := &file_core_v1_core_proto_msgTypes[89]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -5659,7 +5832,7 @@ func (x *Event_MemberLeft) String() string {
 func (*Event_MemberLeft) ProtoMessage() {}
 
 func (x *Event_MemberLeft) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_core_proto_msgTypes[86]
+	mi := &file_core_v1_core_proto_msgTypes[89]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5701,7 +5874,7 @@ type Event_GuildAddedToList struct {
 func (x *Event_GuildAddedToList) Reset() {
 	*x = Event_GuildAddedToList{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_core_v1_core_proto_msgTypes[87]
+		mi := &file_core_v1_core_proto_msgTypes[90]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -5714,7 +5887,7 @@ func (x *Event_GuildAddedToList) String() string {
 func (*Event_GuildAddedToList) ProtoMessage() {}
 
 func (x *Event_GuildAddedToList) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_core_proto_msgTypes[87]
+	mi := &file_core_v1_core_proto_msgTypes[90]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5756,7 +5929,7 @@ type Event_GuildRemovedFromList struct {
 func (x *Event_GuildRemovedFromList) Reset() {
 	*x = Event_GuildRemovedFromList{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_core_v1_core_proto_msgTypes[88]
+		mi := &file_core_v1_core_proto_msgTypes[91]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -5769,7 +5942,7 @@ func (x *Event_GuildRemovedFromList) String() string {
 func (*Event_GuildRemovedFromList) ProtoMessage() {}
 
 func (x *Event_GuildRemovedFromList) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_core_proto_msgTypes[88]
+	mi := &file_core_v1_core_proto_msgTypes[91]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5814,7 +5987,7 @@ type Event_ActionPerformed struct {
 func (x *Event_ActionPerformed) Reset() {
 	*x = Event_ActionPerformed{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_core_v1_core_proto_msgTypes[89]
+		mi := &file_core_v1_core_proto_msgTypes[92]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -5827,7 +6000,7 @@ func (x *Event_ActionPerformed) String() string {
 func (*Event_ActionPerformed) ProtoMessage() {}
 
 func (x *Event_ActionPerformed) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_core_proto_msgTypes[89]
+	mi := &file_core_v1_core_proto_msgTypes[92]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6621,7 +6794,24 @@ var file_core_v1_core_proto_rawDesc = []byte{
 	0x0a, 0x08, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04,
 	0x52, 0x07, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x49, 0x64, 0x12, 0x17, 0x0a, 0x07, 0x72, 0x6f, 0x6c,
 	0x65, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x04, 0x52, 0x06, 0x72, 0x6f, 0x6c, 0x65,
-	0x49, 0x64, 0x2a, 0x36, 0x0a, 0x0a, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65,
+	0x49, 0x64, 0x22, 0x94, 0x01, 0x0a, 0x16, 0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x55, 0x73, 0x65,
+	0x72, 0x52, 0x6f, 0x6c, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x19, 0x0a,
+	0x08, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52,
+	0x07, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x49, 0x64, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72,
+	0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x04, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49,
+	0x64, 0x12, 0x22, 0x0a, 0x0d, 0x67, 0x69, 0x76, 0x65, 0x5f, 0x72, 0x6f, 0x6c, 0x65, 0x5f, 0x69,
+	0x64, 0x73, 0x18, 0x03, 0x20, 0x03, 0x28, 0x04, 0x52, 0x0b, 0x67, 0x69, 0x76, 0x65, 0x52, 0x6f,
+	0x6c, 0x65, 0x49, 0x64, 0x73, 0x12, 0x22, 0x0a, 0x0d, 0x74, 0x61, 0x6b, 0x65, 0x5f, 0x72, 0x6f,
+	0x6c, 0x65, 0x5f, 0x69, 0x64, 0x73, 0x18, 0x04, 0x20, 0x03, 0x28, 0x04, 0x52, 0x0b, 0x74, 0x61,
+	0x6b, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x73, 0x22, 0x49, 0x0a, 0x13, 0x47, 0x65, 0x74,
+	0x55, 0x73, 0x65, 0x72, 0x52, 0x6f, 0x6c, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x12, 0x19, 0x0a, 0x08, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x04, 0x52, 0x07, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x49, 0x64, 0x12, 0x17, 0x0a, 0x07, 0x75,
+	0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x04, 0x52, 0x06, 0x75, 0x73,
+	0x65, 0x72, 0x49, 0x64, 0x22, 0x2c, 0x0a, 0x14, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52,
+	0x6f, 0x6c, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x14, 0x0a, 0x05,
+	0x72, 0x6f, 0x6c, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x04, 0x52, 0x05, 0x72, 0x6f, 0x6c,
+	0x65, 0x73, 0x2a, 0x36, 0x0a, 0x0a, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65,
 	0x12, 0x0a, 0x0a, 0x06, 0x4e, 0x6f, 0x72, 0x6d, 0x61, 0x6c, 0x10, 0x00, 0x12, 0x0b, 0x0a, 0x07,
 	0x50, 0x72, 0x69, 0x6d, 0x61, 0x72, 0x79, 0x10, 0x01, 0x12, 0x0f, 0x0a, 0x0b, 0x44, 0x65, 0x73,
 	0x74, 0x72, 0x75, 0x63, 0x74, 0x69, 0x76, 0x65, 0x10, 0x02, 0x2a, 0x58, 0x0a, 0x12, 0x41, 0x63,
@@ -6634,7 +6824,7 @@ var file_core_v1_core_proto_rawDesc = []byte{
 	0x73, 0x65, 0x6e, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x08, 0x0a, 0x04, 0x44, 0x61, 0x74,
 	0x61, 0x10, 0x00, 0x12, 0x12, 0x0a, 0x0e, 0x43, 0x61, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x65, 0x64,
 	0x49, 0x6d, 0x61, 0x67, 0x65, 0x10, 0x01, 0x12, 0x07, 0x0a, 0x03, 0x52, 0x6f, 0x77, 0x10, 0x02,
-	0x32, 0xaf, 0x1c, 0x0a, 0x0b, 0x43, 0x6f, 0x72, 0x65, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
+	0x32, 0xe7, 0x1d, 0x0a, 0x0b, 0x43, 0x6f, 0x72, 0x65, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
 	0x12, 0x5c, 0x0a, 0x0b, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x12,
 	0x24, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e,
 	0x76, 0x31, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x52, 0x65,
@@ -6855,14 +7045,26 @@ var file_core_v1_core_proto_rawDesc = []byte{
 	0x63, 0x6f, 0x6c, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x44, 0x65, 0x6c, 0x65,
 	0x74, 0x65, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65,
 	0x73, 0x74, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x00, 0x12, 0x54, 0x0a, 0x0c,
-	0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x45, 0x76, 0x65, 0x6e, 0x74, 0x73, 0x12, 0x25, 0x2e, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x76, 0x31, 0x2e,
-	0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x45, 0x76, 0x65, 0x6e, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2e, 0x63,
-	0x6f, 0x72, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x76, 0x65, 0x6e, 0x74, 0x22, 0x00, 0x28, 0x01,
-	0x30, 0x01, 0x42, 0x0d, 0x5a, 0x0b, 0x63, 0x6f, 0x72, 0x65, 0x3b, 0x63, 0x6f, 0x72, 0x65, 0x76,
-	0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x00, 0x12, 0x55, 0x0a, 0x0f,
+	0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x55, 0x73, 0x65, 0x72, 0x52, 0x6f, 0x6c, 0x65, 0x73, 0x12,
+	0x28, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e,
+	0x76, 0x31, 0x2e, 0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x55, 0x73, 0x65, 0x72, 0x52, 0x6f, 0x6c,
+	0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67,
+	0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74,
+	0x79, 0x22, 0x00, 0x12, 0x5f, 0x0a, 0x0c, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x6f,
+	0x6c, 0x65, 0x73, 0x12, 0x25, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2e, 0x63,
+	0x6f, 0x72, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x6f,
+	0x6c, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x26, 0x2e, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65,
+	0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x6f, 0x6c, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x22, 0x00, 0x12, 0x54, 0x0a, 0x0c, 0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x45, 0x76,
+	0x65, 0x6e, 0x74, 0x73, 0x12, 0x25, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2e,
+	0x63, 0x6f, 0x72, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x45, 0x76,
+	0x65, 0x6e, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x45,
+	0x76, 0x65, 0x6e, 0x74, 0x22, 0x00, 0x28, 0x01, 0x30, 0x01, 0x42, 0x0d, 0x5a, 0x0b, 0x63, 0x6f,
+	0x72, 0x65, 0x3b, 0x63, 0x6f, 0x72, 0x65, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x33,
 }
 
 var (
@@ -6878,7 +7080,7 @@ func file_core_v1_core_proto_rawDescGZIP() []byte {
 }
 
 var file_core_v1_core_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_core_v1_core_proto_msgTypes = make([]protoimpl.MessageInfo, 90)
+var file_core_v1_core_proto_msgTypes = make([]protoimpl.MessageInfo, 93)
 var file_core_v1_core_proto_goTypes = []interface{}{
 	(ActionType)(0),                                         // 0: protocol.core.v1.ActionType
 	(ActionPresentation)(0),                                 // 1: protocol.core.v1.ActionPresentation
@@ -6953,35 +7155,38 @@ var file_core_v1_core_proto_goTypes = []interface{}{
 	(*AddGuildRoleRequest)(nil),                             // 70: protocol.core.v1.AddGuildRoleRequest
 	(*AddGuildRoleResponse)(nil),                            // 71: protocol.core.v1.AddGuildRoleResponse
 	(*DeleteGuildRoleRequest)(nil),                          // 72: protocol.core.v1.DeleteGuildRoleRequest
-	(*GetGuildListResponse_GuildListEntry)(nil),             // 73: protocol.core.v1.GetGuildListResponse.GuildListEntry
-	(*GetGuildInvitesResponse_Invite)(nil),                  // 74: protocol.core.v1.GetGuildInvitesResponse.Invite
-	(*GetGuildChannelsResponse_Channel)(nil),                // 75: protocol.core.v1.GetGuildChannelsResponse.Channel
-	(*GetEmotePacksResponse_EmotePack)(nil),                 // 76: protocol.core.v1.GetEmotePacksResponse.EmotePack
-	(*GetEmotePackEmotesResponse_Emote)(nil),                // 77: protocol.core.v1.GetEmotePackEmotesResponse.Emote
-	(*StreamEventsRequest_SubscribeToGuild)(nil),            // 78: protocol.core.v1.StreamEventsRequest.SubscribeToGuild
-	(*StreamEventsRequest_SubscribeToActions)(nil),          // 79: protocol.core.v1.StreamEventsRequest.SubscribeToActions
-	(*StreamEventsRequest_SubscribeToHomeserverEvents)(nil), // 80: protocol.core.v1.StreamEventsRequest.SubscribeToHomeserverEvents
-	(*Event_MessageSent)(nil),                               // 81: protocol.core.v1.Event.MessageSent
-	(*Event_MessageUpdated)(nil),                            // 82: protocol.core.v1.Event.MessageUpdated
-	(*Event_MessageDeleted)(nil),                            // 83: protocol.core.v1.Event.MessageDeleted
-	(*Event_ChannelCreated)(nil),                            // 84: protocol.core.v1.Event.ChannelCreated
-	(*Event_ChannelUpdated)(nil),                            // 85: protocol.core.v1.Event.ChannelUpdated
-	(*Event_ChannelDeleted)(nil),                            // 86: protocol.core.v1.Event.ChannelDeleted
-	(*Event_GuildUpdated)(nil),                              // 87: protocol.core.v1.Event.GuildUpdated
-	(*Event_GuildDeleted)(nil),                              // 88: protocol.core.v1.Event.GuildDeleted
-	(*Event_MemberJoined)(nil),                              // 89: protocol.core.v1.Event.MemberJoined
-	(*Event_MemberLeft)(nil),                                // 90: protocol.core.v1.Event.MemberLeft
-	(*Event_GuildAddedToList)(nil),                          // 91: protocol.core.v1.Event.GuildAddedToList
-	(*Event_GuildRemovedFromList)(nil),                      // 92: protocol.core.v1.Event.GuildRemovedFromList
-	(*Event_ActionPerformed)(nil),                           // 93: protocol.core.v1.Event.ActionPerformed
-	(*empty.Empty)(nil),                                     // 94: google.protobuf.Empty
-	(*timestamp.Timestamp)(nil),                             // 95: google.protobuf.Timestamp
+	(*ManageUserRolesRequest)(nil),                          // 73: protocol.core.v1.ManageUserRolesRequest
+	(*GetUserRolesRequest)(nil),                             // 74: protocol.core.v1.GetUserRolesRequest
+	(*GetUserRolesResponse)(nil),                            // 75: protocol.core.v1.GetUserRolesResponse
+	(*GetGuildListResponse_GuildListEntry)(nil),             // 76: protocol.core.v1.GetGuildListResponse.GuildListEntry
+	(*GetGuildInvitesResponse_Invite)(nil),                  // 77: protocol.core.v1.GetGuildInvitesResponse.Invite
+	(*GetGuildChannelsResponse_Channel)(nil),                // 78: protocol.core.v1.GetGuildChannelsResponse.Channel
+	(*GetEmotePacksResponse_EmotePack)(nil),                 // 79: protocol.core.v1.GetEmotePacksResponse.EmotePack
+	(*GetEmotePackEmotesResponse_Emote)(nil),                // 80: protocol.core.v1.GetEmotePackEmotesResponse.Emote
+	(*StreamEventsRequest_SubscribeToGuild)(nil),            // 81: protocol.core.v1.StreamEventsRequest.SubscribeToGuild
+	(*StreamEventsRequest_SubscribeToActions)(nil),          // 82: protocol.core.v1.StreamEventsRequest.SubscribeToActions
+	(*StreamEventsRequest_SubscribeToHomeserverEvents)(nil), // 83: protocol.core.v1.StreamEventsRequest.SubscribeToHomeserverEvents
+	(*Event_MessageSent)(nil),                               // 84: protocol.core.v1.Event.MessageSent
+	(*Event_MessageUpdated)(nil),                            // 85: protocol.core.v1.Event.MessageUpdated
+	(*Event_MessageDeleted)(nil),                            // 86: protocol.core.v1.Event.MessageDeleted
+	(*Event_ChannelCreated)(nil),                            // 87: protocol.core.v1.Event.ChannelCreated
+	(*Event_ChannelUpdated)(nil),                            // 88: protocol.core.v1.Event.ChannelUpdated
+	(*Event_ChannelDeleted)(nil),                            // 89: protocol.core.v1.Event.ChannelDeleted
+	(*Event_GuildUpdated)(nil),                              // 90: protocol.core.v1.Event.GuildUpdated
+	(*Event_GuildDeleted)(nil),                              // 91: protocol.core.v1.Event.GuildDeleted
+	(*Event_MemberJoined)(nil),                              // 92: protocol.core.v1.Event.MemberJoined
+	(*Event_MemberLeft)(nil),                                // 93: protocol.core.v1.Event.MemberLeft
+	(*Event_GuildAddedToList)(nil),                          // 94: protocol.core.v1.Event.GuildAddedToList
+	(*Event_GuildRemovedFromList)(nil),                      // 95: protocol.core.v1.Event.GuildRemovedFromList
+	(*Event_ActionPerformed)(nil),                           // 96: protocol.core.v1.Event.ActionPerformed
+	(*empty.Empty)(nil),                                     // 97: google.protobuf.Empty
+	(*timestamp.Timestamp)(nil),                             // 98: google.protobuf.Timestamp
 }
 var file_core_v1_core_proto_depIdxs = []int32{
-	94, // 0: protocol.core.v1.Override.webhook:type_name -> google.protobuf.Empty
-	94, // 1: protocol.core.v1.Override.system_plurality:type_name -> google.protobuf.Empty
-	94, // 2: protocol.core.v1.Override.system_message:type_name -> google.protobuf.Empty
-	94, // 3: protocol.core.v1.Override.bridge:type_name -> google.protobuf.Empty
+	97, // 0: protocol.core.v1.Override.webhook:type_name -> google.protobuf.Empty
+	97, // 1: protocol.core.v1.Override.system_plurality:type_name -> google.protobuf.Empty
+	97, // 2: protocol.core.v1.Override.system_message:type_name -> google.protobuf.Empty
+	97, // 3: protocol.core.v1.Override.bridge:type_name -> google.protobuf.Empty
 	0,  // 4: protocol.core.v1.Action.type:type_name -> protocol.core.v1.ActionType
 	1,  // 5: protocol.core.v1.Action.presentation:type_name -> protocol.core.v1.ActionPresentation
 	5,  // 6: protocol.core.v1.Action.children:type_name -> protocol.core.v1.Action
@@ -6991,37 +7196,37 @@ var file_core_v1_core_proto_depIdxs = []int32{
 	6,  // 10: protocol.core.v1.Embed.footer:type_name -> protocol.core.v1.EmbedHeading
 	7,  // 11: protocol.core.v1.Embed.fields:type_name -> protocol.core.v1.EmbedField
 	5,  // 12: protocol.core.v1.Embed.actions:type_name -> protocol.core.v1.Action
-	95, // 13: protocol.core.v1.Message.created_at:type_name -> google.protobuf.Timestamp
-	95, // 14: protocol.core.v1.Message.edited_at:type_name -> google.protobuf.Timestamp
+	98, // 13: protocol.core.v1.Message.created_at:type_name -> google.protobuf.Timestamp
+	98, // 14: protocol.core.v1.Message.edited_at:type_name -> google.protobuf.Timestamp
 	8,  // 15: protocol.core.v1.Message.embeds:type_name -> protocol.core.v1.Embed
 	5,  // 16: protocol.core.v1.Message.actions:type_name -> protocol.core.v1.Action
 	4,  // 17: protocol.core.v1.Message.overrides:type_name -> protocol.core.v1.Override
-	73, // 18: protocol.core.v1.GetGuildListResponse.guilds:type_name -> protocol.core.v1.GetGuildListResponse.GuildListEntry
-	74, // 19: protocol.core.v1.GetGuildInvitesResponse.invites:type_name -> protocol.core.v1.GetGuildInvitesResponse.Invite
-	75, // 20: protocol.core.v1.GetGuildChannelsResponse.channels:type_name -> protocol.core.v1.GetGuildChannelsResponse.Channel
+	76, // 18: protocol.core.v1.GetGuildListResponse.guilds:type_name -> protocol.core.v1.GetGuildListResponse.GuildListEntry
+	77, // 19: protocol.core.v1.GetGuildInvitesResponse.invites:type_name -> protocol.core.v1.GetGuildInvitesResponse.Invite
+	78, // 20: protocol.core.v1.GetGuildChannelsResponse.channels:type_name -> protocol.core.v1.GetGuildChannelsResponse.Channel
 	9,  // 21: protocol.core.v1.GetChannelMessagesResponse.messages:type_name -> protocol.core.v1.Message
 	9,  // 22: protocol.core.v1.GetMessageResponse.message:type_name -> protocol.core.v1.Message
-	76, // 23: protocol.core.v1.GetEmotePacksResponse.packs:type_name -> protocol.core.v1.GetEmotePacksResponse.EmotePack
-	77, // 24: protocol.core.v1.GetEmotePackEmotesResponse.emotes:type_name -> protocol.core.v1.GetEmotePackEmotesResponse.Emote
+	79, // 23: protocol.core.v1.GetEmotePacksResponse.packs:type_name -> protocol.core.v1.GetEmotePacksResponse.EmotePack
+	80, // 24: protocol.core.v1.GetEmotePackEmotesResponse.emotes:type_name -> protocol.core.v1.GetEmotePackEmotesResponse.Emote
 	8,  // 25: protocol.core.v1.UpdateMessageRequest.embeds:type_name -> protocol.core.v1.Embed
 	5,  // 26: protocol.core.v1.UpdateMessageRequest.actions:type_name -> protocol.core.v1.Action
 	4,  // 27: protocol.core.v1.UpdateMessageRequest.overrides:type_name -> protocol.core.v1.Override
-	78, // 28: protocol.core.v1.StreamEventsRequest.subscribe_to_guild:type_name -> protocol.core.v1.StreamEventsRequest.SubscribeToGuild
-	79, // 29: protocol.core.v1.StreamEventsRequest.subscribe_to_actions:type_name -> protocol.core.v1.StreamEventsRequest.SubscribeToActions
-	80, // 30: protocol.core.v1.StreamEventsRequest.subscribe_to_homeserver_events:type_name -> protocol.core.v1.StreamEventsRequest.SubscribeToHomeserverEvents
-	91, // 31: protocol.core.v1.Event.guild_added_to_list:type_name -> protocol.core.v1.Event.GuildAddedToList
-	92, // 32: protocol.core.v1.Event.guild_removed_from_list:type_name -> protocol.core.v1.Event.GuildRemovedFromList
-	93, // 33: protocol.core.v1.Event.action_performed:type_name -> protocol.core.v1.Event.ActionPerformed
-	81, // 34: protocol.core.v1.Event.sent_message:type_name -> protocol.core.v1.Event.MessageSent
-	82, // 35: protocol.core.v1.Event.edited_message:type_name -> protocol.core.v1.Event.MessageUpdated
-	83, // 36: protocol.core.v1.Event.deleted_message:type_name -> protocol.core.v1.Event.MessageDeleted
-	84, // 37: protocol.core.v1.Event.created_channel:type_name -> protocol.core.v1.Event.ChannelCreated
-	85, // 38: protocol.core.v1.Event.edited_channel:type_name -> protocol.core.v1.Event.ChannelUpdated
-	86, // 39: protocol.core.v1.Event.deleted_channel:type_name -> protocol.core.v1.Event.ChannelDeleted
-	87, // 40: protocol.core.v1.Event.edited_guild:type_name -> protocol.core.v1.Event.GuildUpdated
-	88, // 41: protocol.core.v1.Event.deleted_guild:type_name -> protocol.core.v1.Event.GuildDeleted
-	89, // 42: protocol.core.v1.Event.joined_member:type_name -> protocol.core.v1.Event.MemberJoined
-	90, // 43: protocol.core.v1.Event.left_member:type_name -> protocol.core.v1.Event.MemberLeft
+	81, // 28: protocol.core.v1.StreamEventsRequest.subscribe_to_guild:type_name -> protocol.core.v1.StreamEventsRequest.SubscribeToGuild
+	82, // 29: protocol.core.v1.StreamEventsRequest.subscribe_to_actions:type_name -> protocol.core.v1.StreamEventsRequest.SubscribeToActions
+	83, // 30: protocol.core.v1.StreamEventsRequest.subscribe_to_homeserver_events:type_name -> protocol.core.v1.StreamEventsRequest.SubscribeToHomeserverEvents
+	94, // 31: protocol.core.v1.Event.guild_added_to_list:type_name -> protocol.core.v1.Event.GuildAddedToList
+	95, // 32: protocol.core.v1.Event.guild_removed_from_list:type_name -> protocol.core.v1.Event.GuildRemovedFromList
+	96, // 33: protocol.core.v1.Event.action_performed:type_name -> protocol.core.v1.Event.ActionPerformed
+	84, // 34: protocol.core.v1.Event.sent_message:type_name -> protocol.core.v1.Event.MessageSent
+	85, // 35: protocol.core.v1.Event.edited_message:type_name -> protocol.core.v1.Event.MessageUpdated
+	86, // 36: protocol.core.v1.Event.deleted_message:type_name -> protocol.core.v1.Event.MessageDeleted
+	87, // 37: protocol.core.v1.Event.created_channel:type_name -> protocol.core.v1.Event.ChannelCreated
+	88, // 38: protocol.core.v1.Event.edited_channel:type_name -> protocol.core.v1.Event.ChannelUpdated
+	89, // 39: protocol.core.v1.Event.deleted_channel:type_name -> protocol.core.v1.Event.ChannelDeleted
+	90, // 40: protocol.core.v1.Event.edited_guild:type_name -> protocol.core.v1.Event.GuildUpdated
+	91, // 41: protocol.core.v1.Event.deleted_guild:type_name -> protocol.core.v1.Event.GuildDeleted
+	92, // 42: protocol.core.v1.Event.joined_member:type_name -> protocol.core.v1.Event.MemberJoined
+	93, // 43: protocol.core.v1.Event.left_member:type_name -> protocol.core.v1.Event.MemberLeft
 	5,  // 44: protocol.core.v1.SendMessageRequest.actions:type_name -> protocol.core.v1.Action
 	8,  // 45: protocol.core.v1.SendMessageRequest.embeds:type_name -> protocol.core.v1.Embed
 	4,  // 46: protocol.core.v1.SendMessageRequest.overrides:type_name -> protocol.core.v1.Override
@@ -7032,7 +7237,7 @@ var file_core_v1_core_proto_depIdxs = []int32{
 	67, // 51: protocol.core.v1.GetGuildRolesResponse.roles:type_name -> protocol.core.v1.Role
 	67, // 52: protocol.core.v1.AddGuildRoleRequest.role:type_name -> protocol.core.v1.Role
 	9,  // 53: protocol.core.v1.Event.MessageSent.message:type_name -> protocol.core.v1.Message
-	95, // 54: protocol.core.v1.Event.MessageUpdated.edited_at:type_name -> google.protobuf.Timestamp
+	98, // 54: protocol.core.v1.Event.MessageUpdated.edited_at:type_name -> google.protobuf.Timestamp
 	8,  // 55: protocol.core.v1.Event.MessageUpdated.embeds:type_name -> protocol.core.v1.Embed
 	5,  // 56: protocol.core.v1.Event.MessageUpdated.actions:type_name -> protocol.core.v1.Action
 	4,  // 57: protocol.core.v1.Event.MessageUpdated.overrides:type_name -> protocol.core.v1.Override
@@ -7073,47 +7278,51 @@ var file_core_v1_core_proto_depIdxs = []int32{
 	68, // 92: protocol.core.v1.CoreService.GetGuildRoles:input_type -> protocol.core.v1.GetGuildRolesRequest
 	70, // 93: protocol.core.v1.CoreService.AddGuildRole:input_type -> protocol.core.v1.AddGuildRoleRequest
 	72, // 94: protocol.core.v1.CoreService.DeleteGuildRole:input_type -> protocol.core.v1.DeleteGuildRoleRequest
-	48, // 95: protocol.core.v1.CoreService.StreamEvents:input_type -> protocol.core.v1.StreamEventsRequest
-	11, // 96: protocol.core.v1.CoreService.CreateGuild:output_type -> protocol.core.v1.CreateGuildResponse
-	13, // 97: protocol.core.v1.CoreService.CreateInvite:output_type -> protocol.core.v1.CreateInviteResponse
-	15, // 98: protocol.core.v1.CoreService.CreateChannel:output_type -> protocol.core.v1.CreateChannelResponse
-	17, // 99: protocol.core.v1.CoreService.CreateEmotePack:output_type -> protocol.core.v1.CreateEmotePackResponse
-	19, // 100: protocol.core.v1.CoreService.GetGuildList:output_type -> protocol.core.v1.GetGuildListResponse
-	57, // 101: protocol.core.v1.CoreService.AddGuildToGuildList:output_type -> protocol.core.v1.AddGuildToGuildListResponse
-	59, // 102: protocol.core.v1.CoreService.RemoveGuildFromGuildList:output_type -> protocol.core.v1.RemoveGuildFromGuildListResponse
-	21, // 103: protocol.core.v1.CoreService.GetGuild:output_type -> protocol.core.v1.GetGuildResponse
-	23, // 104: protocol.core.v1.CoreService.GetGuildInvites:output_type -> protocol.core.v1.GetGuildInvitesResponse
-	25, // 105: protocol.core.v1.CoreService.GetGuildMembers:output_type -> protocol.core.v1.GetGuildMembersResponse
-	27, // 106: protocol.core.v1.CoreService.GetGuildChannels:output_type -> protocol.core.v1.GetGuildChannelsResponse
-	29, // 107: protocol.core.v1.CoreService.GetChannelMessages:output_type -> protocol.core.v1.GetChannelMessagesResponse
-	31, // 108: protocol.core.v1.CoreService.GetMessage:output_type -> protocol.core.v1.GetMessageResponse
-	33, // 109: protocol.core.v1.CoreService.GetEmotePacks:output_type -> protocol.core.v1.GetEmotePacksResponse
-	35, // 110: protocol.core.v1.CoreService.GetEmotePackEmotes:output_type -> protocol.core.v1.GetEmotePackEmotesResponse
-	94, // 111: protocol.core.v1.CoreService.UpdateGuildName:output_type -> google.protobuf.Empty
-	94, // 112: protocol.core.v1.CoreService.UpdateChannelName:output_type -> google.protobuf.Empty
-	94, // 113: protocol.core.v1.CoreService.UpdateChannelOrder:output_type -> google.protobuf.Empty
-	94, // 114: protocol.core.v1.CoreService.UpdateMessage:output_type -> google.protobuf.Empty
-	94, // 115: protocol.core.v1.CoreService.AddEmoteToPack:output_type -> google.protobuf.Empty
-	94, // 116: protocol.core.v1.CoreService.DeleteGuild:output_type -> google.protobuf.Empty
-	94, // 117: protocol.core.v1.CoreService.DeleteInvite:output_type -> google.protobuf.Empty
-	94, // 118: protocol.core.v1.CoreService.DeleteChannel:output_type -> google.protobuf.Empty
-	94, // 119: protocol.core.v1.CoreService.DeleteMessage:output_type -> google.protobuf.Empty
-	94, // 120: protocol.core.v1.CoreService.DeleteEmoteFromPack:output_type -> google.protobuf.Empty
-	94, // 121: protocol.core.v1.CoreService.DeleteEmotePack:output_type -> google.protobuf.Empty
-	94, // 122: protocol.core.v1.CoreService.DequipEmotePack:output_type -> google.protobuf.Empty
-	51, // 123: protocol.core.v1.CoreService.JoinGuild:output_type -> protocol.core.v1.JoinGuildResponse
-	94, // 124: protocol.core.v1.CoreService.LeaveGuild:output_type -> google.protobuf.Empty
-	94, // 125: protocol.core.v1.CoreService.TriggerAction:output_type -> google.protobuf.Empty
-	55, // 126: protocol.core.v1.CoreService.SendMessage:output_type -> protocol.core.v1.SendMessageResponse
-	61, // 127: protocol.core.v1.CoreService.QueryHasPermission:output_type -> protocol.core.v1.QueryPermissionsResponse
-	94, // 128: protocol.core.v1.CoreService.SetPermissions:output_type -> google.protobuf.Empty
-	66, // 129: protocol.core.v1.CoreService.GetPermissions:output_type -> protocol.core.v1.GetPermissionsResponse
-	69, // 130: protocol.core.v1.CoreService.GetGuildRoles:output_type -> protocol.core.v1.GetGuildRolesResponse
-	71, // 131: protocol.core.v1.CoreService.AddGuildRole:output_type -> protocol.core.v1.AddGuildRoleResponse
-	94, // 132: protocol.core.v1.CoreService.DeleteGuildRole:output_type -> google.protobuf.Empty
-	49, // 133: protocol.core.v1.CoreService.StreamEvents:output_type -> protocol.core.v1.Event
-	96, // [96:134] is the sub-list for method output_type
-	58, // [58:96] is the sub-list for method input_type
+	73, // 95: protocol.core.v1.CoreService.ManageUserRoles:input_type -> protocol.core.v1.ManageUserRolesRequest
+	74, // 96: protocol.core.v1.CoreService.GetUserRoles:input_type -> protocol.core.v1.GetUserRolesRequest
+	48, // 97: protocol.core.v1.CoreService.StreamEvents:input_type -> protocol.core.v1.StreamEventsRequest
+	11, // 98: protocol.core.v1.CoreService.CreateGuild:output_type -> protocol.core.v1.CreateGuildResponse
+	13, // 99: protocol.core.v1.CoreService.CreateInvite:output_type -> protocol.core.v1.CreateInviteResponse
+	15, // 100: protocol.core.v1.CoreService.CreateChannel:output_type -> protocol.core.v1.CreateChannelResponse
+	17, // 101: protocol.core.v1.CoreService.CreateEmotePack:output_type -> protocol.core.v1.CreateEmotePackResponse
+	19, // 102: protocol.core.v1.CoreService.GetGuildList:output_type -> protocol.core.v1.GetGuildListResponse
+	57, // 103: protocol.core.v1.CoreService.AddGuildToGuildList:output_type -> protocol.core.v1.AddGuildToGuildListResponse
+	59, // 104: protocol.core.v1.CoreService.RemoveGuildFromGuildList:output_type -> protocol.core.v1.RemoveGuildFromGuildListResponse
+	21, // 105: protocol.core.v1.CoreService.GetGuild:output_type -> protocol.core.v1.GetGuildResponse
+	23, // 106: protocol.core.v1.CoreService.GetGuildInvites:output_type -> protocol.core.v1.GetGuildInvitesResponse
+	25, // 107: protocol.core.v1.CoreService.GetGuildMembers:output_type -> protocol.core.v1.GetGuildMembersResponse
+	27, // 108: protocol.core.v1.CoreService.GetGuildChannels:output_type -> protocol.core.v1.GetGuildChannelsResponse
+	29, // 109: protocol.core.v1.CoreService.GetChannelMessages:output_type -> protocol.core.v1.GetChannelMessagesResponse
+	31, // 110: protocol.core.v1.CoreService.GetMessage:output_type -> protocol.core.v1.GetMessageResponse
+	33, // 111: protocol.core.v1.CoreService.GetEmotePacks:output_type -> protocol.core.v1.GetEmotePacksResponse
+	35, // 112: protocol.core.v1.CoreService.GetEmotePackEmotes:output_type -> protocol.core.v1.GetEmotePackEmotesResponse
+	97, // 113: protocol.core.v1.CoreService.UpdateGuildName:output_type -> google.protobuf.Empty
+	97, // 114: protocol.core.v1.CoreService.UpdateChannelName:output_type -> google.protobuf.Empty
+	97, // 115: protocol.core.v1.CoreService.UpdateChannelOrder:output_type -> google.protobuf.Empty
+	97, // 116: protocol.core.v1.CoreService.UpdateMessage:output_type -> google.protobuf.Empty
+	97, // 117: protocol.core.v1.CoreService.AddEmoteToPack:output_type -> google.protobuf.Empty
+	97, // 118: protocol.core.v1.CoreService.DeleteGuild:output_type -> google.protobuf.Empty
+	97, // 119: protocol.core.v1.CoreService.DeleteInvite:output_type -> google.protobuf.Empty
+	97, // 120: protocol.core.v1.CoreService.DeleteChannel:output_type -> google.protobuf.Empty
+	97, // 121: protocol.core.v1.CoreService.DeleteMessage:output_type -> google.protobuf.Empty
+	97, // 122: protocol.core.v1.CoreService.DeleteEmoteFromPack:output_type -> google.protobuf.Empty
+	97, // 123: protocol.core.v1.CoreService.DeleteEmotePack:output_type -> google.protobuf.Empty
+	97, // 124: protocol.core.v1.CoreService.DequipEmotePack:output_type -> google.protobuf.Empty
+	51, // 125: protocol.core.v1.CoreService.JoinGuild:output_type -> protocol.core.v1.JoinGuildResponse
+	97, // 126: protocol.core.v1.CoreService.LeaveGuild:output_type -> google.protobuf.Empty
+	97, // 127: protocol.core.v1.CoreService.TriggerAction:output_type -> google.protobuf.Empty
+	55, // 128: protocol.core.v1.CoreService.SendMessage:output_type -> protocol.core.v1.SendMessageResponse
+	61, // 129: protocol.core.v1.CoreService.QueryHasPermission:output_type -> protocol.core.v1.QueryPermissionsResponse
+	97, // 130: protocol.core.v1.CoreService.SetPermissions:output_type -> google.protobuf.Empty
+	66, // 131: protocol.core.v1.CoreService.GetPermissions:output_type -> protocol.core.v1.GetPermissionsResponse
+	69, // 132: protocol.core.v1.CoreService.GetGuildRoles:output_type -> protocol.core.v1.GetGuildRolesResponse
+	71, // 133: protocol.core.v1.CoreService.AddGuildRole:output_type -> protocol.core.v1.AddGuildRoleResponse
+	97, // 134: protocol.core.v1.CoreService.DeleteGuildRole:output_type -> google.protobuf.Empty
+	97, // 135: protocol.core.v1.CoreService.ManageUserRoles:output_type -> google.protobuf.Empty
+	75, // 136: protocol.core.v1.CoreService.GetUserRoles:output_type -> protocol.core.v1.GetUserRolesResponse
+	49, // 137: protocol.core.v1.CoreService.StreamEvents:output_type -> protocol.core.v1.Event
+	98, // [98:138] is the sub-list for method output_type
+	58, // [58:98] is the sub-list for method input_type
 	58, // [58:58] is the sub-list for extension type_name
 	58, // [58:58] is the sub-list for extension extendee
 	0,  // [0:58] is the sub-list for field type_name
@@ -7954,7 +8163,7 @@ func file_core_v1_core_proto_init() {
 			}
 		}
 		file_core_v1_core_proto_msgTypes[69].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetGuildListResponse_GuildListEntry); i {
+			switch v := v.(*ManageUserRolesRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -7966,7 +8175,7 @@ func file_core_v1_core_proto_init() {
 			}
 		}
 		file_core_v1_core_proto_msgTypes[70].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetGuildInvitesResponse_Invite); i {
+			switch v := v.(*GetUserRolesRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -7978,7 +8187,7 @@ func file_core_v1_core_proto_init() {
 			}
 		}
 		file_core_v1_core_proto_msgTypes[71].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetGuildChannelsResponse_Channel); i {
+			switch v := v.(*GetUserRolesResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -7990,7 +8199,7 @@ func file_core_v1_core_proto_init() {
 			}
 		}
 		file_core_v1_core_proto_msgTypes[72].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetEmotePacksResponse_EmotePack); i {
+			switch v := v.(*GetGuildListResponse_GuildListEntry); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -8002,7 +8211,7 @@ func file_core_v1_core_proto_init() {
 			}
 		}
 		file_core_v1_core_proto_msgTypes[73].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetEmotePackEmotesResponse_Emote); i {
+			switch v := v.(*GetGuildInvitesResponse_Invite); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -8014,7 +8223,7 @@ func file_core_v1_core_proto_init() {
 			}
 		}
 		file_core_v1_core_proto_msgTypes[74].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*StreamEventsRequest_SubscribeToGuild); i {
+			switch v := v.(*GetGuildChannelsResponse_Channel); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -8026,7 +8235,7 @@ func file_core_v1_core_proto_init() {
 			}
 		}
 		file_core_v1_core_proto_msgTypes[75].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*StreamEventsRequest_SubscribeToActions); i {
+			switch v := v.(*GetEmotePacksResponse_EmotePack); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -8038,7 +8247,7 @@ func file_core_v1_core_proto_init() {
 			}
 		}
 		file_core_v1_core_proto_msgTypes[76].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*StreamEventsRequest_SubscribeToHomeserverEvents); i {
+			switch v := v.(*GetEmotePackEmotesResponse_Emote); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -8050,7 +8259,7 @@ func file_core_v1_core_proto_init() {
 			}
 		}
 		file_core_v1_core_proto_msgTypes[77].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Event_MessageSent); i {
+			switch v := v.(*StreamEventsRequest_SubscribeToGuild); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -8062,7 +8271,7 @@ func file_core_v1_core_proto_init() {
 			}
 		}
 		file_core_v1_core_proto_msgTypes[78].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Event_MessageUpdated); i {
+			switch v := v.(*StreamEventsRequest_SubscribeToActions); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -8074,7 +8283,7 @@ func file_core_v1_core_proto_init() {
 			}
 		}
 		file_core_v1_core_proto_msgTypes[79].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Event_MessageDeleted); i {
+			switch v := v.(*StreamEventsRequest_SubscribeToHomeserverEvents); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -8086,7 +8295,7 @@ func file_core_v1_core_proto_init() {
 			}
 		}
 		file_core_v1_core_proto_msgTypes[80].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Event_ChannelCreated); i {
+			switch v := v.(*Event_MessageSent); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -8098,7 +8307,7 @@ func file_core_v1_core_proto_init() {
 			}
 		}
 		file_core_v1_core_proto_msgTypes[81].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Event_ChannelUpdated); i {
+			switch v := v.(*Event_MessageUpdated); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -8110,7 +8319,7 @@ func file_core_v1_core_proto_init() {
 			}
 		}
 		file_core_v1_core_proto_msgTypes[82].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Event_ChannelDeleted); i {
+			switch v := v.(*Event_MessageDeleted); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -8122,7 +8331,7 @@ func file_core_v1_core_proto_init() {
 			}
 		}
 		file_core_v1_core_proto_msgTypes[83].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Event_GuildUpdated); i {
+			switch v := v.(*Event_ChannelCreated); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -8134,7 +8343,7 @@ func file_core_v1_core_proto_init() {
 			}
 		}
 		file_core_v1_core_proto_msgTypes[84].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Event_GuildDeleted); i {
+			switch v := v.(*Event_ChannelUpdated); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -8146,7 +8355,7 @@ func file_core_v1_core_proto_init() {
 			}
 		}
 		file_core_v1_core_proto_msgTypes[85].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Event_MemberJoined); i {
+			switch v := v.(*Event_ChannelDeleted); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -8158,7 +8367,7 @@ func file_core_v1_core_proto_init() {
 			}
 		}
 		file_core_v1_core_proto_msgTypes[86].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Event_MemberLeft); i {
+			switch v := v.(*Event_GuildUpdated); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -8170,7 +8379,7 @@ func file_core_v1_core_proto_init() {
 			}
 		}
 		file_core_v1_core_proto_msgTypes[87].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Event_GuildAddedToList); i {
+			switch v := v.(*Event_GuildDeleted); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -8182,7 +8391,7 @@ func file_core_v1_core_proto_init() {
 			}
 		}
 		file_core_v1_core_proto_msgTypes[88].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Event_GuildRemovedFromList); i {
+			switch v := v.(*Event_MemberJoined); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -8194,6 +8403,42 @@ func file_core_v1_core_proto_init() {
 			}
 		}
 		file_core_v1_core_proto_msgTypes[89].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Event_MemberLeft); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_core_v1_core_proto_msgTypes[90].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Event_GuildAddedToList); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_core_v1_core_proto_msgTypes[91].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Event_GuildRemovedFromList); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_core_v1_core_proto_msgTypes[92].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Event_ActionPerformed); i {
 			case 0:
 				return &v.state
@@ -8239,7 +8484,7 @@ func file_core_v1_core_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_core_v1_core_proto_rawDesc,
 			NumEnums:      4,
-			NumMessages:   90,
+			NumMessages:   93,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -8266,43 +8511,70 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type CoreServiceClient interface {
+	// This doesn't require any permissions.
 	CreateGuild(ctx context.Context, in *CreateGuildRequest, opts ...grpc.CallOption) (*CreateGuildResponse, error)
+	// This requires the "invites.manage.create" permission.
 	CreateInvite(ctx context.Context, in *CreateInviteRequest, opts ...grpc.CallOption) (*CreateInviteResponse, error)
+	// This requires the "channels.manage.create" permission.
 	CreateChannel(ctx context.Context, in *CreateChannelRequest, opts ...grpc.CallOption) (*CreateChannelResponse, error)
 	CreateEmotePack(ctx context.Context, in *CreateEmotePackRequest, opts ...grpc.CallOption) (*CreateEmotePackResponse, error)
 	GetGuildList(ctx context.Context, in *GetGuildListRequest, opts ...grpc.CallOption) (*GetGuildListResponse, error)
 	AddGuildToGuildList(ctx context.Context, in *AddGuildToGuildListRequest, opts ...grpc.CallOption) (*AddGuildToGuildListResponse, error)
 	RemoveGuildFromGuildList(ctx context.Context, in *RemoveGuildFromGuildListRequest, opts ...grpc.CallOption) (*RemoveGuildFromGuildListResponse, error)
 	GetGuild(ctx context.Context, in *GetGuildRequest, opts ...grpc.CallOption) (*GetGuildResponse, error)
+	// This requires the "invites.view" permission.
 	GetGuildInvites(ctx context.Context, in *GetGuildInvitesRequest, opts ...grpc.CallOption) (*GetGuildInvitesResponse, error)
 	GetGuildMembers(ctx context.Context, in *GetGuildMembersRequest, opts ...grpc.CallOption) (*GetGuildMembersResponse, error)
+	// You will only be informed of channels you have the "messages.view" permission for.
 	GetGuildChannels(ctx context.Context, in *GetGuildChannelsRequest, opts ...grpc.CallOption) (*GetGuildChannelsResponse, error)
+	// This requires the "messages.view" permission.
 	GetChannelMessages(ctx context.Context, in *GetChannelMessagesRequest, opts ...grpc.CallOption) (*GetChannelMessagesResponse, error)
+	// This requires the "messages.view" permission.
 	GetMessage(ctx context.Context, in *GetMessageRequest, opts ...grpc.CallOption) (*GetMessageResponse, error)
 	GetEmotePacks(ctx context.Context, in *GetEmotePacksRequest, opts ...grpc.CallOption) (*GetEmotePacksResponse, error)
 	GetEmotePackEmotes(ctx context.Context, in *GetEmotePackEmotesRequest, opts ...grpc.CallOption) (*GetEmotePackEmotesResponse, error)
+	// This requires the "guild.manage.change-name" permission.
 	UpdateGuildName(ctx context.Context, in *UpdateGuildNameRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// This requires the "channels.manage.change-name" permission.
 	UpdateChannelName(ctx context.Context, in *UpdateChannelNameRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// This requires the "channels.manage.move" permission.
 	UpdateChannelOrder(ctx context.Context, in *UpdateChannelOrderRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// This requires the "messages.send" permission.
 	UpdateMessage(ctx context.Context, in *UpdateMessageRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	AddEmoteToPack(ctx context.Context, in *AddEmoteToPackRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// This requires the "guild.manage.delete" permission.
 	DeleteGuild(ctx context.Context, in *DeleteGuildRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// This requires the "invites.manage.delete" permission.
 	DeleteInvite(ctx context.Context, in *DeleteInviteRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// This requires the "channels.manage.delete" permission.
 	DeleteChannel(ctx context.Context, in *DeleteChannelRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// This requires the "messages.manage.delete" permission if you are not the message author.
 	DeleteMessage(ctx context.Context, in *DeleteMessageRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	DeleteEmoteFromPack(ctx context.Context, in *DeleteEmoteFromPackRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	DeleteEmotePack(ctx context.Context, in *DeleteEmotePackRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	DequipEmotePack(ctx context.Context, in *DequipEmotePackRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	JoinGuild(ctx context.Context, in *JoinGuildRequest, opts ...grpc.CallOption) (*JoinGuildResponse, error)
 	LeaveGuild(ctx context.Context, in *LeaveGuildRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// This requires the "actions.trigger" permission.
 	TriggerAction(ctx context.Context, in *TriggerActionRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// This requires the "messages.send" permission.
 	SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SendMessageResponse, error)
+	// This requires the "permissions.query" permission if you specify the As field.
 	QueryHasPermission(ctx context.Context, in *QueryPermissionsRequest, opts ...grpc.CallOption) (*QueryPermissionsResponse, error)
+	// This requires the "permissions.manage.set" permission.
 	SetPermissions(ctx context.Context, in *SetPermissionsRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// This requires the "permissions.manage.get" permission.
 	GetPermissions(ctx context.Context, in *GetPermissionsRequest, opts ...grpc.CallOption) (*GetPermissionsResponse, error)
+	// This requires the "roles.get" permission.
 	GetGuildRoles(ctx context.Context, in *GetGuildRolesRequest, opts ...grpc.CallOption) (*GetGuildRolesResponse, error)
+	// This requires the "roles.manage.create" permission.
 	AddGuildRole(ctx context.Context, in *AddGuildRoleRequest, opts ...grpc.CallOption) (*AddGuildRoleResponse, error)
+	// This requires the "roles.manage.delete" permission.
 	DeleteGuildRole(ctx context.Context, in *DeleteGuildRoleRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// This requires the "roles.users.manage" permission.
+	ManageUserRoles(ctx context.Context, in *ManageUserRolesRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// This requires the "roles.users.get" permission.
+	GetUserRoles(ctx context.Context, in *GetUserRolesRequest, opts ...grpc.CallOption) (*GetUserRolesResponse, error)
 	StreamEvents(ctx context.Context, opts ...grpc.CallOption) (CoreService_StreamEventsClient, error)
 }
 
@@ -8647,6 +8919,24 @@ func (c *coreServiceClient) DeleteGuildRole(ctx context.Context, in *DeleteGuild
 	return out, nil
 }
 
+func (c *coreServiceClient) ManageUserRoles(ctx context.Context, in *ManageUserRolesRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/protocol.core.v1.CoreService/ManageUserRoles", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *coreServiceClient) GetUserRoles(ctx context.Context, in *GetUserRolesRequest, opts ...grpc.CallOption) (*GetUserRolesResponse, error) {
+	out := new(GetUserRolesResponse)
+	err := c.cc.Invoke(ctx, "/protocol.core.v1.CoreService/GetUserRoles", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *coreServiceClient) StreamEvents(ctx context.Context, opts ...grpc.CallOption) (CoreService_StreamEventsClient, error) {
 	stream, err := c.cc.NewStream(ctx, &_CoreService_serviceDesc.Streams[0], "/protocol.core.v1.CoreService/StreamEvents", opts...)
 	if err != nil {
@@ -8680,43 +8970,70 @@ func (x *coreServiceStreamEventsClient) Recv() (*Event, error) {
 
 // CoreServiceServer is the server API for CoreService service.
 type CoreServiceServer interface {
+	// This doesn't require any permissions.
 	CreateGuild(context.Context, *CreateGuildRequest) (*CreateGuildResponse, error)
+	// This requires the "invites.manage.create" permission.
 	CreateInvite(context.Context, *CreateInviteRequest) (*CreateInviteResponse, error)
+	// This requires the "channels.manage.create" permission.
 	CreateChannel(context.Context, *CreateChannelRequest) (*CreateChannelResponse, error)
 	CreateEmotePack(context.Context, *CreateEmotePackRequest) (*CreateEmotePackResponse, error)
 	GetGuildList(context.Context, *GetGuildListRequest) (*GetGuildListResponse, error)
 	AddGuildToGuildList(context.Context, *AddGuildToGuildListRequest) (*AddGuildToGuildListResponse, error)
 	RemoveGuildFromGuildList(context.Context, *RemoveGuildFromGuildListRequest) (*RemoveGuildFromGuildListResponse, error)
 	GetGuild(context.Context, *GetGuildRequest) (*GetGuildResponse, error)
+	// This requires the "invites.view" permission.
 	GetGuildInvites(context.Context, *GetGuildInvitesRequest) (*GetGuildInvitesResponse, error)
 	GetGuildMembers(context.Context, *GetGuildMembersRequest) (*GetGuildMembersResponse, error)
+	// You will only be informed of channels you have the "messages.view" permission for.
 	GetGuildChannels(context.Context, *GetGuildChannelsRequest) (*GetGuildChannelsResponse, error)
+	// This requires the "messages.view" permission.
 	GetChannelMessages(context.Context, *GetChannelMessagesRequest) (*GetChannelMessagesResponse, error)
+	// This requires the "messages.view" permission.
 	GetMessage(context.Context, *GetMessageRequest) (*GetMessageResponse, error)
 	GetEmotePacks(context.Context, *GetEmotePacksRequest) (*GetEmotePacksResponse, error)
 	GetEmotePackEmotes(context.Context, *GetEmotePackEmotesRequest) (*GetEmotePackEmotesResponse, error)
+	// This requires the "guild.manage.change-name" permission.
 	UpdateGuildName(context.Context, *UpdateGuildNameRequest) (*empty.Empty, error)
+	// This requires the "channels.manage.change-name" permission.
 	UpdateChannelName(context.Context, *UpdateChannelNameRequest) (*empty.Empty, error)
+	// This requires the "channels.manage.move" permission.
 	UpdateChannelOrder(context.Context, *UpdateChannelOrderRequest) (*empty.Empty, error)
+	// This requires the "messages.send" permission.
 	UpdateMessage(context.Context, *UpdateMessageRequest) (*empty.Empty, error)
 	AddEmoteToPack(context.Context, *AddEmoteToPackRequest) (*empty.Empty, error)
+	// This requires the "guild.manage.delete" permission.
 	DeleteGuild(context.Context, *DeleteGuildRequest) (*empty.Empty, error)
+	// This requires the "invites.manage.delete" permission.
 	DeleteInvite(context.Context, *DeleteInviteRequest) (*empty.Empty, error)
+	// This requires the "channels.manage.delete" permission.
 	DeleteChannel(context.Context, *DeleteChannelRequest) (*empty.Empty, error)
+	// This requires the "messages.manage.delete" permission if you are not the message author.
 	DeleteMessage(context.Context, *DeleteMessageRequest) (*empty.Empty, error)
 	DeleteEmoteFromPack(context.Context, *DeleteEmoteFromPackRequest) (*empty.Empty, error)
 	DeleteEmotePack(context.Context, *DeleteEmotePackRequest) (*empty.Empty, error)
 	DequipEmotePack(context.Context, *DequipEmotePackRequest) (*empty.Empty, error)
 	JoinGuild(context.Context, *JoinGuildRequest) (*JoinGuildResponse, error)
 	LeaveGuild(context.Context, *LeaveGuildRequest) (*empty.Empty, error)
+	// This requires the "actions.trigger" permission.
 	TriggerAction(context.Context, *TriggerActionRequest) (*empty.Empty, error)
+	// This requires the "messages.send" permission.
 	SendMessage(context.Context, *SendMessageRequest) (*SendMessageResponse, error)
+	// This requires the "permissions.query" permission if you specify the As field.
 	QueryHasPermission(context.Context, *QueryPermissionsRequest) (*QueryPermissionsResponse, error)
+	// This requires the "permissions.manage.set" permission.
 	SetPermissions(context.Context, *SetPermissionsRequest) (*empty.Empty, error)
+	// This requires the "permissions.manage.get" permission.
 	GetPermissions(context.Context, *GetPermissionsRequest) (*GetPermissionsResponse, error)
+	// This requires the "roles.get" permission.
 	GetGuildRoles(context.Context, *GetGuildRolesRequest) (*GetGuildRolesResponse, error)
+	// This requires the "roles.manage.create" permission.
 	AddGuildRole(context.Context, *AddGuildRoleRequest) (*AddGuildRoleResponse, error)
+	// This requires the "roles.manage.delete" permission.
 	DeleteGuildRole(context.Context, *DeleteGuildRoleRequest) (*empty.Empty, error)
+	// This requires the "roles.users.manage" permission.
+	ManageUserRoles(context.Context, *ManageUserRolesRequest) (*empty.Empty, error)
+	// This requires the "roles.users.get" permission.
+	GetUserRoles(context.Context, *GetUserRolesRequest) (*GetUserRolesResponse, error)
 	StreamEvents(CoreService_StreamEventsServer) error
 }
 
@@ -8834,6 +9151,12 @@ func (*UnimplementedCoreServiceServer) AddGuildRole(context.Context, *AddGuildRo
 }
 func (*UnimplementedCoreServiceServer) DeleteGuildRole(context.Context, *DeleteGuildRoleRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteGuildRole not implemented")
+}
+func (*UnimplementedCoreServiceServer) ManageUserRoles(context.Context, *ManageUserRolesRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ManageUserRoles not implemented")
+}
+func (*UnimplementedCoreServiceServer) GetUserRoles(context.Context, *GetUserRolesRequest) (*GetUserRolesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserRoles not implemented")
 }
 func (*UnimplementedCoreServiceServer) StreamEvents(CoreService_StreamEventsServer) error {
 	return status.Errorf(codes.Unimplemented, "method StreamEvents not implemented")
@@ -9509,6 +9832,42 @@ func _CoreService_DeleteGuildRole_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CoreService_ManageUserRoles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ManageUserRolesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CoreServiceServer).ManageUserRoles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protocol.core.v1.CoreService/ManageUserRoles",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CoreServiceServer).ManageUserRoles(ctx, req.(*ManageUserRolesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CoreService_GetUserRoles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserRolesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CoreServiceServer).GetUserRoles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protocol.core.v1.CoreService/GetUserRoles",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CoreServiceServer).GetUserRoles(ctx, req.(*GetUserRolesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _CoreService_StreamEvents_Handler(srv interface{}, stream grpc.ServerStream) error {
 	return srv.(CoreServiceServer).StreamEvents(&coreServiceStreamEventsServer{stream})
 }
@@ -9686,6 +10045,14 @@ var _CoreService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteGuildRole",
 			Handler:    _CoreService_DeleteGuildRole_Handler,
+		},
+		{
+			MethodName: "ManageUserRoles",
+			Handler:    _CoreService_ManageUserRoles_Handler,
+		},
+		{
+			MethodName: "GetUserRoles",
+			Handler:    _CoreService_GetUserRoles_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
