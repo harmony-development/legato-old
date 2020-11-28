@@ -14,6 +14,10 @@ COPY . .
 
 RUN GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o legato .
 
+FROM alpine:latest
+
+COPY --from=builder ./legato/legato .
+
 EXPOSE 2289
 
 CMD [ "./legato" ]
