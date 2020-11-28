@@ -12,6 +12,7 @@ type HarmonyContext struct {
 	context.Context
 	UserID    uint64
 	UserRoles []uint64
+	IsOwner   bool
 	Limiter   *rate.Limiter
 }
 

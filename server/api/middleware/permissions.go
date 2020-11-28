@@ -24,6 +24,11 @@ func (m Middlewares) GuildPermissionInterceptor(c context.Context, req interface
 				return nil, status.Error(codes.Internal, responses.InternalServerError)
 			}
 			ctx.UserRoles = roles
+			owner, err := m.DB.GetOwner(location.GetGuildId())
+			if err != nil {
+				return nil, status.Error(codes.Internal, responses.InternalServerError)
+			}
+			ctx.IsOwner = owner == ctx.UserID
 		}
 		return handler(ctx, req)
 	}

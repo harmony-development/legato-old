@@ -279,14 +279,17 @@ func init() {
 
 // GetGuildChannels implements the GetGuildChannels RPC
 func (v1 *V1) GetGuildChannels(c context.Context, r *corev1.GetGuildChannelsRequest) (*corev1.GetGuildChannelsResponse, error) {
+	ctx := c.(middleware.HarmonyContext)
+
 	chans, err := v1.DB.ChannelsForGuild(r.GuildId)
 	if err != nil {
 		return nil, err
 	}
 	ret := []*corev1.GetGuildChannelsResponse_Channel{}
-	roles := c.(middleware.HarmonyContext).UserRoles
+	roles := ctx.UserRoles
+
 	for _, channel := range chans {
-		if v1.Perms.Check("messages.view", roles, r.GuildId, channel.ChannelID) {
+		if ctx.IsOwner || v1.Perms.Check("messages.view", roles, r.GuildId, channel.ChannelID) {
 			ret = append(ret, &corev1.GetGuildChannelsResponse_Channel{
 				ChannelId:   channel.ChannelID,
 				ChannelName: channel.ChannelName,
@@ -679,7 +682,7 @@ func (v1 *V1) DeleteMessage(c context.Context, r *corev1.DeleteMessageRequest) (
 	if err != nil {
 		return nil, err
 	}
-	if ctx.UserID != owner && !v1.Perms.Check("messages.manage.delete", ctx.UserRoles, r.GuildId, r.ChannelId) {
+	if ctx.UserID != owner && !(ctx.IsOwner || v1.Perms.Check("messages.manage.delete", ctx.UserRoles, r.GuildId, r.ChannelId)) {
 		return nil, ErrNoPermissions
 	}
 	v1.PubSub.Guild.Broadcast(r.GuildId, &corev1.Event{
@@ -1238,16 +1241,24 @@ func init() {
 
 // QueryHasPermission implements the QueryHasPermission RPC
 func (v1 *V1) QueryHasPermission(c context.Context, r *corev1.QueryPermissionsRequest) (*corev1.QueryPermissionsResponse, error) {
+	ctx := c.(middleware.HarmonyContext)
+
 	if r.As == 0 {
 		r.As = c.(middleware.HarmonyContext).UserID
-	} else if !v1.Perms.Check("permissions.query", c.(middleware.HarmonyContext).UserRoles, r.GuildId, r.ChannelId) {
+	} else if !(ctx.IsOwner || v1.Perms.Check("permissions.query", ctx.UserRoles, r.GuildId, r.ChannelId)) {
 		return nil, ErrNoPermissions
 	}
+
+	owner, err := v1.DB.GetOwner(r.GuildId)
+	if err != nil {
+		return nil, err
+	}
+
 	roles, err := v1.DB.RolesForUser(r.GuildId, r.As)
 	if err != nil {
 		return nil, err
 	}
 	return &corev1.QueryPermissionsResponse{
-		Ok: v1.Perms.Check(r.CheckFor, roles, r.GuildId, r.ChannelId),
+		Ok: owner == r.As || v1.Perms.Check(r.CheckFor, roles, r.GuildId, r.ChannelId),
 	}, nil
 }
