@@ -5,64 +5,176 @@ package queries
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/lib/pq"
 )
 
-const getGuildPerms = `-- name: GetGuildPerms :one
-SELECT Permissions
-    FROM Guilds
+const createRole = `-- name: CreateRole :one
+INSERT INTO Roles (
+    Guild_ID, Role_ID, Name, Color, Hoist, Pingable
+) VALUES (
+    $1,       $2,      $3,   $4,    $5,    $6
+)
+RETURNING guild_id, role_id, name, color, hoist, pingable
+`
+
+type CreateRoleParams struct {
+	GuildID  uint64 `json:"guild_id"`
+	RoleID   uint64 `json:"role_id"`
+	Name     string `json:"name"`
+	Color    int32  `json:"color"`
+	Hoist    bool   `json:"hoist"`
+	Pingable bool   `json:"pingable"`
+}
+
+func (q *Queries) CreateRole(ctx context.Context, arg CreateRoleParams) (Role, error) {
+	row := q.queryRow(ctx, q.createRoleStmt, createRole,
+		arg.GuildID,
+		arg.RoleID,
+		arg.Name,
+		arg.Color,
+		arg.Hoist,
+		arg.Pingable,
+	)
+	var i Role
+	err := row.Scan(
+		&i.GuildID,
+		&i.RoleID,
+		&i.Name,
+		&i.Color,
+		&i.Hoist,
+		&i.Pingable,
+	)
+	return i, err
+}
+
+const deleteRole = `-- name: DeleteRole :exec
+DELETE FROM Roles
     WHERE Guild_ID = $1
+      AND Role_ID = $2
 `
 
-func (q *Queries) GetGuildPerms(ctx context.Context, guildID uint64) ([]byte, error) {
-	row := q.queryRow(ctx, q.getGuildPermsStmt, getGuildPerms, guildID)
-	var permissions []byte
-	err := row.Scan(&permissions)
-	return permissions, err
+type DeleteRoleParams struct {
+	GuildID uint64 `json:"guild_id"`
+	RoleID  uint64 `json:"role_id"`
 }
 
-const getGuildRoles = `-- name: GetGuildRoles :one
-SELECT Roles
-    FROM Guilds
-    WHERE Guild_ID = $1
-`
-
-func (q *Queries) GetGuildRoles(ctx context.Context, guildID uint64) ([][]byte, error) {
-	row := q.queryRow(ctx, q.getGuildRolesStmt, getGuildRoles, guildID)
-	var roles [][]byte
-	err := row.Scan(pq.Array(&roles))
-	return roles, err
-}
-
-const setGuildPerms = `-- name: SetGuildPerms :exec
-UPDATE Guilds
-    SET Permissions = $1
-    WHERE Guild_ID = $2
-`
-
-type SetGuildPermsParams struct {
-	Permissions []byte `json:"permissions"`
-	GuildID     uint64 `json:"guild_id"`
-}
-
-func (q *Queries) SetGuildPerms(ctx context.Context, arg SetGuildPermsParams) error {
-	_, err := q.exec(ctx, q.setGuildPermsStmt, setGuildPerms, arg.Permissions, arg.GuildID)
+func (q *Queries) DeleteRole(ctx context.Context, arg DeleteRoleParams) error {
+	_, err := q.exec(ctx, q.deleteRoleStmt, deleteRole, arg.GuildID, arg.RoleID)
 	return err
 }
 
-const setGuildRoles = `-- name: SetGuildRoles :exec
-UPDATE Guilds
-    SET Roles = $1
-    WHERE Guild_ID = $2
+const getPermissions = `-- name: GetPermissions :one
+SELECT Nodes FROM Permissions
+    WHERE Guild_ID = $1
+      AND Channel_ID = $2
+      AND Role_ID = $3
 `
 
-type SetGuildRolesParams struct {
-	Roles   [][]byte `json:"roles"`
-	GuildID uint64   `json:"guild_id"`
+type GetPermissionsParams struct {
+	GuildID   uint64        `json:"guild_id"`
+	ChannelID sql.NullInt64 `json:"channel_id"`
+	RoleID    uint64        `json:"role_id"`
 }
 
-func (q *Queries) SetGuildRoles(ctx context.Context, arg SetGuildRolesParams) error {
-	_, err := q.exec(ctx, q.setGuildRolesStmt, setGuildRoles, pq.Array(arg.Roles), arg.GuildID)
+func (q *Queries) GetPermissions(ctx context.Context, arg GetPermissionsParams) ([]string, error) {
+	row := q.queryRow(ctx, q.getPermissionsStmt, getPermissions, arg.GuildID, arg.ChannelID, arg.RoleID)
+	var nodes []string
+	err := row.Scan(pq.Array(&nodes))
+	return nodes, err
+}
+
+const getRolesForGuild = `-- name: GetRolesForGuild :many
+SELECT guild_id, role_id, name, color, hoist, pingable FROM Roles
+    WHERE Guild_ID = $1
+`
+
+func (q *Queries) GetRolesForGuild(ctx context.Context, guildID uint64) ([]Role, error) {
+	rows, err := q.query(ctx, q.getRolesForGuildStmt, getRolesForGuild, guildID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Role
+	for rows.Next() {
+		var i Role
+		if err := rows.Scan(
+			&i.GuildID,
+			&i.RoleID,
+			&i.Name,
+			&i.Color,
+			&i.Hoist,
+			&i.Pingable,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const rolesForUser = `-- name: RolesForUser :many
+SELECT Role_ID FROM Roles_Members
+    WHERE Guild_ID = $1
+      AND Member_ID = $2
+`
+
+type RolesForUserParams struct {
+	GuildID  uint64 `json:"guild_id"`
+	MemberID uint64 `json:"member_id"`
+}
+
+func (q *Queries) RolesForUser(ctx context.Context, arg RolesForUserParams) ([]uint64, error) {
+	rows, err := q.query(ctx, q.rolesForUserStmt, rolesForUser, arg.GuildID, arg.MemberID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []uint64
+	for rows.Next() {
+		var role_id uint64
+		if err := rows.Scan(&role_id); err != nil {
+			return nil, err
+		}
+		items = append(items, role_id)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const setPermissions = `-- name: SetPermissions :exec
+INSERT INTO Permissions (
+    Guild_ID, Channel_ID, Role_ID, Nodes
+) VALUES (
+    $1, $2, $3, $4
+) ON CONFLICT DO UPDATE SET Nodes = EXCLUDED.Nodes
+`
+
+type SetPermissionsParams struct {
+	GuildID   uint64        `json:"guild_id"`
+	ChannelID sql.NullInt64 `json:"channel_id"`
+	RoleID    uint64        `json:"role_id"`
+	Nodes     []string      `json:"nodes"`
+}
+
+func (q *Queries) SetPermissions(ctx context.Context, arg SetPermissionsParams) error {
+	_, err := q.exec(ctx, q.setPermissionsStmt, setPermissions,
+		arg.GuildID,
+		arg.ChannelID,
+		arg.RoleID,
+		pq.Array(arg.Nodes),
+	)
 	return err
 }

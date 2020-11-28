@@ -1,19 +1,34 @@
--- name: GetGuildRoles :one
-SELECT Roles
-    FROM Guilds
+-- name: CreateRole :one
+INSERT INTO Roles (
+    Guild_ID, Role_ID, Name, Color, Hoist, Pingable
+) VALUES (
+    $1,       $2,      $3,   $4,    $5,    $6
+)
+RETURNING *;
+
+-- name: DeleteRole :exec
+DELETE FROM Roles
+    WHERE Guild_ID = $1
+      AND Role_ID = $2;
+
+-- name: GetRolesForGuild :many
+SELECT * FROM Roles
     WHERE Guild_ID = $1;
 
--- name: SetGuildRoles :exec
-UPDATE Guilds
-    SET Roles = $1
-    WHERE Guild_ID = $2;
+-- name: RolesForUser :many
+SELECT Role_ID FROM Roles_Members
+    WHERE Guild_ID = $1
+      AND Member_ID = $2;
 
--- name: GetGuildPerms :one
-SELECT Permissions
-    FROM Guilds
-    WHERE Guild_ID = $1;
+-- name: SetPermissions :exec
+INSERT INTO Permissions (
+    Guild_ID, Channel_ID, Role_ID, Nodes
+) VALUES (
+    $1, $2, $3, $4
+) ON CONFLICT DO UPDATE SET Nodes = EXCLUDED.Nodes;
 
--- name: SetGuildPerms :exec
-UPDATE Guilds
-    SET Permissions = $1
-    WHERE Guild_ID = $2;
+-- name: GetPermissions :one
+SELECT Nodes FROM Permissions
+    WHERE Guild_ID = $1
+      AND Channel_ID = $2
+      AND Role_ID = $3;

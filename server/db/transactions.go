@@ -10,7 +10,6 @@ import (
 	corev1 "github.com/harmony-development/legato/gen/core"
 	profilev1 "github.com/harmony-development/legato/gen/profile"
 	"github.com/harmony-development/legato/server/db/queries"
-	"google.golang.org/protobuf/proto"
 )
 
 func toSqlString(input string) sql.NullString {
@@ -842,74 +841,76 @@ func (db HarmonyDB) DequipEmotePack(userID, packID uint64) error {
 }
 
 func (db HarmonyDB) AddRoleToGuild(guildID uint64, role *corev1.Role) error {
-	data, err := db.queries.GetGuildRoles(ctx, guildID)
-	if err != nil {
-		return err
-	}
-
-	marshalled, err := proto.Marshal(role)
-	if err != nil {
-		return err
-	}
-
-	data = append(data, marshalled)
-	return db.queries.SetGuildRoles(ctx, queries.SetGuildRolesParams{
-		Roles:   data,
-		GuildID: guildID,
+	_, err := db.queries.CreateRole(ctx, queries.CreateRoleParams{
+		GuildID:  guildID,
+		RoleID:   role.RoleId,
+		Name:     role.Name,
+		Color:    role.Color,
+		Hoist:    role.Hoist,
+		Pingable: role.Pingable,
 	})
+	return err
 }
 
 func (db HarmonyDB) RemoveRoleFromGuild(guildID, roleID uint64) error {
-	data, err := db.queries.GetGuildRoles(ctx, guildID)
-	if err != nil {
-		return err
-	}
-
-	var items [][]byte
-
-	for _, item := range data {
-		role := new(corev1.Role)
-		err = proto.Unmarshal(item, role)
-		if err != nil {
-			return err
-		}
-
-		if role.RoleId != roleID {
-			items = append(items, item)
-		}
-	}
-
-	return db.queries.SetGuildRoles(ctx, queries.SetGuildRolesParams{
-		Roles:   items,
+	return db.queries.DeleteRole(ctx, queries.DeleteRoleParams{
 		GuildID: guildID,
+		RoleID:  roleID,
 	})
 }
 
 func (db HarmonyDB) GetGuildRoles(guildID uint64) (ret []*corev1.Role, err error) {
-	data, err := db.queries.GetGuildRoles(ctx, guildID)
-	if err != nil {
-		return
-	}
+	roles, err := db.queries.GetRolesForGuild(ctx, guildID)
 
-	for _, item := range data {
-		role := new(corev1.Role)
-		err = proto.Unmarshal(item, role)
-		if err != nil {
-			return
-		}
-		ret = append(ret, role)
+	for _, role := range roles {
+		ret = append(ret, &corev1.Role{
+			Name:     role.Name,
+			RoleId:   role.RoleID,
+			Color:    role.Color,
+			Hoist:    role.Hoist,
+			Pingable: role.Pingable,
+		})
 	}
 
 	return
 }
 
-func (db HarmonyDB) SetGuildPermissions(guildID uint64, data []byte) error {
-	return db.queries.SetGuildPerms(ctx, queries.SetGuildPermsParams{
-		Permissions: data,
-		GuildID:     guildID,
+func (db HarmonyDB) SetPermissions(guildID uint64, channelID uint64, roleID uint64, permissions []PermissionsNode) error {
+	return db.queries.SetPermissions(ctx, queries.SetPermissionsParams{
+		GuildID: guildID,
+		ChannelID: sql.NullInt64{
+			Int64: int64(channelID),
+			Valid: channelID != 0,
+		},
+		RoleID: roleID,
 	})
 }
 
-func (db HarmonyDB) GetGuildPermissions(guildID uint64) (data []byte, err error) {
-	return db.queries.GetGuildPerms(ctx, guildID)
+func (db HarmonyDB) GetPermissions(guildID uint64, channelID uint64, roleID uint64) (permissions []PermissionsNode, err error) {
+	data, _ := db.queries.GetPermissions(ctx, queries.GetPermissionsParams{
+		GuildID: guildID,
+		ChannelID: sql.NullInt64{
+			Int64: int64(channelID),
+			Valid: channelID != 0,
+		},
+		RoleID: roleID,
+	})
+	for _, item := range data {
+		println(item)
+	}
+	return
+}
+
+func (db HarmonyDB) GetPermissionsData(guildID uint64) (ret PermissionsData, err error) {
+	ret.Roles = make(map[uint64][]PermissionsNode)
+	ret.Categories = make(map[uint64][]uint64)
+	ret.Channels = make(map[uint64]map[uint64][]PermissionsNode)
+	panic("unimplemented")
+}
+
+func (db HarmonyDB) RolesForUser(guildID, userID uint64) (ret []uint64, err error) {
+	return db.queries.RolesForUser(ctx, queries.RolesForUserParams{
+		GuildID:  guildID,
+		MemberID: userID,
+	})
 }

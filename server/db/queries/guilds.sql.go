@@ -6,8 +6,6 @@ package queries
 import (
 	"context"
 	"database/sql"
-
-	"github.com/lib/pq"
 )
 
 const addUserToGuild = `-- name: AddUserToGuild :exec
@@ -74,7 +72,7 @@ INSERT INTO Guilds (
         Guild_Name,
         Picture_URL
     )
-VALUES ($1, $2, $3, $4) RETURNING guild_id, owner_id, guild_name, picture_url, roles, permissions
+VALUES ($1, $2, $3, $4) RETURNING guild_id, owner_id, guild_name, picture_url
 `
 
 type CreateGuildParams struct {
@@ -97,8 +95,6 @@ func (q *Queries) CreateGuild(ctx context.Context, arg CreateGuildParams) (Guild
 		&i.OwnerID,
 		&i.GuildName,
 		&i.PictureUrl,
-		pq.Array(&i.Roles),
-		&i.Permissions,
 	)
 	return i, err
 }
@@ -186,7 +182,7 @@ func (q *Queries) GetChannels(ctx context.Context, guildID sql.NullInt64) ([]Cha
 }
 
 const getGuildData = `-- name: GetGuildData :one
-SELECT guild_id, owner_id, guild_name, picture_url, roles, permissions
+SELECT guild_id, owner_id, guild_name, picture_url
 FROM Guilds
 WHERE Guild_ID = $1
 `
@@ -199,8 +195,6 @@ func (q *Queries) GetGuildData(ctx context.Context, guildID uint64) (Guild, erro
 		&i.OwnerID,
 		&i.GuildName,
 		&i.PictureUrl,
-		pq.Array(&i.Roles),
-		&i.Permissions,
 	)
 	return i, err
 }
@@ -306,21 +300,19 @@ func (q *Queries) GuildsForUser(ctx context.Context, userID uint64) ([]uint64, e
 }
 
 const guildsForUserWithData = `-- name: GuildsForUserWithData :many
-SELECT user_id, guild_members.guild_id, guilds.guild_id, owner_id, guild_name, picture_url, roles, permissions
+SELECT user_id, guild_members.guild_id, guilds.guild_id, owner_id, guild_name, picture_url
 FROM Guild_Members
     INNER JOIN guilds ON Guild_Members.Guild_ID = Guilds.Guild_ID
 WHERE User_ID = $1
 `
 
 type GuildsForUserWithDataRow struct {
-	UserID      uint64   `json:"user_id"`
-	GuildID     uint64   `json:"guild_id"`
-	GuildID_2   uint64   `json:"guild_id_2"`
-	OwnerID     uint64   `json:"owner_id"`
-	GuildName   string   `json:"guild_name"`
-	PictureUrl  string   `json:"picture_url"`
-	Roles       [][]byte `json:"roles"`
-	Permissions []byte   `json:"permissions"`
+	UserID     uint64 `json:"user_id"`
+	GuildID    uint64 `json:"guild_id"`
+	GuildID_2  uint64 `json:"guild_id_2"`
+	OwnerID    uint64 `json:"owner_id"`
+	GuildName  string `json:"guild_name"`
+	PictureUrl string `json:"picture_url"`
 }
 
 func (q *Queries) GuildsForUserWithData(ctx context.Context, userID uint64) ([]GuildsForUserWithDataRow, error) {
@@ -339,8 +331,6 @@ func (q *Queries) GuildsForUserWithData(ctx context.Context, userID uint64) ([]G
 			&i.OwnerID,
 			&i.GuildName,
 			&i.PictureUrl,
-			pq.Array(&i.Roles),
-			&i.Permissions,
 		); err != nil {
 			return nil, err
 		}

@@ -52,12 +52,10 @@ type ForeignUser struct {
 }
 
 type Guild struct {
-	GuildID     uint64   `json:"guild_id"`
-	OwnerID     uint64   `json:"owner_id"`
-	GuildName   string   `json:"guild_name"`
-	PictureUrl  string   `json:"picture_url"`
-	Roles       [][]byte `json:"roles"`
-	Permissions []byte   `json:"permissions"`
+	GuildID    uint64 `json:"guild_id"`
+	OwnerID    uint64 `json:"owner_id"`
+	GuildName  string `json:"guild_name"`
+	PictureUrl string `json:"picture_url"`
 }
 
 type GuildList struct {
@@ -100,6 +98,13 @@ type Message struct {
 	Attachments []string        `json:"attachments"`
 }
 
+type Permission struct {
+	GuildID   uint64        `json:"guild_id"`
+	ChannelID sql.NullInt64 `json:"channel_id"`
+	RoleID    uint64        `json:"role_id"`
+	Nodes     []string      `json:"nodes"`
+}
+
 type Profile struct {
 	UserID   uint64         `json:"user_id"`
 	Username string         `json:"username"`
@@ -113,6 +118,21 @@ type RateLimitWhitelistIp struct {
 
 type RateLimitWhitelistUser struct {
 	UserID uint64 `json:"user_id"`
+}
+
+type Role struct {
+	GuildID  uint64 `json:"guild_id"`
+	RoleID   uint64 `json:"role_id"`
+	Name     string `json:"name"`
+	Color    int32  `json:"color"`
+	Hoist    bool   `json:"hoist"`
+	Pingable bool   `json:"pingable"`
+}
+
+type RolesMember struct {
+	GuildID  uint64 `json:"guild_id"`
+	RoleID   uint64 `json:"role_id"`
+	MemberID uint64 `json:"member_id"`
 }
 
 type Session struct {

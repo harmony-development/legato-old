@@ -1172,5 +1172,14 @@ func (v1 *V1) GetPermissions(c context.Context, r *corev1.GetPermissionsRequest)
 
 // QueryHasPermission implements the QueryHasPermission RPC
 func (v1 *V1) QueryHasPermission(c context.Context, r *corev1.QueryPermissionsRequest) (*corev1.QueryPermissionsResponse, error) {
-	panic("unimplemented")
+	if r.As == 0 {
+		r.As = c.(middleware.HarmonyContext).UserID
+	}
+	roles, err := v1.DB.RolesForUser(r.GuildId, r.As)
+	if err != nil {
+		return nil, err
+	}
+	return &corev1.QueryPermissionsResponse{
+		Ok: v1.Perms.Check(r.CheckFor, roles, r.GuildId, r.ChannelId),
+	}, nil
 }
