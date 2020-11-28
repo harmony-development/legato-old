@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	corev1 "github.com/harmony-development/legato/gen/core"
@@ -34,6 +35,25 @@ type HarmonyDB struct {
 type PermissionsNode struct {
 	Node  string
 	Allow bool
+}
+
+func (p *PermissionsNode) Deserialize(s string) {
+	trimmed := strings.Split(strings.TrimSuffix(strings.TrimPrefix(s, "("), ")"), ",")
+	if trimmed[2] == "t" {
+		p.Allow = true
+	} else {
+		p.Allow = false
+	}
+
+	p.Node = trimmed[1]
+}
+
+func (p PermissionsNode) Serialize() string {
+	node := "f"
+	if p.Allow {
+		node = "t"
+	}
+	return fmt.Sprintf("(%s,%s)", p.Node, node)
 }
 
 type PermissionsData struct {

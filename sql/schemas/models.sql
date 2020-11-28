@@ -84,10 +84,14 @@ CREATE TABLE IF NOT EXISTS Roles_Members (
     PRIMARY KEY (Guild_ID, Role_ID, Member_ID)
 );
 
-CREATE TYPE PermissionsNode AS (
-    Node TEXT,
-    Allow BOOLEAN
-);
+--migration-only DO $$ BEGIN
+    CREATE TYPE PermissionsNode AS (
+        Node TEXT,
+        Allow BOOLEAN
+    );
+--migration-only EXCEPTION
+--migration-only WHEN duplicate_object THEN null;
+--migration-only END $$;
 
 CREATE TABLE IF NOT EXISTS Permissions (
     Guild_ID BIGSERIAL NOT NULL,

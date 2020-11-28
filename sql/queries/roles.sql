@@ -25,10 +25,15 @@ INSERT INTO Permissions (
     Guild_ID, Channel_ID, Role_ID, Nodes
 ) VALUES (
     $1, $2, $3, $4
-) ON CONFLICT DO UPDATE SET Nodes = EXCLUDED.Nodes;
+) ON CONFLICT (Guild_ID, Channel_ID, Role_ID) DO UPDATE SET Nodes = EXCLUDED.Nodes;
 
 -- name: GetPermissions :one
 SELECT Nodes FROM Permissions
     WHERE Guild_ID = $1
       AND Channel_ID = $2
       AND Role_ID = $3;
+
+-- name: GetPermissionsWithoutChannel :one
+SELECT Nodes FROM Permissions
+    WHERE Guild_ID = $1
+      AND Role_ID = $2;

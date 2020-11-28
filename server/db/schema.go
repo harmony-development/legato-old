@@ -15,23 +15,9 @@ func (db *HarmonyDB) Migrate() error {
 	if err != nil {
 		return err
 	}
-	models := strings.Split(string(data), ";")
-	tx, err := db.Begin()
-	if err != nil {
-		return err
-	}
-	for _, q := range models {
-		if _, err := tx.Exec(q); err != nil {
-			return err
-		}
-	}
-	if err := tx.Commit(); err != nil {
-		if err := tx.Rollback(); err != nil {
-			return err
-		}
-		return err
-	}
-	return nil
+
+	_, err = db.Exec(strings.ReplaceAll(string(data), "--migration-only", ""))
+	return err
 }
 
 func (db *HarmonyDB) SessionExpireRoutine() {
