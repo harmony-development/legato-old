@@ -117,5 +117,7 @@ func (inst Instance) Start() {
 	})
 
 	logrus.Info("Legato started")
-	grp.Wait()
+	if err := grp.Wait(); err != nil {
+		logrus.Error(err)
+	}
 }

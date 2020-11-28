@@ -1,6 +1,7 @@
 package intercom
 
 import (
+	"context"
 	"time"
 
 	"github.com/harmony-development/legato/server/logger"
@@ -31,7 +32,9 @@ func New(deps Dependencies) (*Manager, error) {
 }
 
 func (im Manager) Connect(host string) (*grpc.ClientConn, error) {
-	client, err := grpc.Dial(host, grpc.WithTimeout(15*time.Second))
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	client, err := grpc.DialContext(ctx, host)
 	if err != nil {
 		return nil, err
 	}

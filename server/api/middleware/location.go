@@ -52,6 +52,10 @@ func LocationHandler(database db.IHarmonyDB, req interface{}, fullMethod string,
 				GetChannelId() uint64
 			})
 
+			if !ok {
+				panic("channel location middleware used on message without a channel location")
+			}
+
 			channelID := location.GetChannelId()
 
 			if channelID == 0 {
@@ -69,6 +73,10 @@ func LocationHandler(database db.IHarmonyDB, req interface{}, fullMethod string,
 				location, ok := req.(interface {
 					GetMessageId() uint64
 				})
+
+				if !ok {
+					panic("message location middleware used on message without a message location")
+				}
 
 				messageID := location.GetMessageId()
 

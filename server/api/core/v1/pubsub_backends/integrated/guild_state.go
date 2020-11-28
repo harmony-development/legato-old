@@ -105,7 +105,9 @@ func (s *GuildState) Broadcast(guildID uint64, event *corev1.Event) {
 	go func() {
 		for sub := range s.subs[_guildID(guildID)] {
 			for _, server := range s.guildEvents[sub][_guildID(guildID)] {
-				server.Send(event)
+				if err := server.Send(event); err != nil {
+					println(err)
+				}
 			}
 		}
 	}()

@@ -65,6 +65,8 @@ func (h *HomeserverEventState) Broadcast(userID uint64, e *corev1.Event) {
 
 	val, _ := h.homeserverEvents[_userID(userID)]
 	for _, serv := range val {
-		serv.Send(e)
+		if err := serv.Send(e); err != nil {
+			println(err)
+		}
 	}
 }

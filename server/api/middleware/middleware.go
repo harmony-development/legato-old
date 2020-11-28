@@ -78,8 +78,7 @@ func RegisterRPCConfig(config RPCConfig, name ...string) {
 }
 
 func GetRPCConfig(name string) RPCConfig {
-	val, _ := rpcConfigs[name]
-	return val
+	return rpcConfigs[name]
 }
 
 type Dependencies struct {

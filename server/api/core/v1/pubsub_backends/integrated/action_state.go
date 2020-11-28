@@ -30,7 +30,7 @@ func (a *ActionState) Subscribe(userID uint64, server corev1.CoreService_StreamE
 		a.Unsubscribe(userID, server)
 	}()
 
-	val, _ := a.actionEvents[_userID(userID)]
+	val := a.actionEvents[_userID(userID)]
 	val = append(val, server)
 	a.actionEvents[_userID(userID)] = val
 	a.actionChannels[server] = make(chan struct{})
@@ -42,7 +42,7 @@ func (a *ActionState) Unsubscribe(userID uint64, server corev1.CoreService_Strea
 	a.Lock()
 	defer a.Unlock()
 
-	val, _ := a.actionEvents[_userID(userID)]
+	val := a.actionEvents[_userID(userID)]
 	for idx, serv := range val {
 		if serv == server {
 			val[idx] = val[len(val)-1]
@@ -60,6 +60,8 @@ func (a *ActionState) Unsubscribe(userID uint64, server corev1.CoreService_Strea
 func (a *ActionState) Broadcast(userID uint64, action *corev1.Event) {
 	val, _ := a.actionEvents[_userID(userID)]
 	for _, serv := range val {
-		serv.Send(action)
+		if err := serv.Send(action); err != nil {
+			println(err)
+		}
 	}
 }
