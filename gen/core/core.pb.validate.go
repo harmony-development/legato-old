@@ -2043,6 +2043,8 @@ func (m *GetChannelMessagesResponse) Validate() error {
 		return nil
 	}
 
+	// no validation rules for ReachedTop
+
 	for idx, item := range m.GetMessages() {
 		_, _ = idx, item
 

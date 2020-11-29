@@ -4,6 +4,7 @@ import (
 	v1 "github.com/harmony-development/legato/server/api/core/v1"
 	"github.com/harmony-development/legato/server/api/core/v1/permissions"
 	"github.com/harmony-development/legato/server/api/core/v1/pubsub_backends/integrated"
+	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/sony/sonyflake"
@@ -15,6 +16,7 @@ type Dependencies struct {
 	Logger    logger.ILogger
 	Sonyflake *sonyflake.Sonyflake
 	Perms     *permissions.Manager
+	Config    *config.Config
 }
 
 // Service contains the core service
@@ -39,6 +41,7 @@ func New(deps *Dependencies) *Service {
 				Guild:      (&integrated.GuildState{}).Initialize(),
 				Homeserver: (&integrated.HomeserverEventState{}).Initialize(),
 			},
+			Config: deps.Config,
 		},
 	}
 	return core
