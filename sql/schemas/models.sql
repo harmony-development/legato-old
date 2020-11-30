@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS Roles (
     Color INTEGER NOT NULL,
     Hoist BOOLEAN NOT NULL,
     Pingable BOOLEAN NOT NULL,
+    Position TEXT NOT NULL,
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE,
     PRIMARY KEY (Role_ID)
 );
@@ -85,19 +86,16 @@ CREATE TABLE IF NOT EXISTS Roles_Members (
 );
 
 --migration-only DO $$ BEGIN
-    CREATE TYPE PermissionsNode AS (
-        Node TEXT,
-        Allow BOOLEAN
-    );
+CREATE TYPE PermissionsNode AS (Node TEXT, Allow BOOLEAN);
+
 --migration-only EXCEPTION
 --migration-only WHEN duplicate_object THEN null;
 --migration-only END $$;
-
 CREATE TABLE IF NOT EXISTS Permissions (
     Guild_ID BIGSERIAL NOT NULL,
     Channel_ID BIGINT,
     Role_ID BIGSERIAL NOT NULL,
-    Nodes PermissionsNode[] NOT NULL,
+    Nodes PermissionsNode [] NOT NULL,
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE,
     FOREIGN KEY (Role_ID) REFERENCES Roles (Role_ID) ON DELETE CASCADE,
     FOREIGN KEY (Channel_ID) REFERENCES Channels (Channel_ID) ON DELETE CASCADE,
@@ -141,7 +139,7 @@ CREATE TABLE IF NOT EXISTS Messages (
     Actions jsonb,
     Overrides bytea,
     Reply_To_ID BIGINT DEFAULT 0,
-    Attachments text[],
+    Attachments text [],
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE,
     FOREIGN KEY (Channel_ID) REFERENCES Channels (Channel_ID) ON DELETE CASCADE
 );

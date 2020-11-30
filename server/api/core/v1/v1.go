@@ -1184,6 +1184,24 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation,
+		Permission: "roles.move",
+	}, "/protocol.core.v1.CoreService/MoveRole")
+}
+
+// MoveRole implements the MoveRole RPC
+func (v1 *V1) MoveRole(c context.Context, r *corev1.MoveRoleRequest) (*corev1.MoveRoleResponse, error) {
+	err := v1.DB.MoveRole(r.GuildId, r.RoleId, r.BeforeId, r.AfterId)
+	return &corev1.MoveRoleResponse{}, err
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation,
 		Permission: "roles.get",
 	}, "/protocol.core.v1.CoreService/GetGuildRoles")
 }

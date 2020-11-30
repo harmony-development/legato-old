@@ -134,6 +134,8 @@ type IHarmonyDB interface {
 	DequipEmotePack(userID, packID uint64) error
 	AddRoleToGuild(guildID uint64, role *corev1.Role) error
 	RemoveRoleFromGuild(guildID, roleID uint64) error
+	GetRolePositions(guildID, before, previous uint64) (pos string, retErr error)
+	MoveRole(guildID, roleID, beforeRole, previousRole uint64) error
 	GetGuildRoles(guildID uint64) ([]*corev1.Role, error)
 	SetPermissions(guildID uint64, channelID uint64, roleID uint64, permissions []PermissionsNode) error
 	GetPermissions(guildID uint64, channelID uint64, roleID uint64) (permissions []PermissionsNode, err error)

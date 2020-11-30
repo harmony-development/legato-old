@@ -11,11 +11,8 @@ import (
 )
 
 const addUserToRole = `-- name: AddUserToRole :exec
-INSERT INTO Roles_Members (
-    Guild_ID, Role_ID, Member_ID
-) VALUES (
-    $1, $2, $3
-) ON CONFLICT DO NOTHING
+INSERT INTO Roles_Members (Guild_ID, Role_ID, Member_ID)
+VALUES ($1, $2, $3) ON CONFLICT DO NOTHING
 `
 
 type AddUserToRoleParams struct {
@@ -31,11 +28,23 @@ func (q *Queries) AddUserToRole(ctx context.Context, arg AddUserToRoleParams) er
 
 const createRole = `-- name: CreateRole :one
 INSERT INTO Roles (
-    Guild_ID, Role_ID, Name, Color, Hoist, Pingable
-) VALUES (
-    $1,       $2,      $3,   $4,    $5,    $6
-)
-RETURNING guild_id, role_id, name, color, hoist, pingable
+        Guild_ID,
+        Role_ID,
+        Name,
+        Color,
+        Hoist,
+        Pingable,
+        Position
+    )
+VALUES (
+        $1,
+        $2,
+        $3,
+        $4,
+        $5,
+        $6,
+        $7
+    ) RETURNING guild_id, role_id, name, color, hoist, pingable, position
 `
 
 type CreateRoleParams struct {
@@ -45,6 +54,7 @@ type CreateRoleParams struct {
 	Color    int32  `json:"color"`
 	Hoist    bool   `json:"hoist"`
 	Pingable bool   `json:"pingable"`
+	Position string `json:"position"`
 }
 
 func (q *Queries) CreateRole(ctx context.Context, arg CreateRoleParams) (Role, error) {
@@ -55,6 +65,7 @@ func (q *Queries) CreateRole(ctx context.Context, arg CreateRoleParams) (Role, e
 		arg.Color,
 		arg.Hoist,
 		arg.Pingable,
+		arg.Position,
 	)
 	var i Role
 	err := row.Scan(
@@ -64,14 +75,15 @@ func (q *Queries) CreateRole(ctx context.Context, arg CreateRoleParams) (Role, e
 		&i.Color,
 		&i.Hoist,
 		&i.Pingable,
+		&i.Position,
 	)
 	return i, err
 }
 
 const deleteRole = `-- name: DeleteRole :exec
 DELETE FROM Roles
-    WHERE Guild_ID = $1
-      AND Role_ID = $2
+WHERE Guild_ID = $1
+    AND Role_ID = $2
 `
 
 type DeleteRoleParams struct {
@@ -85,10 +97,11 @@ func (q *Queries) DeleteRole(ctx context.Context, arg DeleteRoleParams) error {
 }
 
 const getPermissions = `-- name: GetPermissions :one
-SELECT Nodes FROM Permissions
-    WHERE Guild_ID = $1
-      AND Channel_ID = $2
-      AND Role_ID = $3
+SELECT Nodes
+FROM Permissions
+WHERE Guild_ID = $1
+    AND Channel_ID = $2
+    AND Role_ID = $3
 `
 
 type GetPermissionsParams struct {
@@ -105,9 +118,10 @@ func (q *Queries) GetPermissions(ctx context.Context, arg GetPermissionsParams) 
 }
 
 const getPermissionsWithoutChannel = `-- name: GetPermissionsWithoutChannel :one
-SELECT Nodes FROM Permissions
-    WHERE Guild_ID = $1
-      AND Role_ID = $2
+SELECT Nodes
+FROM Permissions
+WHERE Guild_ID = $1
+    AND Role_ID = $2
 `
 
 type GetPermissionsWithoutChannelParams struct {
@@ -122,9 +136,30 @@ func (q *Queries) GetPermissionsWithoutChannel(ctx context.Context, arg GetPermi
 	return nodes, err
 }
 
+const getRolePosition = `-- name: GetRolePosition :one
+SELECT Position
+FROM Roles
+WHERE Role_ID = $1
+    AND Guild_ID = $2
+`
+
+type GetRolePositionParams struct {
+	RoleID  uint64 `json:"role_id"`
+	GuildID uint64 `json:"guild_id"`
+}
+
+func (q *Queries) GetRolePosition(ctx context.Context, arg GetRolePositionParams) (string, error) {
+	row := q.queryRow(ctx, q.getRolePositionStmt, getRolePosition, arg.RoleID, arg.GuildID)
+	var position string
+	err := row.Scan(&position)
+	return position, err
+}
+
 const getRolesForGuild = `-- name: GetRolesForGuild :many
-SELECT guild_id, role_id, name, color, hoist, pingable FROM Roles
-    WHERE Guild_ID = $1
+SELECT guild_id, role_id, name, color, hoist, pingable, position
+FROM Roles
+WHERE Guild_ID = $1
+ORDER BY Position
 `
 
 func (q *Queries) GetRolesForGuild(ctx context.Context, guildID uint64) ([]Role, error) {
@@ -143,6 +178,7 @@ func (q *Queries) GetRolesForGuild(ctx context.Context, guildID uint64) ([]Role,
 			&i.Color,
 			&i.Hoist,
 			&i.Pingable,
+			&i.Position,
 		); err != nil {
 			return nil, err
 		}
@@ -157,11 +193,29 @@ func (q *Queries) GetRolesForGuild(ctx context.Context, guildID uint64) ([]Role,
 	return items, nil
 }
 
+const moveRole = `-- name: MoveRole :exec
+UPDATE Roles
+SET Position = $1
+WHERE Role_ID = $2
+    AND Guild_ID = $3
+`
+
+type MoveRoleParams struct {
+	Position string `json:"position"`
+	RoleID   uint64 `json:"role_id"`
+	GuildID  uint64 `json:"guild_id"`
+}
+
+func (q *Queries) MoveRole(ctx context.Context, arg MoveRoleParams) error {
+	_, err := q.exec(ctx, q.moveRoleStmt, moveRole, arg.Position, arg.RoleID, arg.GuildID)
+	return err
+}
+
 const removeUserFromRole = `-- name: RemoveUserFromRole :exec
 DELETE FROM Roles_Members
-    WHERE Guild_ID = $1
-      AND Role_ID = $2
-      AND Member_ID = $3
+WHERE Guild_ID = $1
+    AND Role_ID = $2
+    AND Member_ID = $3
 `
 
 type RemoveUserFromRoleParams struct {
@@ -176,9 +230,10 @@ func (q *Queries) RemoveUserFromRole(ctx context.Context, arg RemoveUserFromRole
 }
 
 const rolesForUser = `-- name: RolesForUser :many
-SELECT Role_ID FROM Roles_Members
-    WHERE Guild_ID = $1
-      AND Member_ID = $2
+SELECT Role_ID
+FROM Roles_Members
+WHERE Guild_ID = $1
+    AND Member_ID = $2
 `
 
 type RolesForUserParams struct {
@@ -210,11 +265,10 @@ func (q *Queries) RolesForUser(ctx context.Context, arg RolesForUserParams) ([]u
 }
 
 const setPermissions = `-- name: SetPermissions :exec
-INSERT INTO Permissions (
-    Guild_ID, Channel_ID, Role_ID, Nodes
-) VALUES (
-    $1, $2, $3, $4
-) ON CONFLICT (Guild_ID, Channel_ID, Role_ID) DO UPDATE SET Nodes = EXCLUDED.Nodes
+INSERT INTO Permissions (Guild_ID, Channel_ID, Role_ID, Nodes)
+VALUES ($1, $2, $3, $4) ON CONFLICT (Guild_ID, Channel_ID, Role_ID) DO
+UPDATE
+SET Nodes = EXCLUDED.Nodes
 `
 
 type SetPermissionsParams struct {

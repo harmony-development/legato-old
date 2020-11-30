@@ -859,6 +859,45 @@ func (db HarmonyDB) RemoveRoleFromGuild(guildID, roleID uint64) error {
 	})
 }
 
+func (db *HarmonyDB) GetRolePositions(guildID, before, previous uint64) (pos string, retErr error) {
+	nextPos, err := db.queries.GetRolePosition(ctx, queries.GetRolePositionParams{
+		GuildID: guildID,
+		RoleID:  before,
+	})
+	if err != nil && err != sql.ErrNoRows {
+		db.Logger.Exception(err)
+		retErr = err
+		return
+	}
+	prevPos, err := db.queries.GetRolePosition(ctx, queries.GetRolePositionParams{
+		GuildID: guildID,
+		RoleID:  previous,
+	})
+	if err != nil && err != sql.ErrNoRows {
+		db.Logger.Exception(err)
+		retErr = err
+		return
+	}
+	pos = Rank(prevPos, nextPos)
+	return
+}
+
+func (db HarmonyDB) MoveRole(guildID, roleID, beforeRole, previousRole uint64) error {
+	pos, err := db.GetRolePositions(guildID, beforeRole, previousRole)
+	if err != nil {
+		return err
+	}
+	err = db.queries.MoveRole(ctx, queries.MoveRoleParams{
+		Position: pos,
+		RoleID:   roleID,
+		GuildID:  guildID,
+	})
+
+	db.Logger.CheckException(err)
+
+	return err
+}
+
 func (db HarmonyDB) GetGuildRoles(guildID uint64) (ret []*corev1.Role, err error) {
 	roles, err := db.queries.GetRolesForGuild(ctx, guildID)
 

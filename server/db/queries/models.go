@@ -127,6 +127,7 @@ type Role struct {
 	Color    int32  `json:"color"`
 	Hoist    bool   `json:"hoist"`
 	Pingable bool   `json:"pingable"`
+	Position string `json:"position"`
 }
 
 type RolesMember struct {

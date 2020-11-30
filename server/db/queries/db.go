@@ -172,6 +172,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getPermissionsWithoutChannelStmt, err = db.PrepareContext(ctx, getPermissionsWithoutChannel); err != nil {
 		return nil, fmt.Errorf("error preparing query GetPermissionsWithoutChannel: %w", err)
 	}
+	if q.getRolePositionStmt, err = db.PrepareContext(ctx, getRolePosition); err != nil {
+		return nil, fmt.Errorf("error preparing query GetRolePosition: %w", err)
+	}
 	if q.getRolesForGuildStmt, err = db.PrepareContext(ctx, getRolesForGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query GetRolesForGuild: %w", err)
 	}
@@ -210,6 +213,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.moveGuildStmt, err = db.PrepareContext(ctx, moveGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query MoveGuild: %w", err)
+	}
+	if q.moveRoleStmt, err = db.PrepareContext(ctx, moveRole); err != nil {
+		return nil, fmt.Errorf("error preparing query MoveRole: %w", err)
 	}
 	if q.numChannelsWithIDStmt, err = db.PrepareContext(ctx, numChannelsWithID); err != nil {
 		return nil, fmt.Errorf("error preparing query NumChannelsWithID: %w", err)
@@ -529,6 +535,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getPermissionsWithoutChannelStmt: %w", cerr)
 		}
 	}
+	if q.getRolePositionStmt != nil {
+		if cerr := q.getRolePositionStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getRolePositionStmt: %w", cerr)
+		}
+	}
 	if q.getRolesForGuildStmt != nil {
 		if cerr := q.getRolesForGuildStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getRolesForGuildStmt: %w", cerr)
@@ -592,6 +603,11 @@ func (q *Queries) Close() error {
 	if q.moveGuildStmt != nil {
 		if cerr := q.moveGuildStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing moveGuildStmt: %w", cerr)
+		}
+	}
+	if q.moveRoleStmt != nil {
+		if cerr := q.moveRoleStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing moveRoleStmt: %w", cerr)
 		}
 	}
 	if q.numChannelsWithIDStmt != nil {
@@ -788,6 +804,7 @@ type Queries struct {
 	getPackOwnerStmt                 *sql.Stmt
 	getPermissionsStmt               *sql.Stmt
 	getPermissionsWithoutChannelStmt *sql.Stmt
+	getRolePositionStmt              *sql.Stmt
 	getRolesForGuildStmt             *sql.Stmt
 	getUserStmt                      *sql.Stmt
 	getUserByEmailStmt               *sql.Stmt
@@ -801,6 +818,7 @@ type Queries struct {
 	messageWithIDExistsStmt          *sql.Stmt
 	moveChannelStmt                  *sql.Stmt
 	moveGuildStmt                    *sql.Stmt
+	moveRoleStmt                     *sql.Stmt
 	numChannelsWithIDStmt            *sql.Stmt
 	openInvitesStmt                  *sql.Stmt
 	removeGuildFromListStmt          *sql.Stmt
@@ -878,6 +896,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getPackOwnerStmt:                 q.getPackOwnerStmt,
 		getPermissionsStmt:               q.getPermissionsStmt,
 		getPermissionsWithoutChannelStmt: q.getPermissionsWithoutChannelStmt,
+		getRolePositionStmt:              q.getRolePositionStmt,
 		getRolesForGuildStmt:             q.getRolesForGuildStmt,
 		getUserStmt:                      q.getUserStmt,
 		getUserByEmailStmt:               q.getUserByEmailStmt,
@@ -891,6 +910,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		messageWithIDExistsStmt:          q.messageWithIDExistsStmt,
 		moveChannelStmt:                  q.moveChannelStmt,
 		moveGuildStmt:                    q.moveGuildStmt,
+		moveRoleStmt:                     q.moveRoleStmt,
 		numChannelsWithIDStmt:            q.numChannelsWithIDStmt,
 		openInvitesStmt:                  q.openInvitesStmt,
 		removeGuildFromListStmt:          q.removeGuildFromListStmt,
