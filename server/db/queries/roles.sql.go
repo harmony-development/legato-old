@@ -287,3 +287,75 @@ func (q *Queries) SetPermissions(ctx context.Context, arg SetPermissionsParams) 
 	)
 	return err
 }
+
+const setRoleColor = `-- name: SetRoleColor :exec
+UPDATE Roles
+    SET Color = $1
+    WHERE Guild_ID = $2
+      AND Role_ID = $3
+`
+
+type SetRoleColorParams struct {
+	Color   int32  `json:"color"`
+	GuildID uint64 `json:"guild_id"`
+	RoleID  uint64 `json:"role_id"`
+}
+
+func (q *Queries) SetRoleColor(ctx context.Context, arg SetRoleColorParams) error {
+	_, err := q.exec(ctx, q.setRoleColorStmt, setRoleColor, arg.Color, arg.GuildID, arg.RoleID)
+	return err
+}
+
+const setRoleHoist = `-- name: SetRoleHoist :exec
+UPDATE Roles
+    SET Hoist = $1
+    WHERE Guild_ID = $2
+      AND Role_ID = $3
+`
+
+type SetRoleHoistParams struct {
+	Hoist   bool   `json:"hoist"`
+	GuildID uint64 `json:"guild_id"`
+	RoleID  uint64 `json:"role_id"`
+}
+
+func (q *Queries) SetRoleHoist(ctx context.Context, arg SetRoleHoistParams) error {
+	_, err := q.exec(ctx, q.setRoleHoistStmt, setRoleHoist, arg.Hoist, arg.GuildID, arg.RoleID)
+	return err
+}
+
+const setRoleName = `-- name: SetRoleName :exec
+UPDATE Roles
+    SET Name = $1
+    WHERE Guild_ID = $2
+      AND Role_ID = $3
+`
+
+type SetRoleNameParams struct {
+	Name    string `json:"name"`
+	GuildID uint64 `json:"guild_id"`
+	RoleID  uint64 `json:"role_id"`
+}
+
+func (q *Queries) SetRoleName(ctx context.Context, arg SetRoleNameParams) error {
+	_, err := q.exec(ctx, q.setRoleNameStmt, setRoleName, arg.Name, arg.GuildID, arg.RoleID)
+	return err
+}
+
+const setRolePingable = `-- name: SetRolePingable :exec
+UPDATE Roles
+    SET Pingable = $1
+    WHERE Guild_ID = $2
+      AND Role_ID = $3
+`
+
+type SetRolePingableParams struct {
+	Pingable bool   `json:"pingable"`
+	GuildID  uint64 `json:"guild_id"`
+	RoleID   uint64 `json:"role_id"`
+}
+
+func (q *Queries) SetRolePingable(ctx context.Context, arg SetRolePingableParams) error {
+	_, err := q.exec(ctx, q.setRolePingableStmt, setRolePingable, arg.Pingable, arg.GuildID, arg.RoleID)
+	return err
+}

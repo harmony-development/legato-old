@@ -250,6 +250,18 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.setPermissionsStmt, err = db.PrepareContext(ctx, setPermissions); err != nil {
 		return nil, fmt.Errorf("error preparing query SetPermissions: %w", err)
 	}
+	if q.setRoleColorStmt, err = db.PrepareContext(ctx, setRoleColor); err != nil {
+		return nil, fmt.Errorf("error preparing query SetRoleColor: %w", err)
+	}
+	if q.setRoleHoistStmt, err = db.PrepareContext(ctx, setRoleHoist); err != nil {
+		return nil, fmt.Errorf("error preparing query SetRoleHoist: %w", err)
+	}
+	if q.setRoleNameStmt, err = db.PrepareContext(ctx, setRoleName); err != nil {
+		return nil, fmt.Errorf("error preparing query SetRoleName: %w", err)
+	}
+	if q.setRolePingableStmt, err = db.PrepareContext(ctx, setRolePingable); err != nil {
+		return nil, fmt.Errorf("error preparing query SetRolePingable: %w", err)
+	}
 	if q.setStatusStmt, err = db.PrepareContext(ctx, setStatus); err != nil {
 		return nil, fmt.Errorf("error preparing query SetStatus: %w", err)
 	}
@@ -665,6 +677,26 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing setPermissionsStmt: %w", cerr)
 		}
 	}
+	if q.setRoleColorStmt != nil {
+		if cerr := q.setRoleColorStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing setRoleColorStmt: %w", cerr)
+		}
+	}
+	if q.setRoleHoistStmt != nil {
+		if cerr := q.setRoleHoistStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing setRoleHoistStmt: %w", cerr)
+		}
+	}
+	if q.setRoleNameStmt != nil {
+		if cerr := q.setRoleNameStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing setRoleNameStmt: %w", cerr)
+		}
+	}
+	if q.setRolePingableStmt != nil {
+		if cerr := q.setRolePingableStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing setRolePingableStmt: %w", cerr)
+		}
+	}
 	if q.setStatusStmt != nil {
 		if cerr := q.setStatusStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing setStatusStmt: %w", cerr)
@@ -830,6 +862,10 @@ type Queries struct {
 	setGuildNameStmt                 *sql.Stmt
 	setGuildPictureStmt              *sql.Stmt
 	setPermissionsStmt               *sql.Stmt
+	setRoleColorStmt                 *sql.Stmt
+	setRoleHoistStmt                 *sql.Stmt
+	setRoleNameStmt                  *sql.Stmt
+	setRolePingableStmt              *sql.Stmt
 	setStatusStmt                    *sql.Stmt
 	updateAvatarStmt                 *sql.Stmt
 	updateChannelNameStmt            *sql.Stmt
@@ -922,6 +958,10 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		setGuildNameStmt:                 q.setGuildNameStmt,
 		setGuildPictureStmt:              q.setGuildPictureStmt,
 		setPermissionsStmt:               q.setPermissionsStmt,
+		setRoleColorStmt:                 q.setRoleColorStmt,
+		setRoleHoistStmt:                 q.setRoleHoistStmt,
+		setRoleNameStmt:                  q.setRoleNameStmt,
+		setRolePingableStmt:              q.setRolePingableStmt,
 		setStatusStmt:                    q.setStatusStmt,
 		updateAvatarStmt:                 q.updateAvatarStmt,
 		updateChannelNameStmt:            q.updateChannelNameStmt,

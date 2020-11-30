@@ -142,6 +142,7 @@ type IHarmonyDB interface {
 	GetPermissionsData(guildID uint64) (PermissionsData, error)
 	RolesForUser(guildID, userID uint64) ([]uint64, error)
 	ManageRoles(guildID, userID uint64, addRoles, removeRoles []uint64) error
+	ModifyRole(guildID, roleID uint64, name string, color int32, hoist, pingable, updateName, updateColor, updateHoist, updatePingable bool) error
 }
 
 // New creates a new DB connection

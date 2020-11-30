@@ -1016,6 +1016,50 @@ func (db HarmonyDB) RolesForUser(guildID, userID uint64) (ret []uint64, err erro
 	})
 }
 
+func (db HarmonyDB) ModifyRole(guildID, roleID uint64, name string, color int32, hoist, pingable, updateName, updateColor, updateHoist, updatePingable bool) error {
+	tx, err := db.Begin()
+	if err != nil {
+		db.Logger.CheckException(err)
+		return err
+	}
+
+	quer := db.queries.WithTx(tx)
+
+	if updateName {
+		err = quer.SetRoleName(ctx, queries.SetRoleNameParams{
+			GuildID: guildID,
+			RoleID:  roleID,
+			Name:    name,
+		})
+	}
+	if updateColor && err == nil {
+		err = quer.SetRoleColor(ctx, queries.SetRoleColorParams{
+			GuildID: guildID,
+			RoleID:  roleID,
+			Color:   color,
+		})
+	}
+	if updateHoist && err == nil {
+		err = quer.SetRoleHoist(ctx, queries.SetRoleHoistParams{
+			GuildID: guildID,
+			RoleID:  roleID,
+			Hoist:   hoist,
+		})
+	}
+	if updatePingable && err == nil {
+		err = quer.SetRolePingable(ctx, queries.SetRolePingableParams{
+			GuildID:  guildID,
+			RoleID:   roleID,
+			Pingable: pingable,
+		})
+	}
+	if err != nil {
+		db.Logger.CheckException(err)
+		return err
+	}
+	return nil
+}
+
 func (db HarmonyDB) ManageRoles(guildID, userID uint64, addRoles, removeRoles []uint64) error {
 	tx, err := db.Begin()
 	db.Logger.CheckException(err)

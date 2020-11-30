@@ -75,3 +75,27 @@ SELECT Nodes
 FROM Permissions
 WHERE Guild_ID = $1
     AND Role_ID = $2;
+
+-- name: SetRoleName :exec
+UPDATE Roles
+    SET Name = $1
+    WHERE Guild_ID = $2
+      AND Role_ID = $3;
+
+-- name: SetRoleColor :exec
+UPDATE Roles
+    SET Color = $1
+    WHERE Guild_ID = $2
+      AND Role_ID = $3;
+
+-- name: SetRoleHoist :exec
+UPDATE Roles
+    SET Hoist = $1
+    WHERE Guild_ID = $2
+      AND Role_ID = $3;
+
+-- name: SetRolePingable :exec
+UPDATE Roles
+    SET Pingable = $1
+    WHERE Guild_ID = $2
+      AND Role_ID = $3;

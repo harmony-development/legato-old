@@ -1137,7 +1137,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation,
-		Permission: "roles.manage.create",
+		Permission: "roles.manage",
 	}, "/protocol.core.v1.CoreService/AddGuildRole")
 }
 
@@ -1167,7 +1167,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation,
-		Permission: "roles.manage.delete",
+		Permission: "roles.manage",
 	}, "/protocol.core.v1.CoreService/AddGuildRole")
 }
 
@@ -1184,7 +1184,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation,
-		Permission: "roles.move",
+		Permission: "roles.manage",
 	}, "/protocol.core.v1.CoreService/MoveRole")
 }
 
@@ -1298,6 +1298,22 @@ func init() {
 
 func (v1 *V1) ManageUserRoles(c context.Context, r *corev1.ManageUserRolesRequest) (*empty.Empty, error) {
 	return &empty.Empty{}, v1.DB.ManageRoles(r.GuildId, r.UserId, r.GiveRoleIds, r.TakeRoleIds)
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		Permission: "roles.manage",
+		Location:   middleware.GuildLocation,
+	}, "/protocol.core.v1.CoreService/ModifyGuildRole")
+}
+
+func (v1 *V1) ModifyGuildRole(c context.Context, r *corev1.ModifyGuildRoleRequest) (*empty.Empty, error) {
+	return &empty.Empty{}, v1.DB.ModifyRole(r.GuildId, r.Role.RoleId, r.Role.Name, r.Role.Color, r.Role.Hoist, r.Role.Pingable, r.ModifyName, r.ModifyColor, r.ModifyHoist, r.ModifyPingable)
 }
 
 func init() {
