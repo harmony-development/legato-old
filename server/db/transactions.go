@@ -5,6 +5,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"time"
 
 	corev1 "github.com/harmony-development/legato/gen/core"
@@ -915,6 +916,16 @@ func (db HarmonyDB) GetGuildRoles(guildID uint64) (ret []*corev1.Role, err error
 }
 
 func (db HarmonyDB) SetPermissions(guildID uint64, channelID uint64, roleID uint64, permissions []PermissionsNode) error {
+	var ln int
+	for _, perm := range permissions {
+		if perm.Node == "" {
+			continue
+		}
+		permissions[ln] = perm
+		ln++
+	}
+	permissions = permissions[:ln]
+
 	return db.queries.SetPermissions(ctx, queries.SetPermissionsParams{
 		GuildID: guildID,
 		ChannelID: sql.NullInt64{
@@ -922,20 +933,27 @@ func (db HarmonyDB) SetPermissions(guildID uint64, channelID uint64, roleID uint
 			Valid: channelID != 0,
 		},
 		RoleID: roleID,
+		Nodes:  mustSerialize(permissions),
 	})
 }
 
-func dbToPermissionsNodes(s []string) (ret []PermissionsNode) {
-	for _, item := range s {
-		node := PermissionsNode{}
-		node.Deserialize(item)
-		ret = append(ret, node)
+func mustDeserialize(d json.RawMessage, v interface{}) {
+	err := json.Unmarshal(d, v)
+	if err != nil {
+		panic(err)
 	}
-	return
+}
+
+func mustSerialize(v interface{}) json.RawMessage {
+	data, err := json.Marshal(v)
+	if err != nil {
+		panic(err)
+	}
+	return data
 }
 
 func (db HarmonyDB) GetPermissions(guildID uint64, channelID uint64, roleID uint64) (permissions []PermissionsNode, err error) {
-	var data []string
+	var data json.RawMessage
 
 	if channelID == 0 {
 		data, err = db.queries.GetPermissionsWithoutChannel(ctx, queries.GetPermissionsWithoutChannelParams{
@@ -955,9 +973,12 @@ func (db HarmonyDB) GetPermissions(guildID uint64, channelID uint64, roleID uint
 
 	if err != nil && err != sql.ErrNoRows {
 		return
+	} else if len(data) == 0 {
+		d := "[]"
+		data = json.RawMessage(d)
 	}
 
-	permissions = dbToPermissionsNodes(data)
+	mustDeserialize(data, &permissions)
 
 	return
 }

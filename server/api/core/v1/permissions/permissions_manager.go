@@ -27,11 +27,16 @@ func NewManager(db db.IHarmonyDB) *Manager {
 	return man
 }
 
+var zeroVal = PermissionNode{}
+
 func (p *Manager) saveGuild(guild uint64, data *GuildState) {
 	for channel, cdata := range data.Channels {
 		for role, rdata := range cdata {
 			if err := p.db.SetPermissions(guild, uint64(channel), uint64(role), func() (ret []db.PermissionsNode) {
 				for _, perm := range rdata {
+					if perm == zeroVal {
+						continue
+					}
 					ret = append(ret, db.PermissionsNode{
 						Node:  perm.Glob.s,
 						Allow: perm.Mode == Allow,
@@ -47,6 +52,9 @@ func (p *Manager) saveGuild(guild uint64, data *GuildState) {
 	for role, rdata := range data.Roles {
 		if err := p.db.SetPermissions(guild, 0, uint64(role), func() (ret []db.PermissionsNode) {
 			for _, perm := range rdata {
+				if perm == zeroVal {
+					continue
+				}
 				ret = append(ret, db.PermissionsNode{
 					Node:  perm.Glob.s,
 					Allow: perm.Mode == Allow,

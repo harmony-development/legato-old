@@ -6,8 +6,7 @@ package queries
 import (
 	"context"
 	"database/sql"
-
-	"github.com/lib/pq"
+	"encoding/json"
 )
 
 const addUserToRole = `-- name: AddUserToRole :exec
@@ -110,10 +109,10 @@ type GetPermissionsParams struct {
 	RoleID    uint64        `json:"role_id"`
 }
 
-func (q *Queries) GetPermissions(ctx context.Context, arg GetPermissionsParams) ([]string, error) {
+func (q *Queries) GetPermissions(ctx context.Context, arg GetPermissionsParams) (json.RawMessage, error) {
 	row := q.queryRow(ctx, q.getPermissionsStmt, getPermissions, arg.GuildID, arg.ChannelID, arg.RoleID)
-	var nodes []string
-	err := row.Scan(pq.Array(&nodes))
+	var nodes json.RawMessage
+	err := row.Scan(&nodes)
 	return nodes, err
 }
 
@@ -129,10 +128,10 @@ type GetPermissionsWithoutChannelParams struct {
 	RoleID  uint64 `json:"role_id"`
 }
 
-func (q *Queries) GetPermissionsWithoutChannel(ctx context.Context, arg GetPermissionsWithoutChannelParams) ([]string, error) {
+func (q *Queries) GetPermissionsWithoutChannel(ctx context.Context, arg GetPermissionsWithoutChannelParams) (json.RawMessage, error) {
 	row := q.queryRow(ctx, q.getPermissionsWithoutChannelStmt, getPermissionsWithoutChannel, arg.GuildID, arg.RoleID)
-	var nodes []string
-	err := row.Scan(pq.Array(&nodes))
+	var nodes json.RawMessage
+	err := row.Scan(&nodes)
 	return nodes, err
 }
 
@@ -272,10 +271,10 @@ SET Nodes = EXCLUDED.Nodes
 `
 
 type SetPermissionsParams struct {
-	GuildID   uint64        `json:"guild_id"`
-	ChannelID sql.NullInt64 `json:"channel_id"`
-	RoleID    uint64        `json:"role_id"`
-	Nodes     []string      `json:"nodes"`
+	GuildID   uint64          `json:"guild_id"`
+	ChannelID sql.NullInt64   `json:"channel_id"`
+	RoleID    uint64          `json:"role_id"`
+	Nodes     json.RawMessage `json:"nodes"`
 }
 
 func (q *Queries) SetPermissions(ctx context.Context, arg SetPermissionsParams) error {
@@ -283,7 +282,7 @@ func (q *Queries) SetPermissions(ctx context.Context, arg SetPermissionsParams) 
 		arg.GuildID,
 		arg.ChannelID,
 		arg.RoleID,
-		pq.Array(arg.Nodes),
+		arg.Nodes,
 	)
 	return err
 }

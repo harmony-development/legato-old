@@ -37,8 +37,13 @@ type PermissionsNode struct {
 	Allow bool
 }
 
-func (p *PermissionsNode) Deserialize(s string) {
+func (p *PermissionsNode) Deserialize(s string) (ok bool) {
 	trimmed := strings.Split(strings.TrimSuffix(strings.TrimPrefix(s, "("), ")"), ",")
+
+	if len(trimmed) != 3 {
+		return false
+	}
+
 	if trimmed[2] == "t" {
 		p.Allow = true
 	} else {
@@ -46,6 +51,8 @@ func (p *PermissionsNode) Deserialize(s string) {
 	}
 
 	p.Node = trimmed[1]
+
+	return true
 }
 
 func (p PermissionsNode) Serialize() string {
