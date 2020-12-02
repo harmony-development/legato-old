@@ -999,7 +999,7 @@ func (db HarmonyDB) GetPermissionsData(guildID uint64) (ret PermissionsData, err
 		ret.Channels[channel.ChannelID] = make(map[uint64][]PermissionsNode)
 		for _, role := range roles {
 			perms, err := db.GetPermissions(guildID, channel.ChannelID, role.RoleID)
-			if err != nil {
+			if err != nil && err != sql.ErrNoRows {
 				return PermissionsData{}, err
 			}
 			ret.Channels[channel.ChannelID][role.RoleID] = perms
