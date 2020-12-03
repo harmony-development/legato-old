@@ -57,11 +57,31 @@ WHERE Guild_ID = $1
     AND Role_ID = $2
     AND Member_ID = $3;
 
+-- name: PermissionExistsWithoutChannel :one
+SELECT EXISTS(SELECT 1 FROM PERMISSIONS WHERE Guild_ID = $1 AND Channel_ID IS NULL AND Role_ID = $2);
+
+-- name: PermissionsExists :one
+SELECT EXISTS(SELECT 1 FROM PERMISSIONS WHERE Guild_ID = $1 AND Channel_ID = $2 AND Role_ID = $3);
+
+-- name: UpdatePermissions :exec
+UPDATE Permissions
+SET Nodes = $4
+WHERE Guild_ID = $1
+    AND Channel_ID = $2
+    AND Role_ID = $3;
+
+-- name: UpdatePermissionsWithoutChannel :exec
+UPDATE Permissions
+SET Nodes = $3
+WHERE Guild_ID = $1
+    AND Channel_ID IS NULL
+    AND Role_ID = $2;
+
+
 -- name: SetPermissions :exec
-INSERT INTO Permissions (Guild_ID, Channel_ID, Role_ID, Nodes)
-VALUES ($1, $2, $3, $4) ON CONFLICT (Guild_ID, Channel_ID, Role_ID) DO
-UPDATE
-SET Nodes = EXCLUDED.Nodes;
+INSERT INTO Permissions
+    (Guild_ID, Channel_ID, Role_ID, Nodes)
+    VALUES ($1, $2, $3, $4);
 
 -- name: GetPermissions :one
 SELECT Nodes
@@ -74,6 +94,7 @@ WHERE Guild_ID = $1
 SELECT Nodes
 FROM Permissions
 WHERE Guild_ID = $1
+    AND Channel_ID IS NULL
     AND Role_ID = $2;
 
 -- name: SetRoleName :exec

@@ -926,6 +926,47 @@ func (db HarmonyDB) SetPermissions(guildID uint64, channelID uint64, roleID uint
 	}
 	permissions = permissions[:ln]
 
+	var exists bool
+	var err error
+
+	if channelID == 0 {
+		exists, err = db.queries.PermissionExistsWithoutChannel(ctx, queries.PermissionExistsWithoutChannelParams{
+			GuildID: guildID,
+			RoleID:  roleID,
+		})
+	} else {
+		exists, err = db.queries.PermissionsExists(ctx, queries.PermissionsExistsParams{
+			GuildID: guildID,
+			ChannelID: sql.NullInt64{
+				Int64: int64(channelID),
+				Valid: true,
+			},
+			RoleID: roleID,
+		})
+	}
+
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		if channelID == 0 {
+			return db.queries.UpdatePermissionsWithoutChannel(ctx, queries.UpdatePermissionsWithoutChannelParams{
+				GuildID: guildID,
+				RoleID:  roleID,
+				Nodes:   mustSerialize(permissions),
+			})
+		}
+		return db.queries.UpdatePermissions(ctx, queries.UpdatePermissionsParams{
+			GuildID: guildID,
+			ChannelID: sql.NullInt64{
+				Int64: int64(channelID),
+				Valid: true,
+			},
+			RoleID: roleID,
+			Nodes:  mustSerialize(permissions),
+		})
+	}
 	return db.queries.SetPermissions(ctx, queries.SetPermissionsParams{
 		GuildID: guildID,
 		ChannelID: sql.NullInt64{
@@ -960,6 +1001,7 @@ func (db HarmonyDB) GetPermissions(guildID uint64, channelID uint64, roleID uint
 			GuildID: guildID,
 			RoleID:  roleID,
 		})
+		println(string(data))
 	} else {
 		data, err = db.queries.GetPermissions(ctx, queries.GetPermissionsParams{
 			GuildID: guildID,

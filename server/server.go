@@ -7,7 +7,9 @@ import (
 	"net"
 	stdlibHTTP "net/http"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -118,8 +120,18 @@ func (inst Instance) Start() {
 		return multiplexer.Serve()
 	})
 
-	logrus.Info("Legato started")
-	if err := grp.Wait(); err != nil {
-		logrus.Error(err)
-	}
+	terminateChan := make(chan os.Signal, 1)
+	signal.Notify(terminateChan, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		logrus.Info("Legato started")
+		if err := grp.Wait(); err != nil {
+			logrus.Error(err)
+		}
+		terminateChan <- os.Interrupt
+	}()
+
+	<-terminateChan
+
+	logrus.Info("Legato ended")
 }

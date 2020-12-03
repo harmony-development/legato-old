@@ -1,6 +1,7 @@
 package permissions
 
 import (
+	"github.com/alecthomas/repr"
 	corev1 "github.com/harmony-development/legato/gen/core"
 	"github.com/harmony-development/legato/server/db"
 	lru "github.com/hashicorp/golang-lru"
@@ -17,9 +18,7 @@ func NewManager(db db.IHarmonyDB) *Manager {
 	man := &Manager{
 		db: db,
 	}
-	cache, err := lru.NewWithEvict(50_000, func(key, value interface{}) {
-		man.saveGuild(key.(uint64), value.(*GuildState))
-	})
+	cache, err := lru.New(50_000)
 	if err != nil {
 		panic(err)
 	}
@@ -69,6 +68,9 @@ func (p *Manager) saveGuild(guild uint64, data *GuildState) {
 
 func (p *Manager) obtainGuild(guild uint64) *GuildState {
 	data, err := p.db.GetPermissionsData(guild)
+
+	repr.Println(data)
+
 	if err != nil {
 		panic(err)
 	}
@@ -121,15 +123,18 @@ func (p *Manager) Check(permission string, userRoles []uint64, inGuild uint64, i
 	return state.Check(permission, userRoles, ChannelID(inChannel))
 }
 
-func (p *Manager) GetPermissions(forGuild, forChannel, forRole uint64) (ret []*corev1.Permission) {
-	var guild *GuildState
-
-	if !p.states.Contains(forGuild) {
-		guild = p.obtainGuild(forGuild)
-	} else {
-		intf, _ := p.states.Get(forGuild)
-		guild = intf.(*GuildState)
+func (p *Manager) ensureGuild(guildID uint64) *GuildState {
+	if !p.states.Contains(guildID) {
+		p.states.Add(guildID, p.obtainGuild(guildID))
 	}
+
+	val, _ := p.states.Get(guildID)
+
+	return val.(*GuildState)
+}
+
+func (p *Manager) GetPermissions(forGuild, forChannel, forRole uint64) (ret []*corev1.Permission) {
+	guild := p.ensureGuild(forGuild)
 
 	if forChannel == 0 {
 		data := guild.Roles[RoleID(forRole)]
@@ -162,11 +167,15 @@ func (p *Manager) GetPermissions(forGuild, forChannel, forRole uint64) (ret []*c
 		}
 	}
 
+	repr.Println(ret)
+
 	return
 }
 
 func (p *Manager) SetPermissions(permissions []*corev1.Permission, forGuild, forChannel, forRole uint64) error {
-	var guild *GuildState
+	guild := p.ensureGuild(forGuild)
+
+	repr.Println(permissions)
 
 	if !p.states.Contains(forGuild) {
 		guild = p.obtainGuild(forGuild)
@@ -178,6 +187,10 @@ func (p *Manager) SetPermissions(permissions []*corev1.Permission, forGuild, for
 	var nodes []PermissionNode
 	for _, perm := range permissions {
 		node := PermissionNode{}
+
+		if perm.Matches == "" {
+			continue
+		}
 
 		var err error
 		node.Glob, err = TryGlob(perm.Matches)
@@ -204,9 +217,7 @@ func (p *Manager) SetPermissions(permissions []*corev1.Permission, forGuild, for
 		guild.Channels[ChannelID(forChannel)][RoleID(forRole)] = nodes
 	}
 
-	if !p.states.Contains(forGuild) {
-		p.saveGuild(forGuild, guild)
-	}
+	go p.saveGuild(forGuild, guild)
 
 	return nil
 }
