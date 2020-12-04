@@ -103,7 +103,7 @@ func (a *API) DownloadHandler(c echo.Context) error {
 	defer handle.Close()
 
 	c.Response().Header().Set("Content-Type", contentType)
-	c.Response().Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
+	c.Response().Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=\"%s\"", filename))
 
 	fileData, err := ioutil.ReadAll(handle)
 	if err != nil {
