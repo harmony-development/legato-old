@@ -1,9 +1,7 @@
 package server
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"net"
 	stdlibHTTP "net/http"
 	"os"
@@ -86,15 +84,6 @@ func (inst Instance) Start() {
 
 	grpcListener := multiplexer.Match(cmux.HTTP2())
 	prometheusListener := multiplexer.Match(cmux.HTTP1HeaderFieldPrefix("User-Agent", "Prometheus"))
-	grpcWebListener := multiplexer.Match(
-		func(i io.Reader) bool {
-			req, err := stdlibHTTP.ReadRequest(bufio.NewReader(i))
-			if err != nil {
-				return false
-			}
-			return strings.Contains(req.Header.Get("Access-Control-Request-Headers"), "x-grpc-web") || req.Header.Get("x-grpc-web") == "1" || req.Header.Get("Sec-Websocket-Protocol") == "grpc-websockets"
-		},
-	)
 	httpListener := multiplexer.Match(cmux.HTTP1Fast())
 
 	grp := new(errgroup.Group)
@@ -109,12 +98,20 @@ func (inst Instance) Start() {
 				},
 			},
 		})
-		err := httpServer.Server.Serve(httpListener)
+		err := (&stdlibHTTP.Server{
+			Handler: stdlibHTTP.HandlerFunc(func(resp stdlibHTTP.ResponseWriter, req *stdlibHTTP.Request) {
+				if strings.Contains(req.Header.Get("Access-Control-Request-Headers"), "x-grpc-web") || req.Header.Get("x-grpc-web") == "1" || req.Header.Get("Sec-Websocket-Protocol") == "grpc-websockets" {
+					inst.API.GrpcWebServer.ServeHTTP(resp, req)
+				} else {
+					httpServer.ServeHTTP(resp, req)
+				}
+			}),
+		}).Serve(httpListener)
 		inst.Logger.CheckException(err)
 		return err
 	})
 	grp.Go(func() error {
-		return inst.API.Start(grpcListener, grpcWebListener, prometheusListener)
+		return inst.API.Start(grpcListener, prometheusListener)
 	})
 	grp.Go(func() error {
 		return multiplexer.Serve()

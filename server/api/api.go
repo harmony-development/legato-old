@@ -40,11 +40,10 @@ type Dependencies struct {
 // API contains the component of the server responsible for APIs
 type API struct {
 	Dependencies
-	grpcServer        *grpc.Server
-	grpcWebServer     *grpcweb.WrappedGrpcServer
-	grpcWebHTTPServer *http.Server
-	prometheusServer  *http.Server
-	CoreKit           *core.Service
+	grpcServer       *grpc.Server
+	GrpcWebServer    *grpcweb.WrappedGrpcServer
+	prometheusServer *http.Server
+	CoreKit          *core.Service
 }
 
 // New creates a new API instance
@@ -77,16 +76,11 @@ func New(deps Dependencies) *API {
 			m.ErrorInterceptorStream,
 			m.RateLimitStreamInterceptorStream,
 		))
-	api.grpcWebServer = grpcweb.WrapServer(api.grpcServer, grpcweb.WithOriginFunc(func(_ string) bool {
+	api.GrpcWebServer = grpcweb.WrapServer(api.grpcServer, grpcweb.WithOriginFunc(func(_ string) bool {
 		return true
 	}), grpcweb.WithWebsockets(true), grpcweb.WithWebsocketOriginFunc(func(req *http.Request) bool {
 		return true
 	}))
-	api.grpcWebHTTPServer = &http.Server{
-		Handler: http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
-			api.grpcWebServer.ServeHTTP(resp, req)
-		}),
-	}
 	prometheusMux := http.NewServeMux()
 	prometheusMux.Handle("/metrics", promhttp.Handler())
 	api.prometheusServer = &http.Server{
@@ -118,16 +112,11 @@ func New(deps Dependencies) *API {
 }
 
 // Start starts up the API on a specific port
-func (api API) Start(grpcListener, grpcWebListener, prometheusListener net.Listener) error {
+func (api API) Start(grpcListener, prometheusListener net.Listener) error {
 	errGrp := errgroup.Group{}
 
 	errGrp.Go(func() error {
 		err := api.grpcServer.Serve(grpcListener)
-		api.Logger.CheckException(err)
-		return err
-	})
-	errGrp.Go(func() error {
-		err := api.grpcWebHTTPServer.Serve(grpcWebListener)
 		api.Logger.CheckException(err)
 		return err
 	})
