@@ -2,6 +2,7 @@
 .env
 vendor
 flatfile
+media
 filestore
 harmony.db
 static
