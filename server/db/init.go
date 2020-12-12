@@ -115,8 +115,6 @@ type IHarmonyDB interface {
 	HasGuildWithID(guildID uint64) (bool, error)
 	HasChannelWithID(guildID, channelID uint64) (bool, error)
 	HasMessageWithID(guildID, channelID, messageID uint64) (bool, error)
-	AddFileHash(fileID string, hash []byte) error
-	GetFileIDFromHash(hash []byte) (string, error)
 	GetGuildByID(guildID uint64) (queries.Guild, error)
 	UpdateMessage(messageID uint64, content *string, embeds, actions, overrides *[]byte) (time.Time, error)
 	SetStatus(userID uint64, status profilev1.UserStatus) error
@@ -150,6 +148,11 @@ type IHarmonyDB interface {
 	RolesForUser(guildID, userID uint64) ([]uint64, error)
 	ManageRoles(guildID, userID uint64, addRoles, removeRoles []uint64) error
 	ModifyRole(guildID, roleID uint64, name string, color int32, hoist, pingable, updateName, updateColor, updateHoist, updatePingable bool) error
+	DeleteFileMeta(fileID string) error
+	GetFileIDByHash(hash []byte) (string, error)
+	AddFileHash(fileID string, hash []byte) error
+	SetFileMetadata(fileID string, contentType, name string, size int32) error
+	GetFileMetadata(fileID string) (queries.GetFileMetadataRow, error)
 }
 
 // New creates a new DB connection

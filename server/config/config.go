@@ -6,6 +6,13 @@ import (
 	"github.com/spf13/viper"
 )
 
+type StorageBackendType string
+
+const (
+	Flatfile StorageBackendType = "flatfile"
+	Database StorageBackendType = "database"
+)
+
 // Config is the overall configuration for the auth service
 type Config struct {
 	Server ServerConf
@@ -30,6 +37,7 @@ type ServerConf struct {
 	RespondWithErrors                 bool
 	NonceLength                       int
 	GuildLeaveNotificationQueueLength int
+	StorageBackend                    StorageBackendType
 	Avatar                            Avatar
 	UsernamePolicy                    UsernamePolicy
 	PasswordPolicy                    PasswordPolicy
@@ -91,6 +99,7 @@ var DefaultConf = Config{
 		SnowflakeStart:                    0,
 		NonceLength:                       32,
 		GuildLeaveNotificationQueueLength: 64,
+		StorageBackend:                    Flatfile,
 		Avatar: Avatar{
 			Width:   256,
 			Height:  256,

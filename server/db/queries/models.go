@@ -41,8 +41,10 @@ type FederationNonce struct {
 }
 
 type File struct {
-	Hash   []byte `json:"hash"`
-	FileID string `json:"file_id"`
+	FileID      string `json:"file_id"`
+	Name        string `json:"name"`
+	ContentType string `json:"content_type"`
+	Size        int32  `json:"size"`
 }
 
 type ForeignUser struct {
@@ -68,6 +70,11 @@ type GuildList struct {
 type GuildMember struct {
 	UserID  uint64 `json:"user_id"`
 	GuildID uint64 `json:"guild_id"`
+}
+
+type Hash struct {
+	Hash   []byte `json:"hash"`
+	FileID string `json:"file_id"`
 }
 
 type Invite struct {

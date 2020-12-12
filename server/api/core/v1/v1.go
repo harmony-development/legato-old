@@ -18,6 +18,7 @@ import (
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/db/queries"
+	"github.com/harmony-development/legato/server/http/attachments/backend"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/harmony-development/legato/server/responses"
 	"github.com/sony/sonyflake"
@@ -36,12 +37,13 @@ var (
 
 // Dependencies are the backend services this package needs
 type Dependencies struct {
-	DB        db.IHarmonyDB
-	Logger    logger.ILogger
-	Sonyflake *sonyflake.Sonyflake
-	PubSub    SubscriptionManager
-	Perms     *permissions.Manager
-	Config    *config.Config
+	DB             db.IHarmonyDB
+	Logger         logger.ILogger
+	Sonyflake      *sonyflake.Sonyflake
+	PubSub         SubscriptionManager
+	Perms          *permissions.Manager
+	Config         *config.Config
+	StorageBackend backend.AttachmentBackend
 }
 
 // V1 contains the gRPC handler for v1
@@ -330,6 +332,7 @@ func (v1 *V1) GetMessage(c context.Context, r *corev1.GetMessageRequest) (*corev
 	}
 	var embeds []*corev1.Embed
 	var actions []*corev1.Action
+	attachments := []*corev1.Message_Attachment{}
 	var override *corev1.Override
 	if err := json.Unmarshal(message.Embeds, &embeds); err != nil {
 		return nil, err
@@ -343,6 +346,17 @@ func (v1 *V1) GetMessage(c context.Context, r *corev1.GetMessageRequest) (*corev
 			return nil, err
 		}
 	}
+	for _, a := range message.Attachments {
+		contentType, fileName, size, err := v1.StorageBackend.GetMetadata(a)
+		if err == nil {
+			attachments = append(attachments, &corev1.Message_Attachment{
+				Id:   a,
+				Name: fileName,
+				Type: contentType,
+				Size: size,
+			})
+		}
+	}
 	return &corev1.GetMessageResponse{
 		Message: &corev1.Message{
 			GuildId:     message.GuildID,
@@ -353,7 +367,7 @@ func (v1 *V1) GetMessage(c context.Context, r *corev1.GetMessageRequest) (*corev
 			EditedAt:    editedAt,
 			Content:     message.Content,
 			Embeds:      embeds,
-			Attachments: message.Attachments,
+			Attachments: attachments,
 			Actions:     actions,
 			Overrides:   override,
 			InReplyTo:   uint64(message.ReplyToID.Int64),
@@ -401,6 +415,7 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 				var embeds []*corev1.Embed
 				var actions []*corev1.Action
 				var overrides *corev1.Override
+				attachments := []*corev1.Message_Attachment{}
 				if err := json.Unmarshal(message.Embeds, &embeds); err != nil {
 					continue
 				}
@@ -413,6 +428,17 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 						continue
 					}
 				}
+				for _, a := range message.Attachments {
+					contentType, fileName, size, err := v1.StorageBackend.GetMetadata(a)
+					if err == nil {
+						attachments = append(attachments, &corev1.Message_Attachment{
+							Id:   a,
+							Name: fileName,
+							Type: contentType,
+							Size: size,
+						})
+					}
+				}
 				ret = append(ret, &corev1.Message{
 					GuildId:     message.GuildID,
 					ChannelId:   message.ChannelID,
@@ -421,7 +447,7 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 					CreatedAt:   createdAt,
 					EditedAt:    editedAt,
 					Content:     message.Content,
-					Attachments: message.Attachments,
+					Attachments: attachments,
 					Embeds:      embeds,
 					Actions:     actions,
 					Overrides:   overrides,
@@ -901,13 +927,28 @@ func (v1 *V1) SendMessage(c context.Context, r *corev1.SendMessageRequest) (*cor
 	if err != nil {
 		return nil, err
 	}
+
+	attachments := []*corev1.Message_Attachment{}
+
+	for _, a := range r.Attachments {
+		contentType, fileName, size, err := v1.StorageBackend.GetMetadata(a)
+		if err == nil {
+			attachments = append(attachments, &corev1.Message_Attachment{
+				Id:   a,
+				Name: fileName,
+				Type: contentType,
+				Size: size,
+			})
+		}
+	}
+
 	message := corev1.Message{
 		GuildId:     r.GuildId,
 		ChannelId:   r.ChannelId,
 		MessageId:   messageID,
 		AuthorId:    ctx.UserID,
 		Content:     r.Content,
-		Attachments: r.Attachments,
+		Attachments: attachments,
 		Embeds:      r.Embeds,
 		Actions:     r.Actions,
 		Overrides:   r.Overrides,

@@ -15,6 +15,7 @@ import (
 	"github.com/harmony-development/legato/server/auth"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/http/attachments/backend"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sony/sonyflake"
@@ -29,12 +30,13 @@ import (
 )
 
 type Dependencies struct {
-	Logger      logger.ILogger
-	DB          db.IHarmonyDB
-	Sonyflake   *sonyflake.Sonyflake
-	AuthManager *auth.Manager
-	Config      *config.Config
-	Permissions *permissions.Manager
+	Logger         logger.ILogger
+	DB             db.IHarmonyDB
+	Sonyflake      *sonyflake.Sonyflake
+	AuthManager    *auth.Manager
+	Config         *config.Config
+	Permissions    *permissions.Manager
+	StorageBackend backend.AttachmentBackend
 }
 
 // API contains the component of the server responsible for APIs

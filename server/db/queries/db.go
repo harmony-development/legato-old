@@ -28,11 +28,14 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.addEmoteToPackStmt, err = db.PrepareContext(ctx, addEmoteToPack); err != nil {
 		return nil, fmt.Errorf("error preparing query AddEmoteToPack: %w", err)
 	}
-	if q.addFileHashStmt, err = db.PrepareContext(ctx, addFileHash); err != nil {
-		return nil, fmt.Errorf("error preparing query AddFileHash: %w", err)
+	if q.addFileMetadataStmt, err = db.PrepareContext(ctx, addFileMetadata); err != nil {
+		return nil, fmt.Errorf("error preparing query AddFileMetadata: %w", err)
 	}
 	if q.addForeignUserStmt, err = db.PrepareContext(ctx, addForeignUser); err != nil {
 		return nil, fmt.Errorf("error preparing query AddForeignUser: %w", err)
+	}
+	if q.addHashStmt, err = db.PrepareContext(ctx, addHash); err != nil {
+		return nil, fmt.Errorf("error preparing query AddHash: %w", err)
 	}
 	if q.addLocalUserStmt, err = db.PrepareContext(ctx, addLocalUser); err != nil {
 		return nil, fmt.Errorf("error preparing query AddLocalUser: %w", err)
@@ -85,6 +88,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.deleteEmotePackStmt, err = db.PrepareContext(ctx, deleteEmotePack); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteEmotePack: %w", err)
 	}
+	if q.deleteFileMetadataStmt, err = db.PrepareContext(ctx, deleteFileMetadata); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteFileMetadata: %w", err)
+	}
 	if q.deleteGuildStmt, err = db.PrepareContext(ctx, deleteGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteGuild: %w", err)
 	}
@@ -121,8 +127,11 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getEmotePacksStmt, err = db.PrepareContext(ctx, getEmotePacks); err != nil {
 		return nil, fmt.Errorf("error preparing query GetEmotePacks: %w", err)
 	}
-	if q.getFileByHashStmt, err = db.PrepareContext(ctx, getFileByHash); err != nil {
-		return nil, fmt.Errorf("error preparing query GetFileByHash: %w", err)
+	if q.getFileIDByHashStmt, err = db.PrepareContext(ctx, getFileIDByHash); err != nil {
+		return nil, fmt.Errorf("error preparing query GetFileIDByHash: %w", err)
+	}
+	if q.getFileMetadataStmt, err = db.PrepareContext(ctx, getFileMetadata); err != nil {
+		return nil, fmt.Errorf("error preparing query GetFileMetadata: %w", err)
 	}
 	if q.getGuildDataStmt, err = db.PrepareContext(ctx, getGuildData); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGuildData: %w", err)
@@ -319,14 +328,19 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing addEmoteToPackStmt: %w", cerr)
 		}
 	}
-	if q.addFileHashStmt != nil {
-		if cerr := q.addFileHashStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing addFileHashStmt: %w", cerr)
+	if q.addFileMetadataStmt != nil {
+		if cerr := q.addFileMetadataStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addFileMetadataStmt: %w", cerr)
 		}
 	}
 	if q.addForeignUserStmt != nil {
 		if cerr := q.addForeignUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing addForeignUserStmt: %w", cerr)
+		}
+	}
+	if q.addHashStmt != nil {
+		if cerr := q.addHashStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addHashStmt: %w", cerr)
 		}
 	}
 	if q.addLocalUserStmt != nil {
@@ -414,6 +428,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing deleteEmotePackStmt: %w", cerr)
 		}
 	}
+	if q.deleteFileMetadataStmt != nil {
+		if cerr := q.deleteFileMetadataStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteFileMetadataStmt: %w", cerr)
+		}
+	}
 	if q.deleteGuildStmt != nil {
 		if cerr := q.deleteGuildStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteGuildStmt: %w", cerr)
@@ -474,9 +493,14 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getEmotePacksStmt: %w", cerr)
 		}
 	}
-	if q.getFileByHashStmt != nil {
-		if cerr := q.getFileByHashStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getFileByHashStmt: %w", cerr)
+	if q.getFileIDByHashStmt != nil {
+		if cerr := q.getFileIDByHashStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getFileIDByHashStmt: %w", cerr)
+		}
+	}
+	if q.getFileMetadataStmt != nil {
+		if cerr := q.getFileMetadataStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getFileMetadataStmt: %w", cerr)
 		}
 	}
 	if q.getGuildDataStmt != nil {
@@ -820,8 +844,9 @@ type Queries struct {
 	tx                                  *sql.Tx
 	acquireEmotePackStmt                *sql.Stmt
 	addEmoteToPackStmt                  *sql.Stmt
-	addFileHashStmt                     *sql.Stmt
+	addFileMetadataStmt                 *sql.Stmt
 	addForeignUserStmt                  *sql.Stmt
+	addHashStmt                         *sql.Stmt
 	addLocalUserStmt                    *sql.Stmt
 	addMessageStmt                      *sql.Stmt
 	addNonceStmt                        *sql.Stmt
@@ -839,6 +864,7 @@ type Queries struct {
 	deleteChannelStmt                   *sql.Stmt
 	deleteEmoteFromPackStmt             *sql.Stmt
 	deleteEmotePackStmt                 *sql.Stmt
+	deleteFileMetadataStmt              *sql.Stmt
 	deleteGuildStmt                     *sql.Stmt
 	deleteInviteStmt                    *sql.Stmt
 	deleteMessageStmt                   *sql.Stmt
@@ -851,7 +877,8 @@ type Queries struct {
 	getChannelsStmt                     *sql.Stmt
 	getEmotePackEmotesStmt              *sql.Stmt
 	getEmotePacksStmt                   *sql.Stmt
-	getFileByHashStmt                   *sql.Stmt
+	getFileIDByHashStmt                 *sql.Stmt
+	getFileMetadataStmt                 *sql.Stmt
 	getGuildDataStmt                    *sql.Stmt
 	getGuildListStmt                    *sql.Stmt
 	getGuildListPositionStmt            *sql.Stmt
@@ -920,8 +947,9 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		tx:                                  tx,
 		acquireEmotePackStmt:                q.acquireEmotePackStmt,
 		addEmoteToPackStmt:                  q.addEmoteToPackStmt,
-		addFileHashStmt:                     q.addFileHashStmt,
+		addFileMetadataStmt:                 q.addFileMetadataStmt,
 		addForeignUserStmt:                  q.addForeignUserStmt,
+		addHashStmt:                         q.addHashStmt,
 		addLocalUserStmt:                    q.addLocalUserStmt,
 		addMessageStmt:                      q.addMessageStmt,
 		addNonceStmt:                        q.addNonceStmt,
@@ -939,6 +967,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		deleteChannelStmt:                   q.deleteChannelStmt,
 		deleteEmoteFromPackStmt:             q.deleteEmoteFromPackStmt,
 		deleteEmotePackStmt:                 q.deleteEmotePackStmt,
+		deleteFileMetadataStmt:              q.deleteFileMetadataStmt,
 		deleteGuildStmt:                     q.deleteGuildStmt,
 		deleteInviteStmt:                    q.deleteInviteStmt,
 		deleteMessageStmt:                   q.deleteMessageStmt,
@@ -951,7 +980,8 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getChannelsStmt:                     q.getChannelsStmt,
 		getEmotePackEmotesStmt:              q.getEmotePackEmotesStmt,
 		getEmotePacksStmt:                   q.getEmotePacksStmt,
-		getFileByHashStmt:                   q.getFileByHashStmt,
+		getFileIDByHashStmt:                 q.getFileIDByHashStmt,
+		getFileMetadataStmt:                 q.getFileMetadataStmt,
 		getGuildDataStmt:                    q.getGuildDataStmt,
 		getGuildListStmt:                    q.getGuildListStmt,
 		getGuildListPositionStmt:            q.getGuildListPositionStmt,

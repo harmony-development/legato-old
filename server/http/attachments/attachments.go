@@ -92,7 +92,7 @@ func (a *API) DownloadHandler(c echo.Context) error {
 	}
 	fileID := ctx.Param("file_id")
 
-	contentType, filename, handle, err := a.FileBackend.ReadFile(fileID)
+	contentType, filename, _, handle, err := a.FileBackend.ReadFile(fileID)
 	if err != nil {
 		if err != backend.NotFound {
 			return echo.NewHTTPError(http.StatusInternalServerError)

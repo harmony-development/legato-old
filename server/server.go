@@ -20,6 +20,8 @@ import (
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/http"
+	"github.com/harmony-development/legato/server/http/attachments/backend"
+	database_attachments_backend "github.com/harmony-development/legato/server/http/attachments/backend/database"
 	"github.com/harmony-development/legato/server/http/attachments/backend/flatfile"
 	"github.com/harmony-development/legato/server/intercom"
 	"github.com/harmony-development/legato/server/logger"
@@ -88,15 +90,29 @@ func (inst Instance) Start() {
 
 	grp := new(errgroup.Group)
 	grp.Go(func() error {
-		httpServer := http.New(http.Dependencies{
-			DB:     inst.DB,
-			Logger: inst.Logger,
-			Config: inst.Config,
-			StorageBackend: &flatfile.Backend{
+		var storageBackend backend.AttachmentBackend
+
+		switch inst.Config.Server.StorageBackend {
+		case config.Flatfile:
+			storageBackend = &flatfile.Backend{
 				Dependencies: flatfile.Dependencies{
 					Config: inst.Config,
 				},
-			},
+			}
+		case config.Database:
+			storageBackend = &database_attachments_backend.Backend{
+				Dependencies: database_attachments_backend.Dependencies{
+					Config: inst.Config,
+					DB:     inst.DB,
+				},
+			}
+		}
+
+		httpServer := http.New(http.Dependencies{
+			DB:             inst.DB,
+			Logger:         inst.Logger,
+			Config:         inst.Config,
+			StorageBackend: storageBackend,
 		})
 		err := (&stdlibHTTP.Server{
 			Handler: stdlibHTTP.HandlerFunc(func(resp stdlibHTTP.ResponseWriter, req *stdlibHTTP.Request) {

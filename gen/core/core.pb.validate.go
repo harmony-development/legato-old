@@ -597,6 +597,21 @@ func (m *Message) Validate() error {
 
 	}
 
+	for idx, item := range m.GetAttachments() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return MessageValidationError{
+					field:  fmt.Sprintf("Attachments[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
 	// no validation rules for InReplyTo
 
 	if v, ok := interface{}(m.GetOverrides()).(interface{ Validate() error }); ok {
@@ -5964,6 +5979,81 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = GetUserRolesResponseValidationError{}
+
+// Validate checks the field values on Message_Attachment with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *Message_Attachment) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Id
+
+	// no validation rules for Name
+
+	// no validation rules for Type
+
+	// no validation rules for Size
+
+	return nil
+}
+
+// Message_AttachmentValidationError is the validation error returned by
+// Message_Attachment.Validate if the designated constraints aren't met.
+type Message_AttachmentValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e Message_AttachmentValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e Message_AttachmentValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e Message_AttachmentValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e Message_AttachmentValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e Message_AttachmentValidationError) ErrorName() string {
+	return "Message_AttachmentValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e Message_AttachmentValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sMessage_Attachment.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = Message_AttachmentValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = Message_AttachmentValidationError{}
 
 // Validate checks the field values on GetGuildListResponse_GuildListEntry with
 // the rules defined in the proto definition for this message. If any rules
