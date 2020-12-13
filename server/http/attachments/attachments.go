@@ -1,6 +1,7 @@
 package attachments
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -116,7 +117,11 @@ func (a *API) DownloadHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	return c.Blob(http.StatusOK, contentType, fileData)
+	reader := bytes.NewReader(fileData)
+
+	http.ServeContent(c.Response(), c.Request(), filename, time.Unix(0, 0), reader)
+
+	return nil
 }
 
 func New(deps Dependencies) *API {

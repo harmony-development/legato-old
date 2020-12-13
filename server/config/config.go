@@ -139,7 +139,7 @@ func Load() (*Config, error) {
 	viper.AddConfigPath(".")
 	viper.SetConfigName("config")
 	viper.SetConfigType("json")
-	viper.SetDefault("InstanceServer", defaultCFG)
+	viper.SetDefault("instanceserver", defaultCFG)
 	if err := viper.ReadInConfig(); err != nil {
 		if err := viper.SafeWriteConfig(); err != nil {
 			return nil, err
@@ -147,7 +147,7 @@ func Load() (*Config, error) {
 		return nil, err
 	}
 	var cfg Config
-	if err := viper.UnmarshalKey("InstanceServer", &cfg); err != nil {
+	if err := viper.UnmarshalKey("instanceserver", &cfg); err != nil {
 		return nil, err
 	}
 	// viper.OnConfigChange(func(e fsnotify.Event) {
