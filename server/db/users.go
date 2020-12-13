@@ -96,7 +96,6 @@ func (db *HarmonyDB) AddLocalUser(userID uint64, email, username string, passwor
 		return err
 	}
 	if err := tx.Commit(); err != nil {
-		err = tracerr.Wrap(err)
 		return tracerr.Wrap(tx.Rollback())
 	}
 	return nil

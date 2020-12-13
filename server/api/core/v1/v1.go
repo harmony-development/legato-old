@@ -9,7 +9,6 @@ import (
 	"io"
 	"time"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	corev1 "github.com/harmony-development/legato/gen/core"
@@ -24,6 +23,7 @@ import (
 	"github.com/sony/sonyflake"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -53,7 +53,9 @@ type V1 struct {
 
 // ActionsToProto is a utility function
 func (v1 *V1) ActionsToProto(msgs json.RawMessage) (ret []*corev1.Action) {
-	json.Unmarshal([]byte(msgs), &ret)
+	if err := json.Unmarshal([]byte(msgs), &ret); err != nil {
+		panic(err)
+	}
 	return
 }
 
@@ -65,7 +67,9 @@ func (v1 *V1) ProtoToActions(msgs []*corev1.Action) (ret []byte) {
 
 // EmbedsToProto is a utility function
 func (v1 *V1) EmbedsToProto(embeds json.RawMessage) (ret []*corev1.Embed) {
-	json.Unmarshal([]byte(embeds), &ret)
+	if err := json.Unmarshal([]byte(embeds), &ret); err != nil {
+		panic(err)
+	}
 	return
 }
 
@@ -81,7 +85,10 @@ func (v1 *V1) OverridesToProto(overrides []byte) (ret *corev1.Override) {
 		return
 	}
 	ret = new(corev1.Override)
-	proto.Unmarshal(overrides, ret)
+	err := proto.Unmarshal(overrides, ret)
+	if err != nil {
+		panic(err)
+	}
 	return
 }
 
@@ -397,11 +404,14 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 			return nil, err
 		}
 		messages, err = v1.DB.GetMessagesBefore(r.GuildId, r.ChannelId, time)
+		if err != nil && err != sql.ErrNoRows {
+			return nil, err
+		}
 	} else {
 		messages, err = v1.DB.GetMessages(r.GuildId, r.ChannelId)
-	}
-	if err != nil && err != sql.ErrNoRows {
-		return nil, err
+		if err != nil && err != sql.ErrNoRows {
+			return nil, err
+		}
 	}
 	return &corev1.GetChannelMessagesResponse{
 		ReachedTop: len(messages) < v1.Config.Server.Policies.APIs.Messages.MaximumGetAmount,

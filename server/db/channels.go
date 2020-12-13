@@ -103,9 +103,9 @@ func (db *HarmonyDB) GetChannelPositions(guildID, before, previous uint64) (pos 
 func (db *HarmonyDB) MoveChannel(guildID, channelID, previousID, nextID uint64) error {
 	pos, err := db.GetChannelPositions(guildID, previousID, nextID)
 	if err != nil {
+		err = tracerr.Wrap(err)
 		return err
 	}
-	err = tracerr.Wrap(err)
 	err = db.queries.MoveChannel(ctx, queries.MoveChannelParams{
 		Position:  pos,
 		ChannelID: channelID,

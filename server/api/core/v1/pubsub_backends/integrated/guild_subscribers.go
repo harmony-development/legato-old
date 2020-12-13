@@ -8,13 +8,6 @@ func (s *GuildState) subAdd(guild, user uint64) {
 	g[_guildID(guild)][_userID(user)] = struct{}{}
 }
 
-func (s *GuildState) subRemove(guild, user uint64) {
-	g := s.subs
-	if val, ok := g[_guildID(guild)]; ok {
-		delete(val, _userID(user))
-	}
-}
-
 func (s *GuildState) subRemoveUser(user uint64) {
 	g := s.subs
 	if val, ok := s.guildEvents[_userID(user)]; ok {

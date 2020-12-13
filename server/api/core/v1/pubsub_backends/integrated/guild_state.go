@@ -37,7 +37,8 @@ func (s *GuildState) Subscribe(guildID, userID uint64, server corev1.CoreService
 		<-server.Context().Done()
 		s.UnsubscribeUserFromGuild(userID, guildID)
 	}()
-	val, _ := s.guildEvents[_userID(userID)][_guildID(guildID)]
+	val, ok := s.guildEvents[_userID(userID)][_guildID(guildID)]
+	_ = ok
 	val = append(val, server)
 	s.guildEvents[_userID(userID)][_guildID(guildID)] = val
 	s.serverChannels[server] = make(chan struct{})

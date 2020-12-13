@@ -177,13 +177,6 @@ func (p *Manager) SetPermissions(permissions []*corev1.Permission, forGuild, for
 
 	repr.Println(permissions)
 
-	if !p.states.Contains(forGuild) {
-		guild = p.obtainGuild(forGuild)
-	} else {
-		intf, _ := p.states.Get(forGuild)
-		guild = intf.(*GuildState)
-	}
-
 	var nodes []PermissionNode
 	for _, perm := range permissions {
 		node := PermissionNode{}

@@ -58,7 +58,10 @@ func (a *ActionState) Unsubscribe(userID uint64, server corev1.CoreService_Strea
 
 // Broadcast broadcasts
 func (a *ActionState) Broadcast(userID uint64, action *corev1.Event) {
-	val, _ := a.actionEvents[_userID(userID)]
+	val, ok := a.actionEvents[_userID(userID)]
+	if !ok {
+		return
+	}
 	for _, serv := range val {
 		if err := serv.Send(action); err != nil {
 			println(err)

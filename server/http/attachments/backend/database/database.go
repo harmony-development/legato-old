@@ -45,7 +45,7 @@ func (b *Backend) SaveFile(name, contentType string, r io.Reader) (id string, er
 	hash := sha1.Sum(filedata)
 	err = b.DB.AddFileHash(fileID, hash[:]) // any way to use an array directly?
 
-	return fileID, nil
+	return fileID, err
 }
 
 // ReadFile readsfile

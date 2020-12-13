@@ -15,7 +15,7 @@ func (db *HarmonyDB) AddFileHash(fileID string, hash []byte) error {
 
 func (db *HarmonyDB) GetFileIDByHash(hash []byte) (string, error) {
 	data, err := db.queries.GetFileIDByHash(ctx, hash)
-	tracerr.Wrap(err)
+	err = tracerr.Wrap(err)
 	return data, err
 }
 
@@ -30,7 +30,7 @@ func (db *HarmonyDB) SetFileMetadata(fileID string, contentType, name string, si
 
 func (db *HarmonyDB) GetFileMetadata(fileID string) (queries.GetFileMetadataRow, error) {
 	data, err := db.queries.GetFileMetadata(ctx, fileID)
-	tracerr.Wrap(err)
+	err = tracerr.Wrap(err)
 	return data, err
 }
 

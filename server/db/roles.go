@@ -213,7 +213,8 @@ func (db HarmonyDB) GetPermissionsData(guildID uint64) (ret PermissionsData, err
 		if channel.Category {
 			cat = channel.ChannelID
 		} else if cat != 0 {
-			data, _ := ret.Categories[cat]
+			data, ok := ret.Categories[cat]
+			_ = ok
 			ret.Categories[cat] = append(data, channel.ChannelID)
 		}
 	}

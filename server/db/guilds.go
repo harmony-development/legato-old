@@ -58,7 +58,7 @@ func (db *HarmonyDB) CreateGuild(owner, id, channelID uint64, guildName, picture
 // DeleteGuild deletes a guild with an ID
 func (db *HarmonyDB) DeleteGuild(guildID uint64) error {
 	err := db.queries.DeleteGuild(ctx, guildID)
-	tracerr.Wrap(err)
+	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
 	return err
 }
@@ -66,7 +66,7 @@ func (db *HarmonyDB) DeleteGuild(guildID uint64) error {
 // GetOwner gets the owner of a guild
 func (db *HarmonyDB) GetOwner(guildID uint64) (uint64, error) {
 	owner, err := db.queries.GetGuildOwner(ctx, guildID)
-	tracerr.Wrap(err)
+	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
 	return owner, err
 }
@@ -74,7 +74,7 @@ func (db *HarmonyDB) GetOwner(guildID uint64) (uint64, error) {
 // IsOwner returns whether the user is the guild owner
 func (db *HarmonyDB) IsOwner(guildID, userID uint64) (bool, error) {
 	owner, err := db.GetOwner(guildID)
-	tracerr.Wrap(err)
+	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
 	if err != nil {
 		return false, err
@@ -89,7 +89,7 @@ func (db *HarmonyDB) CreateInvite(guildID uint64, possibleUses int32, name strin
 		PossibleUses: sql.NullInt32{Int32: possibleUses, Valid: true},
 		GuildID:      guildID,
 	})
-	tracerr.Wrap(err)
+	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
 	return inv, err
 }
@@ -100,7 +100,7 @@ func (db *HarmonyDB) AddMemberToGuild(userID, guildID uint64) error {
 		UserID:  userID,
 		GuildID: guildID,
 	})
-	tracerr.Wrap(err)
+	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
 	return err
 }
@@ -108,7 +108,7 @@ func (db *HarmonyDB) AddMemberToGuild(userID, guildID uint64) error {
 // InviteToGuild
 func (db *HarmonyDB) ResolveGuildID(inviteID string) (uint64, error) {
 	id, err := db.queries.ResolveGuildID(ctx, inviteID)
-	tracerr.Wrap(err)
+	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
 	return id, err
 }
@@ -116,7 +116,7 @@ func (db *HarmonyDB) ResolveGuildID(inviteID string) (uint64, error) {
 // IncrementInvite adds to the invite counter in a DB
 func (db *HarmonyDB) IncrementInvite(inviteID string) error {
 	err := db.queries.IncrementInvite(ctx, inviteID)
-	tracerr.Wrap(err)
+	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
 	return err
 }
@@ -125,14 +125,14 @@ func (db *HarmonyDB) IncrementInvite(inviteID string) error {
 func (db *HarmonyDB) DeleteInvite(inviteID string) error {
 	tx, err := db.Begin()
 	if err != nil {
-		tracerr.Wrap(err)
+		err = tracerr.Wrap(err)
 		db.Logger.CheckException(err)
 		return err
 	}
 	tq := db.queries.WithTx(tx)
 	rows, err := tq.DeleteInvite(ctx, inviteID)
 	if err != nil {
-		tracerr.Wrap(err)
+		err = tracerr.Wrap(err)
 		db.Logger.CheckException(err)
 		return err
 	}
@@ -140,7 +140,7 @@ func (db *HarmonyDB) DeleteInvite(inviteID string) error {
 		return tx.Rollback()
 	}
 	if err := tx.Commit(); err != nil {
-		tracerr.Wrap(err)
+		err = tracerr.Wrap(err)
 		db.Logger.CheckException(err)
 		return err
 	}

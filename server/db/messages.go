@@ -12,7 +12,7 @@ import (
 func (db *HarmonyDB) AddMessage(channelID, guildID, userID, messageID uint64, message string, attachments []string, embeds, actions, overrides []byte, replyTo sql.NullInt64) (*queries.Message, error) {
 	tx, err := db.Begin()
 	if err != nil {
-		tracerr.Wrap(err)
+		err = tracerr.Wrap(err)
 		db.Logger.CheckException(err)
 		return nil, err
 	}
@@ -30,12 +30,12 @@ func (db *HarmonyDB) AddMessage(channelID, guildID, userID, messageID uint64, me
 		ReplyToID:   replyTo,
 	})
 	if err != nil {
-		tracerr.Wrap(err)
+		err = tracerr.Wrap(err)
 		db.Logger.CheckException(err)
 		return nil, err
 	}
 	if err := tx.Commit(); err != nil {
-		tracerr.Wrap(err)
+		err = tracerr.Wrap(err)
 		db.Logger.CheckException(err)
 		return nil, err
 	}

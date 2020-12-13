@@ -18,6 +18,7 @@ import (
 	"github.com/harmony-development/legato/server/responses"
 	"github.com/sony/sonyflake"
 	"github.com/thanhpk/randstr"
+	"github.com/ztrue/tracerr"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -54,11 +55,12 @@ func (v1 *V1) Federate(c context.Context, r *foundationv1.FederateRequest) (*fou
 
 	nonce := randstr.Base64(v1.Config.Server.Policies.Federation.NonceLength)
 	err = v1.DB.AddNonce(nonce, user.UserID, r.Target)
+	err = tracerr.Wrap(err)
 
 	return &foundationv1.FederateReply{
 		Token: token,
 		Nonce: nonce,
-	}, nil
+	}, err
 }
 
 func init() {
