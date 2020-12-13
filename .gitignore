@@ -14,3 +14,4 @@ harmony-key.pub
 .ninja_deps
 .ninja_log
 .version.json
+config.hcl

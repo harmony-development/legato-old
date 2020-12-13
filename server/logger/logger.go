@@ -45,7 +45,7 @@ func (l Logger) CheckException(err error) {
 }
 
 func (l Logger) ErrorResponse(code codes.Code, err error, response string) error {
-	if l.Config.Server.RespondWithErrors {
+	if l.Config.Server.Policies.Debug.LogErrors {
 		return status.Error(code, err.Error())
 	}
 	return status.Error(code, response)
@@ -56,7 +56,7 @@ func (l Logger) Exception(err error) {
 	if l.Config.Sentry.Enabled {
 		sentry.CaptureException(err)
 	}
-	if l.Config.Server.LogErrors {
+	if l.Config.Server.Policies.Debug.LogErrors {
 		logrus.Warnf("%s", tracerr.SprintSourceColor(err))
 	}
 }
@@ -68,7 +68,7 @@ func (l Logger) Fatal(err error) {
 }
 
 func (l Logger) Request(c context.Context, req interface{}, info *grpc.UnaryServerInfo) {
-	if l.Config.Server.LogRequests {
+	if l.Config.Server.Policies.Debug.LogRequests {
 		p, ok := peer.FromContext(c)
 		ip := ""
 		if ok {

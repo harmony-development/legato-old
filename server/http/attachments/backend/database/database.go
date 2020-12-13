@@ -33,7 +33,7 @@ func (b *Backend) SaveFile(name, contentType string, r io.Reader) (id string, er
 		return "", err
 	}
 
-	err = ioutil.WriteFile(filepath.Join(b.Config.Server.FlatfileMediaPath, fileID), filedata, 0o660)
+	err = ioutil.WriteFile(filepath.Join(b.Config.Flatfile.MediaPath, fileID), filedata, 0o660)
 	if err != nil {
 		return "", err
 	}
@@ -56,7 +56,7 @@ func (b *Backend) ReadFile(id string) (contentType, fileName string, size int32,
 		return
 	}
 
-	r, err = os.Open(path.Join(b.Config.Server.FlatfileMediaPath, baseFileName))
+	r, err = os.Open(path.Join(b.Config.Flatfile.MediaPath, baseFileName))
 
 	return res.ContentType, res.Name, res.Size, r, err
 }

@@ -164,12 +164,12 @@ func New(cfg *config.Config, logger logger.ILogger, idgen *sonyflake.Sonyflake) 
 	db.Sonyflake = idgen
 	var err error
 	if db.DB, err = sql.Open("postgres", fmt.Sprintf("user=%v password=%v dbname=%v host=%v port=%v sslmode=%v",
-		cfg.DB.User,
-		cfg.DB.Password,
-		cfg.DB.DBName,
-		cfg.DB.Host,
-		cfg.DB.Port,
-		map[bool]string{true: "enable", false: "disable"}[cfg.DB.SSL],
+		cfg.Database.Username,
+		cfg.Database.Password,
+		cfg.Database.Name,
+		cfg.Database.Host,
+		cfg.Database.Port,
+		map[bool]string{true: "enable", false: "disable"}[cfg.Database.SSL],
 	)); err != nil {
 		return nil, tracerr.Wrap(err)
 	}
@@ -182,10 +182,10 @@ func New(cfg *config.Config, logger logger.ILogger, idgen *sonyflake.Sonyflake) 
 	if db.queries, err = queries.Prepare(context.Background(), db); err != nil {
 		return nil, tracerr.Wrap(err)
 	}
-	if db.OwnerCache, err = lru.New(cfg.Server.OwnerCacheMax); err != nil {
+	if db.OwnerCache, err = lru.New(cfg.Server.Policies.MaximumCacheSizes.Owner); err != nil {
 		return nil, tracerr.Wrap(err)
 	}
-	if db.SessionCache, err = lru.New(cfg.Server.SessionCacheMax); err != nil {
+	if db.SessionCache, err = lru.New(cfg.Server.Policies.MaximumCacheSizes.Sessions); err != nil {
 		return nil, tracerr.Wrap(err)
 	}
 	go db.SessionExpireRoutine()

@@ -52,7 +52,7 @@ func (v1 *V1) Federate(c context.Context, r *foundationv1.FederateRequest) (*fou
 		return nil, err
 	}
 
-	nonce := randstr.Base64(v1.Config.Server.NonceLength)
+	nonce := randstr.Base64(v1.Config.Server.Policies.Federation.NonceLength)
 	err = v1.DB.AddNonce(nonce, user.UserID, r.Target)
 
 	return &foundationv1.FederateReply{
@@ -184,34 +184,34 @@ func (v1 *V1) PasswordAcceptable(passwd []byte) bool {
 			stats.symbols++
 		}
 	}
-	bad := stats.upper < v1.Config.Server.PasswordPolicy.MinUpper ||
-		stats.lower < v1.Config.Server.PasswordPolicy.MinLower ||
-		stats.numbers < v1.Config.Server.PasswordPolicy.MinNumbers ||
-		stats.symbols < v1.Config.Server.PasswordPolicy.MinSymbols
+	bad := stats.upper < v1.Config.Server.Policies.Password.MinUpper ||
+		stats.lower < v1.Config.Server.Policies.Password.MinLower ||
+		stats.numbers < v1.Config.Server.Policies.Password.MinNumbers ||
+		stats.symbols < v1.Config.Server.Policies.Password.MinSymbols
 	return !bad
 }
 
 func (v1 *V1) Register(c context.Context, r *foundationv1.RegisterRequest) (*foundationv1.Session, error) {
-	if len(r.Username) < v1.Config.Server.UsernamePolicy.MinLength || len(r.Username) > v1.Config.Server.UsernamePolicy.MaxLength {
+	if len(r.Username) < v1.Config.Server.Policies.Username.MinLength || len(r.Username) > v1.Config.Server.Policies.Username.MaxLength {
 		_ = responses.UsernameLength(
-			v1.Config.Server.UsernamePolicy.MinLength,
-			v1.Config.Server.UsernamePolicy.MaxLength,
+			v1.Config.Server.Policies.Username.MinLength,
+			v1.Config.Server.Policies.Username.MaxLength,
 		)
 		return nil, status.Error(codes.InvalidArgument, responses.InvalidUsername)
 	}
-	if len(r.Password) < v1.Config.Server.PasswordPolicy.MinLength || len(r.Password) > v1.Config.Server.PasswordPolicy.MaxLength {
+	if len(r.Password) < v1.Config.Server.Policies.Password.MinLength || len(r.Password) > v1.Config.Server.Policies.Password.MaxLength {
 		_ = responses.PasswordLength(
-			v1.Config.Server.PasswordPolicy.MinLength,
-			v1.Config.Server.PasswordPolicy.MaxLength,
+			v1.Config.Server.Policies.Password.MinLength,
+			v1.Config.Server.Policies.Password.MaxLength,
 		)
 		return nil, status.Error(codes.InvalidArgument, responses.InvalidPassword)
 	}
 	if !v1.PasswordAcceptable(r.Password) {
 		_ = responses.PasswordPolicy(
-			v1.Config.Server.PasswordPolicy.MinUpper,
-			v1.Config.Server.PasswordPolicy.MinLower,
-			v1.Config.Server.PasswordPolicy.MinNumbers,
-			v1.Config.Server.PasswordPolicy.MinSymbols,
+			v1.Config.Server.Policies.Password.MinUpper,
+			v1.Config.Server.Policies.Password.MinLower,
+			v1.Config.Server.Policies.Password.MinNumbers,
+			v1.Config.Server.Policies.Password.MinSymbols,
 		)
 		return nil, status.Error(codes.InvalidArgument, responses.InvalidPassword)
 	}

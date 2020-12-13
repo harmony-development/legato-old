@@ -404,7 +404,7 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 		return nil, err
 	}
 	return &corev1.GetChannelMessagesResponse{
-		ReachedTop: len(messages) < v1.Config.Server.GetMessageCount,
+		ReachedTop: len(messages) < v1.Config.Server.Policies.APIs.Messages.MaximumGetAmount,
 		Messages: func() (ret []*corev1.Message) {
 			for _, message := range messages {
 				createdAt, _ := ptypes.TimestampProto(message.CreatedAt.UTC())

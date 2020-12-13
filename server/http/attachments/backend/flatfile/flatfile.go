@@ -45,7 +45,7 @@ func (b *Backend) SaveFile(name, contentType string, r io.Reader) (id string, er
 		return "", err
 	}
 
-	err = ioutil.WriteFile(filepath.Join(b.Config.Server.FlatfileMediaPath, fileID), filedata, 0o660)
+	err = ioutil.WriteFile(filepath.Join(b.Config.Flatfile.MediaPath, fileID), filedata, 0o660)
 	if err != nil {
 		return "", err
 	}
@@ -56,7 +56,7 @@ func (b *Backend) SaveFile(name, contentType string, r io.Reader) (id string, er
 		Size:        int32(len(filedata)),
 	}
 
-	err = ioutil.WriteFile(filepath.Join(b.Config.Server.FlatfileMediaPath, fmt.Sprintf("%s.data", fileID)), data.Serialize(), 0o660)
+	err = ioutil.WriteFile(filepath.Join(b.Config.Flatfile.MediaPath, fmt.Sprintf("%s.data", fileID)), data.Serialize(), 0o660)
 	if err != nil {
 		return "", err
 	}
@@ -67,7 +67,7 @@ func (b *Backend) SaveFile(name, contentType string, r io.Reader) (id string, er
 // ReadFile readsfile
 func (b *Backend) ReadFile(id string) (contentType, filename string, size int32, r io.ReadCloser, err error) {
 	baseFileName := filepath.Base(id)
-	data, err := ioutil.ReadFile(filepath.Join(b.Config.Server.FlatfileMediaPath, fmt.Sprintf("%s.data", baseFileName)))
+	data, err := ioutil.ReadFile(filepath.Join(b.Config.Flatfile.MediaPath, fmt.Sprintf("%s.data", baseFileName)))
 	if err != nil {
 		return
 	}
@@ -82,14 +82,14 @@ func (b *Backend) ReadFile(id string) (contentType, filename string, size int32,
 	filename = fileData.Filename
 	size = fileData.Size
 
-	r, err = os.Open(path.Join(b.Config.Server.FlatfileMediaPath, baseFileName))
+	r, err = os.Open(path.Join(b.Config.Flatfile.MediaPath, baseFileName))
 
 	return
 }
 
 func (b *Backend) GetMetadata(id string) (contentType, fileName string, size int32, err error) {
 	baseFileName := filepath.Base(id)
-	data, err := ioutil.ReadFile(filepath.Join(b.Config.Server.FlatfileMediaPath, fmt.Sprintf("%s.data", baseFileName)))
+	data, err := ioutil.ReadFile(filepath.Join(b.Config.Flatfile.MediaPath, fmt.Sprintf("%s.data", baseFileName)))
 	if err != nil {
 		return
 	}

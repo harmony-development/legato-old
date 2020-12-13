@@ -102,7 +102,7 @@ func (db *HarmonyDB) GetMessagesBefore(guildID, channelID uint64, date time.Time
 		Guildid:   guildID,
 		Channelid: channelID,
 		Before:    date,
-		Max:       int32(db.Config.Server.GetMessageCount),
+		Max:       int32(db.Config.Server.Policies.APIs.Messages.MaximumGetAmount),
 	})
 	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)

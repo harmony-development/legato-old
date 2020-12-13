@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	stdlibHTTP "net/http"
@@ -71,19 +72,21 @@ func (inst Instance) Start() {
 	var storageBackend backend.AttachmentBackend
 
 	switch inst.Config.Server.StorageBackend {
-	case config.Flatfile:
+	case "PureFlatfile":
 		storageBackend = &flatfile.Backend{
 			Dependencies: flatfile.Dependencies{
 				Config: inst.Config,
 			},
 		}
-	case config.Database:
+	case "DatabaseFlatfile":
 		storageBackend = &database_attachments_backend.Backend{
 			Dependencies: database_attachments_backend.Dependencies{
 				Config: inst.Config,
 				DB:     inst.DB,
 			},
 		}
+	default:
+		inst.Logger.Fatal(errors.New("Config backend is not valid; must be 'PureFlatfile' or 'DatabaseFlatfile'."))
 	}
 	inst.API = api.New(api.Dependencies{
 		Logger:         inst.Logger,

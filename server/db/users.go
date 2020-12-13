@@ -51,7 +51,7 @@ func (db *HarmonyDB) AddSession(userID uint64, session string) error {
 	return tracerr.Wrap(db.queries.AddSession(ctx, queries.AddSessionParams{
 		UserID:     userID,
 		Session:    session,
-		Expiration: time.Now().UTC().Add(db.Config.Server.SessionDuration).Unix(),
+		Expiration: time.Now().UTC().Add(db.Config.Server.Policies.Sessions.Duration).Unix(),
 	}))
 }
 
