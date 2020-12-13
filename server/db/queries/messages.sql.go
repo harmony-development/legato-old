@@ -252,6 +252,22 @@ func (q *Queries) UpdateMessageActions(ctx context.Context, arg UpdateMessageAct
 	return i, err
 }
 
+const updateMessageAttachments = `-- name: UpdateMessageAttachments :exec
+UPDATE Messages
+SET Attachments = $1
+WHERE Message_ID = $2
+`
+
+type UpdateMessageAttachmentsParams struct {
+	Attachments []string `json:"attachments"`
+	MessageID   uint64   `json:"message_id"`
+}
+
+func (q *Queries) UpdateMessageAttachments(ctx context.Context, arg UpdateMessageAttachmentsParams) error {
+	_, err := q.exec(ctx, q.updateMessageAttachmentsStmt, updateMessageAttachments, pq.Array(arg.Attachments), arg.MessageID)
+	return err
+}
+
 const updateMessageContent = `-- name: UpdateMessageContent :one
 UPDATE Messages
 SET Content = $2,

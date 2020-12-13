@@ -68,13 +68,31 @@ func (inst Instance) Start() {
 	if err != nil {
 		inst.Logger.Fatal(err)
 	}
+	var storageBackend backend.AttachmentBackend
+
+	switch inst.Config.Server.StorageBackend {
+	case config.Flatfile:
+		storageBackend = &flatfile.Backend{
+			Dependencies: flatfile.Dependencies{
+				Config: inst.Config,
+			},
+		}
+	case config.Database:
+		storageBackend = &database_attachments_backend.Backend{
+			Dependencies: database_attachments_backend.Dependencies{
+				Config: inst.Config,
+				DB:     inst.DB,
+			},
+		}
+	}
 	inst.API = api.New(api.Dependencies{
-		Logger:      inst.Logger,
-		DB:          inst.DB,
-		AuthManager: inst.AuthManager,
-		Sonyflake:   inst.Sonyflake,
-		Config:      inst.Config,
-		Permissions: permissions.NewManager(inst.DB),
+		Logger:         inst.Logger,
+		DB:             inst.DB,
+		AuthManager:    inst.AuthManager,
+		Sonyflake:      inst.Sonyflake,
+		Config:         inst.Config,
+		Permissions:    permissions.NewManager(inst.DB),
+		StorageBackend: storageBackend,
 	})
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", inst.Config.Server.Port))
@@ -90,24 +108,6 @@ func (inst Instance) Start() {
 
 	grp := new(errgroup.Group)
 	grp.Go(func() error {
-		var storageBackend backend.AttachmentBackend
-
-		switch inst.Config.Server.StorageBackend {
-		case config.Flatfile:
-			storageBackend = &flatfile.Backend{
-				Dependencies: flatfile.Dependencies{
-					Config: inst.Config,
-				},
-			}
-		case config.Database:
-			storageBackend = &database_attachments_backend.Backend{
-				Dependencies: database_attachments_backend.Dependencies{
-					Config: inst.Config,
-					DB:     inst.DB,
-				},
-			}
-		}
-
 		httpServer := http.New(http.Dependencies{
 			DB:             inst.DB,
 			Logger:         inst.Logger,

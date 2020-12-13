@@ -103,7 +103,7 @@ func (db *HarmonyDB) GetMessage(messageID uint64) (queries.Message, error) {
 	return db.queries.GetMessage(ctx, messageID)
 }
 
-func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, actions, overrides *[]byte) (time.Time, error) {
+func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, actions, overrides *[]byte, attachments *[]string) (time.Time, error) {
 	tx, err := db.Begin()
 	db.Logger.CheckException(err)
 	if err != nil {
@@ -147,6 +147,14 @@ func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, ac
 			return tq.UpdateMessageOverrides(ctx, queries.UpdateMessageOverridesParams{
 				MessageID: messageID,
 				Overrides: *overrides,
+			})
+		})
+	}
+	if attachments != nil {
+		e.Execute(func() error {
+			return tq.UpdateMessageAttachments(ctx, queries.UpdateMessageAttachmentsParams{
+				MessageID:   messageID,
+				Attachments: *attachments,
 			})
 		})
 	}

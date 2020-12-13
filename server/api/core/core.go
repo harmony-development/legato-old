@@ -43,7 +43,8 @@ func New(deps *Dependencies) *Service {
 				Guild:      (&integrated.GuildState{}).Initialize(),
 				Homeserver: (&integrated.HomeserverEventState{}).Initialize(),
 			},
-			Config: deps.Config,
+			Config:         deps.Config,
+			StorageBackend: deps.StorageBackend,
 		},
 	}
 	return core

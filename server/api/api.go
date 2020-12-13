@@ -90,11 +90,12 @@ func New(deps Dependencies) *API {
 	}
 
 	corev1.RegisterCoreServiceServer(api.grpcServer, core.New(&core.Dependencies{
-		DB:        api.DB,
-		Logger:    api.Logger,
-		Sonyflake: api.Sonyflake,
-		Perms:     api.Permissions,
-		Config:    deps.Config,
+		DB:             api.DB,
+		Logger:         api.Logger,
+		Sonyflake:      api.Sonyflake,
+		Perms:          api.Permissions,
+		Config:         deps.Config,
+		StorageBackend: deps.StorageBackend,
 	}).V1)
 	profilev1.RegisterProfileServiceServer(api.grpcServer, &profile.New(profile.Dependencies{
 		DB: api.DB,

@@ -332,7 +332,7 @@ func (v1 *V1) GetMessage(c context.Context, r *corev1.GetMessageRequest) (*corev
 	}
 	var embeds []*corev1.Embed
 	var actions []*corev1.Action
-	attachments := []*corev1.Message_Attachment{}
+	attachments := []*corev1.Attachment{}
 	var override *corev1.Override
 	if err := json.Unmarshal(message.Embeds, &embeds); err != nil {
 		return nil, err
@@ -349,7 +349,7 @@ func (v1 *V1) GetMessage(c context.Context, r *corev1.GetMessageRequest) (*corev
 	for _, a := range message.Attachments {
 		contentType, fileName, size, err := v1.StorageBackend.GetMetadata(a)
 		if err == nil {
-			attachments = append(attachments, &corev1.Message_Attachment{
+			attachments = append(attachments, &corev1.Attachment{
 				Id:   a,
 				Name: fileName,
 				Type: contentType,
@@ -415,7 +415,7 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 				var embeds []*corev1.Embed
 				var actions []*corev1.Action
 				var overrides *corev1.Override
-				attachments := []*corev1.Message_Attachment{}
+				attachments := []*corev1.Attachment{}
 				if err := json.Unmarshal(message.Embeds, &embeds); err != nil {
 					continue
 				}
@@ -431,7 +431,7 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 				for _, a := range message.Attachments {
 					contentType, fileName, size, err := v1.StorageBackend.GetMetadata(a)
 					if err == nil {
-						attachments = append(attachments, &corev1.Message_Attachment{
+						attachments = append(attachments, &corev1.Attachment{
 							Id:   a,
 							Name: fileName,
 							Type: contentType,
@@ -579,6 +579,8 @@ func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (
 	var actions *[]byte
 	var embeds *[]byte
 	var overrides *[]byte
+	var attachments *[]string
+	attachmentsData := []*corev1.Attachment{}
 	if r.UpdateActions {
 		val := v1.ProtoToActions(r.Actions)
 		actions = &val
@@ -591,7 +593,22 @@ func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (
 		val := v1.ProtoToOverrides(r.Overrides)
 		overrides = &val
 	}
-	tiempo, err := v1.DB.UpdateMessage(r.MessageId, &r.Content, embeds, actions, overrides)
+	if r.UpdateAttachments {
+		attachments = &r.Attachments
+
+		for _, a := range r.Attachments {
+			contentType, fileName, size, err := v1.StorageBackend.GetMetadata(a)
+			if err == nil {
+				attachmentsData = append(attachmentsData, &corev1.Attachment{
+					Id:   a,
+					Name: fileName,
+					Type: contentType,
+					Size: size,
+				})
+			}
+		}
+	}
+	tiempo, err := v1.DB.UpdateMessage(r.MessageId, &r.Content, embeds, actions, overrides, attachments)
 	if err != nil {
 		return nil, err
 	}
@@ -610,6 +627,7 @@ func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (
 				UpdateActions: r.UpdateActions,
 				Overrides:     r.Overrides,
 				EditedAt:      editedAt,
+				Attachments:   attachmentsData,
 			},
 		},
 	})
@@ -928,12 +946,12 @@ func (v1 *V1) SendMessage(c context.Context, r *corev1.SendMessageRequest) (*cor
 		return nil, err
 	}
 
-	attachments := []*corev1.Message_Attachment{}
+	attachments := []*corev1.Attachment{}
 
 	for _, a := range r.Attachments {
 		contentType, fileName, size, err := v1.StorageBackend.GetMetadata(a)
 		if err == nil {
-			attachments = append(attachments, &corev1.Message_Attachment{
+			attachments = append(attachments, &corev1.Attachment{
 				Id:   a,
 				Name: fileName,
 				Type: contentType,

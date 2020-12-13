@@ -70,6 +70,11 @@ UPDATE Messages
 SET Overrides = $1
 WHERE Message_ID = $2;
 
+-- name: UpdateMessageAttachments :exec
+UPDATE Messages
+SET Attachments = $1
+WHERE Message_ID = $2;
+
 -- name: MessageWithIDExists :one
 SELECT EXISTS (
     SELECT 1
