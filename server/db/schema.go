@@ -7,17 +7,18 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/sirupsen/logrus"
+	"github.com/ztrue/tracerr"
 )
 
 // Migrate applies the DB layout to the connected DB
 func (db *HarmonyDB) Migrate() error {
 	data, err := ioutil.ReadFile("sql/schemas/models.sql")
 	if err != nil {
-		return err
+		return tracerr.Wrap(err)
 	}
 
 	_, err = db.Exec(strings.ReplaceAll(string(data), "--migration-only", ""))
-	return err
+	return tracerr.Wrap(err)
 }
 
 func (db *HarmonyDB) SessionExpireRoutine() {

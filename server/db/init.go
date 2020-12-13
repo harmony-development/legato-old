@@ -14,6 +14,7 @@ import (
 	"github.com/harmony-development/legato/server/db/queries"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/sony/sonyflake"
+	"github.com/ztrue/tracerr"
 
 	lru "github.com/hashicorp/golang-lru"
 	_ "github.com/lib/pq"
@@ -170,22 +171,22 @@ func New(cfg *config.Config, logger logger.ILogger, idgen *sonyflake.Sonyflake) 
 		cfg.DB.Port,
 		map[bool]string{true: "enable", false: "disable"}[cfg.DB.SSL],
 	)); err != nil {
-		return nil, err
+		return nil, tracerr.Wrap(err)
 	}
 	if err = db.Ping(); err != nil {
-		return nil, err
+		return nil, tracerr.Wrap(err)
 	}
 	if err = db.Migrate(); err != nil {
-		return nil, err
+		return nil, tracerr.Wrap(err)
 	}
 	if db.queries, err = queries.Prepare(context.Background(), db); err != nil {
-		return nil, err
+		return nil, tracerr.Wrap(err)
 	}
 	if db.OwnerCache, err = lru.New(cfg.Server.OwnerCacheMax); err != nil {
-		return nil, err
+		return nil, tracerr.Wrap(err)
 	}
 	if db.SessionCache, err = lru.New(cfg.Server.SessionCacheMax); err != nil {
-		return nil, err
+		return nil, tracerr.Wrap(err)
 	}
 	go db.SessionExpireRoutine()
 	return db, nil

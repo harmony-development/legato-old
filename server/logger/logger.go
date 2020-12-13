@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"os"
-	"runtime/debug"
 
 	"github.com/harmony-development/legato/server/config"
+	"github.com/ztrue/tracerr"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/peer"
@@ -57,7 +57,7 @@ func (l Logger) Exception(err error) {
 		sentry.CaptureException(err)
 	}
 	if l.Config.Server.LogErrors {
-		logrus.Warnf("%v %v", err, string(debug.Stack()))
+		logrus.Warnf("%s", tracerr.SprintSourceColor(err))
 	}
 }
 
