@@ -1,32 +1,39 @@
 package db
 
-import "github.com/harmony-development/legato/server/db/queries"
+import (
+	"github.com/harmony-development/legato/server/db/queries"
+	"github.com/ztrue/tracerr"
+)
 
 // Where's DeleteFileHash? DeleteFileMeta handles that for us
 func (db *HarmonyDB) AddFileHash(fileID string, hash []byte) error {
-	return db.queries.AddHash(ctx, queries.AddHashParams{
+	return tracerr.Wrap(db.queries.AddHash(ctx, queries.AddHashParams{
 		Hash:   hash,
 		FileID: fileID,
-	})
+	}))
 }
 
 func (db *HarmonyDB) GetFileIDByHash(hash []byte) (string, error) {
-	return db.queries.GetFileIDByHash(ctx, hash)
+	data, err := db.queries.GetFileIDByHash(ctx, hash)
+	tracerr.Wrap(err)
+	return data, err
 }
 
 func (db *HarmonyDB) SetFileMetadata(fileID string, contentType, name string, size int32) error {
-	return db.queries.AddFileMetadata(ctx, queries.AddFileMetadataParams{
+	return tracerr.Wrap(db.queries.AddFileMetadata(ctx, queries.AddFileMetadataParams{
 		FileID:      fileID,
 		ContentType: contentType,
 		Name:        name,
 		Size:        size,
-	})
+	}))
 }
 
 func (db *HarmonyDB) GetFileMetadata(fileID string) (queries.GetFileMetadataRow, error) {
-	return db.queries.GetFileMetadata(ctx, fileID)
+	data, err := db.queries.GetFileMetadata(ctx, fileID)
+	tracerr.Wrap(err)
+	return data, err
 }
 
 func (db *HarmonyDB) DeleteFileMeta(fileID string) error {
-	return db.queries.DeleteFileMetadata(ctx, fileID)
+	return tracerr.Wrap(db.queries.DeleteFileMetadata(ctx, fileID))
 }

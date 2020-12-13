@@ -4,15 +4,18 @@ import (
 	"database/sql"
 
 	"github.com/harmony-development/legato/server/db/queries"
+	"github.com/ztrue/tracerr"
 )
 
 // AddChannelToGuild adds a new channel to a guild
 func (db *HarmonyDB) AddChannelToGuild(guildID uint64, channelName string, before, previous uint64, category bool) (queries.Channel, error) {
 	pos, err := db.GetChannelPositions(guildID, before, previous)
+	err = tracerr.Wrap(err)
 	if err != nil {
 		return queries.Channel{}, err
 	}
 	chanID, err := db.Sonyflake.NextID()
+	err = tracerr.Wrap(err)
 	if err != nil {
 		return queries.Channel{}, err
 	}
@@ -23,6 +26,7 @@ func (db *HarmonyDB) AddChannelToGuild(guildID uint64, channelName string, befor
 		Position:    pos,
 		Category:    category,
 	})
+	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
 	return channel, err
 }
@@ -33,6 +37,7 @@ func (db *HarmonyDB) DeleteChannelFromGuild(guildID, channelID uint64) error {
 		GuildID:   toSqlInt64(guildID),
 		ChannelID: channelID,
 	})
+	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
 	return err
 }
@@ -56,6 +61,7 @@ func (db *HarmonyDB) HasChannelWithID(guildID, channelID uint64) (bool, error) {
 		GuildID:   toSqlInt64(guildID),
 		ChannelID: channelID,
 	})
+	err = tracerr.Wrap(err)
 	return count != 0, err
 }
 
@@ -64,6 +70,7 @@ func (db *HarmonyDB) GetChannelListPosition(guildID, channelID uint64) (string, 
 		GuildID:   toSqlInt64(guildID),
 		ChannelID: channelID,
 	})
+	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
 	return position, err
 }
@@ -73,6 +80,7 @@ func (db *HarmonyDB) GetChannelPositions(guildID, before, previous uint64) (pos 
 		ChannelID: before,
 		GuildID:   toSqlInt64(guildID),
 	})
+	err = tracerr.Wrap(err)
 	if err != nil && err != sql.ErrNoRows {
 		db.Logger.Exception(err)
 		retErr = err
@@ -82,6 +90,7 @@ func (db *HarmonyDB) GetChannelPositions(guildID, before, previous uint64) (pos 
 		ChannelID: previous,
 		GuildID:   toSqlInt64(guildID),
 	})
+	err = tracerr.Wrap(err)
 	if err != nil && err != sql.ErrNoRows {
 		db.Logger.Exception(err)
 		retErr = err
@@ -96,11 +105,13 @@ func (db *HarmonyDB) MoveChannel(guildID, channelID, previousID, nextID uint64) 
 	if err != nil {
 		return err
 	}
+	err = tracerr.Wrap(err)
 	err = db.queries.MoveChannel(ctx, queries.MoveChannelParams{
 		Position:  pos,
 		ChannelID: channelID,
 		GuildID:   toSqlInt64(guildID),
 	})
+	err = tracerr.Wrap(err)
 
 	db.Logger.CheckException(err)
 

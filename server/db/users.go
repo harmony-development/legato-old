@@ -6,11 +6,14 @@ import (
 
 	profilev1 "github.com/harmony-development/legato/gen/profile"
 	"github.com/harmony-development/legato/server/db/queries"
+	"github.com/ztrue/tracerr"
 )
 
 // GetLocalGuilds gets the guilds a user is in
 func (db *HarmonyDB) GetLocalGuilds(userID uint64) ([]uint64, error) {
-	return db.queries.GuildsForUser(ctx, userID)
+	data, err := db.queries.GuildsForUser(ctx, userID)
+	err = tracerr.Wrap(err)
+	return data, err
 }
 
 // SessionToUserID gets the user ID from a session
@@ -20,6 +23,7 @@ func (db *HarmonyDB) SessionToUserID(session string) (uint64, error) {
 	if !exists || !ok {
 		userID, err := db.queries.SessionToUserID(ctx, session)
 		if err != nil {
+			err = tracerr.Wrap(err)
 			db.Logger.CheckException(err)
 		}
 		return userID, err
@@ -29,41 +33,49 @@ func (db *HarmonyDB) SessionToUserID(session string) (uint64, error) {
 
 // GetUser gets a user with their email
 func (db *HarmonyDB) GetUserByEmail(email string) (queries.GetUserByEmailRow, error) {
-	return db.queries.GetUserByEmail(ctx, email)
+	ret, err := db.queries.GetUserByEmail(ctx, email)
+	err = tracerr.Wrap(err)
+	return ret, err
 }
 
 // GetUserByID gets a user with their ID and their home server
 func (db *HarmonyDB) GetUserByID(userID uint64) (queries.GetUserRow, error) {
-	return db.queries.GetUser(ctx, userID)
+	ret, err := db.queries.GetUser(ctx, userID)
+	err = tracerr.Wrap(err)
+	return ret, err
 }
 
 // AddSession persists a session into the DB
 func (db *HarmonyDB) AddSession(userID uint64, session string) error {
 	db.SessionCache.Add(session, userID)
-	return db.queries.AddSession(ctx, queries.AddSessionParams{
+	return tracerr.Wrap(db.queries.AddSession(ctx, queries.AddSessionParams{
 		UserID:     userID,
 		Session:    session,
 		Expiration: time.Now().UTC().Add(db.Config.Server.SessionDuration).Unix(),
-	})
+	}))
 }
 
 // GetLocalUserForForeignUser gets a local user from the foreign users database
 func (db *HarmonyDB) GetLocalUserForForeignUser(userID uint64, homeserver string) (uint64, error) {
-	return db.queries.GetLocalUserID(ctx, queries.GetLocalUserIDParams{
+	ret, err := db.queries.GetLocalUserID(ctx, queries.GetLocalUserIDParams{
 		UserID:     userID,
 		HomeServer: homeserver,
 	})
+	err = tracerr.Wrap(err)
+	return ret, err
 }
 
 // AddLocalUser adds a user to the DB that contains login information (not foreign)
 func (db *HarmonyDB) AddLocalUser(userID uint64, email, username string, passwordHash []byte) error {
 	tx, err := db.Begin()
-	db.Logger.CheckException(err)
 	if err != nil {
+		err = tracerr.Wrap(err)
+		db.Logger.CheckException(err)
 		return err
 	}
 	tq := db.queries.WithTx(tx)
 	if err := tq.AddUser(ctx, userID); err != nil {
+		err = tracerr.Wrap(err)
 		return err
 	}
 	if err := tq.AddLocalUser(ctx, queries.AddLocalUserParams{
@@ -71,6 +83,7 @@ func (db *HarmonyDB) AddLocalUser(userID uint64, email, username string, passwor
 		Email:    email,
 		Password: passwordHash,
 	}); err != nil {
+		err = tracerr.Wrap(err)
 		return err
 	}
 	if err := tq.AddProfile(ctx, queries.AddProfileParams{
@@ -79,10 +92,12 @@ func (db *HarmonyDB) AddLocalUser(userID uint64, email, username string, passwor
 		Avatar:   sql.NullString{},
 		Status:   int16(profilev1.UserStatus_USER_STATUS_OFFLINE),
 	}); err != nil {
+		err = tracerr.Wrap(err)
 		return err
 	}
 	if err := tx.Commit(); err != nil {
-		return tx.Rollback()
+		err = tracerr.Wrap(err)
+		return tracerr.Wrap(tx.Rollback())
 	}
 	return nil
 }
@@ -90,12 +105,14 @@ func (db *HarmonyDB) AddLocalUser(userID uint64, email, username string, passwor
 // AddForeignUser inserts
 func (db *HarmonyDB) AddForeignUser(homeServer string, userID, localUserID uint64, username, avatar string) (uint64, error) {
 	tx, err := db.Begin()
-	db.Logger.CheckException(err)
 	if err != nil {
+		err = tracerr.Wrap(err)
+		db.Logger.CheckException(err)
 		return 0, err
 	}
 	tq := db.queries.WithTx(tx)
 	if err := tq.AddUser(ctx, localUserID); err != nil {
+		err = tracerr.Wrap(err)
 		return 0, err
 	}
 	if err := tq.AddProfile(ctx, queries.AddProfileParams{
@@ -104,6 +121,7 @@ func (db *HarmonyDB) AddForeignUser(homeServer string, userID, localUserID uint6
 		Avatar:   toSqlString(avatar),
 		Status:   int16(profilev1.UserStatus_USER_STATUS_OFFLINE),
 	}); err != nil {
+		err = tracerr.Wrap(err)
 		return 0, err
 	}
 	if userID, err = tq.AddForeignUser(ctx, queries.AddForeignUserParams{
@@ -111,12 +129,15 @@ func (db *HarmonyDB) AddForeignUser(homeServer string, userID, localUserID uint6
 		HomeServer:  homeServer,
 		LocalUserID: localUserID,
 	}); err != nil {
+		err = tracerr.Wrap(err)
 		return 0, err
 	}
 	if err := tx.Commit(); err != nil {
 		if err := tx.Rollback(); err != nil {
+			err = tracerr.Wrap(err)
 			return 0, err
 		}
+		err = tracerr.Wrap(err)
 		return 0, err
 	}
 	return userID, nil
@@ -124,39 +145,43 @@ func (db *HarmonyDB) AddForeignUser(homeServer string, userID, localUserID uint6
 
 func (db *HarmonyDB) EmailExists(email string) (bool, error) {
 	count, err := db.queries.EmailExists(ctx, email)
+	err = tracerr.Wrap(err)
 	return count > 0, err
 }
 
 func (db *HarmonyDB) ExpireSessions() error {
 	if err := db.queries.ExpireSessions(ctx, time.Now().UTC().Unix()); err != nil {
+		err = tracerr.Wrap(err)
 		return err
 	}
 	return nil
 }
 
 func (db *HarmonyDB) UpdateUsername(userID uint64, username string) error {
-	return db.queries.UpdateUsername(ctx, queries.UpdateUsernameParams{
+	return tracerr.Wrap(db.queries.UpdateUsername(ctx, queries.UpdateUsernameParams{
 		Username: username,
 		UserID:   userID,
-	})
+	}))
 }
 
 func (db *HarmonyDB) GetAvatar(userID uint64) (sql.NullString, error) {
-	return db.queries.GetAvatar(ctx, userID)
+	ret, err := db.queries.GetAvatar(ctx, userID)
+	err = tracerr.Wrap(err)
+	return ret, err
 }
 
 func (db *HarmonyDB) UpdateAvatar(userID uint64, avatar string) error {
-	return db.queries.UpdateAvatar(ctx, queries.UpdateAvatarParams{
+	return tracerr.Wrap(db.queries.UpdateAvatar(ctx, queries.UpdateAvatarParams{
 		Avatar: toSqlString(avatar),
 		UserID: userID,
-	})
+	}))
 }
 
 func (db *HarmonyDB) SetStatus(userID uint64, status profilev1.UserStatus) error {
-	return db.queries.SetStatus(ctx, queries.SetStatusParams{
+	return tracerr.Wrap(db.queries.SetStatus(ctx, queries.SetStatusParams{
 		Status: int16(status), // lol shut up it's an int16
 		UserID: userID,
-	})
+	}))
 }
 
 func (db *HarmonyDB) GetUserMetadata(userID uint64, appID string) (string, error) {
@@ -164,12 +189,14 @@ func (db *HarmonyDB) GetUserMetadata(userID uint64, appID string) (string, error
 		UserID: userID,
 		AppID:  appID,
 	})
+	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
 	return metadata, err
 }
 
 func (db *HarmonyDB) GetNonceInfo(nonce string) (queries.GetNonceInfoRow, error) {
 	info, err := db.queries.GetNonceInfo(ctx, nonce)
+	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
 	return info, err
 }
@@ -180,12 +207,14 @@ func (db *HarmonyDB) AddNonce(nonce string, userID uint64, homeServer string) er
 		UserID:     userID,
 		HomeServer: homeServer,
 	})
+	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
 	return err
 }
 
 func (db *HarmonyDB) GetGuildList(userID uint64) ([]queries.GetGuildListRow, error) {
 	guilds, err := db.queries.GetGuildList(ctx, userID)
+	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
 	return guilds, err
 }
@@ -196,6 +225,7 @@ func (db *HarmonyDB) GetGuildListPosition(userID, guildID uint64, homeServer str
 		GuildID:    guildID,
 		HomeServer: homeServer,
 	})
+	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
 	return position, err
 }
@@ -206,6 +236,7 @@ func (db *HarmonyDB) AddGuildToList(userID, guildID uint64, homeServer string) e
 		if err == sql.ErrNoRows {
 			pos = ""
 		} else {
+			err = tracerr.Wrap(err)
 			db.Logger.Exception(err)
 			return err
 		}
@@ -217,6 +248,7 @@ func (db *HarmonyDB) AddGuildToList(userID, guildID uint64, homeServer string) e
 		HomeServer: homeServer,
 		Position:   Rank(pos, ""),
 	})
+	err = tracerr.Wrap(err)
 
 	db.Logger.CheckException(err)
 	return err
@@ -232,6 +264,7 @@ func (db *HarmonyDB) MoveGuild(userID, guildID uint64, homeServer string, nextGu
 		if err == sql.ErrNoRows {
 			nextPos = ""
 		} else {
+			err = tracerr.Wrap(err)
 			db.Logger.Exception(err)
 			return err
 		}
@@ -246,6 +279,7 @@ func (db *HarmonyDB) MoveGuild(userID, guildID uint64, homeServer string, nextGu
 		if err == sql.ErrNoRows {
 			nextPos = ""
 		} else {
+			err = tracerr.Wrap(err)
 			db.Logger.Exception(err)
 			return err
 		}
@@ -256,6 +290,7 @@ func (db *HarmonyDB) MoveGuild(userID, guildID uint64, homeServer string, nextGu
 		GuildID:    guildID,
 		HomeServer: homeServer,
 	})
+	err = tracerr.Wrap(err)
 
 	db.Logger.CheckException(err)
 
@@ -268,6 +303,7 @@ func (db HarmonyDB) RemoveGuildFromList(userID, guildID uint64, homeServer strin
 		GuildID:    guildID,
 		HomeServer: homeServer,
 	})
+	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
 	return err
 }
@@ -276,6 +312,9 @@ func (db HarmonyDB) UserIsLocal(userID uint64) error {
 	ok, err := db.queries.UserIsLocal(ctx, userID)
 	if err == nil && !ok {
 		err = ErrNotLocal
+	}
+	if err != ErrNotLocal {
+		err = tracerr.Wrap(err)
 	}
 	return err
 }

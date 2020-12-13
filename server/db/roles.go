@@ -6,6 +6,7 @@ import (
 
 	corev1 "github.com/harmony-development/legato/gen/core"
 	"github.com/harmony-development/legato/server/db/queries"
+	"github.com/ztrue/tracerr"
 )
 
 func (db HarmonyDB) AddRoleToGuild(guildID uint64, role *corev1.Role) error {
@@ -17,14 +18,14 @@ func (db HarmonyDB) AddRoleToGuild(guildID uint64, role *corev1.Role) error {
 		Hoist:    role.Hoist,
 		Pingable: role.Pingable,
 	})
-	return err
+	return tracerr.Wrap(err)
 }
 
 func (db HarmonyDB) RemoveRoleFromGuild(guildID, roleID uint64) error {
-	return db.queries.DeleteRole(ctx, queries.DeleteRoleParams{
+	return tracerr.Wrap(db.queries.DeleteRole(ctx, queries.DeleteRoleParams{
 		GuildID: guildID,
 		RoleID:  roleID,
-	})
+	}))
 }
 
 func (db *HarmonyDB) GetRolePositions(guildID, before, previous uint64) (pos string, retErr error) {
@@ -33,6 +34,7 @@ func (db *HarmonyDB) GetRolePositions(guildID, before, previous uint64) (pos str
 		RoleID:  before,
 	})
 	if err != nil && err != sql.ErrNoRows {
+		err = tracerr.Wrap(err)
 		db.Logger.Exception(err)
 		retErr = err
 		return
@@ -42,6 +44,7 @@ func (db *HarmonyDB) GetRolePositions(guildID, before, previous uint64) (pos str
 		RoleID:  previous,
 	})
 	if err != nil && err != sql.ErrNoRows {
+		err = tracerr.Wrap(err)
 		db.Logger.Exception(err)
 		retErr = err
 		return
@@ -50,24 +53,23 @@ func (db *HarmonyDB) GetRolePositions(guildID, before, previous uint64) (pos str
 	return
 }
 
-func (db HarmonyDB) MoveRole(guildID, roleID, beforeRole, previousRole uint64) error {
+func (db HarmonyDB) MoveRole(guildID, roleID, beforeRole, previousRole uint64) (err error) {
 	pos, err := db.GetRolePositions(guildID, beforeRole, previousRole)
 	if err != nil {
-		return err
+		return tracerr.Wrap(err)
 	}
-	err = db.queries.MoveRole(ctx, queries.MoveRoleParams{
+	err = tracerr.Wrap(db.queries.MoveRole(ctx, queries.MoveRoleParams{
 		Position: pos,
 		RoleID:   roleID,
 		GuildID:  guildID,
-	})
-
-	db.Logger.CheckException(err)
+	}))
 
 	return err
 }
 
 func (db HarmonyDB) GetGuildRoles(guildID uint64) (ret []*corev1.Role, err error) {
 	roles, err := db.queries.GetRolesForGuild(ctx, guildID)
+	err = tracerr.Wrap(err)
 
 	for _, role := range roles {
 		ret = append(ret, &corev1.Role{
@@ -101,6 +103,7 @@ func (db HarmonyDB) SetPermissions(guildID uint64, channelID uint64, roleID uint
 			GuildID: guildID,
 			RoleID:  roleID,
 		})
+		err = tracerr.Wrap(err)
 	} else {
 		exists, err = db.queries.PermissionsExists(ctx, queries.PermissionsExistsParams{
 			GuildID: guildID,
@@ -110,6 +113,7 @@ func (db HarmonyDB) SetPermissions(guildID uint64, channelID uint64, roleID uint
 			},
 			RoleID: roleID,
 		})
+		err = tracerr.Wrap(err)
 	}
 
 	if err != nil {
@@ -118,13 +122,13 @@ func (db HarmonyDB) SetPermissions(guildID uint64, channelID uint64, roleID uint
 
 	if exists {
 		if channelID == 0 {
-			return db.queries.UpdatePermissionsWithoutChannel(ctx, queries.UpdatePermissionsWithoutChannelParams{
+			return tracerr.Wrap(db.queries.UpdatePermissionsWithoutChannel(ctx, queries.UpdatePermissionsWithoutChannelParams{
 				GuildID: guildID,
 				RoleID:  roleID,
 				Nodes:   mustSerialize(permissions),
-			})
+			}))
 		}
-		return db.queries.UpdatePermissions(ctx, queries.UpdatePermissionsParams{
+		return tracerr.Wrap(db.queries.UpdatePermissions(ctx, queries.UpdatePermissionsParams{
 			GuildID: guildID,
 			ChannelID: sql.NullInt64{
 				Int64: int64(channelID),
@@ -132,9 +136,9 @@ func (db HarmonyDB) SetPermissions(guildID uint64, channelID uint64, roleID uint
 			},
 			RoleID: roleID,
 			Nodes:  mustSerialize(permissions),
-		})
+		}))
 	}
-	return db.queries.SetPermissions(ctx, queries.SetPermissionsParams{
+	return tracerr.Wrap(db.queries.SetPermissions(ctx, queries.SetPermissionsParams{
 		GuildID: guildID,
 		ChannelID: sql.NullInt64{
 			Int64: int64(channelID),
@@ -142,7 +146,7 @@ func (db HarmonyDB) SetPermissions(guildID uint64, channelID uint64, roleID uint
 		},
 		RoleID: roleID,
 		Nodes:  mustSerialize(permissions),
-	})
+	}))
 }
 
 func (db HarmonyDB) GetPermissions(guildID uint64, channelID uint64, roleID uint64) (permissions []PermissionsNode, err error) {
@@ -153,6 +157,7 @@ func (db HarmonyDB) GetPermissions(guildID uint64, channelID uint64, roleID uint
 			GuildID: guildID,
 			RoleID:  roleID,
 		})
+		err = tracerr.Wrap(err)
 		println(string(data))
 	} else {
 		data, err = db.queries.GetPermissions(ctx, queries.GetPermissionsParams{
@@ -163,6 +168,7 @@ func (db HarmonyDB) GetPermissions(guildID uint64, channelID uint64, roleID uint
 			},
 			RoleID: roleID,
 		})
+		err = tracerr.Wrap(err)
 	}
 
 	if err != nil && err != sql.ErrNoRows {
@@ -182,12 +188,14 @@ func (db HarmonyDB) GetPermissionsData(guildID uint64) (ret PermissionsData, err
 
 	roles, err := db.queries.GetRolesForGuild(ctx, guildID)
 	if err != nil && err != sql.ErrNoRows {
+		err = tracerr.Wrap(err)
 		return
 	}
 
 	for _, role := range roles {
 		perms, err := db.GetPermissions(guildID, 0, role.RoleID)
 		if err != nil && err != sql.ErrNoRows {
+			err = tracerr.Wrap(err)
 			return PermissionsData{}, err
 		}
 		ret.Roles[role.RoleID] = perms
@@ -196,6 +204,7 @@ func (db HarmonyDB) GetPermissionsData(guildID uint64) (ret PermissionsData, err
 	ret.Categories = make(map[uint64][]uint64)
 	chans, err := db.ChannelsForGuild(guildID)
 	if err != nil {
+		err = tracerr.Wrap(err)
 		return
 	}
 
@@ -215,6 +224,7 @@ func (db HarmonyDB) GetPermissionsData(guildID uint64) (ret PermissionsData, err
 		for _, role := range roles {
 			perms, err := db.GetPermissions(guildID, channel.ChannelID, role.RoleID)
 			if err != nil && err != sql.ErrNoRows {
+				err = tracerr.Wrap(err)
 				return PermissionsData{}, err
 			}
 			ret.Channels[channel.ChannelID][role.RoleID] = perms
@@ -225,15 +235,18 @@ func (db HarmonyDB) GetPermissionsData(guildID uint64) (ret PermissionsData, err
 }
 
 func (db HarmonyDB) RolesForUser(guildID, userID uint64) (ret []uint64, err error) {
-	return db.queries.RolesForUser(ctx, queries.RolesForUserParams{
+	ret, err = db.queries.RolesForUser(ctx, queries.RolesForUserParams{
 		GuildID:  guildID,
 		MemberID: userID,
 	})
+	err = tracerr.Wrap(err)
+	return
 }
 
 func (db HarmonyDB) ModifyRole(guildID, roleID uint64, name string, color int32, hoist, pingable, updateName, updateColor, updateHoist, updatePingable bool) error {
 	tx, err := db.Begin()
 	if err != nil {
+		err = tracerr.Wrap(err)
 		db.Logger.CheckException(err)
 		return err
 	}
@@ -246,6 +259,7 @@ func (db HarmonyDB) ModifyRole(guildID, roleID uint64, name string, color int32,
 			RoleID:  roleID,
 			Name:    name,
 		})
+		err = tracerr.Wrap(err)
 	}
 	if updateColor && err == nil {
 		err = quer.SetRoleColor(ctx, queries.SetRoleColorParams{
@@ -253,6 +267,7 @@ func (db HarmonyDB) ModifyRole(guildID, roleID uint64, name string, color int32,
 			RoleID:  roleID,
 			Color:   color,
 		})
+		err = tracerr.Wrap(err)
 	}
 	if updateHoist && err == nil {
 		err = quer.SetRoleHoist(ctx, queries.SetRoleHoistParams{
@@ -260,6 +275,7 @@ func (db HarmonyDB) ModifyRole(guildID, roleID uint64, name string, color int32,
 			RoleID:  roleID,
 			Hoist:   hoist,
 		})
+		err = tracerr.Wrap(err)
 	}
 	if updatePingable && err == nil {
 		err = quer.SetRolePingable(ctx, queries.SetRolePingableParams{
@@ -267,6 +283,7 @@ func (db HarmonyDB) ModifyRole(guildID, roleID uint64, name string, color int32,
 			RoleID:   roleID,
 			Pingable: pingable,
 		})
+		err = tracerr.Wrap(err)
 	}
 	if err != nil {
 		db.Logger.CheckException(err)
@@ -277,8 +294,9 @@ func (db HarmonyDB) ModifyRole(guildID, roleID uint64, name string, color int32,
 
 func (db HarmonyDB) ManageRoles(guildID, userID uint64, addRoles, removeRoles []uint64) error {
 	tx, err := db.Begin()
-	db.Logger.CheckException(err)
 	if err != nil {
+		err = tracerr.Wrap(err)
+		db.Logger.CheckException(err)
 		return err
 	}
 
@@ -290,6 +308,7 @@ func (db HarmonyDB) ManageRoles(guildID, userID uint64, addRoles, removeRoles []
 			MemberID: userID,
 			RoleID:   add,
 		})
+		err = tracerr.Wrap(err)
 		if err != nil {
 			return err
 		}
@@ -306,6 +325,7 @@ func (db HarmonyDB) ManageRoles(guildID, userID uint64, addRoles, removeRoles []
 	}
 
 	if err = tx.Commit(); err != nil {
+		err = tracerr.Wrap(err)
 		db.Logger.CheckException(err)
 		return err
 	}
