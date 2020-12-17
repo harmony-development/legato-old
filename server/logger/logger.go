@@ -45,7 +45,10 @@ func (l Logger) CheckException(err error) {
 }
 
 func (l Logger) ErrorResponse(code codes.Code, err error, response string) error {
-	if l.Config.Server.Policies.Debug.LogErrors {
+	if l.Config.Server.Policies.Debug.RespondWithErrors {
+		if l.Config.Server.Policies.Debug.ResponseErrorsIncludeTrace {
+			return status.Error(code, tracerr.Sprint(err))
+		}
 		return status.Error(code, err.Error())
 	}
 	return status.Error(code, response)

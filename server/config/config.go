@@ -46,9 +46,10 @@ type Config struct {
 				MaximumCount int `hcl:"MaximumCount,optional" default:"10"`
 			} `hcl:"Attachments,block"`
 			Debug struct {
-				LogErrors         bool `hcl:"LogErrors,optional" default:"true"`
-				LogRequests       bool `hcl:"LogRequests,optional" default:"true"`
-				RespondWithErrors bool `hcl:"RespondWithErrors,optional" default:"false"`
+				LogErrors                  bool `hcl:"LogErrors,optional" default:"true"`
+				LogRequests                bool `hcl:"LogRequests,optional" default:"true"`
+				RespondWithErrors          bool `hcl:"RespondWithErrors,optional" default:"false"`
+				ResponseErrorsIncludeTrace bool `hcl:"ResponseErrorsIncludeTrace" default:"true"`
 			} `hcl:"Debug,block"`
 			Sessions struct {
 				Duration time.Duration `hcl:"Duration,optional" default:"172800000000000"`

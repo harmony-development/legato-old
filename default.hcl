@@ -63,6 +63,7 @@ Server {
 			LogErrors = true
 			LogRequests = true
 			RespondWithErrors = false
+			ResponseErrorsIncludeTrace = false
 		}
 
 		# Session-related policies
