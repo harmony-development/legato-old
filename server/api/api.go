@@ -17,6 +17,7 @@ import (
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/http/attachments/backend"
 	"github.com/harmony-development/legato/server/logger"
+	"github.com/harmony-development/legato/server/search"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sony/sonyflake"
 	"golang.org/x/sync/errgroup"
@@ -37,6 +38,7 @@ type Dependencies struct {
 	Config         *config.Config
 	Permissions    *permissions.Manager
 	StorageBackend backend.AttachmentBackend
+	SearchBackend  search.ISearchBackend
 }
 
 // API contains the component of the server responsible for APIs

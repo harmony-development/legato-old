@@ -26,6 +26,8 @@ import (
 	"github.com/harmony-development/legato/server/http/attachments/backend/flatfile"
 	"github.com/harmony-development/legato/server/intercom"
 	"github.com/harmony-development/legato/server/logger"
+	"github.com/harmony-development/legato/server/search"
+	"github.com/harmony-development/legato/server/search/typesense"
 	"github.com/soheilhy/cmux"
 )
 
@@ -70,7 +72,6 @@ func (inst Instance) Start() {
 		inst.Logger.Fatal(err)
 	}
 	var storageBackend backend.AttachmentBackend
-
 	switch inst.Config.Server.StorageBackend {
 	case "PureFlatfile":
 		storageBackend = &flatfile.Backend{
@@ -86,8 +87,18 @@ func (inst Instance) Start() {
 			},
 		}
 	default:
-		inst.Logger.Fatal(errors.New("Config backend is not valid; must be 'PureFlatfile' or 'DatabaseFlatfile'."))
+		inst.Logger.Fatal(errors.New("config backend is not valid; must be 'PureFlatfile' or 'DatabaseFlatfile'"))
 	}
+
+	var searchBackend search.ISearchBackend
+	switch inst.Config.Search.Backend {
+	case "typesense":
+		searchBackend, err = typesense.New(typesense.Dependencies{Config: inst.Config})
+		if err != nil {
+			inst.Logger.Fatal(err)
+		}
+	}
+
 	inst.API = api.New(api.Dependencies{
 		Logger:         inst.Logger,
 		DB:             inst.DB,
@@ -96,6 +107,7 @@ func (inst Instance) Start() {
 		Config:         inst.Config,
 		Permissions:    permissions.NewManager(inst.DB),
 		StorageBackend: storageBackend,
+		SearchBackend:  searchBackend,
 	})
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", inst.Config.Server.Port))

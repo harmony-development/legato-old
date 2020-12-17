@@ -1,16 +1,12 @@
 package config
 
 import (
-	"bytes"
-	"encoding/json"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"time"
 
 	"github.com/creasty/defaults"
-	"github.com/hashicorp/hcl/hcl/printer"
-	"github.com/hashicorp/hcl/json/parser"
 	"github.com/hashicorp/hcl/v2/hclsimple"
 	"github.com/ztrue/tracerr"
 )
@@ -56,7 +52,7 @@ type Config struct {
 			MaximumCacheSizes struct {
 				Owner    int `hcl:"Owner,optional" default:"5096"`
 				Sessions int `hcl:"Sessions,optional" default:"5096"`
-			} `hcl:"Caches,block"`
+			} `hcl:"MaximumCacheSizes,block"`
 			APIs struct {
 				Messages struct {
 					MaximumGetAmount int `hcl:"MaximumGetAmount,optional" default:"50"`
@@ -77,6 +73,15 @@ type Config struct {
 		Name           string `hcl:"Name,optional" default:"harmony"`
 		ModelsLocation string `hcl:"ModelsLocation,optional" default:"sql/schemas/models.sql"`
 	} `hcl:"Database,block"`
+	Search struct {
+		Backend   string `hcl:"Backend,optional" default:"typesense"`
+		Typesense struct {
+			APIKey   string `hcl:"APIKey,optional" default:"unknown"`
+			Host     string `hcl:"Host,optional" default:"localhost"`
+			Port     string `hcl:"Port,optional" default:"8108"`
+			Protocol string `hcl:"Protocol,optional" default:"http"`
+		} `hcl:"Typesense,block"`
+	} `hcl:"Search,block"`
 	Flatfile struct {
 		MediaPath string `hcl:"MediaPath,optional" default:"flatfile"`
 	} `hcl:"Flatfile,block"`
@@ -93,26 +98,20 @@ func Load() (*Config, error) {
 	defaults.MustSet(&config)
 
 	if _, err := os.Stat("config.hcl"); os.IsNotExist(err) {
-		data, err := json.Marshal(config)
+		from, err := os.Open("./default.hcl")
 		if err != nil {
-			log.Fatal(err)
+			panic(err)
 		}
+		defer from.Close()
 
-		ast, err := parser.Parse(data)
+		to, err := os.OpenFile("./config.hcl", os.O_RDWR|os.O_CREATE, 0755)
 		if err != nil {
-			log.Fatal(err)
+			panic(err)
 		}
+		defer to.Close()
 
-		out := new(bytes.Buffer)
-
-		err = printer.Fprint(out, ast)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		err = ioutil.WriteFile("config.hcl", out.Bytes(), 0755)
-		if err != nil {
-			log.Fatal(err)
+		if _, err := io.Copy(to, from); err != nil {
+			panic(err)
 		}
 
 		log.Println("A default configuration has been written to 'config.hcl'. Edit it as appropriate and then restart Legato.")

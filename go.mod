@@ -3,6 +3,7 @@ module github.com/harmony-development/legato
 go 1.14
 
 require (
+	github.com/GianOrtiz/typesense-go v0.2.1
 	github.com/alecthomas/repr v0.0.0-20201103221029-55c485bd663f
 	github.com/creasty/defaults v1.5.1
 	github.com/desertbit/timer v0.0.0-20180107155436-c41aec40b27f // indirect

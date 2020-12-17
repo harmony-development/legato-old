@@ -121,6 +121,27 @@ Database {
 	ModelsLocation = "sql/schemas/models.sql"
 }
 
+# Search configuration
+# Currently supported backends:
+# - Typesense
+Search {
+	Backend = "typesense"
+
+	# Typesense configuration
+	# only necessary to edit if using Typesense backend
+	Typesense {
+		# The key to use for authentication with the instance
+		# usually located at /etc/typesense/typesense-server.ini
+		APIKey = "unknown"
+
+		Host = "localhost"
+		
+		Port = "8108"
+		
+		Protocol = "http"
+	}
+}
+
 # Flatfile-related configuration
 Flatfile {
 
