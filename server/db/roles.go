@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 
 	corev1 "github.com/harmony-development/legato/gen/core"
 	"github.com/harmony-development/legato/server/db/queries"
@@ -158,7 +159,6 @@ func (db HarmonyDB) GetPermissions(guildID uint64, channelID uint64, roleID uint
 			RoleID:  roleID,
 		})
 		err = tracerr.Wrap(err)
-		println(string(data))
 	} else {
 		data, err = db.queries.GetPermissions(ctx, queries.GetPermissionsParams{
 			GuildID: guildID,
@@ -171,7 +171,7 @@ func (db HarmonyDB) GetPermissions(guildID uint64, channelID uint64, roleID uint
 		err = tracerr.Wrap(err)
 	}
 
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return
 	} else if len(data) == 0 {
 		d := "[]"
