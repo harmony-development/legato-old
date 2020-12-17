@@ -178,6 +178,8 @@ func (db HarmonyDB) GetPermissions(guildID uint64, channelID uint64, roleID uint
 		data = json.RawMessage(d)
 	}
 
+	err = nil
+
 	mustDeserialize(data, &permissions)
 
 	return
