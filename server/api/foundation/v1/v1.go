@@ -132,11 +132,8 @@ func (v1 *V1) FederatedLogin(c context.Context, r *foundationv1.LoginRequest_Fed
 	token := t.Claims.(*auth.Token)
 	session := randstr.Hex(16)
 	localUserID, err := v1.DB.GetLocalUserForForeignUser(token.UserID, r.Domain)
-	if err != nil {
-		return nil, err
-	}
 
-	if localUserID == 0 {
+	if err != nil || localUserID == 0 {
 		id, err := v1.Sonyflake.NextID()
 		if err != nil {
 			return nil, err
