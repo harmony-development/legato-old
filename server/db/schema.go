@@ -12,7 +12,7 @@ import (
 
 // Migrate applies the DB layout to the connected DB
 func (db *HarmonyDB) Migrate() error {
-	data, err := ioutil.ReadFile("sql/schemas/models.sql")
+	data, err := ioutil.ReadFile(db.Config.Database.ModelsLocation)
 	if err != nil {
 		return tracerr.Wrap(err)
 	}
