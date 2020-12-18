@@ -1,0 +1,15 @@
+[Unit]
+Description=Legato Harmony Homeserver
+After=network.target
+Requires=postgresql.service
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=legato
+WorkingDirectory=/var/lib/legato
+ExecStart=/usr/bin/env legato
+
+[Install]
+WantedBy=multi-user.target
