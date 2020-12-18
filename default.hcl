@@ -38,7 +38,7 @@ Server {
 		# Requirements for usernames
 		Username {
 			MinLength = 2
-			MaxLength = 2
+			MaxLength = 20
 		}
 
 		# Requirements for passwords. See Unicode for definitions of which
