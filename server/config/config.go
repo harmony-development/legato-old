@@ -17,6 +17,7 @@ import (
 
 type Config struct {
 	Server struct {
+		Host           string `hcl:"Host,optional" default:"0.0.0.0"`
 		Port           int    `hcl:"Port,optional" default:"2289"`
 		PrivateKeyPath string `hcl:"PrivateKeyPath,optional" default:"harmony-key.pem"`
 		PublicKeyPath  string `hcl:"PublicKeyPath,optional" default:"harmony-key.pub"`
