@@ -28,11 +28,14 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.addEmoteToPackStmt, err = db.PrepareContext(ctx, addEmoteToPack); err != nil {
 		return nil, fmt.Errorf("error preparing query AddEmoteToPack: %w", err)
 	}
-	if q.addFileHashStmt, err = db.PrepareContext(ctx, addFileHash); err != nil {
-		return nil, fmt.Errorf("error preparing query AddFileHash: %w", err)
+	if q.addFileMetadataStmt, err = db.PrepareContext(ctx, addFileMetadata); err != nil {
+		return nil, fmt.Errorf("error preparing query AddFileMetadata: %w", err)
 	}
 	if q.addForeignUserStmt, err = db.PrepareContext(ctx, addForeignUser); err != nil {
 		return nil, fmt.Errorf("error preparing query AddForeignUser: %w", err)
+	}
+	if q.addHashStmt, err = db.PrepareContext(ctx, addHash); err != nil {
+		return nil, fmt.Errorf("error preparing query AddHash: %w", err)
 	}
 	if q.addLocalUserStmt, err = db.PrepareContext(ctx, addLocalUser); err != nil {
 		return nil, fmt.Errorf("error preparing query AddLocalUser: %w", err)
@@ -58,6 +61,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.addUserToGuildStmt, err = db.PrepareContext(ctx, addUserToGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query AddUserToGuild: %w", err)
 	}
+	if q.addUserToRoleStmt, err = db.PrepareContext(ctx, addUserToRole); err != nil {
+		return nil, fmt.Errorf("error preparing query AddUserToRole: %w", err)
+	}
 	if q.createChannelStmt, err = db.PrepareContext(ctx, createChannel); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateChannel: %w", err)
 	}
@@ -81,6 +87,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.deleteEmotePackStmt, err = db.PrepareContext(ctx, deleteEmotePack); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteEmotePack: %w", err)
+	}
+	if q.deleteFileMetadataStmt, err = db.PrepareContext(ctx, deleteFileMetadata); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteFileMetadata: %w", err)
 	}
 	if q.deleteGuildStmt, err = db.PrepareContext(ctx, deleteGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteGuild: %w", err)
@@ -118,8 +127,11 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getEmotePacksStmt, err = db.PrepareContext(ctx, getEmotePacks); err != nil {
 		return nil, fmt.Errorf("error preparing query GetEmotePacks: %w", err)
 	}
-	if q.getFileByHashStmt, err = db.PrepareContext(ctx, getFileByHash); err != nil {
-		return nil, fmt.Errorf("error preparing query GetFileByHash: %w", err)
+	if q.getFileIDByHashStmt, err = db.PrepareContext(ctx, getFileIDByHash); err != nil {
+		return nil, fmt.Errorf("error preparing query GetFileIDByHash: %w", err)
+	}
+	if q.getFileMetadataStmt, err = db.PrepareContext(ctx, getFileMetadata); err != nil {
+		return nil, fmt.Errorf("error preparing query GetFileMetadata: %w", err)
 	}
 	if q.getGuildDataStmt, err = db.PrepareContext(ctx, getGuildData); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGuildData: %w", err)
@@ -169,6 +181,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getPermissionsWithoutChannelStmt, err = db.PrepareContext(ctx, getPermissionsWithoutChannel); err != nil {
 		return nil, fmt.Errorf("error preparing query GetPermissionsWithoutChannel: %w", err)
 	}
+	if q.getRolePositionStmt, err = db.PrepareContext(ctx, getRolePosition); err != nil {
+		return nil, fmt.Errorf("error preparing query GetRolePosition: %w", err)
+	}
 	if q.getRolesForGuildStmt, err = db.PrepareContext(ctx, getRolesForGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query GetRolesForGuild: %w", err)
 	}
@@ -208,17 +223,29 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.moveGuildStmt, err = db.PrepareContext(ctx, moveGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query MoveGuild: %w", err)
 	}
+	if q.moveRoleStmt, err = db.PrepareContext(ctx, moveRole); err != nil {
+		return nil, fmt.Errorf("error preparing query MoveRole: %w", err)
+	}
 	if q.numChannelsWithIDStmt, err = db.PrepareContext(ctx, numChannelsWithID); err != nil {
 		return nil, fmt.Errorf("error preparing query NumChannelsWithID: %w", err)
 	}
 	if q.openInvitesStmt, err = db.PrepareContext(ctx, openInvites); err != nil {
 		return nil, fmt.Errorf("error preparing query OpenInvites: %w", err)
 	}
+	if q.permissionExistsWithoutChannelStmt, err = db.PrepareContext(ctx, permissionExistsWithoutChannel); err != nil {
+		return nil, fmt.Errorf("error preparing query PermissionExistsWithoutChannel: %w", err)
+	}
+	if q.permissionsExistsStmt, err = db.PrepareContext(ctx, permissionsExists); err != nil {
+		return nil, fmt.Errorf("error preparing query PermissionsExists: %w", err)
+	}
 	if q.removeGuildFromListStmt, err = db.PrepareContext(ctx, removeGuildFromList); err != nil {
 		return nil, fmt.Errorf("error preparing query RemoveGuildFromList: %w", err)
 	}
 	if q.removeUserFromGuildStmt, err = db.PrepareContext(ctx, removeUserFromGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query RemoveUserFromGuild: %w", err)
+	}
+	if q.removeUserFromRoleStmt, err = db.PrepareContext(ctx, removeUserFromRole); err != nil {
+		return nil, fmt.Errorf("error preparing query RemoveUserFromRole: %w", err)
 	}
 	if q.resolveGuildIDStmt, err = db.PrepareContext(ctx, resolveGuildID); err != nil {
 		return nil, fmt.Errorf("error preparing query ResolveGuildID: %w", err)
@@ -238,6 +265,18 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.setPermissionsStmt, err = db.PrepareContext(ctx, setPermissions); err != nil {
 		return nil, fmt.Errorf("error preparing query SetPermissions: %w", err)
 	}
+	if q.setRoleColorStmt, err = db.PrepareContext(ctx, setRoleColor); err != nil {
+		return nil, fmt.Errorf("error preparing query SetRoleColor: %w", err)
+	}
+	if q.setRoleHoistStmt, err = db.PrepareContext(ctx, setRoleHoist); err != nil {
+		return nil, fmt.Errorf("error preparing query SetRoleHoist: %w", err)
+	}
+	if q.setRoleNameStmt, err = db.PrepareContext(ctx, setRoleName); err != nil {
+		return nil, fmt.Errorf("error preparing query SetRoleName: %w", err)
+	}
+	if q.setRolePingableStmt, err = db.PrepareContext(ctx, setRolePingable); err != nil {
+		return nil, fmt.Errorf("error preparing query SetRolePingable: %w", err)
+	}
 	if q.setStatusStmt, err = db.PrepareContext(ctx, setStatus); err != nil {
 		return nil, fmt.Errorf("error preparing query SetStatus: %w", err)
 	}
@@ -250,6 +289,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.updateMessageActionsStmt, err = db.PrepareContext(ctx, updateMessageActions); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateMessageActions: %w", err)
 	}
+	if q.updateMessageAttachmentsStmt, err = db.PrepareContext(ctx, updateMessageAttachments); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateMessageAttachments: %w", err)
+	}
 	if q.updateMessageContentStmt, err = db.PrepareContext(ctx, updateMessageContent); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateMessageContent: %w", err)
 	}
@@ -258,6 +300,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.updateMessageOverridesStmt, err = db.PrepareContext(ctx, updateMessageOverrides); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateMessageOverrides: %w", err)
+	}
+	if q.updatePermissionsStmt, err = db.PrepareContext(ctx, updatePermissions); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdatePermissions: %w", err)
+	}
+	if q.updatePermissionsWithoutChannelStmt, err = db.PrepareContext(ctx, updatePermissionsWithoutChannel); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdatePermissionsWithoutChannel: %w", err)
 	}
 	if q.updateUsernameStmt, err = db.PrepareContext(ctx, updateUsername); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateUsername: %w", err)
@@ -283,14 +331,19 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing addEmoteToPackStmt: %w", cerr)
 		}
 	}
-	if q.addFileHashStmt != nil {
-		if cerr := q.addFileHashStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing addFileHashStmt: %w", cerr)
+	if q.addFileMetadataStmt != nil {
+		if cerr := q.addFileMetadataStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addFileMetadataStmt: %w", cerr)
 		}
 	}
 	if q.addForeignUserStmt != nil {
 		if cerr := q.addForeignUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing addForeignUserStmt: %w", cerr)
+		}
+	}
+	if q.addHashStmt != nil {
+		if cerr := q.addHashStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addHashStmt: %w", cerr)
 		}
 	}
 	if q.addLocalUserStmt != nil {
@@ -333,6 +386,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing addUserToGuildStmt: %w", cerr)
 		}
 	}
+	if q.addUserToRoleStmt != nil {
+		if cerr := q.addUserToRoleStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addUserToRoleStmt: %w", cerr)
+		}
+	}
 	if q.createChannelStmt != nil {
 		if cerr := q.createChannelStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing createChannelStmt: %w", cerr)
@@ -371,6 +429,11 @@ func (q *Queries) Close() error {
 	if q.deleteEmotePackStmt != nil {
 		if cerr := q.deleteEmotePackStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteEmotePackStmt: %w", cerr)
+		}
+	}
+	if q.deleteFileMetadataStmt != nil {
+		if cerr := q.deleteFileMetadataStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteFileMetadataStmt: %w", cerr)
 		}
 	}
 	if q.deleteGuildStmt != nil {
@@ -433,9 +496,14 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getEmotePacksStmt: %w", cerr)
 		}
 	}
-	if q.getFileByHashStmt != nil {
-		if cerr := q.getFileByHashStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getFileByHashStmt: %w", cerr)
+	if q.getFileIDByHashStmt != nil {
+		if cerr := q.getFileIDByHashStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getFileIDByHashStmt: %w", cerr)
+		}
+	}
+	if q.getFileMetadataStmt != nil {
+		if cerr := q.getFileMetadataStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getFileMetadataStmt: %w", cerr)
 		}
 	}
 	if q.getGuildDataStmt != nil {
@@ -518,6 +586,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getPermissionsWithoutChannelStmt: %w", cerr)
 		}
 	}
+	if q.getRolePositionStmt != nil {
+		if cerr := q.getRolePositionStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getRolePositionStmt: %w", cerr)
+		}
+	}
 	if q.getRolesForGuildStmt != nil {
 		if cerr := q.getRolesForGuildStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getRolesForGuildStmt: %w", cerr)
@@ -583,6 +656,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing moveGuildStmt: %w", cerr)
 		}
 	}
+	if q.moveRoleStmt != nil {
+		if cerr := q.moveRoleStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing moveRoleStmt: %w", cerr)
+		}
+	}
 	if q.numChannelsWithIDStmt != nil {
 		if cerr := q.numChannelsWithIDStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing numChannelsWithIDStmt: %w", cerr)
@@ -593,6 +671,16 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing openInvitesStmt: %w", cerr)
 		}
 	}
+	if q.permissionExistsWithoutChannelStmt != nil {
+		if cerr := q.permissionExistsWithoutChannelStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing permissionExistsWithoutChannelStmt: %w", cerr)
+		}
+	}
+	if q.permissionsExistsStmt != nil {
+		if cerr := q.permissionsExistsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing permissionsExistsStmt: %w", cerr)
+		}
+	}
 	if q.removeGuildFromListStmt != nil {
 		if cerr := q.removeGuildFromListStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing removeGuildFromListStmt: %w", cerr)
@@ -601,6 +689,11 @@ func (q *Queries) Close() error {
 	if q.removeUserFromGuildStmt != nil {
 		if cerr := q.removeUserFromGuildStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing removeUserFromGuildStmt: %w", cerr)
+		}
+	}
+	if q.removeUserFromRoleStmt != nil {
+		if cerr := q.removeUserFromRoleStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing removeUserFromRoleStmt: %w", cerr)
 		}
 	}
 	if q.resolveGuildIDStmt != nil {
@@ -633,6 +726,26 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing setPermissionsStmt: %w", cerr)
 		}
 	}
+	if q.setRoleColorStmt != nil {
+		if cerr := q.setRoleColorStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing setRoleColorStmt: %w", cerr)
+		}
+	}
+	if q.setRoleHoistStmt != nil {
+		if cerr := q.setRoleHoistStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing setRoleHoistStmt: %w", cerr)
+		}
+	}
+	if q.setRoleNameStmt != nil {
+		if cerr := q.setRoleNameStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing setRoleNameStmt: %w", cerr)
+		}
+	}
+	if q.setRolePingableStmt != nil {
+		if cerr := q.setRolePingableStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing setRolePingableStmt: %w", cerr)
+		}
+	}
 	if q.setStatusStmt != nil {
 		if cerr := q.setStatusStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing setStatusStmt: %w", cerr)
@@ -653,6 +766,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing updateMessageActionsStmt: %w", cerr)
 		}
 	}
+	if q.updateMessageAttachmentsStmt != nil {
+		if cerr := q.updateMessageAttachmentsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateMessageAttachmentsStmt: %w", cerr)
+		}
+	}
 	if q.updateMessageContentStmt != nil {
 		if cerr := q.updateMessageContentStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateMessageContentStmt: %w", cerr)
@@ -666,6 +784,16 @@ func (q *Queries) Close() error {
 	if q.updateMessageOverridesStmt != nil {
 		if cerr := q.updateMessageOverridesStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateMessageOverridesStmt: %w", cerr)
+		}
+	}
+	if q.updatePermissionsStmt != nil {
+		if cerr := q.updatePermissionsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updatePermissionsStmt: %w", cerr)
+		}
+	}
+	if q.updatePermissionsWithoutChannelStmt != nil {
+		if cerr := q.updatePermissionsWithoutChannelStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updatePermissionsWithoutChannelStmt: %w", cerr)
 		}
 	}
 	if q.updateUsernameStmt != nil {
@@ -720,177 +848,209 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                               DBTX
-	tx                               *sql.Tx
-	acquireEmotePackStmt             *sql.Stmt
-	addEmoteToPackStmt               *sql.Stmt
-	addFileHashStmt                  *sql.Stmt
-	addForeignUserStmt               *sql.Stmt
-	addLocalUserStmt                 *sql.Stmt
-	addMessageStmt                   *sql.Stmt
-	addNonceStmt                     *sql.Stmt
-	addProfileStmt                   *sql.Stmt
-	addSessionStmt                   *sql.Stmt
-	addToGuildListStmt               *sql.Stmt
-	addUserStmt                      *sql.Stmt
-	addUserToGuildStmt               *sql.Stmt
-	createChannelStmt                *sql.Stmt
-	createEmotePackStmt              *sql.Stmt
-	createGuildStmt                  *sql.Stmt
-	createGuildInviteStmt            *sql.Stmt
-	createRoleStmt                   *sql.Stmt
-	deleteChannelStmt                *sql.Stmt
-	deleteEmoteFromPackStmt          *sql.Stmt
-	deleteEmotePackStmt              *sql.Stmt
-	deleteGuildStmt                  *sql.Stmt
-	deleteInviteStmt                 *sql.Stmt
-	deleteMessageStmt                *sql.Stmt
-	deleteRoleStmt                   *sql.Stmt
-	dequipEmotePackStmt              *sql.Stmt
-	emailExistsStmt                  *sql.Stmt
-	expireSessionsStmt               *sql.Stmt
-	getAvatarStmt                    *sql.Stmt
-	getChannelPositionStmt           *sql.Stmt
-	getChannelsStmt                  *sql.Stmt
-	getEmotePackEmotesStmt           *sql.Stmt
-	getEmotePacksStmt                *sql.Stmt
-	getFileByHashStmt                *sql.Stmt
-	getGuildDataStmt                 *sql.Stmt
-	getGuildListStmt                 *sql.Stmt
-	getGuildListPositionStmt         *sql.Stmt
-	getGuildMembersStmt              *sql.Stmt
-	getGuildOwnerStmt                *sql.Stmt
-	getGuildPictureStmt              *sql.Stmt
-	getLastGuildPositionInListStmt   *sql.Stmt
-	getLocalUserIDStmt               *sql.Stmt
-	getMessageStmt                   *sql.Stmt
-	getMessageAuthorStmt             *sql.Stmt
-	getMessageDateStmt               *sql.Stmt
-	getMessagesStmt                  *sql.Stmt
-	getNonceInfoStmt                 *sql.Stmt
-	getPackOwnerStmt                 *sql.Stmt
-	getPermissionsStmt               *sql.Stmt
-	getPermissionsWithoutChannelStmt *sql.Stmt
-	getRolesForGuildStmt             *sql.Stmt
-	getUserStmt                      *sql.Stmt
-	getUserByEmailStmt               *sql.Stmt
-	getUserMetadataStmt              *sql.Stmt
-	guildWithIDExistsStmt            *sql.Stmt
-	guildsForUserStmt                *sql.Stmt
-	guildsForUserWithDataStmt        *sql.Stmt
-	incrementInviteStmt              *sql.Stmt
-	isIPWhitelistedStmt              *sql.Stmt
-	isUserWhitelistedStmt            *sql.Stmt
-	messageWithIDExistsStmt          *sql.Stmt
-	moveChannelStmt                  *sql.Stmt
-	moveGuildStmt                    *sql.Stmt
-	numChannelsWithIDStmt            *sql.Stmt
-	openInvitesStmt                  *sql.Stmt
-	removeGuildFromListStmt          *sql.Stmt
-	removeUserFromGuildStmt          *sql.Stmt
-	resolveGuildIDStmt               *sql.Stmt
-	rolesForUserStmt                 *sql.Stmt
-	sessionToUserIDStmt              *sql.Stmt
-	setGuildNameStmt                 *sql.Stmt
-	setGuildPictureStmt              *sql.Stmt
-	setPermissionsStmt               *sql.Stmt
-	setStatusStmt                    *sql.Stmt
-	updateAvatarStmt                 *sql.Stmt
-	updateChannelNameStmt            *sql.Stmt
-	updateMessageActionsStmt         *sql.Stmt
-	updateMessageContentStmt         *sql.Stmt
-	updateMessageEmbedsStmt          *sql.Stmt
-	updateMessageOverridesStmt       *sql.Stmt
-	updateUsernameStmt               *sql.Stmt
-	userInGuildStmt                  *sql.Stmt
-	userIsLocalStmt                  *sql.Stmt
+	db                                  DBTX
+	tx                                  *sql.Tx
+	acquireEmotePackStmt                *sql.Stmt
+	addEmoteToPackStmt                  *sql.Stmt
+	addFileMetadataStmt                 *sql.Stmt
+	addForeignUserStmt                  *sql.Stmt
+	addHashStmt                         *sql.Stmt
+	addLocalUserStmt                    *sql.Stmt
+	addMessageStmt                      *sql.Stmt
+	addNonceStmt                        *sql.Stmt
+	addProfileStmt                      *sql.Stmt
+	addSessionStmt                      *sql.Stmt
+	addToGuildListStmt                  *sql.Stmt
+	addUserStmt                         *sql.Stmt
+	addUserToGuildStmt                  *sql.Stmt
+	addUserToRoleStmt                   *sql.Stmt
+	createChannelStmt                   *sql.Stmt
+	createEmotePackStmt                 *sql.Stmt
+	createGuildStmt                     *sql.Stmt
+	createGuildInviteStmt               *sql.Stmt
+	createRoleStmt                      *sql.Stmt
+	deleteChannelStmt                   *sql.Stmt
+	deleteEmoteFromPackStmt             *sql.Stmt
+	deleteEmotePackStmt                 *sql.Stmt
+	deleteFileMetadataStmt              *sql.Stmt
+	deleteGuildStmt                     *sql.Stmt
+	deleteInviteStmt                    *sql.Stmt
+	deleteMessageStmt                   *sql.Stmt
+	deleteRoleStmt                      *sql.Stmt
+	dequipEmotePackStmt                 *sql.Stmt
+	emailExistsStmt                     *sql.Stmt
+	expireSessionsStmt                  *sql.Stmt
+	getAvatarStmt                       *sql.Stmt
+	getChannelPositionStmt              *sql.Stmt
+	getChannelsStmt                     *sql.Stmt
+	getEmotePackEmotesStmt              *sql.Stmt
+	getEmotePacksStmt                   *sql.Stmt
+	getFileIDByHashStmt                 *sql.Stmt
+	getFileMetadataStmt                 *sql.Stmt
+	getGuildDataStmt                    *sql.Stmt
+	getGuildListStmt                    *sql.Stmt
+	getGuildListPositionStmt            *sql.Stmt
+	getGuildMembersStmt                 *sql.Stmt
+	getGuildOwnerStmt                   *sql.Stmt
+	getGuildPictureStmt                 *sql.Stmt
+	getLastGuildPositionInListStmt      *sql.Stmt
+	getLocalUserIDStmt                  *sql.Stmt
+	getMessageStmt                      *sql.Stmt
+	getMessageAuthorStmt                *sql.Stmt
+	getMessageDateStmt                  *sql.Stmt
+	getMessagesStmt                     *sql.Stmt
+	getNonceInfoStmt                    *sql.Stmt
+	getPackOwnerStmt                    *sql.Stmt
+	getPermissionsStmt                  *sql.Stmt
+	getPermissionsWithoutChannelStmt    *sql.Stmt
+	getRolePositionStmt                 *sql.Stmt
+	getRolesForGuildStmt                *sql.Stmt
+	getUserStmt                         *sql.Stmt
+	getUserByEmailStmt                  *sql.Stmt
+	getUserMetadataStmt                 *sql.Stmt
+	guildWithIDExistsStmt               *sql.Stmt
+	guildsForUserStmt                   *sql.Stmt
+	guildsForUserWithDataStmt           *sql.Stmt
+	incrementInviteStmt                 *sql.Stmt
+	isIPWhitelistedStmt                 *sql.Stmt
+	isUserWhitelistedStmt               *sql.Stmt
+	messageWithIDExistsStmt             *sql.Stmt
+	moveChannelStmt                     *sql.Stmt
+	moveGuildStmt                       *sql.Stmt
+	moveRoleStmt                        *sql.Stmt
+	numChannelsWithIDStmt               *sql.Stmt
+	openInvitesStmt                     *sql.Stmt
+	permissionExistsWithoutChannelStmt  *sql.Stmt
+	permissionsExistsStmt               *sql.Stmt
+	removeGuildFromListStmt             *sql.Stmt
+	removeUserFromGuildStmt             *sql.Stmt
+	removeUserFromRoleStmt              *sql.Stmt
+	resolveGuildIDStmt                  *sql.Stmt
+	rolesForUserStmt                    *sql.Stmt
+	sessionToUserIDStmt                 *sql.Stmt
+	setGuildNameStmt                    *sql.Stmt
+	setGuildPictureStmt                 *sql.Stmt
+	setPermissionsStmt                  *sql.Stmt
+	setRoleColorStmt                    *sql.Stmt
+	setRoleHoistStmt                    *sql.Stmt
+	setRoleNameStmt                     *sql.Stmt
+	setRolePingableStmt                 *sql.Stmt
+	setStatusStmt                       *sql.Stmt
+	updateAvatarStmt                    *sql.Stmt
+	updateChannelNameStmt               *sql.Stmt
+	updateMessageActionsStmt            *sql.Stmt
+	updateMessageAttachmentsStmt        *sql.Stmt
+	updateMessageContentStmt            *sql.Stmt
+	updateMessageEmbedsStmt             *sql.Stmt
+	updateMessageOverridesStmt          *sql.Stmt
+	updatePermissionsStmt               *sql.Stmt
+	updatePermissionsWithoutChannelStmt *sql.Stmt
+	updateUsernameStmt                  *sql.Stmt
+	userInGuildStmt                     *sql.Stmt
+	userIsLocalStmt                     *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                               tx,
-		tx:                               tx,
-		acquireEmotePackStmt:             q.acquireEmotePackStmt,
-		addEmoteToPackStmt:               q.addEmoteToPackStmt,
-		addFileHashStmt:                  q.addFileHashStmt,
-		addForeignUserStmt:               q.addForeignUserStmt,
-		addLocalUserStmt:                 q.addLocalUserStmt,
-		addMessageStmt:                   q.addMessageStmt,
-		addNonceStmt:                     q.addNonceStmt,
-		addProfileStmt:                   q.addProfileStmt,
-		addSessionStmt:                   q.addSessionStmt,
-		addToGuildListStmt:               q.addToGuildListStmt,
-		addUserStmt:                      q.addUserStmt,
-		addUserToGuildStmt:               q.addUserToGuildStmt,
-		createChannelStmt:                q.createChannelStmt,
-		createEmotePackStmt:              q.createEmotePackStmt,
-		createGuildStmt:                  q.createGuildStmt,
-		createGuildInviteStmt:            q.createGuildInviteStmt,
-		createRoleStmt:                   q.createRoleStmt,
-		deleteChannelStmt:                q.deleteChannelStmt,
-		deleteEmoteFromPackStmt:          q.deleteEmoteFromPackStmt,
-		deleteEmotePackStmt:              q.deleteEmotePackStmt,
-		deleteGuildStmt:                  q.deleteGuildStmt,
-		deleteInviteStmt:                 q.deleteInviteStmt,
-		deleteMessageStmt:                q.deleteMessageStmt,
-		deleteRoleStmt:                   q.deleteRoleStmt,
-		dequipEmotePackStmt:              q.dequipEmotePackStmt,
-		emailExistsStmt:                  q.emailExistsStmt,
-		expireSessionsStmt:               q.expireSessionsStmt,
-		getAvatarStmt:                    q.getAvatarStmt,
-		getChannelPositionStmt:           q.getChannelPositionStmt,
-		getChannelsStmt:                  q.getChannelsStmt,
-		getEmotePackEmotesStmt:           q.getEmotePackEmotesStmt,
-		getEmotePacksStmt:                q.getEmotePacksStmt,
-		getFileByHashStmt:                q.getFileByHashStmt,
-		getGuildDataStmt:                 q.getGuildDataStmt,
-		getGuildListStmt:                 q.getGuildListStmt,
-		getGuildListPositionStmt:         q.getGuildListPositionStmt,
-		getGuildMembersStmt:              q.getGuildMembersStmt,
-		getGuildOwnerStmt:                q.getGuildOwnerStmt,
-		getGuildPictureStmt:              q.getGuildPictureStmt,
-		getLastGuildPositionInListStmt:   q.getLastGuildPositionInListStmt,
-		getLocalUserIDStmt:               q.getLocalUserIDStmt,
-		getMessageStmt:                   q.getMessageStmt,
-		getMessageAuthorStmt:             q.getMessageAuthorStmt,
-		getMessageDateStmt:               q.getMessageDateStmt,
-		getMessagesStmt:                  q.getMessagesStmt,
-		getNonceInfoStmt:                 q.getNonceInfoStmt,
-		getPackOwnerStmt:                 q.getPackOwnerStmt,
-		getPermissionsStmt:               q.getPermissionsStmt,
-		getPermissionsWithoutChannelStmt: q.getPermissionsWithoutChannelStmt,
-		getRolesForGuildStmt:             q.getRolesForGuildStmt,
-		getUserStmt:                      q.getUserStmt,
-		getUserByEmailStmt:               q.getUserByEmailStmt,
-		getUserMetadataStmt:              q.getUserMetadataStmt,
-		guildWithIDExistsStmt:            q.guildWithIDExistsStmt,
-		guildsForUserStmt:                q.guildsForUserStmt,
-		guildsForUserWithDataStmt:        q.guildsForUserWithDataStmt,
-		incrementInviteStmt:              q.incrementInviteStmt,
-		isIPWhitelistedStmt:              q.isIPWhitelistedStmt,
-		isUserWhitelistedStmt:            q.isUserWhitelistedStmt,
-		messageWithIDExistsStmt:          q.messageWithIDExistsStmt,
-		moveChannelStmt:                  q.moveChannelStmt,
-		moveGuildStmt:                    q.moveGuildStmt,
-		numChannelsWithIDStmt:            q.numChannelsWithIDStmt,
-		openInvitesStmt:                  q.openInvitesStmt,
-		removeGuildFromListStmt:          q.removeGuildFromListStmt,
-		removeUserFromGuildStmt:          q.removeUserFromGuildStmt,
-		resolveGuildIDStmt:               q.resolveGuildIDStmt,
-		rolesForUserStmt:                 q.rolesForUserStmt,
-		sessionToUserIDStmt:              q.sessionToUserIDStmt,
-		setGuildNameStmt:                 q.setGuildNameStmt,
-		setGuildPictureStmt:              q.setGuildPictureStmt,
-		setPermissionsStmt:               q.setPermissionsStmt,
-		setStatusStmt:                    q.setStatusStmt,
-		updateAvatarStmt:                 q.updateAvatarStmt,
-		updateChannelNameStmt:            q.updateChannelNameStmt,
-		updateMessageActionsStmt:         q.updateMessageActionsStmt,
-		updateMessageContentStmt:         q.updateMessageContentStmt,
-		updateMessageEmbedsStmt:          q.updateMessageEmbedsStmt,
-		updateMessageOverridesStmt:       q.updateMessageOverridesStmt,
-		updateUsernameStmt:               q.updateUsernameStmt,
-		userInGuildStmt:                  q.userInGuildStmt,
-		userIsLocalStmt:                  q.userIsLocalStmt,
+		db:                                  tx,
+		tx:                                  tx,
+		acquireEmotePackStmt:                q.acquireEmotePackStmt,
+		addEmoteToPackStmt:                  q.addEmoteToPackStmt,
+		addFileMetadataStmt:                 q.addFileMetadataStmt,
+		addForeignUserStmt:                  q.addForeignUserStmt,
+		addHashStmt:                         q.addHashStmt,
+		addLocalUserStmt:                    q.addLocalUserStmt,
+		addMessageStmt:                      q.addMessageStmt,
+		addNonceStmt:                        q.addNonceStmt,
+		addProfileStmt:                      q.addProfileStmt,
+		addSessionStmt:                      q.addSessionStmt,
+		addToGuildListStmt:                  q.addToGuildListStmt,
+		addUserStmt:                         q.addUserStmt,
+		addUserToGuildStmt:                  q.addUserToGuildStmt,
+		addUserToRoleStmt:                   q.addUserToRoleStmt,
+		createChannelStmt:                   q.createChannelStmt,
+		createEmotePackStmt:                 q.createEmotePackStmt,
+		createGuildStmt:                     q.createGuildStmt,
+		createGuildInviteStmt:               q.createGuildInviteStmt,
+		createRoleStmt:                      q.createRoleStmt,
+		deleteChannelStmt:                   q.deleteChannelStmt,
+		deleteEmoteFromPackStmt:             q.deleteEmoteFromPackStmt,
+		deleteEmotePackStmt:                 q.deleteEmotePackStmt,
+		deleteFileMetadataStmt:              q.deleteFileMetadataStmt,
+		deleteGuildStmt:                     q.deleteGuildStmt,
+		deleteInviteStmt:                    q.deleteInviteStmt,
+		deleteMessageStmt:                   q.deleteMessageStmt,
+		deleteRoleStmt:                      q.deleteRoleStmt,
+		dequipEmotePackStmt:                 q.dequipEmotePackStmt,
+		emailExistsStmt:                     q.emailExistsStmt,
+		expireSessionsStmt:                  q.expireSessionsStmt,
+		getAvatarStmt:                       q.getAvatarStmt,
+		getChannelPositionStmt:              q.getChannelPositionStmt,
+		getChannelsStmt:                     q.getChannelsStmt,
+		getEmotePackEmotesStmt:              q.getEmotePackEmotesStmt,
+		getEmotePacksStmt:                   q.getEmotePacksStmt,
+		getFileIDByHashStmt:                 q.getFileIDByHashStmt,
+		getFileMetadataStmt:                 q.getFileMetadataStmt,
+		getGuildDataStmt:                    q.getGuildDataStmt,
+		getGuildListStmt:                    q.getGuildListStmt,
+		getGuildListPositionStmt:            q.getGuildListPositionStmt,
+		getGuildMembersStmt:                 q.getGuildMembersStmt,
+		getGuildOwnerStmt:                   q.getGuildOwnerStmt,
+		getGuildPictureStmt:                 q.getGuildPictureStmt,
+		getLastGuildPositionInListStmt:      q.getLastGuildPositionInListStmt,
+		getLocalUserIDStmt:                  q.getLocalUserIDStmt,
+		getMessageStmt:                      q.getMessageStmt,
+		getMessageAuthorStmt:                q.getMessageAuthorStmt,
+		getMessageDateStmt:                  q.getMessageDateStmt,
+		getMessagesStmt:                     q.getMessagesStmt,
+		getNonceInfoStmt:                    q.getNonceInfoStmt,
+		getPackOwnerStmt:                    q.getPackOwnerStmt,
+		getPermissionsStmt:                  q.getPermissionsStmt,
+		getPermissionsWithoutChannelStmt:    q.getPermissionsWithoutChannelStmt,
+		getRolePositionStmt:                 q.getRolePositionStmt,
+		getRolesForGuildStmt:                q.getRolesForGuildStmt,
+		getUserStmt:                         q.getUserStmt,
+		getUserByEmailStmt:                  q.getUserByEmailStmt,
+		getUserMetadataStmt:                 q.getUserMetadataStmt,
+		guildWithIDExistsStmt:               q.guildWithIDExistsStmt,
+		guildsForUserStmt:                   q.guildsForUserStmt,
+		guildsForUserWithDataStmt:           q.guildsForUserWithDataStmt,
+		incrementInviteStmt:                 q.incrementInviteStmt,
+		isIPWhitelistedStmt:                 q.isIPWhitelistedStmt,
+		isUserWhitelistedStmt:               q.isUserWhitelistedStmt,
+		messageWithIDExistsStmt:             q.messageWithIDExistsStmt,
+		moveChannelStmt:                     q.moveChannelStmt,
+		moveGuildStmt:                       q.moveGuildStmt,
+		moveRoleStmt:                        q.moveRoleStmt,
+		numChannelsWithIDStmt:               q.numChannelsWithIDStmt,
+		openInvitesStmt:                     q.openInvitesStmt,
+		permissionExistsWithoutChannelStmt:  q.permissionExistsWithoutChannelStmt,
+		permissionsExistsStmt:               q.permissionsExistsStmt,
+		removeGuildFromListStmt:             q.removeGuildFromListStmt,
+		removeUserFromGuildStmt:             q.removeUserFromGuildStmt,
+		removeUserFromRoleStmt:              q.removeUserFromRoleStmt,
+		resolveGuildIDStmt:                  q.resolveGuildIDStmt,
+		rolesForUserStmt:                    q.rolesForUserStmt,
+		sessionToUserIDStmt:                 q.sessionToUserIDStmt,
+		setGuildNameStmt:                    q.setGuildNameStmt,
+		setGuildPictureStmt:                 q.setGuildPictureStmt,
+		setPermissionsStmt:                  q.setPermissionsStmt,
+		setRoleColorStmt:                    q.setRoleColorStmt,
+		setRoleHoistStmt:                    q.setRoleHoistStmt,
+		setRoleNameStmt:                     q.setRoleNameStmt,
+		setRolePingableStmt:                 q.setRolePingableStmt,
+		setStatusStmt:                       q.setStatusStmt,
+		updateAvatarStmt:                    q.updateAvatarStmt,
+		updateChannelNameStmt:               q.updateChannelNameStmt,
+		updateMessageActionsStmt:            q.updateMessageActionsStmt,
+		updateMessageAttachmentsStmt:        q.updateMessageAttachmentsStmt,
+		updateMessageContentStmt:            q.updateMessageContentStmt,
+		updateMessageEmbedsStmt:             q.updateMessageEmbedsStmt,
+		updateMessageOverridesStmt:          q.updateMessageOverridesStmt,
+		updatePermissionsStmt:               q.updatePermissionsStmt,
+		updatePermissionsWithoutChannelStmt: q.updatePermissionsWithoutChannelStmt,
+		updateUsernameStmt:                  q.updateUsernameStmt,
+		userInGuildStmt:                     q.userInGuildStmt,
+		userIsLocalStmt:                     q.userIsLocalStmt,
 	}
 }

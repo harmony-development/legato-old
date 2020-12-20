@@ -34,7 +34,7 @@ func New(deps Dependencies) (*Manager, error) {
 func (im Manager) Connect(host string) (*grpc.ClientConn, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
-	client, err := grpc.DialContext(ctx, host)
+	client, err := grpc.DialContext(ctx, host, grpc.WithInsecure())
 	if err != nil {
 		return nil, err
 	}

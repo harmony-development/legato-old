@@ -9,19 +9,21 @@ import (
 	"io"
 	"time"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	corev1 "github.com/harmony-development/legato/gen/core"
 	"github.com/harmony-development/legato/server/api/core/v1/permissions"
 	"github.com/harmony-development/legato/server/api/middleware"
+	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/db/queries"
+	"github.com/harmony-development/legato/server/http/attachments/backend"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/harmony-development/legato/server/responses"
 	"github.com/sony/sonyflake"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -35,11 +37,13 @@ var (
 
 // Dependencies are the backend services this package needs
 type Dependencies struct {
-	DB        db.IHarmonyDB
-	Logger    logger.ILogger
-	Sonyflake *sonyflake.Sonyflake
-	PubSub    SubscriptionManager
-	Perms     *permissions.Manager
+	DB             db.IHarmonyDB
+	Logger         logger.ILogger
+	Sonyflake      *sonyflake.Sonyflake
+	PubSub         SubscriptionManager
+	Perms          *permissions.Manager
+	Config         *config.Config
+	StorageBackend backend.AttachmentBackend
 }
 
 // V1 contains the gRPC handler for v1
@@ -49,7 +53,9 @@ type V1 struct {
 
 // ActionsToProto is a utility function
 func (v1 *V1) ActionsToProto(msgs json.RawMessage) (ret []*corev1.Action) {
-	json.Unmarshal([]byte(msgs), &ret)
+	if err := json.Unmarshal([]byte(msgs), &ret); err != nil {
+		panic(err)
+	}
 	return
 }
 
@@ -61,7 +67,9 @@ func (v1 *V1) ProtoToActions(msgs []*corev1.Action) (ret []byte) {
 
 // EmbedsToProto is a utility function
 func (v1 *V1) EmbedsToProto(embeds json.RawMessage) (ret []*corev1.Embed) {
-	json.Unmarshal([]byte(embeds), &ret)
+	if err := json.Unmarshal([]byte(embeds), &ret); err != nil {
+		panic(err)
+	}
 	return
 }
 
@@ -77,7 +85,10 @@ func (v1 *V1) OverridesToProto(overrides []byte) (ret *corev1.Override) {
 		return
 	}
 	ret = new(corev1.Override)
-	proto.Unmarshal(overrides, ret)
+	err := proto.Unmarshal(overrides, ret)
+	if err != nil {
+		panic(err)
+	}
 	return
 }
 
@@ -93,8 +104,7 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    1,
 		},
-		Auth:       true,
-		Permission: middleware.NoPermission,
+		Auth: true,
 	}, "/protocol.core.v1.CoreService/CreateGuild")
 }
 
@@ -126,7 +136,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.JoinedLocation,
-		Permission: middleware.ModifyInvites,
+		Permission: "invites.manage.create",
 	}, "/protocol.core.v1.CoreService/CreateInvite")
 }
 
@@ -153,7 +163,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.JoinedLocation,
-		Permission: middleware.ModifyChannels,
+		Permission: "channels.manage.create",
 	}, "/protocol.core.v1.CoreService/CreateChannel")
 }
 
@@ -186,9 +196,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    15,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation | middleware.JoinedLocation,
-		Permission: middleware.NoPermission,
+		Auth:     true,
+		Location: middleware.GuildLocation | middleware.JoinedLocation,
 	}, "/protocol.core.v1.CoreService/GetGuild")
 }
 
@@ -216,7 +225,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.JoinedLocation,
-		Permission: middleware.ModifyInvites,
+		Permission: "invites.view",
 	}, "/protocol.core.v1.CoreService/GetGuildInvites")
 }
 
@@ -251,9 +260,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    15,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation | middleware.JoinedLocation,
-		Permission: middleware.NoPermission,
+		Auth:     true,
+		Location: middleware.GuildLocation | middleware.JoinedLocation,
 	}, "/protocol.core.v1.CoreService/GetGuildMembers")
 }
 
@@ -276,24 +284,30 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.JoinedLocation,
-		Permission: middleware.NoPermission,
+		WantsRoles: true,
 	}, "/protocol.core.v1.CoreService/GetGuildChannels")
 }
 
 // GetGuildChannels implements the GetGuildChannels RPC
 func (v1 *V1) GetGuildChannels(c context.Context, r *corev1.GetGuildChannelsRequest) (*corev1.GetGuildChannelsResponse, error) {
+	ctx := c.(middleware.HarmonyContext)
+
 	chans, err := v1.DB.ChannelsForGuild(r.GuildId)
 	if err != nil {
 		return nil, err
 	}
 	ret := []*corev1.GetGuildChannelsResponse_Channel{}
+	roles := ctx.UserRoles
+
 	for _, channel := range chans {
-		ret = append(ret, &corev1.GetGuildChannelsResponse_Channel{
-			ChannelId:   channel.ChannelID,
-			ChannelName: channel.ChannelName,
-			IsCategory:  channel.Category,
-			IsVoice:     channel.Isvoice,
-		})
+		if ctx.IsOwner || v1.Perms.Check("messages.view", roles, r.GuildId, channel.ChannelID) {
+			ret = append(ret, &corev1.GetGuildChannelsResponse_Channel{
+				ChannelId:   channel.ChannelID,
+				ChannelName: channel.ChannelName,
+				IsCategory:  channel.Category,
+				IsVoice:     channel.Isvoice,
+			})
+		}
 	}
 	return &corev1.GetGuildChannelsResponse{
 		Channels: ret,
@@ -308,7 +322,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
-		Permission: middleware.NoPermission,
+		Permission: "messages.view",
 	}, "/protocol.core.v1.CoreService/GetMessage")
 }
 
@@ -325,6 +339,7 @@ func (v1 *V1) GetMessage(c context.Context, r *corev1.GetMessageRequest) (*corev
 	}
 	var embeds []*corev1.Embed
 	var actions []*corev1.Action
+	attachments := []*corev1.Attachment{}
 	var override *corev1.Override
 	if err := json.Unmarshal(message.Embeds, &embeds); err != nil {
 		return nil, err
@@ -338,6 +353,17 @@ func (v1 *V1) GetMessage(c context.Context, r *corev1.GetMessageRequest) (*corev
 			return nil, err
 		}
 	}
+	for _, a := range message.Attachments {
+		contentType, fileName, size, err := v1.StorageBackend.GetMetadata(a)
+		if err == nil {
+			attachments = append(attachments, &corev1.Attachment{
+				Id:   a,
+				Name: fileName,
+				Type: contentType,
+				Size: size,
+			})
+		}
+	}
 	return &corev1.GetMessageResponse{
 		Message: &corev1.Message{
 			GuildId:     message.GuildID,
@@ -348,7 +374,7 @@ func (v1 *V1) GetMessage(c context.Context, r *corev1.GetMessageRequest) (*corev
 			EditedAt:    editedAt,
 			Content:     message.Content,
 			Embeds:      embeds,
-			Attachments: message.Attachments,
+			Attachments: attachments,
 			Actions:     actions,
 			Overrides:   override,
 			InReplyTo:   uint64(message.ReplyToID.Int64),
@@ -364,7 +390,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
-		Permission: middleware.NoPermission,
+		Permission: "messages.view",
 	}, "/protocol.core.v1.CoreService/GetChannelMessages")
 }
 
@@ -378,13 +404,17 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 			return nil, err
 		}
 		messages, err = v1.DB.GetMessagesBefore(r.GuildId, r.ChannelId, time)
+		if err != nil && err != sql.ErrNoRows {
+			return nil, err
+		}
 	} else {
 		messages, err = v1.DB.GetMessages(r.GuildId, r.ChannelId)
-	}
-	if err != nil && err != sql.ErrNoRows {
-		return nil, err
+		if err != nil && err != sql.ErrNoRows {
+			return nil, err
+		}
 	}
 	return &corev1.GetChannelMessagesResponse{
+		ReachedTop: len(messages) < v1.Config.Server.Policies.APIs.Messages.MaximumGetAmount,
 		Messages: func() (ret []*corev1.Message) {
 			for _, message := range messages {
 				createdAt, _ := ptypes.TimestampProto(message.CreatedAt.UTC())
@@ -395,6 +425,7 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 				var embeds []*corev1.Embed
 				var actions []*corev1.Action
 				var overrides *corev1.Override
+				attachments := []*corev1.Attachment{}
 				if err := json.Unmarshal(message.Embeds, &embeds); err != nil {
 					continue
 				}
@@ -407,6 +438,17 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 						continue
 					}
 				}
+				for _, a := range message.Attachments {
+					contentType, fileName, size, err := v1.StorageBackend.GetMetadata(a)
+					if err == nil {
+						attachments = append(attachments, &corev1.Attachment{
+							Id:   a,
+							Name: fileName,
+							Type: contentType,
+							Size: size,
+						})
+					}
+				}
 				ret = append(ret, &corev1.Message{
 					GuildId:     message.GuildID,
 					ChannelId:   message.ChannelID,
@@ -415,7 +457,7 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 					CreatedAt:   createdAt,
 					EditedAt:    editedAt,
 					Content:     message.Content,
-					Attachments: message.Attachments,
+					Attachments: attachments,
 					Embeds:      embeds,
 					Actions:     actions,
 					Overrides:   overrides,
@@ -435,7 +477,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.JoinedLocation,
-		Permission: middleware.ModifyGuild,
+		Permission: "guild.manage.change-name",
 	}, "/protocol.core.v1.CoreService/UpdateGuildName")
 }
 
@@ -464,7 +506,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
-		Permission: middleware.ModifyChannels,
+		Permission: "channels.manage.change-name",
 	}, "/protocol.core.v1.CoreService/UpdateChannelName")
 }
 
@@ -494,7 +536,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
-		Permission: middleware.ModifyChannels,
+		Permission: "channels.manage.move",
 	}, "/protocol.core.v1.CoreService/UpdateChannelOrder")
 }
 
@@ -525,7 +567,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.MessageLocation | middleware.AuthorLocation,
-		Permission: middleware.NoPermission,
+		Permission: "messages.send",
 	}, "/protocol.core.v1.CoreService/UpdateMessage")
 }
 
@@ -547,6 +589,8 @@ func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (
 	var actions *[]byte
 	var embeds *[]byte
 	var overrides *[]byte
+	var attachments *[]string
+	attachmentsData := []*corev1.Attachment{}
 	if r.UpdateActions {
 		val := v1.ProtoToActions(r.Actions)
 		actions = &val
@@ -559,7 +603,22 @@ func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (
 		val := v1.ProtoToOverrides(r.Overrides)
 		overrides = &val
 	}
-	tiempo, err := v1.DB.UpdateMessage(r.MessageId, &r.Content, embeds, actions, overrides)
+	if r.UpdateAttachments {
+		attachments = &r.Attachments
+
+		for _, a := range r.Attachments {
+			contentType, fileName, size, err := v1.StorageBackend.GetMetadata(a)
+			if err == nil {
+				attachmentsData = append(attachmentsData, &corev1.Attachment{
+					Id:   a,
+					Name: fileName,
+					Type: contentType,
+					Size: size,
+				})
+			}
+		}
+	}
+	tiempo, err := v1.DB.UpdateMessage(r.MessageId, &r.Content, embeds, actions, overrides, attachments)
 	if err != nil {
 		return nil, err
 	}
@@ -578,6 +637,7 @@ func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (
 				UpdateActions: r.UpdateActions,
 				Overrides:     r.Overrides,
 				EditedAt:      editedAt,
+				Attachments:   attachmentsData,
 			},
 		},
 	})
@@ -592,7 +652,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation,
-		Permission: middleware.Owner,
+		Permission: "guild.manage.delete",
 	}, "/protocol.core.v1.CoreService/DeleteGuild")
 }
 
@@ -620,7 +680,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation,
-		Permission: middleware.ModifyInvites,
+		Permission: "invites.manage.delete",
 	}, "/protocol.core.v1.CoreService/DeleteInvite")
 }
 
@@ -640,7 +700,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.ChannelLocation,
-		Permission: middleware.ModifyChannels,
+		Permission: "channels.manage.delete",
 	}, "/protocol.core.v1.CoreService/DeleteChannel")
 }
 
@@ -667,8 +727,8 @@ func init() {
 			Burst:    5,
 		},
 		Auth:       true,
-		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.MessageLocation | middleware.AuthorLocation,
-		Permission: middleware.NoPermission,
+		WantsRoles: true,
+		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.MessageLocation,
 	}, "/protocol.core.v1.CoreService/DeleteMessage")
 }
 
@@ -679,7 +739,7 @@ func (v1 *V1) DeleteMessage(c context.Context, r *corev1.DeleteMessageRequest) (
 	if err != nil {
 		return nil, err
 	}
-	if ctx.UserID != owner {
+	if ctx.UserID != owner && !(ctx.IsOwner || v1.Perms.Check("messages.manage.delete", ctx.UserRoles, r.GuildId, r.ChannelId)) {
 		return nil, ErrNoPermissions
 	}
 	v1.PubSub.Guild.Broadcast(r.GuildId, &corev1.Event{
@@ -700,9 +760,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    5,
 		},
-		Auth:       true,
-		Location:   middleware.NoLocation,
-		Permission: middleware.NoPermission,
+		Auth:     true,
+		Location: middleware.NoLocation,
 	}, "/protocol.core.v1.CoreService/JoinGuild")
 }
 
@@ -741,9 +800,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    5,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation,
-		Permission: middleware.NoPermission,
+		Auth:     true,
+		Location: middleware.GuildLocation,
 	}, "/protocol.core.v1.CoreService/LeaveGuild")
 }
 
@@ -773,9 +831,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    5,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation,
-		Permission: middleware.NoPermission,
+		Auth:     true,
+		Location: middleware.GuildLocation,
 	}, "/protocol.core.v1.CoreService/StreamEvents")
 }
 
@@ -829,7 +886,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.MessageLocation,
-		Permission: middleware.NoPermission,
+		Permission: "actions.trigger",
 	}, "/protocol.core.v1.CoreService/TriggerAction")
 }
 
@@ -869,7 +926,7 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.ChannelLocation,
-		Permission: middleware.NoPermission,
+		Permission: "messages.send",
 	}, "/protocol.core.v1.CoreService/SendMessage")
 }
 
@@ -898,13 +955,28 @@ func (v1 *V1) SendMessage(c context.Context, r *corev1.SendMessageRequest) (*cor
 	if err != nil {
 		return nil, err
 	}
+
+	attachments := []*corev1.Attachment{}
+
+	for _, a := range r.Attachments {
+		contentType, fileName, size, err := v1.StorageBackend.GetMetadata(a)
+		if err == nil {
+			attachments = append(attachments, &corev1.Attachment{
+				Id:   a,
+				Name: fileName,
+				Type: contentType,
+				Size: size,
+			})
+		}
+	}
+
 	message := corev1.Message{
 		GuildId:     r.GuildId,
 		ChannelId:   r.ChannelId,
 		MessageId:   messageID,
 		AuthorId:    ctx.UserID,
 		Content:     r.Content,
-		Attachments: r.Attachments,
+		Attachments: attachments,
 		Embeds:      r.Embeds,
 		Actions:     r.Actions,
 		Overrides:   r.Overrides,
@@ -931,9 +1003,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    10,
 		},
-		Auth:       true,
-		Location:   middleware.NoLocation,
-		Permission: middleware.NoPermission,
+		Auth:     true,
+		Location: middleware.NoLocation,
 	}, "/protocol.core.v1.CoreService/GetGuildList")
 }
 
@@ -962,10 +1033,9 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    10,
 		},
-		Auth:       true,
-		Local:      true,
-		Location:   middleware.NoLocation,
-		Permission: middleware.NoPermission,
+		Auth:     true,
+		Local:    true,
+		Location: middleware.NoLocation,
 	}, "/protocol.core.v1.CoreService/AddGuildToGuildList")
 }
 
@@ -993,10 +1063,9 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    10,
 		},
-		Auth:       true,
-		Local:      true,
-		Location:   middleware.NoLocation,
-		Permission: middleware.NoPermission,
+		Auth:     true,
+		Local:    true,
+		Location: middleware.NoLocation,
 	}, "/protocol.core.v1.CoreService/RemoveGuildFromGuildList")
 }
 
@@ -1129,6 +1198,18 @@ func (v1 *V1) GetEmotePackEmotes(c context.Context, r *corev1.GetEmotePackEmotes
 	}, nil
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation,
+		Permission: "roles.manage",
+	}, "/protocol.core.v1.CoreService/AddGuildRole")
+}
+
 // AddGuildRole implements the AddGuildRole RPC
 func (v1 *V1) AddGuildRole(c context.Context, r *corev1.AddGuildRoleRequest) (*corev1.AddGuildRoleResponse, error) {
 	roleID, err := v1.Sonyflake.NextID()
@@ -1147,9 +1228,51 @@ func (v1 *V1) AddGuildRole(c context.Context, r *corev1.AddGuildRoleRequest) (*c
 	}, nil
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation,
+		Permission: "roles.manage",
+	}, "/protocol.core.v1.CoreService/AddGuildRole")
+}
+
 // DeleteGuildRole implements the DeleteGuildRole RPC
 func (v1 *V1) DeleteGuildRole(c context.Context, r *corev1.DeleteGuildRoleRequest) (*empty.Empty, error) {
 	return &empty.Empty{}, v1.DB.RemoveRoleFromGuild(r.GuildId, r.RoleId)
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation,
+		Permission: "roles.manage",
+	}, "/protocol.core.v1.CoreService/MoveRole")
+}
+
+// MoveRole implements the MoveRole RPC
+func (v1 *V1) MoveRole(c context.Context, r *corev1.MoveRoleRequest) (*corev1.MoveRoleResponse, error) {
+	err := v1.DB.MoveRole(r.GuildId, r.RoleId, r.BeforeId, r.AfterId)
+	return &corev1.MoveRoleResponse{}, err
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation,
+		Permission: "roles.get",
+	}, "/protocol.core.v1.CoreService/GetGuildRoles")
 }
 
 // GetGuildRoles implements the GetGuildRoles RPC
@@ -1160,9 +1283,33 @@ func (v1 *V1) GetGuildRoles(c context.Context, r *corev1.GetGuildRolesRequest) (
 	}, err
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation,
+		Permission: "permissions.manage.set",
+	}, "/protocol.core.v1.CoreService/SetPermissions")
+}
+
 // SetPermissions implements the SetPermissions RPC
 func (v1 *V1) SetPermissions(c context.Context, r *corev1.SetPermissionsRequest) (*empty.Empty, error) {
 	return &emptypb.Empty{}, v1.Perms.SetPermissions(r.Perms.Permissions, r.GuildId, r.ChannelId, r.RoleId)
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation,
+		Permission: "permissions.manage.get",
+	}, "/protocol.core.v1.CoreService/GetPermissions")
 }
 
 // GetPermissions implements the GetPermissions RPC
@@ -1170,16 +1317,105 @@ func (v1 *V1) GetPermissions(c context.Context, r *corev1.GetPermissionsRequest)
 	return &corev1.GetPermissionsResponse{Perms: &corev1.PermissionList{Permissions: v1.Perms.GetPermissions(r.GuildId, r.ChannelId, r.RoleId)}}, nil
 }
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		WantsRoles: true,
+		Location:   middleware.GuildLocation,
+	}, "/protocol.core.v1.CoreService/QueryHasPermission")
+}
+
 // QueryHasPermission implements the QueryHasPermission RPC
 func (v1 *V1) QueryHasPermission(c context.Context, r *corev1.QueryPermissionsRequest) (*corev1.QueryPermissionsResponse, error) {
+	ctx := c.(middleware.HarmonyContext)
+
 	if r.As == 0 {
 		r.As = c.(middleware.HarmonyContext).UserID
+	} else if !(ctx.IsOwner || v1.Perms.Check("permissions.query", ctx.UserRoles, r.GuildId, r.ChannelId)) {
+		return nil, ErrNoPermissions
 	}
+
+	owner, err := v1.DB.GetOwner(r.GuildId)
+	if err != nil {
+		return nil, err
+	}
+
 	roles, err := v1.DB.RolesForUser(r.GuildId, r.As)
 	if err != nil {
 		return nil, err
 	}
 	return &corev1.QueryPermissionsResponse{
-		Ok: v1.Perms.Check(r.CheckFor, roles, r.GuildId, r.ChannelId),
+		Ok: owner == r.As || v1.Perms.Check(r.CheckFor, roles, r.GuildId, r.ChannelId),
+	}, nil
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation,
+		Permission: "roles.users.manage",
+	}, "/protocol.core.v1.CoreService/ManageUserRoles")
+}
+
+func (v1 *V1) ManageUserRoles(c context.Context, r *corev1.ManageUserRolesRequest) (*empty.Empty, error) {
+	return &empty.Empty{}, v1.DB.ManageRoles(r.GuildId, r.UserId, r.GiveRoleIds, r.TakeRoleIds)
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		Permission: "roles.manage",
+		Location:   middleware.GuildLocation,
+	}, "/protocol.core.v1.CoreService/ModifyGuildRole")
+}
+
+func (v1 *V1) ModifyGuildRole(c context.Context, r *corev1.ModifyGuildRoleRequest) (*empty.Empty, error) {
+	return &empty.Empty{}, v1.DB.ModifyRole(r.GuildId, r.Role.RoleId, r.Role.Name, r.Role.Color, r.Role.Hoist, r.Role.Pingable, r.ModifyName, r.ModifyColor, r.ModifyHoist, r.ModifyPingable)
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    10,
+		},
+		Auth:       true,
+		WantsRoles: true,
+		Location:   middleware.GuildLocation,
+	}, "/protocol.core.v1.CoreService/GetUserRoles")
+}
+
+func (v1 *V1) GetUserRoles(c context.Context, r *corev1.GetUserRolesRequest) (*corev1.GetUserRolesResponse, error) {
+	ctx := c.(middleware.HarmonyContext)
+
+	if r.UserId == 0 {
+		return &corev1.GetUserRolesResponse{
+			Roles: ctx.UserRoles,
+		}, nil
+	}
+
+	if !(ctx.IsOwner || v1.Perms.Check("roles.users.get", ctx.UserRoles, r.GuildId, 0)) {
+		return nil, ErrNoPermissions
+	}
+
+	roles, err := v1.DB.RolesForUser(r.GuildId, r.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &corev1.GetUserRolesResponse{
+		Roles: roles,
 	}, nil
 }

@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/google/uuid"
 	"github.com/harmony-development/legato/server/config"
@@ -26,6 +27,7 @@ type Backend struct {
 type FileData struct {
 	ContentType string
 	Filename    string
+	Size        int32
 }
 
 // Serialize serializes the file data into a byte array
@@ -36,10 +38,6 @@ func (f FileData) Serialize() []byte {
 
 // SaveFile saves file
 func (b *Backend) SaveFile(name, contentType string, r io.Reader) (id string, err error) {
-	data := FileData{
-		ContentType: contentType,
-		Filename:    name,
-	}
 	fileID := uuid.New().String()
 
 	filedata, err := ioutil.ReadAll(r)
@@ -47,12 +45,18 @@ func (b *Backend) SaveFile(name, contentType string, r io.Reader) (id string, er
 		return "", err
 	}
 
-	err = ioutil.WriteFile(path.Join(b.Config.Server.FlatfileMediaPath, fileID), filedata, 0o660)
+	err = ioutil.WriteFile(filepath.Join(b.Config.Flatfile.MediaPath, fileID), filedata, 0o660)
 	if err != nil {
 		return "", err
 	}
 
-	err = ioutil.WriteFile(path.Join(b.Config.Server.FlatfileMediaPath, fmt.Sprintf("%s.data", fileID)), data.Serialize(), 0o660)
+	data := FileData{
+		ContentType: contentType,
+		Filename:    name,
+		Size:        int32(len(filedata)),
+	}
+
+	err = ioutil.WriteFile(filepath.Join(b.Config.Flatfile.MediaPath, fmt.Sprintf("%s.data", fileID)), data.Serialize(), 0o660)
 	if err != nil {
 		return "", err
 	}
@@ -61,8 +65,9 @@ func (b *Backend) SaveFile(name, contentType string, r io.Reader) (id string, er
 }
 
 // ReadFile readsfile
-func (b *Backend) ReadFile(id string) (contentType, filename string, r io.ReadCloser, err error) {
-	data, err := ioutil.ReadFile(path.Join(b.Config.Server.FlatfileMediaPath, fmt.Sprintf("%s.data", id)))
+func (b *Backend) ReadFile(id string) (contentType, filename string, size int32, r io.ReadCloser, err error) {
+	baseFileName := filepath.Base(id)
+	data, err := ioutil.ReadFile(filepath.Join(b.Config.Flatfile.MediaPath, fmt.Sprintf("%s.data", baseFileName)))
 	if err != nil {
 		return
 	}
@@ -75,8 +80,25 @@ func (b *Backend) ReadFile(id string) (contentType, filename string, r io.ReadCl
 
 	contentType = fileData.ContentType
 	filename = fileData.Filename
+	size = fileData.Size
 
-	r, err = os.Open(path.Join(b.Config.Server.FlatfileMediaPath, id))
+	r, err = os.Open(path.Join(b.Config.Flatfile.MediaPath, baseFileName))
 
 	return
+}
+
+func (b *Backend) GetMetadata(id string) (contentType, fileName string, size int32, err error) {
+	baseFileName := filepath.Base(id)
+	data, err := ioutil.ReadFile(filepath.Join(b.Config.Flatfile.MediaPath, fmt.Sprintf("%s.data", baseFileName)))
+	if err != nil {
+		return
+	}
+
+	fileData := FileData{}
+	err = json.Unmarshal(data, &fileData)
+	if err != nil {
+		return
+	}
+
+	return fileData.ContentType, fileData.Filename, fileData.Size, err
 }

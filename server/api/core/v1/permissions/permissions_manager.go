@@ -1,6 +1,7 @@
 package permissions
 
 import (
+	"github.com/alecthomas/repr"
 	corev1 "github.com/harmony-development/legato/gen/core"
 	"github.com/harmony-development/legato/server/db"
 	lru "github.com/hashicorp/golang-lru"
@@ -13,13 +14,11 @@ type Manager struct {
 }
 
 // NewManager creates a new permissions manager
-func NewManager(db db.IHarmonyDB) Manager {
-	man := Manager{
+func NewManager(db db.IHarmonyDB) *Manager {
+	man := &Manager{
 		db: db,
 	}
-	cache, err := lru.NewWithEvict(50_000, func(key, value interface{}) {
-		man.saveGuild(key.(uint64), value.(*GuildState))
-	})
+	cache, err := lru.New(50_000)
 	if err != nil {
 		panic(err)
 	}
@@ -27,11 +26,16 @@ func NewManager(db db.IHarmonyDB) Manager {
 	return man
 }
 
+var zeroVal = PermissionNode{}
+
 func (p *Manager) saveGuild(guild uint64, data *GuildState) {
 	for channel, cdata := range data.Channels {
 		for role, rdata := range cdata {
 			if err := p.db.SetPermissions(guild, uint64(channel), uint64(role), func() (ret []db.PermissionsNode) {
 				for _, perm := range rdata {
+					if perm == zeroVal {
+						continue
+					}
 					ret = append(ret, db.PermissionsNode{
 						Node:  perm.Glob.s,
 						Allow: perm.Mode == Allow,
@@ -47,6 +51,9 @@ func (p *Manager) saveGuild(guild uint64, data *GuildState) {
 	for role, rdata := range data.Roles {
 		if err := p.db.SetPermissions(guild, 0, uint64(role), func() (ret []db.PermissionsNode) {
 			for _, perm := range rdata {
+				if perm == zeroVal {
+					continue
+				}
 				ret = append(ret, db.PermissionsNode{
 					Node:  perm.Glob.s,
 					Allow: perm.Mode == Allow,
@@ -61,6 +68,9 @@ func (p *Manager) saveGuild(guild uint64, data *GuildState) {
 
 func (p *Manager) obtainGuild(guild uint64) *GuildState {
 	data, err := p.db.GetPermissionsData(guild)
+
+	repr.Println(data)
+
 	if err != nil {
 		panic(err)
 	}
@@ -109,19 +119,22 @@ func (p *Manager) Check(permission string, userRoles []uint64, inGuild uint64, i
 		p.states.Add(inGuild, p.obtainGuild(inGuild))
 	}
 	data, _ := p.states.Get(inGuild)
-	state := data.(GuildState)
+	state := data.(*GuildState)
 	return state.Check(permission, userRoles, ChannelID(inChannel))
 }
 
-func (p *Manager) GetPermissions(forGuild, forChannel, forRole uint64) (ret []*corev1.Permission) {
-	var guild *GuildState
-
-	if !p.states.Contains(forGuild) {
-		guild = p.obtainGuild(forGuild)
-	} else {
-		intf, _ := p.states.Get(forGuild)
-		guild = intf.(*GuildState)
+func (p *Manager) ensureGuild(guildID uint64) *GuildState {
+	if !p.states.Contains(guildID) {
+		p.states.Add(guildID, p.obtainGuild(guildID))
 	}
+
+	val, _ := p.states.Get(guildID)
+
+	return val.(*GuildState)
+}
+
+func (p *Manager) GetPermissions(forGuild, forChannel, forRole uint64) (ret []*corev1.Permission) {
+	guild := p.ensureGuild(forGuild)
 
 	if forChannel == 0 {
 		data := guild.Roles[RoleID(forRole)]
@@ -154,22 +167,23 @@ func (p *Manager) GetPermissions(forGuild, forChannel, forRole uint64) (ret []*c
 		}
 	}
 
+	repr.Println(ret)
+
 	return
 }
 
 func (p *Manager) SetPermissions(permissions []*corev1.Permission, forGuild, forChannel, forRole uint64) error {
-	var guild *GuildState
+	guild := p.ensureGuild(forGuild)
 
-	if !p.states.Contains(forGuild) {
-		guild = p.obtainGuild(forGuild)
-	} else {
-		intf, _ := p.states.Get(forGuild)
-		guild = intf.(*GuildState)
-	}
+	repr.Println(permissions)
 
 	var nodes []PermissionNode
 	for _, perm := range permissions {
 		node := PermissionNode{}
+
+		if perm.Matches == "" {
+			continue
+		}
 
 		var err error
 		node.Glob, err = TryGlob(perm.Matches)
@@ -196,9 +210,7 @@ func (p *Manager) SetPermissions(permissions []*corev1.Permission, forGuild, for
 		guild.Channels[ChannelID(forChannel)][RoleID(forRole)] = nodes
 	}
 
-	if !p.states.Contains(forGuild) {
-		p.saveGuild(forGuild, guild)
-	}
+	go p.saveGuild(forGuild, guild)
 
 	return nil
 }

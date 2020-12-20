@@ -2,6 +2,7 @@
 .env
 vendor
 flatfile
+media
 filestore
 harmony.db
 static
@@ -13,3 +14,4 @@ harmony-key.pub
 .ninja_deps
 .ninja_log
 .version.json
+config.hcl

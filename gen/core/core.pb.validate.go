@@ -530,6 +530,78 @@ var _ interface {
 	ErrorName() string
 } = EmbedValidationError{}
 
+// Validate checks the field values on Attachment with the rules defined in the
+// proto definition for this message. If any rules are violated, an error is returned.
+func (m *Attachment) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Id
+
+	// no validation rules for Name
+
+	// no validation rules for Type
+
+	// no validation rules for Size
+
+	return nil
+}
+
+// AttachmentValidationError is the validation error returned by
+// Attachment.Validate if the designated constraints aren't met.
+type AttachmentValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AttachmentValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AttachmentValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AttachmentValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AttachmentValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AttachmentValidationError) ErrorName() string { return "AttachmentValidationError" }
+
+// Error satisfies the builtin error interface
+func (e AttachmentValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAttachment.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AttachmentValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AttachmentValidationError{}
+
 // Validate checks the field values on Message with the rules defined in the
 // proto definition for this message. If any rules are violated, an error is returned.
 func (m *Message) Validate() error {
@@ -589,6 +661,21 @@ func (m *Message) Validate() error {
 			if err := v.Validate(); err != nil {
 				return MessageValidationError{
 					field:  fmt.Sprintf("Actions[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	for idx, item := range m.GetAttachments() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return MessageValidationError{
+					field:  fmt.Sprintf("Attachments[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
 				}
@@ -958,12 +1045,7 @@ func (m *CreateChannelRequest) Validate() error {
 
 	// no validation rules for GuildId
 
-	if utf8.RuneCountInString(m.GetChannelName()) < 1 {
-		return CreateChannelRequestValidationError{
-			field:  "ChannelName",
-			reason: "value length must be at least 1 runes",
-		}
-	}
+	// no validation rules for ChannelName
 
 	// no validation rules for IsCategory
 
@@ -2042,6 +2124,8 @@ func (m *GetChannelMessagesResponse) Validate() error {
 	if m == nil {
 		return nil
 	}
+
+	// no validation rules for ReachedTop
 
 	for idx, item := range m.GetMessages() {
 		_, _ = idx, item
@@ -3749,6 +3833,18 @@ func (m *Event) Validate() error {
 			}
 		}
 
+	case *Event_RoleMoved_:
+
+		if v, ok := interface{}(m.GetRoleMoved()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return EventValidationError{
+					field:  "RoleMoved",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
 	}
 
 	return nil
@@ -5152,6 +5248,144 @@ var _ interface {
 	ErrorName() string
 } = RoleValidationError{}
 
+// Validate checks the field values on MoveRoleRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, an
+// error is returned.
+func (m *MoveRoleRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for GuildId
+
+	// no validation rules for RoleId
+
+	// no validation rules for BeforeId
+
+	// no validation rules for AfterId
+
+	return nil
+}
+
+// MoveRoleRequestValidationError is the validation error returned by
+// MoveRoleRequest.Validate if the designated constraints aren't met.
+type MoveRoleRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e MoveRoleRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e MoveRoleRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e MoveRoleRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e MoveRoleRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e MoveRoleRequestValidationError) ErrorName() string { return "MoveRoleRequestValidationError" }
+
+// Error satisfies the builtin error interface
+func (e MoveRoleRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sMoveRoleRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = MoveRoleRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = MoveRoleRequestValidationError{}
+
+// Validate checks the field values on MoveRoleResponse with the rules defined
+// in the proto definition for this message. If any rules are violated, an
+// error is returned.
+func (m *MoveRoleResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	return nil
+}
+
+// MoveRoleResponseValidationError is the validation error returned by
+// MoveRoleResponse.Validate if the designated constraints aren't met.
+type MoveRoleResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e MoveRoleResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e MoveRoleResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e MoveRoleResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e MoveRoleResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e MoveRoleResponseValidationError) ErrorName() string { return "MoveRoleResponseValidationError" }
+
+// Error satisfies the builtin error interface
+func (e MoveRoleResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sMoveRoleResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = MoveRoleResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = MoveRoleResponseValidationError{}
+
 // Validate checks the field values on GetGuildRolesRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
@@ -5521,6 +5755,302 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = DeleteGuildRoleRequestValidationError{}
+
+// Validate checks the field values on ModifyGuildRoleRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *ModifyGuildRoleRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for GuildId
+
+	if v, ok := interface{}(m.GetRole()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ModifyGuildRoleRequestValidationError{
+				field:  "Role",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for ModifyName
+
+	// no validation rules for ModifyColor
+
+	// no validation rules for ModifyHoist
+
+	// no validation rules for ModifyPingable
+
+	return nil
+}
+
+// ModifyGuildRoleRequestValidationError is the validation error returned by
+// ModifyGuildRoleRequest.Validate if the designated constraints aren't met.
+type ModifyGuildRoleRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ModifyGuildRoleRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ModifyGuildRoleRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ModifyGuildRoleRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ModifyGuildRoleRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ModifyGuildRoleRequestValidationError) ErrorName() string {
+	return "ModifyGuildRoleRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ModifyGuildRoleRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sModifyGuildRoleRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ModifyGuildRoleRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ModifyGuildRoleRequestValidationError{}
+
+// Validate checks the field values on ManageUserRolesRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *ManageUserRolesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for GuildId
+
+	// no validation rules for UserId
+
+	return nil
+}
+
+// ManageUserRolesRequestValidationError is the validation error returned by
+// ManageUserRolesRequest.Validate if the designated constraints aren't met.
+type ManageUserRolesRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ManageUserRolesRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ManageUserRolesRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ManageUserRolesRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ManageUserRolesRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ManageUserRolesRequestValidationError) ErrorName() string {
+	return "ManageUserRolesRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ManageUserRolesRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sManageUserRolesRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ManageUserRolesRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ManageUserRolesRequestValidationError{}
+
+// Validate checks the field values on GetUserRolesRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *GetUserRolesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for GuildId
+
+	// no validation rules for UserId
+
+	return nil
+}
+
+// GetUserRolesRequestValidationError is the validation error returned by
+// GetUserRolesRequest.Validate if the designated constraints aren't met.
+type GetUserRolesRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetUserRolesRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetUserRolesRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetUserRolesRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetUserRolesRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetUserRolesRequestValidationError) ErrorName() string {
+	return "GetUserRolesRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetUserRolesRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetUserRolesRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetUserRolesRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetUserRolesRequestValidationError{}
+
+// Validate checks the field values on GetUserRolesResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *GetUserRolesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	return nil
+}
+
+// GetUserRolesResponseValidationError is the validation error returned by
+// GetUserRolesResponse.Validate if the designated constraints aren't met.
+type GetUserRolesResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetUserRolesResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetUserRolesResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetUserRolesResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetUserRolesResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetUserRolesResponseValidationError) ErrorName() string {
+	return "GetUserRolesResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetUserRolesResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetUserRolesResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetUserRolesResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetUserRolesResponseValidationError{}
 
 // Validate checks the field values on GetGuildListResponse_GuildListEntry with
 // the rules defined in the proto definition for this message. If any rules
@@ -6240,6 +6770,21 @@ func (m *Event_MessageUpdated) Validate() error {
 	}
 
 	// no validation rules for UpdateActions
+
+	for idx, item := range m.GetAttachments() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return Event_MessageUpdatedValidationError{
+					field:  fmt.Sprintf("Attachments[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
 
 	// no validation rules for UpdateAttachments
 
@@ -7118,3 +7663,72 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = Event_ActionPerformedValidationError{}
+
+// Validate checks the field values on Event_RoleMoved with the rules defined
+// in the proto definition for this message. If any rules are violated, an
+// error is returned.
+func (m *Event_RoleMoved) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for GuildId
+
+	// no validation rules for RoleId
+
+	return nil
+}
+
+// Event_RoleMovedValidationError is the validation error returned by
+// Event_RoleMoved.Validate if the designated constraints aren't met.
+type Event_RoleMovedValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e Event_RoleMovedValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e Event_RoleMovedValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e Event_RoleMovedValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e Event_RoleMovedValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e Event_RoleMovedValidationError) ErrorName() string { return "Event_RoleMovedValidationError" }
+
+// Error satisfies the builtin error interface
+func (e Event_RoleMovedValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sEvent_RoleMoved.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = Event_RoleMovedValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = Event_RoleMovedValidationError{}

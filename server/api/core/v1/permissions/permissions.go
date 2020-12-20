@@ -89,13 +89,11 @@ func (g GuildState) Check(permission string, userRoles []uint64, in ChannelID) b
 	if in != 0 {
 		if channelData, ok := g.Channels[in]; ok {
 			for _, role := range userRoles {
-				nodes, _ := channelData[RoleID(role)]
+				nodes, ok := channelData[RoleID(role)]
+				_ = ok
 				for _, node := range nodes {
 					if node.Glob.Match(permission) {
-						if node.Mode == Allow {
-							return true
-						}
-						return false
+						return node.Mode == Allow
 					}
 				}
 			}
@@ -104,13 +102,11 @@ func (g GuildState) Check(permission string, userRoles []uint64, in ChannelID) b
 		if category, ok := g.Categories[in]; ok {
 			if channelData, ok := g.Channels[category]; ok {
 				for _, role := range userRoles {
-					nodes, _ := channelData[RoleID(role)]
+					nodes, ok := channelData[RoleID(role)]
+					_ = ok
 					for _, node := range nodes {
 						if node.Glob.Match(permission) {
-							if node.Mode == Allow {
-								return true
-							}
-							return false
+							return node.Mode == Allow
 						}
 					}
 				}
@@ -119,13 +115,11 @@ func (g GuildState) Check(permission string, userRoles []uint64, in ChannelID) b
 	}
 
 	for _, role := range userRoles {
-		nodes, _ := g.Roles[RoleID(role)]
+		nodes, ok := g.Roles[RoleID(role)]
+		_ = ok
 		for _, node := range nodes {
 			if node.Glob.Match(permission) {
-				if node.Mode == Allow {
-					return true
-				}
-				return false
+				return node.Mode == Allow
 			}
 		}
 	}

@@ -41,8 +41,10 @@ type FederationNonce struct {
 }
 
 type File struct {
-	Hash   []byte `json:"hash"`
-	FileID string `json:"file_id"`
+	FileID      string `json:"file_id"`
+	Name        string `json:"name"`
+	ContentType string `json:"content_type"`
+	Size        int32  `json:"size"`
 }
 
 type ForeignUser struct {
@@ -68,6 +70,11 @@ type GuildList struct {
 type GuildMember struct {
 	UserID  uint64 `json:"user_id"`
 	GuildID uint64 `json:"guild_id"`
+}
+
+type Hash struct {
+	Hash   []byte `json:"hash"`
+	FileID string `json:"file_id"`
 }
 
 type Invite struct {
@@ -99,10 +106,10 @@ type Message struct {
 }
 
 type Permission struct {
-	GuildID   uint64        `json:"guild_id"`
-	ChannelID sql.NullInt64 `json:"channel_id"`
-	RoleID    uint64        `json:"role_id"`
-	Nodes     []string      `json:"nodes"`
+	GuildID   uint64          `json:"guild_id"`
+	ChannelID sql.NullInt64   `json:"channel_id"`
+	RoleID    uint64          `json:"role_id"`
+	Nodes     json.RawMessage `json:"nodes"`
 }
 
 type Profile struct {
@@ -127,6 +134,7 @@ type Role struct {
 	Color    int32  `json:"color"`
 	Hoist    bool   `json:"hoist"`
 	Pingable bool   `json:"pingable"`
+	Position string `json:"position"`
 }
 
 type RolesMember struct {

@@ -18,8 +18,7 @@ func init() {
 			Duration: 5 * time.Minute,
 			Burst:    8,
 		},
-		Auth:       true,
-		Permission: middleware.NoPermission,
+		Auth: true,
 	}, "/protocol.profile.v1.ProfileService/UsernameUpdate")
 }
 

@@ -6,17 +6,44 @@ package queries
 import (
 	"context"
 	"database/sql"
-
-	"github.com/lib/pq"
+	"encoding/json"
 )
+
+const addUserToRole = `-- name: AddUserToRole :exec
+INSERT INTO Roles_Members (Guild_ID, Role_ID, Member_ID)
+VALUES ($1, $2, $3) ON CONFLICT DO NOTHING
+`
+
+type AddUserToRoleParams struct {
+	GuildID  uint64 `json:"guild_id"`
+	RoleID   uint64 `json:"role_id"`
+	MemberID uint64 `json:"member_id"`
+}
+
+func (q *Queries) AddUserToRole(ctx context.Context, arg AddUserToRoleParams) error {
+	_, err := q.exec(ctx, q.addUserToRoleStmt, addUserToRole, arg.GuildID, arg.RoleID, arg.MemberID)
+	return err
+}
 
 const createRole = `-- name: CreateRole :one
 INSERT INTO Roles (
-    Guild_ID, Role_ID, Name, Color, Hoist, Pingable
-) VALUES (
-    $1,       $2,      $3,   $4,    $5,    $6
-)
-RETURNING guild_id, role_id, name, color, hoist, pingable
+        Guild_ID,
+        Role_ID,
+        Name,
+        Color,
+        Hoist,
+        Pingable,
+        Position
+    )
+VALUES (
+        $1,
+        $2,
+        $3,
+        $4,
+        $5,
+        $6,
+        $7
+    ) RETURNING guild_id, role_id, name, color, hoist, pingable, position
 `
 
 type CreateRoleParams struct {
@@ -26,6 +53,7 @@ type CreateRoleParams struct {
 	Color    int32  `json:"color"`
 	Hoist    bool   `json:"hoist"`
 	Pingable bool   `json:"pingable"`
+	Position string `json:"position"`
 }
 
 func (q *Queries) CreateRole(ctx context.Context, arg CreateRoleParams) (Role, error) {
@@ -36,6 +64,7 @@ func (q *Queries) CreateRole(ctx context.Context, arg CreateRoleParams) (Role, e
 		arg.Color,
 		arg.Hoist,
 		arg.Pingable,
+		arg.Position,
 	)
 	var i Role
 	err := row.Scan(
@@ -45,14 +74,15 @@ func (q *Queries) CreateRole(ctx context.Context, arg CreateRoleParams) (Role, e
 		&i.Color,
 		&i.Hoist,
 		&i.Pingable,
+		&i.Position,
 	)
 	return i, err
 }
 
 const deleteRole = `-- name: DeleteRole :exec
 DELETE FROM Roles
-    WHERE Guild_ID = $1
-      AND Role_ID = $2
+WHERE Guild_ID = $1
+    AND Role_ID = $2
 `
 
 type DeleteRoleParams struct {
@@ -66,10 +96,11 @@ func (q *Queries) DeleteRole(ctx context.Context, arg DeleteRoleParams) error {
 }
 
 const getPermissions = `-- name: GetPermissions :one
-SELECT Nodes FROM Permissions
-    WHERE Guild_ID = $1
-      AND Channel_ID = $2
-      AND Role_ID = $3
+SELECT Nodes
+FROM Permissions
+WHERE Guild_ID = $1
+    AND Channel_ID = $2
+    AND Role_ID = $3
 `
 
 type GetPermissionsParams struct {
@@ -78,17 +109,19 @@ type GetPermissionsParams struct {
 	RoleID    uint64        `json:"role_id"`
 }
 
-func (q *Queries) GetPermissions(ctx context.Context, arg GetPermissionsParams) ([]string, error) {
+func (q *Queries) GetPermissions(ctx context.Context, arg GetPermissionsParams) (json.RawMessage, error) {
 	row := q.queryRow(ctx, q.getPermissionsStmt, getPermissions, arg.GuildID, arg.ChannelID, arg.RoleID)
-	var nodes []string
-	err := row.Scan(pq.Array(&nodes))
+	var nodes json.RawMessage
+	err := row.Scan(&nodes)
 	return nodes, err
 }
 
 const getPermissionsWithoutChannel = `-- name: GetPermissionsWithoutChannel :one
-SELECT Nodes FROM Permissions
-    WHERE Guild_ID = $1
-      AND Role_ID = $2
+SELECT Nodes
+FROM Permissions
+WHERE Guild_ID = $1
+    AND Channel_ID IS NULL
+    AND Role_ID = $2
 `
 
 type GetPermissionsWithoutChannelParams struct {
@@ -96,16 +129,37 @@ type GetPermissionsWithoutChannelParams struct {
 	RoleID  uint64 `json:"role_id"`
 }
 
-func (q *Queries) GetPermissionsWithoutChannel(ctx context.Context, arg GetPermissionsWithoutChannelParams) ([]string, error) {
+func (q *Queries) GetPermissionsWithoutChannel(ctx context.Context, arg GetPermissionsWithoutChannelParams) (json.RawMessage, error) {
 	row := q.queryRow(ctx, q.getPermissionsWithoutChannelStmt, getPermissionsWithoutChannel, arg.GuildID, arg.RoleID)
-	var nodes []string
-	err := row.Scan(pq.Array(&nodes))
+	var nodes json.RawMessage
+	err := row.Scan(&nodes)
 	return nodes, err
 }
 
+const getRolePosition = `-- name: GetRolePosition :one
+SELECT Position
+FROM Roles
+WHERE Role_ID = $1
+    AND Guild_ID = $2
+`
+
+type GetRolePositionParams struct {
+	RoleID  uint64 `json:"role_id"`
+	GuildID uint64 `json:"guild_id"`
+}
+
+func (q *Queries) GetRolePosition(ctx context.Context, arg GetRolePositionParams) (string, error) {
+	row := q.queryRow(ctx, q.getRolePositionStmt, getRolePosition, arg.RoleID, arg.GuildID)
+	var position string
+	err := row.Scan(&position)
+	return position, err
+}
+
 const getRolesForGuild = `-- name: GetRolesForGuild :many
-SELECT guild_id, role_id, name, color, hoist, pingable FROM Roles
-    WHERE Guild_ID = $1
+SELECT guild_id, role_id, name, color, hoist, pingable, position
+FROM Roles
+WHERE Guild_ID = $1
+ORDER BY Position
 `
 
 func (q *Queries) GetRolesForGuild(ctx context.Context, guildID uint64) ([]Role, error) {
@@ -124,6 +178,7 @@ func (q *Queries) GetRolesForGuild(ctx context.Context, guildID uint64) ([]Role,
 			&i.Color,
 			&i.Hoist,
 			&i.Pingable,
+			&i.Position,
 		); err != nil {
 			return nil, err
 		}
@@ -138,10 +193,80 @@ func (q *Queries) GetRolesForGuild(ctx context.Context, guildID uint64) ([]Role,
 	return items, nil
 }
 
+const moveRole = `-- name: MoveRole :exec
+UPDATE Roles
+SET Position = $1
+WHERE Role_ID = $2
+    AND Guild_ID = $3
+`
+
+type MoveRoleParams struct {
+	Position string `json:"position"`
+	RoleID   uint64 `json:"role_id"`
+	GuildID  uint64 `json:"guild_id"`
+}
+
+func (q *Queries) MoveRole(ctx context.Context, arg MoveRoleParams) error {
+	_, err := q.exec(ctx, q.moveRoleStmt, moveRole, arg.Position, arg.RoleID, arg.GuildID)
+	return err
+}
+
+const permissionExistsWithoutChannel = `-- name: PermissionExistsWithoutChannel :one
+SELECT EXISTS(SELECT 1 FROM PERMISSIONS WHERE Guild_ID = $1 AND Channel_ID IS NULL AND Role_ID = $2)
+`
+
+type PermissionExistsWithoutChannelParams struct {
+	GuildID uint64 `json:"guild_id"`
+	RoleID  uint64 `json:"role_id"`
+}
+
+func (q *Queries) PermissionExistsWithoutChannel(ctx context.Context, arg PermissionExistsWithoutChannelParams) (bool, error) {
+	row := q.queryRow(ctx, q.permissionExistsWithoutChannelStmt, permissionExistsWithoutChannel, arg.GuildID, arg.RoleID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const permissionsExists = `-- name: PermissionsExists :one
+SELECT EXISTS(SELECT 1 FROM PERMISSIONS WHERE Guild_ID = $1 AND Channel_ID = $2 AND Role_ID = $3)
+`
+
+type PermissionsExistsParams struct {
+	GuildID   uint64        `json:"guild_id"`
+	ChannelID sql.NullInt64 `json:"channel_id"`
+	RoleID    uint64        `json:"role_id"`
+}
+
+func (q *Queries) PermissionsExists(ctx context.Context, arg PermissionsExistsParams) (bool, error) {
+	row := q.queryRow(ctx, q.permissionsExistsStmt, permissionsExists, arg.GuildID, arg.ChannelID, arg.RoleID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const removeUserFromRole = `-- name: RemoveUserFromRole :exec
+DELETE FROM Roles_Members
+WHERE Guild_ID = $1
+    AND Role_ID = $2
+    AND Member_ID = $3
+`
+
+type RemoveUserFromRoleParams struct {
+	GuildID  uint64 `json:"guild_id"`
+	RoleID   uint64 `json:"role_id"`
+	MemberID uint64 `json:"member_id"`
+}
+
+func (q *Queries) RemoveUserFromRole(ctx context.Context, arg RemoveUserFromRoleParams) error {
+	_, err := q.exec(ctx, q.removeUserFromRoleStmt, removeUserFromRole, arg.GuildID, arg.RoleID, arg.MemberID)
+	return err
+}
+
 const rolesForUser = `-- name: RolesForUser :many
-SELECT Role_ID FROM Roles_Members
-    WHERE Guild_ID = $1
-      AND Member_ID = $2
+SELECT Role_ID
+FROM Roles_Members
+WHERE Guild_ID = $1
+    AND Member_ID = $2
 `
 
 type RolesForUserParams struct {
@@ -173,18 +298,16 @@ func (q *Queries) RolesForUser(ctx context.Context, arg RolesForUserParams) ([]u
 }
 
 const setPermissions = `-- name: SetPermissions :exec
-INSERT INTO Permissions (
-    Guild_ID, Channel_ID, Role_ID, Nodes
-) VALUES (
-    $1, $2, $3, $4
-) ON CONFLICT (Guild_ID, Channel_ID, Role_ID) DO UPDATE SET Nodes = EXCLUDED.Nodes
+INSERT INTO Permissions
+    (Guild_ID, Channel_ID, Role_ID, Nodes)
+    VALUES ($1, $2, $3, $4)
 `
 
 type SetPermissionsParams struct {
-	GuildID   uint64        `json:"guild_id"`
-	ChannelID sql.NullInt64 `json:"channel_id"`
-	RoleID    uint64        `json:"role_id"`
-	Nodes     []string      `json:"nodes"`
+	GuildID   uint64          `json:"guild_id"`
+	ChannelID sql.NullInt64   `json:"channel_id"`
+	RoleID    uint64          `json:"role_id"`
+	Nodes     json.RawMessage `json:"nodes"`
 }
 
 func (q *Queries) SetPermissions(ctx context.Context, arg SetPermissionsParams) error {
@@ -192,7 +315,123 @@ func (q *Queries) SetPermissions(ctx context.Context, arg SetPermissionsParams) 
 		arg.GuildID,
 		arg.ChannelID,
 		arg.RoleID,
-		pq.Array(arg.Nodes),
+		arg.Nodes,
 	)
+	return err
+}
+
+const setRoleColor = `-- name: SetRoleColor :exec
+UPDATE Roles
+    SET Color = $1
+    WHERE Guild_ID = $2
+      AND Role_ID = $3
+`
+
+type SetRoleColorParams struct {
+	Color   int32  `json:"color"`
+	GuildID uint64 `json:"guild_id"`
+	RoleID  uint64 `json:"role_id"`
+}
+
+func (q *Queries) SetRoleColor(ctx context.Context, arg SetRoleColorParams) error {
+	_, err := q.exec(ctx, q.setRoleColorStmt, setRoleColor, arg.Color, arg.GuildID, arg.RoleID)
+	return err
+}
+
+const setRoleHoist = `-- name: SetRoleHoist :exec
+UPDATE Roles
+    SET Hoist = $1
+    WHERE Guild_ID = $2
+      AND Role_ID = $3
+`
+
+type SetRoleHoistParams struct {
+	Hoist   bool   `json:"hoist"`
+	GuildID uint64 `json:"guild_id"`
+	RoleID  uint64 `json:"role_id"`
+}
+
+func (q *Queries) SetRoleHoist(ctx context.Context, arg SetRoleHoistParams) error {
+	_, err := q.exec(ctx, q.setRoleHoistStmt, setRoleHoist, arg.Hoist, arg.GuildID, arg.RoleID)
+	return err
+}
+
+const setRoleName = `-- name: SetRoleName :exec
+UPDATE Roles
+    SET Name = $1
+    WHERE Guild_ID = $2
+      AND Role_ID = $3
+`
+
+type SetRoleNameParams struct {
+	Name    string `json:"name"`
+	GuildID uint64 `json:"guild_id"`
+	RoleID  uint64 `json:"role_id"`
+}
+
+func (q *Queries) SetRoleName(ctx context.Context, arg SetRoleNameParams) error {
+	_, err := q.exec(ctx, q.setRoleNameStmt, setRoleName, arg.Name, arg.GuildID, arg.RoleID)
+	return err
+}
+
+const setRolePingable = `-- name: SetRolePingable :exec
+UPDATE Roles
+    SET Pingable = $1
+    WHERE Guild_ID = $2
+      AND Role_ID = $3
+`
+
+type SetRolePingableParams struct {
+	Pingable bool   `json:"pingable"`
+	GuildID  uint64 `json:"guild_id"`
+	RoleID   uint64 `json:"role_id"`
+}
+
+func (q *Queries) SetRolePingable(ctx context.Context, arg SetRolePingableParams) error {
+	_, err := q.exec(ctx, q.setRolePingableStmt, setRolePingable, arg.Pingable, arg.GuildID, arg.RoleID)
+	return err
+}
+
+const updatePermissions = `-- name: UpdatePermissions :exec
+UPDATE Permissions
+SET Nodes = $4
+WHERE Guild_ID = $1
+    AND Channel_ID = $2
+    AND Role_ID = $3
+`
+
+type UpdatePermissionsParams struct {
+	GuildID   uint64          `json:"guild_id"`
+	ChannelID sql.NullInt64   `json:"channel_id"`
+	RoleID    uint64          `json:"role_id"`
+	Nodes     json.RawMessage `json:"nodes"`
+}
+
+func (q *Queries) UpdatePermissions(ctx context.Context, arg UpdatePermissionsParams) error {
+	_, err := q.exec(ctx, q.updatePermissionsStmt, updatePermissions,
+		arg.GuildID,
+		arg.ChannelID,
+		arg.RoleID,
+		arg.Nodes,
+	)
+	return err
+}
+
+const updatePermissionsWithoutChannel = `-- name: UpdatePermissionsWithoutChannel :exec
+UPDATE Permissions
+SET Nodes = $3
+WHERE Guild_ID = $1
+    AND Channel_ID IS NULL
+    AND Role_ID = $2
+`
+
+type UpdatePermissionsWithoutChannelParams struct {
+	GuildID uint64          `json:"guild_id"`
+	RoleID  uint64          `json:"role_id"`
+	Nodes   json.RawMessage `json:"nodes"`
+}
+
+func (q *Queries) UpdatePermissionsWithoutChannel(ctx context.Context, arg UpdatePermissionsWithoutChannelParams) error {
+	_, err := q.exec(ctx, q.updatePermissionsWithoutChannelStmt, updatePermissionsWithoutChannel, arg.GuildID, arg.RoleID, arg.Nodes)
 	return err
 }

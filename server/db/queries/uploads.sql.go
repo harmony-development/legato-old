@@ -7,30 +7,83 @@ import (
 	"context"
 )
 
-const addFileHash = `-- name: AddFileHash :exec
-INSERT INTO Files(Hash, File_ID)
+const addFileMetadata = `-- name: AddFileMetadata :exec
+INSERT INTO Files (File_ID, Content_Type, Name, Size)
+VALUES ($1, $2, $3, $4)
+`
+
+type AddFileMetadataParams struct {
+	FileID      string `json:"file_id"`
+	ContentType string `json:"content_type"`
+	Name        string `json:"name"`
+	Size        int32  `json:"size"`
+}
+
+func (q *Queries) AddFileMetadata(ctx context.Context, arg AddFileMetadataParams) error {
+	_, err := q.exec(ctx, q.addFileMetadataStmt, addFileMetadata,
+		arg.FileID,
+		arg.ContentType,
+		arg.Name,
+		arg.Size,
+	)
+	return err
+}
+
+const addHash = `-- name: AddHash :exec
+INSERT INTO Hashes (Hash, File_ID)
 VALUES ($1, $2)
 `
 
-type AddFileHashParams struct {
+type AddHashParams struct {
 	Hash   []byte `json:"hash"`
 	FileID string `json:"file_id"`
 }
 
-func (q *Queries) AddFileHash(ctx context.Context, arg AddFileHashParams) error {
-	_, err := q.exec(ctx, q.addFileHashStmt, addFileHash, arg.Hash, arg.FileID)
+func (q *Queries) AddHash(ctx context.Context, arg AddHashParams) error {
+	_, err := q.exec(ctx, q.addHashStmt, addHash, arg.Hash, arg.FileID)
 	return err
 }
 
-const getFileByHash = `-- name: GetFileByHash :one
+const deleteFileMetadata = `-- name: DeleteFileMetadata :exec
+DELETE FROM Files
+WHERE File_ID = $1
+`
+
+func (q *Queries) DeleteFileMetadata(ctx context.Context, fileID string) error {
+	_, err := q.exec(ctx, q.deleteFileMetadataStmt, deleteFileMetadata, fileID)
+	return err
+}
+
+const getFileIDByHash = `-- name: GetFileIDByHash :one
 SELECT File_ID
-FROM Files
+FROM Hashes
 WHERE Hash = $1
 `
 
-func (q *Queries) GetFileByHash(ctx context.Context, hash []byte) (string, error) {
-	row := q.queryRow(ctx, q.getFileByHashStmt, getFileByHash, hash)
+func (q *Queries) GetFileIDByHash(ctx context.Context, hash []byte) (string, error) {
+	row := q.queryRow(ctx, q.getFileIDByHashStmt, getFileIDByHash, hash)
 	var file_id string
 	err := row.Scan(&file_id)
 	return file_id, err
+}
+
+const getFileMetadata = `-- name: GetFileMetadata :one
+SELECT Content_Type,
+	Name,
+	Size
+FROM Files
+WHERE File_ID = $1
+`
+
+type GetFileMetadataRow struct {
+	ContentType string `json:"content_type"`
+	Name        string `json:"name"`
+	Size        int32  `json:"size"`
+}
+
+func (q *Queries) GetFileMetadata(ctx context.Context, fileID string) (GetFileMetadataRow, error) {
+	row := q.queryRow(ctx, q.getFileMetadataStmt, getFileMetadata, fileID)
+	var i GetFileMetadataRow
+	err := row.Scan(&i.ContentType, &i.Name, &i.Size)
+	return i, err
 }

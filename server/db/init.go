@@ -14,6 +14,7 @@ import (
 	"github.com/harmony-development/legato/server/db/queries"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/sony/sonyflake"
+	"github.com/ztrue/tracerr"
 
 	lru "github.com/hashicorp/golang-lru"
 	_ "github.com/lib/pq"
@@ -37,8 +38,13 @@ type PermissionsNode struct {
 	Allow bool
 }
 
-func (p *PermissionsNode) Deserialize(s string) {
+func (p *PermissionsNode) Deserialize(s string) (ok bool) {
 	trimmed := strings.Split(strings.TrimSuffix(strings.TrimPrefix(s, "("), ")"), ",")
+
+	if len(trimmed) != 3 {
+		return false
+	}
+
 	if trimmed[2] == "t" {
 		p.Allow = true
 	} else {
@@ -46,6 +52,8 @@ func (p *PermissionsNode) Deserialize(s string) {
 	}
 
 	p.Node = trimmed[1]
+
+	return true
 }
 
 func (p PermissionsNode) Serialize() string {
@@ -108,10 +116,8 @@ type IHarmonyDB interface {
 	HasGuildWithID(guildID uint64) (bool, error)
 	HasChannelWithID(guildID, channelID uint64) (bool, error)
 	HasMessageWithID(guildID, channelID, messageID uint64) (bool, error)
-	AddFileHash(fileID string, hash []byte) error
-	GetFileIDFromHash(hash []byte) (string, error)
 	GetGuildByID(guildID uint64) (queries.Guild, error)
-	UpdateMessage(messageID uint64, content *string, embeds, actions, overrides *[]byte) (time.Time, error)
+	UpdateMessage(messageID uint64, content *string, embeds, actions, overrides *[]byte, attachments *[]string) (time.Time, error)
 	SetStatus(userID uint64, status profilev1.UserStatus) error
 	GetUserMetadata(userID uint64, appID string) (string, error)
 	GetNonceInfo(nonce string) (queries.GetNonceInfoRow, error)
@@ -134,11 +140,20 @@ type IHarmonyDB interface {
 	DequipEmotePack(userID, packID uint64) error
 	AddRoleToGuild(guildID uint64, role *corev1.Role) error
 	RemoveRoleFromGuild(guildID, roleID uint64) error
+	GetRolePositions(guildID, before, previous uint64) (pos string, retErr error)
+	MoveRole(guildID, roleID, beforeRole, previousRole uint64) error
 	GetGuildRoles(guildID uint64) ([]*corev1.Role, error)
 	SetPermissions(guildID uint64, channelID uint64, roleID uint64, permissions []PermissionsNode) error
 	GetPermissions(guildID uint64, channelID uint64, roleID uint64) (permissions []PermissionsNode, err error)
 	GetPermissionsData(guildID uint64) (PermissionsData, error)
 	RolesForUser(guildID, userID uint64) ([]uint64, error)
+	ManageRoles(guildID, userID uint64, addRoles, removeRoles []uint64) error
+	ModifyRole(guildID, roleID uint64, name string, color int32, hoist, pingable, updateName, updateColor, updateHoist, updatePingable bool) error
+	DeleteFileMeta(fileID string) error
+	GetFileIDByHash(hash []byte) (string, error)
+	AddFileHash(fileID string, hash []byte) error
+	SetFileMetadata(fileID string, contentType, name string, size int32) error
+	GetFileMetadata(fileID string) (queries.GetFileMetadataRow, error)
 }
 
 // New creates a new DB connection
@@ -149,29 +164,29 @@ func New(cfg *config.Config, logger logger.ILogger, idgen *sonyflake.Sonyflake) 
 	db.Sonyflake = idgen
 	var err error
 	if db.DB, err = sql.Open("postgres", fmt.Sprintf("user=%v password=%v dbname=%v host=%v port=%v sslmode=%v",
-		cfg.DB.User,
-		cfg.DB.Password,
-		cfg.DB.DBName,
-		cfg.DB.Host,
-		cfg.DB.Port,
-		map[bool]string{true: "enable", false: "disable"}[cfg.DB.SSL],
+		cfg.Database.Username,
+		cfg.Database.Password,
+		cfg.Database.Name,
+		cfg.Database.Host,
+		cfg.Database.Port,
+		map[bool]string{true: "enable", false: "disable"}[cfg.Database.SSL],
 	)); err != nil {
-		return nil, err
+		return nil, tracerr.Wrap(err)
 	}
 	if err = db.Ping(); err != nil {
-		return nil, err
+		return nil, tracerr.Wrap(err)
 	}
 	if err = db.Migrate(); err != nil {
-		return nil, err
+		return nil, tracerr.Wrap(err)
 	}
 	if db.queries, err = queries.Prepare(context.Background(), db); err != nil {
-		return nil, err
+		return nil, tracerr.Wrap(err)
 	}
-	if db.OwnerCache, err = lru.New(cfg.Server.OwnerCacheMax); err != nil {
-		return nil, err
+	if db.OwnerCache, err = lru.New(cfg.Server.Policies.MaximumCacheSizes.Owner); err != nil {
+		return nil, tracerr.Wrap(err)
 	}
-	if db.SessionCache, err = lru.New(cfg.Server.SessionCacheMax); err != nil {
-		return nil, err
+	if db.SessionCache, err = lru.New(cfg.Server.Policies.MaximumCacheSizes.Sessions); err != nil {
+		return nil, tracerr.Wrap(err)
 	}
 	go db.SessionExpireRoutine()
 	return db, nil

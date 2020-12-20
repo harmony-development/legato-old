@@ -18,8 +18,7 @@ func init() {
 			Duration: 10 * time.Second,
 			Burst:    64,
 		},
-		Auth:       true,
-		Permission: middleware.NoPermission,
+		Auth: true,
 	}, "/protocol.profile.v1.ProfileService/GetUser")
 }
 

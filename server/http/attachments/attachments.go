@@ -1,6 +1,7 @@
 package attachments
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -92,7 +93,7 @@ func (a *API) DownloadHandler(c echo.Context) error {
 	}
 	fileID := ctx.Param("file_id")
 
-	contentType, filename, handle, err := a.FileBackend.ReadFile(fileID)
+	contentType, filename, _, handle, err := a.FileBackend.ReadFile(fileID)
 	if err != nil {
 		if err != backend.NotFound {
 			return echo.NewHTTPError(http.StatusInternalServerError)
@@ -100,17 +101,27 @@ func (a *API) DownloadHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
 
+	viewMode := "attachment"
+
+	if strings.HasPrefix(contentType, "image/") || strings.HasPrefix(contentType, "video/") || strings.HasPrefix(contentType, "audio/") {
+		viewMode = "inline"
+	}
+
 	defer handle.Close()
 
 	c.Response().Header().Set("Content-Type", contentType)
-	c.Response().Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
+	c.Response().Header().Set("Content-Disposition", fmt.Sprintf("%s; filename=\"%s\"", viewMode, filename))
 
 	fileData, err := ioutil.ReadAll(handle)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	return c.Blob(http.StatusOK, contentType, fileData)
+	reader := bytes.NewReader(fileData)
+
+	http.ServeContent(c.Response(), c.Request(), filename, time.Unix(0, 0), reader)
+
+	return nil
 }
 
 func New(deps Dependencies) *API {

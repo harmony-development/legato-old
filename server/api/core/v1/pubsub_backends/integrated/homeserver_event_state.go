@@ -44,7 +44,8 @@ func (h *HomeserverEventState) Unsubscribe(userID uint64, s corev1.CoreService_S
 	h.Lock()
 	defer h.Unlock()
 
-	val, _ := h.homeserverEvents[_userID(userID)]
+	val, ok := h.homeserverEvents[_userID(userID)]
+	_ = ok
 	for idx, serv := range val {
 		if serv == s {
 			val[idx] = val[len(val)-1]
@@ -63,7 +64,8 @@ func (h *HomeserverEventState) Broadcast(userID uint64, e *corev1.Event) {
 	h.Lock()
 	defer h.Unlock()
 
-	val, _ := h.homeserverEvents[_userID(userID)]
+	val, ok := h.homeserverEvents[_userID(userID)]
+	_ = ok
 	for _, serv := range val {
 		if err := serv.Send(e); err != nil {
 			println(err)

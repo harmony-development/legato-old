@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS Roles (
     Color INTEGER NOT NULL,
     Hoist BOOLEAN NOT NULL,
     Pingable BOOLEAN NOT NULL,
+    Position TEXT NOT NULL,
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE,
     PRIMARY KEY (Role_ID)
 );
@@ -84,20 +85,21 @@ CREATE TABLE IF NOT EXISTS Roles_Members (
     PRIMARY KEY (Guild_ID, Role_ID, Member_ID)
 );
 
---migration-only DO $$ BEGIN
-    CREATE TYPE PermissionsNode AS (
-        Node TEXT,
-        Allow BOOLEAN
-    );
---migration-only EXCEPTION
---migration-only WHEN duplicate_object THEN null;
---migration-only END $$;
+CREATE TABLE IF NOT EXISTS Channels (
+    Channel_ID BIGSERIAL PRIMARY KEY UNIQUE,
+    Guild_ID BIGSERIAL,
+    Channel_Name TEXT NOT NULL,
+    Position TEXT NOT NULL,
+    Category BOOLEAN NOT NULL,
+    IsVoice BOOLEAN NOT NULL,
+    FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE
+);
 
 CREATE TABLE IF NOT EXISTS Permissions (
     Guild_ID BIGSERIAL NOT NULL,
     Channel_ID BIGINT,
     Role_ID BIGSERIAL NOT NULL,
-    Nodes PermissionsNode[] NOT NULL,
+    Nodes jsonb NOT NULL,
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE,
     FOREIGN KEY (Role_ID) REFERENCES Roles (Role_ID) ON DELETE CASCADE,
     FOREIGN KEY (Channel_ID) REFERENCES Channels (Channel_ID) ON DELETE CASCADE,
@@ -119,16 +121,6 @@ CREATE TABLE IF NOT EXISTS Invites (
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS Channels (
-    Channel_ID BIGSERIAL PRIMARY KEY UNIQUE,
-    Guild_ID BIGSERIAL,
-    Channel_Name TEXT NOT NULL,
-    Position TEXT NOT NULL,
-    Category BOOLEAN NOT NULL,
-    IsVoice BOOLEAN NOT NULL,
-    FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE
-);
-
 CREATE TABLE IF NOT EXISTS Messages (
     Message_ID BIGSERIAL PRIMARY KEY,
     Guild_ID BIGSERIAL NOT NULL,
@@ -141,14 +133,9 @@ CREATE TABLE IF NOT EXISTS Messages (
     Actions jsonb,
     Overrides bytea,
     Reply_To_ID BIGINT DEFAULT 0,
-    Attachments text[],
+    Attachments text [],
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE,
     FOREIGN KEY (Channel_ID) REFERENCES Channels (Channel_ID) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS Files (
-    Hash BYTEA PRIMARY KEY NOT NULL,
-    File_ID TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Rate_Limit_Whitelist_IP (IP TEXT NOT NULL PRIMARY KEY);
@@ -178,4 +165,20 @@ CREATE TABLE IF NOT EXISTS Acquired_Emote_Packs (
     User_ID BIGSERIAL NOT NULL,
     FOREIGN KEY (Pack_ID) REFERENCES Emote_Packs (Pack_ID) ON DELETE CASCADE,
     FOREIGN KEY (User_ID) REFERENCES Users (User_ID) ON DELETE CASCADE
+);
+
+-- Local files backend
+CREATE TABLE IF NOT EXISTS Files (
+    File_ID TEXT NOT NULL,
+    Name TEXT NOT NULL,
+    Content_Type TEXT NOT NULL,
+    Size INTEGER NOT NULL,
+    PRIMARY KEY (File_ID)
+);
+
+CREATE TABLE IF NOT EXISTS Hashes (
+    Hash BYTEA NOT NULL,
+    File_ID TEXT NOT NULL,
+    FOREIGN KEY (File_ID) REFERENCES Files (File_ID),
+    PRIMARY KEY (Hash)
 );

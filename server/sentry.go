@@ -16,8 +16,8 @@ func ConnectSentry(cfg *config.Config) error {
 	}
 
 	err := sentry.Init(sentry.ClientOptions{
-		Dsn:              cfg.Sentry.Dsn,
-		AttachStacktrace: cfg.Sentry.AttachStacktrace,
+		Dsn:              cfg.Sentry.DSN,
+		AttachStacktrace: cfg.Sentry.AttachStacktraces,
 	})
 	if err != nil {
 		return err
