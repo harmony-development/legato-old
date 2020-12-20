@@ -15,3 +15,5 @@ harmony-key.pub
 .ninja_log
 .version.json
 config.hcl
+.direnv
+.envrc
