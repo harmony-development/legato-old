@@ -105,9 +105,9 @@ func (inst Instance) Start() {
 
 	multiplexer := cmux.New(listener)
 
-	grpcListener := multiplexer.Match(cmux.HTTP2())
+	grpcListener := multiplexer.Match(cmux.HTTP2HeaderField("Content-Type", "application/grpc"), cmux.HTTP2HeaderFieldPrefix("Content-Type", "application/grpc+"))
 	prometheusListener := multiplexer.Match(cmux.HTTP1HeaderFieldPrefix("User-Agent", "Prometheus"))
-	httpListener := multiplexer.Match(cmux.HTTP1Fast())
+	httpListener := multiplexer.Match(cmux.Any())
 
 	grp := new(errgroup.Group)
 	grp.Go(func() error {
