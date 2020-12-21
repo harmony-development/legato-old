@@ -3,6 +3,7 @@ package api
 import (
 	"net"
 	"net/http"
+	"time"
 
 	corev1 "github.com/harmony-development/legato/gen/core"
 	foundationv1 "github.com/harmony-development/legato/gen/foundation"
@@ -82,7 +83,7 @@ func New(deps Dependencies) *API {
 		return true
 	}), grpcweb.WithWebsockets(true), grpcweb.WithWebsocketOriginFunc(func(req *http.Request) bool {
 		return true
-	}))
+	}), grpcweb.WithWebsocketPingInterval(10*time.Second))
 	prometheusMux := http.NewServeMux()
 	prometheusMux.Handle("/metrics", promhttp.Handler())
 	api.prometheusServer = &http.Server{
