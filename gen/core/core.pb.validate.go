@@ -1053,6 +1053,8 @@ func (m *CreateChannelRequest) Validate() error {
 
 	// no validation rules for NextId
 
+	// no validation rules for ChannelKind
+
 	return nil
 }
 
@@ -6212,7 +6214,7 @@ func (m *GetGuildChannelsResponse_Channel) Validate() error {
 
 	// no validation rules for IsCategory
 
-	// no validation rules for IsVoice
+	// no validation rules for Kind
 
 	return nil
 }

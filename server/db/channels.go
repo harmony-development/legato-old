@@ -8,7 +8,7 @@ import (
 )
 
 // AddChannelToGuild adds a new channel to a guild
-func (db *HarmonyDB) AddChannelToGuild(guildID uint64, channelName string, before, previous uint64, category bool) (queries.Channel, error) {
+func (db *HarmonyDB) AddChannelToGuild(guildID uint64, channelName string, before, previous uint64, category bool, kind string) (queries.Channel, error) {
 	pos, err := db.GetChannelPositions(guildID, before, previous)
 	err = tracerr.Wrap(err)
 	if err != nil {
@@ -25,6 +25,10 @@ func (db *HarmonyDB) AddChannelToGuild(guildID uint64, channelName string, befor
 		ChannelName: channelName,
 		Position:    pos,
 		Category:    category,
+		Kind: sql.NullString{
+			String: kind,
+			Valid:  kind != "",
+		},
 	})
 	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)

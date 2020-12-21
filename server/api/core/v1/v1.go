@@ -169,7 +169,7 @@ func init() {
 
 // CreateChannel implements the CreateChannel RPC
 func (v1 *V1) CreateChannel(c context.Context, r *corev1.CreateChannelRequest) (*corev1.CreateChannelResponse, error) {
-	channel, err := v1.DB.AddChannelToGuild(r.GuildId, r.ChannelName, r.PreviousId, r.NextId, r.IsCategory)
+	channel, err := v1.DB.AddChannelToGuild(r.GuildId, r.ChannelName, r.PreviousId, r.NextId, r.IsCategory, r.ChannelKind)
 	if err != nil {
 		return nil, err
 	}
@@ -305,7 +305,7 @@ func (v1 *V1) GetGuildChannels(c context.Context, r *corev1.GetGuildChannelsRequ
 				ChannelId:   channel.ChannelID,
 				ChannelName: channel.ChannelName,
 				IsCategory:  channel.Category,
-				IsVoice:     channel.Isvoice,
+				Kind:        channel.Kind.String,
 			})
 		}
 	}

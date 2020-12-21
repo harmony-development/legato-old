@@ -32,7 +32,7 @@ INSERT INTO Channels (
         Channel_Name,
         Position,
         Category,
-        IsVoice
+        Kind
     )
 VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;
 

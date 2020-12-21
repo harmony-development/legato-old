@@ -14,12 +14,12 @@ type AcquiredEmotePack struct {
 }
 
 type Channel struct {
-	ChannelID   uint64        `json:"channel_id"`
-	GuildID     sql.NullInt64 `json:"guild_id"`
-	ChannelName string        `json:"channel_name"`
-	Position    string        `json:"position"`
-	Category    bool          `json:"category"`
-	Isvoice     bool          `json:"isvoice"`
+	ChannelID   uint64         `json:"channel_id"`
+	GuildID     sql.NullInt64  `json:"guild_id"`
+	ChannelName string         `json:"channel_name"`
+	Position    string         `json:"position"`
+	Category    bool           `json:"category"`
+	Kind        sql.NullString `json:"kind"`
 }
 
 type EmotePack struct {
