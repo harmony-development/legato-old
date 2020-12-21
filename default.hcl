@@ -6,6 +6,10 @@ Server {
 	# specified in URLs, so it should be left at 2289.
 	Port = 2289
 
+	# Enables the CORS in REST, useful for browser support
+	# you should probably disable this if using a proxy
+	UseCORS = true
+
 	# The location of the private and public keys of the server; used to establish
 	# trust with other servers when federating.
 	PrivateKeyPath = "harmony-key.pem"

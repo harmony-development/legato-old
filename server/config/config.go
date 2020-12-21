@@ -22,6 +22,7 @@ type Config struct {
 		PublicKeyPath  string `hcl:"PublicKeyPath,optional" default:"harmony-key.pub"`
 		StorageBackend string `hcl:"StorageBackend,optional" default:"PureFlatfile"`
 		SnowflakeStart int64  `hcl:"SnowflakeStart,optional" default:"0"`
+		UseCORS        bool   `hcl:"UseCORS,optional" default:true`
 
 		Policies struct {
 			Avatar struct {

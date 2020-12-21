@@ -38,7 +38,9 @@ func New(deps Dependencies) *Server {
 		Dependencies: deps,
 	}
 	s.Pre(middleware.RemoveTrailingSlash())
-	s.Use(middleware.CORS())
+	if deps.Config.Server.UseCORS {
+		s.Use(middleware.CORS())
+	}
 	s.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
 		StackSize:       1 << 10,
 		DisableStackAll: true,
