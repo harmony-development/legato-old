@@ -98,7 +98,7 @@ func (inst Instance) Start() {
 		StorageBackend: storageBackend,
 	})
 
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", inst.Config.Server.Port))
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", inst.Config.Server.Host, inst.Config.Server.Port))
 	if err != nil {
 		inst.Logger.Fatal(err)
 	}
