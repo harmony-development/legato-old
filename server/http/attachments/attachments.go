@@ -46,6 +46,7 @@ func (a *API) UploadHandler(c echo.Context) error {
 
 	form, err := ctx.MultipartForm()
 	if err != nil {
+		fmt.Println("multipart form error: ", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
@@ -72,12 +73,14 @@ func (a *API) UploadHandler(c echo.Context) error {
 
 		handle, err = file.Open()
 		if err != nil {
+			fmt.Println("unable to open file: ", err)
 			return echo.NewHTTPError(http.StatusInternalServerError)
 		}
 	}
 
 	id, err := a.FileBackend.SaveFile(data.Filename, data.ContentType, handle)
 	if err != nil {
+		fmt.Println("unable to save file: ", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
