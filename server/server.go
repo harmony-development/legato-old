@@ -131,6 +131,9 @@ func (inst Instance) Start() {
 	go func() {
 		errChan <- inst.API.GrpcServer.Serve(http2)
 	}()
+	go func() {
+		errChan <- muxer.Serve()
+	}()
 
 	terminateChan := make(chan os.Signal, 1)
 	signal.Notify(terminateChan, syscall.SIGINT, syscall.SIGTERM)
