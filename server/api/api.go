@@ -1,7 +1,6 @@
 package api
 
 import (
-	"net"
 	"net/http"
 	"time"
 
@@ -20,7 +19,6 @@ import (
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sony/sonyflake"
-	"golang.org/x/sync/errgroup"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
@@ -43,9 +41,9 @@ type Dependencies struct {
 // API contains the component of the server responsible for APIs
 type API struct {
 	Dependencies
-	grpcServer       *grpc.Server
+	GrpcServer       *grpc.Server
 	GrpcWebServer    *grpcweb.WrappedGrpcServer
-	prometheusServer *http.Server
+	PrometheusServer *http.Server
 	CoreKit          *core.Service
 }
 
@@ -59,7 +57,7 @@ func New(deps Dependencies) *API {
 		DB:     deps.DB,
 		Perms:  api.Permissions,
 	})
-	api.grpcServer = grpc.NewServer(
+	api.GrpcServer = grpc.NewServer(
 		grpc_middleware.WithUnaryServerChain(
 			m.HarmonyContextInterceptor,
 			grpc_recovery.UnaryServerInterceptor(grpc_recovery.WithRecoveryHandler(m.RecoveryFunc)),
@@ -79,18 +77,18 @@ func New(deps Dependencies) *API {
 			m.ErrorInterceptorStream,
 			m.RateLimitStreamInterceptorStream,
 		))
-	api.GrpcWebServer = grpcweb.WrapServer(api.grpcServer, grpcweb.WithOriginFunc(func(_ string) bool {
+	api.GrpcWebServer = grpcweb.WrapServer(api.GrpcServer, grpcweb.WithOriginFunc(func(_ string) bool {
 		return true
 	}), grpcweb.WithWebsockets(true), grpcweb.WithWebsocketOriginFunc(func(req *http.Request) bool {
 		return true
 	}), grpcweb.WithWebsocketPingInterval(10*time.Second))
 	prometheusMux := http.NewServeMux()
 	prometheusMux.Handle("/metrics", promhttp.Handler())
-	api.prometheusServer = &http.Server{
+	api.PrometheusServer = &http.Server{
 		Handler: prometheusMux,
 	}
 
-	corev1.RegisterCoreServiceServer(api.grpcServer, core.New(&core.Dependencies{
+	corev1.RegisterCoreServiceServer(api.GrpcServer, core.New(&core.Dependencies{
 		DB:             api.DB,
 		Logger:         api.Logger,
 		Sonyflake:      api.Sonyflake,
@@ -98,37 +96,19 @@ func New(deps Dependencies) *API {
 		Config:         deps.Config,
 		StorageBackend: deps.StorageBackend,
 	}).V1)
-	profilev1.RegisterProfileServiceServer(api.grpcServer, &profile.New(profile.Dependencies{
+	profilev1.RegisterProfileServiceServer(api.GrpcServer, &profile.New(profile.Dependencies{
 		DB: api.DB,
 	}).V1)
-	foundationv1.RegisterFoundationServiceServer(api.grpcServer, foundation.New(&foundation.Dependencies{
+	foundationv1.RegisterFoundationServiceServer(api.GrpcServer, foundation.New(&foundation.Dependencies{
 		DB:          api.DB,
 		Logger:      api.Logger,
 		Sonyflake:   api.Sonyflake,
 		AuthManager: api.AuthManager,
 		Config:      api.Config,
 	}))
-	reflection.Register(api.grpcServer)
-	grpc_prometheus.Register(api.grpcServer)
+	reflection.Register(api.GrpcServer)
+	grpc_prometheus.Register(api.GrpcServer)
 	grpc_prometheus.EnableHandlingTimeHistogram()
 
 	return api
-}
-
-// Start starts up the API on a specific port
-func (api API) Start(grpcListener, prometheusListener net.Listener) error {
-	errGrp := errgroup.Group{}
-
-	errGrp.Go(func() error {
-		err := api.grpcServer.Serve(grpcListener)
-		api.Logger.CheckException(err)
-		return err
-	})
-	errGrp.Go(func() error {
-		err := api.prometheusServer.Serve(prometheusListener)
-		api.Logger.CheckException(err)
-		return err
-	})
-
-	return errGrp.Wait()
 }

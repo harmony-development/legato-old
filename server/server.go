@@ -13,7 +13,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/sony/sonyflake"
-	"golang.org/x/sync/errgroup"
 
 	"github.com/harmony-development/legato/server/api"
 	"github.com/harmony-development/legato/server/api/core/v1/permissions"
@@ -26,7 +25,6 @@ import (
 	"github.com/harmony-development/legato/server/http/attachments/backend/flatfile"
 	"github.com/harmony-development/legato/server/intercom"
 	"github.com/harmony-development/legato/server/logger"
-	"github.com/soheilhy/cmux"
 )
 
 // Instance is an instance of the harmony server
@@ -103,14 +101,8 @@ func (inst Instance) Start() {
 		inst.Logger.Fatal(err)
 	}
 
-	multiplexer := cmux.New(listener)
-
-	grpcListener := multiplexer.Match(cmux.HTTP2HeaderField("Content-Type", "application/grpc"), cmux.HTTP2HeaderFieldPrefix("Content-Type", "application/grpc+"))
-	prometheusListener := multiplexer.Match(cmux.HTTP1HeaderFieldPrefix("User-Agent", "Prometheus"))
-	httpListener := multiplexer.Match(cmux.Any())
-
-	grp := new(errgroup.Group)
-	grp.Go(func() error {
+	errChan := make(chan error)
+	go func() {
 		httpServer := http.New(http.Dependencies{
 			DB:             inst.DB,
 			Logger:         inst.Logger,
@@ -119,29 +111,27 @@ func (inst Instance) Start() {
 		})
 		err := (&stdlibHTTP.Server{
 			Handler: stdlibHTTP.HandlerFunc(func(resp stdlibHTTP.ResponseWriter, req *stdlibHTTP.Request) {
-				if strings.Contains(req.Header.Get("Access-Control-Request-Headers"), "x-grpc-web") || req.Header.Get("x-grpc-web") == "1" || req.Header.Get("Sec-Websocket-Protocol") == "grpc-websockets" {
+				if req.ProtoMajor == 2 && strings.HasPrefix(req.Header.Get("Content-Type"), "application/grpc") {
+					inst.API.GrpcServer.ServeHTTP(resp, req)
+				} else if strings.Contains(req.Header.Get("Access-Control-Request-Headers"), "x-grpc-web") || req.Header.Get("x-grpc-web") == "1" || req.Header.Get("Sec-Websocket-Protocol") == "grpc-websockets" {
 					inst.API.GrpcWebServer.ServeHTTP(resp, req)
+				} else if strings.HasPrefix(req.Header.Get("User-Agent"), "Prometheus") {
+					inst.API.PrometheusServer.Handler.ServeHTTP(resp, req)
 				} else {
 					httpServer.ServeHTTP(resp, req)
 				}
 			}),
-		}).Serve(httpListener)
+		}).Serve(listener)
 		inst.Logger.CheckException(err)
-		return err
-	})
-	grp.Go(func() error {
-		return inst.API.Start(grpcListener, prometheusListener)
-	})
-	grp.Go(func() error {
-		return multiplexer.Serve()
-	})
+		errChan <- err
+	}()
 
 	terminateChan := make(chan os.Signal, 1)
 	signal.Notify(terminateChan, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
 		logrus.Info("Legato started")
-		if err := grp.Wait(); err != nil {
+		if err := <-errChan; err != nil {
 			logrus.Error(err)
 		}
 		terminateChan <- os.Interrupt
