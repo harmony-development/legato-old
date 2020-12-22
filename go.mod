@@ -27,6 +27,7 @@ require (
 	github.com/prometheus/client_golang v0.9.3
 	github.com/rs/cors v1.7.0 // indirect
 	github.com/sirupsen/logrus v1.6.0
+	github.com/soheilhy/cmux v0.1.4
 	github.com/sony/sonyflake v1.0.0
 	github.com/thanhpk/randstr v1.0.4
 	github.com/ztrue/tracerr v0.3.0
@@ -35,7 +36,7 @@ require (
 	golang.org/x/text v0.3.3 // indirect
 	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
-	google.golang.org/genproto v0.0.0-20200806141610-86f49bd18e98 // indirect
 	google.golang.org/grpc v1.31.0
+	google.golang.org/grpc/examples v0.0.0-20201218190559-666aea1fb34c // indirect
 	google.golang.org/protobuf v1.25.0
 )

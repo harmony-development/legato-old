@@ -25,6 +25,7 @@ import (
 	"github.com/harmony-development/legato/server/http/attachments/backend/flatfile"
 	"github.com/harmony-development/legato/server/intercom"
 	"github.com/harmony-development/legato/server/logger"
+	"github.com/soheilhy/cmux"
 )
 
 // Instance is an instance of the harmony server
@@ -101,6 +102,10 @@ func (inst Instance) Start() {
 		inst.Logger.Fatal(err)
 	}
 
+	muxer := cmux.New(listener)
+	http2 := muxer.Match(cmux.HTTP2())
+	http1 := muxer.Match(cmux.HTTP1())
+
 	errChan := make(chan error)
 	go func() {
 		httpServer := http.New(http.Dependencies{
@@ -111,9 +116,7 @@ func (inst Instance) Start() {
 		})
 		err := (&stdlibHTTP.Server{
 			Handler: stdlibHTTP.HandlerFunc(func(resp stdlibHTTP.ResponseWriter, req *stdlibHTTP.Request) {
-				if req.ProtoMajor == 2 && strings.HasPrefix(req.Header.Get("Content-Type"), "application/grpc") {
-					inst.API.GrpcServer.ServeHTTP(resp, req)
-				} else if strings.Contains(req.Header.Get("Access-Control-Request-Headers"), "x-grpc-web") || req.Header.Get("x-grpc-web") == "1" || req.Header.Get("Sec-Websocket-Protocol") == "grpc-websockets" {
+				if strings.Contains(req.Header.Get("Access-Control-Request-Headers"), "x-grpc-web") || req.Header.Get("x-grpc-web") == "1" || req.Header.Get("Sec-Websocket-Protocol") == "grpc-websockets" {
 					inst.API.GrpcWebServer.ServeHTTP(resp, req)
 				} else if strings.HasPrefix(req.Header.Get("User-Agent"), "Prometheus") {
 					inst.API.PrometheusServer.Handler.ServeHTTP(resp, req)
@@ -121,9 +124,12 @@ func (inst Instance) Start() {
 					httpServer.ServeHTTP(resp, req)
 				}
 			}),
-		}).Serve(listener)
+		}).Serve(http1)
 		inst.Logger.CheckException(err)
 		errChan <- err
+	}()
+	go func() {
+		errChan <- inst.API.GrpcServer.Serve(http2)
 	}()
 
 	terminateChan := make(chan os.Signal, 1)
