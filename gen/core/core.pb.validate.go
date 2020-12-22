@@ -4244,6 +4244,8 @@ func (m *SendMessageRequest) Validate() error {
 		}
 	}
 
+	// no validation rules for EchoId
+
 	return nil
 }
 
@@ -6641,6 +6643,8 @@ func (m *Event_MessageSent) Validate() error {
 	if m == nil {
 		return nil
 	}
+
+	// no validation rules for EchoId
 
 	if v, ok := interface{}(m.GetMessage()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {

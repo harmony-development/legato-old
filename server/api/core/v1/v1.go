@@ -988,6 +988,7 @@ func (v1 *V1) SendMessage(c context.Context, r *corev1.SendMessageRequest) (*cor
 	v1.PubSub.Guild.Broadcast(r.GuildId, &corev1.Event{
 		Event: &corev1.Event_SentMessage{
 			SentMessage: &corev1.Event_MessageSent{
+				EchoId:  r.EchoId,
 				Message: &message,
 			},
 		},
