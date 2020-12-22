@@ -100,21 +100,31 @@ func (db HarmonyDB) SetPermissions(guildID uint64, channelID uint64, roleID uint
 	var err error
 
 	if channelID == 0 {
-		exists, err = db.queries.PermissionExistsWithoutChannel(ctx, queries.PermissionExistsWithoutChannelParams{
-			GuildID: guildID,
-			RoleID:  roleID,
-		})
-		err = tracerr.Wrap(err)
+		if roleID == 0 {
+			exists, err = db.queries.PermissionExistsWithoutChannelWithoutRole(ctx, guildID)
+			err = tracerr.Wrap(err)
+		} else {
+			exists, err = db.queries.PermissionExistsWithoutChannel(ctx, queries.PermissionExistsWithoutChannelParams{
+				GuildID: guildID,
+				RoleID:  toSqlInt64(roleID),
+			})
+			err = tracerr.Wrap(err)
+		}
 	} else {
-		exists, err = db.queries.PermissionsExists(ctx, queries.PermissionsExistsParams{
-			GuildID: guildID,
-			ChannelID: sql.NullInt64{
-				Int64: int64(channelID),
-				Valid: true,
-			},
-			RoleID: roleID,
-		})
-		err = tracerr.Wrap(err)
+		if roleID == 0 {
+			exists, err = db.queries.PermissionsExistsWithoutRole(ctx, queries.PermissionsExistsWithoutRoleParams{
+				GuildID:   guildID,
+				ChannelID: toSqlInt64(channelID),
+			})
+			err = tracerr.Wrap(err)
+		} else {
+			exists, err = db.queries.PermissionsExists(ctx, queries.PermissionsExistsParams{
+				GuildID:   guildID,
+				ChannelID: toSqlInt64(channelID),
+				RoleID:    toSqlInt64(roleID),
+			})
+			err = tracerr.Wrap(err)
+		}
 	}
 
 	if err != nil {
@@ -123,10 +133,26 @@ func (db HarmonyDB) SetPermissions(guildID uint64, channelID uint64, roleID uint
 
 	if exists {
 		if channelID == 0 {
+			if roleID == 0 {
+				return tracerr.Wrap(db.queries.UpdatePermissionsWithoutChannelWithoutRole(ctx, queries.UpdatePermissionsWithoutChannelWithoutRoleParams{
+					GuildID: guildID,
+					Nodes:   mustSerialize(permissions),
+				}))
+			}
 			return tracerr.Wrap(db.queries.UpdatePermissionsWithoutChannel(ctx, queries.UpdatePermissionsWithoutChannelParams{
 				GuildID: guildID,
-				RoleID:  roleID,
+				RoleID:  toSqlInt64(roleID),
 				Nodes:   mustSerialize(permissions),
+			}))
+		}
+		if roleID == 0 {
+			return tracerr.Wrap(db.queries.UpdatePermissionsWithoutRole(ctx, queries.UpdatePermissionsWithoutRoleParams{
+				GuildID: guildID,
+				ChannelID: sql.NullInt64{
+					Int64: int64(channelID),
+					Valid: true,
+				},
+				Nodes: mustSerialize(permissions),
 			}))
 		}
 		return tracerr.Wrap(db.queries.UpdatePermissions(ctx, queries.UpdatePermissionsParams{
@@ -135,7 +161,7 @@ func (db HarmonyDB) SetPermissions(guildID uint64, channelID uint64, roleID uint
 				Int64: int64(channelID),
 				Valid: true,
 			},
-			RoleID: roleID,
+			RoleID: toSqlInt64(roleID),
 			Nodes:  mustSerialize(permissions),
 		}))
 	}
@@ -145,8 +171,11 @@ func (db HarmonyDB) SetPermissions(guildID uint64, channelID uint64, roleID uint
 			Int64: int64(channelID),
 			Valid: channelID != 0,
 		},
-		RoleID: roleID,
-		Nodes:  mustSerialize(permissions),
+		RoleID: sql.NullInt64{
+			Int64: int64(roleID),
+			Valid: roleID != 0,
+		},
+		Nodes: mustSerialize(permissions),
 	}))
 }
 
@@ -154,21 +183,31 @@ func (db HarmonyDB) GetPermissions(guildID uint64, channelID uint64, roleID uint
 	var data json.RawMessage
 
 	if channelID == 0 {
-		data, err = db.queries.GetPermissionsWithoutChannel(ctx, queries.GetPermissionsWithoutChannelParams{
-			GuildID: guildID,
-			RoleID:  roleID,
-		})
-		err = tracerr.Wrap(err)
+		if roleID == 0 {
+			data, err = db.queries.GetPermissionsWithoutChannelWithoutRole(ctx, guildID)
+			err = tracerr.Wrap(err)
+		} else {
+			data, err = db.queries.GetPermissionsWithoutChannel(ctx, queries.GetPermissionsWithoutChannelParams{
+				GuildID: guildID,
+				RoleID:  toSqlInt64(roleID),
+			})
+			err = tracerr.Wrap(err)
+		}
 	} else {
-		data, err = db.queries.GetPermissions(ctx, queries.GetPermissionsParams{
-			GuildID: guildID,
-			ChannelID: sql.NullInt64{
-				Int64: int64(channelID),
-				Valid: true,
-			},
-			RoleID: roleID,
-		})
-		err = tracerr.Wrap(err)
+		if roleID == 0 {
+			data, err = db.queries.GetPermissionsWithoutRole(ctx, queries.GetPermissionsWithoutRoleParams{
+				GuildID:   guildID,
+				ChannelID: toSqlInt64(channelID),
+			})
+			err = tracerr.Wrap(err)
+		} else {
+			data, err = db.queries.GetPermissions(ctx, queries.GetPermissionsParams{
+				GuildID:   guildID,
+				ChannelID: toSqlInt64(channelID),
+				RoleID:    toSqlInt64(roleID),
+			})
+			err = tracerr.Wrap(err)
+		}
 	}
 
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {

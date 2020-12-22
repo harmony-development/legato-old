@@ -60,8 +60,14 @@ WHERE Guild_ID = $1
 -- name: PermissionExistsWithoutChannel :one
 SELECT EXISTS(SELECT 1 FROM PERMISSIONS WHERE Guild_ID = $1 AND Channel_ID IS NULL AND Role_ID = $2);
 
+-- name: PermissionExistsWithoutChannelWithoutRole :one
+SELECT EXISTS(SELECT 1 FROM PERMISSIONS WHERE Guild_ID = $1 AND Channel_ID IS NULL AND Role_ID IS NULL);
+
 -- name: PermissionsExists :one
 SELECT EXISTS(SELECT 1 FROM PERMISSIONS WHERE Guild_ID = $1 AND Channel_ID = $2 AND Role_ID = $3);
+
+-- name: PermissionsExistsWithoutRole :one
+SELECT EXISTS(SELECT 1 FROM PERMISSIONS WHERE Guild_ID = $1 AND Channel_ID = $2 AND Role_ID IS NULL);
 
 -- name: UpdatePermissions :exec
 UPDATE Permissions
@@ -70,6 +76,13 @@ WHERE Guild_ID = $1
     AND Channel_ID = $2
     AND Role_ID = $3;
 
+-- name: UpdatePermissionsWithoutRole :exec
+UPDATE Permissions
+SET Nodes = $3
+WHERE Guild_ID = $1
+    AND Channel_ID = $2
+    AND Role_ID IS NULL;
+
 -- name: UpdatePermissionsWithoutChannel :exec
 UPDATE Permissions
 SET Nodes = $3
@@ -77,6 +90,12 @@ WHERE Guild_ID = $1
     AND Channel_ID IS NULL
     AND Role_ID = $2;
 
+-- name: UpdatePermissionsWithoutChannelWithoutRole :exec
+UPDATE Permissions
+SET Nodes = $2
+WHERE Guild_ID = $1
+    AND Channel_ID IS NULL
+    AND Role_ID IS NULL;
 
 -- name: SetPermissions :exec
 INSERT INTO Permissions
@@ -90,12 +109,26 @@ WHERE Guild_ID = $1
     AND Channel_ID = $2
     AND Role_ID = $3;
 
+-- name: GetPermissionsWithoutRole :one
+SELECT Nodes
+FROM Permissions
+WHERE Guild_ID = $1
+    AND Channel_ID = $2
+    AND Role_ID IS NULL;
+
 -- name: GetPermissionsWithoutChannel :one
 SELECT Nodes
 FROM Permissions
 WHERE Guild_ID = $1
     AND Channel_ID IS NULL
     AND Role_ID = $2;
+
+-- name: GetPermissionsWithoutChannelWithoutRole :one
+SELECT Nodes
+FROM Permissions
+WHERE Guild_ID = $1
+    AND Channel_ID IS NULL
+    AND Role_ID IS NULL;
 
 -- name: SetRoleName :exec
 UPDATE Roles

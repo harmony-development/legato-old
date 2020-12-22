@@ -108,7 +108,7 @@ type Message struct {
 type Permission struct {
 	GuildID   uint64          `json:"guild_id"`
 	ChannelID sql.NullInt64   `json:"channel_id"`
-	RoleID    uint64          `json:"role_id"`
+	RoleID    sql.NullInt64   `json:"role_id"`
 	Nodes     json.RawMessage `json:"nodes"`
 }
 

@@ -106,7 +106,7 @@ WHERE Guild_ID = $1
 type GetPermissionsParams struct {
 	GuildID   uint64        `json:"guild_id"`
 	ChannelID sql.NullInt64 `json:"channel_id"`
-	RoleID    uint64        `json:"role_id"`
+	RoleID    sql.NullInt64 `json:"role_id"`
 }
 
 func (q *Queries) GetPermissions(ctx context.Context, arg GetPermissionsParams) (json.RawMessage, error) {
@@ -125,12 +125,47 @@ WHERE Guild_ID = $1
 `
 
 type GetPermissionsWithoutChannelParams struct {
-	GuildID uint64 `json:"guild_id"`
-	RoleID  uint64 `json:"role_id"`
+	GuildID uint64        `json:"guild_id"`
+	RoleID  sql.NullInt64 `json:"role_id"`
 }
 
 func (q *Queries) GetPermissionsWithoutChannel(ctx context.Context, arg GetPermissionsWithoutChannelParams) (json.RawMessage, error) {
 	row := q.queryRow(ctx, q.getPermissionsWithoutChannelStmt, getPermissionsWithoutChannel, arg.GuildID, arg.RoleID)
+	var nodes json.RawMessage
+	err := row.Scan(&nodes)
+	return nodes, err
+}
+
+const getPermissionsWithoutChannelWithoutRole = `-- name: GetPermissionsWithoutChannelWithoutRole :one
+SELECT Nodes
+FROM Permissions
+WHERE Guild_ID = $1
+    AND Channel_ID IS NULL
+    AND Role_ID IS NULL
+`
+
+func (q *Queries) GetPermissionsWithoutChannelWithoutRole(ctx context.Context, guildID uint64) (json.RawMessage, error) {
+	row := q.queryRow(ctx, q.getPermissionsWithoutChannelWithoutRoleStmt, getPermissionsWithoutChannelWithoutRole, guildID)
+	var nodes json.RawMessage
+	err := row.Scan(&nodes)
+	return nodes, err
+}
+
+const getPermissionsWithoutRole = `-- name: GetPermissionsWithoutRole :one
+SELECT Nodes
+FROM Permissions
+WHERE Guild_ID = $1
+    AND Channel_ID = $2
+    AND Role_ID IS NULL
+`
+
+type GetPermissionsWithoutRoleParams struct {
+	GuildID   uint64        `json:"guild_id"`
+	ChannelID sql.NullInt64 `json:"channel_id"`
+}
+
+func (q *Queries) GetPermissionsWithoutRole(ctx context.Context, arg GetPermissionsWithoutRoleParams) (json.RawMessage, error) {
+	row := q.queryRow(ctx, q.getPermissionsWithoutRoleStmt, getPermissionsWithoutRole, arg.GuildID, arg.ChannelID)
 	var nodes json.RawMessage
 	err := row.Scan(&nodes)
 	return nodes, err
@@ -216,12 +251,23 @@ SELECT EXISTS(SELECT 1 FROM PERMISSIONS WHERE Guild_ID = $1 AND Channel_ID IS NU
 `
 
 type PermissionExistsWithoutChannelParams struct {
-	GuildID uint64 `json:"guild_id"`
-	RoleID  uint64 `json:"role_id"`
+	GuildID uint64        `json:"guild_id"`
+	RoleID  sql.NullInt64 `json:"role_id"`
 }
 
 func (q *Queries) PermissionExistsWithoutChannel(ctx context.Context, arg PermissionExistsWithoutChannelParams) (bool, error) {
 	row := q.queryRow(ctx, q.permissionExistsWithoutChannelStmt, permissionExistsWithoutChannel, arg.GuildID, arg.RoleID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const permissionExistsWithoutChannelWithoutRole = `-- name: PermissionExistsWithoutChannelWithoutRole :one
+SELECT EXISTS(SELECT 1 FROM PERMISSIONS WHERE Guild_ID = $1 AND Channel_ID IS NULL AND Role_ID IS NULL)
+`
+
+func (q *Queries) PermissionExistsWithoutChannelWithoutRole(ctx context.Context, guildID uint64) (bool, error) {
+	row := q.queryRow(ctx, q.permissionExistsWithoutChannelWithoutRoleStmt, permissionExistsWithoutChannelWithoutRole, guildID)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
@@ -234,11 +280,27 @@ SELECT EXISTS(SELECT 1 FROM PERMISSIONS WHERE Guild_ID = $1 AND Channel_ID = $2 
 type PermissionsExistsParams struct {
 	GuildID   uint64        `json:"guild_id"`
 	ChannelID sql.NullInt64 `json:"channel_id"`
-	RoleID    uint64        `json:"role_id"`
+	RoleID    sql.NullInt64 `json:"role_id"`
 }
 
 func (q *Queries) PermissionsExists(ctx context.Context, arg PermissionsExistsParams) (bool, error) {
 	row := q.queryRow(ctx, q.permissionsExistsStmt, permissionsExists, arg.GuildID, arg.ChannelID, arg.RoleID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const permissionsExistsWithoutRole = `-- name: PermissionsExistsWithoutRole :one
+SELECT EXISTS(SELECT 1 FROM PERMISSIONS WHERE Guild_ID = $1 AND Channel_ID = $2 AND Role_ID IS NULL)
+`
+
+type PermissionsExistsWithoutRoleParams struct {
+	GuildID   uint64        `json:"guild_id"`
+	ChannelID sql.NullInt64 `json:"channel_id"`
+}
+
+func (q *Queries) PermissionsExistsWithoutRole(ctx context.Context, arg PermissionsExistsWithoutRoleParams) (bool, error) {
+	row := q.queryRow(ctx, q.permissionsExistsWithoutRoleStmt, permissionsExistsWithoutRole, arg.GuildID, arg.ChannelID)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
@@ -306,7 +368,7 @@ INSERT INTO Permissions
 type SetPermissionsParams struct {
 	GuildID   uint64          `json:"guild_id"`
 	ChannelID sql.NullInt64   `json:"channel_id"`
-	RoleID    uint64          `json:"role_id"`
+	RoleID    sql.NullInt64   `json:"role_id"`
 	Nodes     json.RawMessage `json:"nodes"`
 }
 
@@ -403,7 +465,7 @@ WHERE Guild_ID = $1
 type UpdatePermissionsParams struct {
 	GuildID   uint64          `json:"guild_id"`
 	ChannelID sql.NullInt64   `json:"channel_id"`
-	RoleID    uint64          `json:"role_id"`
+	RoleID    sql.NullInt64   `json:"role_id"`
 	Nodes     json.RawMessage `json:"nodes"`
 }
 
@@ -427,11 +489,48 @@ WHERE Guild_ID = $1
 
 type UpdatePermissionsWithoutChannelParams struct {
 	GuildID uint64          `json:"guild_id"`
-	RoleID  uint64          `json:"role_id"`
+	RoleID  sql.NullInt64   `json:"role_id"`
 	Nodes   json.RawMessage `json:"nodes"`
 }
 
 func (q *Queries) UpdatePermissionsWithoutChannel(ctx context.Context, arg UpdatePermissionsWithoutChannelParams) error {
 	_, err := q.exec(ctx, q.updatePermissionsWithoutChannelStmt, updatePermissionsWithoutChannel, arg.GuildID, arg.RoleID, arg.Nodes)
+	return err
+}
+
+const updatePermissionsWithoutChannelWithoutRole = `-- name: UpdatePermissionsWithoutChannelWithoutRole :exec
+UPDATE Permissions
+SET Nodes = $2
+WHERE Guild_ID = $1
+    AND Channel_ID IS NULL
+    AND Role_ID IS NULL
+`
+
+type UpdatePermissionsWithoutChannelWithoutRoleParams struct {
+	GuildID uint64          `json:"guild_id"`
+	Nodes   json.RawMessage `json:"nodes"`
+}
+
+func (q *Queries) UpdatePermissionsWithoutChannelWithoutRole(ctx context.Context, arg UpdatePermissionsWithoutChannelWithoutRoleParams) error {
+	_, err := q.exec(ctx, q.updatePermissionsWithoutChannelWithoutRoleStmt, updatePermissionsWithoutChannelWithoutRole, arg.GuildID, arg.Nodes)
+	return err
+}
+
+const updatePermissionsWithoutRole = `-- name: UpdatePermissionsWithoutRole :exec
+UPDATE Permissions
+SET Nodes = $3
+WHERE Guild_ID = $1
+    AND Channel_ID = $2
+    AND Role_ID IS NULL
+`
+
+type UpdatePermissionsWithoutRoleParams struct {
+	GuildID   uint64          `json:"guild_id"`
+	ChannelID sql.NullInt64   `json:"channel_id"`
+	Nodes     json.RawMessage `json:"nodes"`
+}
+
+func (q *Queries) UpdatePermissionsWithoutRole(ctx context.Context, arg UpdatePermissionsWithoutRoleParams) error {
+	_, err := q.exec(ctx, q.updatePermissionsWithoutRoleStmt, updatePermissionsWithoutRole, arg.GuildID, arg.ChannelID, arg.Nodes)
 	return err
 }
