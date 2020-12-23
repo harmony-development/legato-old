@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	corev1 "github.com/harmony-development/legato/gen/core"
+	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db/queries"
@@ -138,11 +138,11 @@ type IHarmonyDB interface {
 	GetEmotePacks(userID uint64) ([]queries.GetEmotePacksRow, error)
 	GetEmotePackEmotes(packID uint64) ([]queries.GetEmotePackEmotesRow, error)
 	DequipEmotePack(userID, packID uint64) error
-	AddRoleToGuild(guildID uint64, role *corev1.Role) error
+	AddRoleToGuild(guildID uint64, role *chatv1.Role) error
 	RemoveRoleFromGuild(guildID, roleID uint64) error
 	GetRolePositions(guildID, before, previous uint64) (pos string, retErr error)
 	MoveRole(guildID, roleID, beforeRole, previousRole uint64) error
-	GetGuildRoles(guildID uint64) ([]*corev1.Role, error)
+	GetGuildRoles(guildID uint64) ([]*chatv1.Role, error)
 	SetPermissions(guildID uint64, channelID uint64, roleID uint64, permissions []PermissionsNode) error
 	GetPermissions(guildID uint64, channelID uint64, roleID uint64) (permissions []PermissionsNode, err error)
 	GetPermissionsData(guildID uint64) (PermissionsData, error)

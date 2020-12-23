@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/harmony-development/legato/server/api/core/v1/permissions"
+	"github.com/harmony-development/legato/server/api/chat/v1/permissions"
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/logger"
 )

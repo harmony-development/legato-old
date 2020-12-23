@@ -8,7 +8,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 
-	foundationv1 "github.com/harmony-development/legato/gen/foundation"
+	authv1 "github.com/harmony-development/legato/gen/auth/v1"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/intercom"
 )
@@ -75,8 +75,8 @@ func (m Manager) GetPublicKey(host string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	foundationClient := foundationv1.NewFoundationServiceClient(conn)
-	reply, err := foundationClient.Key(context.Background(), &foundationv1.KeyRequest{})
+	foundationClient := authv1.NewAuthServiceClient(conn)
+	reply, err := foundationClient.Key(context.Background(), &authv1.KeyRequest{})
 	if err != nil {
 		return "", err
 	}

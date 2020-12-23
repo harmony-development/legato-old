@@ -15,7 +15,7 @@ import (
 	"github.com/sony/sonyflake"
 
 	"github.com/harmony-development/legato/server/api"
-	"github.com/harmony-development/legato/server/api/core/v1/permissions"
+	"github.com/harmony-development/legato/server/api/chat/v1/permissions"
 	"github.com/harmony-development/legato/server/auth"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"

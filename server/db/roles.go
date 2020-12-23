@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 
-	corev1 "github.com/harmony-development/legato/gen/core"
+	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
 	"github.com/harmony-development/legato/server/db/queries"
 	"github.com/ztrue/tracerr"
 )
 
-func (db HarmonyDB) AddRoleToGuild(guildID uint64, role *corev1.Role) error {
+func (db HarmonyDB) AddRoleToGuild(guildID uint64, role *chatv1.Role) error {
 	_, err := db.queries.CreateRole(ctx, queries.CreateRoleParams{
 		GuildID:  guildID,
 		RoleID:   role.RoleId,
@@ -68,12 +68,12 @@ func (db HarmonyDB) MoveRole(guildID, roleID, beforeRole, previousRole uint64) (
 	return err
 }
 
-func (db HarmonyDB) GetGuildRoles(guildID uint64) (ret []*corev1.Role, err error) {
+func (db HarmonyDB) GetGuildRoles(guildID uint64) (ret []*chatv1.Role, err error) {
 	roles, err := db.queries.GetRolesForGuild(ctx, guildID)
 	err = tracerr.Wrap(err)
 
 	for _, role := range roles {
-		ret = append(ret, &corev1.Role{
+		ret = append(ret, &chatv1.Role{
 			Name:     role.Name,
 			RoleId:   role.RoleID,
 			Color:    role.Color,

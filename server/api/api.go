@@ -4,14 +4,12 @@ import (
 	"net/http"
 	"time"
 
-	corev1 "github.com/harmony-development/legato/gen/core"
-	foundationv1 "github.com/harmony-development/legato/gen/foundation"
-	profilev1 "github.com/harmony-development/legato/gen/profile"
-	"github.com/harmony-development/legato/server/api/core"
-	"github.com/harmony-development/legato/server/api/core/v1/permissions"
-	"github.com/harmony-development/legato/server/api/foundation"
+	authv1 "github.com/harmony-development/legato/gen/auth/v1"
+	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
+	"github.com/harmony-development/legato/server/api/authsvc"
+	"github.com/harmony-development/legato/server/api/chat"
+	"github.com/harmony-development/legato/server/api/chat/v1/permissions"
 	"github.com/harmony-development/legato/server/api/middleware"
-	"github.com/harmony-development/legato/server/api/profile"
 	"github.com/harmony-development/legato/server/auth"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
@@ -44,7 +42,7 @@ type API struct {
 	GrpcServer       *grpc.Server
 	GrpcWebServer    *grpcweb.WrappedGrpcServer
 	PrometheusServer *http.Server
-	CoreKit          *core.Service
+	ChatSvc          *chat.Service
 }
 
 // New creates a new API instance
@@ -88,7 +86,7 @@ func New(deps Dependencies) *API {
 		Handler: prometheusMux,
 	}
 
-	corev1.RegisterCoreServiceServer(api.GrpcServer, core.New(&core.Dependencies{
+	chatv1.RegisterChatServiceServer(api.GrpcServer, chat.New(&chat.Dependencies{
 		DB:             api.DB,
 		Logger:         api.Logger,
 		Sonyflake:      api.Sonyflake,
@@ -96,10 +94,7 @@ func New(deps Dependencies) *API {
 		Config:         deps.Config,
 		StorageBackend: deps.StorageBackend,
 	}).V1)
-	profilev1.RegisterProfileServiceServer(api.GrpcServer, &profile.New(profile.Dependencies{
-		DB: api.DB,
-	}).V1)
-	foundationv1.RegisterFoundationServiceServer(api.GrpcServer, foundation.New(&foundation.Dependencies{
+	authv1.RegisterAuthServiceServer(api.GrpcServer, authsvc.New(&authsvc.Dependencies{
 		DB:          api.DB,
 		Logger:      api.Logger,
 		Sonyflake:   api.Sonyflake,
