@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"time"
 
-	profilev1 "github.com/harmony-development/legato/gen/profile"
+	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/queries"
 	"github.com/ztrue/tracerr"
 )
@@ -90,7 +90,7 @@ func (db *HarmonyDB) AddLocalUser(userID uint64, email, username string, passwor
 		UserID:   userID,
 		Username: username,
 		Avatar:   sql.NullString{},
-		Status:   int16(profilev1.UserStatus_USER_STATUS_OFFLINE),
+		Status:   int16(harmonytypesv1.UserStatus_USER_STATUS_OFFLINE),
 	}); err != nil {
 		err = tracerr.Wrap(err)
 		return err
@@ -118,7 +118,7 @@ func (db *HarmonyDB) AddForeignUser(homeServer string, userID, localUserID uint6
 		UserID:   localUserID,
 		Username: username,
 		Avatar:   toSqlString(avatar),
-		Status:   int16(profilev1.UserStatus_USER_STATUS_OFFLINE),
+		Status:   int16(harmonytypesv1.UserStatus_USER_STATUS_OFFLINE),
 	}); err != nil {
 		err = tracerr.Wrap(err)
 		return 0, err
@@ -176,7 +176,7 @@ func (db *HarmonyDB) UpdateAvatar(userID uint64, avatar string) error {
 	}))
 }
 
-func (db *HarmonyDB) SetStatus(userID uint64, status profilev1.UserStatus) error {
+func (db *HarmonyDB) SetStatus(userID uint64, status harmonytypesv1.UserStatus) error {
 	return tracerr.Wrap(db.queries.SetStatus(ctx, queries.SetStatusParams{
 		Status: int16(status), // lol shut up it's an int16
 		UserID: userID,

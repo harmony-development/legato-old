@@ -5,8 +5,10 @@ for dir in $(find "protocol" -name '*.proto' -print0 | xargs -0 -n1 dirname | so
   protoc --experimental_allow_proto3_optional \
   --proto_path=protocol \
   --proto_path=$(go env GOPATH)/src/github.com/envoyproxy/protoc-gen-validate \
-  --go_out=gen \
+  --go_out=./gen \
   --go_opt="plugins=grpc" \
   --validate_out="lang=go:gen" \
   $(find "${dir}" -name '*.proto')
 done
+
+mv gen/github.com/harmony-development/legato/gen/* gen

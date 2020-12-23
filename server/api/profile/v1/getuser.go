@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"time"
 
+	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	profilev1 "github.com/harmony-development/legato/gen/profile"
 	"github.com/harmony-development/legato/server/api/middleware"
 	"github.com/harmony-development/legato/server/responses"
@@ -38,6 +39,6 @@ func (v1 *V1) GetUser(c context.Context, r *profilev1.GetUserRequest) (*profilev
 	return &profilev1.GetUserResponse{
 		UserName:   res.Username,
 		UserAvatar: res.Avatar.String,
-		UserStatus: profilev1.UserStatus(res.Status),
+		UserStatus: harmonytypesv1.UserStatus(res.Status),
 	}, nil
 }

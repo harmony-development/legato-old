@@ -12,6 +12,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	corev1 "github.com/harmony-development/legato/gen/core"
+	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/api/core/v1/permissions"
 	"github.com/harmony-development/legato/server/api/middleware"
 	"github.com/harmony-development/legato/server/config"
@@ -52,7 +53,7 @@ type V1 struct {
 }
 
 // ActionsToProto is a utility function
-func (v1 *V1) ActionsToProto(msgs json.RawMessage) (ret []*corev1.Action) {
+func (v1 *V1) ActionsToProto(msgs json.RawMessage) (ret []*harmonytypesv1.Action) {
 	if err := json.Unmarshal([]byte(msgs), &ret); err != nil {
 		panic(err)
 	}
@@ -60,13 +61,13 @@ func (v1 *V1) ActionsToProto(msgs json.RawMessage) (ret []*corev1.Action) {
 }
 
 // ProtoToActions is a utility function
-func (v1 *V1) ProtoToActions(msgs []*corev1.Action) (ret []byte) {
+func (v1 *V1) ProtoToActions(msgs []*harmonytypesv1.Action) (ret []byte) {
 	ret, _ = json.Marshal(msgs)
 	return
 }
 
 // EmbedsToProto is a utility function
-func (v1 *V1) EmbedsToProto(embeds json.RawMessage) (ret []*corev1.Embed) {
+func (v1 *V1) EmbedsToProto(embeds json.RawMessage) (ret []*harmonytypesv1.Embed) {
 	if err := json.Unmarshal([]byte(embeds), &ret); err != nil {
 		panic(err)
 	}
@@ -74,17 +75,17 @@ func (v1 *V1) EmbedsToProto(embeds json.RawMessage) (ret []*corev1.Embed) {
 }
 
 // ProtoToEmbeds is a utility function
-func (v1 *V1) ProtoToEmbeds(embeds []*corev1.Embed) (ret []byte) {
+func (v1 *V1) ProtoToEmbeds(embeds []*harmonytypesv1.Embed) (ret []byte) {
 	ret, _ = json.Marshal(embeds)
 	return
 }
 
 // OverridesToProto is a utility function
-func (v1 *V1) OverridesToProto(overrides []byte) (ret *corev1.Override) {
+func (v1 *V1) OverridesToProto(overrides []byte) (ret *harmonytypesv1.Override) {
 	if len(overrides) == 0 {
 		return
 	}
-	ret = new(corev1.Override)
+	ret = new(harmonytypesv1.Override)
 	err := proto.Unmarshal(overrides, ret)
 	if err != nil {
 		panic(err)
@@ -93,7 +94,7 @@ func (v1 *V1) OverridesToProto(overrides []byte) (ret *corev1.Override) {
 }
 
 // ProtoToOverrides is a utility function
-func (v1 *V1) ProtoToOverrides(overrides *corev1.Override) (ret []byte) {
+func (v1 *V1) ProtoToOverrides(overrides *harmonytypesv1.Override) (ret []byte) {
 	ret, _ = proto.Marshal(overrides)
 	return
 }
@@ -337,10 +338,10 @@ func (v1 *V1) GetMessage(c context.Context, r *corev1.GetMessageRequest) (*corev
 	if message.EditedAt.Valid {
 		editedAt, _ = ptypes.TimestampProto(editedAt.AsTime().UTC())
 	}
-	var embeds []*corev1.Embed
-	var actions []*corev1.Action
-	attachments := []*corev1.Attachment{}
-	var override *corev1.Override
+	var embeds []*harmonytypesv1.Embed
+	var actions []*harmonytypesv1.Action
+	attachments := []*harmonytypesv1.Attachment{}
+	var override *harmonytypesv1.Override
 	if err := json.Unmarshal(message.Embeds, &embeds); err != nil {
 		return nil, err
 	}
@@ -348,7 +349,7 @@ func (v1 *V1) GetMessage(c context.Context, r *corev1.GetMessageRequest) (*corev
 		return nil, err
 	}
 	if len(message.Overrides) > 0 {
-		override = new(corev1.Override)
+		override = new(harmonytypesv1.Override)
 		if err := proto.Unmarshal(message.Overrides, override); err != nil {
 			return nil, err
 		}
@@ -356,7 +357,7 @@ func (v1 *V1) GetMessage(c context.Context, r *corev1.GetMessageRequest) (*corev
 	for _, a := range message.Attachments {
 		contentType, fileName, size, err := v1.StorageBackend.GetMetadata(a)
 		if err == nil {
-			attachments = append(attachments, &corev1.Attachment{
+			attachments = append(attachments, &harmonytypesv1.Attachment{
 				Id:   a,
 				Name: fileName,
 				Type: contentType,
@@ -365,7 +366,7 @@ func (v1 *V1) GetMessage(c context.Context, r *corev1.GetMessageRequest) (*corev
 		}
 	}
 	return &corev1.GetMessageResponse{
-		Message: &corev1.Message{
+		Message: &harmonytypesv1.Message{
 			GuildId:     message.GuildID,
 			ChannelId:   message.ChannelID,
 			MessageId:   message.MessageID,
@@ -415,17 +416,17 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 	}
 	return &corev1.GetChannelMessagesResponse{
 		ReachedTop: len(messages) < v1.Config.Server.Policies.APIs.Messages.MaximumGetAmount,
-		Messages: func() (ret []*corev1.Message) {
+		Messages: func() (ret []*harmonytypesv1.Message) {
 			for _, message := range messages {
 				createdAt, _ := ptypes.TimestampProto(message.CreatedAt.UTC())
 				var editedAt *timestamppb.Timestamp
 				if message.EditedAt.Valid {
 					editedAt, _ = ptypes.TimestampProto(editedAt.AsTime().UTC())
 				}
-				var embeds []*corev1.Embed
-				var actions []*corev1.Action
-				var overrides *corev1.Override
-				attachments := []*corev1.Attachment{}
+				var embeds []*harmonytypesv1.Embed
+				var actions []*harmonytypesv1.Action
+				var overrides *harmonytypesv1.Override
+				attachments := []*harmonytypesv1.Attachment{}
 				if err := json.Unmarshal(message.Embeds, &embeds); err != nil {
 					continue
 				}
@@ -433,7 +434,7 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 					continue
 				}
 				if len(message.Overrides) > 0 {
-					overrides = new(corev1.Override)
+					overrides = new(harmonytypesv1.Override)
 					if err := proto.Unmarshal(message.Overrides, overrides); err != nil {
 						continue
 					}
@@ -441,7 +442,7 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 				for _, a := range message.Attachments {
 					contentType, fileName, size, err := v1.StorageBackend.GetMetadata(a)
 					if err == nil {
-						attachments = append(attachments, &corev1.Attachment{
+						attachments = append(attachments, &harmonytypesv1.Attachment{
 							Id:   a,
 							Name: fileName,
 							Type: contentType,
@@ -449,7 +450,7 @@ func (v1 *V1) GetChannelMessages(c context.Context, r *corev1.GetChannelMessages
 						})
 					}
 				}
-				ret = append(ret, &corev1.Message{
+				ret = append(ret, &harmonytypesv1.Message{
 					GuildId:     message.GuildID,
 					ChannelId:   message.ChannelID,
 					MessageId:   message.MessageID,
@@ -590,7 +591,7 @@ func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (
 	var embeds *[]byte
 	var overrides *[]byte
 	var attachments *[]string
-	attachmentsData := []*corev1.Attachment{}
+	attachmentsData := []*harmonytypesv1.Attachment{}
 	if r.UpdateActions {
 		val := v1.ProtoToActions(r.Actions)
 		actions = &val
@@ -609,7 +610,7 @@ func (v1 *V1) UpdateMessage(c context.Context, r *corev1.UpdateMessageRequest) (
 		for _, a := range r.Attachments {
 			contentType, fileName, size, err := v1.StorageBackend.GetMetadata(a)
 			if err == nil {
-				attachmentsData = append(attachmentsData, &corev1.Attachment{
+				attachmentsData = append(attachmentsData, &harmonytypesv1.Attachment{
 					Id:   a,
 					Name: fileName,
 					Type: contentType,
@@ -956,12 +957,12 @@ func (v1 *V1) SendMessage(c context.Context, r *corev1.SendMessageRequest) (*cor
 		return nil, err
 	}
 
-	attachments := []*corev1.Attachment{}
+	attachments := []*harmonytypesv1.Attachment{}
 
 	for _, a := range r.Attachments {
 		contentType, fileName, size, err := v1.StorageBackend.GetMetadata(a)
 		if err == nil {
-			attachments = append(attachments, &corev1.Attachment{
+			attachments = append(attachments, &harmonytypesv1.Attachment{
 				Id:   a,
 				Name: fileName,
 				Type: contentType,
@@ -970,7 +971,7 @@ func (v1 *V1) SendMessage(c context.Context, r *corev1.SendMessageRequest) (*cor
 		}
 	}
 
-	message := corev1.Message{
+	message := harmonytypesv1.Message{
 		GuildId:     r.GuildId,
 		ChannelId:   r.ChannelId,
 		MessageId:   messageID,

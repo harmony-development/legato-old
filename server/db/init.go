@@ -9,7 +9,7 @@ import (
 	"time"
 
 	corev1 "github.com/harmony-development/legato/gen/core"
-	profilev1 "github.com/harmony-development/legato/gen/profile"
+	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db/queries"
 	"github.com/harmony-development/legato/server/logger"
@@ -118,7 +118,7 @@ type IHarmonyDB interface {
 	HasMessageWithID(guildID, channelID, messageID uint64) (bool, error)
 	GetGuildByID(guildID uint64) (queries.Guild, error)
 	UpdateMessage(messageID uint64, content *string, embeds, actions, overrides *[]byte, attachments *[]string) (time.Time, error)
-	SetStatus(userID uint64, status profilev1.UserStatus) error
+	SetStatus(userID uint64, status harmonytypesv1.UserStatus) error
 	GetUserMetadata(userID uint64, appID string) (string, error)
 	GetNonceInfo(nonce string) (queries.GetNonceInfoRow, error)
 	AddNonce(nonce string, userID uint64, homeServer string) error

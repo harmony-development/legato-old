@@ -16,6 +16,8 @@ import (
 	"unicode/utf8"
 
 	"github.com/golang/protobuf/ptypes"
+
+	v1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 )
 
 // ensure the imports are used
@@ -31,6 +33,12 @@ var (
 	_ = (*url.URL)(nil)
 	_ = (*mail.Address)(nil)
 	_ = ptypes.DynamicAny{}
+
+	_ = v1.UserStatus(0)
+
+	_ = v1.UserStatus(0)
+
+	_ = v1.UserStatus(0)
 )
 
 // define the regex for a UUID once up-front
@@ -381,6 +389,144 @@ var _ interface {
 	ErrorName() string
 } = UsernameUpdateRequestValidationError{}
 
+// Validate checks the field values on LocalAvatarUpdateRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *LocalAvatarUpdateRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Id
+
+	return nil
+}
+
+// LocalAvatarUpdateRequestValidationError is the validation error returned by
+// LocalAvatarUpdateRequest.Validate if the designated constraints aren't met.
+type LocalAvatarUpdateRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e LocalAvatarUpdateRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e LocalAvatarUpdateRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e LocalAvatarUpdateRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e LocalAvatarUpdateRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e LocalAvatarUpdateRequestValidationError) ErrorName() string {
+	return "LocalAvatarUpdateRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e LocalAvatarUpdateRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sLocalAvatarUpdateRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = LocalAvatarUpdateRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = LocalAvatarUpdateRequestValidationError{}
+
+// Validate checks the field values on AvatarUpdateRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *AvatarUpdateRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Origin
+
+	return nil
+}
+
+// AvatarUpdateRequestValidationError is the validation error returned by
+// AvatarUpdateRequest.Validate if the designated constraints aren't met.
+type AvatarUpdateRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AvatarUpdateRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AvatarUpdateRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AvatarUpdateRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AvatarUpdateRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AvatarUpdateRequestValidationError) ErrorName() string {
+	return "AvatarUpdateRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e AvatarUpdateRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAvatarUpdateRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AvatarUpdateRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AvatarUpdateRequestValidationError{}
+
 // Validate checks the field values on StatusUpdateRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
@@ -449,3 +595,82 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = StatusUpdateRequestValidationError{}
+
+// Validate checks the field values on ProfileUpdateRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *ProfileUpdateRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for NewUsername
+
+	// no validation rules for UpdateUsername
+
+	// no validation rules for NewAvatar
+
+	// no validation rules for UpdateAvatar
+
+	// no validation rules for NewStatus
+
+	// no validation rules for UpdateStatus
+
+	return nil
+}
+
+// ProfileUpdateRequestValidationError is the validation error returned by
+// ProfileUpdateRequest.Validate if the designated constraints aren't met.
+type ProfileUpdateRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ProfileUpdateRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ProfileUpdateRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ProfileUpdateRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ProfileUpdateRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ProfileUpdateRequestValidationError) ErrorName() string {
+	return "ProfileUpdateRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ProfileUpdateRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sProfileUpdateRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ProfileUpdateRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ProfileUpdateRequestValidationError{}
