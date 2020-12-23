@@ -68,6 +68,9 @@ Server {
 			LogRequests = true
 			RespondWithErrors = false
 			ResponseErrorsIncludeTrace = false
+
+			# This will cause stream-related events to become VERY verbose.
+			VerboseStreamHandling = false
 		}
 
 		# Session-related policies

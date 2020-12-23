@@ -1,6 +1,9 @@
 package v1
 
-import chatv1 "github.com/harmony-development/legato/gen/chat/v1"
+import (
+	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
+	"github.com/harmony-development/legato/server/logger"
+)
 
 type ActionSubscriptionManager interface {
 	Subscribe(userID uint64, stream chatv1.ChatService_StreamEventsServer) chan struct{}
@@ -26,4 +29,5 @@ type SubscriptionManager struct {
 	Actions    ActionSubscriptionManager
 	Guild      GuildSubscriptionManager
 	Homeserver HomeserverSubscriptionManager
+	Logger     logger.ILogger
 }
