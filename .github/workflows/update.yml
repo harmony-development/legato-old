@@ -8,11 +8,11 @@ jobs:
     name: Update Legato service
     runs-on: ubuntu-latest
     steps:
-      - run: 'echo "$SSH_KEY" > key'
+      - run: 'echo "$SSH_KEY" > key && chmod 600 key'
         shell: bash
         env:
           SSH_KEY: ${{secrets.ACTIONS_SSH_KEY}}
-      - run: 'echo "$KNOWN_HOSTS" > known_hosts'
+      - run: 'echo "$KNOWN_HOSTS" > known_hosts && chmod 600 known_hosts'
         shell: bash
         env:
           KNOWN_HOSTS: ${{secrets.ACTIONS_SSH_KNOWN_HOSTS}}
