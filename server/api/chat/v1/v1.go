@@ -1503,7 +1503,7 @@ func (v1 *V1) ProfileUpdate(c context.Context, r *chatv1.ProfileUpdateRequest) (
 		}
 	}
 	if r.UpdateUsername {
-		if err := v1.DB.SetAvatar(ctx.UserID, r.NewUsername); err != nil {
+		if err := v1.DB.SetUsername(ctx.UserID, r.NewUsername); err != nil {
 			v1.Logger.Exception(err)
 			return nil, errors.New(responses.UnknownError)
 		}
