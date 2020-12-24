@@ -111,6 +111,39 @@ func (q *Queries) EmailExists(ctx context.Context, email string) (int64, error) 
 	return count, err
 }
 
+const getAllMutuals = `-- name: GetAllMutuals :many
+SELECT Guild_Members.User_ID
+FROM Guild_Members
+WHERE Guild_ID = (
+    SELECT Guild_ID
+    FROM Guild_Members
+    WHERE Guild_Members.User_ID = $1
+  )
+`
+
+func (q *Queries) GetAllMutuals(ctx context.Context, userID uint64) ([]uint64, error) {
+	rows, err := q.query(ctx, q.getAllMutualsStmt, getAllMutuals, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []uint64
+	for rows.Next() {
+		var user_id uint64
+		if err := rows.Scan(&user_id); err != nil {
+			return nil, err
+		}
+		items = append(items, user_id)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getAvatar = `-- name: GetAvatar :one
 SELECT Avatar
 FROM Profiles

@@ -1487,7 +1487,7 @@ func init() {
 			Burst:    4,
 		},
 		Auth: true,
-	}, "/protocol.chat.v1.ChatService/ProfileUpdateRequest")
+	}, "/protocol.chat.v1.ChatService/ProfileUpdate")
 }
 
 // ProfileUpdate handles the protocol's ProfileUpdate request
@@ -1496,10 +1496,45 @@ func (v1 *V1) ProfileUpdate(c context.Context, r *chatv1.ProfileUpdateRequest) (
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	if err := v1.DB.SetStatus(ctx.UserID, r.NewStatus); err != nil {
-		v1.Logger.Exception(err)
-		return nil, errors.New(responses.UnknownError)
+	if r.UpdateStatus {
+		if err := v1.DB.SetStatus(ctx.UserID, r.NewStatus); err != nil {
+			v1.Logger.Exception(err)
+			return nil, errors.New(responses.UnknownError)
+		}
 	}
+	if r.UpdateUsername {
+		if err := v1.DB.SetAvatar(ctx.UserID, r.NewUsername); err != nil {
+			v1.Logger.Exception(err)
+			return nil, errors.New(responses.UnknownError)
+		}
+	}
+	if r.UpdateAvatar {
+		if err := v1.DB.SetAvatar(ctx.UserID, r.NewAvatar); err != nil {
+			v1.Logger.Exception(err)
+			return nil, errors.New(responses.UnknownError)
+		}
+	}
+
+	guilds, err := v1.DB.GetLocalGuilds(ctx.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, g := range guilds {
+		v1.PubSub.Guild.Broadcast(g, &chatv1.Event{
+			Event: &chatv1.Event_ProfileUpdated_{
+				ProfileUpdated: &chatv1.Event_ProfileUpdated{
+					NewUsername:    r.NewUsername,
+					UpdateUsername: r.UpdateUsername,
+					NewAvatar:      r.NewAvatar,
+					UpdateAvatar:   r.UpdateAvatar,
+					NewStatus:      r.NewStatus,
+					UpdateStatus:   r.UpdateStatus,
+				},
+			},
+		})
+	}
+
 	return &emptypb.Empty{}, nil
 }
 
