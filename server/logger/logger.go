@@ -4,7 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"os"
+	"strings"
 
+	"github.com/alecthomas/repr"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/ztrue/tracerr"
 	"google.golang.org/grpc"
@@ -16,11 +18,19 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// DebugScope is enums for types of debug
+type DebugScope int
+
+const (
+	Streams DebugScope = iota
+)
+
 type ILogger interface {
 	ErrorResponse(code codes.Code, err error, response string) error
 	CheckException(err error)
 	Exception(err error)
 	Request(c context.Context, req interface{}, info *grpc.UnaryServerInfo)
+	Debug(d DebugScope, v ...interface{})
 	Fatal(err error)
 }
 
@@ -79,4 +89,35 @@ func (l Logger) Request(c context.Context, req interface{}, info *grpc.UnaryServ
 		}
 		logrus.Info("[", info.FullMethod, "] FROM ", ip)
 	}
+}
+
+func (l Logger) Debug(d DebugScope, v ...interface{}) {
+	switch d {
+	case Streams:
+		if !l.Config.Server.Policies.Debug.VerboseStreamHandling {
+			return
+		}
+	}
+
+	var message strings.Builder
+
+	for _, i := range v {
+		switch value := i.(type) {
+		case string:
+			message.WriteString(value)
+		case interface{ Context() context.Context }:
+			p, ok := peer.FromContext(value.Context())
+			if ok {
+				message.WriteString(p.Addr.String())
+			} else {
+				message.WriteString(repr.String(value))
+			}
+		default:
+			message.WriteString(repr.String(value))
+		}
+		message.WriteString(" ")
+	}
+
+	logrus.Debug("[STREAMS] ", message.String())
+
 }

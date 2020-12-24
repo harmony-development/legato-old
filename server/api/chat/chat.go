@@ -39,9 +39,9 @@ func New(deps *Dependencies) *Service {
 			Sonyflake: deps.Sonyflake,
 			Perms:     deps.Perms,
 			PubSub: v1.SubscriptionManager{
-				Actions:    (&integrated.ActionState{}).Initialize(),
-				Guild:      (&integrated.GuildState{}).Initialize(),
-				Homeserver: (&integrated.HomeserverEventState{}).Initialize(),
+				Actions:    (&integrated.ActionState{}).Initialize(deps.Logger),
+				Guild:      (&integrated.GuildState{}).Initialize(deps.Logger),
+				Homeserver: (&integrated.HomeserverEventState{}).Initialize(deps.Logger),
 			},
 			Config:         deps.Config,
 			StorageBackend: deps.StorageBackend,

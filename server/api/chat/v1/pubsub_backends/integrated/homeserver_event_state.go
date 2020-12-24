@@ -4,17 +4,20 @@ import (
 	"sync"
 
 	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
+	"github.com/harmony-development/legato/server/logger"
 )
 
 // HomeserverEventState ...
 type HomeserverEventState struct {
 	homeserverChannels map[chatv1.ChatService_StreamEventsServer]chan struct{}
 	homeserverEvents   map[_userID][]chatv1.ChatService_StreamEventsServer
+	Logger             logger.ILogger
 	sync.Mutex
 }
 
 // Initialize the homeserver event state
-func (h *HomeserverEventState) Initialize() *HomeserverEventState {
+func (h *HomeserverEventState) Initialize(l logger.ILogger) *HomeserverEventState {
+	h.Logger = l
 	h.homeserverChannels = make(map[chatv1.ChatService_StreamEventsServer]chan struct{})
 	h.homeserverEvents = make(map[_userID][]chatv1.ChatService_StreamEventsServer)
 	return h

@@ -52,6 +52,7 @@ type Config struct {
 				LogRequests                bool `hcl:"LogRequests,optional" default:"true"`
 				RespondWithErrors          bool `hcl:"RespondWithErrors,optional" default:"false"`
 				ResponseErrorsIncludeTrace bool `hcl:"ResponseErrorsIncludeTrace" default:"true"`
+				VerboseStreamHandling      bool `hcl:"VerboseStreamHandling" default:"false"`
 			} `hcl:"Debug,block"`
 			Sessions struct {
 				Duration time.Duration `hcl:"Duration,optional" default:"172800000000000"`
