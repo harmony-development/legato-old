@@ -4,6 +4,7 @@ import (
 	"github.com/alecthomas/repr"
 	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
 	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/logger"
 	lru "github.com/hashicorp/golang-lru"
 )
 
@@ -11,12 +12,14 @@ import (
 type Manager struct {
 	states *lru.Cache
 	db     db.IHarmonyDB
+	logger logger.ILogger
 }
 
 // NewManager creates a new permissions manager
-func NewManager(db db.IHarmonyDB) *Manager {
+func NewManager(db db.IHarmonyDB, l logger.ILogger) *Manager {
 	man := &Manager{
-		db: db,
+		db:     db,
+		logger: l,
 	}
 	cache, err := lru.New(50_000)
 	if err != nil {
@@ -43,7 +46,7 @@ func (p *Manager) saveGuild(guild uint64, data *GuildState) {
 				}
 				return
 			}()); err != nil {
-				panic(err)
+				p.logger.CheckException(err)
 			}
 		}
 	}
@@ -61,7 +64,7 @@ func (p *Manager) saveGuild(guild uint64, data *GuildState) {
 			}
 			return
 		}()); err != nil {
-			panic(err)
+			p.logger.CheckException(err)
 		}
 	}
 }

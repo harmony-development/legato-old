@@ -93,7 +93,7 @@ func (inst Instance) Start() {
 		AuthManager:    inst.AuthManager,
 		Sonyflake:      inst.Sonyflake,
 		Config:         inst.Config,
-		Permissions:    permissions.NewManager(inst.DB),
+		Permissions:    permissions.NewManager(inst.DB, inst.Logger),
 		StorageBackend: storageBackend,
 	})
 
