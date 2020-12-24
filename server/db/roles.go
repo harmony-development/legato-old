@@ -232,6 +232,9 @@ func (db HarmonyDB) GetPermissionsData(guildID uint64) (ret PermissionsData, err
 		err = tracerr.Wrap(err)
 		return
 	}
+	roles = append(roles, queries.Role{
+		RoleID: 0,
+	})
 
 	for _, role := range roles {
 		perms, err := db.GetPermissions(guildID, 0, role.RoleID)
