@@ -1,0 +1,18 @@
+name: Update Legato service
+on:
+  push:
+    branches:
+      - main
+jobs:
+  update:
+    name: Update Legato service
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'echo "$SSH_KEY" > key'
+        shell: bash
+        env:
+          SSH_KEY: ${{secrets.ACTIONS_SSH_KEY}}
+      - run: 'ssh -i key "root@$SSH_HOST" systemctl start update-legato'
+        shell: bash
+        env:
+          SSH_HOST: ${{secrets.ACTIONS_SSH_HOST}}
