@@ -478,53 +478,40 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.JoinedLocation,
-		Permission: "guild.manage.change-name",
-	}, "/protocol.chat.v1.ChatService/UpdateGuildName")
+		Permission: "guild.manage.change-information",
+	}, "/protocol.chat.v1.ChatService/UpdateGuildInformation")
 }
 
-// UpdateGuildName implements the UpdateGuildName RPC
-func (v1 *V1) UpdateGuildName(c context.Context, r *chatv1.UpdateGuildNameRequest) (*empty.Empty, error) {
-	if err := v1.DB.UpdateGuildName(r.GuildId, r.NewGuildName); err != nil {
-		return nil, err
-	}
-	v1.PubSub.Guild.Broadcast(r.GuildId, &chatv1.Event{
-		Event: &chatv1.Event_EditedGuild{
-			EditedGuild: &chatv1.Event_GuildUpdated{
-				GuildId:    r.GuildId,
-				Name:       r.NewGuildName,
-				UpdateName: true,
+// UpdateGuildInformation implements the UpdateGuildInformation RPC
+func (v1 *V1) UpdateGuildInformation(c context.Context, r *chatv1.UpdateGuildInformationRequest) (*empty.Empty, error) {
+	if r.UpdateGuildName {
+		if err := v1.DB.UpdateGuildName(r.GuildId, r.NewGuildName); err != nil {
+			return nil, err
+		}
+		v1.PubSub.Guild.Broadcast(r.GuildId, &chatv1.Event{
+			Event: &chatv1.Event_EditedGuild{
+				EditedGuild: &chatv1.Event_GuildUpdated{
+					GuildId:    r.GuildId,
+					Name:       r.NewGuildName,
+					UpdateName: true,
+				},
 			},
-		},
-	})
-	return &empty.Empty{}, nil
-}
-
-func init() {
-	middleware.RegisterRPCConfig(middleware.RPCConfig{
-		RateLimit: middleware.RateLimit{
-			Duration: 5 * time.Second,
-			Burst:    2,
-		},
-		Auth:       true,
-		Location:   middleware.GuildLocation | middleware.JoinedLocation,
-		Permission: "guild.manage.change-picture",
-	}, "/protocol.chat.v1.ChatService/UpdateGuildPicture")
-}
-
-// UpdateGuildPicture implements the UpdateGuildPicture RPC
-func (v1 *V1) UpdateGuildPicture(c context.Context, r *chatv1.UpdateGuildPictureRequest) (*empty.Empty, error) {
-	if err := v1.DB.SetGuildPicture(r.GuildId, r.NewGuildPicture); err != nil {
-		return nil, err
+		})
 	}
-	v1.PubSub.Guild.Broadcast(r.GuildId, &chatv1.Event{
-		Event: &chatv1.Event_EditedGuild{
-			EditedGuild: &chatv1.Event_GuildUpdated{
-				GuildId:       r.GuildId,
-				Picture:       r.NewGuildPicture,
-				UpdatePicture: true,
+	if r.UpdateGuildPicture {
+		if err := v1.DB.SetGuildPicture(r.GuildId, r.NewGuildPicture); err != nil {
+			return nil, err
+		}
+		v1.PubSub.Guild.Broadcast(r.GuildId, &chatv1.Event{
+			Event: &chatv1.Event_EditedGuild{
+				EditedGuild: &chatv1.Event_GuildUpdated{
+					GuildId:       r.GuildId,
+					Picture:       r.NewGuildPicture,
+					UpdatePicture: true,
+				},
 			},
-		},
-	})
+		})
+	}
 	return &empty.Empty{}, nil
 }
 

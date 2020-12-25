@@ -620,17 +620,20 @@ func (x *GetGuildMembersResponse) GetMembers() []uint64 {
 	return nil
 }
 
-type UpdateGuildNameRequest struct {
+type UpdateGuildInformationRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	GuildId      uint64 `protobuf:"varint,1,opt,name=guild_id,json=guildId,proto3" json:"guild_id,omitempty"`
-	NewGuildName string `protobuf:"bytes,2,opt,name=new_guild_name,json=newGuildName,proto3" json:"new_guild_name,omitempty"`
+	GuildId            uint64 `protobuf:"varint,1,opt,name=guild_id,json=guildId,proto3" json:"guild_id,omitempty"`
+	NewGuildName       string `protobuf:"bytes,2,opt,name=new_guild_name,json=newGuildName,proto3" json:"new_guild_name,omitempty"`
+	UpdateGuildName    bool   `protobuf:"varint,3,opt,name=update_guild_name,json=updateGuildName,proto3" json:"update_guild_name,omitempty"`
+	NewGuildPicture    string `protobuf:"bytes,4,opt,name=new_guild_picture,json=newGuildPicture,proto3" json:"new_guild_picture,omitempty"`
+	UpdateGuildPicture bool   `protobuf:"varint,5,opt,name=update_guild_picture,json=updateGuildPicture,proto3" json:"update_guild_picture,omitempty"`
 }
 
-func (x *UpdateGuildNameRequest) Reset() {
-	*x = UpdateGuildNameRequest{}
+func (x *UpdateGuildInformationRequest) Reset() {
+	*x = UpdateGuildInformationRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_chat_v1_guilds_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -638,13 +641,13 @@ func (x *UpdateGuildNameRequest) Reset() {
 	}
 }
 
-func (x *UpdateGuildNameRequest) String() string {
+func (x *UpdateGuildInformationRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdateGuildNameRequest) ProtoMessage() {}
+func (*UpdateGuildInformationRequest) ProtoMessage() {}
 
-func (x *UpdateGuildNameRequest) ProtoReflect() protoreflect.Message {
+func (x *UpdateGuildInformationRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_chat_v1_guilds_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -656,78 +659,44 @@ func (x *UpdateGuildNameRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UpdateGuildNameRequest.ProtoReflect.Descriptor instead.
-func (*UpdateGuildNameRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use UpdateGuildInformationRequest.ProtoReflect.Descriptor instead.
+func (*UpdateGuildInformationRequest) Descriptor() ([]byte, []int) {
 	return file_chat_v1_guilds_proto_rawDescGZIP(), []int{12}
 }
 
-func (x *UpdateGuildNameRequest) GetGuildId() uint64 {
+func (x *UpdateGuildInformationRequest) GetGuildId() uint64 {
 	if x != nil {
 		return x.GuildId
 	}
 	return 0
 }
 
-func (x *UpdateGuildNameRequest) GetNewGuildName() string {
+func (x *UpdateGuildInformationRequest) GetNewGuildName() string {
 	if x != nil {
 		return x.NewGuildName
 	}
 	return ""
 }
 
-type UpdateGuildPictureRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	GuildId         uint64 `protobuf:"varint,1,opt,name=guild_id,json=guildId,proto3" json:"guild_id,omitempty"`
-	NewGuildPicture string `protobuf:"bytes,2,opt,name=new_guild_picture,json=newGuildPicture,proto3" json:"new_guild_picture,omitempty"`
-}
-
-func (x *UpdateGuildPictureRequest) Reset() {
-	*x = UpdateGuildPictureRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_chat_v1_guilds_proto_msgTypes[13]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *UpdateGuildPictureRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateGuildPictureRequest) ProtoMessage() {}
-
-func (x *UpdateGuildPictureRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_v1_guilds_proto_msgTypes[13]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateGuildPictureRequest.ProtoReflect.Descriptor instead.
-func (*UpdateGuildPictureRequest) Descriptor() ([]byte, []int) {
-	return file_chat_v1_guilds_proto_rawDescGZIP(), []int{13}
-}
-
-func (x *UpdateGuildPictureRequest) GetGuildId() uint64 {
+func (x *UpdateGuildInformationRequest) GetUpdateGuildName() bool {
 	if x != nil {
-		return x.GuildId
+		return x.UpdateGuildName
 	}
-	return 0
+	return false
 }
 
-func (x *UpdateGuildPictureRequest) GetNewGuildPicture() string {
+func (x *UpdateGuildInformationRequest) GetNewGuildPicture() string {
 	if x != nil {
 		return x.NewGuildPicture
 	}
 	return ""
+}
+
+func (x *UpdateGuildInformationRequest) GetUpdateGuildPicture() bool {
+	if x != nil {
+		return x.UpdateGuildPicture
+	}
+	return false
 }
 
 type DeleteGuildRequest struct {
@@ -741,7 +710,7 @@ type DeleteGuildRequest struct {
 func (x *DeleteGuildRequest) Reset() {
 	*x = DeleteGuildRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chat_v1_guilds_proto_msgTypes[14]
+		mi := &file_chat_v1_guilds_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -754,7 +723,7 @@ func (x *DeleteGuildRequest) String() string {
 func (*DeleteGuildRequest) ProtoMessage() {}
 
 func (x *DeleteGuildRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_v1_guilds_proto_msgTypes[14]
+	mi := &file_chat_v1_guilds_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -767,7 +736,7 @@ func (x *DeleteGuildRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteGuildRequest.ProtoReflect.Descriptor instead.
 func (*DeleteGuildRequest) Descriptor() ([]byte, []int) {
-	return file_chat_v1_guilds_proto_rawDescGZIP(), []int{14}
+	return file_chat_v1_guilds_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *DeleteGuildRequest) GetGuildId() uint64 {
@@ -789,7 +758,7 @@ type DeleteInviteRequest struct {
 func (x *DeleteInviteRequest) Reset() {
 	*x = DeleteInviteRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chat_v1_guilds_proto_msgTypes[15]
+		mi := &file_chat_v1_guilds_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -802,7 +771,7 @@ func (x *DeleteInviteRequest) String() string {
 func (*DeleteInviteRequest) ProtoMessage() {}
 
 func (x *DeleteInviteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_v1_guilds_proto_msgTypes[15]
+	mi := &file_chat_v1_guilds_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -815,7 +784,7 @@ func (x *DeleteInviteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteInviteRequest.ProtoReflect.Descriptor instead.
 func (*DeleteInviteRequest) Descriptor() ([]byte, []int) {
-	return file_chat_v1_guilds_proto_rawDescGZIP(), []int{15}
+	return file_chat_v1_guilds_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *DeleteInviteRequest) GetGuildId() uint64 {
@@ -843,7 +812,7 @@ type JoinGuildRequest struct {
 func (x *JoinGuildRequest) Reset() {
 	*x = JoinGuildRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chat_v1_guilds_proto_msgTypes[16]
+		mi := &file_chat_v1_guilds_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -856,7 +825,7 @@ func (x *JoinGuildRequest) String() string {
 func (*JoinGuildRequest) ProtoMessage() {}
 
 func (x *JoinGuildRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_v1_guilds_proto_msgTypes[16]
+	mi := &file_chat_v1_guilds_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -869,7 +838,7 @@ func (x *JoinGuildRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JoinGuildRequest.ProtoReflect.Descriptor instead.
 func (*JoinGuildRequest) Descriptor() ([]byte, []int) {
-	return file_chat_v1_guilds_proto_rawDescGZIP(), []int{16}
+	return file_chat_v1_guilds_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *JoinGuildRequest) GetInviteId() string {
@@ -890,7 +859,7 @@ type JoinGuildResponse struct {
 func (x *JoinGuildResponse) Reset() {
 	*x = JoinGuildResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chat_v1_guilds_proto_msgTypes[17]
+		mi := &file_chat_v1_guilds_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -903,7 +872,7 @@ func (x *JoinGuildResponse) String() string {
 func (*JoinGuildResponse) ProtoMessage() {}
 
 func (x *JoinGuildResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_v1_guilds_proto_msgTypes[17]
+	mi := &file_chat_v1_guilds_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -916,7 +885,7 @@ func (x *JoinGuildResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JoinGuildResponse.ProtoReflect.Descriptor instead.
 func (*JoinGuildResponse) Descriptor() ([]byte, []int) {
-	return file_chat_v1_guilds_proto_rawDescGZIP(), []int{17}
+	return file_chat_v1_guilds_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *JoinGuildResponse) GetGuildId() uint64 {
@@ -937,7 +906,7 @@ type LeaveGuildRequest struct {
 func (x *LeaveGuildRequest) Reset() {
 	*x = LeaveGuildRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chat_v1_guilds_proto_msgTypes[18]
+		mi := &file_chat_v1_guilds_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -950,7 +919,7 @@ func (x *LeaveGuildRequest) String() string {
 func (*LeaveGuildRequest) ProtoMessage() {}
 
 func (x *LeaveGuildRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_v1_guilds_proto_msgTypes[18]
+	mi := &file_chat_v1_guilds_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -963,7 +932,7 @@ func (x *LeaveGuildRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LeaveGuildRequest.ProtoReflect.Descriptor instead.
 func (*LeaveGuildRequest) Descriptor() ([]byte, []int) {
-	return file_chat_v1_guilds_proto_rawDescGZIP(), []int{18}
+	return file_chat_v1_guilds_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *LeaveGuildRequest) GetGuildId() uint64 {
@@ -986,7 +955,7 @@ type AddGuildToGuildListRequest struct {
 func (x *AddGuildToGuildListRequest) Reset() {
 	*x = AddGuildToGuildListRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chat_v1_guilds_proto_msgTypes[19]
+		mi := &file_chat_v1_guilds_proto_msgTypes[18]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -999,7 +968,7 @@ func (x *AddGuildToGuildListRequest) String() string {
 func (*AddGuildToGuildListRequest) ProtoMessage() {}
 
 func (x *AddGuildToGuildListRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_v1_guilds_proto_msgTypes[19]
+	mi := &file_chat_v1_guilds_proto_msgTypes[18]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1012,7 +981,7 @@ func (x *AddGuildToGuildListRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddGuildToGuildListRequest.ProtoReflect.Descriptor instead.
 func (*AddGuildToGuildListRequest) Descriptor() ([]byte, []int) {
-	return file_chat_v1_guilds_proto_rawDescGZIP(), []int{19}
+	return file_chat_v1_guilds_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *AddGuildToGuildListRequest) GetGuildId() uint64 {
@@ -1038,7 +1007,7 @@ type AddGuildToGuildListResponse struct {
 func (x *AddGuildToGuildListResponse) Reset() {
 	*x = AddGuildToGuildListResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chat_v1_guilds_proto_msgTypes[20]
+		mi := &file_chat_v1_guilds_proto_msgTypes[19]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1051,7 +1020,7 @@ func (x *AddGuildToGuildListResponse) String() string {
 func (*AddGuildToGuildListResponse) ProtoMessage() {}
 
 func (x *AddGuildToGuildListResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_v1_guilds_proto_msgTypes[20]
+	mi := &file_chat_v1_guilds_proto_msgTypes[19]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1064,7 +1033,7 @@ func (x *AddGuildToGuildListResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddGuildToGuildListResponse.ProtoReflect.Descriptor instead.
 func (*AddGuildToGuildListResponse) Descriptor() ([]byte, []int) {
-	return file_chat_v1_guilds_proto_rawDescGZIP(), []int{20}
+	return file_chat_v1_guilds_proto_rawDescGZIP(), []int{19}
 }
 
 type RemoveGuildFromGuildListRequest struct {
@@ -1079,7 +1048,7 @@ type RemoveGuildFromGuildListRequest struct {
 func (x *RemoveGuildFromGuildListRequest) Reset() {
 	*x = RemoveGuildFromGuildListRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chat_v1_guilds_proto_msgTypes[21]
+		mi := &file_chat_v1_guilds_proto_msgTypes[20]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1092,7 +1061,7 @@ func (x *RemoveGuildFromGuildListRequest) String() string {
 func (*RemoveGuildFromGuildListRequest) ProtoMessage() {}
 
 func (x *RemoveGuildFromGuildListRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_v1_guilds_proto_msgTypes[21]
+	mi := &file_chat_v1_guilds_proto_msgTypes[20]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1105,7 +1074,7 @@ func (x *RemoveGuildFromGuildListRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveGuildFromGuildListRequest.ProtoReflect.Descriptor instead.
 func (*RemoveGuildFromGuildListRequest) Descriptor() ([]byte, []int) {
-	return file_chat_v1_guilds_proto_rawDescGZIP(), []int{21}
+	return file_chat_v1_guilds_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *RemoveGuildFromGuildListRequest) GetGuildId() uint64 {
@@ -1131,7 +1100,7 @@ type RemoveGuildFromGuildListResponse struct {
 func (x *RemoveGuildFromGuildListResponse) Reset() {
 	*x = RemoveGuildFromGuildListResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chat_v1_guilds_proto_msgTypes[22]
+		mi := &file_chat_v1_guilds_proto_msgTypes[21]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1144,7 +1113,7 @@ func (x *RemoveGuildFromGuildListResponse) String() string {
 func (*RemoveGuildFromGuildListResponse) ProtoMessage() {}
 
 func (x *RemoveGuildFromGuildListResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_v1_guilds_proto_msgTypes[22]
+	mi := &file_chat_v1_guilds_proto_msgTypes[21]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1157,7 +1126,7 @@ func (x *RemoveGuildFromGuildListResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveGuildFromGuildListResponse.ProtoReflect.Descriptor instead.
 func (*RemoveGuildFromGuildListResponse) Descriptor() ([]byte, []int) {
-	return file_chat_v1_guilds_proto_rawDescGZIP(), []int{22}
+	return file_chat_v1_guilds_proto_rawDescGZIP(), []int{21}
 }
 
 type GetGuildListResponse_GuildListEntry struct {
@@ -1172,7 +1141,7 @@ type GetGuildListResponse_GuildListEntry struct {
 func (x *GetGuildListResponse_GuildListEntry) Reset() {
 	*x = GetGuildListResponse_GuildListEntry{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chat_v1_guilds_proto_msgTypes[23]
+		mi := &file_chat_v1_guilds_proto_msgTypes[22]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1185,7 +1154,7 @@ func (x *GetGuildListResponse_GuildListEntry) String() string {
 func (*GetGuildListResponse_GuildListEntry) ProtoMessage() {}
 
 func (x *GetGuildListResponse_GuildListEntry) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_v1_guilds_proto_msgTypes[23]
+	mi := &file_chat_v1_guilds_proto_msgTypes[22]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1228,7 +1197,7 @@ type GetGuildInvitesResponse_Invite struct {
 func (x *GetGuildInvitesResponse_Invite) Reset() {
 	*x = GetGuildInvitesResponse_Invite{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chat_v1_guilds_proto_msgTypes[24]
+		mi := &file_chat_v1_guilds_proto_msgTypes[23]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1241,7 +1210,7 @@ func (x *GetGuildInvitesResponse_Invite) String() string {
 func (*GetGuildInvitesResponse_Invite) ProtoMessage() {}
 
 func (x *GetGuildInvitesResponse_Invite) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_v1_guilds_proto_msgTypes[24]
+	mi := &file_chat_v1_guilds_proto_msgTypes[23]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1348,58 +1317,60 @@ var file_chat_v1_guilds_proto_rawDesc = []byte{
 	0x69, 0x6c, 0x64, 0x49, 0x64, 0x22, 0x37, 0x0a, 0x17, 0x47, 0x65, 0x74, 0x47, 0x75, 0x69, 0x6c,
 	0x64, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
 	0x12, 0x1c, 0x0a, 0x07, 0x6d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28,
-	0x04, 0x42, 0x02, 0x30, 0x01, 0x52, 0x07, 0x6d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x73, 0x22, 0x5d,
-	0x0a, 0x16, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x4e, 0x61, 0x6d,
-	0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1d, 0x0a, 0x08, 0x67, 0x75, 0x69, 0x6c,
-	0x64, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x42, 0x02, 0x30, 0x01, 0x52, 0x07,
-	0x67, 0x75, 0x69, 0x6c, 0x64, 0x49, 0x64, 0x12, 0x24, 0x0a, 0x0e, 0x6e, 0x65, 0x77, 0x5f, 0x67,
-	0x75, 0x69, 0x6c, 0x64, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x0c, 0x6e, 0x65, 0x77, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x4e, 0x61, 0x6d, 0x65, 0x22, 0x66, 0x0a,
-	0x19, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x50, 0x69, 0x63, 0x74,
-	0x75, 0x72, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1d, 0x0a, 0x08, 0x67, 0x75,
-	0x69, 0x6c, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x42, 0x02, 0x30, 0x01,
-	0x52, 0x07, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x49, 0x64, 0x12, 0x2a, 0x0a, 0x11, 0x6e, 0x65, 0x77,
-	0x5f, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x5f, 0x70, 0x69, 0x63, 0x74, 0x75, 0x72, 0x65, 0x18, 0x02,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x0f, 0x6e, 0x65, 0x77, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x50, 0x69,
-	0x63, 0x74, 0x75, 0x72, 0x65, 0x22, 0x33, 0x0a, 0x12, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x47,
-	0x75, 0x69, 0x6c, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1d, 0x0a, 0x08, 0x67,
-	0x75, 0x69, 0x6c, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x42, 0x02, 0x30,
-	0x01, 0x52, 0x07, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x49, 0x64, 0x22, 0x51, 0x0a, 0x13, 0x44, 0x65,
-	0x6c, 0x65, 0x74, 0x65, 0x49, 0x6e, 0x76, 0x69, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x12, 0x1d, 0x0a, 0x08, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x04, 0x42, 0x02, 0x30, 0x01, 0x52, 0x07, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x49, 0x64,
-	0x12, 0x1b, 0x0a, 0x09, 0x69, 0x6e, 0x76, 0x69, 0x74, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x08, 0x69, 0x6e, 0x76, 0x69, 0x74, 0x65, 0x49, 0x64, 0x22, 0x2f, 0x0a,
-	0x10, 0x4a, 0x6f, 0x69, 0x6e, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x12, 0x1b, 0x0a, 0x09, 0x69, 0x6e, 0x76, 0x69, 0x74, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x69, 0x6e, 0x76, 0x69, 0x74, 0x65, 0x49, 0x64, 0x22, 0x32,
-	0x0a, 0x11, 0x4a, 0x6f, 0x69, 0x6e, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x12, 0x1d, 0x0a, 0x08, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x5f, 0x69, 0x64, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x04, 0x42, 0x02, 0x30, 0x01, 0x52, 0x07, 0x67, 0x75, 0x69, 0x6c, 0x64,
-	0x49, 0x64, 0x22, 0x32, 0x0a, 0x11, 0x4c, 0x65, 0x61, 0x76, 0x65, 0x47, 0x75, 0x69, 0x6c, 0x64,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1d, 0x0a, 0x08, 0x67, 0x75, 0x69, 0x6c, 0x64,
-	0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x42, 0x02, 0x30, 0x01, 0x52, 0x07, 0x67,
-	0x75, 0x69, 0x6c, 0x64, 0x49, 0x64, 0x22, 0x5b, 0x0a, 0x1a, 0x41, 0x64, 0x64, 0x47, 0x75, 0x69,
-	0x6c, 0x64, 0x54, 0x6f, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71,
-	0x75, 0x65, 0x73, 0x74, 0x12, 0x1d, 0x0a, 0x08, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x5f, 0x69, 0x64,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x42, 0x02, 0x30, 0x01, 0x52, 0x07, 0x67, 0x75, 0x69, 0x6c,
-	0x64, 0x49, 0x64, 0x12, 0x1e, 0x0a, 0x0a, 0x68, 0x6f, 0x6d, 0x65, 0x73, 0x65, 0x72, 0x76, 0x65,
-	0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x68, 0x6f, 0x6d, 0x65, 0x73, 0x65, 0x72,
-	0x76, 0x65, 0x72, 0x22, 0x1d, 0x0a, 0x1b, 0x41, 0x64, 0x64, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x54,
-	0x6f, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
-	0x73, 0x65, 0x22, 0x60, 0x0a, 0x1f, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x47, 0x75, 0x69, 0x6c,
-	0x64, 0x46, 0x72, 0x6f, 0x6d, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65,
+	0x04, 0x42, 0x02, 0x30, 0x01, 0x52, 0x07, 0x6d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x73, 0x22, 0xee,
+	0x01, 0x0a, 0x1d, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x49, 0x6e,
+	0x66, 0x6f, 0x72, 0x6d, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x12, 0x1d, 0x0a, 0x08, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x04, 0x42, 0x02, 0x30, 0x01, 0x52, 0x07, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x49, 0x64, 0x12,
+	0x24, 0x0a, 0x0e, 0x6e, 0x65, 0x77, 0x5f, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x5f, 0x6e, 0x61, 0x6d,
+	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x6e, 0x65, 0x77, 0x47, 0x75, 0x69, 0x6c,
+	0x64, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x2a, 0x0a, 0x11, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x5f,
+	0x67, 0x75, 0x69, 0x6c, 0x64, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x08,
+	0x52, 0x0f, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x4e, 0x61, 0x6d,
+	0x65, 0x12, 0x2a, 0x0a, 0x11, 0x6e, 0x65, 0x77, 0x5f, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x5f, 0x70,
+	0x69, 0x63, 0x74, 0x75, 0x72, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0f, 0x6e, 0x65,
+	0x77, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x50, 0x69, 0x63, 0x74, 0x75, 0x72, 0x65, 0x12, 0x30, 0x0a,
+	0x14, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x5f, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x5f, 0x70, 0x69,
+	0x63, 0x74, 0x75, 0x72, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x08, 0x52, 0x12, 0x75, 0x70, 0x64,
+	0x61, 0x74, 0x65, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x50, 0x69, 0x63, 0x74, 0x75, 0x72, 0x65, 0x22,
+	0x33, 0x0a, 0x12, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x52, 0x65,
 	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1d, 0x0a, 0x08, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x5f, 0x69,
 	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x42, 0x02, 0x30, 0x01, 0x52, 0x07, 0x67, 0x75, 0x69,
-	0x6c, 0x64, 0x49, 0x64, 0x12, 0x1e, 0x0a, 0x0a, 0x68, 0x6f, 0x6d, 0x65, 0x73, 0x65, 0x72, 0x76,
-	0x65, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x68, 0x6f, 0x6d, 0x65, 0x73, 0x65,
-	0x72, 0x76, 0x65, 0x72, 0x22, 0x22, 0x0a, 0x20, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x47, 0x75,
-	0x69, 0x6c, 0x64, 0x46, 0x72, 0x6f, 0x6d, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x4c, 0x69, 0x73, 0x74,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x33, 0x5a, 0x31, 0x67, 0x69, 0x74, 0x68,
-	0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x68, 0x61, 0x72, 0x6d, 0x6f, 0x6e, 0x79, 0x2d, 0x64,
-	0x65, 0x76, 0x65, 0x6c, 0x6f, 0x70, 0x6d, 0x65, 0x6e, 0x74, 0x2f, 0x6c, 0x65, 0x67, 0x61, 0x74,
-	0x6f, 0x2f, 0x67, 0x65, 0x6e, 0x2f, 0x63, 0x68, 0x61, 0x74, 0x2f, 0x76, 0x31, 0x62, 0x06, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6c, 0x64, 0x49, 0x64, 0x22, 0x51, 0x0a, 0x13, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x49, 0x6e,
+	0x76, 0x69, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1d, 0x0a, 0x08, 0x67,
+	0x75, 0x69, 0x6c, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x42, 0x02, 0x30,
+	0x01, 0x52, 0x07, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x49, 0x64, 0x12, 0x1b, 0x0a, 0x09, 0x69, 0x6e,
+	0x76, 0x69, 0x74, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x69,
+	0x6e, 0x76, 0x69, 0x74, 0x65, 0x49, 0x64, 0x22, 0x2f, 0x0a, 0x10, 0x4a, 0x6f, 0x69, 0x6e, 0x47,
+	0x75, 0x69, 0x6c, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1b, 0x0a, 0x09, 0x69,
+	0x6e, 0x76, 0x69, 0x74, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08,
+	0x69, 0x6e, 0x76, 0x69, 0x74, 0x65, 0x49, 0x64, 0x22, 0x32, 0x0a, 0x11, 0x4a, 0x6f, 0x69, 0x6e,
+	0x47, 0x75, 0x69, 0x6c, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x1d, 0x0a,
+	0x08, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x42,
+	0x02, 0x30, 0x01, 0x52, 0x07, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x49, 0x64, 0x22, 0x32, 0x0a, 0x11,
+	0x4c, 0x65, 0x61, 0x76, 0x65, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x12, 0x1d, 0x0a, 0x08, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x04, 0x42, 0x02, 0x30, 0x01, 0x52, 0x07, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x49, 0x64,
+	0x22, 0x5b, 0x0a, 0x1a, 0x41, 0x64, 0x64, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x54, 0x6f, 0x47, 0x75,
+	0x69, 0x6c, 0x64, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1d,
+	0x0a, 0x08, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04,
+	0x42, 0x02, 0x30, 0x01, 0x52, 0x07, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x49, 0x64, 0x12, 0x1e, 0x0a,
+	0x0a, 0x68, 0x6f, 0x6d, 0x65, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x0a, 0x68, 0x6f, 0x6d, 0x65, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x22, 0x1d, 0x0a,
+	0x1b, 0x41, 0x64, 0x64, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x54, 0x6f, 0x47, 0x75, 0x69, 0x6c, 0x64,
+	0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x60, 0x0a, 0x1f,
+	0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x46, 0x72, 0x6f, 0x6d, 0x47,
+	0x75, 0x69, 0x6c, 0x64, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
+	0x1d, 0x0a, 0x08, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x04, 0x42, 0x02, 0x30, 0x01, 0x52, 0x07, 0x67, 0x75, 0x69, 0x6c, 0x64, 0x49, 0x64, 0x12, 0x1e,
+	0x0a, 0x0a, 0x68, 0x6f, 0x6d, 0x65, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x0a, 0x68, 0x6f, 0x6d, 0x65, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x22, 0x22,
+	0x0a, 0x20, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x46, 0x72, 0x6f,
+	0x6d, 0x47, 0x75, 0x69, 0x6c, 0x64, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x42, 0x33, 0x5a, 0x31, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d,
+	0x2f, 0x68, 0x61, 0x72, 0x6d, 0x6f, 0x6e, 0x79, 0x2d, 0x64, 0x65, 0x76, 0x65, 0x6c, 0x6f, 0x70,
+	0x6d, 0x65, 0x6e, 0x74, 0x2f, 0x6c, 0x65, 0x67, 0x61, 0x74, 0x6f, 0x2f, 0x67, 0x65, 0x6e, 0x2f,
+	0x63, 0x68, 0x61, 0x74, 0x2f, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1414,7 +1385,7 @@ func file_chat_v1_guilds_proto_rawDescGZIP() []byte {
 	return file_chat_v1_guilds_proto_rawDescData
 }
 
-var file_chat_v1_guilds_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
+var file_chat_v1_guilds_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
 var file_chat_v1_guilds_proto_goTypes = []interface{}{
 	(*CreateGuildRequest)(nil),                  // 0: protocol.chat.v1.CreateGuildRequest
 	(*CreateGuildResponse)(nil),                 // 1: protocol.chat.v1.CreateGuildResponse
@@ -1428,23 +1399,22 @@ var file_chat_v1_guilds_proto_goTypes = []interface{}{
 	(*GetGuildInvitesResponse)(nil),             // 9: protocol.chat.v1.GetGuildInvitesResponse
 	(*GetGuildMembersRequest)(nil),              // 10: protocol.chat.v1.GetGuildMembersRequest
 	(*GetGuildMembersResponse)(nil),             // 11: protocol.chat.v1.GetGuildMembersResponse
-	(*UpdateGuildNameRequest)(nil),              // 12: protocol.chat.v1.UpdateGuildNameRequest
-	(*UpdateGuildPictureRequest)(nil),           // 13: protocol.chat.v1.UpdateGuildPictureRequest
-	(*DeleteGuildRequest)(nil),                  // 14: protocol.chat.v1.DeleteGuildRequest
-	(*DeleteInviteRequest)(nil),                 // 15: protocol.chat.v1.DeleteInviteRequest
-	(*JoinGuildRequest)(nil),                    // 16: protocol.chat.v1.JoinGuildRequest
-	(*JoinGuildResponse)(nil),                   // 17: protocol.chat.v1.JoinGuildResponse
-	(*LeaveGuildRequest)(nil),                   // 18: protocol.chat.v1.LeaveGuildRequest
-	(*AddGuildToGuildListRequest)(nil),          // 19: protocol.chat.v1.AddGuildToGuildListRequest
-	(*AddGuildToGuildListResponse)(nil),         // 20: protocol.chat.v1.AddGuildToGuildListResponse
-	(*RemoveGuildFromGuildListRequest)(nil),     // 21: protocol.chat.v1.RemoveGuildFromGuildListRequest
-	(*RemoveGuildFromGuildListResponse)(nil),    // 22: protocol.chat.v1.RemoveGuildFromGuildListResponse
-	(*GetGuildListResponse_GuildListEntry)(nil), // 23: protocol.chat.v1.GetGuildListResponse.GuildListEntry
-	(*GetGuildInvitesResponse_Invite)(nil),      // 24: protocol.chat.v1.GetGuildInvitesResponse.Invite
+	(*UpdateGuildInformationRequest)(nil),       // 12: protocol.chat.v1.UpdateGuildInformationRequest
+	(*DeleteGuildRequest)(nil),                  // 13: protocol.chat.v1.DeleteGuildRequest
+	(*DeleteInviteRequest)(nil),                 // 14: protocol.chat.v1.DeleteInviteRequest
+	(*JoinGuildRequest)(nil),                    // 15: protocol.chat.v1.JoinGuildRequest
+	(*JoinGuildResponse)(nil),                   // 16: protocol.chat.v1.JoinGuildResponse
+	(*LeaveGuildRequest)(nil),                   // 17: protocol.chat.v1.LeaveGuildRequest
+	(*AddGuildToGuildListRequest)(nil),          // 18: protocol.chat.v1.AddGuildToGuildListRequest
+	(*AddGuildToGuildListResponse)(nil),         // 19: protocol.chat.v1.AddGuildToGuildListResponse
+	(*RemoveGuildFromGuildListRequest)(nil),     // 20: protocol.chat.v1.RemoveGuildFromGuildListRequest
+	(*RemoveGuildFromGuildListResponse)(nil),    // 21: protocol.chat.v1.RemoveGuildFromGuildListResponse
+	(*GetGuildListResponse_GuildListEntry)(nil), // 22: protocol.chat.v1.GetGuildListResponse.GuildListEntry
+	(*GetGuildInvitesResponse_Invite)(nil),      // 23: protocol.chat.v1.GetGuildInvitesResponse.Invite
 }
 var file_chat_v1_guilds_proto_depIdxs = []int32{
-	23, // 0: protocol.chat.v1.GetGuildListResponse.guilds:type_name -> protocol.chat.v1.GetGuildListResponse.GuildListEntry
-	24, // 1: protocol.chat.v1.GetGuildInvitesResponse.invites:type_name -> protocol.chat.v1.GetGuildInvitesResponse.Invite
+	22, // 0: protocol.chat.v1.GetGuildListResponse.guilds:type_name -> protocol.chat.v1.GetGuildListResponse.GuildListEntry
+	23, // 1: protocol.chat.v1.GetGuildInvitesResponse.invites:type_name -> protocol.chat.v1.GetGuildInvitesResponse.Invite
 	2,  // [2:2] is the sub-list for method output_type
 	2,  // [2:2] is the sub-list for method input_type
 	2,  // [2:2] is the sub-list for extension type_name
@@ -1603,7 +1573,7 @@ func file_chat_v1_guilds_proto_init() {
 			}
 		}
 		file_chat_v1_guilds_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*UpdateGuildNameRequest); i {
+			switch v := v.(*UpdateGuildInformationRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1615,18 +1585,6 @@ func file_chat_v1_guilds_proto_init() {
 			}
 		}
 		file_chat_v1_guilds_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*UpdateGuildPictureRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_chat_v1_guilds_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*DeleteGuildRequest); i {
 			case 0:
 				return &v.state
@@ -1638,7 +1596,7 @@ func file_chat_v1_guilds_proto_init() {
 				return nil
 			}
 		}
-		file_chat_v1_guilds_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
+		file_chat_v1_guilds_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*DeleteInviteRequest); i {
 			case 0:
 				return &v.state
@@ -1650,7 +1608,7 @@ func file_chat_v1_guilds_proto_init() {
 				return nil
 			}
 		}
-		file_chat_v1_guilds_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
+		file_chat_v1_guilds_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*JoinGuildRequest); i {
 			case 0:
 				return &v.state
@@ -1662,7 +1620,7 @@ func file_chat_v1_guilds_proto_init() {
 				return nil
 			}
 		}
-		file_chat_v1_guilds_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+		file_chat_v1_guilds_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*JoinGuildResponse); i {
 			case 0:
 				return &v.state
@@ -1674,7 +1632,7 @@ func file_chat_v1_guilds_proto_init() {
 				return nil
 			}
 		}
-		file_chat_v1_guilds_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
+		file_chat_v1_guilds_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*LeaveGuildRequest); i {
 			case 0:
 				return &v.state
@@ -1686,7 +1644,7 @@ func file_chat_v1_guilds_proto_init() {
 				return nil
 			}
 		}
-		file_chat_v1_guilds_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
+		file_chat_v1_guilds_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*AddGuildToGuildListRequest); i {
 			case 0:
 				return &v.state
@@ -1698,7 +1656,7 @@ func file_chat_v1_guilds_proto_init() {
 				return nil
 			}
 		}
-		file_chat_v1_guilds_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
+		file_chat_v1_guilds_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*AddGuildToGuildListResponse); i {
 			case 0:
 				return &v.state
@@ -1710,7 +1668,7 @@ func file_chat_v1_guilds_proto_init() {
 				return nil
 			}
 		}
-		file_chat_v1_guilds_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
+		file_chat_v1_guilds_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*RemoveGuildFromGuildListRequest); i {
 			case 0:
 				return &v.state
@@ -1722,7 +1680,7 @@ func file_chat_v1_guilds_proto_init() {
 				return nil
 			}
 		}
-		file_chat_v1_guilds_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
+		file_chat_v1_guilds_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*RemoveGuildFromGuildListResponse); i {
 			case 0:
 				return &v.state
@@ -1734,7 +1692,7 @@ func file_chat_v1_guilds_proto_init() {
 				return nil
 			}
 		}
-		file_chat_v1_guilds_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
+		file_chat_v1_guilds_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetGuildListResponse_GuildListEntry); i {
 			case 0:
 				return &v.state
@@ -1746,7 +1704,7 @@ func file_chat_v1_guilds_proto_init() {
 				return nil
 			}
 		}
-		file_chat_v1_guilds_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
+		file_chat_v1_guilds_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetGuildInvitesResponse_Invite); i {
 			case 0:
 				return &v.state
@@ -1765,7 +1723,7 @@ func file_chat_v1_guilds_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_chat_v1_guilds_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   25,
+			NumMessages:   24,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

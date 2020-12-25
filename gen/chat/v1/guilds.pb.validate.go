@@ -892,10 +892,10 @@ var _ interface {
 	ErrorName() string
 } = GetGuildMembersResponseValidationError{}
 
-// Validate checks the field values on UpdateGuildNameRequest with the rules
-// defined in the proto definition for this message. If any rules are
+// Validate checks the field values on UpdateGuildInformationRequest with the
+// rules defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
-func (m *UpdateGuildNameRequest) Validate() error {
+func (m *UpdateGuildInformationRequest) Validate() error {
 	if m == nil {
 		return nil
 	}
@@ -904,83 +904,19 @@ func (m *UpdateGuildNameRequest) Validate() error {
 
 	// no validation rules for NewGuildName
 
-	return nil
-}
-
-// UpdateGuildNameRequestValidationError is the validation error returned by
-// UpdateGuildNameRequest.Validate if the designated constraints aren't met.
-type UpdateGuildNameRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e UpdateGuildNameRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e UpdateGuildNameRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e UpdateGuildNameRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e UpdateGuildNameRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e UpdateGuildNameRequestValidationError) ErrorName() string {
-	return "UpdateGuildNameRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e UpdateGuildNameRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sUpdateGuildNameRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = UpdateGuildNameRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = UpdateGuildNameRequestValidationError{}
-
-// Validate checks the field values on UpdateGuildPictureRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
-func (m *UpdateGuildPictureRequest) Validate() error {
-	if m == nil {
-		return nil
-	}
-
-	// no validation rules for GuildId
+	// no validation rules for UpdateGuildName
 
 	// no validation rules for NewGuildPicture
 
+	// no validation rules for UpdateGuildPicture
+
 	return nil
 }
 
-// UpdateGuildPictureRequestValidationError is the validation error returned by
-// UpdateGuildPictureRequest.Validate if the designated constraints aren't met.
-type UpdateGuildPictureRequestValidationError struct {
+// UpdateGuildInformationRequestValidationError is the validation error
+// returned by UpdateGuildInformationRequest.Validate if the designated
+// constraints aren't met.
+type UpdateGuildInformationRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -988,24 +924,24 @@ type UpdateGuildPictureRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e UpdateGuildPictureRequestValidationError) Field() string { return e.field }
+func (e UpdateGuildInformationRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e UpdateGuildPictureRequestValidationError) Reason() string { return e.reason }
+func (e UpdateGuildInformationRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e UpdateGuildPictureRequestValidationError) Cause() error { return e.cause }
+func (e UpdateGuildInformationRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e UpdateGuildPictureRequestValidationError) Key() bool { return e.key }
+func (e UpdateGuildInformationRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e UpdateGuildPictureRequestValidationError) ErrorName() string {
-	return "UpdateGuildPictureRequestValidationError"
+func (e UpdateGuildInformationRequestValidationError) ErrorName() string {
+	return "UpdateGuildInformationRequestValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e UpdateGuildPictureRequestValidationError) Error() string {
+func (e UpdateGuildInformationRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -1017,14 +953,14 @@ func (e UpdateGuildPictureRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sUpdateGuildPictureRequest.%s: %s%s",
+		"invalid %sUpdateGuildInformationRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = UpdateGuildPictureRequestValidationError{}
+var _ error = UpdateGuildInformationRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -1032,7 +968,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = UpdateGuildPictureRequestValidationError{}
+} = UpdateGuildInformationRequestValidationError{}
 
 // Validate checks the field values on DeleteGuildRequest with the rules
 // defined in the proto definition for this message. If any rules are
