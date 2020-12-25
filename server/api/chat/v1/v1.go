@@ -506,6 +506,35 @@ func init() {
 			Burst:    2,
 		},
 		Auth:       true,
+		Location:   middleware.GuildLocation | middleware.JoinedLocation,
+		Permission: "guild.manage.change-picture",
+	}, "/protocol.chat.v1.ChatService/UpdateGuildPicture")
+}
+
+// UpdateGuildPicture implements the UpdateGuildPicture RPC
+func (v1 *V1) UpdateGuildPicture(c context.Context, r *chatv1.UpdateGuildPictureRequest) (*empty.Empty, error) {
+	if err := v1.DB.SetGuildPicture(r.GuildId, r.NewGuildPicture); err != nil {
+		return nil, err
+	}
+	v1.PubSub.Guild.Broadcast(r.GuildId, &chatv1.Event{
+		Event: &chatv1.Event_EditedGuild{
+			EditedGuild: &chatv1.Event_GuildUpdated{
+				GuildId:       r.GuildId,
+				Picture:       r.NewGuildPicture,
+				UpdatePicture: true,
+			},
+		},
+	})
+	return &empty.Empty{}, nil
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    2,
+		},
+		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
 		Permission: "channels.manage.change-name",
 	}, "/protocol.chat.v1.ChatService/UpdateChannelName")

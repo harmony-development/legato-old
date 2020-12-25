@@ -1150,6 +1150,10 @@ func (m *Event_GuildUpdated) Validate() error {
 
 	// no validation rules for UpdateName
 
+	// no validation rules for Picture
+
+	// no validation rules for UpdatePicture
+
 	return nil
 }
 
