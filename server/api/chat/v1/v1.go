@@ -1516,7 +1516,7 @@ func init() {
 			Burst:    4,
 		},
 		Auth: true,
-	}, "/protocol.chat.v1.ChatService/ProfileUpdateRequest")
+	}, "/protocol.chat.v1.ChatService/ProfileUpdate")
 }
 
 // ProfileUpdate handles the protocol's ProfileUpdate request
@@ -1525,31 +1525,45 @@ func (v1 *V1) ProfileUpdate(c context.Context, r *chatv1.ProfileUpdateRequest) (
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	if err := v1.DB.SetStatus(ctx.UserID, r.NewStatus); err != nil {
-		v1.Logger.Exception(err)
-		return nil, errors.New(responses.UnknownError)
+	if r.UpdateStatus {
+		if err := v1.DB.SetStatus(ctx.UserID, r.NewStatus); err != nil {
+			v1.Logger.Exception(err)
+			return nil, errors.New(responses.UnknownError)
+		}
 	}
-	return &emptypb.Empty{}, nil
-}
+	if r.UpdateUsername {
+		if err := v1.DB.SetUsername(ctx.UserID, r.NewUsername); err != nil {
+			v1.Logger.Exception(err)
+			return nil, errors.New(responses.UnknownError)
+		}
+	}
+	if r.UpdateAvatar {
+		if err := v1.DB.SetAvatar(ctx.UserID, r.NewAvatar); err != nil {
+			v1.Logger.Exception(err)
+			return nil, errors.New(responses.UnknownError)
+		}
+	}
 
-func init() {
-	middleware.RegisterRPCConfig(middleware.RPCConfig{
-		RateLimit: middleware.RateLimit{
-			Duration: 5 * time.Minute,
-			Burst:    8,
-		},
-		Auth: true,
-	}, "/protocol.chat.v1.ChatService/UsernameUpdate")
-}
-
-// UsernameUpdate handles the protocol's UsernameUpdate request
-func (v1 *V1) UsernameUpdate(c context.Context, r *chatv1.UsernameUpdateRequest) (*emptypb.Empty, error) {
-	ctx := c.(middleware.HarmonyContext)
-	if err := r.Validate(); err != nil {
+	guilds, err := v1.DB.GetLocalGuilds(ctx.UserID)
+	if err != nil {
 		return nil, err
 	}
-	if err := v1.DB.UpdateUsername(ctx.UserID, r.UserName); err != nil {
-		return nil, status.Error(codes.Internal, responses.UnknownError)
+
+	for _, g := range guilds {
+		v1.PubSub.Guild.Broadcast(g, &chatv1.Event{
+			Event: &chatv1.Event_ProfileUpdated_{
+				ProfileUpdated: &chatv1.Event_ProfileUpdated{
+					UserId:         ctx.UserID,
+					NewUsername:    r.NewUsername,
+					UpdateUsername: r.UpdateUsername,
+					NewAvatar:      r.NewAvatar,
+					UpdateAvatar:   r.UpdateAvatar,
+					NewStatus:      r.NewStatus,
+					UpdateStatus:   r.UpdateStatus,
+				},
+			},
+		})
 	}
+
 	return &emptypb.Empty{}, nil
 }

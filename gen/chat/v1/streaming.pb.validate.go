@@ -1718,6 +1718,8 @@ func (m *Event_ProfileUpdated) Validate() error {
 		return nil
 	}
 
+	// no validation rules for UserId
+
 	// no validation rules for NewUsername
 
 	// no validation rules for UpdateUsername

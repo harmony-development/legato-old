@@ -119,6 +119,8 @@ type IHarmonyDB interface {
 	GetGuildByID(guildID uint64) (queries.Guild, error)
 	UpdateMessage(messageID uint64, content *string, embeds, actions, overrides *[]byte, attachments *[]string) (time.Time, error)
 	SetStatus(userID uint64, status harmonytypesv1.UserStatus) error
+	SetUsername(userID uint64, username string) error
+	SetAvatar(userID uint64, avatar string) error
 	GetUserMetadata(userID uint64, appID string) (string, error)
 	GetNonceInfo(nonce string) (queries.GetNonceInfoRow, error)
 	AddNonce(nonce string, userID uint64, homeServer string) error

@@ -112,6 +112,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.expireSessionsStmt, err = db.PrepareContext(ctx, expireSessions); err != nil {
 		return nil, fmt.Errorf("error preparing query ExpireSessions: %w", err)
 	}
+	if q.getAllMutualsStmt, err = db.PrepareContext(ctx, getAllMutuals); err != nil {
+		return nil, fmt.Errorf("error preparing query GetAllMutuals: %w", err)
+	}
 	if q.getAvatarStmt, err = db.PrepareContext(ctx, getAvatar); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAvatar: %w", err)
 	}
@@ -487,6 +490,11 @@ func (q *Queries) Close() error {
 	if q.expireSessionsStmt != nil {
 		if cerr := q.expireSessionsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing expireSessionsStmt: %w", cerr)
+		}
+	}
+	if q.getAllMutualsStmt != nil {
+		if cerr := q.getAllMutualsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getAllMutualsStmt: %w", cerr)
 		}
 	}
 	if q.getAvatarStmt != nil {
@@ -928,6 +936,7 @@ type Queries struct {
 	dequipEmotePackStmt                            *sql.Stmt
 	emailExistsStmt                                *sql.Stmt
 	expireSessionsStmt                             *sql.Stmt
+	getAllMutualsStmt                              *sql.Stmt
 	getAvatarStmt                                  *sql.Stmt
 	getChannelPositionStmt                         *sql.Stmt
 	getChannelsStmt                                *sql.Stmt
@@ -1038,6 +1047,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		dequipEmotePackStmt:              q.dequipEmotePackStmt,
 		emailExistsStmt:                  q.emailExistsStmt,
 		expireSessionsStmt:               q.expireSessionsStmt,
+		getAllMutualsStmt:                q.getAllMutualsStmt,
 		getAvatarStmt:                    q.getAvatarStmt,
 		getChannelPositionStmt:           q.getChannelPositionStmt,
 		getChannelsStmt:                  q.getChannelsStmt,

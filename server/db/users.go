@@ -183,6 +183,20 @@ func (db *HarmonyDB) SetStatus(userID uint64, status harmonytypesv1.UserStatus) 
 	}))
 }
 
+func (db *HarmonyDB) SetUsername(userID uint64, username string) error {
+	return tracerr.Wrap(db.queries.UpdateUsername(ctx, queries.UpdateUsernameParams{
+		UserID:   userID,
+		Username: username,
+	}))
+}
+
+func (db *HarmonyDB) SetAvatar(userID uint64, avatar string) error {
+	return tracerr.Wrap(db.queries.UpdateAvatar(ctx, queries.UpdateAvatarParams{
+		UserID: userID,
+		Avatar: toSqlString(avatar),
+	}))
+}
+
 func (db *HarmonyDB) GetUserMetadata(userID uint64, appID string) (string, error) {
 	metadata, err := db.queries.GetUserMetadata(ctx, queries.GetUserMetadataParams{
 		UserID: userID,
@@ -316,4 +330,10 @@ func (db HarmonyDB) UserIsLocal(userID uint64) error {
 		err = tracerr.Wrap(err)
 	}
 	return err
+}
+
+func (db HarmonyDB) GetAllMutuals(userID uint64) ([]uint64, error) {
+	mutuals, err := db.queries.GetAllMutuals(ctx, userID)
+	err = tracerr.Wrap(err)
+	return mutuals, err
 }

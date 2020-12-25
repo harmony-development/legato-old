@@ -132,3 +132,12 @@ SELECT EXISTS (
     FROM Rate_Limit_Whitelist_User
     WHERE User_ID = $1
   );
+
+-- name: GetAllMutuals :many
+SELECT Guild_Members.User_ID
+FROM Guild_Members
+WHERE Guild_ID = (
+    SELECT Guild_ID
+    FROM Guild_Members
+    WHERE Guild_Members.User_ID = $1
+  );
