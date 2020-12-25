@@ -5,6 +5,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/harmony-development/legato/server/data"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/sirupsen/logrus"
 	"github.com/ztrue/tracerr"
@@ -12,12 +14,9 @@ import (
 
 // Migrate applies the DB layout to the connected DB
 func (db *HarmonyDB) Migrate() error {
-	data, err := ioutil.ReadFile(db.Config.Database.ModelsLocation)
-	if err != nil {
-		return tracerr.Wrap(err)
-	}
+	data := data.AssertByteArray(ioutil.ReadAll(data.AssertFile(data.FS(false).Open("/sql/"))))
 
-	_, err = db.Exec(strings.ReplaceAll(string(data), "--migration-only", ""))
+	_, err := db.Exec(strings.ReplaceAll(string(data), "--migration-only", ""))
 	return tracerr.Wrap(err)
 }
 

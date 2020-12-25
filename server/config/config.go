@@ -73,13 +73,12 @@ type Config struct {
 		} `hcl:"Policies,block"`
 	} `hcl:"Server,block"`
 	Database struct {
-		Host           string `hcl:"Host,optional" default:"127.0.0.1"`
-		Username       string `hcl:"Username"`
-		Password       string `hcl:"Password"`
-		Port           int    `hcl:"Port,optional" default:"5432"`
-		SSL            bool   `hcl:"SSL,optional" default:"false"`
-		Name           string `hcl:"Name,optional" default:"harmony"`
-		ModelsLocation string `hcl:"ModelsLocation,optional" default:"sql/schemas/models.sql"`
+		Host     string `hcl:"Host,optional" default:"127.0.0.1"`
+		Username string `hcl:"Username"`
+		Password string `hcl:"Password"`
+		Port     int    `hcl:"Port,optional" default:"5432"`
+		SSL      bool   `hcl:"SSL,optional" default:"false"`
+		Name     string `hcl:"Name,optional" default:"harmony"`
 	} `hcl:"Database,block"`
 	Flatfile struct {
 		MediaPath string `hcl:"MediaPath,optional" default:"flatfile"`
