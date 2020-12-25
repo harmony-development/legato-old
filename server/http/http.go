@@ -65,11 +65,13 @@ func New(deps Dependencies) *Server {
 	})
 
 	attachmentsGrp := harmony.Group("/media")
-	attachments.New(attachments.Dependencies{
+	if _, err := attachments.New(attachments.Dependencies{
 		APIGroup:    attachmentsGrp,
 		Router:      s.Router,
 		FileBackend: s.StorageBackend,
-	})
+	}); err != nil {
+		panic(err)
+	}
 
 	return s
 }
