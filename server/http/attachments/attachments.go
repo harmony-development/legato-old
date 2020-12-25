@@ -6,14 +6,18 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
+	"github.com/gregjones/httpcache/diskcache"
 	"github.com/harmony-development/legato/server/http/attachments/backend"
 	"github.com/harmony-development/legato/server/http/hm"
 	"github.com/harmony-development/legato/server/http/responses"
 	"github.com/harmony-development/legato/server/http/routing"
 	"github.com/labstack/echo/v4"
+	"github.com/peterbourgon/diskv"
+	"willnorris.com/go/imageproxy"
 )
 
 type Dependencies struct {
@@ -25,6 +29,7 @@ type Dependencies struct {
 type API struct {
 	*echo.Group
 	Dependencies
+	ImageProxy *imageproxy.Proxy
 }
 
 type UploadData struct {
@@ -96,6 +101,19 @@ func (a *API) DownloadHandler(c echo.Context) error {
 	}
 	fileID := ctx.Param("file_id")
 
+	if strings.HasPrefix(fileID, "http") {
+		decoded, err := url.QueryUnescape(fileID)
+		if err != nil {
+			return err
+		}
+
+		fakeReq, err := http.NewRequest(http.MethodGet, "/"+decoded, nil)
+		if err != nil {
+			return err
+		}
+		a.ImageProxy.ServeHTTP(c.Response(), fakeReq)
+	}
+
 	contentType, filename, _, handle, err := a.FileBackend.ReadFile(fileID)
 	if err != nil {
 		if err != backend.NotFound {
@@ -127,10 +145,14 @@ func (a *API) DownloadHandler(c echo.Context) error {
 	return nil
 }
 
-func New(deps Dependencies) *API {
+func New(deps Dependencies) (*API, error) {
 	api := &API{
 		Group:        deps.APIGroup,
 		Dependencies: deps,
+		ImageProxy: imageproxy.NewProxy(nil, diskcache.NewWithDiskv(diskv.New(diskv.Options{
+			BasePath:  "./imageproxycache",
+			Transform: func(s string) []string { return []string{s[0:2], s[2:4]} },
+		}))),
 	}
 
 	api.Router.BindRoutes(api.Group, []routing.Route{
@@ -156,5 +178,5 @@ func New(deps Dependencies) *API {
 			Method: routing.GET,
 		},
 	})
-	return api
+	return api, nil
 }

@@ -14,6 +14,7 @@ require (
 	github.com/google/go-cmp v0.5.1 // indirect
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/websocket v1.4.2 // indirect
+	github.com/gregjones/httpcache v0.0.0-20190212212710-3befbb6ad0cc
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/hashicorp/golang-lru v0.5.4
@@ -23,8 +24,10 @@ require (
 	github.com/labstack/echo/v4 v4.1.11
 	github.com/lib/pq v1.7.0
 	github.com/logrusorgru/aurora v2.0.3+incompatible // indirect
+	github.com/peterbourgon/diskv v0.0.0-20171120014656-2973218375c3
 	github.com/pion/webrtc/v3 v3.0.0-beta.4
-	github.com/prometheus/client_golang v0.9.3
+	github.com/prometheus/client_golang v1.4.1
+	github.com/prometheus/tsdb v0.7.1 // indirect
 	github.com/rs/cors v1.7.0 // indirect
 	github.com/sirupsen/logrus v1.6.0
 	github.com/soheilhy/cmux v0.1.4
@@ -39,4 +42,5 @@ require (
 	google.golang.org/grpc v1.31.0
 	google.golang.org/grpc/examples v0.0.0-20201218190559-666aea1fb34c // indirect
 	google.golang.org/protobuf v1.25.0
+	willnorris.com/go/imageproxy v0.10.0
 )
