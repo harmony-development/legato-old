@@ -20,8 +20,9 @@ type GuildState struct {
 }
 
 // Initialize the guild state
-func (s *GuildState) Initialize(l logger.ILogger) *GuildState {
+func (s *GuildState) Initialize(l logger.ILogger, db db.IHarmonyDB) *GuildState {
 	s.Logger = l
+	s.DB = db
 	s.serverChannels = make(map[chatv1.ChatService_StreamEventsServer]chan struct{})
 	s.guildEvents = make(map[_userID]map[_guildID][]chatv1.ChatService_StreamEventsServer)
 	s.subs = make(map[_guildID]map[_userID]struct{})

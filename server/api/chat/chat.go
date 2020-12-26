@@ -40,7 +40,7 @@ func New(deps *Dependencies) *Service {
 			Perms:     deps.Perms,
 			PubSub: v1.SubscriptionManager{
 				Actions:    (&integrated.ActionState{}).Initialize(deps.Logger),
-				Guild:      (&integrated.GuildState{}).Initialize(deps.Logger),
+				Guild:      (&integrated.GuildState{}).Initialize(deps.Logger, deps.DB),
 				Homeserver: (&integrated.HomeserverEventState{}).Initialize(deps.Logger),
 			},
 			Config:         deps.Config,
