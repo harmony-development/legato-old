@@ -4,6 +4,8 @@ import (
 	"sync"
 
 	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
+	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
+	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/logger"
 )
 
@@ -13,6 +15,7 @@ type GuildState struct {
 	guildEvents    map[_userID]map[_guildID][]chatv1.ChatService_StreamEventsServer
 	subs           map[_guildID]map[_userID]struct{}
 	Logger         logger.ILogger
+	DB             db.IHarmonyDB
 	sync.Mutex
 }
 
@@ -40,6 +43,18 @@ func (s *GuildState) Subscribe(guildID, userID uint64, server chatv1.ChatService
 		<-server.Context().Done()
 		s.Logger.Debug(logger.Streams, "Disconnecting", server, "(", userID, ")", "from", guildID)
 		s.UnsubscribeUserFromGuild(userID, guildID)
+		if err := s.DB.SetStatus(userID, harmonytypesv1.UserStatus_USER_STATUS_OFFLINE); err != nil {
+			s.Logger.Exception(err)
+			return
+		}
+		s.Broadcast(guildID, &chatv1.Event{
+			Event: &chatv1.Event_ProfileUpdated_{
+				ProfileUpdated: &chatv1.Event_ProfileUpdated{
+					NewStatus:    harmonytypesv1.UserStatus_USER_STATUS_OFFLINE,
+					UpdateStatus: true,
+				},
+			},
+		})
 	}()
 	val, ok := s.guildEvents[_userID(userID)][_guildID(guildID)]
 	_ = ok

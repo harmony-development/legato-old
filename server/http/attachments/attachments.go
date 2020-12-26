@@ -112,6 +112,7 @@ func (a *API) DownloadHandler(c echo.Context) error {
 			return err
 		}
 		a.ImageProxy.ServeHTTP(c.Response(), fakeReq)
+		return nil
 	}
 
 	contentType, filename, _, handle, err := a.FileBackend.ReadFile(fileID)
