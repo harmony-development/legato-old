@@ -17,6 +17,16 @@ type instantViewData struct {
 
 var converter = md.NewConverter("", true, nil)
 
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    1,
+		},
+		Auth: true,
+	}, "/protocol.mediaproxy.v1.MediaProxyService/InstantView")
+}
+
 // InstantView implements the InstantView RPC
 func (v1 *V1) InstantView(ctx context.Context, r *mediaproxyv1.InstantViewRequest) (resp *mediaproxyv1.InstantViewResponse, err error) {
 	resp = &mediaproxyv1.InstantViewResponse{
