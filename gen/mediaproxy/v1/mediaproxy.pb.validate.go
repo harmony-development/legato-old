@@ -271,6 +271,8 @@ func (m *InstantViewResponse) Validate() error {
 
 	// no validation rules for Content
 
+	// no validation rules for IsValid
+
 	return nil
 }
 
@@ -329,3 +331,72 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = InstantViewResponseValidationError{}
+
+// Validate checks the field values on CanInstantViewResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *CanInstantViewResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for CanInstantView
+
+	return nil
+}
+
+// CanInstantViewResponseValidationError is the validation error returned by
+// CanInstantViewResponse.Validate if the designated constraints aren't met.
+type CanInstantViewResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CanInstantViewResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CanInstantViewResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CanInstantViewResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CanInstantViewResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CanInstantViewResponseValidationError) ErrorName() string {
+	return "CanInstantViewResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CanInstantViewResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCanInstantViewResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CanInstantViewResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CanInstantViewResponseValidationError{}

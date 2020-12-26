@@ -1,7 +1,9 @@
 package v1
 
 import (
+	"bytes"
 	"context"
+	"io"
 	"net/http"
 	"time"
 
@@ -17,6 +19,11 @@ type instantViewData struct {
 	instantLRU *lru.ARCCache
 }
 
+type instantViewResult struct {
+	ok   bool
+	data string
+}
+
 var converter = md.NewConverter("", true, nil)
 
 func init() {
@@ -27,6 +34,34 @@ func init() {
 		},
 		Auth: true,
 	}, "/protocol.mediaproxy.v1.MediaProxyService/InstantView")
+}
+
+func (v1 *V1) CanInstantView(ctx context.Context, r *mediaproxyv1.InstantViewRequest) (resp *mediaproxyv1.CanInstantViewResponse, err error) {
+	resp = &mediaproxyv1.CanInstantViewResponse{
+		CanInstantView: true,
+	}
+
+	if val, ok := v1.instantLRU.Get(r.Url); ok {
+		data := val.(instantViewResult)
+		resp.CanInstantView = data.ok
+		return
+	}
+
+	req, err := http.Get(r.Url)
+	if err != nil {
+		return
+	}
+	defer req.Body.Close()
+
+	read := readability.New()
+	if !read.IsReadable(req.Body) {
+		v1.instantLRU.Add(r.Url, instantViewResult{
+			ok: false,
+		})
+		resp.CanInstantView = false
+	}
+
+	return
 }
 
 // InstantView implements the InstantView RPC
@@ -40,8 +75,9 @@ func (v1 *V1) InstantView(ctx context.Context, r *mediaproxyv1.InstantViewReques
 	}
 
 	if val, ok := v1.instantLRU.Get(r.Url); ok {
-		data := val.(string)
-		resp.Content = data
+		data := val.(instantViewResult)
+		resp.IsValid = data.ok
+		resp.Content = data.data
 		return
 	}
 
@@ -51,8 +87,20 @@ func (v1 *V1) InstantView(ctx context.Context, r *mediaproxyv1.InstantViewReques
 	}
 	defer req.Body.Close()
 
+	buffer := new(bytes.Buffer)
+	tee := io.TeeReader(req.Body, buffer)
+
 	read := readability.New()
-	body, err := read.Parse(req.Body, r.Url)
+
+	if !read.IsReadable(tee) {
+		v1.instantLRU.Add(r.Url, instantViewResult{
+			ok: false,
+		})
+		resp.IsValid = false
+		return
+	}
+
+	body, err := read.Parse(io.MultiReader(buffer, tee), r.Url)
 	if err != nil {
 		return
 	}
@@ -62,7 +110,11 @@ func (v1 *V1) InstantView(ctx context.Context, r *mediaproxyv1.InstantViewReques
 		return
 	}
 
-	v1.instantLRU.Add(r.Url, converted)
+	v1.instantLRU.Add(r.Url, instantViewResult{
+		ok:   true,
+		data: converted,
+	})
+	resp.IsValid = true
 	resp.Content = converted
 
 	return
