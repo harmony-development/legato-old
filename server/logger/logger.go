@@ -76,7 +76,10 @@ func (l Logger) Exception(err error) {
 
 // Fatal logs an exception and then aborts
 func (l Logger) Fatal(err error) {
-	l.CheckException(err)
+	if err == nil {
+		panic("fatal called with nil error")
+	}
+	println(tracerr.SprintSourceColor(err))
 	os.Exit(-1)
 }
 
