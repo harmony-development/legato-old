@@ -3,10 +3,13 @@ module github.com/harmony-development/legato
 go 1.14
 
 require (
+	github.com/JohannesKaufmann/html-to-markdown v1.2.0
 	github.com/alecthomas/repr v0.0.0-20201103221029-55c485bd663f
+	github.com/cixtor/readability v1.0.0
 	github.com/creasty/defaults v1.5.1
 	github.com/desertbit/timer v0.0.0-20180107155436-c41aec40b27f // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/dyatlov/go-opengraph v0.0.0-20180429202543-816b6608b3c8
 	github.com/getsentry/sentry-go v0.6.1
 	github.com/go-playground/validator/v10 v10.3.0
 	github.com/gobwas/glob v0.2.3
@@ -27,7 +30,6 @@ require (
 	github.com/peterbourgon/diskv v0.0.0-20171120014656-2973218375c3
 	github.com/pion/webrtc/v3 v3.0.0-beta.4
 	github.com/prometheus/client_golang v1.4.1
-	github.com/prometheus/tsdb v0.7.1 // indirect
 	github.com/rs/cors v1.7.0 // indirect
 	github.com/sirupsen/logrus v1.6.0
 	github.com/soheilhy/cmux v0.1.4

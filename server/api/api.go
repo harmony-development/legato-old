@@ -6,9 +6,11 @@ import (
 
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
 	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
+	mediaproxyv1 "github.com/harmony-development/legato/gen/mediaproxy/v1"
 	"github.com/harmony-development/legato/server/api/authsvc"
 	"github.com/harmony-development/legato/server/api/chat"
 	"github.com/harmony-development/legato/server/api/chat/v1/permissions"
+	"github.com/harmony-development/legato/server/api/mediaproxy"
 	"github.com/harmony-development/legato/server/api/middleware"
 	"github.com/harmony-development/legato/server/auth"
 	"github.com/harmony-development/legato/server/config"
@@ -100,6 +102,11 @@ func New(deps Dependencies) *API {
 		Sonyflake:   api.Sonyflake,
 		AuthManager: api.AuthManager,
 		Config:      api.Config,
+	}))
+	mediaproxyv1.RegisterMediaProxyServiceServer(api.GrpcServer, mediaproxy.New(&mediaproxy.Dependencies{
+		DB:     api.DB,
+		Logger: api.Logger,
+		Config: api.Config,
 	}))
 	reflection.Register(api.GrpcServer)
 	grpc_prometheus.Register(api.GrpcServer)
