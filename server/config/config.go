@@ -58,9 +58,10 @@ type Config struct {
 				Duration time.Duration `hcl:"Duration,optional" default:"172800000000000"`
 			} `hcl:"Sessions,block"`
 			MaximumCacheSizes struct {
-				Owner      int `hcl:"Owner,optional" default:"5096"`
-				Sessions   int `hcl:"Sessions,optional" default:"5096"`
-				LinkEmbeds int `hcl:"LinkEmbeds,optional" default:"65536"`
+				Owner       int `hcl:"Owner,optional" default:"5096"`
+				Sessions    int `hcl:"Sessions,optional" default:"5096"`
+				LinkEmbeds  int `hcl:"LinkEmbeds,optional" default:"65536"`
+				InstantView int `hcl:"InstantView,optional" default:"65536"`
 			} `hcl:"Caches,block"`
 			APIs struct {
 				Messages struct {
