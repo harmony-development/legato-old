@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 
 	"github.com/harmony-development/legato/server/db/queries"
 	"github.com/ztrue/tracerr"
@@ -85,7 +86,7 @@ func (db *HarmonyDB) GetChannelPositions(guildID, before, previous uint64) (pos 
 		GuildID:   toSqlInt64(guildID),
 	})
 	err = tracerr.Wrap(err)
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		db.Logger.Exception(err)
 		retErr = err
 		return
@@ -95,7 +96,7 @@ func (db *HarmonyDB) GetChannelPositions(guildID, before, previous uint64) (pos 
 		GuildID:   toSqlInt64(guildID),
 	})
 	err = tracerr.Wrap(err)
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		db.Logger.Exception(err)
 		retErr = err
 		return
