@@ -759,6 +759,9 @@ func (v1 *V1) DeleteMessage(c context.Context, r *chatv1.DeleteMessageRequest) (
 	if ctx.UserID != owner && !(ctx.IsOwner || v1.Perms.Check("messages.manage.delete", ctx.UserRoles, r.GuildId, r.ChannelId)) {
 		return nil, ErrNoPermissions
 	}
+	if err := v1.DB.DeleteMessage(r.MessageId, r.ChannelId, r.GuildId); err != nil {
+		return nil, err
+	}
 	v1.PubSub.Guild.Broadcast(r.GuildId, &chatv1.Event{
 		Event: &chatv1.Event_DeletedMessage{
 			DeletedMessage: &chatv1.Event_MessageDeleted{
