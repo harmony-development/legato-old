@@ -78,11 +78,11 @@ type IHarmonyDB interface {
 	GetOwner(guildID uint64) (uint64, error)
 	IsOwner(guildID, userID uint64) (bool, error)
 	CreateInvite(guildID uint64, possibleUses int32, name string) (queries.Invite, error)
-	SetChannelName(guildID, channelID uint64, name string) error
+	UpdateChannelInformation(guildID, channelID uint64, name string, updateName bool, metadata *harmonytypesv1.Metadata, updateMetadata bool) error
 	AddMemberToGuild(userID, guildID uint64) error
-	AddChannelToGuild(guildID uint64, channelName string, previous, next uint64, category bool, kind string) (queries.Channel, error)
+	AddChannelToGuild(guildID uint64, channelName string, previous, next uint64, category bool, md *harmonytypesv1.Metadata) (queries.Channel, error)
 	DeleteChannelFromGuild(guildID, channelID uint64) error
-	AddMessage(channelID, guildID, userID, messageID uint64, message string, attachments []string, embeds, actions, overrides []byte, replyTo sql.NullInt64) (*queries.Message, error)
+	AddMessage(channelID, guildID, userID, messageID uint64, message string, attachments []string, embeds, actions, overrides []byte, replyTo sql.NullInt64, md *harmonytypesv1.Metadata) (*queries.Message, error)
 	DeleteMessage(messageID, channelID, guildID uint64) error
 	GetMessageOwner(messageID uint64) (uint64, error)
 	ResolveGuildID(inviteID string) (uint64, error)
@@ -93,9 +93,8 @@ type IHarmonyDB interface {
 	GetMessageDate(messageID uint64) (time.Time, error)
 	GetMessages(guildID, channelID uint64) ([]queries.Message, error)
 	GetMessagesBefore(guildID, channelID uint64, date time.Time) ([]queries.Message, error)
-	UpdateGuildName(guildID uint64, newName string) error
+	UpdateGuildInformation(guildID uint64, name, picture string, metadata *harmonytypesv1.Metadata, updateName, updatePicture, updateMetadata bool) error
 	GetGuildPicture(guildID uint64) (string, error)
-	SetGuildPicture(guildID uint64, pictureURL string) error
 	GetInvites(guildID uint64) ([]queries.Invite, error)
 	DeleteMember(guildID, userID uint64) error
 	GetLocalGuilds(userID uint64) ([]uint64, error)
@@ -117,7 +116,7 @@ type IHarmonyDB interface {
 	HasChannelWithID(guildID, channelID uint64) (bool, error)
 	HasMessageWithID(guildID, channelID, messageID uint64) (bool, error)
 	GetGuildByID(guildID uint64) (queries.Guild, error)
-	UpdateMessage(messageID uint64, content *string, embeds, actions, overrides *[]byte, attachments *[]string) (time.Time, error)
+	UpdateMessage(messageID uint64, content *string, embeds, actions, overrides *[]byte, attachments *[]string, metadata *harmonytypesv1.Metadata, updateMetadata bool) (time.Time, error)
 	SetStatus(userID uint64, status harmonytypesv1.UserStatus) error
 	SetUsername(userID uint64, username string) error
 	SetAvatar(userID uint64, avatar string) error

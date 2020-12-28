@@ -271,6 +271,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.sessionToUserIDStmt, err = db.PrepareContext(ctx, sessionToUserID); err != nil {
 		return nil, fmt.Errorf("error preparing query SessionToUserID: %w", err)
 	}
+	if q.setGuildMetadataStmt, err = db.PrepareContext(ctx, setGuildMetadata); err != nil {
+		return nil, fmt.Errorf("error preparing query SetGuildMetadata: %w", err)
+	}
 	if q.setGuildNameStmt, err = db.PrepareContext(ctx, setGuildName); err != nil {
 		return nil, fmt.Errorf("error preparing query SetGuildName: %w", err)
 	}
@@ -298,6 +301,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.updateAvatarStmt, err = db.PrepareContext(ctx, updateAvatar); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateAvatar: %w", err)
 	}
+	if q.updateChannelMetadataStmt, err = db.PrepareContext(ctx, updateChannelMetadata); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateChannelMetadata: %w", err)
+	}
 	if q.updateChannelNameStmt, err = db.PrepareContext(ctx, updateChannelName); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateChannelName: %w", err)
 	}
@@ -312,6 +318,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.updateMessageEmbedsStmt, err = db.PrepareContext(ctx, updateMessageEmbeds); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateMessageEmbeds: %w", err)
+	}
+	if q.updateMessageMetadataStmt, err = db.PrepareContext(ctx, updateMessageMetadata); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateMessageMetadata: %w", err)
 	}
 	if q.updateMessageOverridesStmt, err = db.PrepareContext(ctx, updateMessageOverrides); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateMessageOverrides: %w", err)
@@ -757,6 +766,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing sessionToUserIDStmt: %w", cerr)
 		}
 	}
+	if q.setGuildMetadataStmt != nil {
+		if cerr := q.setGuildMetadataStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing setGuildMetadataStmt: %w", cerr)
+		}
+	}
 	if q.setGuildNameStmt != nil {
 		if cerr := q.setGuildNameStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing setGuildNameStmt: %w", cerr)
@@ -802,6 +816,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing updateAvatarStmt: %w", cerr)
 		}
 	}
+	if q.updateChannelMetadataStmt != nil {
+		if cerr := q.updateChannelMetadataStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateChannelMetadataStmt: %w", cerr)
+		}
+	}
 	if q.updateChannelNameStmt != nil {
 		if cerr := q.updateChannelNameStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateChannelNameStmt: %w", cerr)
@@ -825,6 +844,11 @@ func (q *Queries) Close() error {
 	if q.updateMessageEmbedsStmt != nil {
 		if cerr := q.updateMessageEmbedsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateMessageEmbedsStmt: %w", cerr)
+		}
+	}
+	if q.updateMessageMetadataStmt != nil {
+		if cerr := q.updateMessageMetadataStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateMessageMetadataStmt: %w", cerr)
 		}
 	}
 	if q.updateMessageOverridesStmt != nil {
@@ -989,6 +1013,7 @@ type Queries struct {
 	resolveGuildIDStmt                             *sql.Stmt
 	rolesForUserStmt                               *sql.Stmt
 	sessionToUserIDStmt                            *sql.Stmt
+	setGuildMetadataStmt                           *sql.Stmt
 	setGuildNameStmt                               *sql.Stmt
 	setGuildPictureStmt                            *sql.Stmt
 	setPermissionsStmt                             *sql.Stmt
@@ -998,11 +1023,13 @@ type Queries struct {
 	setRolePingableStmt                            *sql.Stmt
 	setStatusStmt                                  *sql.Stmt
 	updateAvatarStmt                               *sql.Stmt
+	updateChannelMetadataStmt                      *sql.Stmt
 	updateChannelNameStmt                          *sql.Stmt
 	updateMessageActionsStmt                       *sql.Stmt
 	updateMessageAttachmentsStmt                   *sql.Stmt
 	updateMessageContentStmt                       *sql.Stmt
 	updateMessageEmbedsStmt                        *sql.Stmt
+	updateMessageMetadataStmt                      *sql.Stmt
 	updateMessageOverridesStmt                     *sql.Stmt
 	updatePermissionsStmt                          *sql.Stmt
 	updatePermissionsWithoutChannelStmt            *sql.Stmt
@@ -1100,6 +1127,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		resolveGuildIDStmt:                             q.resolveGuildIDStmt,
 		rolesForUserStmt:                               q.rolesForUserStmt,
 		sessionToUserIDStmt:                            q.sessionToUserIDStmt,
+		setGuildMetadataStmt:                           q.setGuildMetadataStmt,
 		setGuildNameStmt:                               q.setGuildNameStmt,
 		setGuildPictureStmt:                            q.setGuildPictureStmt,
 		setPermissionsStmt:                             q.setPermissionsStmt,
@@ -1109,11 +1137,13 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		setRolePingableStmt:                            q.setRolePingableStmt,
 		setStatusStmt:                                  q.setStatusStmt,
 		updateAvatarStmt:                               q.updateAvatarStmt,
+		updateChannelMetadataStmt:                      q.updateChannelMetadataStmt,
 		updateChannelNameStmt:                          q.updateChannelNameStmt,
 		updateMessageActionsStmt:                       q.updateMessageActionsStmt,
 		updateMessageAttachmentsStmt:                   q.updateMessageAttachmentsStmt,
 		updateMessageContentStmt:                       q.updateMessageContentStmt,
 		updateMessageEmbedsStmt:                        q.updateMessageEmbedsStmt,
+		updateMessageMetadataStmt:                      q.updateMessageMetadataStmt,
 		updateMessageOverridesStmt:                     q.updateMessageOverridesStmt,
 		updatePermissionsStmt:                          q.updatePermissionsStmt,
 		updatePermissionsWithoutChannelStmt:            q.updatePermissionsWithoutChannelStmt,

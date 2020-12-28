@@ -14,12 +14,12 @@ type AcquiredEmotePack struct {
 }
 
 type Channel struct {
-	ChannelID   uint64         `json:"channel_id"`
-	GuildID     sql.NullInt64  `json:"guild_id"`
-	ChannelName string         `json:"channel_name"`
-	Position    string         `json:"position"`
-	Category    bool           `json:"category"`
-	Kind        sql.NullString `json:"kind"`
+	ChannelID   uint64        `json:"channel_id"`
+	GuildID     sql.NullInt64 `json:"guild_id"`
+	ChannelName string        `json:"channel_name"`
+	Position    string        `json:"position"`
+	Category    bool          `json:"category"`
+	Metadata    []byte        `json:"metadata"`
 }
 
 type EmotePack struct {
@@ -58,6 +58,7 @@ type Guild struct {
 	OwnerID    uint64 `json:"owner_id"`
 	GuildName  string `json:"guild_name"`
 	PictureUrl string `json:"picture_url"`
+	Metadata   []byte `json:"metadata"`
 }
 
 type GuildList struct {
@@ -103,6 +104,7 @@ type Message struct {
 	Overrides   []byte          `json:"overrides"`
 	ReplyToID   sql.NullInt64   `json:"reply_to_id"`
 	Attachments []string        `json:"attachments"`
+	Metadata    []byte          `json:"metadata"`
 }
 
 type Permission struct {

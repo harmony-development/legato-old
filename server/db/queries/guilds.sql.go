@@ -30,18 +30,18 @@ INSERT INTO Channels (
         Channel_Name,
         Position,
         Category,
-        Kind
+        Metadata
     )
-VALUES ($1, $2, $3, $4, $5, $6) RETURNING channel_id, guild_id, channel_name, position, category, kind
+VALUES ($1, $2, $3, $4, $5, $6) RETURNING channel_id, guild_id, channel_name, position, category, metadata
 `
 
 type CreateChannelParams struct {
-	GuildID     sql.NullInt64  `json:"guild_id"`
-	ChannelID   uint64         `json:"channel_id"`
-	ChannelName string         `json:"channel_name"`
-	Position    string         `json:"position"`
-	Category    bool           `json:"category"`
-	Kind        sql.NullString `json:"kind"`
+	GuildID     sql.NullInt64 `json:"guild_id"`
+	ChannelID   uint64        `json:"channel_id"`
+	ChannelName string        `json:"channel_name"`
+	Position    string        `json:"position"`
+	Category    bool          `json:"category"`
+	Metadata    []byte        `json:"metadata"`
 }
 
 func (q *Queries) CreateChannel(ctx context.Context, arg CreateChannelParams) (Channel, error) {
@@ -51,7 +51,7 @@ func (q *Queries) CreateChannel(ctx context.Context, arg CreateChannelParams) (C
 		arg.ChannelName,
 		arg.Position,
 		arg.Category,
-		arg.Kind,
+		arg.Metadata,
 	)
 	var i Channel
 	err := row.Scan(
@@ -60,7 +60,7 @@ func (q *Queries) CreateChannel(ctx context.Context, arg CreateChannelParams) (C
 		&i.ChannelName,
 		&i.Position,
 		&i.Category,
-		&i.Kind,
+		&i.Metadata,
 	)
 	return i, err
 }
@@ -72,7 +72,7 @@ INSERT INTO Guilds (
         Guild_Name,
         Picture_URL
     )
-VALUES ($1, $2, $3, $4) RETURNING guild_id, owner_id, guild_name, picture_url
+VALUES ($1, $2, $3, $4) RETURNING guild_id, owner_id, guild_name, picture_url, metadata
 `
 
 type CreateGuildParams struct {
@@ -95,6 +95,7 @@ func (q *Queries) CreateGuild(ctx context.Context, arg CreateGuildParams) (Guild
 		&i.OwnerID,
 		&i.GuildName,
 		&i.PictureUrl,
+		&i.Metadata,
 	)
 	return i, err
 }
@@ -145,7 +146,7 @@ func (q *Queries) GetChannelPosition(ctx context.Context, arg GetChannelPosition
 }
 
 const getChannels = `-- name: GetChannels :many
-SELECT channel_id, guild_id, channel_name, position, category, kind
+SELECT channel_id, guild_id, channel_name, position, category, metadata
 FROM Channels
 WHERE Guild_ID = $1
 ORDER BY Position
@@ -166,7 +167,7 @@ func (q *Queries) GetChannels(ctx context.Context, guildID sql.NullInt64) ([]Cha
 			&i.ChannelName,
 			&i.Position,
 			&i.Category,
-			&i.Kind,
+			&i.Metadata,
 		); err != nil {
 			return nil, err
 		}
@@ -182,7 +183,7 @@ func (q *Queries) GetChannels(ctx context.Context, guildID sql.NullInt64) ([]Cha
 }
 
 const getGuildData = `-- name: GetGuildData :one
-SELECT guild_id, owner_id, guild_name, picture_url
+SELECT guild_id, owner_id, guild_name, picture_url, metadata
 FROM Guilds
 WHERE Guild_ID = $1
 `
@@ -195,6 +196,7 @@ func (q *Queries) GetGuildData(ctx context.Context, guildID uint64) (Guild, erro
 		&i.OwnerID,
 		&i.GuildName,
 		&i.PictureUrl,
+		&i.Metadata,
 	)
 	return i, err
 }
@@ -300,7 +302,7 @@ func (q *Queries) GuildsForUser(ctx context.Context, userID uint64) ([]uint64, e
 }
 
 const guildsForUserWithData = `-- name: GuildsForUserWithData :many
-SELECT user_id, guild_members.guild_id, guilds.guild_id, owner_id, guild_name, picture_url
+SELECT user_id, guild_members.guild_id, guilds.guild_id, owner_id, guild_name, picture_url, metadata
 FROM Guild_Members
     INNER JOIN guilds ON Guild_Members.Guild_ID = Guilds.Guild_ID
 WHERE User_ID = $1
@@ -313,6 +315,7 @@ type GuildsForUserWithDataRow struct {
 	OwnerID    uint64 `json:"owner_id"`
 	GuildName  string `json:"guild_name"`
 	PictureUrl string `json:"picture_url"`
+	Metadata   []byte `json:"metadata"`
 }
 
 func (q *Queries) GuildsForUserWithData(ctx context.Context, userID uint64) ([]GuildsForUserWithDataRow, error) {
@@ -331,6 +334,7 @@ func (q *Queries) GuildsForUserWithData(ctx context.Context, userID uint64) ([]G
 			&i.OwnerID,
 			&i.GuildName,
 			&i.PictureUrl,
+			&i.Metadata,
 		); err != nil {
 			return nil, err
 		}
@@ -398,6 +402,22 @@ func (q *Queries) RemoveUserFromGuild(ctx context.Context, arg RemoveUserFromGui
 	return err
 }
 
+const setGuildMetadata = `-- name: SetGuildMetadata :exec
+UPDATE Guilds
+SET Metadata = $1
+WHERE Guild_ID = $2
+`
+
+type SetGuildMetadataParams struct {
+	Metadata []byte `json:"metadata"`
+	GuildID  uint64 `json:"guild_id"`
+}
+
+func (q *Queries) SetGuildMetadata(ctx context.Context, arg SetGuildMetadataParams) error {
+	_, err := q.exec(ctx, q.setGuildMetadataStmt, setGuildMetadata, arg.Metadata, arg.GuildID)
+	return err
+}
+
 const setGuildName = `-- name: SetGuildName :exec
 UPDATE Guilds
 SET Guild_Name = $1
@@ -427,6 +447,24 @@ type SetGuildPictureParams struct {
 
 func (q *Queries) SetGuildPicture(ctx context.Context, arg SetGuildPictureParams) error {
 	_, err := q.exec(ctx, q.setGuildPictureStmt, setGuildPicture, arg.PictureUrl, arg.GuildID)
+	return err
+}
+
+const updateChannelMetadata = `-- name: UpdateChannelMetadata :exec
+UPDATE Channels
+SET Metadata = $1
+WHERE Guild_ID = $2
+    AND Channel_ID = $3
+`
+
+type UpdateChannelMetadataParams struct {
+	Metadata  []byte        `json:"metadata"`
+	GuildID   sql.NullInt64 `json:"guild_id"`
+	ChannelID uint64        `json:"channel_id"`
+}
+
+func (q *Queries) UpdateChannelMetadata(ctx context.Context, arg UpdateChannelMetadataParams) error {
+	_, err := q.exec(ctx, q.updateChannelMetadataStmt, updateChannelMetadata, arg.Metadata, arg.GuildID, arg.ChannelID)
 	return err
 }
 

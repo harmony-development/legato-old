@@ -44,6 +44,16 @@ func (m *CreateGuildRequest) Validate() error {
 		return nil
 	}
 
+	if v, ok := interface{}(m.GetMetadata()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return CreateGuildRequestValidationError{
+				field:  "Metadata",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
 	// no validation rules for GuildName
 
 	// no validation rules for PictureUrl
@@ -542,6 +552,16 @@ func (m *GetGuildResponse) Validate() error {
 		return nil
 	}
 
+	if v, ok := interface{}(m.GetMetadata()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return GetGuildResponseValidationError{
+				field:  "Metadata",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
 	// no validation rules for GuildName
 
 	// no validation rules for GuildOwner
@@ -909,6 +929,18 @@ func (m *UpdateGuildInformationRequest) Validate() error {
 	// no validation rules for NewGuildPicture
 
 	// no validation rules for UpdateGuildPicture
+
+	if v, ok := interface{}(m.GetMetadata()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UpdateGuildInformationRequestValidationError{
+				field:  "Metadata",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for UpdateMetadata
 
 	return nil
 }

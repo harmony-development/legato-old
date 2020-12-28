@@ -54,7 +54,15 @@ func (m *CreateChannelRequest) Validate() error {
 
 	// no validation rules for NextId
 
-	// no validation rules for ChannelKind
+	if v, ok := interface{}(m.GetMetadata()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return CreateChannelRequestValidationError{
+				field:  "Metadata",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
 
 	return nil
 }
@@ -335,10 +343,10 @@ var _ interface {
 	ErrorName() string
 } = GetGuildChannelsResponseValidationError{}
 
-// Validate checks the field values on UpdateChannelNameRequest with the rules
-// defined in the proto definition for this message. If any rules are
+// Validate checks the field values on UpdateChannelInformationRequest with the
+// rules defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
-func (m *UpdateChannelNameRequest) Validate() error {
+func (m *UpdateChannelInformationRequest) Validate() error {
 	if m == nil {
 		return nil
 	}
@@ -347,14 +355,29 @@ func (m *UpdateChannelNameRequest) Validate() error {
 
 	// no validation rules for ChannelId
 
-	// no validation rules for NewChannelName
+	// no validation rules for Name
+
+	// no validation rules for UpdateName
+
+	if v, ok := interface{}(m.GetMetadata()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UpdateChannelInformationRequestValidationError{
+				field:  "Metadata",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for UpdateMetadata
 
 	return nil
 }
 
-// UpdateChannelNameRequestValidationError is the validation error returned by
-// UpdateChannelNameRequest.Validate if the designated constraints aren't met.
-type UpdateChannelNameRequestValidationError struct {
+// UpdateChannelInformationRequestValidationError is the validation error
+// returned by UpdateChannelInformationRequest.Validate if the designated
+// constraints aren't met.
+type UpdateChannelInformationRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -362,24 +385,24 @@ type UpdateChannelNameRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e UpdateChannelNameRequestValidationError) Field() string { return e.field }
+func (e UpdateChannelInformationRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e UpdateChannelNameRequestValidationError) Reason() string { return e.reason }
+func (e UpdateChannelInformationRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e UpdateChannelNameRequestValidationError) Cause() error { return e.cause }
+func (e UpdateChannelInformationRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e UpdateChannelNameRequestValidationError) Key() bool { return e.key }
+func (e UpdateChannelInformationRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e UpdateChannelNameRequestValidationError) ErrorName() string {
-	return "UpdateChannelNameRequestValidationError"
+func (e UpdateChannelInformationRequestValidationError) ErrorName() string {
+	return "UpdateChannelInformationRequestValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e UpdateChannelNameRequestValidationError) Error() string {
+func (e UpdateChannelInformationRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -391,14 +414,14 @@ func (e UpdateChannelNameRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sUpdateChannelNameRequest.%s: %s%s",
+		"invalid %sUpdateChannelInformationRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = UpdateChannelNameRequestValidationError{}
+var _ error = UpdateChannelInformationRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -406,7 +429,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = UpdateChannelNameRequestValidationError{}
+} = UpdateChannelInformationRequestValidationError{}
 
 // Validate checks the field values on UpdateChannelOrderRequest with the rules
 // defined in the proto definition for this message. If any rules are
@@ -629,6 +652,16 @@ var _ interface {
 func (m *GetGuildChannelsResponse_Channel) Validate() error {
 	if m == nil {
 		return nil
+	}
+
+	if v, ok := interface{}(m.GetMetadata()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return GetGuildChannelsResponse_ChannelValidationError{
+				field:  "Metadata",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
 	}
 
 	// no validation rules for ChannelId

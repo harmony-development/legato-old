@@ -170,7 +170,7 @@ func init() {
 
 // CreateChannel implements the CreateChannel RPC
 func (v1 *V1) CreateChannel(c context.Context, r *chatv1.CreateChannelRequest) (*chatv1.CreateChannelResponse, error) {
-	channel, err := v1.DB.AddChannelToGuild(r.GuildId, r.ChannelName, r.PreviousId, r.NextId, r.IsCategory, r.ChannelKind)
+	channel, err := v1.DB.AddChannelToGuild(r.GuildId, r.ChannelName, r.PreviousId, r.NextId, r.IsCategory, r.Metadata)
 	if err != nil {
 		return nil, err
 	}
@@ -306,7 +306,7 @@ func (v1 *V1) GetGuildChannels(c context.Context, r *chatv1.GetGuildChannelsRequ
 				ChannelId:   channel.ChannelID,
 				ChannelName: channel.ChannelName,
 				IsCategory:  channel.Category,
-				Kind:        channel.Kind.String,
+				Metadata:    db.DeserializeMetadata(channel.Metadata),
 			})
 		}
 	}
@@ -484,34 +484,23 @@ func init() {
 
 // UpdateGuildInformation implements the UpdateGuildInformation RPC
 func (v1 *V1) UpdateGuildInformation(c context.Context, r *chatv1.UpdateGuildInformationRequest) (*empty.Empty, error) {
-	if r.UpdateGuildName {
-		if err := v1.DB.UpdateGuildName(r.GuildId, r.NewGuildName); err != nil {
-			return nil, err
-		}
-		v1.PubSub.Guild.Broadcast(r.GuildId, &chatv1.Event{
-			Event: &chatv1.Event_EditedGuild{
-				EditedGuild: &chatv1.Event_GuildUpdated{
-					GuildId:    r.GuildId,
-					Name:       r.NewGuildName,
-					UpdateName: true,
-				},
-			},
-		})
+	err := v1.DB.UpdateGuildInformation(r.GuildId, r.NewGuildName, r.NewGuildPicture, r.Metadata, r.UpdateGuildName, r.UpdateGuildPicture, r.UpdateMetadata)
+	if err != nil {
+		return nil, err
 	}
-	if r.UpdateGuildPicture {
-		if err := v1.DB.SetGuildPicture(r.GuildId, r.NewGuildPicture); err != nil {
-			return nil, err
-		}
-		v1.PubSub.Guild.Broadcast(r.GuildId, &chatv1.Event{
-			Event: &chatv1.Event_EditedGuild{
-				EditedGuild: &chatv1.Event_GuildUpdated{
-					GuildId:       r.GuildId,
-					Picture:       r.NewGuildPicture,
-					UpdatePicture: true,
-				},
+	v1.PubSub.Guild.Broadcast(r.GuildId, &chatv1.Event{
+		Event: &chatv1.Event_EditedGuild{
+			EditedGuild: &chatv1.Event_GuildUpdated{
+				GuildId:        r.GuildId,
+				Name:           r.NewGuildName,
+				UpdateName:     r.UpdateGuildName,
+				Picture:        r.NewGuildPicture,
+				UpdatePicture:  r.UpdateGuildPicture,
+				Metadata:       r.Metadata,
+				UpdateMetadata: r.UpdateMetadata,
 			},
-		})
-	}
+		},
+	})
 	return &empty.Empty{}, nil
 }
 
@@ -523,22 +512,24 @@ func init() {
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
-		Permission: "channels.manage.change-name",
-	}, "/protocol.chat.v1.ChatService/UpdateChannelName")
+		Permission: "channels.manage.change-information",
+	}, "/protocol.chat.v1.ChatService/UpdateChannelInformation")
 }
 
-// UpdateChannelName implements the UpdateChannelName RPC
-func (v1 *V1) UpdateChannelName(c context.Context, r *chatv1.UpdateChannelNameRequest) (*empty.Empty, error) {
-	if err := v1.DB.SetChannelName(r.GuildId, r.ChannelId, r.NewChannelName); err != nil {
+// UpdateChannelInformation implements the UpdateChannelInformation RPC
+func (v1 *V1) UpdateChannelInformation(c context.Context, r *chatv1.UpdateChannelInformationRequest) (*empty.Empty, error) {
+	if err := v1.DB.UpdateChannelInformation(r.GuildId, r.ChannelId, r.Name, r.UpdateName, r.Metadata, r.UpdateMetadata); err != nil {
 		return nil, err
 	}
 	v1.PubSub.Guild.Broadcast(r.GuildId, &chatv1.Event{
 		Event: &chatv1.Event_EditedChannel{
 			EditedChannel: &chatv1.Event_ChannelUpdated{
-				GuildId:    r.GuildId,
-				ChannelId:  r.ChannelId,
-				Name:       r.NewChannelName,
-				UpdateName: true,
+				GuildId:        r.GuildId,
+				ChannelId:      r.ChannelId,
+				Name:           r.Name,
+				UpdateName:     r.UpdateName,
+				Metadata:       r.Metadata,
+				UpdateMetadata: r.UpdateMetadata,
 			},
 		},
 	})
@@ -635,7 +626,7 @@ func (v1 *V1) UpdateMessage(c context.Context, r *chatv1.UpdateMessageRequest) (
 			}
 		}
 	}
-	tiempo, err := v1.DB.UpdateMessage(r.MessageId, &r.Content, embeds, actions, overrides, attachments)
+	tiempo, err := v1.DB.UpdateMessage(r.MessageId, &r.Content, embeds, actions, overrides, attachments, r.Metadata, r.UpdateMetadata)
 	if err != nil {
 		return nil, err
 	}
@@ -643,18 +634,20 @@ func (v1 *V1) UpdateMessage(c context.Context, r *chatv1.UpdateMessageRequest) (
 	v1.PubSub.Guild.Broadcast(r.GuildId, &chatv1.Event{
 		Event: &chatv1.Event_EditedMessage{
 			EditedMessage: &chatv1.Event_MessageUpdated{
-				GuildId:       r.GuildId,
-				ChannelId:     r.ChannelId,
-				MessageId:     r.MessageId,
-				Content:       r.Content,
-				UpdateContent: r.UpdateContent,
-				Embeds:        r.Embeds,
-				UpdateEmbeds:  r.UpdateEmbeds,
-				Actions:       r.Actions,
-				UpdateActions: r.UpdateActions,
-				Overrides:     r.Overrides,
-				EditedAt:      editedAt,
-				Attachments:   attachmentsData,
+				GuildId:        r.GuildId,
+				ChannelId:      r.ChannelId,
+				MessageId:      r.MessageId,
+				Content:        r.Content,
+				UpdateContent:  r.UpdateContent,
+				Embeds:         r.Embeds,
+				UpdateEmbeds:   r.UpdateEmbeds,
+				Actions:        r.Actions,
+				UpdateActions:  r.UpdateActions,
+				Overrides:      r.Overrides,
+				EditedAt:       editedAt,
+				Attachments:    attachmentsData,
+				Metadata:       r.Metadata,
+				UpdateMetadata: r.UpdateMetadata,
 			},
 		},
 	})
@@ -971,6 +964,7 @@ func (v1 *V1) SendMessage(c context.Context, r *chatv1.SendMessageRequest) (*cha
 			Int64: int64(r.InReplyTo),
 			Valid: r.InReplyTo != 0,
 		},
+		r.Metadata,
 	)
 	if err != nil {
 		return nil, err
@@ -1001,6 +995,7 @@ func (v1 *V1) SendMessage(c context.Context, r *chatv1.SendMessageRequest) (*cha
 		Actions:     r.Actions,
 		Overrides:   r.Overrides,
 		InReplyTo:   r.InReplyTo,
+		Metadata:    r.Metadata,
 	}
 	createdAt, _ := ptypes.TimestampProto(msg.CreatedAt.UTC())
 	message.CreatedAt = createdAt

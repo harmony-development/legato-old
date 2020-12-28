@@ -4,12 +4,13 @@ import (
 	"database/sql"
 	"errors"
 
+	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/queries"
 	"github.com/ztrue/tracerr"
 )
 
 // AddChannelToGuild adds a new channel to a guild
-func (db *HarmonyDB) AddChannelToGuild(guildID uint64, channelName string, before, previous uint64, category bool, kind string) (queries.Channel, error) {
+func (db *HarmonyDB) AddChannelToGuild(guildID uint64, channelName string, before, previous uint64, category bool, metadata *harmonytypesv1.Metadata) (queries.Channel, error) {
 	pos, err := db.GetChannelPositions(guildID, before, previous)
 	err = tracerr.Wrap(err)
 	if err != nil {
@@ -20,16 +21,17 @@ func (db *HarmonyDB) AddChannelToGuild(guildID uint64, channelName string, befor
 	if err != nil {
 		return queries.Channel{}, err
 	}
+	md, err := serializeMetadata(metadata)
+	if err != nil {
+		return queries.Channel{}, err
+	}
 	channel, err := db.queries.CreateChannel(ctx, queries.CreateChannelParams{
 		GuildID:     toSqlInt64(guildID),
 		ChannelID:   chanID,
 		ChannelName: channelName,
 		Position:    pos,
 		Category:    category,
-		Kind: sql.NullString{
-			String: kind,
-			Valid:  kind != "",
-		},
+		Metadata:    md,
 	})
 	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
@@ -45,6 +47,40 @@ func (db *HarmonyDB) DeleteChannelFromGuild(guildID, channelID uint64) error {
 	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
 	return err
+}
+
+func (db *HarmonyDB) UpdateChannelInformation(guildID, channelID uint64, name string, updateName bool, metadata *harmonytypesv1.Metadata, updateMetadata bool) error {
+	tx, err := db.Begin()
+	if err != nil {
+		return tracerr.Wrap(err)
+	}
+	tq := db.queries.WithTx(tx)
+
+	e := executor{}
+	if updateName {
+		e.Execute(func() error {
+			return tq.UpdateChannelName(ctx, queries.UpdateChannelNameParams{
+				ChannelName: name,
+				GuildID:     toSqlInt64(guildID),
+				ChannelID:   channelID,
+			})
+		})
+	}
+	if updateMetadata {
+		e.Execute(func() error {
+			data, err := serializeMetadata(metadata)
+			if err != nil {
+				return err
+			}
+			return tq.UpdateChannelMetadata(ctx, queries.UpdateChannelMetadataParams{
+				Metadata:  data,
+				GuildID:   toSqlInt64(guildID),
+				ChannelID: channelID,
+			})
+		})
+	}
+
+	return e.err
 }
 
 // UpdateChannelName sets the name of a channel

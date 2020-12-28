@@ -785,6 +785,18 @@ func (m *Event_MessageUpdated) Validate() error {
 
 	// no validation rules for UpdateOverrides
 
+	if v, ok := interface{}(m.GetMetadata()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return Event_MessageUpdatedValidationError{
+				field:  "Metadata",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for UpdateMetadata
+
 	return nil
 }
 
@@ -937,6 +949,16 @@ func (m *Event_ChannelCreated) Validate() error {
 
 	// no validation rules for IsCategory
 
+	if v, ok := interface{}(m.GetMetadata()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return Event_ChannelCreatedValidationError{
+				field:  "Metadata",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -1017,6 +1039,18 @@ func (m *Event_ChannelUpdated) Validate() error {
 	// no validation rules for NextId
 
 	// no validation rules for UpdateOrder
+
+	if v, ok := interface{}(m.GetMetadata()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return Event_ChannelUpdatedValidationError{
+				field:  "Metadata",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for UpdateMetadata
 
 	return nil
 }
@@ -1165,6 +1199,18 @@ func (m *Event_GuildUpdated) Validate() error {
 	// no validation rules for Picture
 
 	// no validation rules for UpdatePicture
+
+	if v, ok := interface{}(m.GetMetadata()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return Event_GuildUpdatedValidationError{
+				field:  "Metadata",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for UpdateMetadata
 
 	return nil
 }

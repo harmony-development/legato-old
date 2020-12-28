@@ -10,9 +10,10 @@ INSERT INTO Messages (
     Created_At,
     Reply_to_ID,
     Overrides,
-    Attachments
+    Attachments,
+    Metadata
   )
-VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), $8, $9, $10) RETURNING *;
+VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), $8, $9, $10, $11) RETURNING *;
 
 -- name: DeleteMessage :execrows
 DELETE FROM Messages
@@ -73,6 +74,11 @@ WHERE Message_ID = $2;
 -- name: UpdateMessageAttachments :exec
 UPDATE Messages
 SET Attachments = $1
+WHERE Message_ID = $2;
+
+-- name: UpdateMessageMetadata :exec
+UPDATE Messages
+SET Metadata = $1
 WHERE Message_ID = $2;
 
 -- name: MessageWithIDExists :one

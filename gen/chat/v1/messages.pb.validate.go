@@ -409,6 +409,18 @@ func (m *UpdateMessageRequest) Validate() error {
 
 	// no validation rules for UpdateOverrides
 
+	if v, ok := interface{}(m.GetMetadata()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UpdateMessageRequestValidationError{
+				field:  "Metadata",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for UpdateMetadata
+
 	return nil
 }
 
@@ -675,6 +687,16 @@ func (m *SendMessageRequest) Validate() error {
 	}
 
 	// no validation rules for EchoId
+
+	if v, ok := interface{}(m.GetMetadata()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return SendMessageRequestValidationError{
+				field:  "Metadata",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
 
 	return nil
 }

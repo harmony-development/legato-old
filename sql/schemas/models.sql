@@ -60,7 +60,8 @@ CREATE TABLE IF NOT EXISTS Guilds (
     Guild_ID BIGSERIAL PRIMARY KEY NOT NULL,
     Owner_ID BIGSERIAL NOT NULL,
     Guild_Name TEXT NOT NULL,
-    Picture_URL TEXT NOT NULL
+    Picture_URL TEXT NOT NULL,
+    Metadata bytea
 );
 
 CREATE TABLE IF NOT EXISTS Roles (
@@ -91,7 +92,7 @@ CREATE TABLE IF NOT EXISTS Channels (
     Channel_Name TEXT NOT NULL,
     Position TEXT NOT NULL,
     Category BOOLEAN NOT NULL,
-    Kind TEXT,
+    Metadata BYTEA,
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE
 );
 
@@ -134,6 +135,7 @@ CREATE TABLE IF NOT EXISTS Messages (
     Overrides bytea,
     Reply_To_ID BIGINT DEFAULT 0,
     Attachments text [],
+    Metadata bytea,
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE,
     FOREIGN KEY (Channel_ID) REFERENCES Channels (Channel_ID) ON DELETE CASCADE
 );

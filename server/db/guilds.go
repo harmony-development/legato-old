@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 
+	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/queries"
 	"github.com/ztrue/tracerr"
 )
@@ -159,14 +160,38 @@ func (db *HarmonyDB) UserInGuild(userID, guildID uint64) (bool, error) {
 }
 
 // UpdateGuildName updates the guild name
-func (db *HarmonyDB) UpdateGuildName(guildID uint64, newName string) error {
-	err := db.queries.SetGuildName(ctx, queries.SetGuildNameParams{
-		GuildName: newName,
-		GuildID:   guildID,
-	})
-	err = tracerr.Wrap(err)
-	db.Logger.CheckException(err)
-	return err
+func (db *HarmonyDB) UpdateGuildInformation(guildID uint64, name, picture string, metadata *harmonytypesv1.Metadata, updateName, updatePicture, updateMetadata bool) error {
+	e := executor{}
+	if updateName {
+		e.Execute(func() error {
+			return db.queries.SetGuildName(ctx, queries.SetGuildNameParams{
+				GuildName: name,
+				GuildID:   guildID,
+			})
+		})
+	}
+	if updatePicture {
+		e.Execute(func() error {
+			return db.queries.SetGuildPicture(ctx, queries.SetGuildPictureParams{
+				PictureUrl: picture,
+				GuildID:    guildID,
+			})
+		})
+	}
+	if updateMetadata {
+		e.Execute(func() error {
+			data, err := serializeMetadata(metadata)
+			if err != nil {
+				return err
+			}
+			return db.queries.SetGuildMetadata(ctx, queries.SetGuildMetadataParams{
+				Metadata: data,
+				GuildID:  guildID,
+			})
+		})
+	}
+
+	return e.err
 }
 
 // GetGuildPicture gets the picture for a given guild

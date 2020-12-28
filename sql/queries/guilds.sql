@@ -32,13 +32,19 @@ INSERT INTO Channels (
         Channel_Name,
         Position,
         Category,
-        Kind
+        Metadata
     )
 VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;
 
 -- name: UpdateChannelName :exec
 UPDATE Channels
 SET Channel_Name = $1
+WHERE Guild_ID = $2
+    AND Channel_ID = $3;
+
+-- name: UpdateChannelMetadata :exec
+UPDATE Channels
+SET Metadata = $1
 WHERE Guild_ID = $2
     AND Channel_ID = $3;
 
@@ -72,6 +78,12 @@ WHERE Guild_ID = $1;
 UPDATE Guilds
 SET Picture_URL = $1
 WHERE Guild_ID = $2;
+
+-- name: SetGuildMetadata :exec
+UPDATE Guilds
+SET Metadata = $1
+WHERE Guild_ID = $2;
+
 
 -- name: GetGuildMembers :many
 SELECT User_ID

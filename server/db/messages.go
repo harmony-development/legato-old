@@ -4,16 +4,21 @@ import (
 	"database/sql"
 	"time"
 
+	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/queries"
 	"github.com/ztrue/tracerr"
 )
 
 // AddMessage adds a message to a channel
-func (db *HarmonyDB) AddMessage(channelID, guildID, userID, messageID uint64, message string, attachments []string, embeds, actions, overrides []byte, replyTo sql.NullInt64) (*queries.Message, error) {
+func (db *HarmonyDB) AddMessage(channelID, guildID, userID, messageID uint64, message string, attachments []string, embeds, actions, overrides []byte, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata) (*queries.Message, error) {
 	tx, err := db.Begin()
 	if err != nil {
 		err = tracerr.Wrap(err)
 		db.Logger.CheckException(err)
+		return nil, err
+	}
+	data, err := serializeMetadata(metadata)
+	if err != nil {
 		return nil, err
 	}
 	tq := db.queries.WithTx(tx)
@@ -28,6 +33,7 @@ func (db *HarmonyDB) AddMessage(channelID, guildID, userID, messageID uint64, me
 		Overrides:   overrides,
 		Attachments: attachments,
 		ReplyToID:   replyTo,
+		Metadata:    data,
 	})
 	if err != nil {
 		err = tracerr.Wrap(err)
@@ -117,7 +123,7 @@ func (db *HarmonyDB) GetMessage(messageID uint64) (r queries.Message, err error)
 	return
 }
 
-func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, actions, overrides *[]byte, attachments *[]string) (r time.Time, err error) {
+func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, actions, overrides *[]byte, attachments *[]string, metadata *harmonytypesv1.Metadata, updateMetadata bool) (time.Time, error) {
 	tx, err := db.Begin()
 	if err != nil {
 		err = tracerr.Wrap(err)
@@ -173,6 +179,18 @@ func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, ac
 			return tracerr.Wrap(tq.UpdateMessageAttachments(ctx, queries.UpdateMessageAttachmentsParams{
 				MessageID:   messageID,
 				Attachments: *attachments,
+			}))
+		})
+	}
+	if updateMetadata {
+		e.Execute(func() error {
+			data, err := serializeMetadata(metadata)
+			if err != nil {
+				return err
+			}
+			return tracerr.Wrap(tq.UpdateMessageMetadata(ctx, queries.UpdateMessageMetadataParams{
+				MessageID: messageID,
+				Metadata:  data,
 			}))
 		})
 	}
