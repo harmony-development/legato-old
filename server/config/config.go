@@ -1,16 +1,14 @@
 package config
 
 import (
-	"bytes"
-	"encoding/json"
 	"io/ioutil"
 	"log"
 	"os"
 	"time"
 
 	"github.com/creasty/defaults"
-	"github.com/hashicorp/hcl/hcl/printer"
-	"github.com/hashicorp/hcl/json/parser"
+	"github.com/hashicorp/hcl/v2/gohcl"
+	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/hashicorp/hcl/v2/hclsimple"
 	"github.com/ztrue/tracerr"
 )
@@ -98,24 +96,10 @@ func Load() (*Config, error) {
 	defaults.MustSet(&config)
 
 	if _, err := os.Stat("config.hcl"); os.IsNotExist(err) {
-		data, err := json.Marshal(config)
-		if err != nil {
-			log.Fatal(err)
-		}
+    	file := hclwrite.NewFile()
+    	gohcl.EncodeIntoBody(&config, file.Body())
 
-		ast, err := parser.Parse(data)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		out := new(bytes.Buffer)
-
-		err = printer.Fprint(out, ast)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		err = ioutil.WriteFile("config.hcl", out.Bytes(), 0755)
+		err = ioutil.WriteFile("config.hcl", file.Bytes(), 0755)
 		if err != nil {
 			log.Fatal(err)
 		}
