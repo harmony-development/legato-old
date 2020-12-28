@@ -83,7 +83,7 @@ Server {
 		# When Legato runs into the item ceiling, least recently used items are
 		# removed from memory and must be loaded from the database when referenced
 		# in the future.
-		MaximumCacheSizes {
+		Caches {
 			# Cached information on guild owners
 			Owner = 5096
 
@@ -122,11 +122,6 @@ Database {
 	Port = 5432
 	SSL = false
 	Name = "harmony"
-
-	# The location of the SQL models that Legato uses; used for automatic creation
-	# of tables. Legato requires this to point to the models.sql as found in its
-	# source.
-	ModelsLocation = "sql/schemas/models.sql"
 }
 
 # Flatfile-related configuration
