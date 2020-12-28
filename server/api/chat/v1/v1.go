@@ -1557,3 +1557,35 @@ func (v1 *V1) ProfileUpdate(c context.Context, r *chatv1.ProfileUpdateRequest) (
 
 	return &emptypb.Empty{}, nil
 }
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    4,
+		},
+		Auth:       true,
+		Location:   middleware.GuildLocation | middleware.ChannelLocation,
+		Permission: "messages.send",
+	}, "/protocol.chat.v1.ChatService/Typing")
+}
+
+// Typing handles the protocol's Typing request
+func (v1 *V1) Typing(c context.Context, r *chatv1.TypingRequest) (*empty.Empty, error) {
+	ctx := c.(middleware.HarmonyContext)
+	if err := r.Validate(); err != nil {
+		return nil, err
+	}
+
+	v1.PubSub.Guild.Broadcast(r.GuildId, &chatv1.Event{
+		Event: &chatv1.Event_Typing_{
+			Typing: &chatv1.Event_Typing{
+				UserId:    ctx.UserID,
+				GuildId:   r.GuildId,
+				ChannelId: r.ChannelId,
+			},
+		},
+	})
+
+	return &emptypb.Empty{}, nil
+}
