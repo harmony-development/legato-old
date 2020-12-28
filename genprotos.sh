@@ -11,4 +11,4 @@ for dir in $(find "protocol" -name '*.proto' -print0 | xargs -0 -n1 dirname | so
   $(find "${dir}" -name '*.proto')
 done
 
-mv gen/github.com/harmony-development/legato/gen/* gen
+rsync -a -v gen/github.com/harmony-development/legato/gen/ ./gen
