@@ -75,8 +75,8 @@ type ChoiceStep struct {
 	Choices []string
 }
 
-func NewFormStep(id string, canGoBack bool, fields []FormField, next []Step) FormStep {
-	return FormStep{
+func NewFormStep(id string, canGoBack bool, fields []FormField, next []Step) *FormStep {
+	return &FormStep{
 		BaseStep{
 			id,
 			canGoBack,
@@ -88,14 +88,14 @@ func NewFormStep(id string, canGoBack bool, fields []FormField, next []Step) For
 	}
 }
 
-func NewChoiceStep(id string, canGoBack bool, next []Step) ChoiceStep {
+func NewChoiceStep(id string, canGoBack bool, next []Step) *ChoiceStep {
 	options := []string{}
 
 	for _, s := range next {
 		options = append(options, s.ID())
 	}
 
-	return ChoiceStep{
+	return &ChoiceStep{
 		BaseStep{
 			id,
 			canGoBack,
