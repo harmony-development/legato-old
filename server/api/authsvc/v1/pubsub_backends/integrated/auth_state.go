@@ -101,7 +101,9 @@ func (h *AuthState) Broadcast(authID string, e *authv1.AuthStep) {
 	defer h.Unlock()
 
 	serv, ok := h.authEvents[authID]
-	_ = ok
+	if !ok {
+		return
+	}
 
 	if err := serv.Send(e); err != nil {
 		println(err)
