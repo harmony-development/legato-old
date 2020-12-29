@@ -22,7 +22,7 @@ type AuthState struct {
 	sync.Mutex
 }
 
-func New(l logger.Logger) *AuthState {
+func New(l logger.ILogger) *AuthState {
 	return &AuthState{
 		Logger:        l,
 		authChannels:  make(map[authv1.AuthService_StreamStepsServer]chan struct{}),

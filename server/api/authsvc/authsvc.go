@@ -2,6 +2,7 @@ package authsvc
 
 import (
 	v1 "github.com/harmony-development/legato/server/api/authsvc/v1"
+	authstate "github.com/harmony-development/legato/server/api/authsvc/v1/pubsub_backends/integrated"
 	"github.com/harmony-development/legato/server/auth"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
@@ -31,6 +32,7 @@ func New(deps *Dependencies) *Service {
 			DB:          deps.DB,
 			Logger:      deps.Logger,
 			AuthManager: deps.AuthManager,
+			AuthState:   authstate.New(deps.Logger),
 			Sonyflake:   deps.Sonyflake,
 			Config:      deps.Config,
 		},
