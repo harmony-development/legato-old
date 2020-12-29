@@ -315,13 +315,13 @@ func (v1 *V1) NextStep(c context.Context, r *authv1.NextStepRequest) (*authv1.Au
 		return nil, errors.New("missing auth ID")
 	}
 
-	stepID := v1.AuthState.GetStep(r.AuthId)
+	currentStep := v1.AuthState.GetStep(r.AuthId)
 
-	switch stepID.ID() {
-	case "initial-choice":
-		{
-			return v1.InitialChoice(r)
-		}
+	if currentStep.StepType() == authsteps.StepChoice {
+		return v1.ChoiceHandler(r)
+	}
+
+	switch currentStep.ID() {
 	case "login":
 		{
 			return v1.LocalLogin(r)
@@ -335,58 +335,31 @@ func (v1 *V1) NextStep(c context.Context, r *authv1.NextStepRequest) (*authv1.Au
 	return nil, nil
 }
 
-func (v1 *V1) InitialChoice(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
+func (v1 *V1) ChoiceHandler(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 	c := r.GetChoice()
+	currentStep := v1.AuthState.GetStep(r.AuthId)
+
+	if currentStep == nil {
+		return nil, errors.New("invalid auth id")
+	}
 
 	if c == nil {
-		s := ToAuthStep(initialStep)
+		s := ToAuthStep(v1.AuthState.GetStep(r.AuthId))
 		v1.AuthState.Broadcast(r.AuthId, s)
 		return s, nil
 	}
 
-	id := c.Choice
+	selected := c.Choice
 
-	switch id {
-	case loginStep.ID():
-		s := ToAuthStep(loginStep)
-		v1.AuthState.Broadcast(r.AuthId, s)
-		v1.AuthState.SetStep(r.AuthId, loginStep)
-		return s, nil
-	case registerStep.ID():
-		s := ToAuthStep(registerStep)
-		v1.AuthState.SetStep(r.AuthId, registerStep)
-		v1.AuthState.Broadcast(r.AuthId, s)
-		return s, nil
-	case otherStep.ID():
-		s := ToAuthStep(otherStep)
-		v1.AuthState.SetStep(r.AuthId, otherStep)
-		v1.AuthState.Broadcast(r.AuthId, s)
-		return s, nil
-	default:
-		return nil, errors.New("unknown choice")
+	for _, s := range currentStep.SubSteps() {
+		if s.ID() == selected {
+			conv := ToAuthStep(s)
+			v1.AuthState.Broadcast(r.AuthId, conv)
+			v1.AuthState.SetStep(r.AuthId, s)
+			return conv, nil
+		}
 	}
-}
-
-func (v1 *V1) otherOptionsStep(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
-	c := r.GetChoice()
-
-	if c == nil {
-		s := ToAuthStep(initialStep)
-		v1.AuthState.Broadcast(r.AuthId, s)
-		return s, nil
-	}
-
-	id := c.Choice
-
-	switch id {
-	case resetPasswordStep.ID():
-		s := ToAuthStep(resetPasswordStep)
-		v1.AuthState.Broadcast(r.AuthId, s)
-		v1.AuthState.SetStep(r.AuthId, loginStep)
-		return s, nil
-	default:
-		return nil, errors.New("unknown choice")
-	}
+	return nil, errors.New("unknown choice")
 }
 
 func (v1 *V1) LocalLogin(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
