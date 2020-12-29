@@ -269,7 +269,9 @@ func (v1 *V1) BeginAuth(c context.Context, r *emptypb.Empty) (*authv1.BeginAuthR
 		}
 	}()
 
-	return nil, nil
+	return &authv1.BeginAuthResponse{
+		AuthId: authID,
+	}, nil
 }
 
 func (v1 *V1) StreamSteps(r *authv1.StreamStepsRequest, s authv1.AuthService_StreamStepsServer) error {
@@ -283,7 +285,7 @@ func (v1 *V1) StreamSteps(r *authv1.StreamStepsRequest, s authv1.AuthService_Str
 
 func (v1 *V1) NextStep(c context.Context, r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 	if ok := v1.AuthState.AuthSessionExists(r.AuthId); !ok {
-		return nil, nil
+		return nil, errors.New("missing auth ID")
 	}
 
 	stepID := v1.AuthState.GetStep(r.AuthId)
