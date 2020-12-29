@@ -262,6 +262,13 @@ func (v1 *V1) BeginAuth(c context.Context, r *emptypb.Empty) (*authv1.BeginAuthR
 		return nil, err
 	}
 
+	go func() {
+		time.Sleep(30 * time.Second)
+		if !v1.AuthState.HasStream(authID) {
+			v1.AuthState.DeleteAuthSession(authID)
+		}
+	}()
+
 	return nil, nil
 }
 
@@ -341,6 +348,19 @@ func (v1 *V1) LocalLogin(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 		return nil, err
 	}
 
+	s := &authv1.AuthStep{
+		Step: &authv1.AuthStep_Session{
+			Session: &authv1.Session{
+				UserId:       user.UserID,
+				SessionToken: session,
+			},
+		},
+	}
+
+	v1.AuthState.Broadcast(r.AuthId, s)
+
+	defer v1.AuthState.DeleteAuthSession(r.AuthId)
+
 	return &authv1.AuthStep{
 		Step: &authv1.AuthStep_Session{
 			Session: &authv1.Session{
@@ -412,12 +432,18 @@ func (v1 *V1) Register(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 		return nil, err
 	}
 
-	return &authv1.AuthStep{
+	s := &authv1.AuthStep{
 		Step: &authv1.AuthStep_Session{
 			Session: &authv1.Session{
 				UserId:       userID,
 				SessionToken: session,
 			},
 		},
-	}, nil
+	}
+
+	v1.AuthState.Broadcast(r.AuthId, s)
+
+	defer v1.AuthState.DeleteAuthSession(r.AuthId)
+
+	return s, nil
 }

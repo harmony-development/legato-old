@@ -56,6 +56,19 @@ func (h *AuthState) AuthSessionExists(authID string) bool {
 	return exists
 }
 
+func (h *AuthState) HasStream(authID string) bool {
+	h.Lock()
+	defer h.Unlock()
+
+	_, exists := h.authEvents[authID]
+
+	if !exists {
+		return false
+	}
+
+	return len(h.authEvents[authID]) > 0
+}
+
 // Subscribe ...
 func (h *AuthState) Subscribe(authID string, s authv1.AuthService_StreamStepsServer) (chan struct{}, error) {
 	h.Lock()
@@ -127,4 +140,18 @@ func (h *AuthState) GetStep(authID string) authsteps.Step {
 	defer h.Unlock()
 
 	return h.sessionStates[authID].currentStep
+}
+
+func (h *AuthState) DeleteAuthSession(authID string) {
+	h.Lock()
+	defer h.Unlock()
+
+	if _, exists := h.sessionStates[authID]; exists {
+		delete(h.sessionStates, authID)
+	}
+	if _, exists := h.authEvents[authID]; exists {
+		for _, s := range h.authEvents[authID] {
+			h.Unsubscribe(authID, s)
+		}
+	}
 }
