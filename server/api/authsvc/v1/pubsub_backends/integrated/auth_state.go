@@ -16,7 +16,7 @@ type AuthSessionState struct {
 // AuthState ...
 type AuthState struct {
 	authChannels  map[authv1.AuthService_StreamStepsServer]chan struct{}
-	authEvents    map[string][]authv1.AuthService_StreamStepsServer
+	authEvents    map[string]authv1.AuthService_StreamStepsServer
 	sessionStates map[string]*AuthSessionState
 	Logger        logger.ILogger
 	sync.Mutex
@@ -26,7 +26,7 @@ func New(l logger.ILogger) *AuthState {
 	return &AuthState{
 		Logger:        l,
 		authChannels:  make(map[authv1.AuthService_StreamStepsServer]chan struct{}),
-		authEvents:    make(map[string][]authv1.AuthService_StreamStepsServer),
+		authEvents:    make(map[string]authv1.AuthService_StreamStepsServer),
 		sessionStates: make(map[string]*AuthSessionState),
 	}
 }
@@ -62,11 +62,7 @@ func (h *AuthState) HasStream(authID string) bool {
 
 	_, exists := h.authEvents[authID]
 
-	if !exists {
-		return false
-	}
-
-	return len(h.authEvents[authID]) > 0
+	return exists
 }
 
 // Subscribe ...
@@ -80,11 +76,11 @@ func (h *AuthState) Subscribe(authID string, s authv1.AuthService_StreamStepsSer
 
 	go func() {
 		<-s.Context().Done()
-		h.Unsubscribe(authID, s)
+		h.DeleteAuthSession(authID)
 	}()
 
 	h.authChannels[s] = make(chan struct{})
-	h.authEvents[authID] = append(h.authEvents[authID], s)
+	h.authEvents[authID] = s
 
 	return h.authChannels[s], nil
 }
@@ -94,19 +90,9 @@ func (h *AuthState) Unsubscribe(authID string, s authv1.AuthService_StreamStepsS
 	h.Lock()
 	defer h.Unlock()
 
-	val, ok := h.authEvents[authID]
-	_ = ok
-	for idx, serv := range val {
-		if serv == s {
-			val[idx] = val[len(val)-1]
-			val[len(val)-1] = nil
-			val = val[:len(val)-1]
-			break
-		}
-	}
 	close(h.authChannels[s])
 	delete(h.authChannels, s)
-	h.authEvents[authID] = val
+	h.authEvents[authID] = nil
 }
 
 // Broadcast ...
@@ -114,12 +100,11 @@ func (h *AuthState) Broadcast(authID string, e *authv1.AuthStep) {
 	h.Lock()
 	defer h.Unlock()
 
-	val, ok := h.authEvents[authID]
+	serv, ok := h.authEvents[authID]
 	_ = ok
-	for _, serv := range val {
-		if err := serv.Send(e); err != nil {
-			println(err)
-		}
+
+	if err := serv.Send(e); err != nil {
+		println(err)
 	}
 }
 
@@ -146,11 +131,11 @@ func (h *AuthState) DeleteAuthSession(authID string) {
 	h.Lock()
 	defer h.Unlock()
 
-	delete(h.sessionStates, authID)
 	if _, exists := h.authEvents[authID]; exists {
-		for _, s := range h.authEvents[authID] {
-			close(h.authChannels[s])
-			delete(h.authChannels, s)
-		}
+		s := h.authEvents[authID]
+
+		close(h.authChannels[s])
+		delete(h.authChannels, s)
 	}
+	delete(h.sessionStates, authID)
 }
