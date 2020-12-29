@@ -8,8 +8,8 @@ import (
 
 	"github.com/creasty/defaults"
 	"github.com/hashicorp/hcl/v2/gohcl"
-	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/hashicorp/hcl/v2/hclsimple"
+	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/ztrue/tracerr"
 )
 
@@ -96,8 +96,8 @@ func Load() (*Config, error) {
 	defaults.MustSet(&config)
 
 	if _, err := os.Stat("config.hcl"); os.IsNotExist(err) {
-    	file := hclwrite.NewFile()
-    	gohcl.EncodeIntoBody(&config, file.Body())
+		file := hclwrite.NewFile()
+		gohcl.EncodeIntoBody(&config, file.Body())
 
 		err = ioutil.WriteFile("config.hcl", file.Bytes(), 0755)
 		if err != nil {

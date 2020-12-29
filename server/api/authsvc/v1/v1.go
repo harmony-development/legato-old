@@ -5,11 +5,14 @@ import (
 	"crypto/x509"
 	"database/sql"
 	"encoding/pem"
+	"errors"
 	"time"
 	"unicode"
 
 	"github.com/dgrijalva/jwt-go"
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
+	"github.com/harmony-development/legato/server/api/authsvc/v1/authsteps"
+	authstate "github.com/harmony-development/legato/server/api/authsvc/v1/pubsub_backends/integrated"
 	"github.com/harmony-development/legato/server/api/middleware"
 	"github.com/harmony-development/legato/server/auth"
 	"github.com/harmony-development/legato/server/config"
@@ -31,10 +34,101 @@ type Dependencies struct {
 	AuthManager *auth.Manager
 	Sonyflake   *sonyflake.Sonyflake
 	Config      *config.Config
+	AuthState   *authstate.AuthState
 }
 
 type V1 struct {
 	Dependencies
+}
+
+var loginStep = authsteps.NewFormStep(
+	"login",
+	[]authsteps.FormField{
+		{
+			Name:      "email",
+			FieldType: "email",
+		},
+		{
+			Name:      "password",
+			FieldType: "password",
+		},
+	},
+	[]authsteps.Step{},
+)
+
+var registerStep = authsteps.NewFormStep(
+	"register",
+	[]authsteps.FormField{
+		{
+			Name:      "email",
+			FieldType: "email",
+		},
+		{
+			Name:      "password",
+			FieldType: "password",
+		},
+		{
+			Name:      "confirm-password",
+			FieldType: "password",
+		},
+	},
+	[]authsteps.Step{},
+)
+
+var initialStep = authsteps.NewChoiceStep(
+	"initial-choice",
+	[]authsteps.Step{
+		loginStep,
+		registerStep,
+	},
+)
+
+func ToAuthStep(s authsteps.Step) *authv1.AuthStep {
+	switch s.StepType() {
+	case authsteps.StepChoice:
+		{
+			cs := s.(authsteps.ChoiceStep)
+			return &authv1.AuthStep{
+				Step: &authv1.AuthStep_Choice_{
+					Choice: &authv1.AuthStep_Choice{
+						Title:   cs.ID(),
+						Options: cs.Choices,
+					},
+				},
+			}
+		}
+	case authsteps.StepForm:
+		{
+			fs := s.(authsteps.FormStep)
+			return &authv1.AuthStep{
+				Step: &authv1.AuthStep_Form_{
+					Form: &authv1.AuthStep_Form{
+						Title: fs.ID(),
+						Fields: func() []*authv1.AuthStep_Form_FormField {
+							fields := []*authv1.AuthStep_Form_FormField{}
+
+							for _, f := range fs.Fields {
+								fields = append(fields, &authv1.AuthStep_Form_FormField{
+									Name: f.Name,
+									Type: f.FieldType,
+								})
+							}
+
+							return fields
+						}(),
+					},
+				},
+			}
+		}
+	default:
+		return nil
+	}
+}
+
+func New(deps Dependencies) *V1 {
+	return &V1{
+		Dependencies: deps,
+	}
 }
 
 func (v1 *V1) Federate(c context.Context, r *authv1.FederateRequest) (*authv1.FederateReply, error) {
@@ -73,7 +167,7 @@ func init() {
 	}, "/protocol.auth.v1.AuthService/Federate")
 }
 
-func (v1 *V1) Key(c context.Context, r *authv1.KeyRequest) (*authv1.KeyReply, error) {
+func (v1 *V1) Key(c context.Context, r *emptypb.Empty) (*authv1.KeyReply, error) {
 	keyBytes, err := x509.MarshalPKIXPublicKey(v1.AuthManager.PubKey)
 	if err != nil {
 		return nil, err
@@ -89,29 +183,7 @@ func (v1 *V1) Key(c context.Context, r *authv1.KeyRequest) (*authv1.KeyReply, er
 	}, nil
 }
 
-func (v1 *V1) LocalLogin(c context.Context, r *authv1.LoginRequest_Local) (*authv1.Session, error) {
-	user, err := v1.DB.GetUserByEmail(r.Email)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, status.Error(codes.NotFound, responses.InvalidEmail)
-		}
-		return nil, err
-	}
-	if err := bcrypt.CompareHashAndPassword(user.Password, r.Password); err != nil {
-		return nil, status.Error(codes.Unauthenticated, responses.InvalidPassword)
-	}
-	session := randstr.Hex(16)
-	if err := v1.DB.AddSession(user.UserID, session); err != nil {
-		return nil, err
-	}
-
-	return &authv1.Session{
-		UserId:       user.UserID,
-		SessionToken: session,
-	}, nil
-}
-
-func (v1 *V1) FederatedLogin(c context.Context, r *authv1.LoginRequest_Federated) (*authv1.Session, error) {
+func (v1 *V1) LoginFederated(c context.Context, r *authv1.LoginFederatedRequest) (*authv1.Session, error) {
 	pem, err := v1.AuthManager.GetPublicKey(r.Domain)
 	if err != nil {
 		return nil, err
@@ -154,17 +226,6 @@ func (v1 *V1) FederatedLogin(c context.Context, r *authv1.LoginRequest_Federated
 	}, nil
 }
 
-func (v1 *V1) Login(c context.Context, r *authv1.LoginRequest) (*authv1.Session, error) {
-	switch r.GetLogin().(type) {
-	case *authv1.LoginRequest_Federated_:
-		return v1.FederatedLogin(c, r.GetFederated())
-	case *authv1.LoginRequest_Local_:
-		return v1.LocalLogin(c, r.GetLocal())
-	default:
-		panic("invalid case")
-	}
-}
-
 func (v1 *V1) PasswordAcceptable(passwd []byte) bool {
 	var stats struct {
 		upper   int
@@ -190,22 +251,132 @@ func (v1 *V1) PasswordAcceptable(passwd []byte) bool {
 	return !bad
 }
 
-func (v1 *V1) Register(c context.Context, r *authv1.RegisterRequest) (*authv1.Session, error) {
-	if len(r.Username) < v1.Config.Server.Policies.Username.MinLength || len(r.Username) > v1.Config.Server.Policies.Username.MaxLength {
+func (v1 *V1) GetConfig(c context.Context, r *emptypb.Empty) (*emptypb.Empty, error) {
+	return nil, nil
+}
+
+func (v1 *V1) BeginAuth(c context.Context, r *emptypb.Empty) (*authv1.BeginAuthResponse, error) {
+	authID := randstr.Hex(32)
+
+	if err := v1.AuthState.NewAuthSession(authID, initialStep); err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+func (v1 *V1) StreamSteps(r *authv1.StreamStepsRequest, s authv1.AuthService_StreamStepsServer) error {
+	channel, err := v1.AuthState.Subscribe(r.AuthId, s)
+	if err != nil {
+		return err
+	}
+	<-channel
+	return nil
+}
+
+func (v1 *V1) NextStep(c context.Context, r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
+	if ok := v1.AuthState.AuthSessionExists(r.AuthId); !ok {
+		return nil, nil
+	}
+
+	stepID := v1.AuthState.GetStep(r.AuthId)
+
+	switch stepID.ID() {
+	case "initial-choice":
+		{
+			return v1.InitialChoice(r)
+		}
+	case "login":
+		{
+			return v1.LocalLogin(r)
+		}
+	case "register":
+		{
+			return v1.Register(r)
+		}
+	}
+
+	return nil, nil
+}
+
+func (v1 *V1) InitialChoice(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
+	id := r.GetChoice().Choice
+	switch id {
+	case loginStep.ID():
+		s := ToAuthStep(loginStep)
+		v1.AuthState.Broadcast(r.AuthId, s)
+		v1.AuthState.SetStep(r.AuthId, loginStep)
+		return s, nil
+	case registerStep.ID():
+		s := ToAuthStep(registerStep)
+		v1.AuthState.SetStep(r.AuthId, registerStep)
+		v1.AuthState.Broadcast(r.AuthId, s)
+		return s, nil
+	default:
+		return nil, errors.New("unknown choice")
+	}
+}
+
+func (v1 *V1) LocalLogin(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
+	f := r.GetForm()
+	if f != nil {
+		return nil, errors.New("missing form")
+	}
+
+	email := f.Fields[0].GetString_()
+	password := f.Fields[1].GetBytes()
+
+	user, err := v1.DB.GetUserByEmail(email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, status.Error(codes.NotFound, responses.InvalidEmail)
+		}
+		return nil, err
+	}
+	if err := bcrypt.CompareHashAndPassword(user.Password, password); err != nil {
+		return nil, status.Error(codes.Unauthenticated, responses.InvalidPassword)
+	}
+	session := randstr.Hex(16)
+	if err := v1.DB.AddSession(user.UserID, session); err != nil {
+		return nil, err
+	}
+
+	return &authv1.AuthStep{
+		Step: &authv1.AuthStep_Session{
+			Session: &authv1.Session{
+				UserId:       user.UserID,
+				SessionToken: session,
+			},
+		},
+	}, nil
+}
+
+func (v1 *V1) Register(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
+	f := r.GetForm()
+	if f != nil {
+		return nil, errors.New("missing form")
+	}
+
+	email := f.Fields[0].GetString_()
+	username := f.Fields[1].GetString_()
+	password := f.Fields[2].GetBytes()
+	_ = f.Fields[3].GetBytes() // confirmPassword
+
+	if len(username) < v1.Config.Server.Policies.Username.MinLength || len(username) > v1.Config.Server.Policies.Username.MaxLength {
 		_ = responses.UsernameLength(
 			v1.Config.Server.Policies.Username.MinLength,
 			v1.Config.Server.Policies.Username.MaxLength,
 		)
 		return nil, status.Error(codes.InvalidArgument, responses.InvalidUsername)
 	}
-	if len(r.Password) < v1.Config.Server.Policies.Password.MinLength || len(r.Password) > v1.Config.Server.Policies.Password.MaxLength {
+	if len(password) < v1.Config.Server.Policies.Password.MinLength || len(password) > v1.Config.Server.Policies.Password.MaxLength {
 		_ = responses.PasswordLength(
 			v1.Config.Server.Policies.Password.MinLength,
 			v1.Config.Server.Policies.Password.MaxLength,
 		)
 		return nil, status.Error(codes.InvalidArgument, responses.InvalidPassword)
 	}
-	if !v1.PasswordAcceptable(r.Password) {
+	if !v1.PasswordAcceptable(password) {
 		_ = responses.PasswordPolicy(
 			v1.Config.Server.Policies.Password.MinUpper,
 			v1.Config.Server.Policies.Password.MinLower,
@@ -215,12 +386,12 @@ func (v1 *V1) Register(c context.Context, r *authv1.RegisterRequest) (*authv1.Se
 		return nil, status.Error(codes.InvalidArgument, responses.InvalidPassword)
 	}
 
-	hash, err := bcrypt.GenerateFromPassword(r.Password, bcrypt.DefaultCost)
+	hash, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
 	}
 
-	exists, err := v1.DB.EmailExists(r.Email)
+	exists, err := v1.DB.EmailExists(email)
 	if err != nil {
 		return nil, err
 	} else if exists {
@@ -232,7 +403,7 @@ func (v1 *V1) Register(c context.Context, r *authv1.RegisterRequest) (*authv1.Se
 		return nil, err
 	}
 
-	if err := v1.DB.AddLocalUser(userID, r.Email, r.Username, hash); err != nil {
+	if err := v1.DB.AddLocalUser(userID, email, username, hash); err != nil {
 		return nil, err
 	}
 
@@ -241,12 +412,12 @@ func (v1 *V1) Register(c context.Context, r *authv1.RegisterRequest) (*authv1.Se
 		return nil, err
 	}
 
-	return &authv1.Session{
-		UserId:       userID,
-		SessionToken: session,
+	return &authv1.AuthStep{
+		Step: &authv1.AuthStep_Session{
+			Session: &authv1.Session{
+				UserId:       userID,
+				SessionToken: session,
+			},
+		},
 	}, nil
-}
-
-func (v1 *V1) GetConfig(c context.Context, r *emptypb.Empty) (*authv1.GetConfigResponse, error) {
-	return nil, nil
 }

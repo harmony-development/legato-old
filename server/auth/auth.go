@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 
 	"github.com/dgrijalva/jwt-go"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
 	"github.com/harmony-development/legato/server/config"
@@ -76,7 +77,7 @@ func (m Manager) GetPublicKey(host string) (string, error) {
 		return "", err
 	}
 	foundationClient := authv1.NewAuthServiceClient(conn)
-	reply, err := foundationClient.Key(context.Background(), &authv1.KeyRequest{})
+	reply, err := foundationClient.Key(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return "", err
 	}

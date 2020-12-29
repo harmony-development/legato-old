@@ -670,8 +670,6 @@ func (m *GetGuildChannelsResponse_Channel) Validate() error {
 
 	// no validation rules for IsCategory
 
-	// no validation rules for Kind
-
 	return nil
 }
 

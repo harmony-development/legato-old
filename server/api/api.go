@@ -102,7 +102,7 @@ func New(deps Dependencies) *API {
 		Sonyflake:   api.Sonyflake,
 		AuthManager: api.AuthManager,
 		Config:      api.Config,
-	}))
+	}).V1)
 	mediaproxyv1.RegisterMediaProxyServiceServer(api.GrpcServer, mediaproxy.New(&mediaproxy.Dependencies{
 		DB:     api.DB,
 		Logger: api.Logger,
