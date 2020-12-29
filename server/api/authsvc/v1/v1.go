@@ -79,11 +79,30 @@ var registerStep = authsteps.NewFormStep(
 	[]authsteps.Step{},
 )
 
+var resetPasswordStep = authsteps.NewFormStep(
+	"reset-password",
+	[]authsteps.FormField{
+		{
+			Name:      "email",
+			FieldType: "email",
+		},
+	},
+	[]authsteps.Step{},
+)
+
+var otherStep = authsteps.NewChoiceStep(
+	"other-options",
+	[]authsteps.Step{
+		resetPasswordStep,
+	},
+)
+
 var initialStep = authsteps.NewChoiceStep(
 	"initial-choice",
 	[]authsteps.Step{
 		loginStep,
 		registerStep,
+		otherStep,
 	},
 )
 
@@ -130,6 +149,10 @@ func ToAuthStep(s authsteps.Step) *authv1.AuthStep {
 }
 
 func New(deps Dependencies) *V1 {
+	if deps.Config.Server.Policies.EnablePasswordResetForm {
+		otherStep.AddStep(resetPasswordStep)
+	}
+
 	return &V1{
 		Dependencies: deps,
 	}

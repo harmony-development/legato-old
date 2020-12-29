@@ -24,7 +24,8 @@ type Config struct {
 		UseCORS        bool   `hcl:"UseCORS,optional" default:"true"`
 
 		Policies struct {
-			Avatar struct {
+			EnablePasswordResetForm bool `hcl:"EnablePasswordResetForm,optional" default:"false"`
+			Avatar                  struct {
 				Width   int  `hcl:"Width,optional" default:"256"`
 				Height  int  `hcl:"Height,optional" default:"256"`
 				Quality int  `hcl:"Quality,optional" default:"50"`

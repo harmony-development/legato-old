@@ -36,6 +36,10 @@ func (b BaseStep) SubSteps() []Step {
 	return b.subSteps
 }
 
+func (b BaseStep) AddStep(s Step) {
+	b.subSteps = append(b.subSteps, s)
+}
+
 // FormField ...
 type FormField struct {
 	Name      string
