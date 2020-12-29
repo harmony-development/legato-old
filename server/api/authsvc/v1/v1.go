@@ -309,7 +309,16 @@ func (v1 *V1) NextStep(c context.Context, r *authv1.NextStepRequest) (*authv1.Au
 }
 
 func (v1 *V1) InitialChoice(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
-	id := r.GetChoice().Choice
+	c := r.GetChoice()
+
+	if c == nil {
+		s := ToAuthStep(initialStep)
+		v1.AuthState.Broadcast(r.AuthId, s)
+		return s, nil
+	}
+
+	id := c.Choice
+
 	switch id {
 	case loginStep.ID():
 		s := ToAuthStep(loginStep)
