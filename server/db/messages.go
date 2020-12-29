@@ -199,7 +199,7 @@ func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, ac
 			err = tracerr.Wrap(err)
 			return time.Time{}, err
 		}
-		err = tracerr.Wrap(err)
+		err = tracerr.Wrap(e.err)
 		return time.Time{}, e.err
 	}
 	if err := tx.Commit(); err != nil {
