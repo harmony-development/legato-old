@@ -376,14 +376,7 @@ func (v1 *V1) LocalLogin(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 
 	defer v1.AuthState.DeleteAuthSession(r.AuthId)
 
-	return &authv1.AuthStep{
-		Step: &authv1.AuthStep_Session{
-			Session: &authv1.Session{
-				UserId:       user.UserID,
-				SessionToken: session,
-			},
-		},
-	}, nil
+	return s, nil
 }
 
 func (v1 *V1) Register(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
