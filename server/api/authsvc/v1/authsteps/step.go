@@ -29,11 +29,11 @@ type BaseStep struct {
 	previousStep Step
 }
 
-func (b BaseStep) ID() string {
+func (b *BaseStep) ID() string {
 	return b.id
 }
 
-func (b BaseStep) CanGoBack() bool {
+func (b *BaseStep) CanGoBack() bool {
 	return b.canGoBack
 }
 
@@ -41,19 +41,19 @@ func (b BaseStep) StepType() StepType {
 	return b.stepType
 }
 
-func (b BaseStep) SubSteps() []Step {
+func (b *BaseStep) SubSteps() []Step {
 	return b.subSteps
 }
 
-func (b BaseStep) AddStep(s Step) {
+func (b *BaseStep) AddStep(s Step) {
 	b.subSteps = append(b.subSteps, s)
 }
 
-func (b BaseStep) SetPreviousStep(s Step) {
+func (b *BaseStep) SetPreviousStep(s Step) {
 	b.previousStep = s
 }
 
-func (b BaseStep) GetPreviousStep() Step {
+func (b *BaseStep) GetPreviousStep() Step {
 	return b.previousStep
 }
 
@@ -65,19 +65,19 @@ type FormField struct {
 
 // FormStep ...
 type FormStep struct {
-	BaseStep
+	*BaseStep
 	Fields []FormField
 }
 
 // ChoiceStep ...
 type ChoiceStep struct {
-	BaseStep
+	*BaseStep
 	Choices []string
 }
 
 func NewFormStep(id string, canGoBack bool, fields []FormField, next []Step) *FormStep {
 	return &FormStep{
-		BaseStep{
+		&BaseStep{
 			id,
 			canGoBack,
 			StepForm,
@@ -96,7 +96,7 @@ func NewChoiceStep(id string, canGoBack bool, next []Step) *ChoiceStep {
 	}
 
 	return &ChoiceStep{
-		BaseStep{
+		&BaseStep{
 			id,
 			canGoBack,
 			StepChoice,
