@@ -158,6 +158,12 @@ func New(deps Dependencies) *V1 {
 		otherStep.AddStep(resetPasswordStep)
 	}
 
+	initialStep.SetPreviousStep(initialStep)
+	registerStep.SetPreviousStep(initialStep)
+	loginStep.SetPreviousStep(initialStep)
+	otherStep.SetPreviousStep(initialStep)
+	resetPasswordStep.SetPreviousStep(otherStep)
+
 	return &V1{
 		Dependencies: deps,
 	}
@@ -376,7 +382,6 @@ func (v1 *V1) ChoiceHandler(r *authv1.NextStepRequest) (*authv1.AuthStep, error)
 
 	for _, s := range currentStep.SubSteps() {
 		if s.ID() == selected {
-			s.SetPreviousStep(currentStep)
 			conv := ToAuthStep(s)
 			v1.AuthState.Broadcast(r.AuthId, conv)
 			v1.AuthState.SetStep(r.AuthId, s)
