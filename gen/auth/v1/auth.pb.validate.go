@@ -182,6 +182,8 @@ func (m *AuthStep) Validate() error {
 
 	// no validation rules for FallbackUrl
 
+	// no validation rules for CanGoBack
+
 	switch m.Step.(type) {
 
 	case *AuthStep_Choice_:

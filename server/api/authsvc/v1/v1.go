@@ -117,6 +117,7 @@ func ToAuthStep(s authsteps.Step) *authv1.AuthStep {
 		{
 			cs := s.(*authsteps.ChoiceStep)
 			return &authv1.AuthStep{
+				CanGoBack: cs.CanGoBack(),
 				Step: &authv1.AuthStep_Choice_{
 					Choice: &authv1.AuthStep_Choice{
 						Title:   cs.ID(),
@@ -129,6 +130,7 @@ func ToAuthStep(s authsteps.Step) *authv1.AuthStep {
 		{
 			fs := s.(*authsteps.FormStep)
 			return &authv1.AuthStep{
+				CanGoBack: fs.CanGoBack(),
 				Step: &authv1.AuthStep_Form_{
 					Form: &authv1.AuthStep_Form{
 						Title: fs.ID(),
@@ -416,6 +418,7 @@ func (v1 *V1) LocalLogin(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 	}
 
 	s := &authv1.AuthStep{
+		CanGoBack: loginStep.CanGoBack(),
 		Step: &authv1.AuthStep_Session{
 			Session: &authv1.Session{
 				UserId:       user.UserID,
@@ -493,6 +496,7 @@ func (v1 *V1) Register(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 	}
 
 	s := &authv1.AuthStep{
+		CanGoBack: registerStep.CanGoBack(),
 		Step: &authv1.AuthStep_Session{
 			Session: &authv1.Session{
 				UserId:       userID,
