@@ -357,6 +357,33 @@ func (v1 *V1) InitialChoice(r *authv1.NextStepRequest) (*authv1.AuthStep, error)
 		v1.AuthState.SetStep(r.AuthId, registerStep)
 		v1.AuthState.Broadcast(r.AuthId, s)
 		return s, nil
+	case otherStep.ID():
+		s := ToAuthStep(otherStep)
+		v1.AuthState.SetStep(r.AuthId, otherStep)
+		v1.AuthState.Broadcast(r.AuthId, s)
+		return s, nil
+	default:
+		return nil, errors.New("unknown choice")
+	}
+}
+
+func (v1 *V1) otherOptionsStep(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
+	c := r.GetChoice()
+
+	if c == nil {
+		s := ToAuthStep(initialStep)
+		v1.AuthState.Broadcast(r.AuthId, s)
+		return s, nil
+	}
+
+	id := c.Choice
+
+	switch id {
+	case resetPasswordStep.ID():
+		s := ToAuthStep(resetPasswordStep)
+		v1.AuthState.Broadcast(r.AuthId, s)
+		v1.AuthState.SetStep(r.AuthId, loginStep)
+		return s, nil
 	default:
 		return nil, errors.New("unknown choice")
 	}
