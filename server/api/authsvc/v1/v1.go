@@ -115,7 +115,7 @@ func ToAuthStep(s authsteps.Step) *authv1.AuthStep {
 	switch s.StepType() {
 	case authsteps.StepChoice:
 		{
-			cs := s.(authsteps.ChoiceStep)
+			cs := s.(*authsteps.ChoiceStep)
 			return &authv1.AuthStep{
 				Step: &authv1.AuthStep_Choice_{
 					Choice: &authv1.AuthStep_Choice{
@@ -127,7 +127,7 @@ func ToAuthStep(s authsteps.Step) *authv1.AuthStep {
 		}
 	case authsteps.StepForm:
 		{
-			fs := s.(authsteps.FormStep)
+			fs := s.(*authsteps.FormStep)
 			return &authv1.AuthStep{
 				Step: &authv1.AuthStep_Form_{
 					Form: &authv1.AuthStep_Form{
