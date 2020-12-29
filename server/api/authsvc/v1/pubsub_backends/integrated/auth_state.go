@@ -133,11 +133,10 @@ func (h *AuthState) DeleteAuthSession(authID string) {
 	h.Lock()
 	defer h.Unlock()
 
-	if _, exists := h.authEvents[authID]; exists {
-		s := h.authEvents[authID]
+	s := h.authEvents[authID]
 
-		close(h.authChannels[s])
-		delete(h.authChannels, s)
-	}
+	close(h.authChannels[s])
+	delete(h.authChannels, s)
+	h.authEvents[authID] = nil
 	delete(h.sessionStates, authID)
 }
