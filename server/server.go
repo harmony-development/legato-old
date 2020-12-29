@@ -116,7 +116,7 @@ func (inst Instance) Start() {
 		})
 		err := (&stdlibHTTP.Server{
 			Handler: stdlibHTTP.HandlerFunc(func(resp stdlibHTTP.ResponseWriter, req *stdlibHTTP.Request) {
-				if strings.Contains(req.Header.Get("Access-Control-Request-Headers"), "x-grpc-web") || req.Header.Get("x-grpc-web") == "1" || req.Header.Get("Sec-Websocket-Protocol") == "grpc-websockets" {
+				if strings.Contains(req.Header.Get("Access-Control-Request-Headers"), "x-grpc-web") || req.Header.Get("x-grpc-web") == "1" || req.Header.Get("Sec-Websocket-Protocol") == "grpc-websockets" || strings.Contains(req.Header.Get("content-type"), "grpc-web") {
 					inst.API.GrpcWebServer.ServeHTTP(resp, req)
 				} else if strings.HasPrefix(req.Header.Get("User-Agent"), "Prometheus") {
 					inst.API.PrometheusServer.Handler.ServeHTTP(resp, req)
