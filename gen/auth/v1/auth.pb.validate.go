@@ -220,6 +220,18 @@ func (m *AuthStep) Validate() error {
 			}
 		}
 
+	case *AuthStep_Waiting_:
+
+		if v, ok := interface{}(m.GetWaiting()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return AuthStepValidationError{
+					field:  "Waiting",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
 	}
 
 	return nil
@@ -373,6 +385,73 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = NextStepRequestValidationError{}
+
+// Validate checks the field values on StepBackRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, an
+// error is returned.
+func (m *StepBackRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for AuthId
+
+	return nil
+}
+
+// StepBackRequestValidationError is the validation error returned by
+// StepBackRequest.Validate if the designated constraints aren't met.
+type StepBackRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e StepBackRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e StepBackRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e StepBackRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e StepBackRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e StepBackRequestValidationError) ErrorName() string { return "StepBackRequestValidationError" }
+
+// Error satisfies the builtin error interface
+func (e StepBackRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sStepBackRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = StepBackRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = StepBackRequestValidationError{}
 
 // Validate checks the field values on StreamStepsRequest with the rules
 // defined in the proto definition for this message. If any rules are
@@ -864,6 +943,75 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = AuthStep_FormValidationError{}
+
+// Validate checks the field values on AuthStep_Waiting with the rules defined
+// in the proto definition for this message. If any rules are violated, an
+// error is returned.
+func (m *AuthStep_Waiting) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Title
+
+	// no validation rules for Description
+
+	return nil
+}
+
+// AuthStep_WaitingValidationError is the validation error returned by
+// AuthStep_Waiting.Validate if the designated constraints aren't met.
+type AuthStep_WaitingValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AuthStep_WaitingValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AuthStep_WaitingValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AuthStep_WaitingValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AuthStep_WaitingValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AuthStep_WaitingValidationError) ErrorName() string { return "AuthStep_WaitingValidationError" }
+
+// Error satisfies the builtin error interface
+func (e AuthStep_WaitingValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAuthStep_Waiting.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AuthStep_WaitingValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AuthStep_WaitingValidationError{}
 
 // Validate checks the field values on AuthStep_Form_FormField with the rules
 // defined in the proto definition for this message. If any rules are

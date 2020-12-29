@@ -43,6 +43,7 @@ type V1 struct {
 
 var loginStep = authsteps.NewFormStep(
 	"login",
+	true,
 	[]authsteps.FormField{
 		{
 			Name:      "email",
@@ -58,6 +59,7 @@ var loginStep = authsteps.NewFormStep(
 
 var registerStep = authsteps.NewFormStep(
 	"register",
+	true,
 	[]authsteps.FormField{
 		{
 			Name:      "email",
@@ -81,6 +83,7 @@ var registerStep = authsteps.NewFormStep(
 
 var resetPasswordStep = authsteps.NewFormStep(
 	"reset-password",
+	true,
 	[]authsteps.FormField{
 		{
 			Name:      "email",
@@ -92,6 +95,7 @@ var resetPasswordStep = authsteps.NewFormStep(
 
 var otherStep = authsteps.NewChoiceStep(
 	"other-options",
+	true,
 	[]authsteps.Step{
 		resetPasswordStep,
 	},
@@ -99,6 +103,7 @@ var otherStep = authsteps.NewChoiceStep(
 
 var initialStep = authsteps.NewChoiceStep(
 	"initial-choice",
+	false,
 	[]authsteps.Step{
 		loginStep,
 		registerStep,
@@ -335,6 +340,24 @@ func (v1 *V1) NextStep(c context.Context, r *authv1.NextStepRequest) (*authv1.Au
 	return nil, nil
 }
 
+func (v1 *V1) StepBack(c context.Context, r *authv1.StepBackRequest) (*authv1.AuthStep, error) {
+	if ok := v1.AuthState.AuthSessionExists(r.AuthId); !ok {
+		return nil, errors.New("missing auth ID")
+	}
+
+	currentStep := v1.AuthState.GetStep(r.AuthId)
+
+	if currentStep.CanGoBack() {
+		previousStep := currentStep.GetPreviousStep()
+		conv := ToAuthStep(previousStep)
+		v1.AuthState.Broadcast(r.AuthId, conv)
+		v1.AuthState.SetStep(r.AuthId, previousStep)
+		return conv, nil
+	}
+
+	return nil, errors.New("can't go back")
+}
+
 func (v1 *V1) ChoiceHandler(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 	c := r.GetChoice()
 	currentStep := v1.AuthState.GetStep(r.AuthId)
@@ -353,6 +376,7 @@ func (v1 *V1) ChoiceHandler(r *authv1.NextStepRequest) (*authv1.AuthStep, error)
 
 	for _, s := range currentStep.SubSteps() {
 		if s.ID() == selected {
+			s.SetPreviousStep(currentStep)
 			conv := ToAuthStep(s)
 			v1.AuthState.Broadcast(r.AuthId, conv)
 			v1.AuthState.SetStep(r.AuthId, s)

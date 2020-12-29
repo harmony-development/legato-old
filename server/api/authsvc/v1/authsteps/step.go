@@ -13,19 +13,28 @@ const (
 // Step is an interface which enables polymorphism
 type Step interface {
 	ID() string
+	CanGoBack() bool
+	SetPreviousStep(s Step)
+	GetPreviousStep() Step
 	StepType() StepType
 	SubSteps() []Step
 }
 
 // BaseStep is the base implementation for the Step interface
 type BaseStep struct {
-	id       string
-	stepType StepType
-	subSteps []Step
+	id           string
+	canGoBack    bool
+	stepType     StepType
+	subSteps     []Step
+	previousStep Step
 }
 
 func (b BaseStep) ID() string {
 	return b.id
+}
+
+func (b BaseStep) CanGoBack() bool {
+	return b.canGoBack
 }
 
 func (b BaseStep) StepType() StepType {
@@ -38,6 +47,14 @@ func (b BaseStep) SubSteps() []Step {
 
 func (b BaseStep) AddStep(s Step) {
 	b.subSteps = append(b.subSteps, s)
+}
+
+func (b BaseStep) SetPreviousStep(s Step) {
+	b.previousStep = s
+}
+
+func (b BaseStep) GetPreviousStep() Step {
+	return b.previousStep
 }
 
 // FormField ...
@@ -58,18 +75,20 @@ type ChoiceStep struct {
 	Choices []string
 }
 
-func NewFormStep(id string, fields []FormField, next []Step) FormStep {
+func NewFormStep(id string, canGoBack bool, fields []FormField, next []Step) FormStep {
 	return FormStep{
 		BaseStep{
 			id,
+			canGoBack,
 			StepForm,
 			next,
+			nil,
 		},
 		fields,
 	}
 }
 
-func NewChoiceStep(id string, next []Step) ChoiceStep {
+func NewChoiceStep(id string, canGoBack bool, next []Step) ChoiceStep {
 	options := []string{}
 
 	for _, s := range next {
@@ -79,8 +98,10 @@ func NewChoiceStep(id string, next []Step) ChoiceStep {
 	return ChoiceStep{
 		BaseStep{
 			id,
+			canGoBack,
 			StepChoice,
 			next,
+			nil,
 		},
 		options,
 	}
