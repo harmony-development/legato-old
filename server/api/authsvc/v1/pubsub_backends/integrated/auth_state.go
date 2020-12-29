@@ -74,8 +74,8 @@ func (h *AuthState) Subscribe(authID string, s authv1.AuthService_StreamStepsSer
 	h.Lock()
 	defer h.Unlock()
 
-	if _, ok := h.authEvents[authID]; !ok {
-		return nil, errors.New("no auth event")
+	if _, ok := h.sessionStates[authID]; !ok {
+		return nil, errors.New("no session state")
 	}
 
 	go func() {
