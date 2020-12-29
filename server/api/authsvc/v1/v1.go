@@ -64,6 +64,10 @@ var registerStep = authsteps.NewFormStep(
 			FieldType: "email",
 		},
 		{
+			Name:      "username",
+			FieldType: "username",
+		},
+		{
 			Name:      "password",
 			FieldType: "password",
 		},
