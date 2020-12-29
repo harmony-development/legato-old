@@ -10,14 +10,14 @@ import (
 )
 
 type AuthSessionState struct {
-	currentStep authsteps.Step
+	CurrentStep authsteps.Step
 }
 
 // AuthState ...
 type AuthState struct {
 	authChannels  map[authv1.AuthService_StreamStepsServer]chan struct{}
 	authEvents    map[string][]authv1.AuthService_StreamStepsServer
-	sessionStates map[string]AuthSessionState
+	sessionStates map[string]*AuthSessionState
 	Logger        logger.ILogger
 	sync.Mutex
 }
@@ -27,7 +27,7 @@ func New(l logger.ILogger) *AuthState {
 		Logger:        l,
 		authChannels:  make(map[authv1.AuthService_StreamStepsServer]chan struct{}),
 		authEvents:    make(map[string][]authv1.AuthService_StreamStepsServer),
-		sessionStates: make(map[string]AuthSessionState),
+		sessionStates: make(map[string]*AuthSessionState),
 	}
 }
 
@@ -40,8 +40,8 @@ func (h *AuthState) NewAuthSession(authID string, step authsteps.Step) error {
 		return errors.New("session already exists")
 	}
 
-	h.sessionStates[authID] = AuthSessionState{
-		currentStep: step,
+	h.sessionStates[authID] = &AuthSessionState{
+		CurrentStep: step,
 	}
 
 	return nil
@@ -128,18 +128,18 @@ func (h *AuthState) SetStep(authID string, newStep authsteps.Step) {
 	h.Lock()
 	defer h.Unlock()
 
-	val, ok := h.sessionStates[authID]
+	_, ok := h.sessionStates[authID]
 	if !ok {
 		return
 	}
-	val.currentStep = newStep
+	h.sessionStates[authID].CurrentStep = newStep
 }
 
 func (h *AuthState) GetStep(authID string) authsteps.Step {
 	h.Lock()
 	defer h.Unlock()
 
-	return h.sessionStates[authID].currentStep
+	return h.sessionStates[authID].CurrentStep
 }
 
 func (h *AuthState) DeleteAuthSession(authID string) {
