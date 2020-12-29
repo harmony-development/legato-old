@@ -341,7 +341,7 @@ func (v1 *V1) InitialChoice(r *authv1.NextStepRequest) (*authv1.AuthStep, error)
 
 func (v1 *V1) LocalLogin(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 	f := r.GetForm()
-	if f != nil {
+	if f == nil {
 		return nil, errors.New("missing form")
 	}
 
