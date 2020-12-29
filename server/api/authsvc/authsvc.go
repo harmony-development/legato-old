@@ -27,15 +27,13 @@ func New(deps *Dependencies) *Service {
 	svc := &Service{
 		Dependencies: deps,
 	}
-	svc.V1 = &v1.V1{
-		Dependencies: v1.Dependencies{
-			DB:          deps.DB,
-			Logger:      deps.Logger,
-			AuthManager: deps.AuthManager,
-			AuthState:   authstate.New(deps.Logger),
-			Sonyflake:   deps.Sonyflake,
-			Config:      deps.Config,
-		},
-	}
+	svc.V1 = v1.New(v1.Dependencies{
+		DB:          deps.DB,
+		Logger:      deps.Logger,
+		AuthManager: deps.AuthManager,
+		AuthState:   authstate.New(deps.Logger),
+		Sonyflake:   deps.Sonyflake,
+		Config:      deps.Config,
+	})
 	return svc
 }
