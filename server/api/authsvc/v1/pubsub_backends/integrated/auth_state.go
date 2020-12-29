@@ -74,11 +74,6 @@ func (h *AuthState) Subscribe(authID string, s authv1.AuthService_StreamStepsSer
 		return nil, errors.New("no session state")
 	}
 
-	go func() {
-		<-s.Context().Done()
-		h.DeleteAuthSession(authID)
-	}()
-
 	h.authChannels[s] = make(chan struct{})
 	h.authEvents[authID] = s
 
