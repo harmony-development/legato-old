@@ -149,7 +149,9 @@ func (h *AuthState) DeleteAuthSession(authID string) {
 	delete(h.sessionStates, authID)
 	if _, exists := h.authEvents[authID]; exists {
 		for _, s := range h.authEvents[authID] {
+			h.Unlock()
 			h.Unsubscribe(authID, s)
+			h.Lock()
 		}
 	}
 }
