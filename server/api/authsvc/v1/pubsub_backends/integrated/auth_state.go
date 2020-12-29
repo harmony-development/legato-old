@@ -135,8 +135,10 @@ func (h *AuthState) DeleteAuthSession(authID string) {
 
 	s := h.authEvents[authID]
 
-	close(h.authChannels[s])
-	delete(h.authChannels, s)
+	if h.authChannels[s] != nil {
+		close(h.authChannels[s])
+		delete(h.authChannels, s)
+	}
 	h.authEvents[authID] = nil
 	delete(h.sessionStates, authID)
 }
