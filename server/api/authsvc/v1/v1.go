@@ -71,11 +71,7 @@ var registerStep = authsteps.NewFormStep(
 		},
 		{
 			Name:      "password",
-			FieldType: "password",
-		},
-		{
-			Name:      "confirm-password",
-			FieldType: "password",
+			FieldType: "new-password",
 		},
 	},
 	[]authsteps.Step{},
