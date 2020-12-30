@@ -32,7 +32,8 @@ SET Local_User_ID = Foreign_Users.Local_User_ID RETURNING Local_User_ID;
 SELECT Users.User_ID,
   Profiles.Username,
   Profiles.Avatar,
-  Profiles.Status
+  Profiles.Status,
+  Profiles.Is_Bot
 FROM Users
   INNER JOIN Profiles ON (Users.User_ID = Profiles.User_ID)
 WHERE Users.User_ID = $1;

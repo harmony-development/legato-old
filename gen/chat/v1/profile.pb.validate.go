@@ -117,6 +117,8 @@ func (m *GetUserResponse) Validate() error {
 
 	// no validation rules for UserStatus
 
+	// no validation rules for IsBot
+
 	return nil
 }
 

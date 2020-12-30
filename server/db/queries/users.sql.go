@@ -252,7 +252,8 @@ const getUser = `-- name: GetUser :one
 SELECT Users.User_ID,
   Profiles.Username,
   Profiles.Avatar,
-  Profiles.Status
+  Profiles.Status,
+  Profiles.Is_Bot
 FROM Users
   INNER JOIN Profiles ON (Users.User_ID = Profiles.User_ID)
 WHERE Users.User_ID = $1
@@ -263,6 +264,7 @@ type GetUserRow struct {
 	Username string         `json:"username"`
 	Avatar   sql.NullString `json:"avatar"`
 	Status   int16          `json:"status"`
+	IsBot    bool           `json:"is_bot"`
 }
 
 func (q *Queries) GetUser(ctx context.Context, userID uint64) (GetUserRow, error) {
@@ -273,6 +275,7 @@ func (q *Queries) GetUser(ctx context.Context, userID uint64) (GetUserRow, error
 		&i.Username,
 		&i.Avatar,
 		&i.Status,
+		&i.IsBot,
 	)
 	return i, err
 }

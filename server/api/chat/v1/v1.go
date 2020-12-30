@@ -1463,6 +1463,7 @@ func (v1 *V1) GetUser(c context.Context, r *chatv1.GetUserRequest) (*chatv1.GetU
 		UserName:   res.Username,
 		UserAvatar: res.Avatar.String,
 		UserStatus: harmonytypesv1.UserStatus(res.Status),
+		IsBot:      res.IsBot,
 	}, nil
 }
 
