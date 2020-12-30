@@ -6,5 +6,6 @@ mkShell {
   shellHook = ''
     export PROTOC=${protobuf}/bin/protoc
     export PROTOC_INCLUDE=${protobuf}/include
+    export GOROOT=${go}/share/go
   '';
 }

@@ -11,5 +11,6 @@
       "server": "localhost",
       "username": "amadeus"
     }
-  ]
+  ],
+  "nixEnvSelector.nixShellConfig": "${workspaceRoot}/shell.nix"
 }
