@@ -120,6 +120,7 @@ type IHarmonyDB interface {
 	SetStatus(userID uint64, status harmonytypesv1.UserStatus) error
 	SetUsername(userID uint64, username string) error
 	SetAvatar(userID uint64, avatar string) error
+	SetIsBot(userID uint64, isBot bool) error
 	GetUserMetadata(userID uint64, appID string) (string, error)
 	GetNonceInfo(nonce string) (queries.GetNonceInfoRow, error)
 	AddNonce(nonce string, userID uint64, homeServer string) error

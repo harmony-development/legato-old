@@ -332,6 +332,19 @@ func (q *Queries) GetUserMetadata(ctx context.Context, arg GetUserMetadataParams
 	return metadata, err
 }
 
+const isBot = `-- name: IsBot :one
+SELECT Is_Bot
+FROM Profiles
+WHERE User_ID = $1
+`
+
+func (q *Queries) IsBot(ctx context.Context, userID uint64) (bool, error) {
+	row := q.queryRow(ctx, q.isBotStmt, isBot, userID)
+	var is_bot bool
+	err := row.Scan(&is_bot)
+	return is_bot, err
+}
+
 const isIPWhitelisted = `-- name: IsIPWhitelisted :one
 SELECT EXISTS (
     SELECT 1
@@ -396,6 +409,22 @@ type RemoveGuildFromListParams struct {
 
 func (q *Queries) RemoveGuildFromList(ctx context.Context, arg RemoveGuildFromListParams) error {
 	_, err := q.exec(ctx, q.removeGuildFromListStmt, removeGuildFromList, arg.UserID, arg.GuildID, arg.HomeServer)
+	return err
+}
+
+const setBot = `-- name: SetBot :exec
+UPDATE Profiles
+SET Is_Bot = $1
+WHERE User_ID = $2
+`
+
+type SetBotParams struct {
+	IsBot  bool   `json:"is_bot"`
+	UserID uint64 `json:"user_id"`
+}
+
+func (q *Queries) SetBot(ctx context.Context, arg SetBotParams) error {
+	_, err := q.exec(ctx, q.setBotStmt, setBot, arg.IsBot, arg.UserID)
 	return err
 }
 

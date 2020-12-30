@@ -217,6 +217,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.incrementInviteStmt, err = db.PrepareContext(ctx, incrementInvite); err != nil {
 		return nil, fmt.Errorf("error preparing query IncrementInvite: %w", err)
 	}
+	if q.isBotStmt, err = db.PrepareContext(ctx, isBot); err != nil {
+		return nil, fmt.Errorf("error preparing query IsBot: %w", err)
+	}
 	if q.isIPWhitelistedStmt, err = db.PrepareContext(ctx, isIPWhitelisted); err != nil {
 		return nil, fmt.Errorf("error preparing query IsIPWhitelisted: %w", err)
 	}
@@ -270,6 +273,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.sessionToUserIDStmt, err = db.PrepareContext(ctx, sessionToUserID); err != nil {
 		return nil, fmt.Errorf("error preparing query SessionToUserID: %w", err)
+	}
+	if q.setBotStmt, err = db.PrepareContext(ctx, setBot); err != nil {
+		return nil, fmt.Errorf("error preparing query SetBot: %w", err)
+	}
+	if q.setExpirationStmt, err = db.PrepareContext(ctx, setExpiration); err != nil {
+		return nil, fmt.Errorf("error preparing query SetExpiration: %w", err)
 	}
 	if q.setGuildMetadataStmt, err = db.PrepareContext(ctx, setGuildMetadata); err != nil {
 		return nil, fmt.Errorf("error preparing query SetGuildMetadata: %w", err)
@@ -676,6 +685,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing incrementInviteStmt: %w", cerr)
 		}
 	}
+	if q.isBotStmt != nil {
+		if cerr := q.isBotStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing isBotStmt: %w", cerr)
+		}
+	}
 	if q.isIPWhitelistedStmt != nil {
 		if cerr := q.isIPWhitelistedStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing isIPWhitelistedStmt: %w", cerr)
@@ -764,6 +778,16 @@ func (q *Queries) Close() error {
 	if q.sessionToUserIDStmt != nil {
 		if cerr := q.sessionToUserIDStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing sessionToUserIDStmt: %w", cerr)
+		}
+	}
+	if q.setBotStmt != nil {
+		if cerr := q.setBotStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing setBotStmt: %w", cerr)
+		}
+	}
+	if q.setExpirationStmt != nil {
+		if cerr := q.setExpirationStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing setExpirationStmt: %w", cerr)
 		}
 	}
 	if q.setGuildMetadataStmt != nil {
@@ -995,6 +1019,7 @@ type Queries struct {
 	guildsForUserStmt                              *sql.Stmt
 	guildsForUserWithDataStmt                      *sql.Stmt
 	incrementInviteStmt                            *sql.Stmt
+	isBotStmt                                      *sql.Stmt
 	isIPWhitelistedStmt                            *sql.Stmt
 	isUserWhitelistedStmt                          *sql.Stmt
 	messageWithIDExistsStmt                        *sql.Stmt
@@ -1013,6 +1038,8 @@ type Queries struct {
 	resolveGuildIDStmt                             *sql.Stmt
 	rolesForUserStmt                               *sql.Stmt
 	sessionToUserIDStmt                            *sql.Stmt
+	setBotStmt                                     *sql.Stmt
+	setExpirationStmt                              *sql.Stmt
 	setGuildMetadataStmt                           *sql.Stmt
 	setGuildNameStmt                               *sql.Stmt
 	setGuildPictureStmt                            *sql.Stmt
@@ -1109,6 +1136,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		guildsForUserStmt:                              q.guildsForUserStmt,
 		guildsForUserWithDataStmt:                      q.guildsForUserWithDataStmt,
 		incrementInviteStmt:                            q.incrementInviteStmt,
+		isBotStmt:                                      q.isBotStmt,
 		isIPWhitelistedStmt:                            q.isIPWhitelistedStmt,
 		isUserWhitelistedStmt:                          q.isUserWhitelistedStmt,
 		messageWithIDExistsStmt:                        q.messageWithIDExistsStmt,
@@ -1127,6 +1155,8 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		resolveGuildIDStmt:                             q.resolveGuildIDStmt,
 		rolesForUserStmt:                               q.rolesForUserStmt,
 		sessionToUserIDStmt:                            q.sessionToUserIDStmt,
+		setBotStmt:                                     q.setBotStmt,
+		setExpirationStmt:                              q.setExpirationStmt,
 		setGuildMetadataStmt:                           q.setGuildMetadataStmt,
 		setGuildNameStmt:                               q.setGuildNameStmt,
 		setGuildPictureStmt:                            q.setGuildPictureStmt,

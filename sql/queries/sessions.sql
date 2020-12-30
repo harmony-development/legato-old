@@ -4,13 +4,14 @@ FROM Sessions
 WHERE Session = $1;
 
 -- name: AddSession :exec
-INSERT INTO Sessions
-(User_ID,
- Session,
- Expiration)
+INSERT INTO Sessions (User_ID, Session, Expiration)
 VALUES ($1, $2, $3);
 
+-- name: SetExpiration :exec
+UPDATE Sessions
+SET Expiration = $1
+WHERE User_ID = $2;
+
 -- name: ExpireSessions :exec
-DELETE
-FROM Sessions
+DELETE FROM Sessions
 WHERE Expiration <= $1;

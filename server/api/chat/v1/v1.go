@@ -1528,6 +1528,12 @@ func (v1 *V1) ProfileUpdate(c context.Context, r *chatv1.ProfileUpdateRequest) (
 			return nil, errors.New(responses.UnknownError)
 		}
 	}
+	if r.UpdateIsBot {
+		if err := v1.DB.SetIsBot(ctx.UserID, r.IsBot); err != nil {
+			v1.Logger.Exception(err)
+			return nil, errors.New(responses.UnknownError)
+		}
+	}
 
 	guilds, err := v1.DB.GetLocalGuilds(ctx.UserID)
 	if err != nil {

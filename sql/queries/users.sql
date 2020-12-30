@@ -68,6 +68,16 @@ UPDATE Profiles
 SET Status = $1
 WHERE User_ID = $2;
 
+-- name: SetBot :exec
+UPDATE Profiles
+SET Is_Bot = $1
+WHERE User_ID = $2;
+
+-- name: IsBot :one
+SELECT Is_Bot
+FROM Profiles
+WHERE User_ID = $1;
+
 -- name: GetUserMetadata :one
 SELECT Metadata
 FROM User_Metadata

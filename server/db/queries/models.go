@@ -119,6 +119,7 @@ type Profile struct {
 	Username string         `json:"username"`
 	Avatar   sql.NullString `json:"avatar"`
 	Status   int16          `json:"status"`
+	IsBot    bool           `json:"is_bot"`
 }
 
 type RateLimitWhitelistIp struct {

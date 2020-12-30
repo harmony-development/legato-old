@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"math"
 	"time"
 
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
@@ -336,4 +337,32 @@ func (db HarmonyDB) GetAllMutuals(userID uint64) ([]uint64, error) {
 	mutuals, err := db.queries.GetAllMutuals(ctx, userID)
 	err = tracerr.Wrap(err)
 	return mutuals, err
+}
+
+func (db HarmonyDB) SetIsBot(userID uint64, isBot bool) error {
+	if isBot {
+		if err := db.queries.SetExpiration(ctx, queries.SetExpirationParams{
+			UserID:     userID,
+			Expiration: math.MaxInt64,
+		}); err != nil {
+			return err
+		}
+
+		return db.queries.SetBot(ctx, queries.SetBotParams{
+			IsBot:  isBot,
+			UserID: userID,
+		})
+	} else {
+		if err := db.queries.SetExpiration(ctx, queries.SetExpirationParams{
+			Expiration: time.Now().UTC().Add(db.Config.Server.Policies.Sessions.Duration).Unix(),
+			UserID:     userID,
+		}); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (db HarmonyDB) IsBot(userID uint64) (bool, error) {
+	return db.queries.IsBot(ctx, userID)
 }
