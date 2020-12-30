@@ -1552,6 +1552,8 @@ func (v1 *V1) ProfileUpdate(c context.Context, r *chatv1.ProfileUpdateRequest) (
 					UpdateAvatar:   r.UpdateAvatar,
 					NewStatus:      r.NewStatus,
 					UpdateStatus:   r.UpdateStatus,
+					IsBot:          r.IsBot,
+					UpdateIsBot:    r.UpdateIsBot,
 				},
 			},
 		})

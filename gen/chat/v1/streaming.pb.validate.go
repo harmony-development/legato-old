@@ -1790,6 +1790,10 @@ func (m *Event_ProfileUpdated) Validate() error {
 
 	// no validation rules for UpdateStatus
 
+	// no validation rules for IsBot
+
+	// no validation rules for UpdateIsBot
+
 	return nil
 }
 

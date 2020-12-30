@@ -342,13 +342,14 @@ func (db HarmonyDB) GetAllMutuals(userID uint64) ([]uint64, error) {
 func (db HarmonyDB) SetIsBot(userID uint64, isBot bool) error {
 	var newExpiration int64
 
+	if err := db.queries.SetBot(ctx, queries.SetBotParams{
+		IsBot:  isBot,
+		UserID: userID,
+	}); err != nil {
+		return err
+	}
+
 	if isBot {
-		if err := db.queries.SetBot(ctx, queries.SetBotParams{
-			IsBot:  isBot,
-			UserID: userID,
-		}); err != nil {
-			return err
-		}
 		newExpiration = math.MaxInt64
 	} else {
 		newExpiration = time.Now().UTC().Add(db.Config.Server.Policies.Sessions.Duration).Unix()
