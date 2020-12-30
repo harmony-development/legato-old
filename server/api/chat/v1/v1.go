@@ -826,6 +826,15 @@ func (v1 *V1) LeaveGuild(c context.Context, r *chatv1.LeaveGuildRequest) (*empty
 	} else if isOwner {
 		return nil, status.Error(codes.FailedPrecondition, responses.InvalidRequest)
 	}
+
+	if err := v1.DB.DeleteMember(r.GuildId, ctx.UserID); err != nil {
+		return nil, err
+	}
+
+	if err := v1.DB.RemoveGuildFromList(ctx.UserID, r.GuildId, ""); err != nil {
+		return nil, err
+	}
+
 	v1.PubSub.Guild.UnsubscribeUserFromGuild(r.GuildId, ctx.UserID)
 	v1.PubSub.Guild.Broadcast(r.GuildId, &chatv1.Event{
 		Event: &chatv1.Event_LeftMember{
@@ -835,6 +844,16 @@ func (v1 *V1) LeaveGuild(c context.Context, r *chatv1.LeaveGuildRequest) (*empty
 			},
 		},
 	})
+
+	v1.PubSub.Homeserver.Broadcast(ctx.UserID, &chatv1.Event{
+		Event: &chatv1.Event_GuildRemovedFromList_{
+			GuildRemovedFromList: &chatv1.Event_GuildRemovedFromList{
+				GuildId:    r.GuildId,
+				Homeserver: "",
+			},
+		},
+	})
+
 	return &emptypb.Empty{}, nil
 }
 
@@ -1529,6 +1548,7 @@ func (v1 *V1) ProfileUpdate(c context.Context, r *chatv1.ProfileUpdateRequest) (
 			return nil, errors.New(responses.UnknownError)
 		}
 	}
+
 	if r.UpdateIsBot {
 		if err := v1.DB.SetIsBot(ctx.UserID, r.IsBot); err != nil {
 			v1.Logger.Exception(err)

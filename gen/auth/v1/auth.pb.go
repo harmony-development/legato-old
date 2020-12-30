@@ -135,6 +135,11 @@ func (x *Session) GetSessionToken() string {
 	return ""
 }
 
+// AuthStep
+// A step in the authentication process
+// Contains a variety of different types of views
+// It is recommended to have a fallback_url specified
+// For non-trivial authentication procedures (such as captchas)
 type AuthStep struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -259,6 +264,10 @@ func (*AuthStep_Session) isAuthStep_Step() {}
 
 func (*AuthStep_Waiting_) isAuthStep_Step() {}
 
+// NextStepRequest
+// contains the client's response to the server's challenge
+// This needs to be called first with no arguments to
+// receive the first step
 type NextStepRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -347,6 +356,8 @@ func (*NextStepRequest_Choice_) isNextStepRequest_Step() {}
 
 func (*NextStepRequest_Form_) isNextStepRequest_Step() {}
 
+// StepBackRequest
+// A request to go back 1 step
 type StepBackRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -394,6 +405,9 @@ func (x *StepBackRequest) GetAuthId() string {
 	return ""
 }
 
+// StreamStepsRequest
+// Required to be initiated by all authenticating clients
+// Allows the server to send steps
 type StreamStepsRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -646,6 +660,9 @@ func (x *LoginFederatedRequest) GetDomain() string {
 	return ""
 }
 
+// Choice
+// A step which allows the user to choose from a range of options
+// Allows you to show a heading by specifying title
 type AuthStep_Choice struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -701,6 +718,9 @@ func (x *AuthStep_Choice) GetOptions() []string {
 	return nil
 }
 
+// Form
+// A step which requires the user to input information
+// Allows you to show a heading by specifying title
 type AuthStep_Form struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -756,6 +776,10 @@ func (x *AuthStep_Form) GetFields() []*AuthStep_Form_FormField {
 	return nil
 }
 
+// Waiting
+// A step which requires the user to perform an external action
+// The title and description should explain to the user
+// what they should do to complete this step
 type AuthStep_Waiting struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -811,6 +835,15 @@ func (x *AuthStep_Waiting) GetDescription() string {
 	return ""
 }
 
+// FormField
+// A field in the form, containing information on how it should
+// be rendered
+// Here is a list of form types that need to be supported:
+// email: a field type that has to contain a valid email
+// password: a field type that has to contain a password
+// new-password: a field type for new passwords
+// text: a field type that has to contain text
+// number: a field type that has to contain a number
 type AuthStep_Form_FormField struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -866,6 +899,7 @@ func (x *AuthStep_Form_FormField) GetType() string {
 	return ""
 }
 
+// A simple choice string indicating which option the user chose
 type NextStepRequest_Choice struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -913,6 +947,7 @@ func (x *NextStepRequest_Choice) GetChoice() string {
 	return ""
 }
 
+// Form fields can either be bytes, string, or int64.
 type NextStepRequest_FormFields struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1007,6 +1042,7 @@ func (*NextStepRequest_FormFields_String_) isNextStepRequest_FormFields_Field() 
 
 func (*NextStepRequest_FormFields_Number) isNextStepRequest_FormFields_Field() {}
 
+// An array of form fields, in the same order they came in from the server
 type NextStepRequest_Form struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

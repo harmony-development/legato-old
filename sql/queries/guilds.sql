@@ -84,7 +84,6 @@ UPDATE Guilds
 SET Metadata = $1
 WHERE Guild_ID = $2;
 
-
 -- name: GetGuildMembers :many
 SELECT User_ID
 FROM Guild_Members
