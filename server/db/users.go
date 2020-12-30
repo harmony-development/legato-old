@@ -340,27 +340,24 @@ func (db HarmonyDB) GetAllMutuals(userID uint64) ([]uint64, error) {
 }
 
 func (db HarmonyDB) SetIsBot(userID uint64, isBot bool) error {
-	if isBot {
-		if err := db.queries.SetExpiration(ctx, queries.SetExpirationParams{
-			UserID:     userID,
-			Expiration: math.MaxInt64,
-		}); err != nil {
-			return err
-		}
+	var newExpiration int64
 
-		return db.queries.SetBot(ctx, queries.SetBotParams{
+	if isBot {
+		if err := db.queries.SetBot(ctx, queries.SetBotParams{
 			IsBot:  isBot,
 			UserID: userID,
-		})
-	} else {
-		if err := db.queries.SetExpiration(ctx, queries.SetExpirationParams{
-			Expiration: time.Now().UTC().Add(db.Config.Server.Policies.Sessions.Duration).Unix(),
-			UserID:     userID,
 		}); err != nil {
 			return err
 		}
+		newExpiration = math.MaxInt64
+	} else {
+		newExpiration = time.Now().UTC().Add(db.Config.Server.Policies.Sessions.Duration).Unix()
 	}
-	return nil
+
+	return db.queries.SetExpiration(ctx, queries.SetExpirationParams{
+		UserID:     userID,
+		Expiration: newExpiration,
+	})
 }
 
 func (db HarmonyDB) IsBot(userID uint64) (bool, error) {
