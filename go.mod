@@ -21,7 +21,6 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/hashicorp/golang-lru v0.5.4
-	github.com/hashicorp/hcl v1.0.0
 	github.com/hashicorp/hcl/v2 v2.8.0
 	github.com/improbable-eng/grpc-web v0.13.0
 	github.com/labstack/echo/v4 v4.1.11
