@@ -3,6 +3,7 @@ package logger
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"os"
 	"strings"
 
@@ -48,7 +49,7 @@ func New(cfg *config.Config) *Logger {
 
 // CheckException logs an exception if it's defined
 func (l Logger) CheckException(err error) {
-	if err == nil || err == sql.ErrNoRows {
+	if err == nil || errors.Is(err, sql.ErrNoRows) {
 		return
 	}
 	l.Exception(err)

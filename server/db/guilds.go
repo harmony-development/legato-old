@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/queries"
@@ -155,6 +156,9 @@ func (db *HarmonyDB) UserInGuild(userID, guildID uint64) (bool, error) {
 		GuildID: guildID,
 	})
 	err = tracerr.Wrap(err)
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, nil
+	}
 	db.Logger.CheckException(err)
 	return id == userID, err
 }
