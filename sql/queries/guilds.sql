@@ -101,6 +101,11 @@ FROM Guild_Members
     INNER JOIN guilds ON Guild_Members.Guild_ID = Guilds.Guild_ID
 WHERE User_ID = $1;
 
+-- name: CountMembersInGuild :one
+SELECT COUNT(*)
+FROM Guild_Members
+WHERE Guild_ID = $1;
+
 -- name: UserInGuild :one
 SELECT User_ID
 FROM Guild_Members

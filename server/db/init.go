@@ -100,6 +100,7 @@ type IHarmonyDB interface {
 	GetLocalGuilds(userID uint64) ([]uint64, error)
 	ChannelsForGuild(guildID uint64) ([]queries.Channel, error)
 	MembersInGuild(guildID uint64) ([]uint64, error)
+	CountMembersInGuild(guildID uint64) (int64, error)
 	GetMessage(messageID uint64) (queries.Message, error)
 	GetUserByEmail(email string) (queries.GetUserByEmailRow, error)
 	GetUserByID(userID uint64) (queries.GetUserRow, error)

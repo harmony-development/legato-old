@@ -208,6 +208,10 @@ func (db *HarmonyDB) GetGuildPicture(guildID uint64) (string, error) {
 	return pic, err
 }
 
+func (db *HarmonyDB) CountMembersInGuild(guildID uint64) (int64, error) {
+	return db.queries.CountMembersInGuild(ctx, guildID)
+}
+
 // SetGuildPicture sets the picture for a given guild
 func (db *HarmonyDB) SetGuildPicture(guildID uint64, pictureURL string) error {
 	err := db.queries.SetGuildPicture(ctx, queries.SetGuildPictureParams{
