@@ -439,7 +439,6 @@ func (v1 *V1) Register(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 	email := f.Fields[0].GetString_()
 	username := f.Fields[1].GetString_()
 	password := f.Fields[2].GetBytes()
-	_ = f.Fields[3].GetBytes() // confirmPassword
 
 	if len(username) < v1.Config.Server.Policies.Username.MinLength || len(username) > v1.Config.Server.Policies.Username.MaxLength {
 		_ = responses.UsernameLength(
