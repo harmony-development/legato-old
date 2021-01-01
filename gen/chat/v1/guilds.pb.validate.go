@@ -1278,6 +1278,148 @@ var _ interface {
 	ErrorName() string
 } = JoinGuildResponseValidationError{}
 
+// Validate checks the field values on PreviewGuildRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *PreviewGuildRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for InviteId
+
+	return nil
+}
+
+// PreviewGuildRequestValidationError is the validation error returned by
+// PreviewGuildRequest.Validate if the designated constraints aren't met.
+type PreviewGuildRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e PreviewGuildRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e PreviewGuildRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e PreviewGuildRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e PreviewGuildRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e PreviewGuildRequestValidationError) ErrorName() string {
+	return "PreviewGuildRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e PreviewGuildRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sPreviewGuildRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = PreviewGuildRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = PreviewGuildRequestValidationError{}
+
+// Validate checks the field values on PreviewGuildResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *PreviewGuildResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Name
+
+	// no validation rules for Avatar
+
+	// no validation rules for MemeberCount
+
+	return nil
+}
+
+// PreviewGuildResponseValidationError is the validation error returned by
+// PreviewGuildResponse.Validate if the designated constraints aren't met.
+type PreviewGuildResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e PreviewGuildResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e PreviewGuildResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e PreviewGuildResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e PreviewGuildResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e PreviewGuildResponseValidationError) ErrorName() string {
+	return "PreviewGuildResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e PreviewGuildResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sPreviewGuildResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = PreviewGuildResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = PreviewGuildResponseValidationError{}
+
 // Validate checks the field values on LeaveGuildRequest with the rules defined
 // in the proto definition for this message. If any rules are violated, an
 // error is returned.

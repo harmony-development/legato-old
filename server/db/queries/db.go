@@ -64,6 +64,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.addUserToRoleStmt, err = db.PrepareContext(ctx, addUserToRole); err != nil {
 		return nil, fmt.Errorf("error preparing query AddUserToRole: %w", err)
 	}
+	if q.countMembersInGuildStmt, err = db.PrepareContext(ctx, countMembersInGuild); err != nil {
+		return nil, fmt.Errorf("error preparing query CountMembersInGuild: %w", err)
+	}
 	if q.createChannelStmt, err = db.PrepareContext(ctx, createChannel); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateChannel: %w", err)
 	}
@@ -428,6 +431,11 @@ func (q *Queries) Close() error {
 	if q.addUserToRoleStmt != nil {
 		if cerr := q.addUserToRoleStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing addUserToRoleStmt: %w", cerr)
+		}
+	}
+	if q.countMembersInGuildStmt != nil {
+		if cerr := q.countMembersInGuildStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing countMembersInGuildStmt: %w", cerr)
 		}
 	}
 	if q.createChannelStmt != nil {
@@ -968,6 +976,7 @@ type Queries struct {
 	addUserStmt                                    *sql.Stmt
 	addUserToGuildStmt                             *sql.Stmt
 	addUserToRoleStmt                              *sql.Stmt
+	countMembersInGuildStmt                        *sql.Stmt
 	createChannelStmt                              *sql.Stmt
 	createEmotePackStmt                            *sql.Stmt
 	createGuildStmt                                *sql.Stmt
@@ -1085,6 +1094,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		addUserStmt:                      q.addUserStmt,
 		addUserToGuildStmt:               q.addUserToGuildStmt,
 		addUserToRoleStmt:                q.addUserToRoleStmt,
+		countMembersInGuildStmt:          q.countMembersInGuildStmt,
 		createChannelStmt:                q.createChannelStmt,
 		createEmotePackStmt:              q.createEmotePackStmt,
 		createGuildStmt:                  q.createGuildStmt,

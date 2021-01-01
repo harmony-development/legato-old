@@ -23,6 +23,19 @@ func (q *Queries) AddUserToGuild(ctx context.Context, arg AddUserToGuildParams) 
 	return err
 }
 
+const countMembersInGuild = `-- name: CountMembersInGuild :one
+SELECT COUNT(*)
+FROM Guild_Members
+WHERE Guild_ID = $1
+`
+
+func (q *Queries) CountMembersInGuild(ctx context.Context, guildID uint64) (int64, error) {
+	row := q.queryRow(ctx, q.countMembersInGuildStmt, countMembersInGuild, guildID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createChannel = `-- name: CreateChannel :one
 INSERT INTO Channels (
         Guild_ID,

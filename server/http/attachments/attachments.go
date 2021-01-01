@@ -101,17 +101,37 @@ func (a *API) DownloadHandler(c echo.Context) error {
 	}
 	fileID := ctx.Param("file_id")
 
-	if strings.HasPrefix(fileID, "http") {
-		decoded, err := url.QueryUnescape(fileID)
-		if err != nil {
-			return err
-		}
+	decoded, err := url.QueryUnescape(fileID)
+	if err != nil {
+		return err
+	}
 
+	if strings.HasPrefix(decoded, "https:") || strings.HasPrefix(decoded, "http:") {
 		fakeReq, err := http.NewRequest(http.MethodGet, "/"+decoded, nil)
 		if err != nil {
 			return err
 		}
 		a.ImageProxy.ServeHTTP(c.Response(), fakeReq)
+		return nil
+	}
+
+	if strings.HasPrefix(decoded, "hmc:") {
+		trimmed := strings.TrimPrefix(decoded, "hmc://")
+		split := strings.Split(trimmed, "/")
+		if len(split) != 2 {
+			return c.JSON(http.StatusBadRequest, "malformed hmc:// URL")
+		}
+
+		resp, err := http.Get(fmt.Sprintf("https://%s/_harmony/media/download/%s", split[0], split[1]))
+		if err != nil {
+			return err
+		}
+
+		_, err = io.Copy(c.Response().Writer, resp.Body)
+		if err != nil {
+			return err
+		}
+
 		return nil
 	}
 

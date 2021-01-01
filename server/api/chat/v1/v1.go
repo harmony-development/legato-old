@@ -387,6 +387,40 @@ func init() {
 	middleware.RegisterRPCConfig(middleware.RPCConfig{
 		RateLimit: middleware.RateLimit{
 			Duration: 5 * time.Second,
+			Burst:    2,
+		},
+		Auth: false,
+	}, "/protocol.chat.v1.ChatService/PreviewGuild")
+}
+
+func (v1 *V1) PreviewGuild(c context.Context, r *chatv1.PreviewGuildRequest) (*chatv1.PreviewGuildResponse, error) {
+	data, err := v1.DB.ResolveGuildID(r.InviteId)
+	if err != nil {
+		return nil, err
+	}
+
+	ret := &chatv1.PreviewGuildResponse{}
+	guildData, err := v1.DB.GetGuildByID(data)
+	if err != nil {
+		return nil, err
+	}
+
+	ret.Avatar = guildData.PictureUrl
+	ret.Name = guildData.GuildName
+	count := int64(0)
+	count, err = v1.DB.CountMembersInGuild(data)
+	if err != nil {
+		return nil, err
+	}
+
+	ret.MemeberCount = uint64(count)
+	return ret, nil
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
 			Burst:    10,
 		},
 		Auth:       true,
