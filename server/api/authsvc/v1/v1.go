@@ -331,11 +331,11 @@ func (v1 *V1) NextStep(c context.Context, r *authv1.NextStepRequest) (*authv1.Au
 	}
 
 	switch currentStep.ID() {
-	case "login":
+	case loginStep.ID():
 		{
 			return v1.LocalLogin(r)
 		}
-	case "register":
+	case registerStep.ID():
 		{
 			return v1.Register(r)
 		}
@@ -432,7 +432,7 @@ func (v1 *V1) LocalLogin(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 
 func (v1 *V1) Register(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 	f := r.GetForm()
-	if f != nil {
+	if f == nil {
 		return nil, errors.New("missing form")
 	}
 
