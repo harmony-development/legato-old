@@ -837,7 +837,9 @@ func (v1 *V1) JoinGuild(c context.Context, r *chatv1.JoinGuildRequest) (*chatv1.
 		},
 	})
 	if data, err := v1.DB.GetFirstChannel(guildID); err == nil {
-		v1.sendMessage(guildID, data, fmt.Sprintf("Everyone welcome <@%d>", ctx.UserID), "System")
+		if err := v1.sendMessage(guildID, data, fmt.Sprintf("Everyone welcome <@%d>", ctx.UserID), "System"); err != nil {
+			v1.Logger.CheckException(err)
+		}
 	}
 	return &chatv1.JoinGuildResponse{
 		GuildId: guildID,
