@@ -992,8 +992,8 @@ func (v1 *V1) TriggerAction(c context.Context, r *chatv1.TriggerActionRequest) (
 func init() {
 	middleware.RegisterRPCConfig(middleware.RPCConfig{
 		RateLimit: middleware.RateLimit{
-			Duration: 1 * time.Second,
-			Burst:    1500,
+			Duration: 10 * time.Second,
+			Burst:    50,
 		},
 		Auth:       true,
 		Location:   middleware.GuildLocation | middleware.ChannelLocation,
