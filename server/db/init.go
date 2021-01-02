@@ -157,6 +157,7 @@ type IHarmonyDB interface {
 	AddFileHash(fileID string, hash []byte) error
 	SetFileMetadata(fileID string, contentType, name string, size int32) error
 	GetFileMetadata(fileID string) (queries.GetFileMetadataRow, error)
+	GetFirstChannel(guildID uint64) (uint64, error)
 }
 
 // New creates a new DB connection

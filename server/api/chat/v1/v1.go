@@ -836,6 +836,9 @@ func (v1 *V1) JoinGuild(c context.Context, r *chatv1.JoinGuildRequest) (*chatv1.
 			},
 		},
 	})
+	if data, err := v1.DB.GetFirstChannel(guildID); err == nil {
+		v1.sendMessage(guildID, data, fmt.Sprintf("Everyone welcome <@%d>", ctx.UserID), "System")
+	}
 	return &chatv1.JoinGuildResponse{
 		GuildId: guildID,
 	}, nil
@@ -1646,4 +1649,58 @@ func (v1 *V1) Typing(c context.Context, r *chatv1.TypingRequest) (*empty.Empty, 
 	})
 
 	return &emptypb.Empty{}, nil
+}
+
+func (v1 *V1) sendMessage(guildID, channelID uint64, content, displayUsername string) error {
+	messageID, err := v1.Sonyflake.NextID()
+	if err != nil {
+		return err
+	}
+	msg, err := v1.DB.AddMessage(
+		channelID,
+		guildID,
+		0,
+		messageID,
+		content,
+		nil,
+		nil,
+		nil,
+		nil,
+		sql.NullInt64{
+			Int64: int64(0),
+			Valid: false,
+		},
+		nil,
+	)
+	if err != nil {
+		return err
+	}
+
+	message := harmonytypesv1.Message{
+		GuildId:     guildID,
+		ChannelId:   channelID,
+		MessageId:   messageID,
+		AuthorId:    0,
+		Content:     content,
+		Attachments: nil,
+		Embeds:      nil,
+		Actions:     nil,
+		Overrides: &harmonytypesv1.Override{
+			Name:   displayUsername,
+			Reason: &harmonytypesv1.Override_SystemMessage{},
+		},
+		InReplyTo: 0,
+		Metadata:  nil,
+	}
+	createdAt, _ := ptypes.TimestampProto(msg.CreatedAt.UTC())
+	message.CreatedAt = createdAt
+	v1.PubSub.Guild.Broadcast(guildID, &chatv1.Event{
+		Event: &chatv1.Event_SentMessage{
+			SentMessage: &chatv1.Event_MessageSent{
+				EchoId:  0,
+				Message: &message,
+			},
+		},
+	})
+	return nil
 }

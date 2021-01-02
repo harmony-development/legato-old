@@ -136,3 +136,9 @@ UPDATE Channels
 SET Position = $1
 WHERE Channel_ID = $2
     AND Guild_ID = $3;
+
+-- name: GetFirstChannel :one
+SELECT Channel_ID
+FROM Channels
+WHERE Guild_ID = $1
+FETCH FIRST ROW ONLY;

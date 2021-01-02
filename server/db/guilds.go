@@ -260,3 +260,8 @@ func (db *HarmonyDB) GetGuildByID(guildID uint64) (queries.Guild, error) {
 	err = tracerr.Wrap(err)
 	return data, err
 }
+
+func (db *HarmonyDB) GetFirstChannel(guildID uint64) (uint64, error) {
+	data, err := db.queries.GetFirstChannel(ctx, toSqlInt64(guildID))
+	return data, err
+}

@@ -139,6 +139,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getFileMetadataStmt, err = db.PrepareContext(ctx, getFileMetadata); err != nil {
 		return nil, fmt.Errorf("error preparing query GetFileMetadata: %w", err)
 	}
+	if q.getFirstChannelStmt, err = db.PrepareContext(ctx, getFirstChannel); err != nil {
+		return nil, fmt.Errorf("error preparing query GetFirstChannel: %w", err)
+	}
 	if q.getGuildDataStmt, err = db.PrepareContext(ctx, getGuildData); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGuildData: %w", err)
 	}
@@ -556,6 +559,11 @@ func (q *Queries) Close() error {
 	if q.getFileMetadataStmt != nil {
 		if cerr := q.getFileMetadataStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getFileMetadataStmt: %w", cerr)
+		}
+	}
+	if q.getFirstChannelStmt != nil {
+		if cerr := q.getFirstChannelStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getFirstChannelStmt: %w", cerr)
 		}
 	}
 	if q.getGuildDataStmt != nil {
@@ -1001,6 +1009,7 @@ type Queries struct {
 	getEmotePacksStmt                              *sql.Stmt
 	getFileIDByHashStmt                            *sql.Stmt
 	getFileMetadataStmt                            *sql.Stmt
+	getFirstChannelStmt                            *sql.Stmt
 	getGuildDataStmt                               *sql.Stmt
 	getGuildListStmt                               *sql.Stmt
 	getGuildListPositionStmt                       *sql.Stmt
@@ -1119,6 +1128,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getEmotePacksStmt:                q.getEmotePacksStmt,
 		getFileIDByHashStmt:              q.getFileIDByHashStmt,
 		getFileMetadataStmt:              q.getFileMetadataStmt,
+		getFirstChannelStmt:              q.getFirstChannelStmt,
 		getGuildDataStmt:                 q.getGuildDataStmt,
 		getGuildListStmt:                 q.getGuildListStmt,
 		getGuildListPositionStmt:         q.getGuildListPositionStmt,
