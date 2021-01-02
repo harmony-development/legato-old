@@ -1664,10 +1664,12 @@ func (v1 *V1) sendMessage(guildID, channelID uint64, content, displayUsername st
 		0,
 		messageID,
 		content,
-		nil,
-		nil,
-		nil,
-		nil,
+		[]string{},
+		v1.ProtoToEmbeds([]*harmonytypesv1.Embed{}),
+		v1.ProtoToActions([]*harmonytypesv1.Action{}),
+		v1.ProtoToOverrides(&harmonytypesv1.Override{
+			Name: displayUsername,
+		}),
 		sql.NullInt64{
 			Int64: int64(0),
 			Valid: false,
