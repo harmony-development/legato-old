@@ -413,7 +413,7 @@ func (v1 *V1) PreviewGuild(c context.Context, r *chatv1.PreviewGuildRequest) (*c
 		return nil, err
 	}
 
-	ret.MemeberCount = uint64(count)
+	ret.MemberCount = uint64(count)
 	return ret, nil
 }
 

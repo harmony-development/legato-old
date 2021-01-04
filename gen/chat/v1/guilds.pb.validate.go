@@ -1359,7 +1359,7 @@ func (m *PreviewGuildResponse) Validate() error {
 
 	// no validation rules for Avatar
 
-	// no validation rules for MemeberCount
+	// no validation rules for MemberCount
 
 	return nil
 }
