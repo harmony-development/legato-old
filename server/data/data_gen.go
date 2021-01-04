@@ -209,21 +209,11 @@ func FSMustString(useLocal bool, name string) string {
 
 var _escData = map[string]*_escFile{
 
-	"/sql/migration-scripts/.version.json": {
-		name:    ".version.json",
-		local:   "../../sql/migration-scripts/.version.json",
-		size:    18,
-		modtime: 1602038259,
-		compressed: `
-H4sIAAAAAAAC/6rmUlBQKkstKs7Mz1OyUjDgqgUEAAD//6N63RASAAAA
-`,
-	},
-
 	"/sql/migration-scripts/1-add-reply-field.rb": {
 		name:    "1-add-reply-field.rb",
 		local:   "../../sql/migration-scripts/1-add-reply-field.rb",
 		size:    194,
-		modtime: 1608425064,
+		modtime: 1606512970,
 		compressed: `
 H4sIAAAAAAAC/zzKwUrEMBCA4fs8xYhIDkLzAOIha4sUsgq1nkOaDiWwTtZJIhbru0t78PTzw3d7o2sW
 PUXWxF8odVoBhD5rFEJ1XdT/ODdHce5e6Y+4iC8xsaslXnIjkwIIiRkfcQ+FcmxTxHP2Yac4J9xC4g0Q
@@ -236,7 +226,7 @@ xVDCAAAA
 		name:    "10-permissions-to-jsonb.rb",
 		local:   "../../sql/migration-scripts/10-permissions-to-jsonb.rb",
 		size:    260,
-		modtime: 1608425072,
+		modtime: 1608436544,
 		compressed: `
 H4sIAAAAAAAC/3zKsUrEQBCH8X6e4i8iWwjJAxwW0cRqTY4jqUSWZDMcK96szmZF8Xx3SQrBxurjg9/l
 RZmTllOQkuUdmqdPIuW3HJRhXo/md5ybgzp3bcpTOOq4hCguL+ElFToZIh9FcIM17Jdti0VHSaNfKeaI
@@ -249,7 +239,7 @@ s49yJgCrKviDPa6+iCrbNwf01a1tsGc9hZRClLTB+tDtcdfZ4aFFG2dOu/99Vdd/OJ5TlAlt16MdrEXd
 		name:    "11-channel-kinds.rb",
 		local:   "../../sql/migration-scripts/11-channel-kinds.rb",
 		size:    282,
-		modtime: 1608598375,
+		modtime: 1608614055,
 		compressed: `
 H4sIAAAAAAAC/3TNz0rDQBDH8fs8xU9E9iAkDxByiM2CYrQlbtVbSDZDu1Anun+KYn13SUU99TR8mc8w
 52d5Cj4fnOQse/g0fBB5fkvOM9TrRv1F143Od92lyl/cxvfRTdKl6HYh84MispMISsyDbTxmFn0vobcz
@@ -262,7 +252,7 @@ tW41bsLjnCgRfeKCTj+p2+UKi2Wzvrv/vSroi1jG7wAAAP//6QalxhoBAAA=
 		name:    "12-nullable.rb",
 		local:   "../../sql/migration-scripts/12-nullable.rb",
 		size:    195,
-		modtime: 1608604673,
+		modtime: 1608614055,
 		compressed: `
 H4sIAAAAAAAC/zzKwUrDQBDG8fs8xSciOQjZBxAP1fYgrEkJ6XlJNkMZaGd1dlcU67tLFHr6+H/8bm9c
 zeZmUcf6AavzF5HxexVjNG/H5hohLGIh3DfuLEebiiQNtcgptzY3RDGp4hHrcCx/2RabNE9xpVgSLjHp
@@ -275,7 +265,7 @@ hQCsquVPjrj7po0fdwPGzZPfYc92lpwlacb//9z7w2uHIZ04vGyxHfo9un5Ed/D+gX6IdfkNAAD//530
 		name:    "13-metadata.rb",
 		local:   "../../sql/migration-scripts/13-metadata.rb",
 		size:    298,
-		modtime: 1609133970,
+		modtime: 1609176019,
 		compressed: `
 H4sIAAAAAAAC/4TMwUrEMBSF4X2e4ohIF0L7AOKiTgcXto4M4zrcJpcaqDd6k4iD9d2lLgRBmdXhh49z
 ftaUpM0YpGF5g5bxaIzyawnKqF6m6ies9UGtvaya5zAp5RDFlhzmVOtYGeOiCK6xDrv8nXVWkkRupfAR
@@ -284,11 +274,23 @@ d/Jx4JRo4r/lp2HxXwEAAP//MaWlgCoBAAA=
 `,
 	},
 
+	"/sql/migration-scripts/14-is-bot.rb": {
+		name:    "14-is-bot.rb",
+		local:   "../../sql/migration-scripts/14-is-bot.rb",
+		size:    176,
+		modtime: 1609285553,
+		compressed: `
+H4sIAAAAAAAC/zzKwYrCMBCA4fs8xSzLksNC8wDiIaU9CMWK9B7adCyBOtFJIor13aUePP388P3+6BxF
+D5418Q0lDw8AoWv2Qqguk/qOtaMXa/+VPvtJ+uQD25z8HAsZFIALzLjFNeTSZ4skPcferRTHgIsLvAAi
+rqqgOzn8e4JpuvqInSmbGg8STn6miKaqcBdtGRKWbdvUZr+BFxCP7wAAAP//NZ6Ee7AAAAA=
+`,
+	},
+
 	"/sql/migration-scripts/2-reply-field-default.rb": {
 		name:    "2-reply-field-default.rb",
 		local:   "../../sql/migration-scripts/2-reply-field-default.rb",
 		size:    208,
-		modtime: 1608425064,
+		modtime: 1606512970,
 		compressed: `
 H4sIAAAAAAAC/zyKQUsDMRBG7/MrRkRyEDbexcNqIwipQk3PIZsdlkCd1EkiFut/l6zQ7/LxeO/6Srci
 ekqsib9Q2nQCEPpsSQjVcVEX8H5O4v2t0h9pkVBTZt9qOpRBJgUQMzM+YD+KdcWhSuASYk9xzniOmc+A
@@ -301,7 +303,7 @@ iL0a6Jsi3vzAaJ3ZoRsfrcEtlRIWKmv0L57e7H77ijs6Hk7eZf+yWWXfu3G4Mc/j3jq8u4dfIJ7/AgAA
 		name:    "3-overrides.rb",
 		local:   "../../sql/migration-scripts/3-overrides.rb",
 		size:    271,
-		modtime: 1608425064,
+		modtime: 1606512970,
 		compressed: `
 H4sIAAAAAAAC/2SMTUrEQBBG932KT0R6ISQHkFlE0qAQf5jJ4LJJOkVoidValR4Ux7tLspDBWRUf7726
 vCizStlHLokPkNx/GSP0kaMQ7Pto/4b3QxTvr235Fkfp5pjY5zlOWkhvjQmJGRssh8K8zmKWjrULi4oh
@@ -314,7 +316,7 @@ rujlzm3dCbzf4XHfNMtn4uE3AAD//+1+Kv4PAQAA
 		name:    "4-overrides-are-bytea.rb",
 		local:   "../../sql/migration-scripts/4-overrides-are-bytea.rb",
 		size:    206,
-		modtime: 1608425064,
+		modtime: 1606512970,
 		compressed: `
 H4sIAAAAAAAC/zzKwUrEMBSF4f19iiMiXQjtA4iLUYoImY5ou3AV0uRSAnqjN8ng4Pju0gquDj/nu7zo
 atZujtKxHKF1PhEpf9aojOZjaf7D2hDV2uume4+LuhKT2FriW251boh8EsEt1mFftmyLOsnOrxQh4eyT
@@ -327,7 +329,7 @@ AAD//7q1MaXOAAAA
 		name:    "5-attachments.rb",
 		local:   "../../sql/migration-scripts/5-attachments.rb",
 		size:    208,
-		modtime: 1608425064,
+		modtime: 1606512970,
 		compressed: `
 H4sIAAAAAAAC/0zLQUrFMBDG8f2cYkQkC6E5wMNFpG9XUUp3IiFNhxqwE51MpGK9u7SIvNXwZ37f9ZWt
 ReyY2BJ/otTxC0DooyYhNO+z+Q/vpyTe3xq7pFmCpsy+anorjYwGIGZmvMP9UNQjG5XAJcSd4pRxi5k3
@@ -340,7 +342,7 @@ QMRdNbRSxJtvaPvHJxzcfXdGpxri60Ks5QSuG8793+OBSgkzlWPs2vZSotKqzy8n+AHi6TcAAP//e1iT
 		name:    "6-roles.rb",
 		local:   "../../sql/migration-scripts/6-roles.rb",
 		size:    177,
-		modtime: 1608425064,
+		modtime: 1606512970,
 		compressed: `
 H4sIAAAAAAAC/zzKv2rDMBCA8f2e4kopGgrWA5QOLjZdPBlvpQj9OYzAOSUnKcTEefdgD5k+Pvi9v+ma
 RbvImviKUt0KIHSpUQjVeVavMSZEMeZT6VOcxZaY2NQSl9yIUwA+MeM37iFfjm2KWM7W7xRDws0n3gAR
@@ -352,7 +354,7 @@ d9XQjTx+3KEdpn7Eqf0ZevytcQn5IG3X4ZgWyujWQvbv/wseQByeAQAA//8Sa71EsQAAAA==
 		name:    "7-permissions.rb",
 		local:   "../../sql/migration-scripts/7-permissions.rb",
 		size:    181,
-		modtime: 1608425064,
+		modtime: 1606512970,
 		compressed: `
 H4sIAAAAAAAC/zzKvUrFQBBA4X6eYkRkCyH7AGIRSbBJIZJ+2Z8hDCSzOrsrBuO7X5LiVocD3+ODbUVt
 YLEkP6gt7ABK342V0Hwt5j7OJVbnno3deFFfOYtrldfSaTAAMYvgK56hWK/tqnopPp4UU8YjZjkAEU/V
@@ -364,7 +366,7 @@ YLEkP6gt7ABK342V0Hwt5j7OJVbnno3deFFfOYtrldfSaTAAMYvgK56hWK/tqnopPp4UU8YjZjkAEU/V
 		name:    "8-revamp-roles-permissions.rb",
 		local:   "../../sql/migration-scripts/8-revamp-roles-permissions.rb",
 		size:    1468,
-		modtime: 1608425064,
+		modtime: 1606530386,
 		compressed: `
 H4sIAAAAAAAC/9STz47aMBDG736KqaqKRUXwAKseTBio1eBQx0iLqioKxKKWgt3aSf+o23evEhJIkHab
 w156iuz5/LPn+yavX81K72Z7bWbKfAdX7n8R4tS3UjsFo6/H0WWRJJl2SfJ2NDvpo0sLbU1SFjr3U7cf
@@ -381,7 +383,7 @@ USIENA7oApubBFtTsTujmjbHZDzAu2StTnvlXszDM+45xQu23UO1bXdJzXhcSkM4lw56pK2vTao+g4No
 		name:    "9-role-positions.rb",
 		local:   "../../sql/migration-scripts/9-role-positions.rb",
 		size:    185,
-		modtime: 1608425073,
+		modtime: 1608436544,
 		compressed: `
 H4sIAAAAAAAC/zzMTWrDMBDF8f2cYkopWhSsA5Qu3No75wOjQHbClgcjcEbJSAoJce4e7EVWjz/8eJ8f
 OkfRvWdNfEXJ/R1A6JK9EKrzqN5h7eDF2m+lT36ULvnANic/xUJ6BeACM/7iMuTSmkWSjmPnFopDwNkF
@@ -393,7 +395,7 @@ ngERF1XQjRx+PaBsTN2iKf+aGtswUVxFWVX4v2sOmy3uQ/TrhamP5gfgCcQDvAIAAP//WPww0LkAAAA=
 		name:    "migrate.rb",
 		local:   "../../sql/migration-scripts/migrate.rb",
 		size:    391,
-		modtime: 1608425064,
+		modtime: 1606512970,
 		compressed: `
 H4sIAAAAAAAC/2yQvW7CMBSFdz/FIQyQUoxYq7ZLxdChqZT+rFZCLsESien1TVUEeffKJGoQqidb50ff
 MdNXY5lgTGHZmNlkUdmSM7GuNo3YndecT5T6JvZ4QEliwtW6ehorZTc4C/d4+kjTVfJuPlfp2/NrogBg
@@ -407,15 +409,15 @@ j/2wdjHYbzTn0S3oZ037MPQOwg0NBRcjr8H/JaQC4i5wRh0M1YWine+KO3/iZBv2iEP3zTSKVPD9BgAA
 		name:    "migration_utils.rb",
 		local:   "../../sql/migration-scripts/migration_utils.rb",
 		size:    753,
-		modtime: 1609134003,
+		modtime: 1609747556,
 		compressed: `
-H4sIAAAAAAAC/4SSz47aMBCH736KqXsgkVBQ1RsSPbSl/w6AoPQSIZQ4k+CqjNOxA4uWffeVkwCBFbtc
-cOzffPN5kvfvBpXlQappgLQDrtKDEIz/K80IvbLoXR7+WkM9Ib4s5/Px5Pf6z3i++DmdwAg+fBQiwxwK
-dGtlKNeFAABgdBUT/FpMJ1GZsMXgm/6HEWOSBbLJRZ4pw1AgZRfGDtlqQzUkxUI3qzeRUVt3gsay3ZCr
-1seqCmH0CfBBYelOLTrgm7vVx17trGcveoH/D+tILWFKpFuJPsi9DCEzcMyP52Z5tGftMGiuwejcYV0g
-IScOg0cYtghv6pfwFIYvTZQhQuXqg2aYMOq8gSCMpSbrElJokXfIchXLr5/bWSiPh9n3qMXAMEsp2dbT
-kZuEt4YOsn82vvoNK4vsg02nWC6tp99Ll4m1e8NZt2LW7r1SZdhdVRh299MbY6/SP4x1ciW6n6EyVA/v
-OQAA///LbJ528QIAAA==
+H4sIAAAAAAAC/4SSz47aMBCH736KqXsgkVBQpZ6Q6KEt/XcABKWXCKHEmQRXZZyOHVi07LuvnAQIrNjl
+gmP/5pvPk7x/N6gsD1JNA6QdcJUehGD8X2lG6JVF7/Lw1xrqCfFlOZ+PJ7/Xf8bzxc/pBEbw4aMQGeZQ
+oFsrQ7kuBAAAo6uY4NdiOonKhC0G3/Q/jBiTLJBNLvJMGYYCKbswdshWG6ohKRa6Wb2JjNq6EzSW7YZc
+tT5WVQijT4APCkt3atEB39ytPvZqZz170Qv8f1hHaglTIt1K9EHuZQiZgWN+PDfLoz1rh0FzDUbnDusC
+CTlxGDzCsEV4U7+EpzB8aaIMESpXHzTDhFHnDQRhLDVZl5BCi7xDlqtYfv3czkJ5PMy+Ry0GhllKybae
+jtwkvDV0kP2z8dVvWFlkH2w6xXJpPf1eukys3RvOuhWzdu+VKsPuqsKwu5/eGHuV/mGskyvR/QyVoXp4
+zwEAAP//TJX4BfECAAA=
 `,
 	},
 
@@ -423,7 +425,7 @@ OQAA///LbJ528QIAAA==
 		name:    "run-migrations.sh",
 		local:   "../../sql/migration-scripts/run-migrations.sh",
 		size:    316,
-		modtime: 1608425064,
+		modtime: 1606512970,
 		compressed: `
 H4sIAAAAAAAC/6SOQUvDQBCF7/MrXscQWqGOepUU1Ar2pKR4WhbZdRezuN3K1rSI+N8liUbv3uYx7/tm
 jibS7rLYkMSnPazZNUTru4f6+qbi4uPqcn37OER1qj+ZDk2IHgrzBlwMC4a+gNsSsFzVFRdTPDnM79FN
@@ -436,7 +438,7 @@ X1Fu7Tt6NcsmPGfz5k+ypa8AAAD//2304lU8AQAA
 		name:    "emotes.sql",
 		local:   "../../sql/queries/emotes.sql",
 		size:    1058,
-		modtime: 1608425064,
+		modtime: 1606512970,
 		compressed: `
 H4sIAAAAAAAC/5yTT0+DQBDFz91PMQcObUKbtN5oPJCy1TV1MUD1SDYwMY0uWKBRv72B8mcDS6ueupnd
 zpvf8N58DomQaMEmQ1EglWmBTyJ6Awu/MCKM+9QLgPHAheouLC9zmJY/IXNMqA5cSDRhn2MWMmdGnu3d
@@ -451,7 +453,7 @@ KQE6kf9EoXzsfiaYgZUm2Hihsdkvwrb+CQAA//+5o4QAIgQAAA==
 		name:    "federation.sql",
 		local:   "../../sql/queries/federation.sql",
 		size:    203,
-		modtime: 1608425064,
+		modtime: 1601703329,
 		compressed: `
 H4sIAAAAAAAC/2SOMcuDMBiE9/dX3JBBIQ5+36Z0kDbWgFUw2o4i+hY6mECU0p9fsCCFTrfcPfdEEeww
 c4JsmipnR0bCLx5JV0Y1LXTV1sh5Yj+sD2f7rbIg2FKiW9j3+iRRuJl7w/7JPqRrVnbKIBCxhPiTEP9h
@@ -462,20 +464,21 @@ SrQ/nXnd5treHRJnmYwq1bHdaYRvHuVNffl1oFuhGoWP8wEiTt8BAAD//4bcy2jLAAAA
 	"/sql/queries/guilds.sql": {
 		name:    "guilds.sql",
 		local:   "../../sql/queries/guilds.sql",
-		size:    2525,
-		modtime: 1609129911,
+		size:    2720,
+		modtime: 1609555928,
 		compressed: `
-H4sIAAAAAAAC/7xVUW+bPBR996+4DzwkFa3U9vv20GoPGTipJ2IqMOv2FLHGapECTEC69t9PBmNsYrJU
-m5bHg3PuucfnXp+fQ5Hm/Aa8iqcNX+2z3RZuyoIjQmMcMSCUhdDCNcwQyF8LbIjvKiT8WfDKQLozNM35
-gN1nj82+4pskClpsjr4sggTHMHMuXXCuXHCuXXD+m0OEWRJRQldwdouQkrniTcvrp03a6YxxgD0GZ2gZ
-hWupFD3c4QgrlfARnEudxec7rprlr/wR+TjADMM7OBbbbVLzipU6zYFpmzXPv/Oqhpk4LPxRjOPe5xBS
-8EK6DIjHwA+BhuyO0JVeNOJ5+cIF1bIq86MN9JVtfbTeL6gPUpQAr/Q6XRq857Qo+O4wD/LD8UTIQ1Zs
-lIqyzpqsLLRzacOfyuptQNa8Sbdpkx6NjQvO/y44Hybjk/zYDn0JEdK95N5fMKz6QjFmhtbOtUMnr5ST
-Q7cCv54s2vdxpLA68idFV7xRt3STp8XbaFBURVs8wsjHEXz6pm7GNoLtxBsz2O8AOYoJCfz4tFFUSTvI
-8lGddh+MJMdS7eFlyzEXjg+ratJzmwNymxke6BvuHdskHlNOKNXoT5La89pjpxH/NnS3yOJAv92MhMml
-gk7bRYaxrZ5lWQkKk7T7dNH/1UYu0kAoxRF8DgmFp+7RCql57EKrPibt5GlLcVrdQ9Y8d4+QZbj+rS6B
-k0J7uk+9B51QzdJ06sUH0Tbx8WtWN7VRDH8lMYu1B0HilwrQp6HHpoZ6rhem+7zfAl15o7AXJpTNzubo
-r6yLYW32q8+cbglai5m0Jzi6Ll9Gm8/2HCgh2mSOOrCWur79FQAA///T80NS3QkAAA==
+H4sIAAAAAAAC/7xWQU/bMBS+51e8Qw4tKkjAtgNohy5xiqfURokzxgll1IJIJJkSl8G/n5I4rp06oQxp
+HF/M9773+Xufe3wMRZrzC/Aqngq+2mZPG7goC+5gEqOIASaMQluuYeaA/GsLd9hfqAr9U/DKqHRnSJrz
+Xe06uxfbit8lUdjW5s6PZZigGGbu6QLcswW45wtwP80hQiyJCCYrOLp0HEVzxUWL66ci7XjGKEQegyMn
+iOhaMnVurlCEFEv4Cu6pjuLzJ66G5S/83vFRiBiCd2AsN5uk5hUrdZg90e7WPP/FqxpmzeFGH4U4nH0O
+lIBHSRBij4FPgVB2hclKbxrxvHzmDVRQlfnkAH1n2xyt9kvigyTVFM/0Pp0bvMe0KPjTvh/kh2lHyEPW
+2sAVZZ2JrCy0c6ngD2X1uqusuUg3qUgnbbMA9/MC3C+j9kl+b3ZzNSSkesm1v2RIzeXEiBlcO9X2lTxT
+Su6mberno037OSYaqyMfabriQt3SRZ4Wr4NFUR1t9qCRjyL4dqtuxraC7cYbO9hngFzFBId+fNgqKqft
+eXmSp10Hw8mxZLt/2XLNG8V3UTWquU0BmWaGBnrCvSNN4iHkCFMN/iCqPa7ddhrwm6azCdCHm2EwmSnO
+YVFkwLZ0grJqIEzQ7tNJ/6828MYMmBAUwXeKCTx0bxYl5rETrfsQtKOnZeI4u5tMPHZvkGW3/i8vr9wW
+QqLgQnvBJSmPJoTNjub/cCFNSxvkm1esc1VbOm6n5kOjKPbRS1aL2miGfuKYxdpTI+unqqDvWV8bi4u5
+3phs8z5fuvYTwn00iHaB3IeqmRuyaG1mwh6g6Lp8HmSq7aFRRLSdH0xgbTV8aIKsqoXxY6FXUIEdoGGA
+mHcFAY5iBhG9AUrC28u/AQAA//+M9/GDoAoAAA==
 `,
 	},
 
@@ -483,7 +486,7 @@ r6yLYW32q8+cbglai5m0Jzi6Ll9Gm8/2HCgh2mSOOrCWur79FQAA///T80NS3QkAAA==
 		name:    "invites.sql",
 		local:   "../../sql/queries/invites.sql",
 		size:    521,
-		modtime: 1591746002,
+		modtime: 1592590385,
 		compressed: `
 H4sIAAAAAAAC/5SRQU+DQBCF7/sr3oFDW+kBvVF7aLpj3QShWRY9NljnQAKLYbHqvzcgkNbERC97eJn9
 5r03yyVsXnEIza4uT7x7K8oXJRHWlkVKEW0Neu2gJO508gBlT0XLTgDA0z1pGpRuYA0vWAkxQZU9Nlyx
@@ -497,7 +500,7 @@ iXp9E0vM+kZxe+kNif4hrLEM5quvAAAA//9iNxiqCQIAAA==
 		name:    "messages.sql",
 		local:   "../../sql/queries/messages.sql",
 		size:    1717,
-		modtime: 1609133731,
+		modtime: 1609176019,
 		compressed: `
 H4sIAAAAAAAC/5xVTY/aPBC++1fMwQdYeaUXePvFdiWy2KWRIFRJKO0JuWRaIkGyir0t+++rEMcxKmFX
 uSDPh2ceHs8zub2FTB5wDF6SLFAp+QthnGdI/CASYQx+EC/BBBT0CADA7CndJxufs5M13cksw721VwoL
@@ -515,7 +518,7 @@ OCbeHU0j5pfBGLG3o6kTusNx9snLeOw6qZR8EVKTc1Lvpf7D9j/cLKgrLdysDk3qpXelg015XXkTWqd6
 		name:    "roles.sql",
 		local:   "../../sql/queries/roles.sql",
 		size:    3336,
-		modtime: 1608605082,
+		modtime: 1608614055,
 		compressed: `
 H4sIAAAAAAAC/7SXS4+bPBSG9/yKs2CRjDKLhHxfpVRdpOAkSMREXDrtasQ0VgcJcAXMaPrvKxvHmOAh
 meayss3hvA+vjy+5v4ciyckC7JIkNQloRmBBC2K4OERBBC6OfGCjFYwMEL/1S5rtH11nIkdYRGcAJzlp
@@ -535,12 +538,13 @@ zD9J/g0AAP//WqVuwAgNAAA=
 	"/sql/queries/sessions.sql": {
 		name:    "sessions.sql",
 		local:   "../../sql/queries/sessions.sql",
-		size:    256,
-		modtime: 1591746002,
+		size:    340,
+		modtime: 1609286831,
 		compressed: `
-H4sIAAAAAAAC/2yOMc+CMBCG9/sVN3SApAx834Y6EDljE4SEFh0NkRsYbA114OcbCRUHx3vvzfM+SYK2
-u3OGmr0fnDWu9TyqAjNnGTSVtDf4jq6qgENTn0LRw+VIDYUTdyjSDcCHl/d9eGU88Q1UpakxqCpTr4xo
-QUsImQSk6TGM3XNwNoZzXrakMRKpRPEnUfzH3ytzlQNuWSqoJEM/bVc0bmfjVwAAAP//fO6lZgABAAA=
+H4sIAAAAAAAC/2yQsU6GMBSF9z7FHTr8JGUAN9SB2GtsgmBo0dEQuQODraEMPL4BW+jg2NOT73y5eQ52
+/KYKNHk/O2vc4GlREipniWls8MnAHn0qyZ777jUWPft4wR7jEx6BF/eMnbx6muJXRRt9MdVq7A2o1nQn
+A24BLWIkALefeRnX2dmMvdfNgBpuvBDASwH8Lks3NK1XO8wMb7I2eFlqNAny0AzmYXqPypR6tOlU/MNK
+bNAg/HeBhP5wXOE3AAD//+8IlHJUAQAA
 `,
 	},
 
@@ -548,7 +552,7 @@ QUsImQSk6TGM3XNwNoZzXrakMRKpRPEnUfzH3ytzlQNuWSqoJEM/bVc0bmfjVwAAAP//fO6lZgABAAA=
 		name:    "uploads.sql",
 		local:   "../../sql/queries/uploads.sql",
 		size:    429,
-		modtime: 1608425073,
+		modtime: 1608436544,
 		compressed: `
 H4sIAAAAAAAC/3zQwWoCMRAG4LPzFP8hhxXiwbYnSw9bd6wL6wq7aXuU0AxU0Fgwh9qnLzFWiBVPOUzm
 m/lnNIK3W5mgdG623shCgnU2WEzkWz6obnvuDOrWLBHLexTxWdWVxnTng/iwMocv0WjtVjT69Y8M6a1s
@@ -560,47 +564,48 @@ XrlHocYa6k5D3Wuoh+Ej0Xnci4R83M4L9dzw1OQwDY4yDSJNs265SIvQ+5w7xmkbPEGNr/h19XyY2/1n
 	"/sql/queries/users.sql": {
 		name:    "users.sql",
 		local:   "../../sql/queries/users.sql",
-		size:    2897,
-		modtime: 1608860441,
+		size:    3060,
+		modtime: 1609288563,
 		compressed: `
-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
+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
 `,
 	},
 
 	"/sql/schemas/models.sql": {
 		name:    "models.sql",
 		local:   "../../sql/schemas/models.sql",
-		size:    5729,
-		modtime: 1609130171,
+		size:    5758,
+		modtime: 1609285417,
 		compressed: `
-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
+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
+6aXRCH4WAAA=
 `,
 	},
 
@@ -638,12 +643,12 @@ var _escDirs = map[string][]os.FileInfo{
 	},
 
 	"../../sql/migration-scripts": {
-		_escData["/sql/migration-scripts/.version.json"],
 		_escData["/sql/migration-scripts/1-add-reply-field.rb"],
 		_escData["/sql/migration-scripts/10-permissions-to-jsonb.rb"],
 		_escData["/sql/migration-scripts/11-channel-kinds.rb"],
 		_escData["/sql/migration-scripts/12-nullable.rb"],
 		_escData["/sql/migration-scripts/13-metadata.rb"],
+		_escData["/sql/migration-scripts/14-is-bot.rb"],
 		_escData["/sql/migration-scripts/2-reply-field-default.rb"],
 		_escData["/sql/migration-scripts/3-overrides.rb"],
 		_escData["/sql/migration-scripts/4-overrides-are-bytea.rb"],

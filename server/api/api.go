@@ -7,12 +7,13 @@ import (
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
 	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
 	mediaproxyv1 "github.com/harmony-development/legato/gen/mediaproxy/v1"
-	"github.com/harmony-development/legato/server/api/authsvc"
+	voicev1 "github.com/harmony-development/legato/gen/voice/v1"
 	authv1impl "github.com/harmony-development/legato/server/api/authsvc/v1"
 	chatv1impl "github.com/harmony-development/legato/server/api/chat/v1"
 	"github.com/harmony-development/legato/server/api/chat/v1/permissions"
 	"github.com/harmony-development/legato/server/api/mediaproxy"
 	"github.com/harmony-development/legato/server/api/middleware"
+	voicev1impl "github.com/harmony-development/legato/server/api/voice/v1"
 	"github.com/harmony-development/legato/server/auth"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
@@ -99,7 +100,7 @@ func New(deps Dependencies) *API {
 		},
 	})
 	authv1.RegisterAuthServiceServer(api.GrpcServer, &authv1impl.V1{
-		Dependencies: &authsvc.Dependencies{
+		Dependencies: authv1impl.Dependencies{
 			DB:          api.DB,
 			Logger:      api.Logger,
 			Sonyflake:   api.Sonyflake,
@@ -112,6 +113,11 @@ func New(deps Dependencies) *API {
 		Logger: api.Logger,
 		Config: api.Config,
 	}))
+	voicev1.RegisterVoiceServiceServer(api.GrpcServer, &voicev1impl.V1{
+		Dependencies: voicev1impl.Dependencies{
+			DB: api.DB,
+		},
+	})
 	reflection.Register(api.GrpcServer)
 	grpc_prometheus.Register(api.GrpcServer)
 	grpc_prometheus.EnableHandlingTimeHistogram()

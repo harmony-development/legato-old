@@ -14,8 +14,7 @@ import (
 
 // Migrate applies the DB layout to the connected DB
 func (db *HarmonyDB) Migrate() error {
-	data := data.AssertByteArray(ioutil.ReadAll(data.AssertFile(data.FS(false).Open("/sql/"))))
-
+	data := data.AssertByteArray(ioutil.ReadAll(data.AssertFile(data.FS(false).Open("/sql/schemas/models.sql"))))
 	_, err := db.Exec(strings.ReplaceAll(string(data), "--migration-only", ""))
 	return tracerr.Wrap(err)
 }
