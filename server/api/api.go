@@ -13,6 +13,7 @@ import (
 	"github.com/harmony-development/legato/server/api/chat/v1/permissions"
 	"github.com/harmony-development/legato/server/api/mediaproxy"
 	"github.com/harmony-development/legato/server/api/middleware"
+	"github.com/harmony-development/legato/server/api/voice/state"
 	voicev1impl "github.com/harmony-development/legato/server/api/voice/v1"
 	"github.com/harmony-development/legato/server/auth"
 	"github.com/harmony-development/legato/server/config"
@@ -116,6 +117,9 @@ func New(deps Dependencies) *API {
 	voicev1.RegisterVoiceServiceServer(api.GrpcServer, &voicev1impl.V1{
 		Dependencies: voicev1impl.Dependencies{
 			DB: api.DB,
+			VoiceState: &state.VoiceState{
+				VoiceChannels: map[string]*state.Channel{},
+			},
 		},
 	})
 	reflection.Register(api.GrpcServer)

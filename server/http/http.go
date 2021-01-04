@@ -12,7 +12,6 @@ import (
 	"github.com/harmony-development/legato/server/http/attachments/backend"
 	"github.com/harmony-development/legato/server/http/hm"
 	"github.com/harmony-development/legato/server/http/routing"
-	"github.com/harmony-development/legato/server/http/webrtc"
 	"github.com/harmony-development/legato/server/logger"
 )
 
@@ -57,12 +56,6 @@ func New(deps Dependencies) *Server {
 
 	harmony := s.Group("/_harmony")
 	harmony.Use(m.WithHarmony)
-
-	webrtcGrp := harmony.Group("/webrtc")
-	webrtc.New(webrtc.Dependencies{
-		APIGroup: webrtcGrp,
-		Router:   s.Router,
-	})
 
 	attachmentsGrp := harmony.Group("/media")
 	if _, err := attachments.New(attachments.Dependencies{

@@ -15,7 +15,7 @@ require (
 	github.com/gobwas/glob v0.2.3
 	github.com/golang/protobuf v1.4.2
 	github.com/google/go-cmp v0.5.1 // indirect
-	github.com/google/uuid v1.1.1
+	github.com/google/uuid v1.1.2
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/gregjones/httpcache v0.0.0-20190212212710-3befbb6ad0cc
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
@@ -28,7 +28,10 @@ require (
 	github.com/logrusorgru/aurora v2.0.3+incompatible // indirect
 	github.com/mjibson/esc v0.2.0 // indirect
 	github.com/peterbourgon/diskv v0.0.0-20171120014656-2973218375c3
-	github.com/pion/webrtc/v3 v3.0.0-beta.4
+	github.com/pion/quic v0.1.4 // indirect
+	github.com/pion/sdp/v2 v2.4.0 // indirect
+	github.com/pion/srtp v1.5.1 // indirect
+	github.com/pion/webrtc/v3 v3.0.2
 	github.com/prometheus/client_golang v1.4.1
 	github.com/rs/cors v1.7.0 // indirect
 	github.com/sirupsen/logrus v1.6.0
@@ -36,7 +39,7 @@ require (
 	github.com/sony/sonyflake v1.0.0
 	github.com/thanhpk/randstr v1.0.4
 	github.com/ztrue/tracerr v0.3.0
-	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899
+	golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897
 	golang.org/x/mod v0.4.0 // indirect
 	golang.org/x/text v0.3.3 // indirect
 	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
