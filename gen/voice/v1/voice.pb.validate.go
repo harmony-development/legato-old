@@ -129,6 +129,209 @@ var _ interface {
 	ErrorName() string
 } = ClientSignalValidationError{}
 
+// Validate checks the field values on AnswerRequest with the rules defined in
+// the proto definition for this message. If any rules are violated, an error
+// is returned.
+func (m *AnswerRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Answer
+
+	return nil
+}
+
+// AnswerRequestValidationError is the validation error returned by
+// AnswerRequest.Validate if the designated constraints aren't met.
+type AnswerRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AnswerRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AnswerRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AnswerRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AnswerRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AnswerRequestValidationError) ErrorName() string { return "AnswerRequestValidationError" }
+
+// Error satisfies the builtin error interface
+func (e AnswerRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAnswerRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AnswerRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AnswerRequestValidationError{}
+
+// Validate checks the field values on CandidateRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, an
+// error is returned.
+func (m *CandidateRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Candidate
+
+	return nil
+}
+
+// CandidateRequestValidationError is the validation error returned by
+// CandidateRequest.Validate if the designated constraints aren't met.
+type CandidateRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CandidateRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CandidateRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CandidateRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CandidateRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CandidateRequestValidationError) ErrorName() string { return "CandidateRequestValidationError" }
+
+// Error satisfies the builtin error interface
+func (e CandidateRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCandidateRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CandidateRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CandidateRequestValidationError{}
+
+// Validate checks the field values on ConnectRequest with the rules defined in
+// the proto definition for this message. If any rules are violated, an error
+// is returned.
+func (m *ConnectRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for GuildId
+
+	// no validation rules for ChannelId
+
+	return nil
+}
+
+// ConnectRequestValidationError is the validation error returned by
+// ConnectRequest.Validate if the designated constraints aren't met.
+type ConnectRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ConnectRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ConnectRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ConnectRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ConnectRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ConnectRequestValidationError) ErrorName() string { return "ConnectRequestValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ConnectRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sConnectRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ConnectRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ConnectRequestValidationError{}
+
 // Validate checks the field values on Signal with the rules defined in the
 // proto definition for this message. If any rules are violated, an error is returned.
 func (m *Signal) Validate() error {

@@ -11,7 +11,7 @@ import (
 type UserState struct {
 	sync.RWMutex
 	peerConnection *webrtc.PeerConnection
-	signalStream   chan voicev1.Signal
+	stream         voicev1.VoiceService_ConnectServer
 }
 
 type Channel struct {
@@ -28,6 +28,14 @@ type VoiceState struct {
 func (v *VoiceState) GetChannel(channelID string) *Channel {
 	v.Lock()
 	defer v.Unlock()
+	if _, ok := v.VoiceChannels[channelID]; !ok {
+		v.VoiceChannels[channelID] = &Channel{
+			Users:   map[string]*UserState{},
+			Tracks:  map[string]*webrtc.TrackLocalStaticRTP{},
+			RWMutex: sync.RWMutex{},
+		}
+	}
+
 	return v.VoiceChannels[channelID]
 }
 
@@ -66,13 +74,13 @@ func (c *Channel) AddTrack(userID string, track *webrtc.TrackRemote) (*webrtc.Tr
 		if err != nil {
 			return nil, err
 		}
-		user.signalStream <- voicev1.Signal{
+		user.stream.Send(&voicev1.Signal{
 			Event: &voicev1.Signal_Offer_{
 				Offer: &voicev1.Signal_Offer{
 					Offer: string(offerString),
 				},
 			},
-		}
+		})
 	}
 	return localTrack, nil
 }

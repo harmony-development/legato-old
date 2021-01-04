@@ -9,7 +9,7 @@ package v1
 import (
 	context "context"
 	proto "github.com/golang/protobuf/proto"
-	_ "github.com/golang/protobuf/ptypes/empty"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -110,6 +110,155 @@ func (*ClientSignal_Answer_) isClientSignal_Event() {}
 
 func (*ClientSignal_Candidate_) isClientSignal_Event() {}
 
+type AnswerRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Answer string `protobuf:"bytes,1,opt,name=answer,proto3" json:"answer,omitempty"`
+}
+
+func (x *AnswerRequest) Reset() {
+	*x = AnswerRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_voice_v1_voice_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AnswerRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AnswerRequest) ProtoMessage() {}
+
+func (x *AnswerRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_voice_v1_voice_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AnswerRequest.ProtoReflect.Descriptor instead.
+func (*AnswerRequest) Descriptor() ([]byte, []int) {
+	return file_voice_v1_voice_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *AnswerRequest) GetAnswer() string {
+	if x != nil {
+		return x.Answer
+	}
+	return ""
+}
+
+type CandidateRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Candidate string `protobuf:"bytes,1,opt,name=candidate,proto3" json:"candidate,omitempty"`
+}
+
+func (x *CandidateRequest) Reset() {
+	*x = CandidateRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_voice_v1_voice_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CandidateRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CandidateRequest) ProtoMessage() {}
+
+func (x *CandidateRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_voice_v1_voice_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CandidateRequest.ProtoReflect.Descriptor instead.
+func (*CandidateRequest) Descriptor() ([]byte, []int) {
+	return file_voice_v1_voice_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *CandidateRequest) GetCandidate() string {
+	if x != nil {
+		return x.Candidate
+	}
+	return ""
+}
+
+type ConnectRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	GuildId   uint64 `protobuf:"varint,1,opt,name=guild_id,json=guildId,proto3" json:"guild_id,omitempty"`
+	ChannelId uint64 `protobuf:"varint,2,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty"`
+}
+
+func (x *ConnectRequest) Reset() {
+	*x = ConnectRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_voice_v1_voice_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ConnectRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConnectRequest) ProtoMessage() {}
+
+func (x *ConnectRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_voice_v1_voice_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConnectRequest.ProtoReflect.Descriptor instead.
+func (*ConnectRequest) Descriptor() ([]byte, []int) {
+	return file_voice_v1_voice_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ConnectRequest) GetGuildId() uint64 {
+	if x != nil {
+		return x.GuildId
+	}
+	return 0
+}
+
+func (x *ConnectRequest) GetChannelId() uint64 {
+	if x != nil {
+		return x.ChannelId
+	}
+	return 0
+}
+
 type Signal struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -124,7 +273,7 @@ type Signal struct {
 func (x *Signal) Reset() {
 	*x = Signal{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_voice_v1_voice_proto_msgTypes[1]
+		mi := &file_voice_v1_voice_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -137,7 +286,7 @@ func (x *Signal) String() string {
 func (*Signal) ProtoMessage() {}
 
 func (x *Signal) ProtoReflect() protoreflect.Message {
-	mi := &file_voice_v1_voice_proto_msgTypes[1]
+	mi := &file_voice_v1_voice_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -150,7 +299,7 @@ func (x *Signal) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Signal.ProtoReflect.Descriptor instead.
 func (*Signal) Descriptor() ([]byte, []int) {
-	return file_voice_v1_voice_proto_rawDescGZIP(), []int{1}
+	return file_voice_v1_voice_proto_rawDescGZIP(), []int{4}
 }
 
 func (m *Signal) GetEvent() isSignal_Event {
@@ -201,7 +350,7 @@ type ClientSignal_Answer struct {
 func (x *ClientSignal_Answer) Reset() {
 	*x = ClientSignal_Answer{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_voice_v1_voice_proto_msgTypes[2]
+		mi := &file_voice_v1_voice_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -214,7 +363,7 @@ func (x *ClientSignal_Answer) String() string {
 func (*ClientSignal_Answer) ProtoMessage() {}
 
 func (x *ClientSignal_Answer) ProtoReflect() protoreflect.Message {
-	mi := &file_voice_v1_voice_proto_msgTypes[2]
+	mi := &file_voice_v1_voice_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -248,7 +397,7 @@ type ClientSignal_Candidate struct {
 func (x *ClientSignal_Candidate) Reset() {
 	*x = ClientSignal_Candidate{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_voice_v1_voice_proto_msgTypes[3]
+		mi := &file_voice_v1_voice_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -261,7 +410,7 @@ func (x *ClientSignal_Candidate) String() string {
 func (*ClientSignal_Candidate) ProtoMessage() {}
 
 func (x *ClientSignal_Candidate) ProtoReflect() protoreflect.Message {
-	mi := &file_voice_v1_voice_proto_msgTypes[3]
+	mi := &file_voice_v1_voice_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -295,7 +444,7 @@ type Signal_ICECandidate struct {
 func (x *Signal_ICECandidate) Reset() {
 	*x = Signal_ICECandidate{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_voice_v1_voice_proto_msgTypes[4]
+		mi := &file_voice_v1_voice_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -308,7 +457,7 @@ func (x *Signal_ICECandidate) String() string {
 func (*Signal_ICECandidate) ProtoMessage() {}
 
 func (x *Signal_ICECandidate) ProtoReflect() protoreflect.Message {
-	mi := &file_voice_v1_voice_proto_msgTypes[4]
+	mi := &file_voice_v1_voice_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -321,7 +470,7 @@ func (x *Signal_ICECandidate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Signal_ICECandidate.ProtoReflect.Descriptor instead.
 func (*Signal_ICECandidate) Descriptor() ([]byte, []int) {
-	return file_voice_v1_voice_proto_rawDescGZIP(), []int{1, 0}
+	return file_voice_v1_voice_proto_rawDescGZIP(), []int{4, 0}
 }
 
 func (x *Signal_ICECandidate) GetCandidate() string {
@@ -342,7 +491,7 @@ type Signal_Offer struct {
 func (x *Signal_Offer) Reset() {
 	*x = Signal_Offer{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_voice_v1_voice_proto_msgTypes[5]
+		mi := &file_voice_v1_voice_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -355,7 +504,7 @@ func (x *Signal_Offer) String() string {
 func (*Signal_Offer) ProtoMessage() {}
 
 func (x *Signal_Offer) ProtoReflect() protoreflect.Message {
-	mi := &file_voice_v1_voice_proto_msgTypes[5]
+	mi := &file_voice_v1_voice_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -368,7 +517,7 @@ func (x *Signal_Offer) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Signal_Offer.ProtoReflect.Descriptor instead.
 func (*Signal_Offer) Descriptor() ([]byte, []int) {
-	return file_voice_v1_voice_proto_rawDescGZIP(), []int{1, 1}
+	return file_voice_v1_voice_proto_rawDescGZIP(), []int{4, 1}
 }
 
 func (x *Signal_Offer) GetOffer() string {
@@ -400,31 +549,50 @@ var file_voice_v1_voice_proto_rawDesc = []byte{
 	0x61, 0x6e, 0x73, 0x77, 0x65, 0x72, 0x1a, 0x29, 0x0a, 0x09, 0x43, 0x61, 0x6e, 0x64, 0x69, 0x64,
 	0x61, 0x74, 0x65, 0x12, 0x1c, 0x0a, 0x09, 0x63, 0x61, 0x6e, 0x64, 0x69, 0x64, 0x61, 0x74, 0x65,
 	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x63, 0x61, 0x6e, 0x64, 0x69, 0x64, 0x61, 0x74,
-	0x65, 0x42, 0x07, 0x0a, 0x05, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x22, 0xdf, 0x01, 0x0a, 0x06, 0x53,
-	0x69, 0x67, 0x6e, 0x61, 0x6c, 0x12, 0x46, 0x0a, 0x09, 0x63, 0x61, 0x6e, 0x64, 0x69, 0x64, 0x61,
-	0x74, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x26, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x63, 0x6f, 0x6c, 0x2e, 0x76, 0x6f, 0x69, 0x63, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x69, 0x67,
-	0x6e, 0x61, 0x6c, 0x2e, 0x49, 0x43, 0x45, 0x43, 0x61, 0x6e, 0x64, 0x69, 0x64, 0x61, 0x74, 0x65,
-	0x48, 0x00, 0x52, 0x09, 0x63, 0x61, 0x6e, 0x64, 0x69, 0x64, 0x61, 0x74, 0x65, 0x12, 0x37, 0x0a,
-	0x05, 0x6f, 0x66, 0x66, 0x65, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1f, 0x2e, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2e, 0x76, 0x6f, 0x69, 0x63, 0x65, 0x2e, 0x76, 0x31,
-	0x2e, 0x53, 0x69, 0x67, 0x6e, 0x61, 0x6c, 0x2e, 0x4f, 0x66, 0x66, 0x65, 0x72, 0x48, 0x00, 0x52,
-	0x05, 0x6f, 0x66, 0x66, 0x65, 0x72, 0x1a, 0x2c, 0x0a, 0x0c, 0x49, 0x43, 0x45, 0x43, 0x61, 0x6e,
-	0x64, 0x69, 0x64, 0x61, 0x74, 0x65, 0x12, 0x1c, 0x0a, 0x09, 0x63, 0x61, 0x6e, 0x64, 0x69, 0x64,
-	0x61, 0x74, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x63, 0x61, 0x6e, 0x64, 0x69,
-	0x64, 0x61, 0x74, 0x65, 0x1a, 0x1d, 0x0a, 0x05, 0x4f, 0x66, 0x66, 0x65, 0x72, 0x12, 0x14, 0x0a,
-	0x05, 0x6f, 0x66, 0x66, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x6f, 0x66,
-	0x66, 0x65, 0x72, 0x42, 0x07, 0x0a, 0x05, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x32, 0x5b, 0x0a, 0x0c,
-	0x56, 0x6f, 0x69, 0x63, 0x65, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x4b, 0x0a, 0x07,
-	0x43, 0x6f, 0x6e, 0x6e, 0x65, 0x63, 0x74, 0x12, 0x1f, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63,
-	0x6f, 0x6c, 0x2e, 0x76, 0x6f, 0x69, 0x63, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x69, 0x65,
-	0x6e, 0x74, 0x53, 0x69, 0x67, 0x6e, 0x61, 0x6c, 0x1a, 0x19, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x63, 0x6f, 0x6c, 0x2e, 0x76, 0x6f, 0x69, 0x63, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x69, 0x67,
-	0x6e, 0x61, 0x6c, 0x22, 0x00, 0x28, 0x01, 0x30, 0x01, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74,
-	0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x68, 0x61, 0x72, 0x6d, 0x6f, 0x6e, 0x79, 0x2d,
-	0x64, 0x65, 0x76, 0x65, 0x6c, 0x6f, 0x70, 0x6d, 0x65, 0x6e, 0x74, 0x2f, 0x6c, 0x65, 0x67, 0x61,
-	0x74, 0x6f, 0x2f, 0x67, 0x65, 0x6e, 0x2f, 0x76, 0x6f, 0x69, 0x63, 0x65, 0x2f, 0x76, 0x31, 0x62,
-	0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x65, 0x42, 0x07, 0x0a, 0x05, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x22, 0x27, 0x0a, 0x0d, 0x41, 0x6e,
+	0x73, 0x77, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x61,
+	0x6e, 0x73, 0x77, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x61, 0x6e, 0x73,
+	0x77, 0x65, 0x72, 0x22, 0x30, 0x0a, 0x10, 0x43, 0x61, 0x6e, 0x64, 0x69, 0x64, 0x61, 0x74, 0x65,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1c, 0x0a, 0x09, 0x63, 0x61, 0x6e, 0x64, 0x69,
+	0x64, 0x61, 0x74, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x63, 0x61, 0x6e, 0x64,
+	0x69, 0x64, 0x61, 0x74, 0x65, 0x22, 0x4a, 0x0a, 0x0e, 0x43, 0x6f, 0x6e, 0x6e, 0x65, 0x63, 0x74,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x19, 0x0a, 0x08, 0x67, 0x75, 0x69, 0x6c, 0x64,
+	0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x07, 0x67, 0x75, 0x69, 0x6c, 0x64,
+	0x49, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x63, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x5f, 0x69, 0x64,
+	0x18, 0x02, 0x20, 0x01, 0x28, 0x04, 0x52, 0x09, 0x63, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x49,
+	0x64, 0x22, 0xdf, 0x01, 0x0a, 0x06, 0x53, 0x69, 0x67, 0x6e, 0x61, 0x6c, 0x12, 0x46, 0x0a, 0x09,
+	0x63, 0x61, 0x6e, 0x64, 0x69, 0x64, 0x61, 0x74, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x26, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2e, 0x76, 0x6f, 0x69, 0x63, 0x65,
+	0x2e, 0x76, 0x31, 0x2e, 0x53, 0x69, 0x67, 0x6e, 0x61, 0x6c, 0x2e, 0x49, 0x43, 0x45, 0x43, 0x61,
+	0x6e, 0x64, 0x69, 0x64, 0x61, 0x74, 0x65, 0x48, 0x00, 0x52, 0x09, 0x63, 0x61, 0x6e, 0x64, 0x69,
+	0x64, 0x61, 0x74, 0x65, 0x12, 0x37, 0x0a, 0x05, 0x6f, 0x66, 0x66, 0x65, 0x72, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x1f, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2e, 0x76,
+	0x6f, 0x69, 0x63, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x69, 0x67, 0x6e, 0x61, 0x6c, 0x2e, 0x4f,
+	0x66, 0x66, 0x65, 0x72, 0x48, 0x00, 0x52, 0x05, 0x6f, 0x66, 0x66, 0x65, 0x72, 0x1a, 0x2c, 0x0a,
+	0x0c, 0x49, 0x43, 0x45, 0x43, 0x61, 0x6e, 0x64, 0x69, 0x64, 0x61, 0x74, 0x65, 0x12, 0x1c, 0x0a,
+	0x09, 0x63, 0x61, 0x6e, 0x64, 0x69, 0x64, 0x61, 0x74, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x09, 0x63, 0x61, 0x6e, 0x64, 0x69, 0x64, 0x61, 0x74, 0x65, 0x1a, 0x1d, 0x0a, 0x05, 0x4f,
+	0x66, 0x66, 0x65, 0x72, 0x12, 0x14, 0x0a, 0x05, 0x6f, 0x66, 0x66, 0x65, 0x72, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x05, 0x6f, 0x66, 0x66, 0x65, 0x72, 0x42, 0x07, 0x0a, 0x05, 0x65, 0x76,
+	0x65, 0x6e, 0x74, 0x32, 0xe7, 0x01, 0x0a, 0x0c, 0x56, 0x6f, 0x69, 0x63, 0x65, 0x53, 0x65, 0x72,
+	0x76, 0x69, 0x63, 0x65, 0x12, 0x42, 0x0a, 0x06, 0x41, 0x6e, 0x73, 0x77, 0x65, 0x72, 0x12, 0x20,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2e, 0x76, 0x6f, 0x69, 0x63, 0x65, 0x2e,
+	0x76, 0x31, 0x2e, 0x41, 0x6e, 0x73, 0x77, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
+	0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x48, 0x0a, 0x09, 0x43, 0x61, 0x6e, 0x64,
+	0x69, 0x64, 0x61, 0x74, 0x65, 0x12, 0x23, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c,
+	0x2e, 0x76, 0x6f, 0x69, 0x63, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x61, 0x6e, 0x64, 0x69, 0x64,
+	0x61, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f,
+	0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70,
+	0x74, 0x79, 0x12, 0x49, 0x0a, 0x07, 0x43, 0x6f, 0x6e, 0x6e, 0x65, 0x63, 0x74, 0x12, 0x21, 0x2e,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2e, 0x76, 0x6f, 0x69, 0x63, 0x65, 0x2e, 0x76,
+	0x31, 0x2e, 0x43, 0x6f, 0x6e, 0x6e, 0x65, 0x63, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x1a, 0x19, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2e, 0x76, 0x6f, 0x69, 0x63,
+	0x65, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x69, 0x67, 0x6e, 0x61, 0x6c, 0x30, 0x01, 0x42, 0x34, 0x5a,
+	0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x68, 0x61, 0x72, 0x6d,
+	0x6f, 0x6e, 0x79, 0x2d, 0x64, 0x65, 0x76, 0x65, 0x6c, 0x6f, 0x70, 0x6d, 0x65, 0x6e, 0x74, 0x2f,
+	0x6c, 0x65, 0x67, 0x61, 0x74, 0x6f, 0x2f, 0x67, 0x65, 0x6e, 0x2f, 0x76, 0x6f, 0x69, 0x63, 0x65,
+	0x2f, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -439,24 +607,32 @@ func file_voice_v1_voice_proto_rawDescGZIP() []byte {
 	return file_voice_v1_voice_proto_rawDescData
 }
 
-var file_voice_v1_voice_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_voice_v1_voice_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_voice_v1_voice_proto_goTypes = []interface{}{
 	(*ClientSignal)(nil),           // 0: protocol.voice.v1.ClientSignal
-	(*Signal)(nil),                 // 1: protocol.voice.v1.Signal
-	(*ClientSignal_Answer)(nil),    // 2: protocol.voice.v1.ClientSignal.Answer
-	(*ClientSignal_Candidate)(nil), // 3: protocol.voice.v1.ClientSignal.Candidate
-	(*Signal_ICECandidate)(nil),    // 4: protocol.voice.v1.Signal.ICECandidate
-	(*Signal_Offer)(nil),           // 5: protocol.voice.v1.Signal.Offer
+	(*AnswerRequest)(nil),          // 1: protocol.voice.v1.AnswerRequest
+	(*CandidateRequest)(nil),       // 2: protocol.voice.v1.CandidateRequest
+	(*ConnectRequest)(nil),         // 3: protocol.voice.v1.ConnectRequest
+	(*Signal)(nil),                 // 4: protocol.voice.v1.Signal
+	(*ClientSignal_Answer)(nil),    // 5: protocol.voice.v1.ClientSignal.Answer
+	(*ClientSignal_Candidate)(nil), // 6: protocol.voice.v1.ClientSignal.Candidate
+	(*Signal_ICECandidate)(nil),    // 7: protocol.voice.v1.Signal.ICECandidate
+	(*Signal_Offer)(nil),           // 8: protocol.voice.v1.Signal.Offer
+	(*empty.Empty)(nil),            // 9: google.protobuf.Empty
 }
 var file_voice_v1_voice_proto_depIdxs = []int32{
-	2, // 0: protocol.voice.v1.ClientSignal.answer:type_name -> protocol.voice.v1.ClientSignal.Answer
-	3, // 1: protocol.voice.v1.ClientSignal.candidate:type_name -> protocol.voice.v1.ClientSignal.Candidate
-	4, // 2: protocol.voice.v1.Signal.candidate:type_name -> protocol.voice.v1.Signal.ICECandidate
-	5, // 3: protocol.voice.v1.Signal.offer:type_name -> protocol.voice.v1.Signal.Offer
-	0, // 4: protocol.voice.v1.VoiceService.Connect:input_type -> protocol.voice.v1.ClientSignal
-	1, // 5: protocol.voice.v1.VoiceService.Connect:output_type -> protocol.voice.v1.Signal
-	5, // [5:6] is the sub-list for method output_type
-	4, // [4:5] is the sub-list for method input_type
+	5, // 0: protocol.voice.v1.ClientSignal.answer:type_name -> protocol.voice.v1.ClientSignal.Answer
+	6, // 1: protocol.voice.v1.ClientSignal.candidate:type_name -> protocol.voice.v1.ClientSignal.Candidate
+	7, // 2: protocol.voice.v1.Signal.candidate:type_name -> protocol.voice.v1.Signal.ICECandidate
+	8, // 3: protocol.voice.v1.Signal.offer:type_name -> protocol.voice.v1.Signal.Offer
+	1, // 4: protocol.voice.v1.VoiceService.Answer:input_type -> protocol.voice.v1.AnswerRequest
+	2, // 5: protocol.voice.v1.VoiceService.Candidate:input_type -> protocol.voice.v1.CandidateRequest
+	3, // 6: protocol.voice.v1.VoiceService.Connect:input_type -> protocol.voice.v1.ConnectRequest
+	9, // 7: protocol.voice.v1.VoiceService.Answer:output_type -> google.protobuf.Empty
+	9, // 8: protocol.voice.v1.VoiceService.Candidate:output_type -> google.protobuf.Empty
+	4, // 9: protocol.voice.v1.VoiceService.Connect:output_type -> protocol.voice.v1.Signal
+	7, // [7:10] is the sub-list for method output_type
+	4, // [4:7] is the sub-list for method input_type
 	4, // [4:4] is the sub-list for extension type_name
 	4, // [4:4] is the sub-list for extension extendee
 	0, // [0:4] is the sub-list for field type_name
@@ -481,7 +657,7 @@ func file_voice_v1_voice_proto_init() {
 			}
 		}
 		file_voice_v1_voice_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Signal); i {
+			switch v := v.(*AnswerRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -493,7 +669,7 @@ func file_voice_v1_voice_proto_init() {
 			}
 		}
 		file_voice_v1_voice_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ClientSignal_Answer); i {
+			switch v := v.(*CandidateRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -505,7 +681,7 @@ func file_voice_v1_voice_proto_init() {
 			}
 		}
 		file_voice_v1_voice_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ClientSignal_Candidate); i {
+			switch v := v.(*ConnectRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -517,7 +693,7 @@ func file_voice_v1_voice_proto_init() {
 			}
 		}
 		file_voice_v1_voice_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Signal_ICECandidate); i {
+			switch v := v.(*Signal); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -529,6 +705,42 @@ func file_voice_v1_voice_proto_init() {
 			}
 		}
 		file_voice_v1_voice_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ClientSignal_Answer); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_voice_v1_voice_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ClientSignal_Candidate); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_voice_v1_voice_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Signal_ICECandidate); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_voice_v1_voice_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Signal_Offer); i {
 			case 0:
 				return &v.state
@@ -545,7 +757,7 @@ func file_voice_v1_voice_proto_init() {
 		(*ClientSignal_Answer_)(nil),
 		(*ClientSignal_Candidate_)(nil),
 	}
-	file_voice_v1_voice_proto_msgTypes[1].OneofWrappers = []interface{}{
+	file_voice_v1_voice_proto_msgTypes[4].OneofWrappers = []interface{}{
 		(*Signal_Candidate)(nil),
 		(*Signal_Offer_)(nil),
 	}
@@ -555,7 +767,7 @@ func file_voice_v1_voice_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_voice_v1_voice_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -581,7 +793,9 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type VoiceServiceClient interface {
-	Connect(ctx context.Context, opts ...grpc.CallOption) (VoiceService_ConnectClient, error)
+	Answer(ctx context.Context, in *AnswerRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	Candidate(ctx context.Context, in *CandidateRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	Connect(ctx context.Context, in *ConnectRequest, opts ...grpc.CallOption) (VoiceService_ConnectClient, error)
 }
 
 type voiceServiceClient struct {
@@ -592,27 +806,46 @@ func NewVoiceServiceClient(cc grpc.ClientConnInterface) VoiceServiceClient {
 	return &voiceServiceClient{cc}
 }
 
-func (c *voiceServiceClient) Connect(ctx context.Context, opts ...grpc.CallOption) (VoiceService_ConnectClient, error) {
+func (c *voiceServiceClient) Answer(ctx context.Context, in *AnswerRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/protocol.voice.v1.VoiceService/Answer", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *voiceServiceClient) Candidate(ctx context.Context, in *CandidateRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/protocol.voice.v1.VoiceService/Candidate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *voiceServiceClient) Connect(ctx context.Context, in *ConnectRequest, opts ...grpc.CallOption) (VoiceService_ConnectClient, error) {
 	stream, err := c.cc.NewStream(ctx, &_VoiceService_serviceDesc.Streams[0], "/protocol.voice.v1.VoiceService/Connect", opts...)
 	if err != nil {
 		return nil, err
 	}
 	x := &voiceServiceConnectClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
 	return x, nil
 }
 
 type VoiceService_ConnectClient interface {
-	Send(*ClientSignal) error
 	Recv() (*Signal, error)
 	grpc.ClientStream
 }
 
 type voiceServiceConnectClient struct {
 	grpc.ClientStream
-}
-
-func (x *voiceServiceConnectClient) Send(m *ClientSignal) error {
-	return x.ClientStream.SendMsg(m)
 }
 
 func (x *voiceServiceConnectClient) Recv() (*Signal, error) {
@@ -625,14 +858,22 @@ func (x *voiceServiceConnectClient) Recv() (*Signal, error) {
 
 // VoiceServiceServer is the server API for VoiceService service.
 type VoiceServiceServer interface {
-	Connect(VoiceService_ConnectServer) error
+	Answer(context.Context, *AnswerRequest) (*empty.Empty, error)
+	Candidate(context.Context, *CandidateRequest) (*empty.Empty, error)
+	Connect(*ConnectRequest, VoiceService_ConnectServer) error
 }
 
 // UnimplementedVoiceServiceServer can be embedded to have forward compatible implementations.
 type UnimplementedVoiceServiceServer struct {
 }
 
-func (*UnimplementedVoiceServiceServer) Connect(VoiceService_ConnectServer) error {
+func (*UnimplementedVoiceServiceServer) Answer(context.Context, *AnswerRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Answer not implemented")
+}
+func (*UnimplementedVoiceServiceServer) Candidate(context.Context, *CandidateRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Candidate not implemented")
+}
+func (*UnimplementedVoiceServiceServer) Connect(*ConnectRequest, VoiceService_ConnectServer) error {
 	return status.Errorf(codes.Unimplemented, "method Connect not implemented")
 }
 
@@ -640,13 +881,52 @@ func RegisterVoiceServiceServer(s *grpc.Server, srv VoiceServiceServer) {
 	s.RegisterService(&_VoiceService_serviceDesc, srv)
 }
 
+func _VoiceService_Answer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AnswerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VoiceServiceServer).Answer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protocol.voice.v1.VoiceService/Answer",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VoiceServiceServer).Answer(ctx, req.(*AnswerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _VoiceService_Candidate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CandidateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VoiceServiceServer).Candidate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protocol.voice.v1.VoiceService/Candidate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VoiceServiceServer).Candidate(ctx, req.(*CandidateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _VoiceService_Connect_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(VoiceServiceServer).Connect(&voiceServiceConnectServer{stream})
+	m := new(ConnectRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(VoiceServiceServer).Connect(m, &voiceServiceConnectServer{stream})
 }
 
 type VoiceService_ConnectServer interface {
 	Send(*Signal) error
-	Recv() (*ClientSignal, error)
 	grpc.ServerStream
 }
 
@@ -658,24 +938,24 @@ func (x *voiceServiceConnectServer) Send(m *Signal) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *voiceServiceConnectServer) Recv() (*ClientSignal, error) {
-	m := new(ClientSignal)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
 var _VoiceService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "protocol.voice.v1.VoiceService",
 	HandlerType: (*VoiceServiceServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Answer",
+			Handler:    _VoiceService_Answer_Handler,
+		},
+		{
+			MethodName: "Candidate",
+			Handler:    _VoiceService_Candidate_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "Connect",
 			Handler:       _VoiceService_Connect_Handler,
 			ServerStreams: true,
-			ClientStreams: true,
 		},
 	},
 	Metadata: "voice/v1/voice.proto",

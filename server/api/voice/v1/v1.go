@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/harmony-development/legato/server/api/voice/state"
 	"github.com/harmony-development/legato/server/db"
 	"github.com/pion/webrtc/v3"
+	"github.com/ztrue/tracerr"
 )
 
 type Dependencies struct {
@@ -27,11 +29,19 @@ func init() {
 			Burst:    5,
 		},
 		Auth:     true,
-		Location: middleware.GuildLocation,
+		Location: middleware.GuildLocation | middleware.ChannelLocation,
 	}, "/protocol.chat.v1.VoiceService/Connect")
 }
 
-func (v1 *V1) Connect(s voicev1.VoiceService_ConnectServer) error {
+func (v1 *V1) Connect(r *voicev1.ConnectRequest, s voicev1.VoiceService_ConnectServer) error {
+	userID, err := middleware.AuthHandler(v1.DB, s.Context())
+	if err := middleware.LocationHandler(v1.DB, r, "/protocol.chat.v1.VoiceService/Connect", userID); err != nil {
+		fmt.Println(err)
+		return err
+	}
+	if err != nil {
+		return err
+	}
 	peerConnection, err := webrtc.NewPeerConnection(webrtc.Configuration{})
 	if err != nil {
 		return err
@@ -47,6 +57,25 @@ func (v1 *V1) Connect(s voicev1.VoiceService_ConnectServer) error {
 	}); err != nil {
 		return err
 	}
+
+	peerConnection.OnICECandidate(func(i *webrtc.ICECandidate) {
+		if i == nil {
+			return
+		}
+		candidateString, err := json.Marshal(i.ToJSON())
+		if err != nil {
+			fmt.Println(tracerr.Wrap(err))
+			return
+		}
+
+		s.Send(&voicev1.Signal{
+			Event: &voicev1.Signal_Candidate{
+				Candidate: &voicev1.Signal_ICECandidate{
+					Candidate: string(candidateString),
+				},
+			},
+		})
+	})
 
 	return nil
 }
