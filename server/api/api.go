@@ -8,7 +8,8 @@ import (
 	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
 	mediaproxyv1 "github.com/harmony-development/legato/gen/mediaproxy/v1"
 	"github.com/harmony-development/legato/server/api/authsvc"
-	"github.com/harmony-development/legato/server/api/chat"
+	authv1impl "github.com/harmony-development/legato/server/api/authsvc/v1"
+	chatv1impl "github.com/harmony-development/legato/server/api/chat/v1"
 	"github.com/harmony-development/legato/server/api/chat/v1/permissions"
 	"github.com/harmony-development/legato/server/api/mediaproxy"
 	"github.com/harmony-development/legato/server/api/middleware"
@@ -44,7 +45,6 @@ type API struct {
 	GrpcServer       *grpc.Server
 	GrpcWebServer    *grpcweb.WrappedGrpcServer
 	PrometheusServer *http.Server
-	ChatSvc          *chat.Service
 }
 
 // New creates a new API instance
@@ -88,21 +88,25 @@ func New(deps Dependencies) *API {
 		Handler: prometheusMux,
 	}
 
-	chatv1.RegisterChatServiceServer(api.GrpcServer, chat.New(&chat.Dependencies{
-		DB:             api.DB,
-		Logger:         api.Logger,
-		Sonyflake:      api.Sonyflake,
-		Perms:          api.Permissions,
-		Config:         deps.Config,
-		StorageBackend: deps.StorageBackend,
-	}).V1)
-	authv1.RegisterAuthServiceServer(api.GrpcServer, authsvc.New(&authsvc.Dependencies{
-		DB:          api.DB,
-		Logger:      api.Logger,
-		Sonyflake:   api.Sonyflake,
-		AuthManager: api.AuthManager,
-		Config:      api.Config,
-	}).V1)
+	chatv1.RegisterChatServiceServer(api.GrpcServer, &chatv1impl.V1{
+		Dependencies: chatv1impl.Dependencies{
+			DB:             api.DB,
+			Logger:         api.Logger,
+			Sonyflake:      api.Sonyflake,
+			Perms:          api.Permissions,
+			Config:         deps.Config,
+			StorageBackend: deps.StorageBackend,
+		},
+	})
+	authv1.RegisterAuthServiceServer(api.GrpcServer, &authv1impl.V1{
+		Dependencies: &authsvc.Dependencies{
+			DB:          api.DB,
+			Logger:      api.Logger,
+			Sonyflake:   api.Sonyflake,
+			AuthManager: api.AuthManager,
+			Config:      api.Config,
+		},
+	})
 	mediaproxyv1.RegisterMediaProxyServiceServer(api.GrpcServer, mediaproxy.New(&mediaproxy.Dependencies{
 		DB:     api.DB,
 		Logger: api.Logger,
