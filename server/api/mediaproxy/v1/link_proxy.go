@@ -17,7 +17,6 @@ func init() {
 			Duration: 1 * time.Second,
 			Burst:    3,
 		},
-		Auth: true,
 	}, "/protocol.mediaproxy.v1.MediaProxyService/FetchLinkMetadata")
 }
 

@@ -32,7 +32,6 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    1,
 		},
-		Auth: true,
 	}, "/protocol.mediaproxy.v1.MediaProxyService/InstantView")
 }
 

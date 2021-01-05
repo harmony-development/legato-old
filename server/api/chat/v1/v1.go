@@ -105,7 +105,6 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    1,
 		},
-		Auth: true,
 	}, "/protocol.chat.v1.ChatService/CreateGuild")
 }
 
@@ -135,9 +134,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    5,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation | middleware.JoinedLocation,
-		Permission: "invites.manage.create",
+
+		Location: middleware.GuildLocation | middleware.JoinedLocation,
 	}, "/protocol.chat.v1.ChatService/CreateInvite")
 }
 
@@ -162,9 +160,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    5,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation | middleware.JoinedLocation,
-		Permission: "channels.manage.create",
+
+		Location: middleware.GuildLocation | middleware.JoinedLocation,
 	}, "/protocol.chat.v1.ChatService/CreateChannel")
 }
 
@@ -197,7 +194,7 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    15,
 		},
-		Auth:     true,
+
 		Location: middleware.GuildLocation | middleware.JoinedLocation,
 	}, "/protocol.chat.v1.ChatService/GetGuild")
 }
@@ -224,9 +221,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    15,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation | middleware.JoinedLocation,
-		Permission: "invites.view",
+
+		Location: middleware.GuildLocation | middleware.JoinedLocation,
 	}, "/protocol.chat.v1.ChatService/GetGuildInvites")
 }
 
@@ -261,7 +257,7 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    15,
 		},
-		Auth:     true,
+
 		Location: middleware.GuildLocation | middleware.JoinedLocation,
 	}, "/protocol.chat.v1.ChatService/GetGuildMembers")
 }
@@ -283,7 +279,7 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    15,
 		},
-		Auth:       true,
+
 		Location:   middleware.GuildLocation | middleware.JoinedLocation,
 		WantsRoles: true,
 	}, "/protocol.chat.v1.ChatService/GetGuildChannels")
@@ -321,9 +317,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    10,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
-		Permission: "messages.view",
+
+		Location: middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
 	}, "/protocol.chat.v1.ChatService/GetMessage")
 }
 
@@ -389,7 +384,6 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    2,
 		},
-		Auth: false,
 	}, "/protocol.chat.v1.ChatService/PreviewGuild")
 }
 
@@ -423,9 +417,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    10,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
-		Permission: "messages.view",
+
+		Location: middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
 	}, "/protocol.chat.v1.ChatService/GetChannelMessages")
 }
 
@@ -510,9 +503,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    2,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation | middleware.JoinedLocation,
-		Permission: "guild.manage.change-information",
+
+		Location: middleware.GuildLocation | middleware.JoinedLocation,
 	}, "/protocol.chat.v1.ChatService/UpdateGuildInformation")
 }
 
@@ -544,9 +536,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    2,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
-		Permission: "channels.manage.change-information",
+
+		Location: middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
 	}, "/protocol.chat.v1.ChatService/UpdateChannelInformation")
 }
 
@@ -576,9 +567,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    2,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
-		Permission: "channels.manage.move",
+
+		Location: middleware.GuildLocation | middleware.ChannelLocation | middleware.JoinedLocation,
 	}, "/protocol.chat.v1.ChatService/UpdateChannelOrder")
 }
 
@@ -607,9 +597,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    2,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.MessageLocation | middleware.AuthorLocation,
-		Permission: "messages.send",
+
+		Location: middleware.GuildLocation | middleware.ChannelLocation | middleware.MessageLocation | middleware.AuthorLocation,
 	}, "/protocol.chat.v1.ChatService/UpdateMessage")
 }
 
@@ -694,9 +683,8 @@ func init() {
 			Duration: 15 * time.Second,
 			Burst:    1,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation,
-		Permission: "guild.manage.delete",
+
+		Location: middleware.GuildLocation,
 	}, "/protocol.chat.v1.ChatService/DeleteGuild")
 }
 
@@ -722,9 +710,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    5,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation,
-		Permission: "invites.manage.delete",
+
+		Location: middleware.GuildLocation,
 	}, "/protocol.chat.v1.ChatService/DeleteInvite")
 }
 
@@ -742,9 +729,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    5,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation | middleware.ChannelLocation,
-		Permission: "channels.manage.delete",
+
+		Location: middleware.GuildLocation | middleware.ChannelLocation,
 	}, "/protocol.chat.v1.ChatService/DeleteChannel")
 }
 
@@ -770,7 +756,7 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    5,
 		},
-		Auth:       true,
+
 		WantsRoles: true,
 		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.MessageLocation,
 	}, "/protocol.chat.v1.ChatService/DeleteMessage")
@@ -807,7 +793,7 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    5,
 		},
-		Auth:     true,
+
 		Location: middleware.NoLocation,
 	}, "/protocol.chat.v1.ChatService/JoinGuild")
 }
@@ -852,7 +838,7 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    5,
 		},
-		Auth:     true,
+
 		Location: middleware.GuildLocation,
 	}, "/protocol.chat.v1.ChatService/LeaveGuild")
 }
@@ -902,7 +888,7 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    5,
 		},
-		Auth:     true,
+
 		Location: middleware.GuildLocation,
 	}, "/protocol.chat.v1.ChatService/StreamEvents")
 }
@@ -955,9 +941,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    20,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation | middleware.ChannelLocation | middleware.MessageLocation,
-		Permission: "actions.trigger",
+
+		Location: middleware.GuildLocation | middleware.ChannelLocation | middleware.MessageLocation,
 	}, "/protocol.chat.v1.ChatService/TriggerAction")
 }
 
@@ -995,9 +980,8 @@ func init() {
 			Duration: 10 * time.Second,
 			Burst:    50,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation | middleware.ChannelLocation,
-		Permission: "messages.send",
+
+		Location: middleware.GuildLocation | middleware.ChannelLocation,
 	}, "/protocol.chat.v1.ChatService/SendMessage")
 }
 
@@ -1077,7 +1061,7 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    10,
 		},
-		Auth:     true,
+
 		Location: middleware.NoLocation,
 	}, "/protocol.chat.v1.ChatService/GetGuildList")
 }
@@ -1107,8 +1091,7 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    10,
 		},
-		Auth:     true,
-		Local:    true,
+
 		Location: middleware.NoLocation,
 	}, "/protocol.chat.v1.ChatService/AddGuildToGuildList")
 }
@@ -1137,8 +1120,7 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    10,
 		},
-		Auth:     true,
-		Local:    true,
+
 		Location: middleware.NoLocation,
 	}, "/protocol.chat.v1.ChatService/RemoveGuildFromGuildList")
 }
@@ -1278,9 +1260,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    10,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation,
-		Permission: "roles.manage",
+
+		Location: middleware.GuildLocation,
 	}, "/protocol.chat.v1.ChatService/AddGuildRole")
 }
 
@@ -1308,9 +1289,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    10,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation,
-		Permission: "roles.manage",
+
+		Location: middleware.GuildLocation,
 	}, "/protocol.chat.v1.ChatService/AddGuildRole")
 }
 
@@ -1325,9 +1305,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    10,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation,
-		Permission: "roles.manage",
+
+		Location: middleware.GuildLocation,
 	}, "/protocol.chat.v1.ChatService/MoveRole")
 }
 
@@ -1343,9 +1322,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    10,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation,
-		Permission: "roles.get",
+
+		Location: middleware.GuildLocation,
 	}, "/protocol.chat.v1.ChatService/GetGuildRoles")
 }
 
@@ -1363,9 +1341,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    10,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation,
-		Permission: "permissions.manage.set",
+
+		Location: middleware.GuildLocation,
 	}, "/protocol.chat.v1.ChatService/SetPermissions")
 }
 
@@ -1380,9 +1357,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    10,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation,
-		Permission: "permissions.manage.get",
+
+		Location: middleware.GuildLocation,
 	}, "/protocol.chat.v1.ChatService/GetPermissions")
 }
 
@@ -1397,7 +1373,7 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    10,
 		},
-		Auth:       true,
+
 		WantsRoles: true,
 		Location:   middleware.GuildLocation,
 	}, "/protocol.chat.v1.ChatService/QueryHasPermission")
@@ -1433,9 +1409,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    10,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation,
-		Permission: "roles.users.manage",
+
+		Location: middleware.GuildLocation,
 	}, "/protocol.chat.v1.ChatService/ManageUserRoles")
 }
 
@@ -1449,9 +1424,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    10,
 		},
-		Auth:       true,
-		Permission: "roles.manage",
-		Location:   middleware.GuildLocation,
+
+		Location: middleware.GuildLocation,
 	}, "/protocol.chat.v1.ChatService/ModifyGuildRole")
 }
 
@@ -1465,7 +1439,7 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    10,
 		},
-		Auth:       true,
+
 		WantsRoles: true,
 		Location:   middleware.GuildLocation,
 	}, "/protocol.chat.v1.ChatService/GetUserRoles")
@@ -1500,7 +1474,6 @@ func init() {
 			Duration: 10 * time.Second,
 			Burst:    64,
 		},
-		Auth: true,
 	}, "/protocol.chat.v1.ChatService/GetUser")
 }
 
@@ -1531,7 +1504,6 @@ func init() {
 			Duration: 1 * time.Second,
 			Burst:    4,
 		},
-		Auth: true,
 	}, "/protocol.chat.v1.ChatService/GetUserMetadata")
 }
 
@@ -1559,7 +1531,6 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    4,
 		},
-		Auth: true,
 	}, "/protocol.chat.v1.ChatService/ProfileUpdate")
 }
 
@@ -1627,9 +1598,8 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    4,
 		},
-		Auth:       true,
-		Location:   middleware.GuildLocation | middleware.ChannelLocation,
-		Permission: "messages.send",
+
+		Location: middleware.GuildLocation | middleware.ChannelLocation,
 	}, "/protocol.chat.v1.ChatService/Typing")
 }
 

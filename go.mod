@@ -23,10 +23,10 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/hashicorp/hcl/v2 v2.8.0
 	github.com/improbable-eng/grpc-web v0.13.0
+	github.com/jhump/protoreflect v1.8.1
 	github.com/labstack/echo/v4 v4.1.11
 	github.com/lib/pq v1.7.0
 	github.com/logrusorgru/aurora v2.0.3+incompatible // indirect
-	github.com/mjibson/esc v0.2.0 // indirect
 	github.com/peterbourgon/diskv v0.0.0-20171120014656-2973218375c3
 	github.com/pion/webrtc/v3 v3.0.0-beta.4
 	github.com/prometheus/client_golang v1.4.1
@@ -35,15 +35,14 @@ require (
 	github.com/soheilhy/cmux v0.1.4
 	github.com/sony/sonyflake v1.0.0
 	github.com/thanhpk/randstr v1.0.4
+	github.com/yuin/goldmark v1.2.1 // indirect
 	github.com/ztrue/tracerr v0.3.0
 	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899
-	golang.org/x/mod v0.4.0 // indirect
-	golang.org/x/text v0.3.3 // indirect
+	golang.org/x/net v0.0.0-20201021035429-f5854403a974 // indirect
 	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
-	golang.org/x/tools v0.0.0-20210102185154-773b96fafca2 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/grpc v1.31.0
 	google.golang.org/grpc/examples v0.0.0-20201218190559-666aea1fb34c // indirect
-	google.golang.org/protobuf v1.25.0
+	google.golang.org/protobuf v1.25.1-0.20200805231151-a709e31e5d12
 	willnorris.com/go/imageproxy v0.10.0
 )

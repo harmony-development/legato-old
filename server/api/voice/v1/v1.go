@@ -22,7 +22,6 @@ func init() {
 			Duration: 5 * time.Second,
 			Burst:    5,
 		},
-		Auth:     true,
 		Location: middleware.GuildLocation,
 	}, "/protocol.chat.v1.VoiceService/Connect")
 }

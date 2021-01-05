@@ -1,23 +1,11 @@
 package middleware
 
 import (
-	"context"
-
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/responses"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
-
-func (m Middlewares) LocationInterceptor(c context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	ctx := c.(HarmonyContext)
-
-	if err := LocationHandler(m.DB, req, info.FullMethod, ctx.UserID); err != nil {
-		return nil, err
-	}
-	return handler(c, req)
-}
 
 func LocationHandler(database db.IHarmonyDB, req interface{}, fullMethod string, userID uint64) error {
 	if GetRPCConfig(fullMethod).Location.Has(NoLocation) {

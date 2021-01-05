@@ -32,9 +32,6 @@ type RateLimit struct {
 
 type RPCConfig struct {
 	RateLimit  RateLimit
-	Auth       bool
-	Local      bool
-	Permission string
 	WantsRoles bool
 	Location   Location
 }

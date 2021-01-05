@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -19,6 +20,7 @@ import (
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/http/attachments/backend"
 	"github.com/harmony-development/legato/server/logger"
+	"github.com/jhump/protoreflect/grpcreflect"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sony/sonyflake"
 
@@ -66,9 +68,7 @@ func New(deps Dependencies) *API {
 			m.ErrorInterceptor,
 			m.RateLimitInterceptor,
 			m.ValidatorInterceptor,
-			m.AuthInterceptor,
-			m.LocationInterceptor,
-			m.GuildPermissionInterceptor,
+			m.MethodMetadataInterceptor,
 			m.LoggingInterceptor,
 		),
 		grpc_middleware.WithStreamServerChain(
@@ -83,6 +83,7 @@ func New(deps Dependencies) *API {
 	}), grpcweb.WithWebsockets(true), grpcweb.WithWebsocketOriginFunc(func(req *http.Request) bool {
 		return true
 	}), grpcweb.WithWebsocketPingInterval(10*time.Second))
+
 	prometheusMux := http.NewServeMux()
 	prometheusMux.Handle("/metrics", promhttp.Handler())
 	api.PrometheusServer = &http.Server{
@@ -121,6 +122,17 @@ func New(deps Dependencies) *API {
 	reflection.Register(api.GrpcServer)
 	grpc_prometheus.Register(api.GrpcServer)
 	grpc_prometheus.EnableHandlingTimeHistogram()
+
+	sds, err := grpcreflect.LoadServiceDescriptors(api.GrpcServer)
+	if err != nil {
+		panic(err)
+	}
+	for _, sd := range sds {
+		for _, md := range sd.GetMethods() {
+			methodName := fmt.Sprintf("/%s/%s", sd.GetFullyQualifiedName(), md.GetName())
+			middleware.Methods[methodName] = md
+		}
+	}
 
 	return api
 }

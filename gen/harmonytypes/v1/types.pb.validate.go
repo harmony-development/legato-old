@@ -36,6 +36,79 @@ var (
 // define the regex for a UUID once up-front
 var _types_uuidPattern = regexp.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 
+// Validate checks the field values on HarmonyMethodMetadata with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *HarmonyMethodMetadata) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for RequiresAuthentication
+
+	// no validation rules for RequiresLocal
+
+	// no validation rules for RequiresPermissionNode
+
+	return nil
+}
+
+// HarmonyMethodMetadataValidationError is the validation error returned by
+// HarmonyMethodMetadata.Validate if the designated constraints aren't met.
+type HarmonyMethodMetadataValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e HarmonyMethodMetadataValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e HarmonyMethodMetadataValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e HarmonyMethodMetadataValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e HarmonyMethodMetadataValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e HarmonyMethodMetadataValidationError) ErrorName() string {
+	return "HarmonyMethodMetadataValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e HarmonyMethodMetadataValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sHarmonyMethodMetadata.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = HarmonyMethodMetadataValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = HarmonyMethodMetadataValidationError{}
+
 // Validate checks the field values on Override with the rules defined in the
 // proto definition for this message. If any rules are violated, an error is returned.
 func (m *Override) Validate() error {

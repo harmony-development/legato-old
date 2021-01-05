@@ -199,7 +199,6 @@ func init() {
 			Duration: 1 * time.Second,
 			Burst:    3,
 		},
-		Auth: true,
 	}, "/protocol.auth.v1.AuthService/Federate")
 }
 
