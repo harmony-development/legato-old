@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"encoding/pem"
 	"errors"
+	"fmt"
 	"time"
 	"unicode"
 
@@ -229,7 +230,10 @@ func (v1 *V1) LoginFederated(c context.Context, r *authv1.LoginFederatedRequest)
 		return nil, err
 	}
 
-	t, err := jwt.ParseWithClaims(r.AuthToken, &auth.Token{}, func(_ *jwt.Token) (interface{}, error) {
+	t, err := jwt.ParseWithClaims(r.AuthToken, &auth.Token{}, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, fmt.Errorf("Invalid signing method: %v", t.Header["alg"])
+		}
 		return pubKey, nil
 	})
 	if err != nil {
