@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/responses"
@@ -18,14 +19,19 @@ import (
 var Methods map[string]*desc.MethodDescriptor
 
 func (m Middlewares) MethodMetadataInterceptor(c context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	desc, err := protoregistry.GlobalFiles.FindDescriptorByName(protoreflect.FullName(info.FullMethod))
+	fixed := strings.ReplaceAll(info.FullMethod[1:], "/", ".")
+	desc, err := protoregistry.GlobalFiles.FindDescriptorByName(protoreflect.FullName(fixed))
 	if err != nil {
-		return nil, fmt.Errorf("unknown method: %w", err)
+		return nil, fmt.Errorf("unknown method in registry: %w", err)
 	}
 	method := desc.(protoreflect.MethodDescriptor)
 	opts := proto.GetExtension(method.Options(), harmonytypesv1.E_Metadata).(*harmonytypesv1.HarmonyMethodMetadata)
 
 	ctx := c.(HarmonyContext)
+
+	if opts == nil {
+		goto finally
+	}
 
 	// Auth
 	{
@@ -122,5 +128,6 @@ afterLocal:
 	}
 afterPermissions:
 
+finally:
 	return handler(ctx, req)
 }
