@@ -16,7 +16,7 @@ jobs:
         shell: bash
         env:
           KNOWN_HOSTS: ${{secrets.ACTIONS_SSH_KNOWN_HOSTS}}
-      - run: 'ssh -i key -o UserKnownHostsFile=known_hosts "root@$SSH_HOST" systemctl start update-legato'
+      - run: 'ssh -i key -o UserKnownHostsFile=known_hosts "root@$SSH_HOST" update-legato'
         shell: bash
         env:
           SSH_HOST: ${{secrets.ACTIONS_SSH_HOST}}
