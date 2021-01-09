@@ -931,7 +931,7 @@ func (v1 *V1) StreamEvents(s chatv1.ChatService_StreamEventsServer) error {
 			if err != nil {
 				continue
 			}
-			v1.PubSub.AddActionSubscription(s)
+			v1.PubSub.AddHomeserverSubscription(s)
 		}
 	}
 }
