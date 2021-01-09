@@ -20,6 +20,7 @@ import (
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/http/attachments/backend"
 	"github.com/harmony-development/legato/server/logger"
+	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/grpcreflect"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sony/sonyflake"
@@ -127,6 +128,8 @@ func New(deps Dependencies) *API {
 	if err != nil {
 		panic(err)
 	}
+
+	middleware.Methods = make(map[string]*desc.MethodDescriptor)
 	for _, sd := range sds {
 		for _, md := range sd.GetMethods() {
 			methodName := fmt.Sprintf("/%s/%s", sd.GetFullyQualifiedName(), md.GetName())
