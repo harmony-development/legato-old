@@ -3,7 +3,7 @@ package chat
 import (
 	v1 "github.com/harmony-development/legato/server/api/chat/v1"
 	"github.com/harmony-development/legato/server/api/chat/v1/permissions"
-	"github.com/harmony-development/legato/server/api/chat/v1/pubsub_backends/integrated"
+	"github.com/harmony-development/legato/server/api/chat/v1/pubsub_backends/inprocess"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/http/attachments/backend"
@@ -34,15 +34,11 @@ func New(deps *Dependencies) *Service {
 	}
 	chat.V1 = &v1.V1{
 		Dependencies: v1.Dependencies{
-			DB:        deps.DB,
-			Logger:    deps.Logger,
-			Sonyflake: deps.Sonyflake,
-			Perms:     deps.Perms,
-			PubSub: v1.SubscriptionManager{
-				Actions:    (&integrated.ActionState{}).Initialize(deps.Logger),
-				Guild:      (&integrated.GuildState{}).Initialize(deps.Logger, deps.DB),
-				Homeserver: (&integrated.HomeserverEventState{}).Initialize(deps.Logger),
-			},
+			DB:             deps.DB,
+			Logger:         deps.Logger,
+			Sonyflake:      deps.Sonyflake,
+			Perms:          deps.Perms,
+			PubSub:         (&inprocess.StreamManager{}).Init(deps.Logger, deps.DB),
 			Config:         deps.Config,
 			StorageBackend: deps.StorageBackend,
 		},
