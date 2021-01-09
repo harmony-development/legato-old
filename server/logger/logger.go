@@ -33,6 +33,7 @@ type ILogger interface {
 	Request(c context.Context, req interface{}, info *grpc.UnaryServerInfo)
 	Debug(d DebugScope, v ...interface{})
 	Fatal(err error)
+	Warn(s string, v ...interface{})
 }
 
 // Logger is the Harmony logger
@@ -72,6 +73,13 @@ func (l Logger) Exception(err error) {
 	}
 	if l.Config.Server.Policies.Debug.LogErrors {
 		logrus.Warnf("%s", tracerr.SprintSourceColor(err))
+	}
+}
+
+// Warn warns
+func (l Logger) Warn(fm string, v ...interface{}) {
+	if l.Config.Server.Policies.Debug.LogErrors {
+		logrus.Warnf("%s", v...)
 	}
 }
 

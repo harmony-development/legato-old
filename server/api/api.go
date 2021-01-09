@@ -26,7 +26,6 @@ import (
 	"github.com/sony/sonyflake"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	"google.golang.org/grpc"
@@ -64,7 +63,7 @@ func New(deps Dependencies) *API {
 	api.GrpcServer = grpc.NewServer(
 		grpc_middleware.WithUnaryServerChain(
 			m.HarmonyContextInterceptor,
-			grpc_recovery.UnaryServerInterceptor(grpc_recovery.WithRecoveryHandler(m.RecoveryFunc)),
+			m.UnaryRecoveryFunc,
 			grpc_prometheus.UnaryServerInterceptor,
 			m.ErrorInterceptor,
 			m.RateLimitInterceptor,
@@ -73,7 +72,7 @@ func New(deps Dependencies) *API {
 			m.LoggingInterceptor,
 		),
 		grpc_middleware.WithStreamServerChain(
-			grpc_recovery.StreamServerInterceptor(grpc_recovery.WithRecoveryHandler(m.RecoveryFunc)),
+			m.StreamRecoveryFunc,
 			grpc_prometheus.StreamServerInterceptor,
 			m.HarmonyContextInterceptorStream,
 			m.ErrorInterceptorStream,

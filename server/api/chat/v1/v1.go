@@ -41,7 +41,7 @@ type Dependencies struct {
 	DB             db.IHarmonyDB
 	Logger         logger.ILogger
 	Sonyflake      *sonyflake.Sonyflake
-	PubSub         StreamManager
+	Streams        StreamManager
 	Perms          *permissions.Manager
 	Config         *config.Config
 	StorageBackend backend.AttachmentBackend
@@ -171,7 +171,7 @@ func (v1 *V1) CreateChannel(c context.Context, r *chatv1.CreateChannelRequest) (
 	if err != nil {
 		return nil, err
 	}
-	v1.PubSub.BroadcastGuild(r.GuildId, &chatv1.Event{
+	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
 		Event: &chatv1.Event_CreatedChannel{
 			CreatedChannel: &chatv1.Event_ChannelCreated{
 				GuildId:    r.GuildId,
@@ -514,7 +514,7 @@ func (v1 *V1) UpdateGuildInformation(c context.Context, r *chatv1.UpdateGuildInf
 	if err != nil {
 		return nil, err
 	}
-	v1.PubSub.BroadcastGuild(r.GuildId, &chatv1.Event{
+	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
 		Event: &chatv1.Event_EditedGuild{
 			EditedGuild: &chatv1.Event_GuildUpdated{
 				GuildId:        r.GuildId,
@@ -546,7 +546,7 @@ func (v1 *V1) UpdateChannelInformation(c context.Context, r *chatv1.UpdateChanne
 	if err := v1.DB.UpdateChannelInformation(r.GuildId, r.ChannelId, r.Name, r.UpdateName, r.Metadata, r.UpdateMetadata); err != nil {
 		return nil, err
 	}
-	v1.PubSub.BroadcastGuild(r.GuildId, &chatv1.Event{
+	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
 		Event: &chatv1.Event_EditedChannel{
 			EditedChannel: &chatv1.Event_ChannelUpdated{
 				GuildId:        r.GuildId,
@@ -577,7 +577,7 @@ func (v1 *V1) UpdateChannelOrder(c context.Context, r *chatv1.UpdateChannelOrder
 	if err := v1.DB.MoveChannel(r.GuildId, r.ChannelId, r.PreviousId, r.NextId); err != nil {
 		return nil, err
 	}
-	v1.PubSub.BroadcastGuild(r.GuildId, &chatv1.Event{
+	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
 		Event: &chatv1.Event_EditedChannel{
 			EditedChannel: &chatv1.Event_ChannelUpdated{
 				GuildId:     r.GuildId,
@@ -654,7 +654,7 @@ func (v1 *V1) UpdateMessage(c context.Context, r *chatv1.UpdateMessageRequest) (
 		return nil, err
 	}
 	editedAt, _ := ptypes.TimestampProto(tiempo.UTC())
-	v1.PubSub.BroadcastGuild(r.GuildId, &chatv1.Event{
+	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
 		Event: &chatv1.Event_EditedMessage{
 			EditedMessage: &chatv1.Event_MessageUpdated{
 				GuildId:        r.GuildId,
@@ -694,7 +694,7 @@ func (v1 *V1) DeleteGuild(c context.Context, r *chatv1.DeleteGuildRequest) (*emp
 	if err != nil {
 		return nil, err
 	}
-	v1.PubSub.BroadcastGuild(r.GuildId, &chatv1.Event{
+	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
 		Event: &chatv1.Event_DeletedGuild{
 			DeletedGuild: &chatv1.Event_GuildDeleted{
 				GuildId: r.GuildId,
@@ -739,7 +739,7 @@ func (v1 *V1) DeleteChannel(c context.Context, r *chatv1.DeleteChannelRequest) (
 	if err := v1.DB.DeleteChannelFromGuild(r.GuildId, r.ChannelId); err != nil {
 		return nil, err
 	}
-	v1.PubSub.BroadcastGuild(r.GuildId, &chatv1.Event{
+	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
 		Event: &chatv1.Event_DeletedChannel{
 			DeletedChannel: &chatv1.Event_ChannelDeleted{
 				GuildId:   r.GuildId,
@@ -775,7 +775,7 @@ func (v1 *V1) DeleteMessage(c context.Context, r *chatv1.DeleteMessageRequest) (
 	if err := v1.DB.DeleteMessage(r.MessageId, r.ChannelId, r.GuildId); err != nil {
 		return nil, err
 	}
-	v1.PubSub.BroadcastGuild(r.GuildId, &chatv1.Event{
+	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
 		Event: &chatv1.Event_DeletedMessage{
 			DeletedMessage: &chatv1.Event_MessageDeleted{
 				GuildId:   r.GuildId,
@@ -814,7 +814,7 @@ func (v1 *V1) JoinGuild(c context.Context, r *chatv1.JoinGuildRequest) (*chatv1.
 	if err := v1.DB.IncrementInvite(r.InviteId); err != nil {
 		return nil, err
 	}
-	v1.PubSub.BroadcastGuild(guildID, &chatv1.Event{
+	v1.Streams.BroadcastGuild(guildID, &chatv1.Event{
 		Event: &chatv1.Event_JoinedMember{
 			JoinedMember: &chatv1.Event_MemberJoined{
 				GuildId:  guildID,
@@ -860,8 +860,8 @@ func (v1 *V1) LeaveGuild(c context.Context, r *chatv1.LeaveGuildRequest) (*empty
 		return nil, err
 	}
 
-	v1.PubSub.RemoveGuildSubscription(r.GuildId, ctx.UserID)
-	v1.PubSub.BroadcastGuild(r.GuildId, &chatv1.Event{
+	v1.Streams.RemoveGuildSubscription(r.GuildId, ctx.UserID)
+	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
 		Event: &chatv1.Event_LeftMember{
 			LeftMember: &chatv1.Event_MemberLeft{
 				MemberId: ctx.UserID,
@@ -870,7 +870,7 @@ func (v1 *V1) LeaveGuild(c context.Context, r *chatv1.LeaveGuildRequest) (*empty
 		},
 	})
 
-	v1.PubSub.BroadcastHomeserver(ctx.UserID, &chatv1.Event{
+	v1.Streams.BroadcastHomeserver(ctx.UserID, &chatv1.Event{
 		Event: &chatv1.Event_GuildRemovedFromList_{
 			GuildRemovedFromList: &chatv1.Event_GuildRemovedFromList{
 				GuildId:    r.GuildId,
@@ -923,15 +923,15 @@ func (v1 *V1) StreamEvents(s chatv1.ChatService_StreamEventsServer) error {
 				fmt.Println("user not in guild")
 				break
 			}
-			v1.PubSub.AddGuildSubscription(s, x.SubscribeToGuild.GuildId)
+			v1.Streams.AddGuildSubscription(s, x.SubscribeToGuild.GuildId)
 		case *chatv1.StreamEventsRequest_SubscribeToActions_:
-			v1.PubSub.AddActionSubscription(s)
+			v1.Streams.AddActionSubscription(s)
 		case *chatv1.StreamEventsRequest_SubscribeToHomeserverEvents_:
 			err = v1.DB.UserIsLocal(userID)
 			if err != nil {
 				continue
 			}
-			v1.PubSub.AddHomeserverSubscription(s)
+			v1.Streams.AddHomeserverSubscription(s)
 		}
 	}
 }
@@ -958,7 +958,7 @@ func (v1 *V1) TriggerAction(c context.Context, r *chatv1.TriggerActionRequest) (
 	}
 	for _, action := range v1.ActionsToProto(msg.Actions) {
 		if action.Id == r.ActionId {
-			v1.PubSub.BroadcastAction(ctx.UserID, &chatv1.Event{
+			v1.Streams.BroadcastAction(ctx.UserID, &chatv1.Event{
 				Event: &chatv1.Event_ActionPerformed_{
 					ActionPerformed: &chatv1.Event_ActionPerformed{
 						GuildId:    r.GuildId,
@@ -1043,7 +1043,7 @@ func (v1 *V1) SendMessage(c context.Context, r *chatv1.SendMessageRequest) (*cha
 	createdAt, _ := ptypes.TimestampProto(msg.CreatedAt.UTC())
 	message.CreatedAt = createdAt
 	message.AuthorId = ctx.UserID
-	v1.PubSub.BroadcastGuild(r.GuildId, &chatv1.Event{
+	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
 		Event: &chatv1.Event_SentMessage{
 			SentMessage: &chatv1.Event_MessageSent{
 				EchoId:  r.EchoId,
@@ -1104,7 +1104,7 @@ func (v1 *V1) AddGuildToGuildList(c context.Context, r *chatv1.AddGuildToGuildLi
 	if err != nil {
 		return nil, err
 	}
-	v1.PubSub.BroadcastHomeserver(ctx.UserID, &chatv1.Event{
+	v1.Streams.BroadcastHomeserver(ctx.UserID, &chatv1.Event{
 		Event: &chatv1.Event_GuildAddedToList_{
 			GuildAddedToList: &chatv1.Event_GuildAddedToList{
 				GuildId:    r.GuildId,
@@ -1133,7 +1133,7 @@ func (v1 *V1) RemoveGuildFromGuildList(c context.Context, r *chatv1.RemoveGuildF
 	if err != nil {
 		return nil, err
 	}
-	v1.PubSub.BroadcastHomeserver(ctx.UserID, &chatv1.Event{
+	v1.Streams.BroadcastHomeserver(ctx.UserID, &chatv1.Event{
 		Event: &chatv1.Event_GuildRemovedFromList_{
 			GuildRemovedFromList: &chatv1.Event_GuildRemovedFromList{
 				GuildId:    r.GuildId,
@@ -1573,7 +1573,7 @@ func (v1 *V1) ProfileUpdate(c context.Context, r *chatv1.ProfileUpdateRequest) (
 	}
 
 	for _, g := range guilds {
-		v1.PubSub.BroadcastGuild(g, &chatv1.Event{
+		v1.Streams.BroadcastGuild(g, &chatv1.Event{
 			Event: &chatv1.Event_ProfileUpdated_{
 				ProfileUpdated: &chatv1.Event_ProfileUpdated{
 					UserId:         ctx.UserID,
@@ -1611,7 +1611,7 @@ func (v1 *V1) Typing(c context.Context, r *chatv1.TypingRequest) (*empty.Empty, 
 		return nil, err
 	}
 
-	v1.PubSub.BroadcastGuild(r.GuildId, &chatv1.Event{
+	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
 		Event: &chatv1.Event_Typing_{
 			Typing: &chatv1.Event_Typing{
 				UserId:    ctx.UserID,
@@ -1669,7 +1669,7 @@ func (v1 *V1) sendMessage(guildID, channelID uint64, content, displayUsername st
 	}
 	createdAt, _ := ptypes.TimestampProto(msg.CreatedAt.UTC())
 	message.CreatedAt = createdAt
-	v1.PubSub.BroadcastGuild(guildID, &chatv1.Event{
+	v1.Streams.BroadcastGuild(guildID, &chatv1.Event{
 		Event: &chatv1.Event_SentMessage{
 			SentMessage: &chatv1.Event_MessageSent{
 				EchoId:  0,

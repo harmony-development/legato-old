@@ -34,14 +34,12 @@ type StreamManager struct {
 }
 
 // Init prepares a stream manager for use
-func (s *StreamManager) Init(l logger.ILogger, db db.IHarmonyDB) *StreamManager {
+func (s *StreamManager) Init(l logger.ILogger, db db.IHarmonyDB) {
 	s.logger = l
 	s.database = db
 
 	s.serverToStreamData = make(map[chatv1.ChatService_StreamEventsServer]streamData)
 	s.userIDToServers = make(map[uint64]map[chatv1.ChatService_StreamEventsServer]struct{})
-
-	return s
 }
 
 // RegisterClient registers a client
