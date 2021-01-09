@@ -32,13 +32,16 @@ func New(deps *Dependencies) *Service {
 	chat := &Service{
 		Dependencies: deps,
 	}
+	pubsub := &inprocess.StreamManager{}
+	pubsub.Init(deps.Logger, deps.DB)
+
 	chat.V1 = &v1.V1{
 		Dependencies: v1.Dependencies{
 			DB:             deps.DB,
 			Logger:         deps.Logger,
 			Sonyflake:      deps.Sonyflake,
 			Perms:          deps.Perms,
-			PubSub:         new(inprocess.StreamManager).Init(deps.Logger, deps.DB),
+			PubSub:         pubsub,
 			Config:         deps.Config,
 			StorageBackend: deps.StorageBackend,
 		},
