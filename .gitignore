@@ -15,6 +15,11 @@ harmony-key.pub
 .ninja_log
 .version.json
 config.hcl
+imageproxycache
+
+# Direnv
 .direnv
 .envrc
-imageproxycache
+
+# Nix
+/result*
