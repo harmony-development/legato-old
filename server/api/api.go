@@ -10,6 +10,7 @@ import (
 	mediaproxyv1 "github.com/harmony-development/legato/gen/mediaproxy/v1"
 	voicev1 "github.com/harmony-development/legato/gen/voice/v1"
 	authv1impl "github.com/harmony-development/legato/server/api/authsvc/v1"
+	authstate "github.com/harmony-development/legato/server/api/authsvc/v1/pubsub_backends/integrated"
 	"github.com/harmony-development/legato/server/api/chat"
 	"github.com/harmony-development/legato/server/api/chat/v1/permissions"
 	"github.com/harmony-development/legato/server/api/mediaproxy"
@@ -105,6 +106,7 @@ func New(deps Dependencies) *API {
 			Sonyflake:   api.Sonyflake,
 			AuthManager: api.AuthManager,
 			Config:      api.Config,
+			AuthState:   authstate.New(api.Logger),
 		},
 	})
 	mediaproxyv1.RegisterMediaProxyServiceServer(api.GrpcServer, mediaproxy.New(&mediaproxy.Dependencies{
