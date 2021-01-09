@@ -38,7 +38,7 @@ func New(deps *Dependencies) *Service {
 			Logger:         deps.Logger,
 			Sonyflake:      deps.Sonyflake,
 			Perms:          deps.Perms,
-			PubSub:         (&inprocess.StreamManager{}).Init(deps.Logger, deps.DB),
+			PubSub:         new(inprocess.StreamManager).Init(deps.Logger, deps.DB),
 			Config:         deps.Config,
 			StorageBackend: deps.StorageBackend,
 		},

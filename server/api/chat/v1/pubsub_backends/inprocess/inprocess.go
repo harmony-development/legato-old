@@ -8,6 +8,10 @@ import (
 	"github.com/harmony-development/legato/server/logger"
 )
 
+func unused(v interface{}) {
+
+}
+
 // streamData is the data of a stream
 type streamData struct {
 	userID uint64
@@ -52,7 +56,8 @@ func (s *StreamManager) RegisterClient(userID uint64, srv chatv1.ChatService_Str
 		guilds: make(map[uint64]struct{}),
 	}
 
-	servs, _ := s.userIDToServers[userID]
+	servs, ok := s.userIDToServers[userID]
+	unused(ok)
 	if servs == nil {
 		s.userIDToServers[userID] = make(map[chatv1.ChatService_StreamEventsServer]struct{})
 		servs = s.userIDToServers[userID]
@@ -87,7 +92,8 @@ func (s *StreamManager) AddGuildSubscription(srv chatv1.ChatService_StreamEvents
 
 	s.serverToStreamData[srv].guilds[to] = struct{}{}
 
-	g, _ := s.guildIDToUserIDs[to]
+	g, ok := s.guildIDToUserIDs[to]
+	unused(ok)
 	if g == nil {
 		g = make(map[uint64]struct{})
 		s.guildIDToUserIDs[to] = g
@@ -137,8 +143,7 @@ func (s *StreamManager) BroadcastGuild(to uint64, event *chatv1.Event) {
 			for serv := range s.userIDToServers[userID] {
 				if _, ok := s.serverToStreamData[serv].guilds[to]; ok {
 					err := serv.Send(event)
-					if err != nil {
-					}
+					unused(err)
 				}
 			}
 		}
@@ -154,8 +159,7 @@ func (s *StreamManager) BroadcastHomeserver(userid uint64, event *chatv1.Event) 
 		for server := range s.userIDToServers[userid] {
 			if s.serverToStreamData[server].homeserver {
 				err := server.Send(event)
-				if err != nil {
-				}
+				unused(err)
 			}
 		}
 	}()
@@ -170,8 +174,7 @@ func (s *StreamManager) BroadcastAction(userid uint64, event *chatv1.Event) {
 		for server := range s.userIDToServers[userid] {
 			if s.serverToStreamData[server].action {
 				err := server.Send(event)
-				if err != nil {
-				}
+				unused(err)
 			}
 		}
 	}()
