@@ -21,6 +21,11 @@ go get -v -t -d ./...
 go build
 ```
 
+### Nix
+If you have `nix` installed:
+- with Flakes: `nix build`
+- with legacy (without flakes): `nix-build nix/default.nix`
+
 ## Usage
 Make sure to install `postgres` database
 
