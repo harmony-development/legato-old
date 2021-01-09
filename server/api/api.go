@@ -10,7 +10,7 @@ import (
 	mediaproxyv1 "github.com/harmony-development/legato/gen/mediaproxy/v1"
 	voicev1 "github.com/harmony-development/legato/gen/voice/v1"
 	authv1impl "github.com/harmony-development/legato/server/api/authsvc/v1"
-	chatv1impl "github.com/harmony-development/legato/server/api/chat/v1"
+	"github.com/harmony-development/legato/server/api/chat"
 	"github.com/harmony-development/legato/server/api/chat/v1/permissions"
 	"github.com/harmony-development/legato/server/api/mediaproxy"
 	"github.com/harmony-development/legato/server/api/middleware"
@@ -90,16 +90,14 @@ func New(deps Dependencies) *API {
 		Handler: prometheusMux,
 	}
 
-	chatv1.RegisterChatServiceServer(api.GrpcServer, &chatv1impl.V1{
-		Dependencies: chatv1impl.Dependencies{
-			DB:             api.DB,
-			Logger:         api.Logger,
-			Sonyflake:      api.Sonyflake,
-			Perms:          api.Permissions,
-			Config:         deps.Config,
-			StorageBackend: deps.StorageBackend,
-		},
-	})
+	chatv1.RegisterChatServiceServer(api.GrpcServer, chat.New(&chat.Dependencies{
+		DB:             api.DB,
+		Logger:         api.Logger,
+		Sonyflake:      api.Sonyflake,
+		Perms:          api.Permissions,
+		Config:         deps.Config,
+		StorageBackend: deps.StorageBackend,
+	}).V1)
 	authv1.RegisterAuthServiceServer(api.GrpcServer, &authv1impl.V1{
 		Dependencies: authv1impl.Dependencies{
 			DB:          api.DB,
