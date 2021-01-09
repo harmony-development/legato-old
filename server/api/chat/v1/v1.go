@@ -905,6 +905,7 @@ func (v1 *V1) StreamEvents(s chatv1.ChatService_StreamEventsServer) error {
 			return nil
 		}
 		if err != nil {
+			fmt.Printf("error streaming: %+v\n", err)
 			return err
 		}
 		switch x := in.Request.(type) {
@@ -928,7 +929,7 @@ func (v1 *V1) StreamEvents(s chatv1.ChatService_StreamEventsServer) error {
 		case *chatv1.StreamEventsRequest_SubscribeToHomeserverEvents_:
 			err = v1.DB.UserIsLocal(userID)
 			if err != nil {
-				break
+				continue
 			}
 			v1.PubSub.AddActionSubscription(s)
 		}
