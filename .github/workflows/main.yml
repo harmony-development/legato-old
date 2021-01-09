@@ -47,7 +47,7 @@ jobs:
           name: legato
           path: legato
   golangci:
-    name: lint
+    name: Lint Legato
     runs-on: ubuntu-latest
     steps:
       - 
@@ -62,3 +62,19 @@ jobs:
         uses: golangci/golangci-lint-action@v2
         with:
           version: v1.29
+  update:
+    name: Update Legato at harmonyapp.io
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'echo "$SSH_KEY" > key && chmod 600 key'
+        shell: bash
+        env:
+          SSH_KEY: ${{secrets.ACTIONS_SSH_KEY}}
+      - run: 'echo "$KNOWN_HOSTS" > known_hosts && chmod 600 known_hosts'
+        shell: bash
+        env:
+          KNOWN_HOSTS: ${{secrets.ACTIONS_SSH_KNOWN_HOSTS}}
+      - run: 'ssh -i key -o UserKnownHostsFile=known_hosts "root@$SSH_HOST" update-legato'
+        shell: bash
+        env:
+          SSH_HOST: ${{secrets.ACTIONS_SSH_HOST}}
