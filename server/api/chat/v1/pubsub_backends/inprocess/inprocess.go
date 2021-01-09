@@ -136,7 +136,9 @@ func (s *StreamManager) BroadcastGuild(to uint64, event *chatv1.Event) {
 		for userID := range s.guildIDToUserIDs[to] {
 			for serv := range s.userIDToServers[userID] {
 				if _, ok := s.serverToStreamData[serv].guilds[to]; ok {
-					serv.Send(event)
+					err := serv.Send(event)
+					if err != nil {
+					}
 				}
 			}
 		}
@@ -151,7 +153,9 @@ func (s *StreamManager) BroadcastHomeserver(userid uint64, event *chatv1.Event) 
 
 		for server := range s.userIDToServers[userid] {
 			if s.serverToStreamData[server].homeserver {
-				server.Send(event)
+				err := server.Send(event)
+				if err != nil {
+				}
 			}
 		}
 	}()
@@ -165,7 +169,9 @@ func (s *StreamManager) BroadcastAction(userid uint64, event *chatv1.Event) {
 
 		for server := range s.userIDToServers[userid] {
 			if s.serverToStreamData[server].action {
-				server.Send(event)
+				err := server.Send(event)
+				if err != nil {
+				}
 			}
 		}
 	}()
