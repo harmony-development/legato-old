@@ -899,6 +899,7 @@ func (v1 *V1) StreamEvents(s chatv1.ChatService_StreamEventsServer) error {
 	if err != nil {
 		return err
 	}
+	v1.Streams.RegisterClient(userID, s)
 	for {
 		in, err := s.Recv()
 		if err == io.EOF {
