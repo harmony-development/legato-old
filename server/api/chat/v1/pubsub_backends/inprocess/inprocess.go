@@ -40,6 +40,7 @@ func (s *StreamManager) Init(l logger.ILogger, db db.IHarmonyDB) {
 
 	s.serverToStreamData = make(map[chatv1.ChatService_StreamEventsServer]streamData)
 	s.userIDToServers = make(map[uint64]map[chatv1.ChatService_StreamEventsServer]struct{})
+	s.guildIDToUserIDs = make(map[uint64]map[uint64]struct{})
 }
 
 // RegisterClient registers a client
