@@ -71,7 +71,7 @@ afterLocal:
 
 	// Permissions
 	{
-		if opts.RequiresPermissionNode != "" {
+		if opts.RequiresPermissionNode == "" {
 			if GetRPCConfig(info.FullMethod).WantsRoles {
 				location, ok := req.(interface {
 					GetGuildId() uint64
