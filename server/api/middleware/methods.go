@@ -35,7 +35,7 @@ func (m Middlewares) MethodMetadataInterceptor(c context.Context, req interface{
 
 	// Auth
 	{
-		if opts.RequiresAuthentication {
+		if !opts.RequiresAuthentication {
 			goto afterAuth
 		}
 
@@ -71,7 +71,7 @@ afterLocal:
 
 	// Permissions
 	{
-		if opts.RequiresPermissionNode == "" {
+		if opts.RequiresPermissionNode != "" {
 			if GetRPCConfig(info.FullMethod).WantsRoles {
 				location, ok := req.(interface {
 					GetGuildId() uint64
