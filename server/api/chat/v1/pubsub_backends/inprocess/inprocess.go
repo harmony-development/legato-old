@@ -89,9 +89,9 @@ func (s *StreamManager) AddGuildSubscription(srv chatv1.ChatService_StreamEvents
 	s.Lock()
 	defer s.Unlock()
 
-	s.serverToStreamData[srv].Guilds[toGuild] = struct{}{}
+	s.serverToStreamData[srv].guilds[toGuild] = struct{}{}
 
-	userID := s.serverToStreamData[srv].UserID
+	userID := s.serverToStreamData[srv].userID
 
 	g, ok := s.guildIDToUserIDs[toGuild]
 	unused(ok)
