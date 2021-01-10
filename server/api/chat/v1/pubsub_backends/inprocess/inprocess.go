@@ -85,20 +85,22 @@ func (s *StreamManager) RegisterClient(userID uint64, srv chatv1.ChatService_Str
 }
 
 // AddGuildSubscription adds a subscription
-func (s *StreamManager) AddGuildSubscription(srv chatv1.ChatService_StreamEventsServer, to uint64) {
+func (s *StreamManager) AddGuildSubscription(srv chatv1.ChatService_StreamEventsServer, toGuild uint64) {
 	s.Lock()
 	defer s.Unlock()
 
-	s.serverToStreamData[srv].guilds[to] = struct{}{}
+	s.serverToStreamData[srv].Guilds[toGuild] = struct{}{}
 
-	g, ok := s.guildIDToUserIDs[to]
+	userID := s.serverToStreamData[srv].UserID
+
+	g, ok := s.guildIDToUserIDs[toGuild]
 	unused(ok)
 	if g == nil {
 		g = make(map[uint64]struct{})
-		s.guildIDToUserIDs[to] = g
+		s.guildIDToUserIDs[toGuild] = g
 	}
 
-	g[to] = struct{}{}
+	g[userID] = struct{}{}
 }
 
 // AddHomeserverSubscription adds a subscription
