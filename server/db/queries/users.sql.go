@@ -45,8 +45,8 @@ func (q *Queries) AddLocalUser(ctx context.Context, arg AddLocalUserParams) erro
 }
 
 const addProfile = `-- name: AddProfile :exec
-INSERT INTO Profiles(User_ID, Username, Avatar, Status)
-VALUES ($1, $2, $3, $4)
+INSERT INTO Profiles(User_ID, Username, Avatar, Status, Is_Bot)
+VALUES ($1, $2, $3, $4, $5)
 `
 
 type AddProfileParams struct {
@@ -54,6 +54,7 @@ type AddProfileParams struct {
 	Username string         `json:"username"`
 	Avatar   sql.NullString `json:"avatar"`
 	Status   int16          `json:"status"`
+	IsBot    bool           `json:"is_bot"`
 }
 
 func (q *Queries) AddProfile(ctx context.Context, arg AddProfileParams) error {
@@ -62,6 +63,7 @@ func (q *Queries) AddProfile(ctx context.Context, arg AddProfileParams) error {
 		arg.Username,
 		arg.Avatar,
 		arg.Status,
+		arg.IsBot,
 	)
 	return err
 }

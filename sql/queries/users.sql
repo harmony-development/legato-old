@@ -15,8 +15,8 @@ INSERT INTO Users (User_ID)
 VALUES ($1);
 
 -- name: AddProfile :exec
-INSERT INTO Profiles(User_ID, Username, Avatar, Status)
-VALUES ($1, $2, $3, $4);
+INSERT INTO Profiles(User_ID, Username, Avatar, Status, Is_Bot)
+VALUES ($1, $2, $3, $4, $5);
 
 -- name: AddLocalUser :exec
 INSERT INTO Local_Users (User_ID, Email, Password)

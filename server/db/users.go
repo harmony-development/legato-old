@@ -92,6 +92,7 @@ func (db *HarmonyDB) AddLocalUser(userID uint64, email, username string, passwor
 		Username: username,
 		Avatar:   sql.NullString{},
 		Status:   int16(harmonytypesv1.UserStatus_USER_STATUS_OFFLINE),
+		IsBot:    false,
 	}); err != nil {
 		err = tracerr.Wrap(err)
 		return err
@@ -120,6 +121,7 @@ func (db *HarmonyDB) AddForeignUser(homeServer string, userID, localUserID uint6
 		Username: username,
 		Avatar:   toSqlString(avatar),
 		Status:   int16(harmonytypesv1.UserStatus_USER_STATUS_OFFLINE),
+		IsBot:    false,
 	}); err != nil {
 		err = tracerr.Wrap(err)
 		return 0, err
