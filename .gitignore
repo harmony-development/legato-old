@@ -23,3 +23,4 @@ imageproxycache
 
 # Nix
 /result*
+/shell.nix

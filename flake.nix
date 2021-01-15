@@ -4,12 +4,16 @@
   inputs = {
     flakeUtils.url = "github:numtide/flake-utils";
     nixpkgs.url = "nixpkgs/nixpkgs-unstable";
+    devshell.url = "github:numtide/devshell";
   };
 
   outputs = inputs: with inputs; with flakeUtils.lib;
     eachSystem [ "x86_64-linux" "i686-linux" ] (system:
       let
-        pkgs = import nixpkgs { inherit system; };
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [ devshell.overlay ];
+        };
 
         packages = {
           legato = import ./nix/build.nix { inherit pkgs; };
