@@ -23,7 +23,7 @@ go build
 
 ### Nix
 If you have `nix` installed:
-- with Flakes: `nix build`
+- with Flakes: `nix build` (or you can install it with `nix profile install github:harmony-development/legato`)
 - with legacy (without flakes): `nix-build nix/default.nix`
 
 ## Usage
