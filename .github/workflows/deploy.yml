@@ -3,6 +3,10 @@ on:
   push:
     branches: 
       - main
+    paths-ignore:
+      - "**/**.nix"
+      - "flake.lock"
+
 jobs:
   update:
     name: Update Legato at harmonyapp.io

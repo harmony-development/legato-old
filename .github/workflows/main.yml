@@ -4,10 +4,16 @@ on:
     branches: 
       - main
       - staging
+    paths-ignore:
+      - "**/**.nix"
+      - "flake.lock"
   pull_request:
     branches: 
       - main
       - staging
+    paths-ignore:
+      - "**/**.nix"
+      - "flake.lock"
 jobs:
   build:
     name: Build
