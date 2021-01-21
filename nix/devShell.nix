@@ -1,6 +1,6 @@
 { pkgs }:
 with pkgs;
-mkDevShell {
+devshell.mkShell {
   packages = [ go protobuf vips ];
   env = {
     GOROOT = "${go}/share/go";
