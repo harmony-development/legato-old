@@ -3,7 +3,7 @@ on:
   push:
     branches: [ main ]
 jobs:
-  tests:
+  build:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -18,6 +18,10 @@ jobs:
         extra_nix_config: |
           experimental-features = nix-command flakes
         nix_path: nixpkgs=channel:nixos-unstable
-    
+    - name: Setup cachix
+      uses: cachix/cachix-action@v8
+      with:
+        name: harmony
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - name: Build
       run: nix build -L --show-trace
