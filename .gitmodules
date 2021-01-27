@@ -1,3 +1,6 @@
 [submodule "protocol"]
 	path = protocol
 	url = https://github.com/harmony-development/protocol
+[submodule "hrpc"]
+	path = hrpc
+	url = https://github.com/harmony-development/hrpc.git
