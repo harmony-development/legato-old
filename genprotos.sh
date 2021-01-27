@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 mkdir -p "gen"
 
-go build -o ./hrpc/hrpc-bin ./hrpc/main.go
+cd ./hrpc
+go build
+cd ..
 
 for dir in $(find "protocol" -name '*.proto' -print0 | xargs -0 -n1 dirname | sort | uniq); do
     echo "Generating files in ${dir}..."
@@ -9,7 +11,7 @@ for dir in $(find "protocol" -name '*.proto' -print0 | xargs -0 -n1 dirname | so
 
     protoc --experimental_allow_proto3_optional \
     --proto_path=protocol \
-    --plugin=protoc-gen-custom=./hrpc/hrpc-bin \
+    --plugin=protoc-gen-custom=./hrpc/hrpc \
     --custom_out=./gen \
     --custom_opt="/templates/hrpc-server-go.htmpl" \
     --go_out=./gen \
