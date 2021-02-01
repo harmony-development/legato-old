@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"time"
 
 	"github.com/golang/protobuf/ptypes"
@@ -896,26 +895,24 @@ func init() {
 
 // StreamEvents implements the StreamEvents RPC
 func (v1 *V1) StreamEvents(c echo.Context, in chan *chatv1.StreamEventsRequest, out chan *chatv1.Event) {
-	userID, err := v1.Middleware.AuthHandler(v1.DB, s.Context())
+	userID, err := v1.Middleware.AuthHandler(c)
 	if err != nil {
-		return err
+		// TODO: error handling
+		return
 	}
-	v1.Streams.RegisterClient(userID, s)
+	done := make(chan struct{})
+	v1.Streams.RegisterClient(userID, out, done)
+	defer func() {
+		done <- struct{}{}
+	}()
 	for {
-		in, err := s.Recv()
-		if err == io.EOF {
-			return nil
+		dat, ok := <-in
+		if !ok {
+			return
 		}
-		if err != nil {
-			fmt.Printf("error streaming: %+v\n", err)
-			return err
-		}
-		switch x := in.Request.(type) {
+
+		switch x := dat.Request.(type) {
 		case *chatv1.StreamEventsRequest_SubscribeToGuild_:
-			if err := middleware.LocationHandler(v1.DB, x.SubscribeToGuild, "/protocol.chat.v1.ChatService/StreamGuildEvents", userID); err != nil {
-				fmt.Println(err)
-				break
-			}
 			ok, err := v1.DB.UserInGuild(userID, x.SubscribeToGuild.GuildId)
 			if err != nil {
 				fmt.Println(err)
@@ -925,15 +922,15 @@ func (v1 *V1) StreamEvents(c echo.Context, in chan *chatv1.StreamEventsRequest, 
 				fmt.Println("user not in guild")
 				break
 			}
-			v1.Streams.AddGuildSubscription(s, x.SubscribeToGuild.GuildId)
+			v1.Streams.AddGuildSubscription(out, x.SubscribeToGuild.GuildId)
 		case *chatv1.StreamEventsRequest_SubscribeToActions_:
-			v1.Streams.AddActionSubscription(s)
+			v1.Streams.AddActionSubscription(out)
 		case *chatv1.StreamEventsRequest_SubscribeToHomeserverEvents_:
 			err = v1.DB.UserIsLocal(userID)
 			if err != nil {
 				continue
 			}
-			v1.Streams.AddHomeserverSubscription(s)
+			v1.Streams.AddHomeserverSubscription(out)
 		}
 	}
 }

@@ -5,11 +5,11 @@ import (
 )
 
 type StreamManager interface {
-	RegisterClient(userID uint64, s chatv1.ChatService_StreamEventsServer) chan struct{}
+	RegisterClient(userID uint64, s chan *chatv1.Event, done chan struct{})
 
-	AddGuildSubscription(s chatv1.ChatService_StreamEventsServer, to uint64)
-	AddHomeserverSubscription(s chatv1.ChatService_StreamEventsServer)
-	AddActionSubscription(s chatv1.ChatService_StreamEventsServer)
+	AddGuildSubscription(s chan *chatv1.Event, to uint64)
+	AddHomeserverSubscription(s chan *chatv1.Event)
+	AddActionSubscription(s chan *chatv1.Event)
 
 	RemoveGuildSubscription(userID, guildID uint64)
 
