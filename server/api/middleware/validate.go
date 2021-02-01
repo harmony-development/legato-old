@@ -1,21 +1,21 @@
 package middleware
 
 import (
-	"context"
-
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"github.com/harmony-development/hrpc/server"
+	"github.com/labstack/echo/v4"
+	"google.golang.org/protobuf/reflect/protoreflect"
+	"google.golang.org/protobuf/types/descriptorpb"
 )
 
-func (m Middlewares) ValidatorInterceptor(c context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	ctx := c.(HarmonyContext)
-	validator, ok := req.(interface{ Validate() error })
-	if !ok {
-		return handler(ctx, req)
+func (m Middlewares) Validate(c echo.Context, meth *descriptorpb.MethodDescriptorProto, d *descriptorpb.FileDescriptorProto, h server.Handler) server.Handler {
+	return func(c echo.Context, req protoreflect.ProtoMessage) (protoreflect.ProtoMessage, error) {
+		validator, ok := req.(interface{ Validate() error })
+		if !ok {
+			return h(c, req)
+		}
+		if err := validator.Validate(); err != nil {
+			return nil, err
+		}
+		return h(c, req)
 	}
-	if err := validator.Validate(); err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-	return handler(ctx, req)
 }

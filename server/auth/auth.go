@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"context"
 	"crypto/rsa"
 	"fmt"
 	"io/ioutil"
@@ -72,12 +71,8 @@ func (m Manager) MakeAuthToken(userID uint64, target, username, avatar string) (
 
 // GetPublicKey gets the public key from a host
 func (m Manager) GetPublicKey(host string) (string, error) {
-	conn, err := m.IntercomManager.GetOrConnect(host)
-	if err != nil {
-		return "", err
-	}
-	foundationClient := authv1.NewAuthServiceClient(conn)
-	reply, err := foundationClient.Key(context.Background(), &emptypb.Empty{})
+	foundationClient := authv1.NewAuthServiceClient(host)
+	reply, err := foundationClient.Key(&emptypb.Empty{})
 	if err != nil {
 		return "", err
 	}

@@ -15,8 +15,8 @@ type AuthSessionState struct {
 
 // AuthState ...
 type AuthState struct {
-	authChannels  map[authv1.AuthService_StreamStepsServer]chan struct{}
-	authEvents    map[string]authv1.AuthService_StreamStepsServer
+	authChannels  map[chan *authv1.AuthStep]chan struct{}
+	authEvents    map[string]chan *authv1.AuthStep
 	sessionStates map[string]*AuthSessionState
 	Logger        logger.ILogger
 	sync.Mutex
@@ -25,8 +25,8 @@ type AuthState struct {
 func New(l logger.ILogger) *AuthState {
 	return &AuthState{
 		Logger:        l,
-		authChannels:  make(map[authv1.AuthService_StreamStepsServer]chan struct{}),
-		authEvents:    make(map[string]authv1.AuthService_StreamStepsServer),
+		authChannels:  make(map[chan *authv1.AuthStep]chan struct{}),
+		authEvents:    make(map[string]chan *authv1.AuthStep),
 		sessionStates: make(map[string]*AuthSessionState),
 	}
 }
@@ -66,7 +66,7 @@ func (h *AuthState) HasStream(authID string) bool {
 }
 
 // Subscribe ...
-func (h *AuthState) Subscribe(authID string, s authv1.AuthService_StreamStepsServer) (chan struct{}, error) {
+func (h *AuthState) Subscribe(authID string, out chan *authv1.AuthStep) (chan struct{}, error) {
 	h.Lock()
 	defer h.Unlock()
 
@@ -74,19 +74,18 @@ func (h *AuthState) Subscribe(authID string, s authv1.AuthService_StreamStepsSer
 		return nil, errors.New("no session state")
 	}
 
-	h.authChannels[s] = make(chan struct{})
-	h.authEvents[authID] = s
+	h.authChannels[out] = make(chan struct{})
+	h.authEvents[authID] = out
 
-	return h.authChannels[s], nil
+	return h.authChannels[out], nil
 }
 
 // Unsubscribe ...
-func (h *AuthState) Unsubscribe(authID string, s authv1.AuthService_StreamStepsServer) {
+func (h *AuthState) Unsubscribe(authID string, out chan *authv1.AuthStep) {
 	h.Lock()
 	defer h.Unlock()
 
-	close(h.authChannels[s])
-	delete(h.authChannels, s)
+	close(out)
 	h.authEvents[authID] = nil
 }
 
@@ -100,9 +99,7 @@ func (h *AuthState) Broadcast(authID string, e *authv1.AuthStep) {
 		return
 	}
 
-	if err := serv.Send(e); err != nil {
-		println(err)
-	}
+	serv <- e
 }
 
 // SetStep ...

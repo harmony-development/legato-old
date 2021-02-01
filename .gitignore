@@ -1,5 +1,6 @@
 .idea/
 .env
+hrpc-bin
 vendor
 flatfile
 media

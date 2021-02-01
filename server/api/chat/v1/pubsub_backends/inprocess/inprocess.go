@@ -26,8 +26,8 @@ type StreamManager struct {
 	logger   logger.ILogger
 	database db.IHarmonyDB
 
-	serverToStreamData map[chatv1.ChatService_StreamEventsServer]streamData
-	userIDToServers    map[uint64]map[chatv1.ChatService_StreamEventsServer]struct{}
+	serverToStreamData map[chan *chatv1.Event]streamData
+	userIDToServers    map[uint64]map[chan *chatv1.Event]struct{}
 	guildIDToUserIDs   map[uint64]map[uint64]struct{}
 
 	sync.RWMutex
@@ -38,17 +38,15 @@ func (s *StreamManager) Init(l logger.ILogger, db db.IHarmonyDB) {
 	s.logger = l
 	s.database = db
 
-	s.serverToStreamData = make(map[chatv1.ChatService_StreamEventsServer]streamData)
-	s.userIDToServers = make(map[uint64]map[chatv1.ChatService_StreamEventsServer]struct{})
+	s.serverToStreamData = make(map[chan *chatv1.Event]streamData)
+	s.userIDToServers = make(map[uint64]map[chan *chatv1.Event]struct{})
 	s.guildIDToUserIDs = make(map[uint64]map[uint64]struct{})
 }
 
 // RegisterClient registers a client
-func (s *StreamManager) RegisterClient(userID uint64, srv chatv1.ChatService_StreamEventsServer) (ret chan struct{}) {
+func (s *StreamManager) RegisterClient(userID uint64, srv chan *chatv1.Event, done chan struct{}) {
 	s.Lock()
 	defer s.Unlock()
-
-	ret = make(chan struct{})
 
 	s.serverToStreamData[srv] = streamData{
 		userID: userID,
@@ -58,7 +56,7 @@ func (s *StreamManager) RegisterClient(userID uint64, srv chatv1.ChatService_Str
 	servs, ok := s.userIDToServers[userID]
 	unused(ok)
 	if servs == nil {
-		s.userIDToServers[userID] = make(map[chatv1.ChatService_StreamEventsServer]struct{})
+		s.userIDToServers[userID] = make(map[chan *chatv1.Event]struct{})
 		servs = s.userIDToServers[userID]
 	}
 	servs[srv] = struct{}{}
@@ -66,7 +64,7 @@ func (s *StreamManager) RegisterClient(userID uint64, srv chatv1.ChatService_Str
 	s.userIDToServers[userID] = servs
 
 	go func() {
-		<-srv.Context().Done()
+		<-done
 
 		s.Lock()
 		defer s.Unlock()
@@ -77,15 +75,11 @@ func (s *StreamManager) RegisterClient(userID uint64, srv chatv1.ChatService_Str
 		if len(s.userIDToServers[userID]) == 0 {
 			delete(s.userIDToServers, userID)
 		}
-
-		close(ret)
 	}()
-
-	return ret
 }
 
 // AddGuildSubscription adds a subscription
-func (s *StreamManager) AddGuildSubscription(srv chatv1.ChatService_StreamEventsServer, toGuild uint64) {
+func (s *StreamManager) AddGuildSubscription(srv chan *chatv1.Event, toGuild uint64) {
 	s.Lock()
 	defer s.Unlock()
 
@@ -104,7 +98,7 @@ func (s *StreamManager) AddGuildSubscription(srv chatv1.ChatService_StreamEvents
 }
 
 // AddHomeserverSubscription adds a subscription
-func (s *StreamManager) AddHomeserverSubscription(srv chatv1.ChatService_StreamEventsServer) {
+func (s *StreamManager) AddHomeserverSubscription(srv chan *chatv1.Event) {
 	s.Lock()
 	defer s.Unlock()
 
@@ -114,7 +108,7 @@ func (s *StreamManager) AddHomeserverSubscription(srv chatv1.ChatService_StreamE
 }
 
 // AddActionSubscription adds a subscription
-func (s *StreamManager) AddActionSubscription(srv chatv1.ChatService_StreamEventsServer) {
+func (s *StreamManager) AddActionSubscription(srv chan *chatv1.Event) {
 	s.Lock()
 	defer s.Unlock()
 
@@ -143,8 +137,7 @@ func (s *StreamManager) BroadcastGuild(to uint64, event *chatv1.Event) {
 		for userID := range s.guildIDToUserIDs[to] {
 			for serv := range s.userIDToServers[userID] {
 				if _, ok := s.serverToStreamData[serv].guilds[to]; ok {
-					err := serv.Send(event)
-					unused(err)
+					serv <- event
 				}
 			}
 		}
@@ -159,8 +152,7 @@ func (s *StreamManager) BroadcastHomeserver(userid uint64, event *chatv1.Event) 
 
 		for server := range s.userIDToServers[userid] {
 			if s.serverToStreamData[server].homeserver {
-				err := server.Send(event)
-				unused(err)
+				server <- event
 			}
 		}
 	}()
@@ -174,8 +166,7 @@ func (s *StreamManager) BroadcastAction(userid uint64, event *chatv1.Event) {
 
 		for server := range s.userIDToServers[userid] {
 			if s.serverToStreamData[server].action {
-				err := server.Send(event)
-				unused(err)
+				server <- event
 			}
 		}
 	}()

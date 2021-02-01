@@ -1,13 +1,12 @@
 package middleware
 
 import (
-	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/responses"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-func LocationHandler(database db.IHarmonyDB, req interface{}, fullMethod string, userID uint64) error {
+func (m Middlewares) LocationHandler(req interface{}, fullMethod string, userID uint64) error {
 	if GetRPCConfig(fullMethod).Location.Has(NoLocation) {
 		return nil
 	}
@@ -27,7 +26,7 @@ func LocationHandler(database db.IHarmonyDB, req interface{}, fullMethod string,
 			return status.Error(codes.InvalidArgument, responses.MissingLocationGuild)
 		}
 
-		ok, err := database.HasGuildWithID(guildID)
+		ok, err := m.DB.HasGuildWithID(guildID)
 		if err != nil {
 			return status.Error(codes.Internal, responses.InternalServerError)
 		}
@@ -49,7 +48,7 @@ func LocationHandler(database db.IHarmonyDB, req interface{}, fullMethod string,
 			if channelID == 0 {
 				return status.Error(codes.InvalidArgument, responses.BadLocationChannel)
 			}
-			ok, err := database.HasChannelWithID(guildID, channelID)
+			ok, err := m.DB.HasChannelWithID(guildID, channelID)
 			if err != nil {
 				return status.Error(codes.Internal, responses.InternalServerError)
 			}
@@ -71,7 +70,7 @@ func LocationHandler(database db.IHarmonyDB, req interface{}, fullMethod string,
 				if messageID == 0 {
 					return status.Error(codes.InvalidArgument, responses.BadLocationMessage)
 				}
-				ok, err := database.HasMessageWithID(guildID, channelID, messageID)
+				ok, err := m.DB.HasMessageWithID(guildID, channelID, messageID)
 				if err != nil {
 					return status.Error(codes.Internal, responses.InternalServerError)
 				}
@@ -79,7 +78,7 @@ func LocationHandler(database db.IHarmonyDB, req interface{}, fullMethod string,
 					return status.Error(codes.FailedPrecondition, responses.BadLocationMessage)
 				}
 				if locFlags.Has(AuthorLocation) {
-					owner, err := database.GetMessageOwner(messageID)
+					owner, err := m.DB.GetMessageOwner(messageID)
 					if err != nil {
 						return status.Error(codes.Internal, responses.InternalServerError)
 					}
@@ -93,7 +92,7 @@ func LocationHandler(database db.IHarmonyDB, req interface{}, fullMethod string,
 			if guildID == 0 {
 				return status.Error(codes.InvalidArgument, responses.MissingLocationGuild)
 			}
-			ok, err := database.UserInGuild(userID, guildID)
+			ok, err := m.DB.UserInGuild(userID, guildID)
 			if err != nil {
 				return status.Error(codes.Internal, responses.InternalServerError)
 			}

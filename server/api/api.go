@@ -1,10 +1,7 @@
 package api
 
 import (
-	"fmt"
-	"net/http"
-	"time"
-
+	"github.com/harmony-development/hrpc/server"
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
 	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
 	mediaproxyv1 "github.com/harmony-development/legato/gen/mediaproxy/v1"
@@ -13,23 +10,16 @@ import (
 	"github.com/harmony-development/legato/server/api/chat"
 	"github.com/harmony-development/legato/server/api/chat/v1/permissions"
 	"github.com/harmony-development/legato/server/api/mediaproxy"
-	"github.com/harmony-development/legato/server/api/middleware"
+	hm "github.com/harmony-development/legato/server/api/middleware"
 	voicev1impl "github.com/harmony-development/legato/server/api/voice/v1"
 	"github.com/harmony-development/legato/server/auth"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/http/attachments/backend"
 	"github.com/harmony-development/legato/server/logger"
-	"github.com/jhump/protoreflect/desc"
-	"github.com/jhump/protoreflect/grpcreflect"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/sony/sonyflake"
-
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-	"github.com/improbable-eng/grpc-web/go/grpcweb"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
 
 type Dependencies struct {
@@ -44,94 +34,44 @@ type Dependencies struct {
 
 // API contains the component of the server responsible for APIs
 type API struct {
+	*echo.Echo
 	Dependencies
-	GrpcServer       *grpc.Server
-	GrpcWebServer    *grpcweb.WrappedGrpcServer
-	PrometheusServer *http.Server
-	ChatSvc          *chat.Service
 }
 
 // New creates a new API instance
 func New(deps Dependencies) *API {
 	api := &API{
+		Echo:         echo.New(),
 		Dependencies: deps,
 	}
-	m := middleware.New(middleware.Dependencies{
+
+	m := hm.New(hm.Dependencies{
 		Logger: deps.Logger,
 		DB:     deps.DB,
 		Perms:  api.Permissions,
 	})
-	api.GrpcServer = grpc.NewServer(
-		grpc_middleware.WithUnaryServerChain(
-			m.HarmonyContextInterceptor,
-			m.UnaryRecoveryFunc,
-			grpc_prometheus.UnaryServerInterceptor,
-			m.ErrorInterceptor,
-			m.RateLimitInterceptor,
-			m.ValidatorInterceptor,
-			m.MethodMetadataInterceptor,
-			m.LoggingInterceptor,
-		),
-		grpc_middleware.WithStreamServerChain(
-			m.StreamRecoveryFunc,
-			grpc_prometheus.StreamServerInterceptor,
-			m.HarmonyContextInterceptorStream,
-			m.ErrorInterceptorStream,
-			m.RateLimitStreamInterceptorStream,
-		))
-	api.GrpcWebServer = grpcweb.WrapServer(api.GrpcServer, grpcweb.WithOriginFunc(func(_ string) bool {
-		return true
-	}), grpcweb.WithWebsockets(true), grpcweb.WithWebsocketOriginFunc(func(req *http.Request) bool {
-		return true
-	}), grpcweb.WithWebsocketPingInterval(10*time.Second))
 
-	prometheusMux := http.NewServeMux()
-	prometheusMux.Handle("/metrics", promhttp.Handler())
-	api.PrometheusServer = &http.Server{
-		Handler: prometheusMux,
-	}
+	api.Echo.Use(middleware.Logger())
+	api.Echo.Use(middleware.AddTrailingSlash())
+	api.Echo.Use(middleware.Recover())
+	api.Echo.Use(middleware.CORS())
 
-	chatv1.RegisterChatServiceServer(api.GrpcServer, chat.New(&chat.Dependencies{
-		DB:             api.DB,
-		Logger:         api.Logger,
-		Sonyflake:      api.Sonyflake,
-		Perms:          api.Permissions,
-		Config:         deps.Config,
-		StorageBackend: deps.StorageBackend,
-	}).V1)
-	authv1.RegisterAuthServiceServer(api.GrpcServer, authsvc.New(&authsvc.Dependencies{
-		DB:          api.DB,
-		Logger:      api.Logger,
-		Sonyflake:   api.Sonyflake,
-		AuthManager: api.AuthManager,
-		Config:      api.Config,
-	}).V1)
-	mediaproxyv1.RegisterMediaProxyServiceServer(api.GrpcServer, mediaproxy.New(&mediaproxy.Dependencies{
-		DB:     api.DB,
-		Logger: api.Logger,
-		Config: api.Config,
-	}))
-	voicev1.RegisterVoiceServiceServer(api.GrpcServer, &voicev1impl.V1{
-		Dependencies: voicev1impl.Dependencies{
-			DB: api.DB,
-		},
+	authService := authv1.NewAuthServiceHandler(authsvc.New(&authsvc.Dependencies{}).V1)
+	chatService := chatv1.NewChatServiceHandler(chat.New(&chat.Dependencies{}).V1)
+	mediaProxyService := mediaproxyv1.NewMediaProxyServiceHandler(mediaproxy.New(&mediaproxy.Dependencies{}).V1)
+	voiceService := voicev1.NewVoiceServiceHandler(&voicev1impl.V1{
+		Dependencies: voicev1impl.Dependencies{},
 	})
-	reflection.Register(api.GrpcServer)
-	grpc_prometheus.Register(api.GrpcServer)
-	grpc_prometheus.EnableHandlingTimeHistogram()
 
-	sds, err := grpcreflect.LoadServiceDescriptors(api.GrpcServer)
-	if err != nil {
-		panic(err)
-	}
+	hrpcServer := server.NewHRPCServer(api.Echo, authService, chatService, mediaProxyService, voiceService)
 
-	middleware.Methods = make(map[string]*desc.MethodDescriptor)
-	for _, sd := range sds {
-		for _, md := range sd.GetMethods() {
-			methodName := fmt.Sprintf("/%s/%s", sd.GetFullyQualifiedName(), md.GetName())
-			middleware.Methods[methodName] = md
-		}
-	}
+	hrpcServer.SetUnaryPre(server.ChainHandlerTransformers(
+		m.UnaryRecoveryFunc,
+		m.HarmonyContextInterceptor,
+		m.RateLimitInterceptor,
+		m.Validate,
+		m.MethodMetadataInterceptor,
+	))
 
 	return api
 }

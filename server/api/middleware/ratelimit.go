@@ -1,12 +1,15 @@
 package middleware
 
 import (
-	"context"
+	"net/http"
 	"time"
 
+	"github.com/harmony-development/hrpc/server"
+	"github.com/harmony-development/legato/server/http/responses"
+	"github.com/labstack/echo/v4"
 	"golang.org/x/time/rate"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/peer"
+	"google.golang.org/protobuf/reflect/protoreflect"
+	"google.golang.org/protobuf/types/descriptorpb"
 )
 
 type visitor struct {
@@ -29,25 +32,17 @@ func (m Middlewares) RateCleanup() {
 	}
 }
 
-func (m Middlewares) RateLimitInterceptor(c context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	ctx := c.(HarmonyContext)
-	p, _ := peer.FromContext(c)
-	l, exists := rpcConfigs[info.FullMethod]
-	if exists {
-		ctx.Limiter = m.GetVisitor(info.FullMethod, p.Addr.String(), l.RateLimit.Duration, l.RateLimit.Burst)
+func (m Middlewares) RateLimitInterceptor(_ echo.Context, meth *descriptorpb.MethodDescriptorProto, d *descriptorpb.FileDescriptorProto, h server.Handler) server.Handler {
+	return func(c echo.Context, req protoreflect.ProtoMessage) (protoreflect.ProtoMessage, error) {
+		ctx := c.(HarmonyContext)
+		l, exists := rpcConfigs[meth.GetName()]
+		if exists {
+			if !m.GetVisitor(meth.GetName(), ctx.RealIP(), l.RateLimit.Duration, l.RateLimit.Burst).Allow() {
+				return nil, echo.NewHTTPError(http.StatusTooManyRequests, responses.TooManyRequests)
+			}
+		}
+		return h(ctx, req)
 	}
-
-	return handler(c, req)
-}
-
-func (m Middlewares) RateLimitStreamInterceptorStream(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-	wrappedStream := ss.(HarmonyWrappedServerStream)
-	p, _ := peer.FromContext(wrappedStream.WrappedContext)
-	l, exists := rpcConfigs[info.FullMethod]
-	if exists {
-		wrappedStream.WrappedContext.Limiter = m.GetVisitor(info.FullMethod, p.Addr.String(), l.RateLimit.Duration, l.RateLimit.Burst)
-	}
-	return handler(srv, wrappedStream)
 }
 
 func (m *Middlewares) GetVisitor(path, ip string, duration time.Duration, burst int) *rate.Limiter {

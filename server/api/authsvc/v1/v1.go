@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"context"
 	"crypto/x509"
 	"database/sql"
 	"encoding/pem"
@@ -20,6 +19,7 @@ import (
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/harmony-development/legato/server/responses"
+	"github.com/labstack/echo/v4"
 	"github.com/sony/sonyflake"
 	"github.com/thanhpk/randstr"
 	"github.com/ztrue/tracerr"
@@ -168,7 +168,7 @@ func New(deps Dependencies) *V1 {
 	}
 }
 
-func (v1 *V1) Federate(c context.Context, r *authv1.FederateRequest) (*authv1.FederateReply, error) {
+func (v1 *V1) Federate(c echo.Context, r *authv1.FederateRequest) (*authv1.FederateReply, error) {
 	ctx := c.(middleware.HarmonyContext)
 
 	user, err := v1.DB.GetUserByID(ctx.UserID)
@@ -203,7 +203,7 @@ func init() {
 	}, "/protocol.auth.v1.AuthService/Federate")
 }
 
-func (v1 *V1) Key(c context.Context, r *emptypb.Empty) (*authv1.KeyReply, error) {
+func (v1 *V1) Key(c echo.Context, r *emptypb.Empty) (*authv1.KeyReply, error) {
 	keyBytes, err := x509.MarshalPKIXPublicKey(v1.AuthManager.PubKey)
 	if err != nil {
 		return nil, err
@@ -219,7 +219,7 @@ func (v1 *V1) Key(c context.Context, r *emptypb.Empty) (*authv1.KeyReply, error)
 	}, nil
 }
 
-func (v1 *V1) LoginFederated(c context.Context, r *authv1.LoginFederatedRequest) (*authv1.Session, error) {
+func (v1 *V1) LoginFederated(c echo.Context, r *authv1.LoginFederatedRequest) (*authv1.Session, error) {
 	pem, err := v1.AuthManager.GetPublicKey(r.Domain)
 	if err != nil {
 		return nil, err
@@ -290,11 +290,11 @@ func (v1 *V1) PasswordAcceptable(passwd []byte) bool {
 	return !bad
 }
 
-func (v1 *V1) GetConfig(c context.Context, r *emptypb.Empty) (*emptypb.Empty, error) {
+func (v1 *V1) GetConfig(c echo.Context, r *emptypb.Empty) (*emptypb.Empty, error) {
 	return nil, nil
 }
 
-func (v1 *V1) BeginAuth(c context.Context, r *emptypb.Empty) (*authv1.BeginAuthResponse, error) {
+func (v1 *V1) BeginAuth(c echo.Context, r *emptypb.Empty) (*authv1.BeginAuthResponse, error) {
 	authID := randstr.Hex(32)
 
 	if err := v1.AuthState.NewAuthSession(authID, initialStep); err != nil {
@@ -313,16 +313,16 @@ func (v1 *V1) BeginAuth(c context.Context, r *emptypb.Empty) (*authv1.BeginAuthR
 	}, nil
 }
 
-func (v1 *V1) StreamSteps(r *authv1.StreamStepsRequest, s authv1.AuthService_StreamStepsServer) error {
-	channel, err := v1.AuthState.Subscribe(r.AuthId, s)
+func (v1 *V1) StreamSteps(c echo.Context, r *authv1.StreamStepsRequest, out chan *authv1.AuthStep) {
+	channel, err := v1.AuthState.Subscribe(r.AuthId, out)
 	if err != nil {
-		return err
+		close(out)
 	}
 	<-channel
-	return nil
+	close(out)
 }
 
-func (v1 *V1) NextStep(c context.Context, r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
+func (v1 *V1) NextStep(c echo.Context, r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 	if ok := v1.AuthState.AuthSessionExists(r.AuthId); !ok {
 		return nil, errors.New("missing auth ID")
 	}
@@ -347,7 +347,7 @@ func (v1 *V1) NextStep(c context.Context, r *authv1.NextStepRequest) (*authv1.Au
 	return nil, nil
 }
 
-func (v1 *V1) StepBack(c context.Context, r *authv1.StepBackRequest) (*authv1.AuthStep, error) {
+func (v1 *V1) StepBack(c echo.Context, r *authv1.StepBackRequest) (*authv1.AuthStep, error) {
 	if ok := v1.AuthState.AuthSessionExists(r.AuthId); !ok {
 		return nil, errors.New("missing auth ID")
 	}
