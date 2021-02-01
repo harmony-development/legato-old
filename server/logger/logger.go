@@ -10,7 +10,6 @@ import (
 	"github.com/alecthomas/repr"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/ztrue/tracerr"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/status"
@@ -30,7 +29,6 @@ type ILogger interface {
 	ErrorResponse(code codes.Code, err error, response string) error
 	CheckException(err error)
 	Exception(err error)
-	Request(c context.Context, req interface{}, info *grpc.UnaryServerInfo)
 	Debug(d DebugScope, v ...interface{})
 	Fatal(err error)
 	Warn(s string, v ...interface{})
@@ -90,17 +88,6 @@ func (l Logger) Fatal(err error) {
 	}
 	println(tracerr.SprintSourceColor(err))
 	os.Exit(-1)
-}
-
-func (l Logger) Request(c context.Context, req interface{}, info *grpc.UnaryServerInfo) {
-	if l.Config.Server.Policies.Debug.LogRequests {
-		p, ok := peer.FromContext(c)
-		ip := ""
-		if ok {
-			ip = p.Addr.String()
-		}
-		logrus.Info("[", info.FullMethod, "] FROM ", ip)
-	}
 }
 
 func (l Logger) Debug(d DebugScope, v ...interface{}) {

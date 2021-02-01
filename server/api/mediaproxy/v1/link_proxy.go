@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"context"
 	"net/http"
 	"time"
 
@@ -9,6 +8,7 @@ import (
 	mediaproxyv1 "github.com/harmony-development/legato/gen/mediaproxy/v1"
 	"github.com/harmony-development/legato/server/api/middleware"
 	lru "github.com/hashicorp/golang-lru"
+	"github.com/labstack/echo/v4"
 )
 
 func init() {
@@ -60,7 +60,7 @@ func (v1 *V1) obtainOG(url string, out *mediaproxyv1.SiteMetadata) error {
 }
 
 // FetchLinkMetadata implements the FetchLinkMetadata RPC
-func (v1 *V1) FetchLinkMetadata(ctx context.Context, r *mediaproxyv1.FetchLinkMetadataRequest) (resp *mediaproxyv1.SiteMetadata, err error) {
+func (v1 *V1) FetchLinkMetadata(c echo.Context, r *mediaproxyv1.FetchLinkMetadataRequest) (resp *mediaproxyv1.SiteMetadata, err error) {
 	resp = &mediaproxyv1.SiteMetadata{}
 	err = v1.obtainOG(r.Url, resp)
 	return

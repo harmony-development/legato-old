@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -21,6 +20,7 @@ import (
 	"github.com/harmony-development/legato/server/http/attachments/backend"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/harmony-development/legato/server/responses"
+	"github.com/labstack/echo/v4"
 	"github.com/sony/sonyflake"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -45,6 +45,7 @@ type Dependencies struct {
 	Perms          *permissions.Manager
 	Config         *config.Config
 	StorageBackend backend.AttachmentBackend
+	Middleware     *middleware.Middlewares
 }
 
 // V1 contains the gRPC handler for v1
@@ -109,7 +110,7 @@ func init() {
 }
 
 // CreateGuild implements the CreateGuild RPC
-func (v1 *V1) CreateGuild(c context.Context, r *chatv1.CreateGuildRequest) (*chatv1.CreateGuildResponse, error) {
+func (v1 *V1) CreateGuild(c echo.Context, r *chatv1.CreateGuildRequest) (*chatv1.CreateGuildResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 	guildID, err := v1.Sonyflake.NextID()
 	if err != nil {
@@ -140,7 +141,7 @@ func init() {
 }
 
 // CreateInvite implements the CreateInvite RPC
-func (v1 *V1) CreateInvite(c context.Context, r *chatv1.CreateInviteRequest) (*chatv1.CreateInviteResponse, error) {
+func (v1 *V1) CreateInvite(c echo.Context, r *chatv1.CreateInviteRequest) (*chatv1.CreateInviteResponse, error) {
 	inv := int32(-1)
 	if r.PossibleUses != 0 {
 		inv = r.PossibleUses
@@ -166,7 +167,7 @@ func init() {
 }
 
 // CreateChannel implements the CreateChannel RPC
-func (v1 *V1) CreateChannel(c context.Context, r *chatv1.CreateChannelRequest) (*chatv1.CreateChannelResponse, error) {
+func (v1 *V1) CreateChannel(c echo.Context, r *chatv1.CreateChannelRequest) (*chatv1.CreateChannelResponse, error) {
 	channel, err := v1.DB.AddChannelToGuild(r.GuildId, r.ChannelName, r.PreviousId, r.NextId, r.IsCategory, r.Metadata)
 	if err != nil {
 		return nil, err
@@ -200,7 +201,7 @@ func init() {
 }
 
 // GetGuild implements the GetGuild RPC
-func (v1 *V1) GetGuild(c context.Context, r *chatv1.GetGuildRequest) (*chatv1.GetGuildResponse, error) {
+func (v1 *V1) GetGuild(c echo.Context, r *chatv1.GetGuildRequest) (*chatv1.GetGuildResponse, error) {
 	guild, err := v1.DB.GetGuildByID(r.GuildId)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -227,7 +228,7 @@ func init() {
 }
 
 // GetGuildInvites implements the GetGuildInvites RPC
-func (v1 *V1) GetGuildInvites(c context.Context, r *chatv1.GetGuildInvitesRequest) (*chatv1.GetGuildInvitesResponse, error) {
+func (v1 *V1) GetGuildInvites(c echo.Context, r *chatv1.GetGuildInvitesRequest) (*chatv1.GetGuildInvitesResponse, error) {
 	invites, err := v1.DB.GetInvites(r.GuildId)
 	if err != nil {
 		return nil, err
@@ -263,7 +264,7 @@ func init() {
 }
 
 // GetGuildMembers implements the GetGuildMembers RPC
-func (v1 *V1) GetGuildMembers(c context.Context, r *chatv1.GetGuildMembersRequest) (*chatv1.GetGuildMembersResponse, error) {
+func (v1 *V1) GetGuildMembers(c echo.Context, r *chatv1.GetGuildMembersRequest) (*chatv1.GetGuildMembersResponse, error) {
 	members, err := v1.DB.MembersInGuild(r.GuildId)
 	if err != nil {
 		return nil, err
@@ -286,7 +287,7 @@ func init() {
 }
 
 // GetGuildChannels implements the GetGuildChannels RPC
-func (v1 *V1) GetGuildChannels(c context.Context, r *chatv1.GetGuildChannelsRequest) (*chatv1.GetGuildChannelsResponse, error) {
+func (v1 *V1) GetGuildChannels(c echo.Context, r *chatv1.GetGuildChannelsRequest) (*chatv1.GetGuildChannelsResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 
 	chans, err := v1.DB.ChannelsForGuild(r.GuildId)
@@ -323,7 +324,7 @@ func init() {
 }
 
 // GetMessage implements the GetMessage RPC
-func (v1 *V1) GetMessage(c context.Context, r *chatv1.GetMessageRequest) (*chatv1.GetMessageResponse, error) {
+func (v1 *V1) GetMessage(c echo.Context, r *chatv1.GetMessageRequest) (*chatv1.GetMessageResponse, error) {
 	message, err := v1.DB.GetMessage(r.MessageId)
 	if err != nil {
 		return nil, err
@@ -387,7 +388,7 @@ func init() {
 	}, "/protocol.chat.v1.ChatService/PreviewGuild")
 }
 
-func (v1 *V1) PreviewGuild(c context.Context, r *chatv1.PreviewGuildRequest) (*chatv1.PreviewGuildResponse, error) {
+func (v1 *V1) PreviewGuild(c echo.Context, r *chatv1.PreviewGuildRequest) (*chatv1.PreviewGuildResponse, error) {
 	data, err := v1.DB.ResolveGuildID(r.InviteId)
 	if err != nil {
 		return nil, err
@@ -423,7 +424,7 @@ func init() {
 }
 
 // GetChannelMessages implements the GetChannelMessages RPC
-func (v1 *V1) GetChannelMessages(c context.Context, r *chatv1.GetChannelMessagesRequest) (*chatv1.GetChannelMessagesResponse, error) {
+func (v1 *V1) GetChannelMessages(c echo.Context, r *chatv1.GetChannelMessagesRequest) (*chatv1.GetChannelMessagesResponse, error) {
 	var err error
 	var messages []queries.Message
 	if r.BeforeMessage != 0 {
@@ -509,7 +510,7 @@ func init() {
 }
 
 // UpdateGuildInformation implements the UpdateGuildInformation RPC
-func (v1 *V1) UpdateGuildInformation(c context.Context, r *chatv1.UpdateGuildInformationRequest) (*empty.Empty, error) {
+func (v1 *V1) UpdateGuildInformation(c echo.Context, r *chatv1.UpdateGuildInformationRequest) (*empty.Empty, error) {
 	err := v1.DB.UpdateGuildInformation(r.GuildId, r.NewGuildName, r.NewGuildPicture, r.Metadata, r.UpdateGuildName, r.UpdateGuildPicture, r.UpdateMetadata)
 	if err != nil {
 		return nil, err
@@ -542,7 +543,7 @@ func init() {
 }
 
 // UpdateChannelInformation implements the UpdateChannelInformation RPC
-func (v1 *V1) UpdateChannelInformation(c context.Context, r *chatv1.UpdateChannelInformationRequest) (*empty.Empty, error) {
+func (v1 *V1) UpdateChannelInformation(c echo.Context, r *chatv1.UpdateChannelInformationRequest) (*empty.Empty, error) {
 	if err := v1.DB.UpdateChannelInformation(r.GuildId, r.ChannelId, r.Name, r.UpdateName, r.Metadata, r.UpdateMetadata); err != nil {
 		return nil, err
 	}
@@ -573,7 +574,7 @@ func init() {
 }
 
 // UpdateChannelOrder implements the UpdateChannelOrder RPC
-func (v1 *V1) UpdateChannelOrder(c context.Context, r *chatv1.UpdateChannelOrderRequest) (*empty.Empty, error) {
+func (v1 *V1) UpdateChannelOrder(c echo.Context, r *chatv1.UpdateChannelOrderRequest) (*empty.Empty, error) {
 	if err := v1.DB.MoveChannel(r.GuildId, r.ChannelId, r.PreviousId, r.NextId); err != nil {
 		return nil, err
 	}
@@ -603,7 +604,7 @@ func init() {
 }
 
 // UpdateMessage implements the UpdateMessage RPC
-func (v1 *V1) UpdateMessage(c context.Context, r *chatv1.UpdateMessageRequest) (*empty.Empty, error) {
+func (v1 *V1) UpdateMessage(c echo.Context, r *chatv1.UpdateMessageRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
 	if !r.UpdateActions && !r.UpdateEmbeds && !r.UpdateContent && !r.UpdateOverrides {
 		return nil, status.Error(codes.InvalidArgument, responses.InvalidRequest)
@@ -689,7 +690,7 @@ func init() {
 }
 
 // DeleteGuild implements the DeleteGuild RPC
-func (v1 *V1) DeleteGuild(c context.Context, r *chatv1.DeleteGuildRequest) (*empty.Empty, error) {
+func (v1 *V1) DeleteGuild(c echo.Context, r *chatv1.DeleteGuildRequest) (*empty.Empty, error) {
 	err := v1.DB.DeleteGuild(r.GuildId)
 	if err != nil {
 		return nil, err
@@ -716,7 +717,7 @@ func init() {
 }
 
 // DeleteInvite implements the DeleteInvite RPC
-func (v1 *V1) DeleteInvite(c context.Context, r *chatv1.DeleteInviteRequest) (*empty.Empty, error) {
+func (v1 *V1) DeleteInvite(c echo.Context, r *chatv1.DeleteInviteRequest) (*empty.Empty, error) {
 	if err := v1.DB.DeleteInvite(r.InviteId); err != nil {
 		return nil, err
 	}
@@ -735,7 +736,7 @@ func init() {
 }
 
 // DeleteChannel implements the DeleteChannel RPC
-func (v1 *V1) DeleteChannel(c context.Context, r *chatv1.DeleteChannelRequest) (*empty.Empty, error) {
+func (v1 *V1) DeleteChannel(c echo.Context, r *chatv1.DeleteChannelRequest) (*empty.Empty, error) {
 	if err := v1.DB.DeleteChannelFromGuild(r.GuildId, r.ChannelId); err != nil {
 		return nil, err
 	}
@@ -763,7 +764,7 @@ func init() {
 }
 
 // DeleteMessage implements the DeleteMessage RPC
-func (v1 *V1) DeleteMessage(c context.Context, r *chatv1.DeleteMessageRequest) (*empty.Empty, error) {
+func (v1 *V1) DeleteMessage(c echo.Context, r *chatv1.DeleteMessageRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
 	owner, err := v1.DB.GetMessageOwner(r.MessageId)
 	if err != nil {
@@ -799,7 +800,7 @@ func init() {
 }
 
 // JoinGuild implements the JoinGuild RPC
-func (v1 *V1) JoinGuild(c context.Context, r *chatv1.JoinGuildRequest) (*chatv1.JoinGuildResponse, error) {
+func (v1 *V1) JoinGuild(c echo.Context, r *chatv1.JoinGuildRequest) (*chatv1.JoinGuildResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 	guildID, err := v1.DB.ResolveGuildID(r.InviteId)
 	if err != nil {
@@ -844,7 +845,7 @@ func init() {
 }
 
 // LeaveGuild implements the LeaveGuild RPC
-func (v1 *V1) LeaveGuild(c context.Context, r *chatv1.LeaveGuildRequest) (*empty.Empty, error) {
+func (v1 *V1) LeaveGuild(c echo.Context, r *chatv1.LeaveGuildRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
 	if isOwner, err := v1.DB.IsOwner(r.GuildId, ctx.UserID); err != nil {
 		return nil, err
@@ -894,8 +895,8 @@ func init() {
 }
 
 // StreamEvents implements the StreamEvents RPC
-func (v1 *V1) StreamEvents(s chatv1.ChatService_StreamEventsServer) error {
-	userID, err := middleware.AuthHandler(v1.DB, s.Context())
+func (v1 *V1) StreamEvents(c echo.Context, in chan *chatv1.StreamEventsRequest, out chan *chatv1.Event) {
+	userID, err := v1.Middleware.AuthHandler(v1.DB, s.Context())
 	if err != nil {
 		return err
 	}
@@ -948,7 +949,7 @@ func init() {
 	}, "/protocol.chat.v1.ChatService/TriggerAction")
 }
 
-func (v1 *V1) TriggerAction(c context.Context, r *chatv1.TriggerActionRequest) (*emptypb.Empty, error) {
+func (v1 *V1) TriggerAction(c echo.Context, r *chatv1.TriggerActionRequest) (*emptypb.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
 	msg, err := v1.DB.GetMessage(r.MessageId)
 	if err != nil {
@@ -988,7 +989,7 @@ func init() {
 }
 
 // SendMessage implements the SendMessage RPC
-func (v1 *V1) SendMessage(c context.Context, r *chatv1.SendMessageRequest) (*chatv1.SendMessageResponse, error) {
+func (v1 *V1) SendMessage(c echo.Context, r *chatv1.SendMessageRequest) (*chatv1.SendMessageResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 	messageID, err := v1.Sonyflake.NextID()
 	if err != nil {
@@ -1069,7 +1070,7 @@ func init() {
 }
 
 // GetGuildList implements the GetGuildList RPC
-func (v1 *V1) GetGuildList(c context.Context, r *chatv1.GetGuildListRequest) (*chatv1.GetGuildListResponse, error) {
+func (v1 *V1) GetGuildList(c echo.Context, r *chatv1.GetGuildListRequest) (*chatv1.GetGuildListResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 	data, err := v1.DB.GetGuildList(ctx.UserID)
 	if err != nil {
@@ -1099,7 +1100,7 @@ func init() {
 }
 
 // AddGuildToGuildList implements the AddGuildToGuildList RPC
-func (v1 *V1) AddGuildToGuildList(c context.Context, r *chatv1.AddGuildToGuildListRequest) (*chatv1.AddGuildToGuildListResponse, error) {
+func (v1 *V1) AddGuildToGuildList(c echo.Context, r *chatv1.AddGuildToGuildListRequest) (*chatv1.AddGuildToGuildListResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 	err := v1.DB.AddGuildToList(ctx.UserID, r.GuildId, r.Homeserver)
 	if err != nil {
@@ -1128,7 +1129,7 @@ func init() {
 }
 
 // RemoveGuildFromGuildList implements the RemoveGuildFromGuildList RPC
-func (v1 *V1) RemoveGuildFromGuildList(c context.Context, r *chatv1.RemoveGuildFromGuildListRequest) (*chatv1.RemoveGuildFromGuildListResponse, error) {
+func (v1 *V1) RemoveGuildFromGuildList(c echo.Context, r *chatv1.RemoveGuildFromGuildListRequest) (*chatv1.RemoveGuildFromGuildListResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 	err := v1.DB.RemoveGuildFromList(ctx.UserID, r.GuildId, r.Homeserver)
 	if err != nil {
@@ -1146,7 +1147,7 @@ func (v1 *V1) RemoveGuildFromGuildList(c context.Context, r *chatv1.RemoveGuildF
 }
 
 // CreateEmotePack implements the CreateEmotePack RPC
-func (v1 *V1) CreateEmotePack(c context.Context, r *chatv1.CreateEmotePackRequest) (*chatv1.CreateEmotePackResponse, error) {
+func (v1 *V1) CreateEmotePack(c echo.Context, r *chatv1.CreateEmotePackRequest) (*chatv1.CreateEmotePackResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 
 	packID, err := v1.Sonyflake.NextID()
@@ -1164,7 +1165,7 @@ func (v1 *V1) CreateEmotePack(c context.Context, r *chatv1.CreateEmotePackReques
 }
 
 // AddEmoteToPack implements the AddEmoteToPack RPC
-func (v1 *V1) AddEmoteToPack(c context.Context, r *chatv1.AddEmoteToPackRequest) (*empty.Empty, error) {
+func (v1 *V1) AddEmoteToPack(c echo.Context, r *chatv1.AddEmoteToPackRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
 
 	if isOwner, err := v1.DB.IsPackOwner(ctx.UserID, r.PackId); err != nil {
@@ -1179,7 +1180,7 @@ func (v1 *V1) AddEmoteToPack(c context.Context, r *chatv1.AddEmoteToPackRequest)
 }
 
 // DeleteEmoteFromPack implements the DeleteEmoteFromPack RPC
-func (v1 *V1) DeleteEmoteFromPack(c context.Context, r *chatv1.DeleteEmoteFromPackRequest) (*empty.Empty, error) {
+func (v1 *V1) DeleteEmoteFromPack(c echo.Context, r *chatv1.DeleteEmoteFromPackRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
 
 	if isOwner, err := v1.DB.IsPackOwner(ctx.UserID, r.PackId); err != nil {
@@ -1194,7 +1195,7 @@ func (v1 *V1) DeleteEmoteFromPack(c context.Context, r *chatv1.DeleteEmoteFromPa
 }
 
 // DeleteEmotePack implements the DeleteEmotePack RPC
-func (v1 *V1) DeleteEmotePack(c context.Context, r *chatv1.DeleteEmotePackRequest) (*empty.Empty, error) {
+func (v1 *V1) DeleteEmotePack(c echo.Context, r *chatv1.DeleteEmotePackRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
 
 	if isOwner, err := v1.DB.IsPackOwner(ctx.UserID, r.PackId); err != nil {
@@ -1209,7 +1210,7 @@ func (v1 *V1) DeleteEmotePack(c context.Context, r *chatv1.DeleteEmotePackReques
 }
 
 // DequipEmotePack implements the DequipEmotePack RPC
-func (v1 *V1) DequipEmotePack(c context.Context, r *chatv1.DequipEmotePackRequest) (*empty.Empty, error) {
+func (v1 *V1) DequipEmotePack(c echo.Context, r *chatv1.DequipEmotePackRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
 
 	if err := v1.DB.DequipEmotePack(ctx.UserID, r.PackId); err != nil {
@@ -1219,7 +1220,7 @@ func (v1 *V1) DequipEmotePack(c context.Context, r *chatv1.DequipEmotePackReques
 }
 
 // GetEmotePacks implements the GetEmotePacks RPC
-func (v1 *V1) GetEmotePacks(c context.Context, r *chatv1.GetEmotePacksRequest) (*chatv1.GetEmotePacksResponse, error) {
+func (v1 *V1) GetEmotePacks(c echo.Context, r *chatv1.GetEmotePacksRequest) (*chatv1.GetEmotePacksResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 	packs, err := v1.DB.GetEmotePacks(ctx.UserID)
 	if err != nil {
@@ -1239,7 +1240,7 @@ func (v1 *V1) GetEmotePacks(c context.Context, r *chatv1.GetEmotePacksRequest) (
 }
 
 // GetEmotePackEmotes implements the GetEmotePackEmotes RPC
-func (v1 *V1) GetEmotePackEmotes(c context.Context, r *chatv1.GetEmotePackEmotesRequest) (*chatv1.GetEmotePackEmotesResponse, error) {
+func (v1 *V1) GetEmotePackEmotes(c echo.Context, r *chatv1.GetEmotePackEmotesRequest) (*chatv1.GetEmotePackEmotesResponse, error) {
 	emotes, err := v1.DB.GetEmotePackEmotes(r.PackId)
 	if err != nil {
 		return nil, err
@@ -1268,7 +1269,7 @@ func init() {
 }
 
 // AddGuildRole implements the AddGuildRole RPC
-func (v1 *V1) AddGuildRole(c context.Context, r *chatv1.AddGuildRoleRequest) (*chatv1.AddGuildRoleResponse, error) {
+func (v1 *V1) AddGuildRole(c echo.Context, r *chatv1.AddGuildRoleRequest) (*chatv1.AddGuildRoleResponse, error) {
 	roleID, err := v1.Sonyflake.NextID()
 	if err != nil {
 		return nil, err
@@ -1297,7 +1298,7 @@ func init() {
 }
 
 // DeleteGuildRole implements the DeleteGuildRole RPC
-func (v1 *V1) DeleteGuildRole(c context.Context, r *chatv1.DeleteGuildRoleRequest) (*empty.Empty, error) {
+func (v1 *V1) DeleteGuildRole(c echo.Context, r *chatv1.DeleteGuildRoleRequest) (*empty.Empty, error) {
 	return &empty.Empty{}, v1.DB.RemoveRoleFromGuild(r.GuildId, r.RoleId)
 }
 
@@ -1313,7 +1314,7 @@ func init() {
 }
 
 // MoveRole implements the MoveRole RPC
-func (v1 *V1) MoveRole(c context.Context, r *chatv1.MoveRoleRequest) (*chatv1.MoveRoleResponse, error) {
+func (v1 *V1) MoveRole(c echo.Context, r *chatv1.MoveRoleRequest) (*chatv1.MoveRoleResponse, error) {
 	err := v1.DB.MoveRole(r.GuildId, r.RoleId, r.BeforeId, r.AfterId)
 	return &chatv1.MoveRoleResponse{}, err
 }
@@ -1330,7 +1331,7 @@ func init() {
 }
 
 // GetGuildRoles implements the GetGuildRoles RPC
-func (v1 *V1) GetGuildRoles(c context.Context, r *chatv1.GetGuildRolesRequest) (*chatv1.GetGuildRolesResponse, error) {
+func (v1 *V1) GetGuildRoles(c echo.Context, r *chatv1.GetGuildRolesRequest) (*chatv1.GetGuildRolesResponse, error) {
 	roles, err := v1.DB.GetGuildRoles(r.GuildId)
 	return &chatv1.GetGuildRolesResponse{
 		Roles: roles,
@@ -1349,7 +1350,7 @@ func init() {
 }
 
 // SetPermissions implements the SetPermissions RPC
-func (v1 *V1) SetPermissions(c context.Context, r *chatv1.SetPermissionsRequest) (*empty.Empty, error) {
+func (v1 *V1) SetPermissions(c echo.Context, r *chatv1.SetPermissionsRequest) (*empty.Empty, error) {
 	return &emptypb.Empty{}, v1.Perms.SetPermissions(r.Perms.Permissions, r.GuildId, r.ChannelId, r.RoleId)
 }
 
@@ -1365,7 +1366,7 @@ func init() {
 }
 
 // GetPermissions implements the GetPermissions RPC
-func (v1 *V1) GetPermissions(c context.Context, r *chatv1.GetPermissionsRequest) (*chatv1.GetPermissionsResponse, error) {
+func (v1 *V1) GetPermissions(c echo.Context, r *chatv1.GetPermissionsRequest) (*chatv1.GetPermissionsResponse, error) {
 	return &chatv1.GetPermissionsResponse{Perms: &chatv1.PermissionList{Permissions: v1.Perms.GetPermissions(r.GuildId, r.ChannelId, r.RoleId)}}, nil
 }
 
@@ -1382,7 +1383,7 @@ func init() {
 }
 
 // QueryHasPermission implements the QueryHasPermission RPC
-func (v1 *V1) QueryHasPermission(c context.Context, r *chatv1.QueryPermissionsRequest) (*chatv1.QueryPermissionsResponse, error) {
+func (v1 *V1) QueryHasPermission(c echo.Context, r *chatv1.QueryPermissionsRequest) (*chatv1.QueryPermissionsResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 
 	if r.As == 0 {
@@ -1416,7 +1417,7 @@ func init() {
 	}, "/protocol.chat.v1.ChatService/ManageUserRoles")
 }
 
-func (v1 *V1) ManageUserRoles(c context.Context, r *chatv1.ManageUserRolesRequest) (*empty.Empty, error) {
+func (v1 *V1) ManageUserRoles(c echo.Context, r *chatv1.ManageUserRolesRequest) (*empty.Empty, error) {
 	return &empty.Empty{}, v1.DB.ManageRoles(r.GuildId, r.UserId, r.GiveRoleIds, r.TakeRoleIds)
 }
 
@@ -1431,7 +1432,7 @@ func init() {
 	}, "/protocol.chat.v1.ChatService/ModifyGuildRole")
 }
 
-func (v1 *V1) ModifyGuildRole(c context.Context, r *chatv1.ModifyGuildRoleRequest) (*empty.Empty, error) {
+func (v1 *V1) ModifyGuildRole(c echo.Context, r *chatv1.ModifyGuildRoleRequest) (*empty.Empty, error) {
 	return &empty.Empty{}, v1.DB.ModifyRole(r.GuildId, r.Role.RoleId, r.Role.Name, r.Role.Color, r.Role.Hoist, r.Role.Pingable, r.ModifyName, r.ModifyColor, r.ModifyHoist, r.ModifyPingable)
 }
 
@@ -1447,7 +1448,7 @@ func init() {
 	}, "/protocol.chat.v1.ChatService/GetUserRoles")
 }
 
-func (v1 *V1) GetUserRoles(c context.Context, r *chatv1.GetUserRolesRequest) (*chatv1.GetUserRolesResponse, error) {
+func (v1 *V1) GetUserRoles(c echo.Context, r *chatv1.GetUserRolesRequest) (*chatv1.GetUserRolesResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
 
 	if r.UserId == 0 {
@@ -1480,7 +1481,7 @@ func init() {
 }
 
 // GetUser handles the protocol's GetUser request
-func (v1 *V1) GetUser(c context.Context, r *chatv1.GetUserRequest) (*chatv1.GetUserResponse, error) {
+func (v1 *V1) GetUser(c echo.Context, r *chatv1.GetUserRequest) (*chatv1.GetUserResponse, error) {
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
@@ -1510,7 +1511,7 @@ func init() {
 }
 
 // GetUserMetadata handles the protocol's GetUserMetadata request
-func (v1 *V1) GetUserMetadata(ctx context.Context, r *chatv1.GetUserMetadataRequest) (*chatv1.GetUserMetadataResponse, error) {
+func (v1 *V1) GetUserMetadata(c echo.Context, r *chatv1.GetUserMetadataRequest) (*chatv1.GetUserMetadataResponse, error) {
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
@@ -1537,7 +1538,7 @@ func init() {
 }
 
 // ProfileUpdate handles the protocol's ProfileUpdate request
-func (v1 *V1) ProfileUpdate(c context.Context, r *chatv1.ProfileUpdateRequest) (*empty.Empty, error) {
+func (v1 *V1) ProfileUpdate(c echo.Context, r *chatv1.ProfileUpdateRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
 	if err := r.Validate(); err != nil {
 		return nil, err
@@ -1594,6 +1595,10 @@ func (v1 *V1) ProfileUpdate(c context.Context, r *chatv1.ProfileUpdateRequest) (
 	return &emptypb.Empty{}, nil
 }
 
+func (v1 *V1) Sync(c echo.Context, r *chatv1.SyncRequest, out chan *chatv1.SyncEvent) {
+
+}
+
 func init() {
 	middleware.RegisterRPCConfig(middleware.RPCConfig{
 		RateLimit: middleware.RateLimit{
@@ -1606,7 +1611,7 @@ func init() {
 }
 
 // Typing handles the protocol's Typing request
-func (v1 *V1) Typing(c context.Context, r *chatv1.TypingRequest) (*empty.Empty, error) {
+func (v1 *V1) Typing(c echo.Context, r *chatv1.TypingRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
 	if err := r.Validate(); err != nil {
 		return nil, err

@@ -4,10 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	stdlibHTTP "net/http"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -19,13 +17,11 @@ import (
 	"github.com/harmony-development/legato/server/auth"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
-	"github.com/harmony-development/legato/server/http"
 	"github.com/harmony-development/legato/server/http/attachments/backend"
 	database_attachments_backend "github.com/harmony-development/legato/server/http/attachments/backend/database"
 	"github.com/harmony-development/legato/server/http/attachments/backend/flatfile"
 	"github.com/harmony-development/legato/server/intercom"
 	"github.com/harmony-development/legato/server/logger"
-	"github.com/soheilhy/cmux"
 )
 
 // Instance is an instance of the harmony server
@@ -85,7 +81,7 @@ func (inst Instance) Start() {
 			},
 		}
 	default:
-		inst.Logger.Fatal(errors.New("Config backend is not valid; must be 'PureFlatfile' or 'DatabaseFlatfile'."))
+		inst.Logger.Fatal(errors.New("config backend is not valid; must be 'PureFlatfile' or 'DatabaseFlatfile'"))
 	}
 	inst.API = api.New(api.Dependencies{
 		Logger:         inst.Logger,
@@ -97,42 +93,16 @@ func (inst Instance) Start() {
 		StorageBackend: storageBackend,
 	})
 
-	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", inst.Config.Server.Host, inst.Config.Server.Port))
+	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", inst.Config.Server.Host, inst.Config.Server.Port))
 	if err != nil {
 		inst.Logger.Fatal(err)
 	}
 
-	muxer := cmux.New(listener)
-	http2 := muxer.Match(cmux.HTTP2())
-	http1 := muxer.Match(cmux.HTTP1())
-
 	errChan := make(chan error)
+
 	go func() {
-		httpServer := http.New(http.Dependencies{
-			DB:             inst.DB,
-			Logger:         inst.Logger,
-			Config:         inst.Config,
-			StorageBackend: storageBackend,
-		})
-		err := (&stdlibHTTP.Server{
-			Handler: stdlibHTTP.HandlerFunc(func(resp stdlibHTTP.ResponseWriter, req *stdlibHTTP.Request) {
-				if strings.Contains(req.Header.Get("Access-Control-Request-Headers"), "x-grpc-web") || req.Header.Get("x-grpc-web") == "1" || req.Header.Get("Sec-Websocket-Protocol") == "grpc-websockets" || strings.Contains(req.Header.Get("content-type"), "grpc-web") {
-					inst.API.GrpcWebServer.ServeHTTP(resp, req)
-				} else if strings.HasPrefix(req.Header.Get("User-Agent"), "Prometheus") {
-					inst.API.PrometheusServer.Handler.ServeHTTP(resp, req)
-				} else {
-					httpServer.ServeHTTP(resp, req)
-				}
-			}),
-		}).Serve(http1)
-		inst.Logger.CheckException(err)
-		errChan <- err
-	}()
-	go func() {
-		errChan <- inst.API.GrpcServer.Serve(http2)
-	}()
-	go func() {
-		errChan <- muxer.Serve()
+		inst.API.Listener = lis
+		errChan <- inst.API.Start("")
 	}()
 
 	terminateChan := make(chan os.Signal, 1)

@@ -2,13 +2,13 @@ package v1
 
 import (
 	"bytes"
-	"context"
 	"io"
 	"net/http"
 	"time"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
 	"github.com/cixtor/readability"
+	"github.com/labstack/echo/v4"
 
 	mediaproxyv1 "github.com/harmony-development/legato/gen/mediaproxy/v1"
 	"github.com/harmony-development/legato/server/api/middleware"
@@ -35,7 +35,7 @@ func init() {
 	}, "/protocol.mediaproxy.v1.MediaProxyService/InstantView")
 }
 
-func (v1 *V1) CanInstantView(ctx context.Context, r *mediaproxyv1.InstantViewRequest) (resp *mediaproxyv1.CanInstantViewResponse, err error) {
+func (v1 *V1) CanInstantView(c echo.Context, r *mediaproxyv1.InstantViewRequest) (resp *mediaproxyv1.CanInstantViewResponse, err error) {
 	resp = &mediaproxyv1.CanInstantViewResponse{
 		CanInstantView: true,
 	}
@@ -64,7 +64,7 @@ func (v1 *V1) CanInstantView(ctx context.Context, r *mediaproxyv1.InstantViewReq
 }
 
 // InstantView implements the InstantView RPC
-func (v1 *V1) InstantView(ctx context.Context, r *mediaproxyv1.InstantViewRequest) (resp *mediaproxyv1.InstantViewResponse, err error) {
+func (v1 *V1) InstantView(c echo.Context, r *mediaproxyv1.InstantViewRequest) (resp *mediaproxyv1.InstantViewResponse, err error) {
 	resp = &mediaproxyv1.InstantViewResponse{
 		Metadata: &mediaproxyv1.SiteMetadata{},
 	}
