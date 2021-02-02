@@ -229,10 +229,10 @@ github.com/grpc-ecosystem/grpc-gateway v1.5.0/go.mod h1:RSKVYQBd5MCa4OVpNdGskqpg
 github.com/grpc-ecosystem/grpc-gateway v1.6.2/go.mod h1:RSKVYQBd5MCa4OVpNdGskqpgL2+G+NZTnrVHpWWfpdw=
 github.com/grpc-ecosystem/grpc-gateway v1.8.5 h1:2+KSC78XiO6Qy0hIjfc1OD9H+hsaJdJlb8Kqsd41CTE=
 github.com/grpc-ecosystem/grpc-gateway v1.8.5/go.mod h1:vNeuVxBJEsws4ogUvrchl83t/GYV9WGTSLVdBhOQFDY=
-github.com/harmony-development/hrpc v0.0.0-20210129231049-0722e99e0312 h1:WhgEaVqbl9+O+5sOyjfdmSjYBF9kIyV4qSwdGRKGGyU=
-github.com/harmony-development/hrpc v0.0.0-20210129231049-0722e99e0312/go.mod h1:zYTQs+J/ZAZoBd2eymRva0GwqgbGhgk5brG/0Butswg=
 github.com/harmony-development/hrpc v0.0.0-20210131180547-8aee136aeae7 h1:kT/AFveEI6Uro6S24lZdNgjGlyi0grqxL6w4wMFp6s8=
 github.com/harmony-development/hrpc v0.0.0-20210131180547-8aee136aeae7/go.mod h1:inDlsntAsQf9Q7ru7VPnlLjFV1STNsKNgiUPmfP/SWo=
+github.com/harmony-development/hrpc v0.0.0-20210202032735-c79eb8e8b942 h1:CJqdl47HngekcW++VMTb1kYFEVwLGiP95VFTBIW8WmE=
+github.com/harmony-development/hrpc v0.0.0-20210202032735-c79eb8e8b942/go.mod h1:inDlsntAsQf9Q7ru7VPnlLjFV1STNsKNgiUPmfP/SWo=
 github.com/harmony-development/legato v0.0.0-20210121011755-599a0fd86c25/go.mod h1:GhTxyGk8bClEa0MVGgb273114FXKHoMwOemF2pPYPKE=
 github.com/hashicorp/go-version v1.2.0/go.mod h1:fltr4n8CU8Ke44wwGCBoEymUuxUHl09ZGVZPK5anwXA=
 github.com/hashicorp/golang-lru v0.5.0/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=
