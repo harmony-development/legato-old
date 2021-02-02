@@ -23,7 +23,7 @@ require (
 	github.com/google/uuid v1.2.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79
-	github.com/harmony-development/hrpc v0.0.0-20210202033806-abd478da246c
+	github.com/harmony-development/hrpc v0.0.0-20210202034322-4247c48febc0
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/hashicorp/hcl/v2 v2.8.2
 	github.com/kr/text v0.2.0 // indirect

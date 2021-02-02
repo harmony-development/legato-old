@@ -306,6 +306,8 @@ github.com/grpc-ecosystem/grpc-gateway v1.8.5/go.mod h1:vNeuVxBJEsws4ogUvrchl83t
 github.com/grpc-ecosystem/grpc-gateway v1.9.5/go.mod h1:vNeuVxBJEsws4ogUvrchl83t/GYV9WGTSLVdBhOQFDY=
 github.com/harmony-development/hrpc v0.0.0-20210202033806-abd478da246c h1:moX6+1vwu9OQZV8F38S0AhsNCE6u5vozsTpycew6Lkk=
 github.com/harmony-development/hrpc v0.0.0-20210202033806-abd478da246c/go.mod h1:inDlsntAsQf9Q7ru7VPnlLjFV1STNsKNgiUPmfP/SWo=
+github.com/harmony-development/hrpc v0.0.0-20210202034322-4247c48febc0 h1:2/52Yoo05EtiVyRk4pC1LthYRop2JekpZ5UyOUpnKns=
+github.com/harmony-development/hrpc v0.0.0-20210202034322-4247c48febc0/go.mod h1:inDlsntAsQf9Q7ru7VPnlLjFV1STNsKNgiUPmfP/SWo=
 github.com/harmony-development/legato v0.0.0-20210121011755-599a0fd86c25/go.mod h1:GhTxyGk8bClEa0MVGgb273114FXKHoMwOemF2pPYPKE=
 github.com/hashicorp/consul/api v1.3.0/go.mod h1:MmDNSzIMUjNpY/mQ398R4bk2FnqQLoPndWW5VkKPlCE=
 github.com/hashicorp/consul/sdk v0.3.0/go.mod h1:VKf9jXwCTEY1QZP2MOLRhb5i/I/ssyNV1vwHyQBF0x8=
