@@ -15,6 +15,7 @@ import (
 	"github.com/harmony-development/legato/server/auth"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/http"
 	"github.com/harmony-development/legato/server/http/attachments/backend"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/labstack/echo/v4"
@@ -55,6 +56,13 @@ func New(deps Dependencies) *API {
 	api.Echo.Use(middleware.AddTrailingSlash())
 	api.Echo.Use(middleware.Recover())
 	api.Echo.Use(middleware.CORS())
+
+	http.New(api.Echo, http.Dependencies{
+		DB:             deps.DB,
+		Logger:         deps.Logger,
+		Config:         deps.Config,
+		StorageBackend: api.StorageBackend,
+	})
 
 	authService := authv1.NewAuthServiceHandler(authsvc.New(&authsvc.Dependencies{
 		DB:          deps.DB,

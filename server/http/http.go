@@ -1,8 +1,6 @@
 package http
 
 import (
-	sentryecho "github.com/getsentry/sentry-go/echo"
-	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
@@ -12,13 +10,11 @@ import (
 	"github.com/harmony-development/legato/server/http/attachments/backend"
 	"github.com/harmony-development/legato/server/http/hm"
 	"github.com/harmony-development/legato/server/http/routing"
-	"github.com/harmony-development/legato/server/http/webrtc"
 	"github.com/harmony-development/legato/server/logger"
 )
 
 // Server is an instance of the HTTP server
 type Server struct {
-	*echo.Echo
 	Router *routing.Router
 	Dependencies
 }
@@ -31,38 +27,17 @@ type Dependencies struct {
 	StorageBackend backend.AttachmentBackend
 }
 
-// New creates a new HTTP server instance
-func New(deps Dependencies) *Server {
-	s := &Server{
-		Echo:         echo.New(),
-		Dependencies: deps,
-	}
-	s.Pre(middleware.RemoveTrailingSlash())
-	if deps.Config.Server.UseCORS {
-		s.Use(middleware.CORS())
-	}
-	s.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
-		StackSize:       1 << 10,
-		DisableStackAll: true,
-	}))
-	s.Use(sentryecho.New(sentryecho.Options{
-		Repanic:         true,
-		WaitForDelivery: false,
-	}))
-	s.Validator = &HarmonyValidator{
-		Validator: validator.New(),
-	}
+// New creates the /_harmony group of stuff
+func New(e *echo.Echo, deps Dependencies) {
 	m := hm.New(deps.DB, deps.Logger)
-	s.Router = &routing.Router{Middlewares: m}
+	s := &Server{
+		Dependencies: deps,
+		Router:       &routing.Router{Middlewares: m},
+	}
 
-	harmony := s.Group("/_harmony")
+	harmony := e.Group("/_harmony")
 	harmony.Use(m.WithHarmony)
-
-	webrtcGrp := harmony.Group("/webrtc")
-	webrtc.New(webrtc.Dependencies{
-		APIGroup: webrtcGrp,
-		Router:   s.Router,
-	})
+	harmony.Use(middleware.CORS())
 
 	attachmentsGrp := harmony.Group("/media")
 	if _, err := attachments.New(attachments.Dependencies{
@@ -72,6 +47,4 @@ func New(deps Dependencies) *Server {
 	}); err != nil {
 		panic(err)
 	}
-
-	return s
 }
