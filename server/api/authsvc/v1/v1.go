@@ -318,8 +318,6 @@ func (v1 *V1) StreamSteps(c echo.Context, r *authv1.StreamStepsRequest, out chan
 	if err != nil {
 		close(out)
 	}
-
-	close(out)
 }
 
 func (v1 *V1) NextStep(c echo.Context, r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
