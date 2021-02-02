@@ -17,7 +17,7 @@ var Methods map[string]*descriptorpb.MethodDescriptorProto
 func (m Middlewares) MethodMetadataInterceptor(meth *descriptorpb.MethodDescriptorProto, d *descriptorpb.FileDescriptorProto, h server.Handler) server.Handler {
 	return func(c echo.Context, req protoreflect.ProtoMessage) (protoreflect.ProtoMessage, error) {
 		ctx := c.(HarmonyContext)
-		opts := proto.GetExtension(d.Options, harmonytypesv1.E_Metadata).(*harmonytypesv1.HarmonyMethodMetadata)
+		opts := proto.GetExtension(meth.Options, harmonytypesv1.E_Metadata).(*harmonytypesv1.HarmonyMethodMetadata)
 		if opts == nil {
 			goto finally
 		}
