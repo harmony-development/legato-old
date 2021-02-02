@@ -56,11 +56,30 @@ func New(deps Dependencies) *API {
 	api.Echo.Use(middleware.Recover())
 	api.Echo.Use(middleware.CORS())
 
-	authService := authv1.NewAuthServiceHandler(authsvc.New(&authsvc.Dependencies{}).V1)
-	chatService := chatv1.NewChatServiceHandler(chat.New(&chat.Dependencies{}).V1)
-	mediaProxyService := mediaproxyv1.NewMediaProxyServiceHandler(mediaproxy.New(&mediaproxy.Dependencies{}).V1)
+	authService := authv1.NewAuthServiceHandler(authsvc.New(&authsvc.Dependencies{
+		DB:          deps.DB,
+		Logger:      deps.Logger,
+		Sonyflake:   deps.Sonyflake,
+		Config:      deps.Config,
+		AuthManager: deps.AuthManager,
+	}).V1)
+	chatService := chatv1.NewChatServiceHandler(chat.New(&chat.Dependencies{
+		DB:             deps.DB,
+		Logger:         deps.Logger,
+		Sonyflake:      deps.Sonyflake,
+		Perms:          deps.Permissions,
+		Config:         deps.Config,
+		StorageBackend: deps.StorageBackend,
+	}).V1)
+	mediaProxyService := mediaproxyv1.NewMediaProxyServiceHandler(mediaproxy.New(&mediaproxy.Dependencies{
+		DB:     deps.DB,
+		Logger: deps.Logger,
+		Config: deps.Config,
+	}).V1)
 	voiceService := voicev1.NewVoiceServiceHandler(&voicev1impl.V1{
-		Dependencies: voicev1impl.Dependencies{},
+		Dependencies: voicev1impl.Dependencies{
+			DB: deps.DB,
+		},
 	})
 
 	hrpcServer := server.NewHRPCServer(api.Echo, authService, chatService, mediaProxyService, voiceService)
