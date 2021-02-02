@@ -3,7 +3,6 @@ package server
 import (
 	"errors"
 	"fmt"
-	"net"
 	"os"
 	"os/signal"
 	"syscall"
@@ -93,16 +92,10 @@ func (inst Instance) Start() {
 		StorageBackend: storageBackend,
 	})
 
-	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", inst.Config.Server.Host, inst.Config.Server.Port))
-	if err != nil {
-		inst.Logger.Fatal(err)
-	}
-
 	errChan := make(chan error)
 
 	go func() {
-		inst.API.Listener = lis
-		errChan <- inst.API.Start("")
+		errChan <- inst.API.Start(fmt.Sprintf("%s:%d", inst.Config.Server.Host, inst.Config.Server.Port))
 	}()
 
 	terminateChan := make(chan os.Signal, 1)
