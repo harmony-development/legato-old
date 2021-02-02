@@ -1,13 +1,12 @@
 package v1
 
-import (
-	"bytes"
-	"fmt"
-	"io/ioutil"
-	"net/http"
-
-	"google.golang.org/protobuf/proto"
-)
+import "net/http"
+import "google.golang.org/protobuf/proto"
+import "io/ioutil"
+import "fmt"
+import "github.com/gorilla/websocket"
+import "net/url"
+import "bytes"
 
 type MediaProxyServiceClient struct {
 	client    *http.Client

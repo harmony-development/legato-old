@@ -788,7 +788,11 @@ func (h *ChatServiceHandler) CreateGuildHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.CreateGuild(c, requestProto)
+	fn := h.Server.CreateGuild(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -806,7 +810,11 @@ func (h *ChatServiceHandler) CreateInviteHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.CreateInvite(c, requestProto)
+	fn := h.Server.CreateInvite(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -824,7 +832,11 @@ func (h *ChatServiceHandler) CreateChannelHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.CreateChannel(c, requestProto)
+	fn := h.Server.CreateChannel(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -842,7 +854,11 @@ func (h *ChatServiceHandler) CreateEmotePackHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.CreateEmotePack(c, requestProto)
+	fn := h.Server.CreateEmotePack(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -860,7 +876,11 @@ func (h *ChatServiceHandler) GetGuildListHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.GetGuildList(c, requestProto)
+	fn := h.Server.GetGuildList(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -878,7 +898,11 @@ func (h *ChatServiceHandler) AddGuildToGuildListHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.AddGuildToGuildList(c, requestProto)
+	fn := h.Server.AddGuildToGuildList(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -896,7 +920,11 @@ func (h *ChatServiceHandler) RemoveGuildFromGuildListHandler(c echo.Context) err
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.RemoveGuildFromGuildList(c, requestProto)
+	fn := h.Server.RemoveGuildFromGuildList(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -914,7 +942,11 @@ func (h *ChatServiceHandler) GetGuildHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.GetGuild(c, requestProto)
+	fn := h.Server.GetGuild(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -932,7 +964,11 @@ func (h *ChatServiceHandler) GetGuildInvitesHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.GetGuildInvites(c, requestProto)
+	fn := h.Server.GetGuildInvites(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -950,7 +986,11 @@ func (h *ChatServiceHandler) GetGuildMembersHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.GetGuildMembers(c, requestProto)
+	fn := h.Server.GetGuildMembers(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -968,7 +1008,11 @@ func (h *ChatServiceHandler) GetGuildChannelsHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.GetGuildChannels(c, requestProto)
+	fn := h.Server.GetGuildChannels(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -986,7 +1030,11 @@ func (h *ChatServiceHandler) GetChannelMessagesHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.GetChannelMessages(c, requestProto)
+	fn := h.Server.GetChannelMessages(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1004,7 +1052,11 @@ func (h *ChatServiceHandler) GetMessageHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.GetMessage(c, requestProto)
+	fn := h.Server.GetMessage(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1022,7 +1074,11 @@ func (h *ChatServiceHandler) GetEmotePacksHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.GetEmotePacks(c, requestProto)
+	fn := h.Server.GetEmotePacks(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1040,7 +1096,11 @@ func (h *ChatServiceHandler) GetEmotePackEmotesHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.GetEmotePackEmotes(c, requestProto)
+	fn := h.Server.GetEmotePackEmotes(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1058,7 +1118,11 @@ func (h *ChatServiceHandler) UpdateGuildInformationHandler(c echo.Context) error
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.UpdateGuildInformation(c, requestProto)
+	fn := h.Server.UpdateGuildInformation(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1076,7 +1140,11 @@ func (h *ChatServiceHandler) UpdateChannelInformationHandler(c echo.Context) err
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.UpdateChannelInformation(c, requestProto)
+	fn := h.Server.UpdateChannelInformation(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1094,7 +1162,11 @@ func (h *ChatServiceHandler) UpdateChannelOrderHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.UpdateChannelOrder(c, requestProto)
+	fn := h.Server.UpdateChannelOrder(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1112,7 +1184,11 @@ func (h *ChatServiceHandler) UpdateMessageHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.UpdateMessage(c, requestProto)
+	fn := h.Server.UpdateMessage(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1130,7 +1206,11 @@ func (h *ChatServiceHandler) AddEmoteToPackHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.AddEmoteToPack(c, requestProto)
+	fn := h.Server.AddEmoteToPack(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1148,7 +1228,11 @@ func (h *ChatServiceHandler) DeleteGuildHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.DeleteGuild(c, requestProto)
+	fn := h.Server.DeleteGuild(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1166,7 +1250,11 @@ func (h *ChatServiceHandler) DeleteInviteHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.DeleteInvite(c, requestProto)
+	fn := h.Server.DeleteInvite(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1184,7 +1272,11 @@ func (h *ChatServiceHandler) DeleteChannelHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.DeleteChannel(c, requestProto)
+	fn := h.Server.DeleteChannel(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1202,7 +1294,11 @@ func (h *ChatServiceHandler) DeleteMessageHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.DeleteMessage(c, requestProto)
+	fn := h.Server.DeleteMessage(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1220,7 +1316,11 @@ func (h *ChatServiceHandler) DeleteEmoteFromPackHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.DeleteEmoteFromPack(c, requestProto)
+	fn := h.Server.DeleteEmoteFromPack(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1238,7 +1338,11 @@ func (h *ChatServiceHandler) DeleteEmotePackHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.DeleteEmotePack(c, requestProto)
+	fn := h.Server.DeleteEmotePack(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1256,7 +1360,11 @@ func (h *ChatServiceHandler) DequipEmotePackHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.DequipEmotePack(c, requestProto)
+	fn := h.Server.DequipEmotePack(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1274,7 +1382,11 @@ func (h *ChatServiceHandler) JoinGuildHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.JoinGuild(c, requestProto)
+	fn := h.Server.JoinGuild(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1292,7 +1404,11 @@ func (h *ChatServiceHandler) LeaveGuildHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.LeaveGuild(c, requestProto)
+	fn := h.Server.LeaveGuild(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1310,7 +1426,11 @@ func (h *ChatServiceHandler) TriggerActionHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.TriggerAction(c, requestProto)
+	fn := h.Server.TriggerAction(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1328,7 +1448,11 @@ func (h *ChatServiceHandler) SendMessageHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.SendMessage(c, requestProto)
+	fn := h.Server.SendMessage(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1346,7 +1470,11 @@ func (h *ChatServiceHandler) QueryHasPermissionHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.QueryHasPermission(c, requestProto)
+	fn := h.Server.QueryHasPermission(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1364,7 +1492,11 @@ func (h *ChatServiceHandler) SetPermissionsHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.SetPermissions(c, requestProto)
+	fn := h.Server.SetPermissions(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1382,7 +1514,11 @@ func (h *ChatServiceHandler) GetPermissionsHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.GetPermissions(c, requestProto)
+	fn := h.Server.GetPermissions(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1400,7 +1536,11 @@ func (h *ChatServiceHandler) MoveRoleHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.MoveRole(c, requestProto)
+	fn := h.Server.MoveRole(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1418,7 +1558,11 @@ func (h *ChatServiceHandler) GetGuildRolesHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.GetGuildRoles(c, requestProto)
+	fn := h.Server.GetGuildRoles(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1436,7 +1580,11 @@ func (h *ChatServiceHandler) AddGuildRoleHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.AddGuildRole(c, requestProto)
+	fn := h.Server.AddGuildRole(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1454,7 +1602,11 @@ func (h *ChatServiceHandler) ModifyGuildRoleHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.ModifyGuildRole(c, requestProto)
+	fn := h.Server.ModifyGuildRole(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1472,7 +1624,11 @@ func (h *ChatServiceHandler) DeleteGuildRoleHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.DeleteGuildRole(c, requestProto)
+	fn := h.Server.DeleteGuildRole(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1490,7 +1646,11 @@ func (h *ChatServiceHandler) ManageUserRolesHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.ManageUserRoles(c, requestProto)
+	fn := h.Server.ManageUserRoles(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1508,7 +1668,11 @@ func (h *ChatServiceHandler) GetUserRolesHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.GetUserRoles(c, requestProto)
+	fn := h.Server.GetUserRoles(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1665,7 +1829,11 @@ func (h *ChatServiceHandler) GetUserHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.GetUser(c, requestProto)
+	fn := h.Server.GetUser(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1683,7 +1851,11 @@ func (h *ChatServiceHandler) GetUserMetadataHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.GetUserMetadata(c, requestProto)
+	fn := h.Server.GetUserMetadata(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1701,7 +1873,11 @@ func (h *ChatServiceHandler) ProfileUpdateHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.ProfileUpdate(c, requestProto)
+	fn := h.Server.ProfileUpdate(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1719,7 +1895,11 @@ func (h *ChatServiceHandler) TypingHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.Typing(c, requestProto)
+	fn := h.Server.Typing(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1737,7 +1917,11 @@ func (h *ChatServiceHandler) PreviewGuildHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.PreviewGuild(c, requestProto)
+	fn := h.Server.PreviewGuild(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}

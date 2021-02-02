@@ -173,7 +173,11 @@ func (h *AuthServiceHandler) FederateHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.Federate(c, requestProto)
+	fn := h.Server.Federate(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -191,7 +195,11 @@ func (h *AuthServiceHandler) LoginFederatedHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.LoginFederated(c, requestProto)
+	fn := h.Server.LoginFederated(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -209,7 +217,11 @@ func (h *AuthServiceHandler) KeyHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.Key(c, requestProto)
+	fn := h.Server.Key(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -227,7 +239,11 @@ func (h *AuthServiceHandler) BeginAuthHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.BeginAuth(c, requestProto)
+	fn := h.Server.BeginAuth(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -245,7 +261,11 @@ func (h *AuthServiceHandler) NextStepHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.NextStep(c, requestProto)
+	fn := h.Server.NextStep(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -263,7 +283,11 @@ func (h *AuthServiceHandler) StepBackHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.StepBack(c, requestProto)
+	fn := h.Server.StepBack(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}

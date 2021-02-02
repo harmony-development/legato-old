@@ -1,15 +1,12 @@
 package v1
 
-import (
-	"io/ioutil"
-	"net/http"
-
-	"github.com/gorilla/websocket"
-	"github.com/harmony-development/hrpc/server"
-	"github.com/labstack/echo/v4"
-	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/descriptorpb"
-)
+import "github.com/labstack/echo/v4"
+import "io/ioutil"
+import "net/http"
+import "google.golang.org/protobuf/proto"
+import "github.com/gorilla/websocket"
+import "google.golang.org/protobuf/types/descriptorpb"
+import "github.com/harmony-development/hrpc/server"
 
 func BindPB(obj interface{}, c echo.Context) error {
 	buf, err := ioutil.ReadAll(c.Request().Body)
@@ -114,7 +111,11 @@ func (h *MediaProxyServiceHandler) FetchLinkMetadataHandler(c echo.Context) erro
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.FetchLinkMetadata(c, requestProto)
+	fn := h.Server.FetchLinkMetadata(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -132,7 +133,11 @@ func (h *MediaProxyServiceHandler) InstantViewHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.InstantView(c, requestProto)
+	fn := h.Server.InstantView(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -150,7 +155,11 @@ func (h *MediaProxyServiceHandler) CanInstantViewHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	res, err := h.Server.CanInstantView(c, requestProto)
+	fn := h.Server.CanInstantView(c, requestProto)
+	if h.UnaryPre != nil {
+		fn = h.UnaryPre(fn)
+	}
+	res, err := fn(c, requestProto)
 	if err != nil {
 		return err
 	}
