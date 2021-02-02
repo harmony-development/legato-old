@@ -23,6 +23,7 @@ type DebugScope int
 
 const (
 	Streams DebugScope = iota
+	Startup
 )
 
 type ILogger interface {
