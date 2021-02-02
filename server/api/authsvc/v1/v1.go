@@ -314,11 +314,11 @@ func (v1 *V1) BeginAuth(c echo.Context, r *emptypb.Empty) (*authv1.BeginAuthResp
 }
 
 func (v1 *V1) StreamSteps(c echo.Context, r *authv1.StreamStepsRequest, out chan *authv1.AuthStep) {
-	channel, err := v1.AuthState.Subscribe(r.AuthId, out)
+	_, err := v1.AuthState.Subscribe(r.AuthId, out)
 	if err != nil {
 		close(out)
 	}
-	<-channel
+
 	close(out)
 }
 
