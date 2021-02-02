@@ -4,6 +4,7 @@ import (
 	v1 "github.com/harmony-development/legato/server/api/chat/v1"
 	"github.com/harmony-development/legato/server/api/chat/v1/permissions"
 	"github.com/harmony-development/legato/server/api/chat/v1/pubsub_backends/inprocess"
+	"github.com/harmony-development/legato/server/api/middleware"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/http/attachments/backend"
@@ -18,6 +19,7 @@ type Dependencies struct {
 	Sonyflake      *sonyflake.Sonyflake
 	Perms          *permissions.Manager
 	Config         *config.Config
+	Middlewares    *middleware.Middlewares
 	StorageBackend backend.AttachmentBackend
 }
 
@@ -45,6 +47,7 @@ func New(deps *Dependencies) *Service {
 			Streams:        pubsub,
 			Config:         deps.Config,
 			StorageBackend: deps.StorageBackend,
+			Middleware:     chat.Middlewares,
 		},
 	}
 	return chat
