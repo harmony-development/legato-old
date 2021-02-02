@@ -1,12 +1,15 @@
 package v1
 
-import "github.com/labstack/echo/v4"
-import "io/ioutil"
-import "net/http"
-import "google.golang.org/protobuf/proto"
-import "github.com/gorilla/websocket"
-import "google.golang.org/protobuf/types/descriptorpb"
-import "github.com/harmony-development/hrpc/server"
+import (
+	"io/ioutil"
+	"net/http"
+
+	"github.com/gorilla/websocket"
+	"github.com/harmony-development/hrpc/server"
+	"github.com/labstack/echo/v4"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/descriptorpb"
+)
 
 func BindPB(obj interface{}, c echo.Context) error {
 	buf, err := ioutil.ReadAll(c.Request().Body)
@@ -77,16 +80,17 @@ func (h *VoiceServiceHandler) Routes() map[string]echo.HandlerFunc {
 
 func (h *VoiceServiceHandler) ConnectHandler(c echo.Context) error {
 
-	var err error
+	ws, err := h.upgrader.Upgrade(c.Response(), c.Request(), nil)
+	if err != nil {
+		return err
+	}
+	defer ws.Close()
 
 	in := make(chan *ClientSignal)
 	err = nil
 
 	out := make(chan *Signal)
-	ws, err := h.upgrader.Upgrade(c.Response(), c.Request(), nil)
-	if err != nil {
-		return err
-	}
+
 	h.Server.Connect(c, in, out)
 
 	msgs := make(chan []byte)
@@ -102,7 +106,7 @@ func (h *VoiceServiceHandler) ConnectHandler(c echo.Context) error {
 		}
 	}()
 
-	defer ws.WriteMessage(websocket.CloseMessage, []byte{})
+	defer ws.Close()
 
 	for {
 		select {

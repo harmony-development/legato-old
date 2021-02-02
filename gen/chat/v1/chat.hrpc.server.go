@@ -1522,16 +1522,17 @@ func (h *ChatServiceHandler) GetUserRolesHandler(c echo.Context) error {
 
 func (h *ChatServiceHandler) StreamEventsHandler(c echo.Context) error {
 
-	var err error
+	ws, err := h.upgrader.Upgrade(c.Response(), c.Request(), nil)
+	if err != nil {
+		return err
+	}
+	defer ws.Close()
 
 	in := make(chan *StreamEventsRequest)
 	err = nil
 
 	out := make(chan *Event)
-	ws, err := h.upgrader.Upgrade(c.Response(), c.Request(), nil)
-	if err != nil {
-		return err
-	}
+
 	h.Server.StreamEvents(c, in, out)
 
 	msgs := make(chan []byte)
@@ -1547,7 +1548,7 @@ func (h *ChatServiceHandler) StreamEventsHandler(c echo.Context) error {
 		}
 	}()
 
-	defer ws.WriteMessage(websocket.CloseMessage, []byte{})
+	defer ws.Close()
 
 	for {
 		select {
@@ -1604,21 +1605,26 @@ func (h *ChatServiceHandler) StreamEventsHandler(c echo.Context) error {
 
 func (h *ChatServiceHandler) SyncHandler(c echo.Context) error {
 
-	var err error
-
-	in := new(SyncRequest)
-	if err = BindPB(in, c); err != nil {
-		return err
-	}
-
-	out := make(chan *SyncEvent)
 	ws, err := h.upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		return err
 	}
+	defer ws.Close()
+
+	in := new(SyncRequest)
+	_, message, err := ws.ReadMessage()
+	if err != nil {
+		return err
+	}
+	if err := proto.Unmarshal(message, in); err != nil {
+		return err
+	}
+
+	out := make(chan *SyncEvent)
+
 	h.Server.Sync(c, in, out)
 
-	defer ws.WriteMessage(websocket.CloseMessage, []byte{})
+	defer ws.Close()
 
 	for {
 		select {
