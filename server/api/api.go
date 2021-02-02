@@ -70,6 +70,7 @@ func New(deps Dependencies) *API {
 		Perms:          deps.Permissions,
 		Config:         deps.Config,
 		StorageBackend: deps.StorageBackend,
+		Middlewares:    m,
 	}).V1)
 	mediaProxyService := mediaproxyv1.NewMediaProxyServiceHandler(mediaproxy.New(&mediaproxy.Dependencies{
 		DB:     deps.DB,
