@@ -1,14 +1,16 @@
 package v1
 
-import "net/http"
-import "google.golang.org/protobuf/proto"
-import "io/ioutil"
-import "fmt"
-import "github.com/gorilla/websocket"
-import "net/url"
-import "bytes"
+import (
+	"bytes"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 
-import "github.com/golang/protobuf/ptypes/empty"
+	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/gorilla/websocket"
+	"google.golang.org/protobuf/proto"
+)
 
 type ChatServiceClient struct {
 	client    *http.Client

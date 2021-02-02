@@ -1,12 +1,15 @@
 package v1
 
-import "github.com/labstack/echo/v4"
-import "io/ioutil"
-import "net/http"
-import "google.golang.org/protobuf/proto"
-import "github.com/gorilla/websocket"
-import "google.golang.org/protobuf/types/descriptorpb"
-import "github.com/harmony-development/hrpc/server"
+import (
+	"io/ioutil"
+	"net/http"
+
+	"github.com/gorilla/websocket"
+	"github.com/harmony-development/hrpc/server"
+	"github.com/labstack/echo/v4"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/descriptorpb"
+)
 
 func BindPB(obj interface{}, c echo.Context) error {
 	buf, err := ioutil.ReadAll(c.Request().Body)

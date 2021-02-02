@@ -1,14 +1,16 @@
 package v1
 
-import "github.com/labstack/echo/v4"
-import "io/ioutil"
-import "net/http"
-import "google.golang.org/protobuf/proto"
-import "github.com/gorilla/websocket"
-import "google.golang.org/protobuf/types/descriptorpb"
-import "github.com/harmony-development/hrpc/server"
+import (
+	"io/ioutil"
+	"net/http"
 
-import "github.com/golang/protobuf/ptypes/empty"
+	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/gorilla/websocket"
+	"github.com/harmony-development/hrpc/server"
+	"github.com/labstack/echo/v4"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/descriptorpb"
+)
 
 func BindPB(obj interface{}, c echo.Context) error {
 	buf, err := ioutil.ReadAll(c.Request().Body)
@@ -788,11 +790,16 @@ func (h *ChatServiceHandler) CreateGuildHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.CreateGuild(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.CreateGuild(c, req.(*CreateGuildRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerCreateGuildData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -810,11 +817,16 @@ func (h *ChatServiceHandler) CreateInviteHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.CreateInvite(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.CreateInvite(c, req.(*CreateInviteRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerCreateInviteData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -832,11 +844,16 @@ func (h *ChatServiceHandler) CreateChannelHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.CreateChannel(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.CreateChannel(c, req.(*CreateChannelRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerCreateChannelData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -854,11 +871,16 @@ func (h *ChatServiceHandler) CreateEmotePackHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.CreateEmotePack(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.CreateEmotePack(c, req.(*CreateEmotePackRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerCreateEmotePackData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -876,11 +898,16 @@ func (h *ChatServiceHandler) GetGuildListHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.GetGuildList(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.GetGuildList(c, req.(*GetGuildListRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerGetGuildListData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -898,11 +925,16 @@ func (h *ChatServiceHandler) AddGuildToGuildListHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.AddGuildToGuildList(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.AddGuildToGuildList(c, req.(*AddGuildToGuildListRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerAddGuildToGuildListData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -920,11 +952,16 @@ func (h *ChatServiceHandler) RemoveGuildFromGuildListHandler(c echo.Context) err
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.RemoveGuildFromGuildList(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.RemoveGuildFromGuildList(c, req.(*RemoveGuildFromGuildListRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerRemoveGuildFromGuildListData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -942,11 +979,16 @@ func (h *ChatServiceHandler) GetGuildHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.GetGuild(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.GetGuild(c, req.(*GetGuildRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerGetGuildData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -964,11 +1006,16 @@ func (h *ChatServiceHandler) GetGuildInvitesHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.GetGuildInvites(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.GetGuildInvites(c, req.(*GetGuildInvitesRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerGetGuildInvitesData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -986,11 +1033,16 @@ func (h *ChatServiceHandler) GetGuildMembersHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.GetGuildMembers(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.GetGuildMembers(c, req.(*GetGuildMembersRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerGetGuildMembersData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1008,11 +1060,16 @@ func (h *ChatServiceHandler) GetGuildChannelsHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.GetGuildChannels(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.GetGuildChannels(c, req.(*GetGuildChannelsRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerGetGuildChannelsData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1030,11 +1087,16 @@ func (h *ChatServiceHandler) GetChannelMessagesHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.GetChannelMessages(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.GetChannelMessages(c, req.(*GetChannelMessagesRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerGetChannelMessagesData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1052,11 +1114,16 @@ func (h *ChatServiceHandler) GetMessageHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.GetMessage(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.GetMessage(c, req.(*GetMessageRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerGetMessageData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1074,11 +1141,16 @@ func (h *ChatServiceHandler) GetEmotePacksHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.GetEmotePacks(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.GetEmotePacks(c, req.(*GetEmotePacksRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerGetEmotePacksData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1096,11 +1168,16 @@ func (h *ChatServiceHandler) GetEmotePackEmotesHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.GetEmotePackEmotes(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.GetEmotePackEmotes(c, req.(*GetEmotePackEmotesRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerGetEmotePackEmotesData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1118,11 +1195,16 @@ func (h *ChatServiceHandler) UpdateGuildInformationHandler(c echo.Context) error
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.UpdateGuildInformation(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.UpdateGuildInformation(c, req.(*UpdateGuildInformationRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerUpdateGuildInformationData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1140,11 +1222,16 @@ func (h *ChatServiceHandler) UpdateChannelInformationHandler(c echo.Context) err
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.UpdateChannelInformation(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.UpdateChannelInformation(c, req.(*UpdateChannelInformationRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerUpdateChannelInformationData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1162,11 +1249,16 @@ func (h *ChatServiceHandler) UpdateChannelOrderHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.UpdateChannelOrder(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.UpdateChannelOrder(c, req.(*UpdateChannelOrderRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerUpdateChannelOrderData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1184,11 +1276,16 @@ func (h *ChatServiceHandler) UpdateMessageHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.UpdateMessage(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.UpdateMessage(c, req.(*UpdateMessageRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerUpdateMessageData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1206,11 +1303,16 @@ func (h *ChatServiceHandler) AddEmoteToPackHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.AddEmoteToPack(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.AddEmoteToPack(c, req.(*AddEmoteToPackRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerAddEmoteToPackData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1228,11 +1330,16 @@ func (h *ChatServiceHandler) DeleteGuildHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.DeleteGuild(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.DeleteGuild(c, req.(*DeleteGuildRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerDeleteGuildData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1250,11 +1357,16 @@ func (h *ChatServiceHandler) DeleteInviteHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.DeleteInvite(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.DeleteInvite(c, req.(*DeleteInviteRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerDeleteInviteData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1272,11 +1384,16 @@ func (h *ChatServiceHandler) DeleteChannelHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.DeleteChannel(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.DeleteChannel(c, req.(*DeleteChannelRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerDeleteChannelData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1294,11 +1411,16 @@ func (h *ChatServiceHandler) DeleteMessageHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.DeleteMessage(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.DeleteMessage(c, req.(*DeleteMessageRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerDeleteMessageData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1316,11 +1438,16 @@ func (h *ChatServiceHandler) DeleteEmoteFromPackHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.DeleteEmoteFromPack(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.DeleteEmoteFromPack(c, req.(*DeleteEmoteFromPackRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerDeleteEmoteFromPackData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1338,11 +1465,16 @@ func (h *ChatServiceHandler) DeleteEmotePackHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.DeleteEmotePack(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.DeleteEmotePack(c, req.(*DeleteEmotePackRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerDeleteEmotePackData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1360,11 +1492,16 @@ func (h *ChatServiceHandler) DequipEmotePackHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.DequipEmotePack(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.DequipEmotePack(c, req.(*DequipEmotePackRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerDequipEmotePackData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1382,11 +1519,16 @@ func (h *ChatServiceHandler) JoinGuildHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.JoinGuild(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.JoinGuild(c, req.(*JoinGuildRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerJoinGuildData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1404,11 +1546,16 @@ func (h *ChatServiceHandler) LeaveGuildHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.LeaveGuild(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.LeaveGuild(c, req.(*LeaveGuildRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerLeaveGuildData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1426,11 +1573,16 @@ func (h *ChatServiceHandler) TriggerActionHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.TriggerAction(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.TriggerAction(c, req.(*TriggerActionRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerTriggerActionData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1448,11 +1600,16 @@ func (h *ChatServiceHandler) SendMessageHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.SendMessage(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.SendMessage(c, req.(*SendMessageRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerSendMessageData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1470,11 +1627,16 @@ func (h *ChatServiceHandler) QueryHasPermissionHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.QueryHasPermission(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.QueryHasPermission(c, req.(*QueryPermissionsRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerQueryHasPermissionData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1492,11 +1654,16 @@ func (h *ChatServiceHandler) SetPermissionsHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.SetPermissions(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.SetPermissions(c, req.(*SetPermissionsRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerSetPermissionsData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1514,11 +1681,16 @@ func (h *ChatServiceHandler) GetPermissionsHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.GetPermissions(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.GetPermissions(c, req.(*GetPermissionsRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerGetPermissionsData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1536,11 +1708,16 @@ func (h *ChatServiceHandler) MoveRoleHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.MoveRole(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.MoveRole(c, req.(*MoveRoleRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerMoveRoleData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1558,11 +1735,16 @@ func (h *ChatServiceHandler) GetGuildRolesHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.GetGuildRoles(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.GetGuildRoles(c, req.(*GetGuildRolesRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerGetGuildRolesData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1580,11 +1762,16 @@ func (h *ChatServiceHandler) AddGuildRoleHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.AddGuildRole(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.AddGuildRole(c, req.(*AddGuildRoleRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerAddGuildRoleData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1602,11 +1789,16 @@ func (h *ChatServiceHandler) ModifyGuildRoleHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.ModifyGuildRole(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.ModifyGuildRole(c, req.(*ModifyGuildRoleRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerModifyGuildRoleData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1624,11 +1816,16 @@ func (h *ChatServiceHandler) DeleteGuildRoleHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.DeleteGuildRole(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.DeleteGuildRole(c, req.(*DeleteGuildRoleRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerDeleteGuildRoleData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1646,11 +1843,16 @@ func (h *ChatServiceHandler) ManageUserRolesHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.ManageUserRoles(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.ManageUserRoles(c, req.(*ManageUserRolesRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerManageUserRolesData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1668,11 +1870,16 @@ func (h *ChatServiceHandler) GetUserRolesHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.GetUserRoles(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.GetUserRoles(c, req.(*GetUserRolesRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerGetUserRolesData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1829,11 +2036,16 @@ func (h *ChatServiceHandler) GetUserHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.GetUser(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.GetUser(c, req.(*GetUserRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerGetUserData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1851,11 +2063,16 @@ func (h *ChatServiceHandler) GetUserMetadataHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.GetUserMetadata(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.GetUserMetadata(c, req.(*GetUserMetadataRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerGetUserMetadataData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1873,11 +2090,16 @@ func (h *ChatServiceHandler) ProfileUpdateHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.ProfileUpdate(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.ProfileUpdate(c, req.(*ProfileUpdateRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerProfileUpdateData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1895,11 +2117,16 @@ func (h *ChatServiceHandler) TypingHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.Typing(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.Typing(c, req.(*TypingRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerTypingData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -1917,11 +2144,16 @@ func (h *ChatServiceHandler) PreviewGuildHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.PreviewGuild(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.PreviewGuild(c, req.(*PreviewGuildRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerPreviewGuildData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}

@@ -1,14 +1,16 @@
 package v1
 
-import "github.com/labstack/echo/v4"
-import "io/ioutil"
-import "net/http"
-import "google.golang.org/protobuf/proto"
-import "github.com/gorilla/websocket"
-import "google.golang.org/protobuf/types/descriptorpb"
-import "github.com/harmony-development/hrpc/server"
+import (
+	"io/ioutil"
+	"net/http"
 
-import "github.com/golang/protobuf/ptypes/empty"
+	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/gorilla/websocket"
+	"github.com/harmony-development/hrpc/server"
+	"github.com/labstack/echo/v4"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/descriptorpb"
+)
 
 func BindPB(obj interface{}, c echo.Context) error {
 	buf, err := ioutil.ReadAll(c.Request().Body)
@@ -173,11 +175,16 @@ func (h *AuthServiceHandler) FederateHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.Federate(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.Federate(c, req.(*FederateRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(AuthServiceServerFederateData, Authᐳv1ᐳauth, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -195,11 +202,16 @@ func (h *AuthServiceHandler) LoginFederatedHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.LoginFederated(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.LoginFederated(c, req.(*LoginFederatedRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(AuthServiceServerLoginFederatedData, Authᐳv1ᐳauth, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -217,11 +229,16 @@ func (h *AuthServiceHandler) KeyHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.Key(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.Key(c, req.(*empty.Empty))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(AuthServiceServerKeyData, Authᐳv1ᐳauth, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -239,11 +256,16 @@ func (h *AuthServiceHandler) BeginAuthHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.BeginAuth(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.BeginAuth(c, req.(*empty.Empty))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(AuthServiceServerBeginAuthData, Authᐳv1ᐳauth, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -261,11 +283,16 @@ func (h *AuthServiceHandler) NextStepHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.NextStep(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.NextStep(c, req.(*NextStepRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(AuthServiceServerNextStepData, Authᐳv1ᐳauth, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}
@@ -283,11 +310,16 @@ func (h *AuthServiceHandler) StepBackHandler(c echo.Context) error {
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
-	fn := h.Server.StepBack(c, requestProto)
-	if h.UnaryPre != nil {
-		fn = h.UnaryPre(fn)
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.StepBack(c, req.(*StepBackRequest))
 	}
-	res, err := fn(c, requestProto)
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(AuthServiceServerStepBackData, Authᐳv1ᐳauth, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
 	if err != nil {
 		return err
 	}

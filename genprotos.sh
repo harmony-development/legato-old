@@ -20,4 +20,4 @@ done
 
 rsync -a -v --remove-source-files gen/github.com/harmony-development/legato/gen/ ./gen
 
-go fmt ./gen/./...
+goimports -w ./gen/*/v1/*.go

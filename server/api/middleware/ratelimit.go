@@ -32,7 +32,7 @@ func (m Middlewares) RateCleanup() {
 	}
 }
 
-func (m Middlewares) RateLimitInterceptor(_ echo.Context, meth *descriptorpb.MethodDescriptorProto, d *descriptorpb.FileDescriptorProto, h server.Handler) server.Handler {
+func (m Middlewares) RateLimitInterceptor(meth *descriptorpb.MethodDescriptorProto, d *descriptorpb.FileDescriptorProto, h server.Handler) server.Handler {
 	return func(c echo.Context, req protoreflect.ProtoMessage) (protoreflect.ProtoMessage, error) {
 		ctx := c.(HarmonyContext)
 		l, exists := rpcConfigs[meth.GetName()]
