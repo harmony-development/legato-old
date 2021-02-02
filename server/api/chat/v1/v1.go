@@ -902,10 +902,10 @@ func (v1 *V1) StreamEvents(c echo.Context, in chan *chatv1.StreamEventsRequest, 
 	}
 	done := make(chan struct{})
 	v1.Streams.RegisterClient(userID, out, done)
-	defer func() {
-		done <- struct{}{}
-	}()
 	go func() {
+		defer func() {
+			done <- struct{}{}
+		}()
 		for {
 			dat, ok := <-in
 			if !ok {
