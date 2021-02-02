@@ -905,34 +905,36 @@ func (v1 *V1) StreamEvents(c echo.Context, in chan *chatv1.StreamEventsRequest, 
 	defer func() {
 		done <- struct{}{}
 	}()
-	for {
-		dat, ok := <-in
-		if !ok {
-			return
-		}
-
-		switch x := dat.Request.(type) {
-		case *chatv1.StreamEventsRequest_SubscribeToGuild_:
-			ok, err := v1.DB.UserInGuild(userID, x.SubscribeToGuild.GuildId)
-			if err != nil {
-				fmt.Println(err)
-				break
-			}
+	go func() {
+		for {
+			dat, ok := <-in
 			if !ok {
-				fmt.Println("user not in guild")
-				break
+				return
 			}
-			v1.Streams.AddGuildSubscription(out, x.SubscribeToGuild.GuildId)
-		case *chatv1.StreamEventsRequest_SubscribeToActions_:
-			v1.Streams.AddActionSubscription(out)
-		case *chatv1.StreamEventsRequest_SubscribeToHomeserverEvents_:
-			err = v1.DB.UserIsLocal(userID)
-			if err != nil {
-				continue
+
+			switch x := dat.Request.(type) {
+			case *chatv1.StreamEventsRequest_SubscribeToGuild_:
+				ok, err := v1.DB.UserInGuild(userID, x.SubscribeToGuild.GuildId)
+				if err != nil {
+					fmt.Println(err)
+					break
+				}
+				if !ok {
+					fmt.Println("user not in guild")
+					break
+				}
+				v1.Streams.AddGuildSubscription(out, x.SubscribeToGuild.GuildId)
+			case *chatv1.StreamEventsRequest_SubscribeToActions_:
+				v1.Streams.AddActionSubscription(out)
+			case *chatv1.StreamEventsRequest_SubscribeToHomeserverEvents_:
+				err = v1.DB.UserIsLocal(userID)
+				if err != nil {
+					continue
+				}
+				v1.Streams.AddHomeserverSubscription(out)
 			}
-			v1.Streams.AddHomeserverSubscription(out)
 		}
-	}
+	}()
 }
 
 func init() {
