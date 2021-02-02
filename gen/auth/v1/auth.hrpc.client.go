@@ -1,14 +1,14 @@
 package v1
 
-import (
-	"bytes"
-	"fmt"
-	"io/ioutil"
-	"net/http"
+import "net/http"
+import "google.golang.org/protobuf/proto"
+import "io/ioutil"
+import "fmt"
+import "github.com/gorilla/websocket"
+import "net/url"
+import "bytes"
 
-	"github.com/golang/protobuf/ptypes/empty"
-	"google.golang.org/protobuf/proto"
-)
+import "github.com/golang/protobuf/ptypes/empty"
 
 type AuthServiceClient struct {
 	client    *http.Client
