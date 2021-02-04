@@ -35,13 +35,12 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/muesli/smartcrop v0.3.0 // indirect
 	github.com/peterbourgon/diskv v0.0.0-20171120014656-2973218375c3
-	github.com/pion/ice/v2 v2.0.15 // indirect
-	github.com/pion/webrtc/v3 v3.0.4
 	github.com/prometheus/client_golang v1.9.0 // indirect
 	github.com/prometheus/procfs v0.3.0 // indirect
 	github.com/sebdah/goldie/v2 v2.5.3 // indirect
 	github.com/sirupsen/logrus v1.7.0
 	github.com/sony/sonyflake v1.0.0
+	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/thanhpk/randstr v1.0.4
 	github.com/yuin/goldmark v1.3.1 // indirect
 	github.com/zclconf/go-cty v1.7.1 // indirect
