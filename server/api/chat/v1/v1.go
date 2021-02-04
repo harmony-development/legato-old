@@ -14,8 +14,9 @@ import (
 	"github.com/harmony-development/legato/server/api/chat/v1/permissions"
 	"github.com/harmony-development/legato/server/api/middleware"
 	"github.com/harmony-development/legato/server/config"
-	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/db/queries"
+	"github.com/harmony-development/legato/server/db/types"
+	"github.com/harmony-development/legato/server/db/utilities"
 	"github.com/harmony-development/legato/server/http/attachments/backend"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/harmony-development/legato/server/responses"
@@ -37,7 +38,7 @@ var (
 
 // Dependencies are the backend services this package needs
 type Dependencies struct {
-	DB             db.IHarmonyDB
+	DB             types.IHarmonyDB
 	Logger         logger.ILogger
 	Sonyflake      *sonyflake.Sonyflake
 	Streams        StreamManager
@@ -302,7 +303,7 @@ func (v1 *V1) GetGuildChannels(c echo.Context, r *chatv1.GetGuildChannelsRequest
 				ChannelId:   channel.ChannelID,
 				ChannelName: channel.ChannelName,
 				IsCategory:  channel.Category,
-				Metadata:    db.DeserializeMetadata(channel.Metadata),
+				Metadata:    utilities.DeserializeMetadata(channel.Metadata),
 			})
 		}
 	}

@@ -17,6 +17,8 @@ import (
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/http/attachments/backend"
+
+	"github.com/harmony-development/legato/server/db/types"
 	database_attachments_backend "github.com/harmony-development/legato/server/http/attachments/backend/database"
 	"github.com/harmony-development/legato/server/http/attachments/backend/flatfile"
 	"github.com/harmony-development/legato/server/intercom"
@@ -31,7 +33,7 @@ type Instance struct {
 	IntercomManager *intercom.Manager
 	AuthManager     *auth.Manager
 	Logger          logger.ILogger
-	DB              db.IHarmonyDB
+	DB              types.IHarmonyDB
 }
 
 // Start begins the instance server
@@ -49,7 +51,11 @@ func (inst Instance) Start() {
 		logrus.Fatal("Error connecting to sentry", err)
 	}
 	inst.Logger = logger.New(cfg)
-	inst.DB, err = db.New(inst.Config, inst.Logger, inst.Sonyflake)
+	bk := db.GetBackend(inst.Config.Database.Backend)
+	if bk == nil {
+		inst.Logger.Fatal(fmt.Errorf("'%s' is not a known backend! Known backends are: %+v", inst.Config.Database.Backend, db.Backends()))
+	}
+	inst.DB, err = bk.New(inst.Config, inst.Logger, inst.Sonyflake)
 	if err != nil {
 		inst.Logger.Fatal(err)
 	}

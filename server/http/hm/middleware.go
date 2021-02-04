@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/harmony-development/legato/server/db"
 	"github.com/harmony-development/legato/server/db/queries"
+	"github.com/harmony-development/legato/server/db/types"
 	"github.com/harmony-development/legato/server/logger"
 
 	"github.com/labstack/echo/v4"
@@ -31,13 +31,13 @@ type HarmonyContext struct {
 
 // Middlewares contains middlewares for Harmony
 type Middlewares struct {
-	DB         db.IHarmonyDB
+	DB         types.IHarmonyDB
 	Logger     logger.ILogger
 	RateLimits map[string]map[string]*visitor
 	RateLock   sync.RWMutex
 }
 
-func (hc *HarmonyContext) VerifyOwner(db db.IHarmonyDB, guildID, userID uint64) error {
+func (hc *HarmonyContext) VerifyOwner(db types.IHarmonyDB, guildID, userID uint64) error {
 	owner, err := db.GetOwner(guildID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "unable to verify ownership, please try again later")
@@ -49,7 +49,7 @@ func (hc *HarmonyContext) VerifyOwner(db db.IHarmonyDB, guildID, userID uint64) 
 }
 
 // New instantiates the middlewares for Harmony
-func New(db db.IHarmonyDB, logger logger.ILogger) *Middlewares {
+func New(db types.IHarmonyDB, logger logger.ILogger) *Middlewares {
 	m := &Middlewares{
 		DB:         db,
 		Logger:     logger,

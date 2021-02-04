@@ -3,13 +3,13 @@ package mediaproxy
 import (
 	v1 "github.com/harmony-development/legato/server/api/mediaproxy/v1"
 	"github.com/harmony-development/legato/server/config"
-	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/db/types"
 	"github.com/harmony-development/legato/server/logger"
 )
 
 // Dependencies are the backend services this package needs
 type Dependencies struct {
-	DB     db.IHarmonyDB
+	DB     types.IHarmonyDB
 	Logger logger.ILogger
 	Config *config.Config
 }

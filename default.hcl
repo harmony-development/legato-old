@@ -122,6 +122,9 @@ Database {
 	Port = 5432
 	SSL = false
 	Name = "harmony"
+
+	Backend = "sqlite"
+	Filename = "data.db"
 }
 
 # Flatfile-related configuration

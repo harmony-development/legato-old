@@ -2,14 +2,14 @@ package v1
 
 import (
 	"github.com/harmony-development/legato/server/config"
-	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/db/types"
 	"github.com/harmony-development/legato/server/logger"
 	lru "github.com/hashicorp/golang-lru"
 )
 
 // Dependencies are the backend services this package needs
 type Dependencies struct {
-	DB     db.IHarmonyDB
+	DB     types.IHarmonyDB
 	Logger logger.ILogger
 	Config *config.Config
 }

@@ -27,7 +27,7 @@ func GenData() {
 		StartTime: time.Unix(cfg.Server.SnowflakeStart, 0),
 	})
 
-	database, err := db.New(cfg, logger.New(cfg), sonyflake)
+	database, err := db.GetBackend(cfg.Database.Backend).New(cfg, logger.New(cfg), sonyflake)
 	if err != nil {
 		logrus.Fatal("Unable to connect to database", err)
 	}

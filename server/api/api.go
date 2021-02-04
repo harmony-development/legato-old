@@ -14,7 +14,7 @@ import (
 	voicev1impl "github.com/harmony-development/legato/server/api/voice/v1"
 	"github.com/harmony-development/legato/server/auth"
 	"github.com/harmony-development/legato/server/config"
-	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/db/types"
 	"github.com/harmony-development/legato/server/http"
 	"github.com/harmony-development/legato/server/http/attachments/backend"
 	"github.com/harmony-development/legato/server/logger"
@@ -25,7 +25,7 @@ import (
 
 type Dependencies struct {
 	Logger         logger.ILogger
-	DB             db.IHarmonyDB
+	DB             types.IHarmonyDB
 	Sonyflake      *sonyflake.Sonyflake
 	AuthManager    *auth.Manager
 	Config         *config.Config

@@ -1,4 +1,4 @@
-package db
+package postgres
 
 import (
 	"database/sql"
@@ -6,11 +6,12 @@ import (
 
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/queries"
+	"github.com/harmony-development/legato/server/db/utilities"
 	"github.com/ztrue/tracerr"
 )
 
 // CreateGuild creates a standard guild
-func (db *HarmonyDB) CreateGuild(owner, id, channelID uint64, guildName, picture string) (*queries.Guild, error) {
+func (db *database) CreateGuild(owner, id, channelID uint64, guildName, picture string) (*queries.Guild, error) {
 	tx, err := db.Begin()
 	if err != nil {
 		err = tracerr.Wrap(err)
@@ -39,7 +40,7 @@ func (db *HarmonyDB) CreateGuild(owner, id, channelID uint64, guildName, picture
 		return nil, err
 	}
 	_, err = tq.CreateChannel(ctx, queries.CreateChannelParams{
-		GuildID:     toSqlInt64(guild.GuildID),
+		GuildID:     utilities.ToSqlInt64(guild.GuildID),
 		ChannelID:   channelID,
 		ChannelName: "general",
 		Position:    "",
@@ -58,7 +59,7 @@ func (db *HarmonyDB) CreateGuild(owner, id, channelID uint64, guildName, picture
 }
 
 // DeleteGuild deletes a guild with an ID
-func (db *HarmonyDB) DeleteGuild(guildID uint64) error {
+func (db *database) DeleteGuild(guildID uint64) error {
 	err := db.queries.DeleteGuild(ctx, guildID)
 	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
@@ -66,7 +67,7 @@ func (db *HarmonyDB) DeleteGuild(guildID uint64) error {
 }
 
 // GetOwner gets the owner of a guild
-func (db *HarmonyDB) GetOwner(guildID uint64) (uint64, error) {
+func (db *database) GetOwner(guildID uint64) (uint64, error) {
 	owner, err := db.queries.GetGuildOwner(ctx, guildID)
 	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
@@ -74,7 +75,7 @@ func (db *HarmonyDB) GetOwner(guildID uint64) (uint64, error) {
 }
 
 // IsOwner returns whether the user is the guild owner
-func (db *HarmonyDB) IsOwner(guildID, userID uint64) (bool, error) {
+func (db *database) IsOwner(guildID, userID uint64) (bool, error) {
 	owner, err := db.GetOwner(guildID)
 	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
@@ -85,7 +86,7 @@ func (db *HarmonyDB) IsOwner(guildID, userID uint64) (bool, error) {
 }
 
 // AddInvite inserts a new invite to the DB
-func (db *HarmonyDB) CreateInvite(guildID uint64, possibleUses int32, name string) (queries.Invite, error) {
+func (db *database) CreateInvite(guildID uint64, possibleUses int32, name string) (queries.Invite, error) {
 	inv, err := db.queries.CreateGuildInvite(ctx, queries.CreateGuildInviteParams{
 		InviteID:     name,
 		PossibleUses: sql.NullInt32{Int32: possibleUses, Valid: true},
@@ -97,7 +98,7 @@ func (db *HarmonyDB) CreateInvite(guildID uint64, possibleUses int32, name strin
 }
 
 // AddMemberToGuild adds a new member to a guild
-func (db *HarmonyDB) AddMemberToGuild(userID, guildID uint64) error {
+func (db *database) AddMemberToGuild(userID, guildID uint64) error {
 	err := db.queries.AddUserToGuild(ctx, queries.AddUserToGuildParams{
 		UserID:  userID,
 		GuildID: guildID,
@@ -108,7 +109,7 @@ func (db *HarmonyDB) AddMemberToGuild(userID, guildID uint64) error {
 }
 
 // InviteToGuild
-func (db *HarmonyDB) ResolveGuildID(inviteID string) (uint64, error) {
+func (db *database) ResolveGuildID(inviteID string) (uint64, error) {
 	id, err := db.queries.ResolveGuildID(ctx, inviteID)
 	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
@@ -116,7 +117,7 @@ func (db *HarmonyDB) ResolveGuildID(inviteID string) (uint64, error) {
 }
 
 // IncrementInvite adds to the invite counter in a DB
-func (db *HarmonyDB) IncrementInvite(inviteID string) error {
+func (db *database) IncrementInvite(inviteID string) error {
 	err := db.queries.IncrementInvite(ctx, inviteID)
 	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
@@ -124,7 +125,7 @@ func (db *HarmonyDB) IncrementInvite(inviteID string) error {
 }
 
 // DeleteInvite removes an invite from the DB
-func (db *HarmonyDB) DeleteInvite(inviteID string) error {
+func (db *database) DeleteInvite(inviteID string) error {
 	tx, err := db.Begin()
 	if err != nil {
 		err = tracerr.Wrap(err)
@@ -150,7 +151,7 @@ func (db *HarmonyDB) DeleteInvite(inviteID string) error {
 }
 
 // UserInGuild checks whether a user is in a guild
-func (db *HarmonyDB) UserInGuild(userID, guildID uint64) (bool, error) {
+func (db *database) UserInGuild(userID, guildID uint64) (bool, error) {
 	id, err := db.queries.UserInGuild(ctx, queries.UserInGuildParams{
 		UserID:  userID,
 		GuildID: guildID,
@@ -164,8 +165,8 @@ func (db *HarmonyDB) UserInGuild(userID, guildID uint64) (bool, error) {
 }
 
 // UpdateGuildName updates the guild name
-func (db *HarmonyDB) UpdateGuildInformation(guildID uint64, name, picture string, metadata *harmonytypesv1.Metadata, updateName, updatePicture, updateMetadata bool) error {
-	e := executor{}
+func (db *database) UpdateGuildInformation(guildID uint64, name, picture string, metadata *harmonytypesv1.Metadata, updateName, updatePicture, updateMetadata bool) error {
+	e := utilities.Executor{}
 	if updateName {
 		e.Execute(func() error {
 			return db.queries.SetGuildName(ctx, queries.SetGuildNameParams{
@@ -184,7 +185,7 @@ func (db *HarmonyDB) UpdateGuildInformation(guildID uint64, name, picture string
 	}
 	if updateMetadata {
 		e.Execute(func() error {
-			data, err := serializeMetadata(metadata)
+			data, err := utilities.SerializeMetadata(metadata)
 			if err != nil {
 				return err
 			}
@@ -195,11 +196,11 @@ func (db *HarmonyDB) UpdateGuildInformation(guildID uint64, name, picture string
 		})
 	}
 
-	return e.err
+	return e.Err
 }
 
 // GetGuildPicture gets the picture for a given guild
-func (db *HarmonyDB) GetGuildPicture(guildID uint64) (string, error) {
+func (db *database) GetGuildPicture(guildID uint64) (string, error) {
 	pic, err := db.queries.GetGuildPicture(ctx, guildID)
 	if err != nil {
 		err = tracerr.Wrap(err)
@@ -208,12 +209,12 @@ func (db *HarmonyDB) GetGuildPicture(guildID uint64) (string, error) {
 	return pic, err
 }
 
-func (db *HarmonyDB) CountMembersInGuild(guildID uint64) (int64, error) {
+func (db *database) CountMembersInGuild(guildID uint64) (int64, error) {
 	return db.queries.CountMembersInGuild(ctx, guildID)
 }
 
 // SetGuildPicture sets the picture for a given guild
-func (db *HarmonyDB) SetGuildPicture(guildID uint64, pictureURL string) error {
+func (db *database) SetGuildPicture(guildID uint64, pictureURL string) error {
 	err := db.queries.SetGuildPicture(ctx, queries.SetGuildPictureParams{
 		GuildID:    guildID,
 		PictureUrl: pictureURL,
@@ -224,7 +225,7 @@ func (db *HarmonyDB) SetGuildPicture(guildID uint64, pictureURL string) error {
 }
 
 // GetInvites gets open invites for a guild
-func (db *HarmonyDB) GetInvites(guildID uint64) ([]queries.Invite, error) {
+func (db *database) GetInvites(guildID uint64) ([]queries.Invite, error) {
 	invites, err := db.queries.OpenInvites(ctx, guildID)
 	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
@@ -232,7 +233,7 @@ func (db *HarmonyDB) GetInvites(guildID uint64) ([]queries.Invite, error) {
 }
 
 // DeleteMember deletes a member from a guild
-func (db *HarmonyDB) DeleteMember(guildID, userID uint64) error {
+func (db *database) DeleteMember(guildID, userID uint64) error {
 	err := db.queries.RemoveUserFromGuild(ctx, queries.RemoveUserFromGuildParams{
 		GuildID: guildID,
 		UserID:  userID,
@@ -243,25 +244,25 @@ func (db *HarmonyDB) DeleteMember(guildID, userID uint64) error {
 }
 
 // MembersInGuild lists the members of a guild
-func (db *HarmonyDB) MembersInGuild(guildID uint64) ([]uint64, error) {
+func (db *database) MembersInGuild(guildID uint64) ([]uint64, error) {
 	data, err := db.queries.GetGuildMembers(ctx, guildID)
 	err = tracerr.Wrap(err)
 	return data, err
 }
 
-func (db *HarmonyDB) HasGuildWithID(guildID uint64) (bool, error) {
+func (db *database) HasGuildWithID(guildID uint64) (bool, error) {
 	count, err := db.queries.GuildWithIDExists(ctx, guildID)
 	err = tracerr.Wrap(err)
 	return count, err
 }
 
-func (db *HarmonyDB) GetGuildByID(guildID uint64) (queries.Guild, error) {
+func (db *database) GetGuildByID(guildID uint64) (queries.Guild, error) {
 	data, err := db.queries.GetGuildData(ctx, guildID)
 	err = tracerr.Wrap(err)
 	return data, err
 }
 
-func (db *HarmonyDB) GetFirstChannel(guildID uint64) (uint64, error) {
-	data, err := db.queries.GetFirstChannel(ctx, toSqlInt64(guildID))
+func (db *database) GetFirstChannel(guildID uint64) (uint64, error) {
+	data, err := db.queries.GetFirstChannel(ctx, utilities.ToSqlInt64(guildID))
 	return data, err
 }

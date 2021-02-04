@@ -1,4 +1,4 @@
-package db
+package postgres
 
 const (
 	minChar = byte('0')

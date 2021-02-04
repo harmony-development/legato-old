@@ -1,4 +1,4 @@
-package db
+package postgres
 
 import (
 	"io/ioutil"
@@ -13,13 +13,13 @@ import (
 )
 
 // Migrate applies the DB layout to the connected DB
-func (db *HarmonyDB) Migrate() error {
+func (db *database) Migrate() error {
 	data := data.AssertByteArray(ioutil.ReadAll(data.AssertFile(data.FS(false).Open("/sql/schemas/models.sql"))))
 	_, err := db.Exec(strings.ReplaceAll(string(data), "--migration-only", ""))
 	return tracerr.Wrap(err)
 }
 
-func (db *HarmonyDB) SessionExpireRoutine() {
+func (db *database) SessionExpireRoutine() {
 	for {
 		time.Sleep(15 * time.Minute)
 		err := db.ExpireSessions()

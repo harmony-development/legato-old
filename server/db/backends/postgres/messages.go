@@ -1,4 +1,4 @@
-package db
+package postgres
 
 import (
 	"database/sql"
@@ -6,18 +6,19 @@ import (
 
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/queries"
+	"github.com/harmony-development/legato/server/db/utilities"
 	"github.com/ztrue/tracerr"
 )
 
 // AddMessage adds a message to a channel
-func (db *HarmonyDB) AddMessage(channelID, guildID, userID, messageID uint64, message string, attachments []string, embeds, actions, overrides []byte, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata) (*queries.Message, error) {
+func (db *database) AddMessage(channelID, guildID, userID, messageID uint64, message string, attachments []string, embeds, actions, overrides []byte, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata) (*queries.Message, error) {
 	tx, err := db.Begin()
 	if err != nil {
 		err = tracerr.Wrap(err)
 		db.Logger.CheckException(err)
 		return nil, err
 	}
-	data, err := serializeMetadata(metadata)
+	data, err := utilities.SerializeMetadata(metadata)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +50,7 @@ func (db *HarmonyDB) AddMessage(channelID, guildID, userID, messageID uint64, me
 }
 
 // DeleteMessage deletes a message
-func (db *HarmonyDB) DeleteMessage(messageID, channelID, guildID uint64) (err error) {
+func (db *database) DeleteMessage(messageID, channelID, guildID uint64) (err error) {
 	tx, err := db.Begin()
 	if err != nil {
 		err = tracerr.Wrap(err)
@@ -79,7 +80,7 @@ func (db *HarmonyDB) DeleteMessage(messageID, channelID, guildID uint64) (err er
 }
 
 // GetMessageOwner gets the owner of a messageID
-func (db *HarmonyDB) GetMessageOwner(messageID uint64) (owner uint64, err error) {
+func (db *database) GetMessageOwner(messageID uint64) (owner uint64, err error) {
 	owner, err = db.queries.GetMessageAuthor(ctx, messageID)
 	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
@@ -87,7 +88,7 @@ func (db *HarmonyDB) GetMessageOwner(messageID uint64) (owner uint64, err error)
 }
 
 // GetMessageDate gets the date for a message
-func (db *HarmonyDB) GetMessageDate(messageID uint64) (t time.Time, err error) {
+func (db *database) GetMessageDate(messageID uint64) (t time.Time, err error) {
 	msgDate, err := db.queries.GetMessageDate(ctx, messageID)
 	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
@@ -95,7 +96,7 @@ func (db *HarmonyDB) GetMessageDate(messageID uint64) (t time.Time, err error) {
 }
 
 // GetMessages gets the newest messages from a guild
-func (db *HarmonyDB) GetMessages(guildID, channelID uint64) (r []queries.Message, err error) {
+func (db *database) GetMessages(guildID, channelID uint64) (r []queries.Message, err error) {
 	msgs, err := db.GetMessagesBefore(guildID, channelID, time.Now())
 	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
@@ -103,7 +104,7 @@ func (db *HarmonyDB) GetMessages(guildID, channelID uint64) (r []queries.Message
 }
 
 // GetMessagesBefore gets messages before a given message in a guild
-func (db *HarmonyDB) GetMessagesBefore(guildID, channelID uint64, date time.Time) (r []queries.Message, err error) {
+func (db *database) GetMessagesBefore(guildID, channelID uint64, date time.Time) (r []queries.Message, err error) {
 	msgsBefore, err := db.queries.GetMessages(ctx, queries.GetMessagesParams{
 		Guildid:   guildID,
 		Channelid: channelID,
@@ -116,14 +117,14 @@ func (db *HarmonyDB) GetMessagesBefore(guildID, channelID uint64, date time.Time
 }
 
 // GetMessage gets the data of a message
-func (db *HarmonyDB) GetMessage(messageID uint64) (r queries.Message, err error) {
+func (db *database) GetMessage(messageID uint64) (r queries.Message, err error) {
 	r, err = db.queries.GetMessage(ctx, messageID)
 	err = tracerr.Wrap(err)
 	db.Logger.CheckException(err)
 	return
 }
 
-func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, actions, overrides *[]byte, attachments *[]string, metadata *harmonytypesv1.Metadata, updateMetadata bool) (time.Time, error) {
+func (db *database) UpdateMessage(messageID uint64, content *string, embeds, actions, overrides *[]byte, attachments *[]string, metadata *harmonytypesv1.Metadata, updateMetadata bool) (time.Time, error) {
 	tx, err := db.Begin()
 	if err != nil {
 		err = tracerr.Wrap(err)
@@ -132,7 +133,7 @@ func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, ac
 	}
 	tq := db.queries.WithTx(tx)
 	var editedAt time.Time
-	e := executor{}
+	e := utilities.Executor{}
 	if content != nil {
 		e.Execute(func() error {
 			data, err := tq.UpdateMessageContent(ctx, queries.UpdateMessageContentParams{
@@ -184,7 +185,7 @@ func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, ac
 	}
 	if updateMetadata {
 		e.Execute(func() error {
-			data, err := serializeMetadata(metadata)
+			data, err := utilities.SerializeMetadata(metadata)
 			if err != nil {
 				return err
 			}
@@ -194,12 +195,12 @@ func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, ac
 			}))
 		})
 	}
-	if e.err != nil {
+	if e.Err != nil {
 		if err := tx.Rollback(); err != nil {
 			err = tracerr.Wrap(err)
 			return time.Time{}, err
 		}
-		err = tracerr.Wrap(e.err)
+		err = tracerr.Wrap(e.Err)
 		return time.Time{}, err
 	}
 	if err := tx.Commit(); err != nil {
@@ -209,7 +210,7 @@ func (db *HarmonyDB) UpdateMessage(messageID uint64, content *string, embeds, ac
 	return editedAt, nil
 }
 
-func (db HarmonyDB) HasMessageWithID(guildID, channelID, messageID uint64) (r bool, err error) {
+func (db database) HasMessageWithID(guildID, channelID, messageID uint64) (r bool, err error) {
 	r, err = db.queries.MessageWithIDExists(ctx, queries.MessageWithIDExistsParams{
 		GuildID:   guildID,
 		ChannelID: channelID,

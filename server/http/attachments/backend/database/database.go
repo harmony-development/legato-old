@@ -10,13 +10,13 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/harmony-development/legato/server/config"
-	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/db/types"
 )
 
 // Dependencies lists the deps of the flatfile backend
 type Dependencies struct {
 	Config *config.Config
-	DB     db.IHarmonyDB
+	DB     types.IHarmonyDB
 }
 
 // Backend is the flatfile implementation of a file storage backend

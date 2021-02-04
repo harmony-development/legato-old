@@ -5,7 +5,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 
 	"github.com/harmony-development/legato/server/config"
-	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/db/types"
 	"github.com/harmony-development/legato/server/http/attachments"
 	"github.com/harmony-development/legato/server/http/attachments/backend"
 	"github.com/harmony-development/legato/server/http/hm"
@@ -21,7 +21,7 @@ type Server struct {
 
 // Dependencies are elements that a Server needs
 type Dependencies struct {
-	DB             db.IHarmonyDB
+	DB             types.IHarmonyDB
 	Logger         logger.ILogger
 	Config         *config.Config
 	StorageBackend backend.AttachmentBackend

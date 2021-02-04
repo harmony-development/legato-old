@@ -5,12 +5,12 @@ import (
 
 	voicev1 "github.com/harmony-development/legato/gen/voice/v1"
 	"github.com/harmony-development/legato/server/api/middleware"
-	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/db/types"
 	"github.com/labstack/echo/v4"
 )
 
 type Dependencies struct {
-	DB db.IHarmonyDB
+	DB types.IHarmonyDB
 }
 
 type V1 struct {

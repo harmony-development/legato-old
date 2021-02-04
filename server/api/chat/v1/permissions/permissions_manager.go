@@ -3,7 +3,7 @@ package permissions
 import (
 	"github.com/alecthomas/repr"
 	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
-	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/db/types"
 	"github.com/harmony-development/legato/server/logger"
 	lru "github.com/hashicorp/golang-lru"
 )
@@ -11,12 +11,12 @@ import (
 // Manager manages permissions
 type Manager struct {
 	states *lru.Cache
-	db     db.IHarmonyDB
+	db     types.IHarmonyDB
 	logger logger.ILogger
 }
 
 // NewManager creates a new permissions manager
-func NewManager(db db.IHarmonyDB, l logger.ILogger) *Manager {
+func NewManager(db types.IHarmonyDB, l logger.ILogger) *Manager {
 	man := &Manager{
 		db:     db,
 		logger: l,
@@ -34,12 +34,12 @@ var zeroVal = PermissionNode{}
 func (p *Manager) saveGuild(guild uint64, data *GuildState) {
 	for channel, cdata := range data.Channels {
 		for role, rdata := range cdata {
-			if err := p.db.SetPermissions(guild, uint64(channel), uint64(role), func() (ret []db.PermissionsNode) {
+			if err := p.db.SetPermissions(guild, uint64(channel), uint64(role), func() (ret []types.PermissionsNode) {
 				for _, perm := range rdata {
 					if perm == zeroVal {
 						continue
 					}
-					ret = append(ret, db.PermissionsNode{
+					ret = append(ret, types.PermissionsNode{
 						Node:  perm.Glob.s,
 						Allow: perm.Mode == Allow,
 					})
@@ -52,12 +52,12 @@ func (p *Manager) saveGuild(guild uint64, data *GuildState) {
 	}
 
 	for role, rdata := range data.Roles {
-		if err := p.db.SetPermissions(guild, 0, uint64(role), func() (ret []db.PermissionsNode) {
+		if err := p.db.SetPermissions(guild, 0, uint64(role), func() (ret []types.PermissionsNode) {
 			for _, perm := range rdata {
 				if perm == zeroVal {
 					continue
 				}
-				ret = append(ret, db.PermissionsNode{
+				ret = append(ret, types.PermissionsNode{
 					Node:  perm.Glob.s,
 					Allow: perm.Mode == Allow,
 				})
@@ -83,7 +83,7 @@ func (p *Manager) obtainGuild(guild uint64) *GuildState {
 	gs.Roles = make(map[RoleID][]PermissionNode)
 	gs.Channels = make(map[ChannelID]map[RoleID][]PermissionNode)
 
-	dbToManager := func(nodes []db.PermissionsNode) (ret []PermissionNode) {
+	dbToManager := func(nodes []types.PermissionsNode) (ret []PermissionNode) {
 		for _, node := range nodes {
 			ret = append(ret, PermissionNode{
 				Glob: MustGlob(node.Node),

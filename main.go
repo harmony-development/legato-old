@@ -7,6 +7,8 @@ import (
 	"github.com/harmony-development/legato/server"
 
 	"github.com/sirupsen/logrus"
+
+	_ "github.com/harmony-development/legato/server/db/backends/postgres"
 )
 
 func main() {

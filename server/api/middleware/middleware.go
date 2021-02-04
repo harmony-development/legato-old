@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/harmony-development/legato/server/api/chat/v1/permissions"
-	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/db/types"
 	"github.com/harmony-development/legato/server/logger"
 )
 
@@ -50,7 +50,7 @@ func GetRPCConfig(name string) RPCConfig {
 
 type Dependencies struct {
 	Logger logger.ILogger
-	DB     db.IHarmonyDB
+	DB     types.IHarmonyDB
 	Perms  *permissions.Manager
 }
 

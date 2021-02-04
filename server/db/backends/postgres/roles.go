@@ -1,4 +1,4 @@
-package db
+package postgres
 
 import (
 	"database/sql"
@@ -7,10 +7,12 @@ import (
 
 	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
 	"github.com/harmony-development/legato/server/db/queries"
+	"github.com/harmony-development/legato/server/db/types"
+	"github.com/harmony-development/legato/server/db/utilities"
 	"github.com/ztrue/tracerr"
 )
 
-func (db HarmonyDB) AddRoleToGuild(guildID uint64, role *chatv1.Role) error {
+func (db database) AddRoleToGuild(guildID uint64, role *chatv1.Role) error {
 	_, err := db.queries.CreateRole(ctx, queries.CreateRoleParams{
 		GuildID:  guildID,
 		RoleID:   role.RoleId,
@@ -22,14 +24,14 @@ func (db HarmonyDB) AddRoleToGuild(guildID uint64, role *chatv1.Role) error {
 	return tracerr.Wrap(err)
 }
 
-func (db HarmonyDB) RemoveRoleFromGuild(guildID, roleID uint64) error {
+func (db database) RemoveRoleFromGuild(guildID, roleID uint64) error {
 	return tracerr.Wrap(db.queries.DeleteRole(ctx, queries.DeleteRoleParams{
 		GuildID: guildID,
 		RoleID:  roleID,
 	}))
 }
 
-func (db *HarmonyDB) GetRolePositions(guildID, before, previous uint64) (pos string, retErr error) {
+func (db *database) GetRolePositions(guildID, before, previous uint64) (pos string, retErr error) {
 	nextPos, err := db.queries.GetRolePosition(ctx, queries.GetRolePositionParams{
 		GuildID: guildID,
 		RoleID:  before,
@@ -54,7 +56,7 @@ func (db *HarmonyDB) GetRolePositions(guildID, before, previous uint64) (pos str
 	return
 }
 
-func (db HarmonyDB) MoveRole(guildID, roleID, beforeRole, previousRole uint64) (err error) {
+func (db database) MoveRole(guildID, roleID, beforeRole, previousRole uint64) (err error) {
 	pos, err := db.GetRolePositions(guildID, beforeRole, previousRole)
 	if err != nil {
 		return tracerr.Wrap(err)
@@ -68,7 +70,7 @@ func (db HarmonyDB) MoveRole(guildID, roleID, beforeRole, previousRole uint64) (
 	return err
 }
 
-func (db HarmonyDB) GetGuildRoles(guildID uint64) (ret []*chatv1.Role, err error) {
+func (db database) GetGuildRoles(guildID uint64) (ret []*chatv1.Role, err error) {
 	roles, err := db.queries.GetRolesForGuild(ctx, guildID)
 	err = tracerr.Wrap(err)
 
@@ -85,7 +87,7 @@ func (db HarmonyDB) GetGuildRoles(guildID uint64) (ret []*chatv1.Role, err error
 	return
 }
 
-func (db HarmonyDB) SetPermissions(guildID uint64, channelID uint64, roleID uint64, permissions []PermissionsNode) error {
+func (db database) SetPermissions(guildID uint64, channelID uint64, roleID uint64, permissions []types.PermissionsNode) error {
 	var ln int
 	for _, perm := range permissions {
 		if perm.Node == "" {
@@ -106,7 +108,7 @@ func (db HarmonyDB) SetPermissions(guildID uint64, channelID uint64, roleID uint
 		} else {
 			exists, err = db.queries.PermissionExistsWithoutChannel(ctx, queries.PermissionExistsWithoutChannelParams{
 				GuildID: guildID,
-				RoleID:  toSqlInt64(roleID),
+				RoleID:  utilities.ToSqlInt64(roleID),
 			})
 			err = tracerr.Wrap(err)
 		}
@@ -114,14 +116,14 @@ func (db HarmonyDB) SetPermissions(guildID uint64, channelID uint64, roleID uint
 		if roleID == 0 {
 			exists, err = db.queries.PermissionsExistsWithoutRole(ctx, queries.PermissionsExistsWithoutRoleParams{
 				GuildID:   guildID,
-				ChannelID: toSqlInt64(channelID),
+				ChannelID: utilities.ToSqlInt64(channelID),
 			})
 			err = tracerr.Wrap(err)
 		} else {
 			exists, err = db.queries.PermissionsExists(ctx, queries.PermissionsExistsParams{
 				GuildID:   guildID,
-				ChannelID: toSqlInt64(channelID),
-				RoleID:    toSqlInt64(roleID),
+				ChannelID: utilities.ToSqlInt64(channelID),
+				RoleID:    utilities.ToSqlInt64(roleID),
 			})
 			err = tracerr.Wrap(err)
 		}
@@ -136,13 +138,13 @@ func (db HarmonyDB) SetPermissions(guildID uint64, channelID uint64, roleID uint
 			if roleID == 0 {
 				return tracerr.Wrap(db.queries.UpdatePermissionsWithoutChannelWithoutRole(ctx, queries.UpdatePermissionsWithoutChannelWithoutRoleParams{
 					GuildID: guildID,
-					Nodes:   mustSerialize(permissions),
+					Nodes:   utilities.MustSerialize(permissions),
 				}))
 			}
 			return tracerr.Wrap(db.queries.UpdatePermissionsWithoutChannel(ctx, queries.UpdatePermissionsWithoutChannelParams{
 				GuildID: guildID,
-				RoleID:  toSqlInt64(roleID),
-				Nodes:   mustSerialize(permissions),
+				RoleID:  utilities.ToSqlInt64(roleID),
+				Nodes:   utilities.MustSerialize(permissions),
 			}))
 		}
 		if roleID == 0 {
@@ -152,7 +154,7 @@ func (db HarmonyDB) SetPermissions(guildID uint64, channelID uint64, roleID uint
 					Int64: int64(channelID),
 					Valid: true,
 				},
-				Nodes: mustSerialize(permissions),
+				Nodes: utilities.MustSerialize(permissions),
 			}))
 		}
 		return tracerr.Wrap(db.queries.UpdatePermissions(ctx, queries.UpdatePermissionsParams{
@@ -161,8 +163,8 @@ func (db HarmonyDB) SetPermissions(guildID uint64, channelID uint64, roleID uint
 				Int64: int64(channelID),
 				Valid: true,
 			},
-			RoleID: toSqlInt64(roleID),
-			Nodes:  mustSerialize(permissions),
+			RoleID: utilities.ToSqlInt64(roleID),
+			Nodes:  utilities.MustSerialize(permissions),
 		}))
 	}
 	return tracerr.Wrap(db.queries.SetPermissions(ctx, queries.SetPermissionsParams{
@@ -175,11 +177,11 @@ func (db HarmonyDB) SetPermissions(guildID uint64, channelID uint64, roleID uint
 			Int64: int64(roleID),
 			Valid: roleID != 0,
 		},
-		Nodes: mustSerialize(permissions),
+		Nodes: utilities.MustSerialize(permissions),
 	}))
 }
 
-func (db HarmonyDB) GetPermissions(guildID uint64, channelID uint64, roleID uint64) (permissions []PermissionsNode, err error) {
+func (db database) GetPermissions(guildID uint64, channelID uint64, roleID uint64) (permissions []types.PermissionsNode, err error) {
 	var data json.RawMessage
 
 	if channelID == 0 {
@@ -189,7 +191,7 @@ func (db HarmonyDB) GetPermissions(guildID uint64, channelID uint64, roleID uint
 		} else {
 			data, err = db.queries.GetPermissionsWithoutChannel(ctx, queries.GetPermissionsWithoutChannelParams{
 				GuildID: guildID,
-				RoleID:  toSqlInt64(roleID),
+				RoleID:  utilities.ToSqlInt64(roleID),
 			})
 			err = tracerr.Wrap(err)
 		}
@@ -197,14 +199,14 @@ func (db HarmonyDB) GetPermissions(guildID uint64, channelID uint64, roleID uint
 		if roleID == 0 {
 			data, err = db.queries.GetPermissionsWithoutRole(ctx, queries.GetPermissionsWithoutRoleParams{
 				GuildID:   guildID,
-				ChannelID: toSqlInt64(channelID),
+				ChannelID: utilities.ToSqlInt64(channelID),
 			})
 			err = tracerr.Wrap(err)
 		} else {
 			data, err = db.queries.GetPermissions(ctx, queries.GetPermissionsParams{
 				GuildID:   guildID,
-				ChannelID: toSqlInt64(channelID),
-				RoleID:    toSqlInt64(roleID),
+				ChannelID: utilities.ToSqlInt64(channelID),
+				RoleID:    utilities.ToSqlInt64(roleID),
 			})
 			err = tracerr.Wrap(err)
 		}
@@ -219,13 +221,13 @@ func (db HarmonyDB) GetPermissions(guildID uint64, channelID uint64, roleID uint
 
 	err = nil
 
-	mustDeserialize(data, &permissions)
+	utilities.MustDeserialize(data, &permissions)
 
 	return
 }
 
-func (db HarmonyDB) GetPermissionsData(guildID uint64) (ret PermissionsData, err error) {
-	ret.Roles = make(map[uint64][]PermissionsNode)
+func (db database) GetPermissionsData(guildID uint64) (ret types.PermissionsData, err error) {
+	ret.Roles = make(map[uint64][]types.PermissionsNode)
 
 	roles, err := db.queries.GetRolesForGuild(ctx, guildID)
 	if err != nil && err != sql.ErrNoRows {
@@ -240,7 +242,7 @@ func (db HarmonyDB) GetPermissionsData(guildID uint64) (ret PermissionsData, err
 		perms, err := db.GetPermissions(guildID, 0, role.RoleID)
 		if err != nil && err != sql.ErrNoRows {
 			err = tracerr.Wrap(err)
-			return PermissionsData{}, err
+			return types.PermissionsData{}, err
 		}
 		ret.Roles[role.RoleID] = perms
 	}
@@ -263,14 +265,14 @@ func (db HarmonyDB) GetPermissionsData(guildID uint64) (ret PermissionsData, err
 		}
 	}
 
-	ret.Channels = make(map[uint64]map[uint64][]PermissionsNode)
+	ret.Channels = make(map[uint64]map[uint64][]types.PermissionsNode)
 	for _, channel := range chans {
-		ret.Channels[channel.ChannelID] = make(map[uint64][]PermissionsNode)
+		ret.Channels[channel.ChannelID] = make(map[uint64][]types.PermissionsNode)
 		for _, role := range roles {
 			perms, err := db.GetPermissions(guildID, channel.ChannelID, role.RoleID)
 			if err != nil && err != sql.ErrNoRows {
 				err = tracerr.Wrap(err)
-				return PermissionsData{}, err
+				return types.PermissionsData{}, err
 			}
 			ret.Channels[channel.ChannelID][role.RoleID] = perms
 		}
@@ -279,7 +281,7 @@ func (db HarmonyDB) GetPermissionsData(guildID uint64) (ret PermissionsData, err
 	return
 }
 
-func (db HarmonyDB) RolesForUser(guildID, userID uint64) (ret []uint64, err error) {
+func (db database) RolesForUser(guildID, userID uint64) (ret []uint64, err error) {
 	ret, err = db.queries.RolesForUser(ctx, queries.RolesForUserParams{
 		GuildID:  guildID,
 		MemberID: userID,
@@ -288,7 +290,7 @@ func (db HarmonyDB) RolesForUser(guildID, userID uint64) (ret []uint64, err erro
 	return
 }
 
-func (db HarmonyDB) ModifyRole(guildID, roleID uint64, name string, color int32, hoist, pingable, updateName, updateColor, updateHoist, updatePingable bool) error {
+func (db database) ModifyRole(guildID, roleID uint64, name string, color int32, hoist, pingable, updateName, updateColor, updateHoist, updatePingable bool) error {
 	tx, err := db.Begin()
 	if err != nil {
 		err = tracerr.Wrap(err)
@@ -337,7 +339,7 @@ func (db HarmonyDB) ModifyRole(guildID, roleID uint64, name string, color int32,
 	return nil
 }
 
-func (db HarmonyDB) ManageRoles(guildID, userID uint64, addRoles, removeRoles []uint64) error {
+func (db database) ManageRoles(guildID, userID uint64, addRoles, removeRoles []uint64) error {
 	tx, err := db.Begin()
 	if err != nil {
 		err = tracerr.Wrap(err)

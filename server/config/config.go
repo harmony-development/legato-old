@@ -80,6 +80,8 @@ type Config struct {
 		Port     int    `hcl:"Port,optional" default:"5432"`
 		SSL      bool   `hcl:"SSL,optional" default:"false"`
 		Name     string `hcl:"Name,optional" default:"harmony"`
+		Backend  string `hcl:"Backend,optional" default:"sqlite"`
+		Filename string `hcl:"Filename,optional" default:"data.db"`
 	} `hcl:"Database,block"`
 	Flatfile struct {
 		MediaPath string `hcl:"MediaPath,optional" default:"flatfile"`

@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
-	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/db/types"
 	"github.com/harmony-development/legato/server/logger"
 )
 
@@ -24,7 +24,7 @@ type streamData struct {
 // StreamManager manages streams
 type StreamManager struct {
 	logger   logger.ILogger
-	database db.IHarmonyDB
+	database types.IHarmonyDB
 
 	serverToStreamData map[chan *chatv1.Event]streamData
 	userIDToServers    map[uint64]map[chan *chatv1.Event]struct{}
@@ -34,7 +34,7 @@ type StreamManager struct {
 }
 
 // Init prepares a stream manager for use
-func (s *StreamManager) Init(l logger.ILogger, db db.IHarmonyDB) {
+func (s *StreamManager) Init(l logger.ILogger, db types.IHarmonyDB) {
 	s.logger = l
 	s.database = db
 

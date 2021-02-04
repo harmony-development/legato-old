@@ -5,13 +5,13 @@ import (
 	authstate "github.com/harmony-development/legato/server/api/authsvc/v1/pubsub_backends/integrated"
 	"github.com/harmony-development/legato/server/auth"
 	"github.com/harmony-development/legato/server/config"
-	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/db/types"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/sony/sonyflake"
 )
 
 type Dependencies struct {
-	DB          db.IHarmonyDB
+	DB          types.IHarmonyDB
 	Logger      logger.ILogger
 	AuthManager *auth.Manager
 	Sonyflake   *sonyflake.Sonyflake

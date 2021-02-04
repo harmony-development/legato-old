@@ -6,7 +6,7 @@ import (
 	"github.com/harmony-development/legato/server/api/chat/v1/pubsub_backends/inprocess"
 	"github.com/harmony-development/legato/server/api/middleware"
 	"github.com/harmony-development/legato/server/config"
-	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/db/types"
 	"github.com/harmony-development/legato/server/http/attachments/backend"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/sony/sonyflake"
@@ -14,7 +14,7 @@ import (
 
 // Dependencies are the backend services this package needs
 type Dependencies struct {
-	DB             db.IHarmonyDB
+	DB             types.IHarmonyDB
 	Logger         logger.ILogger
 	Sonyflake      *sonyflake.Sonyflake
 	Perms          *permissions.Manager

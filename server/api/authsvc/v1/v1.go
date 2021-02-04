@@ -16,7 +16,7 @@ import (
 	"github.com/harmony-development/legato/server/api/middleware"
 	"github.com/harmony-development/legato/server/auth"
 	"github.com/harmony-development/legato/server/config"
-	"github.com/harmony-development/legato/server/db"
+	"github.com/harmony-development/legato/server/db/types"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/harmony-development/legato/server/responses"
 	"github.com/labstack/echo/v4"
@@ -30,7 +30,7 @@ import (
 )
 
 type Dependencies struct {
-	DB          db.IHarmonyDB
+	DB          types.IHarmonyDB
 	Logger      logger.ILogger
 	AuthManager *auth.Manager
 	Sonyflake   *sonyflake.Sonyflake
