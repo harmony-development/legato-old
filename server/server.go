@@ -101,7 +101,6 @@ func (inst Instance) Start() {
 	errChan := make(chan error)
 
 	go func() {
-		inst.Logger.Debug(logger.Startup, "API routes:", inst.API.Routes())
 		errChan <- inst.API.Start(fmt.Sprintf("%s:%d", inst.Config.Server.Host, inst.Config.Server.Port))
 	}()
 

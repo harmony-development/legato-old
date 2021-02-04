@@ -3,11 +3,13 @@ module github.com/harmony-development/legato
 go 1.14
 
 require (
+	entgo.io/ent v0.6.0
 	github.com/JohannesKaufmann/html-to-markdown v1.2.0
 	github.com/PuerkitoBio/goquery v1.6.1 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/alecthomas/repr v0.0.0-20201120212035-bb82daffcca2
 	github.com/andybalholm/cascadia v1.2.0 // indirect
+	github.com/badoux/checkmail v1.2.1
 	github.com/cixtor/readability v1.0.0
 	github.com/creasty/defaults v1.5.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -32,6 +34,7 @@ require (
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lib/pq v1.9.0
 	github.com/mattn/go-colorable v0.1.8 // indirect
+	github.com/mattn/go-sqlite3 v1.14.6
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/muesli/smartcrop v0.3.0 // indirect
 	github.com/peterbourgon/diskv v0.0.0-20171120014656-2973218375c3
