@@ -13,7 +13,7 @@ buildGoModule rec {
 
   subPackages = [ "." ];
 
-  meta = with stdenv.lib; {
+  meta = with pkgs.lib; {
     description = "Reference server implementation for the Harmony protocol.";
     homepage = "https://github.com/harmony-development/legato";
     license = licenses.agpl3;
