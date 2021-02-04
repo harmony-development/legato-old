@@ -310,6 +310,8 @@ github.com/harmony-development/hrpc v0.0.0-20210202034322-4247c48febc0 h1:2/52Yo
 github.com/harmony-development/hrpc v0.0.0-20210202034322-4247c48febc0/go.mod h1:inDlsntAsQf9Q7ru7VPnlLjFV1STNsKNgiUPmfP/SWo=
 github.com/harmony-development/hrpc v0.0.0-20210202034614-ca72d60a90a5 h1:BYA1xROK0LgWBRgdTLmn54ueg1sV47U16oISjxrrCKI=
 github.com/harmony-development/hrpc v0.0.0-20210202034614-ca72d60a90a5/go.mod h1:inDlsntAsQf9Q7ru7VPnlLjFV1STNsKNgiUPmfP/SWo=
+github.com/harmony-development/hrpc v0.0.0-20210203225555-0254665bdb3c h1:PmDTSZbLdeZ4vaVtztSMbfb75H6fwdP84lSY7ta21FE=
+github.com/harmony-development/hrpc v0.0.0-20210203225555-0254665bdb3c/go.mod h1:inDlsntAsQf9Q7ru7VPnlLjFV1STNsKNgiUPmfP/SWo=
 github.com/harmony-development/legato v0.0.0-20210121011755-599a0fd86c25/go.mod h1:GhTxyGk8bClEa0MVGgb273114FXKHoMwOemF2pPYPKE=
 github.com/hashicorp/consul/api v1.3.0/go.mod h1:MmDNSzIMUjNpY/mQ398R4bk2FnqQLoPndWW5VkKPlCE=
 github.com/hashicorp/consul/sdk v0.3.0/go.mod h1:VKf9jXwCTEY1QZP2MOLRhb5i/I/ssyNV1vwHyQBF0x8=
@@ -538,6 +540,7 @@ github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/9
 github.com/performancecopilot/speed v3.0.0+incompatible/go.mod h1:/CLtqpZ5gBg1M9iaPbIdPPGyKcA8hKdoy6hAWba7Yac=
 github.com/peterbourgon/diskv v0.0.0-20171120014656-2973218375c3 h1:ZKRE3mqKoxObHs5oWjLnA1WxXhmlDDAVuE0VsuLIoNk=
 github.com/peterbourgon/diskv v0.0.0-20171120014656-2973218375c3/go.mod h1:uqqh8zWWbv1HBMNONnaR/tNboyR3/BZd58JJSHlUSCU=
+github.com/peterbourgon/diskv v1.0.0 h1:bRU92KzrX3TQ6IYobfie/PnZkFC+1opBfHpf/PHPDoo=
 github.com/pierrec/lz4 v1.0.2-0.20190131084431-473cd7ce01a1/go.mod h1:3/3N9NVKO0jef7pBehbT1qWhCMrIgbYNnFAZCqQ5LRc=
 github.com/pierrec/lz4 v2.0.5+incompatible/go.mod h1:pdkljMzZIN41W+lC3N2tnIh5sFi+IEE17M5jbnwPHcY=
 github.com/pingcap/errors v0.11.4 h1:lFuQV/oaUMGcD2tqt+01ROSmJs75VG1ToEOkZIZ4nE4=
@@ -1028,6 +1031,8 @@ google.golang.org/genproto v0.0.0-20200806141610-86f49bd18e98 h1:LCO0fg4kb6WwkXQ
 google.golang.org/genproto v0.0.0-20200806141610-86f49bd18e98/go.mod h1:FWY/as6DDZQgahTzZj3fqbO1CbirC29ZNUFHwi0/+no=
 google.golang.org/genproto v0.0.0-20210201184850-646a494a81ea h1:B/tOZ5zKaomKBjKJJMjuqwmIc3YNX10q5DcCt8xLYY4=
 google.golang.org/genproto v0.0.0-20210201184850-646a494a81ea/go.mod h1:FWY/as6DDZQgahTzZj3fqbO1CbirC29ZNUFHwi0/+no=
+google.golang.org/genproto v0.0.0-20210203152818-3206188e46ba h1:np3A9jnmE/eMtrOwwvUycmQ1XoLyj5nqZ41bAyYLqJ0=
+google.golang.org/genproto v0.0.0-20210203152818-3206188e46ba/go.mod h1:FWY/as6DDZQgahTzZj3fqbO1CbirC29ZNUFHwi0/+no=
 google.golang.org/grpc v1.14.0/go.mod h1:yo6s7OP7yaDglbqo1J04qKzAhqBH6lvTonzMVmEdcZw=
 google.golang.org/grpc v1.16.0/go.mod h1:0JHn/cJsOMiMfNA9+DeHDlAU7KAAB5GDlYFpa9MZMio=
 google.golang.org/grpc v1.17.0/go.mod h1:6QZJwpn2B+Zp71q/5VxRsJ6NXXVCE5NRUHRo+f3cWCs=

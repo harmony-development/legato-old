@@ -1,0 +1,4 @@
+run:
+  skip-files:
+    - "*.pb.go"
+    - "*.hrpc.*.go"
