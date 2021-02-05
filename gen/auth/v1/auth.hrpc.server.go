@@ -362,7 +362,7 @@ func (h *AuthServiceHandler) StreamStepsHandler(c echo.Context) error {
 
 		case msg, ok := <-out:
 			if !ok {
-				continue
+				break
 			}
 
 			w, err := ws.NextWriter(websocket.BinaryMessage)

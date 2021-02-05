@@ -1927,7 +1927,7 @@ func (h *ChatServiceHandler) StreamEventsHandler(c echo.Context) error {
 
 		case data, ok := <-msgs:
 			if !ok {
-				continue
+				break
 			}
 
 			item := new(StreamEventsRequest)
@@ -1942,7 +1942,7 @@ func (h *ChatServiceHandler) StreamEventsHandler(c echo.Context) error {
 
 		case msg, ok := <-out:
 			if !ok {
-				continue
+				break
 			}
 
 			w, err := ws.NextWriter(websocket.BinaryMessage)
@@ -2010,7 +2010,7 @@ func (h *ChatServiceHandler) SyncHandler(c echo.Context) error {
 
 		case msg, ok := <-out:
 			if !ok {
-				continue
+				break
 			}
 
 			w, err := ws.NextWriter(websocket.BinaryMessage)
