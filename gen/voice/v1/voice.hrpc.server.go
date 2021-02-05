@@ -114,7 +114,7 @@ func (h *VoiceServiceHandler) ConnectHandler(c echo.Context) error {
 
 		case data, ok := <-msgs:
 			if !ok {
-				break
+				return nil
 			}
 
 			item := new(ClientSignal)
@@ -129,7 +129,7 @@ func (h *VoiceServiceHandler) ConnectHandler(c echo.Context) error {
 
 		case msg, ok := <-out:
 			if !ok {
-				break
+				return nil
 			}
 
 			w, err := ws.NextWriter(websocket.BinaryMessage)
