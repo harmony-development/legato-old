@@ -335,17 +335,20 @@ func (h *AuthServiceHandler) StreamStepsHandler(c echo.Context) error {
 
 	ws, err := h.upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
-		return err
+		c.Logger().Error(err)
+		return nil
 	}
 	defer ws.Close()
 
 	in := new(StreamStepsRequest)
 	_, message, err := ws.ReadMessage()
 	if err != nil {
-		return err
+		c.Logger().Error(err)
+		return nil
 	}
 	if err := proto.Unmarshal(message, in); err != nil {
-		return err
+		c.Logger().Error(err)
+		return nil
 	}
 
 	out := make(chan *AuthStep)
@@ -366,21 +369,24 @@ func (h *AuthServiceHandler) StreamStepsHandler(c echo.Context) error {
 			if err != nil {
 
 				close(out)
-				return err
+				c.Logger().Error(err)
+				return nil
 			}
 
 			response, err := proto.Marshal(msg)
 			if err != nil {
 
 				close(out)
-				return err
+				c.Logger().Error(err)
+				return nil
 			}
 
 			w.Write(response)
 			if err := w.Close(); err != nil {
 
 				close(out)
-				return err
+				c.Logger().Error(err)
+				return nil
 			}
 		}
 	}

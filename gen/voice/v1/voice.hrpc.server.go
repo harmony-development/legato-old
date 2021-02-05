@@ -82,7 +82,8 @@ func (h *VoiceServiceHandler) ConnectHandler(c echo.Context) error {
 
 	ws, err := h.upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
-		return err
+		c.Logger().Error(err)
+		return nil
 	}
 	defer ws.Close()
 
@@ -120,7 +121,8 @@ func (h *VoiceServiceHandler) ConnectHandler(c echo.Context) error {
 			if err := proto.Unmarshal(data, item); err != nil {
 				close(in)
 				close(out)
-				return err
+				c.Logger().Error(err)
+				return nil
 			}
 
 			in <- item
@@ -136,7 +138,8 @@ func (h *VoiceServiceHandler) ConnectHandler(c echo.Context) error {
 				close(in)
 
 				close(out)
-				return err
+				c.Logger().Error(err)
+				return nil
 			}
 
 			response, err := proto.Marshal(msg)
@@ -145,7 +148,8 @@ func (h *VoiceServiceHandler) ConnectHandler(c echo.Context) error {
 				close(in)
 
 				close(out)
-				return err
+				c.Logger().Error(err)
+				return nil
 			}
 
 			w.Write(response)
@@ -154,7 +158,8 @@ func (h *VoiceServiceHandler) ConnectHandler(c echo.Context) error {
 				close(in)
 
 				close(out)
-				return err
+				c.Logger().Error(err)
+				return nil
 			}
 		}
 	}
