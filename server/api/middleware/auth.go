@@ -15,5 +15,7 @@ func (m *Middlewares) AuthHandler(c echo.Context) (uint64, error) {
 		println("bad session")
 		return 0, errors.New(responses.InvalidSession)
 	}
+	go m.DB.ExtendSession(session)
+
 	return userID, nil
 }

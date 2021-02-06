@@ -52,6 +52,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.addSessionStmt, err = db.PrepareContext(ctx, addSession); err != nil {
 		return nil, fmt.Errorf("error preparing query AddSession: %w", err)
 	}
+	if q.addTimeToSessionStmt, err = db.PrepareContext(ctx, addTimeToSession); err != nil {
+		return nil, fmt.Errorf("error preparing query AddTimeToSession: %w", err)
+	}
 	if q.addToGuildListStmt, err = db.PrepareContext(ctx, addToGuildList); err != nil {
 		return nil, fmt.Errorf("error preparing query AddToGuildList: %w", err)
 	}
@@ -414,6 +417,11 @@ func (q *Queries) Close() error {
 	if q.addSessionStmt != nil {
 		if cerr := q.addSessionStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing addSessionStmt: %w", cerr)
+		}
+	}
+	if q.addTimeToSessionStmt != nil {
+		if cerr := q.addTimeToSessionStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addTimeToSessionStmt: %w", cerr)
 		}
 	}
 	if q.addToGuildListStmt != nil {
@@ -980,6 +988,7 @@ type Queries struct {
 	addNonceStmt                                   *sql.Stmt
 	addProfileStmt                                 *sql.Stmt
 	addSessionStmt                                 *sql.Stmt
+	addTimeToSessionStmt                           *sql.Stmt
 	addToGuildListStmt                             *sql.Stmt
 	addUserStmt                                    *sql.Stmt
 	addUserToGuildStmt                             *sql.Stmt
@@ -1099,6 +1108,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		addNonceStmt:                     q.addNonceStmt,
 		addProfileStmt:                   q.addProfileStmt,
 		addSessionStmt:                   q.addSessionStmt,
+		addTimeToSessionStmt:             q.addTimeToSessionStmt,
 		addToGuildListStmt:               q.addToGuildListStmt,
 		addUserStmt:                      q.addUserStmt,
 		addUserToGuildStmt:               q.addUserToGuildStmt,

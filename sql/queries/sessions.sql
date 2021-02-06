@@ -12,6 +12,11 @@ UPDATE Sessions
 SET Expiration = $1
 WHERE User_ID = $2;
 
+-- name: AddTimeToSession :exec
+UPDATE Sessions
+    SET Expiration = (select extract(epoch from now()) + 172800)
+    WHERE Session = $1;
+
 -- name: ExpireSessions :exec
 DELETE FROM Sessions
 WHERE Expiration <= $1;

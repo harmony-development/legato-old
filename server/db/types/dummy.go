@@ -358,3 +358,7 @@ func (d DummyDB) GetFileMetadata(fileID string) (queries.GetFileMetadataRow, err
 func (d DummyDB) GetFirstChannel(guildID uint64) (uint64, error) {
 	panic("unimplemented")
 }
+
+func (d DummyDB) ExtendSession(session string) error {
+	panic("unimplemented")
+}

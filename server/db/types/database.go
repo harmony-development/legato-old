@@ -44,6 +44,7 @@ type IHarmonyDB interface {
 	GetUserByEmail(email string) (queries.GetUserByEmailRow, error)
 	GetUserByID(userID uint64) (queries.GetUserRow, error)
 	AddSession(userID uint64, session string) error
+	ExtendSession(session string) error
 	GetLocalUserForForeignUser(userID uint64, homeserver string) (uint64, error)
 	AddLocalUser(userID uint64, email, username string, passwordHash []byte) error
 	AddForeignUser(homeServer string, userID, localUserID uint64, username, avatar string) (uint64, error)

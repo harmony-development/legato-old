@@ -23,6 +23,17 @@ func (q *Queries) AddSession(ctx context.Context, arg AddSessionParams) error {
 	return err
 }
 
+const addTimeToSession = `-- name: AddTimeToSession :exec
+UPDATE Sessions
+    SET Expiration = (select extract(epoch from now()) + 172800)
+    WHERE Session = $1
+`
+
+func (q *Queries) AddTimeToSession(ctx context.Context, session string) error {
+	_, err := q.exec(ctx, q.addTimeToSessionStmt, addTimeToSession, session)
+	return err
+}
+
 const expireSessions = `-- name: ExpireSessions :exec
 DELETE FROM Sessions
 WHERE Expiration <= $1

@@ -161,6 +161,10 @@ func (db *database) ExpireSessions() error {
 	return nil
 }
 
+func (db *database) ExtendSession(session string) error {
+	return tracerr.Wrap(db.queries.AddTimeToSession(ctx, session))
+}
+
 func (db *database) UpdateUsername(userID uint64, username string) error {
 	return tracerr.Wrap(db.queries.UpdateUsername(ctx, queries.UpdateUsernameParams{
 		Username: username,
