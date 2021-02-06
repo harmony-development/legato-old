@@ -357,38 +357,38 @@ func (h *AuthServiceHandler) StreamStepsHandler(c echo.Context) error {
 
 	defer ws.Close()
 
-	for {
-		select {
+	for msg := range out {
 
-		case msg, ok := <-out:
-			if !ok {
-				return nil
-			}
+		w, err := ws.NextWriter(websocket.BinaryMessage)
+		if err != nil {
 
-			w, err := ws.NextWriter(websocket.BinaryMessage)
-			if err != nil {
+			close(out)
+			c.Logger().Error(err)
+			return nil
+		}
 
-				close(out)
-				c.Logger().Error(err)
-				return nil
-			}
+		response, err := proto.Marshal(msg)
+		if err != nil {
 
-			response, err := proto.Marshal(msg)
-			if err != nil {
+			close(out)
+			c.Logger().Error(err)
+			return nil
+		}
 
-				close(out)
-				c.Logger().Error(err)
-				return nil
-			}
+		if _, err := w.Write(response); err != nil {
 
-			w.Write(response)
-			if err := w.Close(); err != nil {
+			close(out)
+			c.Logger().Error(err)
+			return nil
+		}
+		if err := w.Close(); err != nil {
 
-				close(out)
-				c.Logger().Error(err)
-				return nil
-			}
+			close(out)
+			c.Logger().Error(err)
+			return nil
 		}
 	}
+
+	return nil
 
 }

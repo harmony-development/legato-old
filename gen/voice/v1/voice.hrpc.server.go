@@ -88,7 +88,6 @@ func (h *VoiceServiceHandler) ConnectHandler(c echo.Context) error {
 	defer ws.Close()
 
 	in := make(chan *ClientSignal)
-	err = nil
 
 	out := make(chan *Signal)
 
@@ -111,7 +110,6 @@ func (h *VoiceServiceHandler) ConnectHandler(c echo.Context) error {
 
 	for {
 		select {
-
 		case data, ok := <-msgs:
 			if !ok {
 				return nil
@@ -126,7 +124,6 @@ func (h *VoiceServiceHandler) ConnectHandler(c echo.Context) error {
 			}
 
 			in <- item
-
 		case msg, ok := <-out:
 			if !ok {
 				return nil
@@ -152,7 +149,14 @@ func (h *VoiceServiceHandler) ConnectHandler(c echo.Context) error {
 				return nil
 			}
 
-			w.Write(response)
+			if _, err := w.Write(response); err != nil {
+
+				close(in)
+
+				close(out)
+				c.Logger().Error(err)
+				return nil
+			}
 			if err := w.Close(); err != nil {
 
 				close(in)
@@ -162,6 +166,7 @@ func (h *VoiceServiceHandler) ConnectHandler(c echo.Context) error {
 				return nil
 			}
 		}
+
 	}
 
 }

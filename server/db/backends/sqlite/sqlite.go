@@ -71,7 +71,7 @@ func doRecovery(err *error) {
 // New creates a new DB connection
 func New(cfg *config.Config, logger logger.ILogger, idgen *sonyflake.Sonyflake) (types.IHarmonyDB, error) {
 	db := &database{}
-	err := error(nil)
+	var err error
 
 	db.Client, err = ent.Open("sqlite3", fmt.Sprintf("file:%s?_fk=1", cfg.Database.Filename))
 	if err != nil {

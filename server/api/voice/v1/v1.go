@@ -28,5 +28,4 @@ func init() {
 }
 
 func (v1 *V1) Connect(ctx echo.Context, in chan *voicev1.ClientSignal, out chan *voicev1.Signal) {
-	return
 }
