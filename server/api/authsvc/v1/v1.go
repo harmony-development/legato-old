@@ -4,7 +4,6 @@ import (
 	"crypto/x509"
 	"database/sql"
 	"encoding/pem"
-	"errors"
 	"fmt"
 	"time"
 	"unicode"
@@ -24,8 +23,6 @@ import (
 	"github.com/thanhpk/randstr"
 	"github.com/ztrue/tracerr"
 	"golang.org/x/crypto/bcrypt"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -174,7 +171,7 @@ func (v1 *V1) Federate(c echo.Context, r *authv1.FederateRequest) (*authv1.Feder
 	user, err := v1.DB.GetUserByID(ctx.UserID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, v1.Logger.ErrorResponse(codes.NotFound, err, "user not found")
+			return nil, responses.NewError(responses.BadUserID)
 		}
 		return nil, err
 	}
@@ -322,7 +319,7 @@ func (v1 *V1) StreamSteps(c echo.Context, r *authv1.StreamStepsRequest, out chan
 
 func (v1 *V1) NextStep(c echo.Context, r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 	if ok := v1.AuthState.AuthSessionExists(r.AuthId); !ok {
-		return nil, errors.New("missing auth ID")
+		return nil, responses.NewError(responses.BadAuthID)
 	}
 
 	currentStep := v1.AuthState.GetStep(r.AuthId)
@@ -347,7 +344,7 @@ func (v1 *V1) NextStep(c echo.Context, r *authv1.NextStepRequest) (*authv1.AuthS
 
 func (v1 *V1) StepBack(c echo.Context, r *authv1.StepBackRequest) (*authv1.AuthStep, error) {
 	if ok := v1.AuthState.AuthSessionExists(r.AuthId); !ok {
-		return nil, errors.New("missing auth ID")
+		return nil, responses.NewError(responses.BadAuthID)
 	}
 
 	currentStep := v1.AuthState.GetStep(r.AuthId)
@@ -360,7 +357,7 @@ func (v1 *V1) StepBack(c echo.Context, r *authv1.StepBackRequest) (*authv1.AuthS
 		return conv, nil
 	}
 
-	return nil, errors.New("can't go back")
+	return nil, responses.NewOther("cannot go back")
 }
 
 func (v1 *V1) ChoiceHandler(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
@@ -368,7 +365,7 @@ func (v1 *V1) ChoiceHandler(r *authv1.NextStepRequest) (*authv1.AuthStep, error)
 	currentStep := v1.AuthState.GetStep(r.AuthId)
 
 	if currentStep == nil {
-		return nil, errors.New("invalid auth id")
+		return nil, responses.NewError(responses.BadAuthID)
 	}
 
 	if c == nil {
@@ -387,13 +384,13 @@ func (v1 *V1) ChoiceHandler(r *authv1.NextStepRequest) (*authv1.AuthStep, error)
 			return conv, nil
 		}
 	}
-	return nil, errors.New("unknown choice")
+	return nil, responses.NewError(responses.BadChoice)
 }
 
 func (v1 *V1) LocalLogin(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 	f := r.GetForm()
 	if f == nil {
-		return nil, errors.New("missing form")
+		return nil, responses.NewError(responses.MissingForm)
 	}
 
 	email := f.Fields[0].GetString_()
@@ -402,12 +399,12 @@ func (v1 *V1) LocalLogin(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 	user, err := v1.DB.GetUserByEmail(email)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, status.Error(codes.NotFound, responses.InvalidEmail)
+			return nil, responses.NewError(responses.BadEmail)
 		}
 		return nil, err
 	}
 	if err := bcrypt.CompareHashAndPassword(user.Password, password); err != nil {
-		return nil, status.Error(codes.Unauthenticated, responses.InvalidPassword)
+		return nil, responses.NewError(responses.IncorrectPassword)
 	}
 	session := randstr.Hex(16)
 	if err := v1.DB.AddSession(user.UserID, session); err != nil {
@@ -434,7 +431,7 @@ func (v1 *V1) LocalLogin(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 func (v1 *V1) Register(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 	f := r.GetForm()
 	if f == nil {
-		return nil, errors.New("missing form")
+		return nil, responses.NewError(responses.MissingForm)
 	}
 
 	email := f.Fields[0].GetString_()
@@ -442,27 +439,13 @@ func (v1 *V1) Register(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 	password := f.Fields[2].GetBytes()
 
 	if len(username) < v1.Config.Server.Policies.Username.MinLength || len(username) > v1.Config.Server.Policies.Username.MaxLength {
-		_ = responses.UsernameLength(
-			v1.Config.Server.Policies.Username.MinLength,
-			v1.Config.Server.Policies.Username.MaxLength,
-		)
-		return nil, status.Error(codes.InvalidArgument, responses.InvalidUsername)
+		return nil, responses.NewError(responses.BadPassword)
 	}
 	if len(password) < v1.Config.Server.Policies.Password.MinLength || len(password) > v1.Config.Server.Policies.Password.MaxLength {
-		_ = responses.PasswordLength(
-			v1.Config.Server.Policies.Password.MinLength,
-			v1.Config.Server.Policies.Password.MaxLength,
-		)
-		return nil, status.Error(codes.InvalidArgument, responses.InvalidPassword)
+		return nil, responses.NewError(responses.BadPassword)
 	}
 	if !v1.PasswordAcceptable(password) {
-		_ = responses.PasswordPolicy(
-			v1.Config.Server.Policies.Password.MinUpper,
-			v1.Config.Server.Policies.Password.MinLower,
-			v1.Config.Server.Policies.Password.MinNumbers,
-			v1.Config.Server.Policies.Password.MinSymbols,
-		)
-		return nil, status.Error(codes.InvalidArgument, responses.InvalidPassword)
+		return nil, responses.NewError(responses.BadPassword)
 	}
 
 	hash, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
@@ -474,7 +457,7 @@ func (v1 *V1) Register(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 	if err != nil {
 		return nil, err
 	} else if exists {
-		return nil, status.Error(codes.AlreadyExists, responses.AlreadyRegistered)
+		return nil, responses.NewError(responses.AlreadyRegistered)
 	}
 
 	userID, err := v1.Sonyflake.NextID()

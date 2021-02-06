@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"context"
 	"database/sql"
 	"errors"
 	"os"
@@ -10,9 +9,6 @@ import (
 	"github.com/alecthomas/repr"
 	"github.com/harmony-development/legato/server/config"
 	"github.com/ztrue/tracerr"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/peer"
-	"google.golang.org/grpc/status"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/sirupsen/logrus"
@@ -27,7 +23,6 @@ const (
 )
 
 type ILogger interface {
-	ErrorResponse(code codes.Code, err error, response string) error
 	CheckException(err error)
 	Exception(err error)
 	Debug(d DebugScope, v ...interface{})
@@ -53,16 +48,6 @@ func (l Logger) CheckException(err error) {
 		return
 	}
 	l.Exception(err)
-}
-
-func (l Logger) ErrorResponse(code codes.Code, err error, response string) error {
-	if l.Config.Server.Policies.Debug.RespondWithErrors {
-		if l.Config.Server.Policies.Debug.ResponseErrorsIncludeTrace {
-			return status.Error(code, tracerr.Sprint(err))
-		}
-		return status.Error(code, err.Error())
-	}
-	return status.Error(code, response)
 }
 
 // Exception logs an exception
@@ -105,13 +90,6 @@ func (l Logger) Debug(d DebugScope, v ...interface{}) {
 		switch value := i.(type) {
 		case string:
 			message.WriteString(value)
-		case interface{ Context() context.Context }:
-			p, ok := peer.FromContext(value.Context())
-			if ok {
-				message.WriteString(p.Addr.String())
-			} else {
-				message.WriteString(repr.String(value))
-			}
 		default:
 			message.WriteString(repr.String(value))
 		}

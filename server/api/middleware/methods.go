@@ -5,8 +5,6 @@ import (
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/responses"
 	"github.com/labstack/echo/v4"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/descriptorpb"
@@ -66,12 +64,12 @@ func (m Middlewares) MethodMetadataInterceptor(meth *descriptorpb.MethodDescript
 					}
 					roles, err := m.DB.RolesForUser(location.GetGuildId(), ctx.UserID)
 					if err != nil {
-						return nil, status.Error(codes.Internal, responses.InternalServerError)
+						return nil, err
 					}
 					ctx.UserRoles = roles
 					owner, err := m.DB.GetOwner(location.GetGuildId())
 					if err != nil {
-						return nil, status.Error(codes.Internal, responses.InternalServerError)
+						return nil, err
 					}
 					ctx.IsOwner = owner == ctx.UserID
 				}
@@ -87,7 +85,7 @@ func (m Middlewares) MethodMetadataInterceptor(meth *descriptorpb.MethodDescript
 			guildID := location.GetGuildId()
 			owner, err := m.DB.GetOwner(guildID)
 			if err != nil {
-				return nil, status.Error(codes.Internal, responses.InternalServerError)
+				return nil, err
 			}
 			if owner == ctx.UserID {
 				goto afterPermissions
@@ -103,12 +101,12 @@ func (m Middlewares) MethodMetadataInterceptor(meth *descriptorpb.MethodDescript
 
 			roles, err := m.DB.RolesForUser(guildID, ctx.UserID)
 			if err != nil {
-				return nil, status.Error(codes.Internal, responses.InternalServerError)
+				return nil, err
 			}
 			ctx.UserRoles = roles
 
 			if !m.Perms.Check(opts.RequiresPermissionNode, roles, guildID, channelID) {
-				return nil, status.Error(codes.PermissionDenied, responses.InsufficientPrivileges)
+				return nil, responses.NewError(responses.NotEnoughPermissions)
 			}
 		}
 	afterPermissions:

@@ -1,66 +1,72 @@
 package responses
 
+import harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
+
 // basically a list of API responses for i18n compatibility
 
 const (
-	InvalidEmail           = "auth.invalid-email"
-	InvalidUsername        = "auth.invalid-username"
-	AlreadyRegistered      = "auth.already-registered"
-	InvalidPassword        = "auth.invalid-password"
-	InvalidSession         = "invalid-session"
-	TooManyRequests        = "too-many-requests"
-	InvalidRequest         = "invalid-request"
-	InsufficientPrivileges = "insufficient-privileges"
-	UserNotFound           = "user-not-found"
-	GuildNotFound          = "guild.not-found"
-	NotInGuild             = "guild.not-member"
-	MetadataNotFound       = "user.metadata-not-found"
-	NonceNotFound          = "nonce-not-found"
-	MissingLocation        = "missing-location"
-	MissingLocationGuild   = "missing-location-guild"
-	MissingLocationChannel = "missing-location-channel"
-	MissingLocationMessage = "missing-location-message"
-	BadLocationGuild       = "invalid-location-guild"
-	BadLocationChannel     = "invalid-location-channel"
-	BadLocationMessage     = "invalid-location-message"
-	InternalServerError    = "internal-server-error"
-	TeaPot                 = "i-am-a-teapot-and-will-not-serve-coffee"
-	UnknownError           = "unknown"
+	InternalServerError = "h.internal-server-error"
+
+	NoSessionProvided = "h.blank-session"
+	BadSession        = "h.bad-session"
+
+	MissingGuildID   = "h.missing-guild-id"
+	MissingChannelID = "h.missing-channel-id"
+	MissingMessageID = "h.missing-message-id"
+	MissingUserID    = "h.bad-user-id"
+	MissingAuthID    = "h.missing-auth-id"
+
+	BadGuildID   = "h.bad-guild-id"
+	BadChannelID = "h.bad-channel-id"
+	BadMessageID = "h.bad-message-id"
+	BadUserID    = "h.bad-user-id"
+	BadAuthID    = "h.bad-auth-id"
+
+	NotAuthor = "h.not-author"
+
+	NotJoined = "h.not-joined"
+
+	IsOwner              = "h.is-owner"
+	NotOwner             = "h.not-owner"
+	NotEnoughPermissions = "h.not-enough-permissions"
+
+	AlreadyRegistered = "h.already-registered"
+
+	BadEmail    = "h.bad-email"
+	BadPassword = "h.bad-password"
+	BadUsername = "h.bad-username"
+
+	IncorrectPassword = "h.incorrect-password"
+
+	EntirelyBlank = "h.entirely-blank"
+
+	BadAction = "h.bad-action"
+
+	NoMetadata = "h.no-metadata"
+
+	Other = "h.other"
+
+	BadChoice = "h.bad-auth-choice"
+
+	MissingForm = "h.missing-form"
 )
 
-type WithFields struct {
-	Message string      `json:"message"`
-	Fields  interface{} `json:"fields"`
+// Error is a wrapper around harmonytypesv1.Error implementing the Error interface
+type Error harmonytypesv1.Error
+
+func (e *Error) Error() string {
+	return e.HumanMessage
 }
 
-func UsernameLength(minLength, maxLength int) WithFields {
-	return WithFields{
-		Message: "register.username-length",
-		Fields: map[string]interface{}{
-			"minLength": minLength,
-			"maxLength": maxLength,
-		},
+func NewError(code string) error {
+	return &Error{
+		Identifier: code,
 	}
 }
 
-func PasswordLength(minLength, maxLength int) WithFields {
-	return WithFields{
-		Message: "register.password-length",
-		Fields: map[string]interface{}{
-			"minLength": minLength,
-			"maxLength": maxLength,
-		},
-	}
-}
-
-func PasswordPolicy(minUpper, minLower, minNumbers, minSpecial int) WithFields {
-	return WithFields{
-		Message: "register.password-policy",
-		Fields: map[string]interface{}{
-			"minUpper":   minUpper,
-			"minLower":   minLower,
-			"minNumbers": minNumbers,
-			"minSpecial": minSpecial,
-		},
+func NewOther(msg string) error {
+	return &Error{
+		Identifier:   Other,
+		HumanMessage: msg,
 	}
 }

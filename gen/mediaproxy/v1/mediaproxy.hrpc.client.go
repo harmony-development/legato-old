@@ -12,12 +12,19 @@ import (
 type MediaProxyServiceClient struct {
 	client    *http.Client
 	serverURL string
+
+	Header    http.Header
+	HTTPProto string
+	WSProto   string
 }
 
 func NewMediaProxyServiceClient(url string) *MediaProxyServiceClient {
 	return &MediaProxyServiceClient{
 		client:    &http.Client{},
 		serverURL: url,
+		Header:    http.Header{},
+		HTTPProto: "https",
+		WSProto:   "wss",
 	}
 }
 
@@ -26,7 +33,15 @@ func (client *MediaProxyServiceClient) FetchLinkMetadata(r *FetchLinkMetadataReq
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.mediaproxy.v1.MediaProxyService/FetchLinkMetadata", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.mediaproxy.v1.MediaProxyService/FetchLinkMetadata", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -48,7 +63,15 @@ func (client *MediaProxyServiceClient) InstantView(r *InstantViewRequest) (*Inst
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.mediaproxy.v1.MediaProxyService/InstantView", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.mediaproxy.v1.MediaProxyService/InstantView", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -70,7 +93,15 @@ func (client *MediaProxyServiceClient) CanInstantView(r *InstantViewRequest) (*C
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.mediaproxy.v1.MediaProxyService/CanInstantView", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.mediaproxy.v1.MediaProxyService/CanInstantView", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}

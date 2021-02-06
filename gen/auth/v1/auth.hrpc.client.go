@@ -13,12 +13,19 @@ import (
 type AuthServiceClient struct {
 	client    *http.Client
 	serverURL string
+
+	Header    http.Header
+	HTTPProto string
+	WSProto   string
 }
 
 func NewAuthServiceClient(url string) *AuthServiceClient {
 	return &AuthServiceClient{
 		client:    &http.Client{},
 		serverURL: url,
+		Header:    http.Header{},
+		HTTPProto: "https",
+		WSProto:   "wss",
 	}
 }
 
@@ -27,7 +34,15 @@ func (client *AuthServiceClient) Federate(r *FederateRequest) (*FederateReply, e
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.auth.v1.AuthService/Federate", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.auth.v1.AuthService/Federate", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -49,7 +64,15 @@ func (client *AuthServiceClient) LoginFederated(r *LoginFederatedRequest) (*Sess
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.auth.v1.AuthService/LoginFederated", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.auth.v1.AuthService/LoginFederated", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -71,7 +94,15 @@ func (client *AuthServiceClient) Key(r *empty.Empty) (*KeyReply, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.auth.v1.AuthService/Key", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.auth.v1.AuthService/Key", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -93,7 +124,15 @@ func (client *AuthServiceClient) BeginAuth(r *empty.Empty) (*BeginAuthResponse, 
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.auth.v1.AuthService/BeginAuth", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.auth.v1.AuthService/BeginAuth", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -115,7 +154,15 @@ func (client *AuthServiceClient) NextStep(r *NextStepRequest) (*AuthStep, error)
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.auth.v1.AuthService/NextStep", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.auth.v1.AuthService/NextStep", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -137,7 +184,15 @@ func (client *AuthServiceClient) StepBack(r *StepBackRequest) (*AuthStep, error)
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.auth.v1.AuthService/StepBack", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.auth.v1.AuthService/StepBack", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}

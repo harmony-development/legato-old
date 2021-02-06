@@ -15,12 +15,19 @@ import (
 type ChatServiceClient struct {
 	client    *http.Client
 	serverURL string
+
+	Header    http.Header
+	HTTPProto string
+	WSProto   string
 }
 
 func NewChatServiceClient(url string) *ChatServiceClient {
 	return &ChatServiceClient{
 		client:    &http.Client{},
 		serverURL: url,
+		Header:    http.Header{},
+		HTTPProto: "https",
+		WSProto:   "wss",
 	}
 }
 
@@ -29,7 +36,15 @@ func (client *ChatServiceClient) CreateGuild(r *CreateGuildRequest) (*CreateGuil
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/CreateGuild", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/CreateGuild", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -51,7 +66,15 @@ func (client *ChatServiceClient) CreateInvite(r *CreateInviteRequest) (*CreateIn
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/CreateInvite", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/CreateInvite", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -73,7 +96,15 @@ func (client *ChatServiceClient) CreateChannel(r *CreateChannelRequest) (*Create
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/CreateChannel", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/CreateChannel", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -95,7 +126,15 @@ func (client *ChatServiceClient) CreateEmotePack(r *CreateEmotePackRequest) (*Cr
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/CreateEmotePack", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/CreateEmotePack", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -117,7 +156,15 @@ func (client *ChatServiceClient) GetGuildList(r *GetGuildListRequest) (*GetGuild
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/GetGuildList", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/GetGuildList", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -139,7 +186,15 @@ func (client *ChatServiceClient) AddGuildToGuildList(r *AddGuildToGuildListReque
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/AddGuildToGuildList", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/AddGuildToGuildList", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -161,7 +216,15 @@ func (client *ChatServiceClient) RemoveGuildFromGuildList(r *RemoveGuildFromGuil
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/RemoveGuildFromGuildList", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/RemoveGuildFromGuildList", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -183,7 +246,15 @@ func (client *ChatServiceClient) GetGuild(r *GetGuildRequest) (*GetGuildResponse
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/GetGuild", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/GetGuild", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -205,7 +276,15 @@ func (client *ChatServiceClient) GetGuildInvites(r *GetGuildInvitesRequest) (*Ge
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/GetGuildInvites", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/GetGuildInvites", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -227,7 +306,15 @@ func (client *ChatServiceClient) GetGuildMembers(r *GetGuildMembersRequest) (*Ge
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/GetGuildMembers", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/GetGuildMembers", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -249,7 +336,15 @@ func (client *ChatServiceClient) GetGuildChannels(r *GetGuildChannelsRequest) (*
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/GetGuildChannels", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/GetGuildChannels", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -271,7 +366,15 @@ func (client *ChatServiceClient) GetChannelMessages(r *GetChannelMessagesRequest
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/GetChannelMessages", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/GetChannelMessages", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -293,7 +396,15 @@ func (client *ChatServiceClient) GetMessage(r *GetMessageRequest) (*GetMessageRe
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/GetMessage", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/GetMessage", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -315,7 +426,15 @@ func (client *ChatServiceClient) GetEmotePacks(r *GetEmotePacksRequest) (*GetEmo
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/GetEmotePacks", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/GetEmotePacks", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -337,7 +456,15 @@ func (client *ChatServiceClient) GetEmotePackEmotes(r *GetEmotePackEmotesRequest
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/GetEmotePackEmotes", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/GetEmotePackEmotes", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -359,7 +486,15 @@ func (client *ChatServiceClient) UpdateGuildInformation(r *UpdateGuildInformatio
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/UpdateGuildInformation", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/UpdateGuildInformation", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -381,7 +516,15 @@ func (client *ChatServiceClient) UpdateChannelInformation(r *UpdateChannelInform
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/UpdateChannelInformation", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/UpdateChannelInformation", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -403,7 +546,15 @@ func (client *ChatServiceClient) UpdateChannelOrder(r *UpdateChannelOrderRequest
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/UpdateChannelOrder", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/UpdateChannelOrder", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -425,7 +576,15 @@ func (client *ChatServiceClient) UpdateMessage(r *UpdateMessageRequest) (*empty.
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/UpdateMessage", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/UpdateMessage", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -447,7 +606,15 @@ func (client *ChatServiceClient) AddEmoteToPack(r *AddEmoteToPackRequest) (*empt
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/AddEmoteToPack", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/AddEmoteToPack", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -469,7 +636,15 @@ func (client *ChatServiceClient) DeleteGuild(r *DeleteGuildRequest) (*empty.Empt
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/DeleteGuild", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/DeleteGuild", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -491,7 +666,15 @@ func (client *ChatServiceClient) DeleteInvite(r *DeleteInviteRequest) (*empty.Em
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/DeleteInvite", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/DeleteInvite", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -513,7 +696,15 @@ func (client *ChatServiceClient) DeleteChannel(r *DeleteChannelRequest) (*empty.
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/DeleteChannel", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/DeleteChannel", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -535,7 +726,15 @@ func (client *ChatServiceClient) DeleteMessage(r *DeleteMessageRequest) (*empty.
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/DeleteMessage", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/DeleteMessage", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -557,7 +756,15 @@ func (client *ChatServiceClient) DeleteEmoteFromPack(r *DeleteEmoteFromPackReque
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/DeleteEmoteFromPack", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/DeleteEmoteFromPack", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -579,7 +786,15 @@ func (client *ChatServiceClient) DeleteEmotePack(r *DeleteEmotePackRequest) (*em
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/DeleteEmotePack", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/DeleteEmotePack", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -601,7 +816,15 @@ func (client *ChatServiceClient) DequipEmotePack(r *DequipEmotePackRequest) (*em
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/DequipEmotePack", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/DequipEmotePack", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -623,7 +846,15 @@ func (client *ChatServiceClient) JoinGuild(r *JoinGuildRequest) (*JoinGuildRespo
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/JoinGuild", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/JoinGuild", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -645,7 +876,15 @@ func (client *ChatServiceClient) LeaveGuild(r *LeaveGuildRequest) (*empty.Empty,
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/LeaveGuild", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/LeaveGuild", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -667,7 +906,15 @@ func (client *ChatServiceClient) TriggerAction(r *TriggerActionRequest) (*empty.
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/TriggerAction", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/TriggerAction", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -689,7 +936,15 @@ func (client *ChatServiceClient) SendMessage(r *SendMessageRequest) (*SendMessag
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/SendMessage", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/SendMessage", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -711,7 +966,15 @@ func (client *ChatServiceClient) QueryHasPermission(r *QueryPermissionsRequest) 
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/QueryHasPermission", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/QueryHasPermission", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -733,7 +996,15 @@ func (client *ChatServiceClient) SetPermissions(r *SetPermissionsRequest) (*empt
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/SetPermissions", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/SetPermissions", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -755,7 +1026,15 @@ func (client *ChatServiceClient) GetPermissions(r *GetPermissionsRequest) (*GetP
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/GetPermissions", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/GetPermissions", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -777,7 +1056,15 @@ func (client *ChatServiceClient) MoveRole(r *MoveRoleRequest) (*MoveRoleResponse
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/MoveRole", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/MoveRole", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -799,7 +1086,15 @@ func (client *ChatServiceClient) GetGuildRoles(r *GetGuildRolesRequest) (*GetGui
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/GetGuildRoles", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/GetGuildRoles", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -821,7 +1116,15 @@ func (client *ChatServiceClient) AddGuildRole(r *AddGuildRoleRequest) (*AddGuild
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/AddGuildRole", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/AddGuildRole", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -843,7 +1146,15 @@ func (client *ChatServiceClient) ModifyGuildRole(r *ModifyGuildRoleRequest) (*em
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/ModifyGuildRole", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/ModifyGuildRole", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -865,7 +1176,15 @@ func (client *ChatServiceClient) DeleteGuildRole(r *DeleteGuildRoleRequest) (*em
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/DeleteGuildRole", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/DeleteGuildRole", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -887,7 +1206,15 @@ func (client *ChatServiceClient) ManageUserRoles(r *ManageUserRolesRequest) (*em
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/ManageUserRoles", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/ManageUserRoles", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -909,7 +1236,15 @@ func (client *ChatServiceClient) GetUserRoles(r *GetUserRolesRequest) (*GetUserR
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/GetUserRoles", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/GetUserRoles", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -927,9 +1262,9 @@ func (client *ChatServiceClient) GetUserRoles(r *GetUserRolesRequest) (*GetUserR
 }
 
 func (client *ChatServiceClient) StreamEvents() (in chan<- *StreamEventsRequest, out <-chan *Event, err error) {
-	u := url.URL{Scheme: "ws", Host: client.serverURL, Path: "/protocol.chat.v1.ChatService/StreamEvents"}
+	u := url.URL{Scheme: client.WSProto, Host: client.serverURL, Path: "/protocol.chat.v1.ChatService/StreamEvents"}
 
-	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
+	c, _, err := websocket.DefaultDialer.Dial(u.String(), client.Header)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -997,7 +1332,15 @@ func (client *ChatServiceClient) GetUser(r *GetUserRequest) (*GetUserResponse, e
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/GetUser", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/GetUser", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -1019,7 +1362,15 @@ func (client *ChatServiceClient) GetUserMetadata(r *GetUserMetadataRequest) (*Ge
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/GetUserMetadata", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/GetUserMetadata", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -1041,7 +1392,15 @@ func (client *ChatServiceClient) ProfileUpdate(r *ProfileUpdateRequest) (*empty.
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/ProfileUpdate", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/ProfileUpdate", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -1063,7 +1422,15 @@ func (client *ChatServiceClient) Typing(r *TypingRequest) (*empty.Empty, error) 
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/Typing", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/Typing", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}
@@ -1085,7 +1452,15 @@ func (client *ChatServiceClient) PreviewGuild(r *PreviewGuildRequest) (*PreviewG
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	resp, err := client.client.Post(fmt.Sprintf("http://%s/protocol.chat.v1.ChatService/PreviewGuild", client.serverURL), "application/octet-stream", bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/PreviewGuild", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/octet-stream")
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
 	}

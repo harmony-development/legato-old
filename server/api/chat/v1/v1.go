@@ -3,7 +3,6 @@ package v1
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"time"
 
@@ -22,18 +21,9 @@ import (
 	"github.com/harmony-development/legato/server/responses"
 	"github.com/labstack/echo/v4"
 	"github.com/sony/sonyflake"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
-)
-
-var (
-	// ErrNoPermissions : you're not authenticated to do this
-	ErrNoPermissions = errors.New("No permissions")
-	// ErrNotInGuild : you're not in the guild
-	ErrNotInGuild = errors.New("Not in guild")
 )
 
 // Dependencies are the backend services this package needs
@@ -205,7 +195,7 @@ func (v1 *V1) GetGuild(c echo.Context, r *chatv1.GetGuildRequest) (*chatv1.GetGu
 	guild, err := v1.DB.GetGuildByID(r.GuildId)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, v1.Logger.ErrorResponse(codes.NotFound, err, responses.GuildNotFound)
+			return nil, responses.NewError(responses.BadGuildID)
 		}
 		return nil, err
 	}
@@ -607,7 +597,7 @@ func init() {
 func (v1 *V1) UpdateMessage(c echo.Context, r *chatv1.UpdateMessageRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
 	if !r.UpdateActions && !r.UpdateEmbeds && !r.UpdateContent && !r.UpdateOverrides {
-		return nil, status.Error(codes.InvalidArgument, responses.InvalidRequest)
+		return nil, responses.NewError(responses.EntirelyBlank)
 	}
 
 	owner, err := v1.DB.GetMessageOwner(r.MessageId)
@@ -615,7 +605,7 @@ func (v1 *V1) UpdateMessage(c echo.Context, r *chatv1.UpdateMessageRequest) (*em
 		return nil, err
 	}
 	if owner != ctx.UserID {
-		return nil, ErrNoPermissions
+		return nil, responses.NewError(responses.NotOwner)
 	}
 
 	var actions *[]byte
@@ -771,7 +761,7 @@ func (v1 *V1) DeleteMessage(c echo.Context, r *chatv1.DeleteMessageRequest) (*em
 		return nil, err
 	}
 	if ctx.UserID != owner && !(ctx.IsOwner || v1.Perms.Check("messages.manage.delete", ctx.UserRoles, r.GuildId, r.ChannelId)) {
-		return nil, ErrNoPermissions
+		return nil, responses.NewError(responses.NotEnoughPermissions)
 	}
 	if err := v1.DB.DeleteMessage(r.MessageId, r.ChannelId, r.GuildId); err != nil {
 		return nil, err
@@ -805,7 +795,7 @@ func (v1 *V1) JoinGuild(c echo.Context, r *chatv1.JoinGuildRequest) (*chatv1.Joi
 	guildID, err := v1.DB.ResolveGuildID(r.InviteId)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, v1.Logger.ErrorResponse(codes.NotFound, err, responses.GuildNotFound)
+			return nil, responses.NewError(responses.BadGuildID)
 		}
 		return nil, err
 	}
@@ -850,7 +840,7 @@ func (v1 *V1) LeaveGuild(c echo.Context, r *chatv1.LeaveGuildRequest) (*empty.Em
 	if isOwner, err := v1.DB.IsOwner(r.GuildId, ctx.UserID); err != nil {
 		return nil, err
 	} else if isOwner {
-		return nil, status.Error(codes.FailedPrecondition, responses.InvalidRequest)
+		return nil, responses.NewError(responses.IsOwner)
 	}
 
 	if err := v1.DB.DeleteMember(r.GuildId, ctx.UserID); err != nil {
@@ -956,7 +946,7 @@ func (v1 *V1) TriggerAction(c echo.Context, r *chatv1.TriggerActionRequest) (*em
 		return nil, err
 	}
 	if msg.ChannelID != r.ChannelId || msg.GuildID != r.GuildId {
-		return nil, status.Error(codes.InvalidArgument, responses.InvalidRequest)
+		return nil, responses.NewError(responses.BadAction)
 	}
 	for _, action := range v1.ActionsToProto(msg.Actions) {
 		if action.Id == r.ActionId {
@@ -974,7 +964,7 @@ func (v1 *V1) TriggerAction(c echo.Context, r *chatv1.TriggerActionRequest) (*em
 			return &emptypb.Empty{}, nil
 		}
 	}
-	return nil, status.Error(codes.InvalidArgument, responses.InvalidRequest)
+	return nil, responses.NewError(responses.BadAction)
 }
 
 func init() {
@@ -993,7 +983,7 @@ func (v1 *V1) SendMessage(c echo.Context, r *chatv1.SendMessageRequest) (*chatv1
 	ctx := c.(middleware.HarmonyContext)
 	messageID, err := v1.Sonyflake.NextID()
 	if err != nil {
-		return nil, v1.Logger.ErrorResponse(codes.Unknown, err, responses.UnknownError)
+		return nil, err
 	}
 	msg, err := v1.DB.AddMessage(
 		r.ChannelId,
@@ -1171,7 +1161,7 @@ func (v1 *V1) AddEmoteToPack(c echo.Context, r *chatv1.AddEmoteToPackRequest) (*
 	if isOwner, err := v1.DB.IsPackOwner(ctx.UserID, r.PackId); err != nil {
 		return nil, err
 	} else if !isOwner {
-		return nil, status.Error(codes.PermissionDenied, responses.InsufficientPrivileges)
+		return nil, responses.NewError(responses.NotOwner)
 	}
 	if err := v1.DB.AddEmoteToPack(r.PackId, r.ImageId, r.Name); err != nil {
 		return nil, err
@@ -1186,7 +1176,7 @@ func (v1 *V1) DeleteEmoteFromPack(c echo.Context, r *chatv1.DeleteEmoteFromPackR
 	if isOwner, err := v1.DB.IsPackOwner(ctx.UserID, r.PackId); err != nil {
 		return nil, err
 	} else if !isOwner {
-		return nil, status.Error(codes.PermissionDenied, responses.InsufficientPrivileges)
+		return nil, responses.NewError(responses.NotOwner)
 	}
 	if err := v1.DB.DeleteEmoteFromPack(r.PackId, r.ImageId); err != nil {
 		return nil, err
@@ -1201,7 +1191,7 @@ func (v1 *V1) DeleteEmotePack(c echo.Context, r *chatv1.DeleteEmotePackRequest) 
 	if isOwner, err := v1.DB.IsPackOwner(ctx.UserID, r.PackId); err != nil {
 		return nil, err
 	} else if !isOwner {
-		return nil, status.Error(codes.PermissionDenied, responses.InsufficientPrivileges)
+		return nil, responses.NewError(responses.NotOwner)
 	}
 	if err := v1.DB.DeleteEmotePack(r.PackId); err != nil {
 		return nil, err
@@ -1389,7 +1379,7 @@ func (v1 *V1) QueryHasPermission(c echo.Context, r *chatv1.QueryPermissionsReque
 	if r.As == 0 {
 		r.As = c.(middleware.HarmonyContext).UserID
 	} else if !(ctx.IsOwner || v1.Perms.Check("permissions.query", ctx.UserRoles, r.GuildId, r.ChannelId)) {
-		return nil, ErrNoPermissions
+		return nil, responses.NewError(responses.NotEnoughPermissions)
 	}
 
 	owner, err := v1.DB.GetOwner(r.GuildId)
@@ -1458,7 +1448,7 @@ func (v1 *V1) GetUserRoles(c echo.Context, r *chatv1.GetUserRolesRequest) (*chat
 	}
 
 	if !(ctx.IsOwner || v1.Perms.Check("roles.users.get", ctx.UserRoles, r.GuildId, 0)) {
-		return nil, ErrNoPermissions
+		return nil, responses.NewError(responses.NotEnoughPermissions)
 	}
 
 	roles, err := v1.DB.RolesForUser(r.GuildId, r.UserId)
@@ -1488,10 +1478,10 @@ func (v1 *V1) GetUser(c echo.Context, r *chatv1.GetUserRequest) (*chatv1.GetUser
 	res, err := v1.DB.GetUserByID(r.UserId)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, status.Error(codes.NotFound, responses.UserNotFound)
+			return nil, responses.NewError(responses.BadUserID)
 		}
 		v1.Logger.Exception(err)
-		return nil, status.Error(codes.Internal, responses.UnknownError)
+		return nil, err
 	}
 	return &chatv1.GetUserResponse{
 		UserName:   res.Username,
@@ -1518,10 +1508,10 @@ func (v1 *V1) GetUserMetadata(c echo.Context, r *chatv1.GetUserMetadataRequest) 
 	meta, err := v1.DB.GetUserMetadata(0, r.AppId)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, errors.New(responses.MetadataNotFound)
+			return nil, responses.NewError(responses.NoMetadata)
 		}
 		v1.Logger.Exception(err)
-		return nil, errors.New(responses.UnknownError)
+		return nil, err
 	}
 	return &chatv1.GetUserMetadataResponse{
 		Metadata: meta,
@@ -1546,26 +1536,26 @@ func (v1 *V1) ProfileUpdate(c echo.Context, r *chatv1.ProfileUpdateRequest) (*em
 	if r.UpdateStatus {
 		if err := v1.DB.SetStatus(ctx.UserID, r.NewStatus); err != nil {
 			v1.Logger.Exception(err)
-			return nil, errors.New(responses.UnknownError)
+			return nil, err
 		}
 	}
 	if r.UpdateUsername {
 		if err := v1.DB.SetUsername(ctx.UserID, r.NewUsername); err != nil {
 			v1.Logger.Exception(err)
-			return nil, errors.New(responses.UnknownError)
+			return nil, err
 		}
 	}
 	if r.UpdateAvatar {
 		if err := v1.DB.SetAvatar(ctx.UserID, r.NewAvatar); err != nil {
 			v1.Logger.Exception(err)
-			return nil, errors.New(responses.UnknownError)
+			return nil, err
 		}
 	}
 
 	if r.UpdateIsBot {
 		if err := v1.DB.SetIsBot(ctx.UserID, r.IsBot); err != nil {
 			v1.Logger.Exception(err)
-			return nil, errors.New(responses.UnknownError)
+			return nil, err
 		}
 	}
 

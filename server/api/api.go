@@ -1,6 +1,9 @@
 package api
 
 import (
+	"unsafe"
+
+	"github.com/golang/protobuf/proto"
 	"github.com/harmony-development/hrpc/server"
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
 	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
@@ -18,9 +21,12 @@ import (
 	"github.com/harmony-development/legato/server/http"
 	"github.com/harmony-development/legato/server/http/attachments/backend"
 	"github.com/harmony-development/legato/server/logger"
+	"github.com/harmony-development/legato/server/responses"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sony/sonyflake"
+
+	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 )
 
 type Dependencies struct {
@@ -52,6 +58,34 @@ func New(deps Dependencies) *API {
 		Perms:  api.Permissions,
 	})
 
+	api.Echo.HTTPErrorHandler = func(e error, c echo.Context) {
+		switch v := e.(type) {
+		case *responses.Error:
+			data, err := proto.Marshal((*harmonytypesv1.Error)(unsafe.Pointer(v)))
+			if err != nil {
+				c.Logger().Error(e)
+				return
+			}
+			if err := c.Blob(400, "application/octet-stream", data); err != nil {
+				c.Logger().Error(err)
+			}
+		default:
+			err := &harmonytypesv1.Error{
+				Identifier: responses.InternalServerError,
+			}
+			if api.Config.Server.Policies.Debug.RespondWithErrors {
+				err.HumanMessage = v.Error()
+			}
+			data, i := proto.Marshal(err)
+			if i != nil {
+				c.Logger().Error(i)
+				return
+			}
+			if err := c.Blob(500, "application/octet-stream", data); err != nil {
+				c.Logger().Error(err)
+			}
+		}
+	}
 	api.Echo.Use(middleware.Logger())
 	api.Echo.Use(middleware.AddTrailingSlash())
 	api.Echo.Use(middleware.Recover())

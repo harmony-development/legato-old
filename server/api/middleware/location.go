@@ -2,8 +2,6 @@ package middleware
 
 import (
 	"github.com/harmony-development/legato/server/responses"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 func (m Middlewares) LocationHandler(req interface{}, fullMethod string, userID uint64) error {
@@ -23,15 +21,15 @@ func (m Middlewares) LocationHandler(req interface{}, fullMethod string, userID 
 		guildID := location.GetGuildId()
 
 		if guildID == 0 {
-			return status.Error(codes.InvalidArgument, responses.MissingLocationGuild)
+			return responses.NewError(responses.MissingGuildID)
 		}
 
 		ok, err := m.DB.HasGuildWithID(guildID)
 		if err != nil {
-			return status.Error(codes.Internal, responses.InternalServerError)
+			return err
 		}
 		if !ok {
-			return status.Error(codes.FailedPrecondition, responses.BadLocationGuild)
+			return responses.NewError(responses.BadGuildID)
 		}
 
 		if locFlags.Has(ChannelLocation) {
@@ -46,14 +44,14 @@ func (m Middlewares) LocationHandler(req interface{}, fullMethod string, userID 
 			channelID := location.GetChannelId()
 
 			if channelID == 0 {
-				return status.Error(codes.InvalidArgument, responses.BadLocationChannel)
+				return responses.NewError(responses.MissingChannelID)
 			}
 			ok, err := m.DB.HasChannelWithID(guildID, channelID)
 			if err != nil {
-				return status.Error(codes.Internal, responses.InternalServerError)
+				return err
 			}
 			if !ok {
-				return status.Error(codes.FailedPrecondition, responses.BadLocationChannel)
+				return responses.NewError(responses.MissingChannelID)
 			}
 
 			if locFlags.Has(MessageLocation) {
@@ -68,36 +66,36 @@ func (m Middlewares) LocationHandler(req interface{}, fullMethod string, userID 
 				messageID := location.GetMessageId()
 
 				if messageID == 0 {
-					return status.Error(codes.InvalidArgument, responses.BadLocationMessage)
+					return responses.NewError(responses.MissingMessageID)
 				}
 				ok, err := m.DB.HasMessageWithID(guildID, channelID, messageID)
 				if err != nil {
-					return status.Error(codes.Internal, responses.InternalServerError)
+					return err
 				}
 				if !ok {
-					return status.Error(codes.FailedPrecondition, responses.BadLocationMessage)
+					return responses.NewError(responses.BadMessageID)
 				}
 				if locFlags.Has(AuthorLocation) {
 					owner, err := m.DB.GetMessageOwner(messageID)
 					if err != nil {
-						return status.Error(codes.Internal, responses.InternalServerError)
+						return err
 					}
 					if owner != userID {
-						return status.Error(codes.PermissionDenied, responses.BadLocationMessage)
+						return responses.NewError(responses.NotAuthor)
 					}
 				}
 			}
 		}
 		if locFlags.Has(JoinedLocation) {
 			if guildID == 0 {
-				return status.Error(codes.InvalidArgument, responses.MissingLocationGuild)
+				return responses.NewError(responses.MissingGuildID)
 			}
 			ok, err := m.DB.UserInGuild(userID, guildID)
 			if err != nil {
-				return status.Error(codes.Internal, responses.InternalServerError)
+				return err
 			}
 			if !ok {
-				return status.Error(codes.FailedPrecondition, responses.BadLocationGuild)
+				return responses.NewError(responses.NotJoined)
 			}
 		}
 	}

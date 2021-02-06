@@ -5,7 +5,6 @@ import (
 	"github.com/harmony-development/hrpc/server"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/time/rate"
-	"google.golang.org/grpc"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/descriptorpb"
 )
@@ -22,15 +21,6 @@ type HarmonyContext struct {
 
 type IHarmonyWrappedServerStream interface {
 	GetWrappedContext() HarmonyContext
-}
-
-type HarmonyWrappedServerStream struct {
-	grpc.ServerStream
-	WrappedContext HarmonyContext
-}
-
-func (ss HarmonyWrappedServerStream) GetWrappedContext() HarmonyContext {
-	return ss.WrappedContext
 }
 
 func (m Middlewares) HarmonyContextInterceptor(meth *descriptorpb.MethodDescriptorProto, d *descriptorpb.FileDescriptorProto, h server.Handler) server.Handler {
