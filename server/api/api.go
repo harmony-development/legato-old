@@ -3,7 +3,6 @@ package api
 import (
 	"unsafe"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/harmony-development/hrpc/server"
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
 	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
@@ -25,6 +24,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sony/sonyflake"
+	"google.golang.org/protobuf/proto"
 
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 )
