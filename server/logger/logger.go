@@ -26,6 +26,7 @@ type ILogger interface {
 	CheckException(err error)
 	Exception(err error)
 	Debug(d DebugScope, v ...interface{})
+	Verbose(d DebugScope, format string, v ...interface{})
 	Fatal(err error)
 	Warn(s string, v ...interface{})
 }
@@ -48,6 +49,17 @@ func (l Logger) CheckException(err error) {
 		return
 	}
 	l.Exception(err)
+}
+
+func (l Logger) Verbose(d DebugScope, format string, v ...interface{}) {
+	switch d {
+	case Streams:
+		if !l.Config.Server.Policies.Debug.VerboseStreamHandling {
+			return
+		}
+	}
+
+	logrus.Infof(format, v...)
 }
 
 // Exception logs an exception
