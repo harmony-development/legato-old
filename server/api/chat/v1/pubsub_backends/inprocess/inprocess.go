@@ -36,7 +36,7 @@ type StreamManager struct {
 // Init prepares a stream manager for use
 func (s *StreamManager) Init(l logger.ILogger, db types.IHarmonyDB) {
 	l.Verbose(logger.Streams, "Initialising stream manager...")
-	defer l.Verbose(logger.Streams, "Initialising stream manager...")
+	defer l.Verbose(logger.Streams, "Initialised stream manager...")
 
 	s.logger = l
 	s.database = db
