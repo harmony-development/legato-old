@@ -25,7 +25,7 @@ require (
 	github.com/google/uuid v1.2.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79
-	github.com/harmony-development/hrpc v0.0.0-20210205212703-e476737f7afc
+	github.com/harmony-development/hrpc v0.0.0-20210206204540-15bd187fc838
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/hashicorp/hcl/v2 v2.8.2
 	github.com/kr/text v0.2.0 // indirect
@@ -39,7 +39,7 @@ require (
 	github.com/muesli/smartcrop v0.3.0 // indirect
 	github.com/peterbourgon/diskv v0.0.0-20171120014656-2973218375c3
 	github.com/prometheus/client_golang v1.9.0 // indirect
-	github.com/prometheus/procfs v0.4.0 // indirect
+	github.com/prometheus/procfs v0.6.0 // indirect
 	github.com/sebdah/goldie/v2 v2.5.3 // indirect
 	github.com/sirupsen/logrus v1.7.0
 	github.com/sony/sonyflake v1.0.0
