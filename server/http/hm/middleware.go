@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db/queries"
 	"github.com/harmony-development/legato/server/db/types"
 	"github.com/harmony-development/legato/server/logger"
@@ -35,6 +36,7 @@ type Middlewares struct {
 	Logger     logger.ILogger
 	RateLimits map[string]map[string]*visitor
 	RateLock   sync.RWMutex
+	Config     *config.Config
 }
 
 func (hc *HarmonyContext) VerifyOwner(db types.IHarmonyDB, guildID, userID uint64) error {
@@ -49,10 +51,11 @@ func (hc *HarmonyContext) VerifyOwner(db types.IHarmonyDB, guildID, userID uint6
 }
 
 // New instantiates the middlewares for Harmony
-func New(db types.IHarmonyDB, logger logger.ILogger) *Middlewares {
+func New(db types.IHarmonyDB, logger logger.ILogger, cfg *config.Config) *Middlewares {
 	m := &Middlewares{
 		DB:         db,
 		Logger:     logger,
+		Config:     cfg,
 		RateLimits: make(map[string]map[string]*visitor),
 	}
 	go m.RateCleanup()

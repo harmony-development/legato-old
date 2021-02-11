@@ -29,7 +29,7 @@ type Dependencies struct {
 
 // New creates the /_harmony group of stuff
 func New(e *echo.Echo, deps Dependencies) {
-	m := hm.New(deps.DB, deps.Logger)
+	m := hm.New(deps.DB, deps.Logger, deps.Config)
 	s := &Server{
 		Dependencies: deps,
 		Router:       &routing.Router{Middlewares: m},
