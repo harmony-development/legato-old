@@ -40,7 +40,7 @@ func (client *MediaProxyServiceClient) FetchLinkMetadata(r *FetchLinkMetadataReq
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -70,7 +70,7 @@ func (client *MediaProxyServiceClient) InstantView(r *InstantViewRequest) (*Inst
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -100,7 +100,7 @@ func (client *MediaProxyServiceClient) CanInstantView(r *InstantViewRequest) (*C
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)

@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/harmony-development/hrpc/server"
 	"github.com/labstack/echo/v4"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/descriptorpb"
 )
@@ -17,8 +18,16 @@ func BindPB(obj interface{}, c echo.Context) error {
 		return err
 	}
 
-	if err = proto.Unmarshal(buf, obj.(proto.Message)); err != nil {
-		return err
+	ct := c.Request().Header.Get("Content-Type")
+	switch ct {
+	case "application/hrpc", "application/octet-stream":
+		if err = proto.Unmarshal(buf, obj.(proto.Message)); err != nil {
+			return err
+		}
+	case "application/hrpc-json":
+		if err = protojson.Unmarshal(buf, obj.(proto.Message)); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -116,11 +125,21 @@ func (h *VoiceServiceHandler) ConnectHandler(c echo.Context) error {
 			}
 
 			item := new(ClientSignal)
-			if err := proto.Unmarshal(data, item); err != nil {
-				close(in)
-				close(out)
-				c.Logger().Error(err)
-				return nil
+			switch c.Request().Header.Get("Content-Type") {
+			case "application/hrpc-json":
+				if err = protojson.Unmarshal(data, item); err != nil {
+					close(in)
+					close(out)
+					c.Logger().Error(err)
+					return nil
+				}
+			default:
+				if err = proto.Unmarshal(data, item); err != nil {
+					close(in)
+					close(out)
+					c.Logger().Error(err)
+					return nil
+				}
 			}
 
 			in <- item
@@ -139,7 +158,15 @@ func (h *VoiceServiceHandler) ConnectHandler(c echo.Context) error {
 				return nil
 			}
 
-			response, err := proto.Marshal(msg)
+			var response []byte
+
+			switch c.Request().Header.Get("Content-Type") {
+			case "application/hrpc-json":
+				response, err = protojson.Marshal(msg)
+			default:
+				response, err = proto.Marshal(msg)
+			}
+
 			if err != nil {
 
 				close(in)

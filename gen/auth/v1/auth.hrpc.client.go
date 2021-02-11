@@ -41,7 +41,7 @@ func (client *AuthServiceClient) Federate(r *FederateRequest) (*FederateReply, e
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -71,7 +71,7 @@ func (client *AuthServiceClient) LoginFederated(r *LoginFederatedRequest) (*Sess
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -101,7 +101,7 @@ func (client *AuthServiceClient) Key(r *empty.Empty) (*KeyReply, error) {
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -131,7 +131,7 @@ func (client *AuthServiceClient) BeginAuth(r *empty.Empty) (*BeginAuthResponse, 
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -161,7 +161,7 @@ func (client *AuthServiceClient) NextStep(r *NextStepRequest) (*AuthStep, error)
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -191,7 +191,7 @@ func (client *AuthServiceClient) StepBack(r *StepBackRequest) (*AuthStep, error)
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)

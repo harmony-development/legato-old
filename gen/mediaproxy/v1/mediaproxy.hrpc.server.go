@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/harmony-development/hrpc/server"
 	"github.com/labstack/echo/v4"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/descriptorpb"
 )
@@ -17,8 +18,16 @@ func BindPB(obj interface{}, c echo.Context) error {
 		return err
 	}
 
-	if err = proto.Unmarshal(buf, obj.(proto.Message)); err != nil {
-		return err
+	ct := c.Request().Header.Get("Content-Type")
+	switch ct {
+	case "application/hrpc", "application/octet-stream":
+		if err = proto.Unmarshal(buf, obj.(proto.Message)); err != nil {
+			return err
+		}
+	case "application/hrpc-json":
+		if err = protojson.Unmarshal(buf, obj.(proto.Message)); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -127,11 +136,25 @@ func (h *MediaProxyServiceHandler) FetchLinkMetadataHandler(c echo.Context) erro
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -154,11 +177,25 @@ func (h *MediaProxyServiceHandler) InstantViewHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -181,10 +218,24 @@ func (h *MediaProxyServiceHandler) CanInstantViewHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }

@@ -43,7 +43,7 @@ func (client *ChatServiceClient) CreateGuild(r *CreateGuildRequest) (*CreateGuil
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -73,7 +73,7 @@ func (client *ChatServiceClient) CreateInvite(r *CreateInviteRequest) (*CreateIn
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -103,7 +103,7 @@ func (client *ChatServiceClient) CreateChannel(r *CreateChannelRequest) (*Create
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -133,7 +133,7 @@ func (client *ChatServiceClient) CreateEmotePack(r *CreateEmotePackRequest) (*Cr
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -163,7 +163,7 @@ func (client *ChatServiceClient) GetGuildList(r *GetGuildListRequest) (*GetGuild
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -193,7 +193,7 @@ func (client *ChatServiceClient) AddGuildToGuildList(r *AddGuildToGuildListReque
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -223,7 +223,7 @@ func (client *ChatServiceClient) RemoveGuildFromGuildList(r *RemoveGuildFromGuil
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -253,7 +253,7 @@ func (client *ChatServiceClient) GetGuild(r *GetGuildRequest) (*GetGuildResponse
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -283,7 +283,7 @@ func (client *ChatServiceClient) GetGuildInvites(r *GetGuildInvitesRequest) (*Ge
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -313,7 +313,7 @@ func (client *ChatServiceClient) GetGuildMembers(r *GetGuildMembersRequest) (*Ge
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -343,7 +343,7 @@ func (client *ChatServiceClient) GetGuildChannels(r *GetGuildChannelsRequest) (*
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -373,7 +373,7 @@ func (client *ChatServiceClient) GetChannelMessages(r *GetChannelMessagesRequest
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -403,7 +403,7 @@ func (client *ChatServiceClient) GetMessage(r *GetMessageRequest) (*GetMessageRe
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -433,7 +433,7 @@ func (client *ChatServiceClient) GetEmotePacks(r *GetEmotePacksRequest) (*GetEmo
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -463,7 +463,7 @@ func (client *ChatServiceClient) GetEmotePackEmotes(r *GetEmotePackEmotesRequest
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -493,7 +493,7 @@ func (client *ChatServiceClient) UpdateGuildInformation(r *UpdateGuildInformatio
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -523,7 +523,7 @@ func (client *ChatServiceClient) UpdateChannelInformation(r *UpdateChannelInform
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -553,7 +553,7 @@ func (client *ChatServiceClient) UpdateChannelOrder(r *UpdateChannelOrderRequest
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -583,7 +583,7 @@ func (client *ChatServiceClient) UpdateMessage(r *UpdateMessageRequest) (*empty.
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -613,7 +613,7 @@ func (client *ChatServiceClient) AddEmoteToPack(r *AddEmoteToPackRequest) (*empt
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -643,7 +643,7 @@ func (client *ChatServiceClient) DeleteGuild(r *DeleteGuildRequest) (*empty.Empt
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -673,7 +673,7 @@ func (client *ChatServiceClient) DeleteInvite(r *DeleteInviteRequest) (*empty.Em
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -703,7 +703,7 @@ func (client *ChatServiceClient) DeleteChannel(r *DeleteChannelRequest) (*empty.
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -733,7 +733,7 @@ func (client *ChatServiceClient) DeleteMessage(r *DeleteMessageRequest) (*empty.
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -763,7 +763,7 @@ func (client *ChatServiceClient) DeleteEmoteFromPack(r *DeleteEmoteFromPackReque
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -793,7 +793,7 @@ func (client *ChatServiceClient) DeleteEmotePack(r *DeleteEmotePackRequest) (*em
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -823,7 +823,7 @@ func (client *ChatServiceClient) DequipEmotePack(r *DequipEmotePackRequest) (*em
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -853,7 +853,7 @@ func (client *ChatServiceClient) JoinGuild(r *JoinGuildRequest) (*JoinGuildRespo
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -883,7 +883,7 @@ func (client *ChatServiceClient) LeaveGuild(r *LeaveGuildRequest) (*empty.Empty,
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -913,7 +913,7 @@ func (client *ChatServiceClient) TriggerAction(r *TriggerActionRequest) (*empty.
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -943,7 +943,7 @@ func (client *ChatServiceClient) SendMessage(r *SendMessageRequest) (*SendMessag
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -973,7 +973,7 @@ func (client *ChatServiceClient) QueryHasPermission(r *QueryPermissionsRequest) 
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -1003,7 +1003,7 @@ func (client *ChatServiceClient) SetPermissions(r *SetPermissionsRequest) (*empt
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -1033,7 +1033,7 @@ func (client *ChatServiceClient) GetPermissions(r *GetPermissionsRequest) (*GetP
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -1063,7 +1063,7 @@ func (client *ChatServiceClient) MoveRole(r *MoveRoleRequest) (*MoveRoleResponse
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -1093,7 +1093,7 @@ func (client *ChatServiceClient) GetGuildRoles(r *GetGuildRolesRequest) (*GetGui
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -1123,7 +1123,7 @@ func (client *ChatServiceClient) AddGuildRole(r *AddGuildRoleRequest) (*AddGuild
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -1153,7 +1153,7 @@ func (client *ChatServiceClient) ModifyGuildRole(r *ModifyGuildRoleRequest) (*em
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -1183,7 +1183,7 @@ func (client *ChatServiceClient) DeleteGuildRole(r *DeleteGuildRoleRequest) (*em
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -1213,7 +1213,7 @@ func (client *ChatServiceClient) ManageUserRoles(r *ManageUserRolesRequest) (*em
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -1243,7 +1243,7 @@ func (client *ChatServiceClient) GetUserRoles(r *GetUserRolesRequest) (*GetUserR
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -1339,7 +1339,7 @@ func (client *ChatServiceClient) GetUser(r *GetUserRequest) (*GetUserResponse, e
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -1369,7 +1369,7 @@ func (client *ChatServiceClient) GetUserMetadata(r *GetUserMetadataRequest) (*Ge
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -1399,7 +1399,7 @@ func (client *ChatServiceClient) ProfileUpdate(r *ProfileUpdateRequest) (*empty.
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -1429,7 +1429,7 @@ func (client *ChatServiceClient) Typing(r *TypingRequest) (*empty.Empty, error) 
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)
@@ -1459,7 +1459,7 @@ func (client *ChatServiceClient) PreviewGuild(r *PreviewGuildRequest) (*PreviewG
 	for k, v := range client.Header {
 		req.Header[k] = v
 	}
-	req.Header.Add("content-type", "application/octet-stream")
+	req.Header.Add("content-type", "application/hrpc")
 	resp, err := client.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error posting request: %w", err)

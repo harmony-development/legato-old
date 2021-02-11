@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/harmony-development/hrpc/server"
 	"github.com/labstack/echo/v4"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/descriptorpb"
 )
@@ -18,8 +19,16 @@ func BindPB(obj interface{}, c echo.Context) error {
 		return err
 	}
 
-	if err = proto.Unmarshal(buf, obj.(proto.Message)); err != nil {
-		return err
+	ct := c.Request().Header.Get("Content-Type")
+	switch ct {
+	case "application/hrpc", "application/octet-stream":
+		if err = proto.Unmarshal(buf, obj.(proto.Message)); err != nil {
+			return err
+		}
+	case "application/hrpc-json":
+		if err = protojson.Unmarshal(buf, obj.(proto.Message)); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -803,11 +812,25 @@ func (h *ChatServiceHandler) CreateGuildHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -830,11 +853,25 @@ func (h *ChatServiceHandler) CreateInviteHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -857,11 +894,25 @@ func (h *ChatServiceHandler) CreateChannelHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -884,11 +935,25 @@ func (h *ChatServiceHandler) CreateEmotePackHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -911,11 +976,25 @@ func (h *ChatServiceHandler) GetGuildListHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -938,11 +1017,25 @@ func (h *ChatServiceHandler) AddGuildToGuildListHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -965,11 +1058,25 @@ func (h *ChatServiceHandler) RemoveGuildFromGuildListHandler(c echo.Context) err
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -992,11 +1099,25 @@ func (h *ChatServiceHandler) GetGuildHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1019,11 +1140,25 @@ func (h *ChatServiceHandler) GetGuildInvitesHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1046,11 +1181,25 @@ func (h *ChatServiceHandler) GetGuildMembersHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1073,11 +1222,25 @@ func (h *ChatServiceHandler) GetGuildChannelsHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1100,11 +1263,25 @@ func (h *ChatServiceHandler) GetChannelMessagesHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1127,11 +1304,25 @@ func (h *ChatServiceHandler) GetMessageHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1154,11 +1345,25 @@ func (h *ChatServiceHandler) GetEmotePacksHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1181,11 +1386,25 @@ func (h *ChatServiceHandler) GetEmotePackEmotesHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1208,11 +1427,25 @@ func (h *ChatServiceHandler) UpdateGuildInformationHandler(c echo.Context) error
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1235,11 +1468,25 @@ func (h *ChatServiceHandler) UpdateChannelInformationHandler(c echo.Context) err
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1262,11 +1509,25 @@ func (h *ChatServiceHandler) UpdateChannelOrderHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1289,11 +1550,25 @@ func (h *ChatServiceHandler) UpdateMessageHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1316,11 +1591,25 @@ func (h *ChatServiceHandler) AddEmoteToPackHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1343,11 +1632,25 @@ func (h *ChatServiceHandler) DeleteGuildHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1370,11 +1673,25 @@ func (h *ChatServiceHandler) DeleteInviteHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1397,11 +1714,25 @@ func (h *ChatServiceHandler) DeleteChannelHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1424,11 +1755,25 @@ func (h *ChatServiceHandler) DeleteMessageHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1451,11 +1796,25 @@ func (h *ChatServiceHandler) DeleteEmoteFromPackHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1478,11 +1837,25 @@ func (h *ChatServiceHandler) DeleteEmotePackHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1505,11 +1878,25 @@ func (h *ChatServiceHandler) DequipEmotePackHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1532,11 +1919,25 @@ func (h *ChatServiceHandler) JoinGuildHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1559,11 +1960,25 @@ func (h *ChatServiceHandler) LeaveGuildHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1586,11 +2001,25 @@ func (h *ChatServiceHandler) TriggerActionHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1613,11 +2042,25 @@ func (h *ChatServiceHandler) SendMessageHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1640,11 +2083,25 @@ func (h *ChatServiceHandler) QueryHasPermissionHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1667,11 +2124,25 @@ func (h *ChatServiceHandler) SetPermissionsHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1694,11 +2165,25 @@ func (h *ChatServiceHandler) GetPermissionsHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1721,11 +2206,25 @@ func (h *ChatServiceHandler) MoveRoleHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1748,11 +2247,25 @@ func (h *ChatServiceHandler) GetGuildRolesHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1775,11 +2288,25 @@ func (h *ChatServiceHandler) AddGuildRoleHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1802,11 +2329,25 @@ func (h *ChatServiceHandler) ModifyGuildRoleHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1829,11 +2370,25 @@ func (h *ChatServiceHandler) DeleteGuildRoleHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1856,11 +2411,25 @@ func (h *ChatServiceHandler) ManageUserRolesHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1883,11 +2452,25 @@ func (h *ChatServiceHandler) GetUserRolesHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -1929,11 +2512,21 @@ func (h *ChatServiceHandler) StreamEventsHandler(c echo.Context) error {
 			}
 
 			item := new(StreamEventsRequest)
-			if err := proto.Unmarshal(data, item); err != nil {
-				close(in)
-				close(out)
-				c.Logger().Error(err)
-				return nil
+			switch c.Request().Header.Get("Content-Type") {
+			case "application/hrpc-json":
+				if err = protojson.Unmarshal(data, item); err != nil {
+					close(in)
+					close(out)
+					c.Logger().Error(err)
+					return nil
+				}
+			default:
+				if err = proto.Unmarshal(data, item); err != nil {
+					close(in)
+					close(out)
+					c.Logger().Error(err)
+					return nil
+				}
 			}
 
 			in <- item
@@ -1952,7 +2545,15 @@ func (h *ChatServiceHandler) StreamEventsHandler(c echo.Context) error {
 				return nil
 			}
 
-			response, err := proto.Marshal(msg)
+			var response []byte
+
+			switch c.Request().Header.Get("Content-Type") {
+			case "application/hrpc-json":
+				response, err = protojson.Marshal(msg)
+			default:
+				response, err = proto.Marshal(msg)
+			}
+
 			if err != nil {
 
 				close(in)
@@ -2003,6 +2604,16 @@ func (h *ChatServiceHandler) SyncHandler(c echo.Context) error {
 		c.Logger().Error(err)
 		return nil
 	}
+	switch c.Request().Header.Get("Content-Type") {
+	case "application/hrpc-json":
+		if err = protojson.Unmarshal(message, in); err != nil {
+			return err
+		}
+	default:
+		if err = proto.Unmarshal(message, in); err != nil {
+			return err
+		}
+	}
 
 	out := make(chan *SyncEvent, 100)
 
@@ -2020,7 +2631,15 @@ func (h *ChatServiceHandler) SyncHandler(c echo.Context) error {
 			return nil
 		}
 
-		response, err := proto.Marshal(msg)
+		var response []byte
+
+		switch c.Request().Header.Get("Content-Type") {
+		case "application/hrpc-json":
+			response, err = protojson.Marshal(msg)
+		default:
+			response, err = proto.Marshal(msg)
+		}
+
 		if err != nil {
 
 			close(out)
@@ -2065,11 +2684,25 @@ func (h *ChatServiceHandler) GetUserHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -2092,11 +2725,25 @@ func (h *ChatServiceHandler) GetUserMetadataHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -2119,11 +2766,25 @@ func (h *ChatServiceHandler) ProfileUpdateHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -2146,11 +2807,25 @@ func (h *ChatServiceHandler) TypingHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
 
@@ -2173,10 +2848,24 @@ func (h *ChatServiceHandler) PreviewGuildHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	response, err := proto.Marshal(res)
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
 	if err != nil {
 		return err
 	}
-	return c.Blob(http.StatusOK, "application/octet-stream", response)
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
 
 }
