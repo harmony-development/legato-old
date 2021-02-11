@@ -155,6 +155,8 @@ func (s *StreamManager) BroadcastGuild(to uint64, event *chatv1.Event) {
 		s.RLock()
 		defer s.RUnlock()
 
+		s.logger.Verbose(logger.Streams, "User IDs subscribed to guild %d: %#v", to, s.guildIDToUserIDs[to])
+
 		for userID := range s.guildIDToUserIDs[to] {
 			s.logger.Verbose(logger.Streams, "Broadcasting guild event %+v to user %d for guild %d", event, userID, to)
 			for serv := range s.userIDToServers[userID] {
