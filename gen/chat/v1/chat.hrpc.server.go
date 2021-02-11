@@ -1900,9 +1900,9 @@ func (h *ChatServiceHandler) StreamEventsHandler(c echo.Context) error {
 	}
 	defer ws.Close()
 
-	in := make(chan *StreamEventsRequest)
+	in := make(chan *StreamEventsRequest, 100)
 
-	out := make(chan *Event)
+	out := make(chan *Event, 100)
 
 	h.Server.StreamEvents(c, in, out)
 
@@ -2004,7 +2004,7 @@ func (h *ChatServiceHandler) SyncHandler(c echo.Context) error {
 		return nil
 	}
 
-	out := make(chan *SyncEvent)
+	out := make(chan *SyncEvent, 100)
 
 	h.Server.Sync(c, in, out)
 

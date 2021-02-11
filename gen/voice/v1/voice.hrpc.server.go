@@ -87,9 +87,9 @@ func (h *VoiceServiceHandler) ConnectHandler(c echo.Context) error {
 	}
 	defer ws.Close()
 
-	in := make(chan *ClientSignal)
+	in := make(chan *ClientSignal, 100)
 
-	out := make(chan *Signal)
+	out := make(chan *Signal, 100)
 
 	h.Server.Connect(c, in, out)
 

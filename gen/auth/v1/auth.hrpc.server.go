@@ -351,7 +351,7 @@ func (h *AuthServiceHandler) StreamStepsHandler(c echo.Context) error {
 		return nil
 	}
 
-	out := make(chan *AuthStep)
+	out := make(chan *AuthStep, 100)
 
 	h.Server.StreamSteps(c, in, out)
 
