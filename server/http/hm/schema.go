@@ -6,11 +6,14 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/harmony-development/legato/server/http/responses"
 )
 
 func (m *Middlewares) Schema(schema interface{}) echo.MiddlewareFunc {
 	schemaType := reflect.TypeOf(schema)
+	v := &validator.Validate{}
+
 	return func(handler echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			ctx := c.(HarmonyContext)
@@ -22,7 +25,7 @@ func (m *Middlewares) Schema(schema interface{}) echo.MiddlewareFunc {
 				}
 				return echo.NewHTTPError(http.StatusBadRequest, responses.InvalidRequest)
 			}
-			if err := ctx.Validate(data); err != nil {
+			if err := v.Struct(data); err != nil {
 				if m.Config.Server.Policies.Debug.RespondWithErrors {
 					return echo.NewHTTPError(http.StatusBadRequest, err)
 				}
