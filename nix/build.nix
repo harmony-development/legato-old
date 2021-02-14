@@ -9,7 +9,7 @@ buildGoModule rec {
   buildInputs = [ vips ];
 
   # This needs to be updated every time go dependencies change
-  vendorSha256 = "sha256:0qi876q1svzn2lm2gac9ykl783syhwrb6cbdqdi6yy99ybwg3x13";
+  vendorSha256 = "sha256-XJZWjAuIVcA67FDO54SsKjNQ9UMkRngEv1ZSoV9+rJc=";
 
   subPackages = [ "." ];
 
