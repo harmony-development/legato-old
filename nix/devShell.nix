@@ -1,7 +1,12 @@
 { pkgs }:
 with pkgs;
 devshell.mkShell {
-  packages = [ go protobuf vips ];
+  packages = [ protobuf vips ];
+  commands = [
+    {
+      package = go;
+    }
+  ];
   env = [
     {
       name = "GOROOT";
