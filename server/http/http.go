@@ -37,7 +37,9 @@ func New(e *echo.Echo, deps Dependencies) {
 
 	harmony := e.Group("/_harmony")
 	harmony.Use(m.WithHarmony)
-	harmony.Use(middleware.CORS())
+	if deps.Config.Server.UseCORS {
+		harmony.Use(middleware.CORS())
+	}
 
 	attachmentsGrp := harmony.Group("/media")
 	if _, err := attachments.New(attachments.Dependencies{
