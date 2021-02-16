@@ -89,7 +89,9 @@ func New(deps Dependencies) *API {
 	api.Echo.Use(middleware.Logger())
 	api.Echo.Use(middleware.AddTrailingSlash())
 	api.Echo.Use(middleware.Recover())
-	api.Echo.Use(middleware.CORS())
+	if deps.Config.Server.UseCORS {
+		api.Echo.Use(middleware.CORS())
+	}
 
 	http.New(api.Echo, http.Dependencies{
 		DB:             deps.DB,
