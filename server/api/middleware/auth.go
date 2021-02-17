@@ -11,6 +11,10 @@ import (
 func (m *Middlewares) AuthHandler(c echo.Context) (uint64, error) {
 	session := c.Request().Header.Get("Authorization")
 
+	if session == "" {
+		session = c.Request().Header.Get("Sec-WebSocket-Protocol")
+	}
+
 	userID, err := m.DB.SessionToUserID(session)
 	if err != nil {
 		println("bad session")
