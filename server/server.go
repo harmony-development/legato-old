@@ -47,9 +47,6 @@ func (inst Instance) Start() {
 	inst.Sonyflake = sonyflake.NewSonyflake(sonyflake.Settings{
 		StartTime: time.Unix(cfg.Server.SnowflakeStart, 0),
 	})
-	if err := ConnectSentry(cfg); err != nil {
-		logrus.Fatal("Error connecting to sentry", err)
-	}
 	inst.Logger = logger.New(cfg)
 	bk := db.GetBackend(inst.Config.Database.Backend)
 	if bk == nil {

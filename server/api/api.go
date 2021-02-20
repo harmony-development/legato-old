@@ -4,6 +4,8 @@ import (
 	"unsafe"
 
 	"github.com/alecthomas/repr"
+	"github.com/getsentry/sentry-go"
+	sentryecho "github.com/getsentry/sentry-go/echo"
 	"github.com/harmony-development/hrpc/server"
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
 	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
@@ -60,6 +62,9 @@ func New(deps Dependencies) *API {
 	})
 
 	api.Echo.HTTPErrorHandler = func(e error, c echo.Context) {
+		if deps.Config.Sentry.Enabled {
+			sentry.CaptureException(e)
+		}
 		if deps.Config.Server.Policies.Debug.LogErrors && e != nil {
 			c.Logger().Error(repr.String(e))
 		}
@@ -93,6 +98,17 @@ func New(deps Dependencies) *API {
 	api.Echo.Use(middleware.Logger())
 	api.Echo.Use(middleware.AddTrailingSlash())
 	api.Echo.Use(middleware.Recover())
+
+	if deps.Config.Sentry.Enabled {
+		if err := sentry.Init(sentry.ClientOptions{
+			Dsn: deps.Config.Sentry.DSN,
+		}); err != nil {
+			panic(err)
+		}
+		api.Echo.Use(sentryecho.New(sentryecho.Options{
+			Repanic: true,
+		}))
+	}
 	if deps.Config.Server.UseCORS {
 		api.Echo.Use(middleware.CORS())
 	}
