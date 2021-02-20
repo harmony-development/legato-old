@@ -44,6 +44,17 @@ func init() {
 	}
 }
 
+var MediaProxyServiceData *descriptorpb.ServiceDescriptorProto = new(descriptorpb.ServiceDescriptorProto)
+
+func init() {
+	data := []byte("\n\x11MediaProxyService\x12r\n\x11FetchLinkMetadata\x120.protocol.mediaproxy.v1.FetchLinkMetadataRequest\x1a$.protocol.mediaproxy.v1.SiteMetadata\"\x05\x9aD\x02\b\x01\x12m\n\vInstantView\x12*.protocol.mediaproxy.v1.InstantViewRequest\x1a+.protocol.mediaproxy.v1.InstantViewResponse\"\x05\x9aD\x02\b\x01\x12s\n\x0eCanInstantView\x12*.protocol.mediaproxy.v1.InstantViewRequest\x1a..protocol.mediaproxy.v1.CanInstantViewResponse\"\x05\x9aD\x02\b\x01")
+
+	err := proto.Unmarshal(data, MediaProxyServiceData)
+	if err != nil {
+		panic(err)
+	}
+}
+
 type MediaProxyServiceServer interface {
 	FetchLinkMetadata(ctx echo.Context, r *FetchLinkMetadataRequest) (resp *SiteMetadata, err error)
 
@@ -129,7 +140,7 @@ func (h *MediaProxyServiceHandler) FetchLinkMetadataHandler(c echo.Context) erro
 	}
 
 	if h.UnaryPre != nil {
-		invoker = h.UnaryPre(MediaProxyServiceServerFetchLinkMetadataData, Mediaproxyᐳv1ᐳmediaproxy, invoker)
+		invoker = h.UnaryPre(MediaProxyServiceServerFetchLinkMetadataData, MediaProxyServiceData, Mediaproxyᐳv1ᐳmediaproxy, invoker)
 	}
 
 	res, err := invoker(c, requestProto)
@@ -170,7 +181,7 @@ func (h *MediaProxyServiceHandler) InstantViewHandler(c echo.Context) error {
 	}
 
 	if h.UnaryPre != nil {
-		invoker = h.UnaryPre(MediaProxyServiceServerInstantViewData, Mediaproxyᐳv1ᐳmediaproxy, invoker)
+		invoker = h.UnaryPre(MediaProxyServiceServerInstantViewData, MediaProxyServiceData, Mediaproxyᐳv1ᐳmediaproxy, invoker)
 	}
 
 	res, err := invoker(c, requestProto)
@@ -211,7 +222,7 @@ func (h *MediaProxyServiceHandler) CanInstantViewHandler(c echo.Context) error {
 	}
 
 	if h.UnaryPre != nil {
-		invoker = h.UnaryPre(MediaProxyServiceServerCanInstantViewData, Mediaproxyᐳv1ᐳmediaproxy, invoker)
+		invoker = h.UnaryPre(MediaProxyServiceServerCanInstantViewData, MediaProxyServiceData, Mediaproxyᐳv1ᐳmediaproxy, invoker)
 	}
 
 	res, err := invoker(c, requestProto)

@@ -14,7 +14,7 @@ import (
 )
 
 // UnaryRecoveryFunc recovers unary requests
-func (m Middlewares) UnaryRecoveryFunc(meth *descriptorpb.MethodDescriptorProto, d *descriptorpb.FileDescriptorProto, h server.Handler) server.Handler {
+func (m Middlewares) UnaryRecoveryFunc(meth *descriptorpb.MethodDescriptorProto, serv *descriptorpb.ServiceDescriptorProto, d *descriptorpb.FileDescriptorProto, h server.Handler) server.Handler {
 	return func(c echo.Context, req protoreflect.ProtoMessage) (msg protoreflect.ProtoMessage, err error) {
 		defer func() {
 			if r := recover(); r != nil {

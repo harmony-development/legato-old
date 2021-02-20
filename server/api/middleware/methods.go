@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"fmt"
+
 	"github.com/harmony-development/hrpc/server"
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/responses"
@@ -12,7 +14,7 @@ import (
 
 var Methods map[string]*descriptorpb.MethodDescriptorProto
 
-func (m Middlewares) MethodMetadataInterceptor(meth *descriptorpb.MethodDescriptorProto, d *descriptorpb.FileDescriptorProto, h server.Handler) server.Handler {
+func (m Middlewares) MethodMetadataInterceptor(meth *descriptorpb.MethodDescriptorProto, serv *descriptorpb.ServiceDescriptorProto, d *descriptorpb.FileDescriptorProto, h server.Handler) server.Handler {
 	return func(c echo.Context, req protoreflect.ProtoMessage) (protoreflect.ProtoMessage, error) {
 		ctx := c.(HarmonyContext)
 		opts := proto.GetExtension(meth.Options, harmonytypesv1.E_Metadata).(*harmonytypesv1.HarmonyMethodMetadata)
@@ -55,7 +57,7 @@ func (m Middlewares) MethodMetadataInterceptor(meth *descriptorpb.MethodDescript
 		// Permissions
 		{
 			if opts.RequiresPermissionNode == "" {
-				if GetRPCConfig(meth.GetName()).WantsRoles {
+				if GetRPCConfig(fmt.Sprintf("/%s.%s/%s", d.GetPackage(), serv.GetName(), meth.GetName())).WantsRoles {
 					location, ok := req.(interface {
 						GetGuildId() uint64
 					})

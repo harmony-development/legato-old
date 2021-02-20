@@ -44,6 +44,17 @@ func init() {
 	}
 }
 
+var VoiceServiceData *descriptorpb.ServiceDescriptorProto = new(descriptorpb.ServiceDescriptorProto)
+
+func init() {
+	data := []byte("\n\fVoiceService\x12K\n\aConnect\x12\x1f.protocol.voice.v1.ClientSignal\x1a\x19.protocol.voice.v1.Signal\"\x00(\x010\x01")
+
+	err := proto.Unmarshal(data, VoiceServiceData)
+	if err != nil {
+		panic(err)
+	}
+}
+
 type VoiceServiceServer interface {
 	Connect(ctx echo.Context, in chan *ClientSignal, out chan *Signal)
 }

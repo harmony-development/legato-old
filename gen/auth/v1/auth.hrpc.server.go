@@ -45,6 +45,17 @@ func init() {
 	}
 }
 
+var AuthServiceData *descriptorpb.ServiceDescriptorProto = new(descriptorpb.ServiceDescriptorProto)
+
+func init() {
+	data := []byte("\n\vAuthService\x12N\n\bFederate\x12!.protocol.auth.v1.FederateRequest\x1a\x1f.protocol.auth.v1.FederateReply\x12T\n\x0eLoginFederated\x12'.protocol.auth.v1.LoginFederatedRequest\x1a\x19.protocol.auth.v1.Session\x129\n\x03Key\x12\x16.google.protobuf.Empty\x1a\x1a.protocol.auth.v1.KeyReply\x12H\n\tBeginAuth\x12\x16.google.protobuf.Empty\x1a#.protocol.auth.v1.BeginAuthResponse\x12I\n\bNextStep\x12!.protocol.auth.v1.NextStepRequest\x1a\x1a.protocol.auth.v1.AuthStep\x12I\n\bStepBack\x12!.protocol.auth.v1.StepBackRequest\x1a\x1a.protocol.auth.v1.AuthStep\x12Q\n\vStreamSteps\x12$.protocol.auth.v1.StreamStepsRequest\x1a\x1a.protocol.auth.v1.AuthStep0\x01")
+
+	err := proto.Unmarshal(data, AuthServiceData)
+	if err != nil {
+		panic(err)
+	}
+}
+
 type AuthServiceServer interface {
 	Federate(ctx echo.Context, r *FederateRequest) (resp *FederateReply, err error)
 
@@ -190,7 +201,7 @@ func (h *AuthServiceHandler) FederateHandler(c echo.Context) error {
 	}
 
 	if h.UnaryPre != nil {
-		invoker = h.UnaryPre(AuthServiceServerFederateData, Authᐳv1ᐳauth, invoker)
+		invoker = h.UnaryPre(AuthServiceServerFederateData, AuthServiceData, Authᐳv1ᐳauth, invoker)
 	}
 
 	res, err := invoker(c, requestProto)
@@ -231,7 +242,7 @@ func (h *AuthServiceHandler) LoginFederatedHandler(c echo.Context) error {
 	}
 
 	if h.UnaryPre != nil {
-		invoker = h.UnaryPre(AuthServiceServerLoginFederatedData, Authᐳv1ᐳauth, invoker)
+		invoker = h.UnaryPre(AuthServiceServerLoginFederatedData, AuthServiceData, Authᐳv1ᐳauth, invoker)
 	}
 
 	res, err := invoker(c, requestProto)
@@ -272,7 +283,7 @@ func (h *AuthServiceHandler) KeyHandler(c echo.Context) error {
 	}
 
 	if h.UnaryPre != nil {
-		invoker = h.UnaryPre(AuthServiceServerKeyData, Authᐳv1ᐳauth, invoker)
+		invoker = h.UnaryPre(AuthServiceServerKeyData, AuthServiceData, Authᐳv1ᐳauth, invoker)
 	}
 
 	res, err := invoker(c, requestProto)
@@ -313,7 +324,7 @@ func (h *AuthServiceHandler) BeginAuthHandler(c echo.Context) error {
 	}
 
 	if h.UnaryPre != nil {
-		invoker = h.UnaryPre(AuthServiceServerBeginAuthData, Authᐳv1ᐳauth, invoker)
+		invoker = h.UnaryPre(AuthServiceServerBeginAuthData, AuthServiceData, Authᐳv1ᐳauth, invoker)
 	}
 
 	res, err := invoker(c, requestProto)
@@ -354,7 +365,7 @@ func (h *AuthServiceHandler) NextStepHandler(c echo.Context) error {
 	}
 
 	if h.UnaryPre != nil {
-		invoker = h.UnaryPre(AuthServiceServerNextStepData, Authᐳv1ᐳauth, invoker)
+		invoker = h.UnaryPre(AuthServiceServerNextStepData, AuthServiceData, Authᐳv1ᐳauth, invoker)
 	}
 
 	res, err := invoker(c, requestProto)
@@ -395,7 +406,7 @@ func (h *AuthServiceHandler) StepBackHandler(c echo.Context) error {
 	}
 
 	if h.UnaryPre != nil {
-		invoker = h.UnaryPre(AuthServiceServerStepBackData, Authᐳv1ᐳauth, invoker)
+		invoker = h.UnaryPre(AuthServiceServerStepBackData, AuthServiceData, Authᐳv1ᐳauth, invoker)
 	}
 
 	res, err := invoker(c, requestProto)

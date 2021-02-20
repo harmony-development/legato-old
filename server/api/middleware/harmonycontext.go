@@ -23,7 +23,7 @@ type IHarmonyWrappedServerStream interface {
 	GetWrappedContext() HarmonyContext
 }
 
-func (m Middlewares) HarmonyContextInterceptor(meth *descriptorpb.MethodDescriptorProto, d *descriptorpb.FileDescriptorProto, h server.Handler) server.Handler {
+func (m Middlewares) HarmonyContextInterceptor(meth *descriptorpb.MethodDescriptorProto, serv *descriptorpb.ServiceDescriptorProto, d *descriptorpb.FileDescriptorProto, h server.Handler) server.Handler {
 	return func(c echo.Context, req protoreflect.ProtoMessage) (protoreflect.ProtoMessage, error) {
 		return h(HarmonyContext{
 			Context: c,
