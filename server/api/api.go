@@ -3,6 +3,7 @@ package api
 import (
 	"unsafe"
 
+	"github.com/alecthomas/repr"
 	"github.com/harmony-development/hrpc/server"
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
 	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
@@ -59,8 +60,8 @@ func New(deps Dependencies) *API {
 	})
 
 	api.Echo.HTTPErrorHandler = func(e error, c echo.Context) {
-		if deps.Config.Server.Policies.Debug.LogErrors {
-			c.Logger().Error(e)
+		if deps.Config.Server.Policies.Debug.LogErrors && e != nil {
+			c.Logger().Error(repr.String(e))
 		}
 		switch v := e.(type) {
 		case *responses.Error:
