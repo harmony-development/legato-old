@@ -142,3 +142,20 @@ SELECT Channel_ID
 FROM Channels
 WHERE Guild_ID = $1
 FETCH FIRST ROW ONLY;
+
+-- name: BanUser :exec
+INSERT INTO Bans (Guild_ID, User_ID)
+VALUES ($1, $2) ON CONFLICT DO NOTHING;
+
+-- name: IsBanned :one
+SELECT EXISTS(
+        SELECT 1
+        FROM Bans
+        WHERE Guild_ID = $1
+            AND User_ID = $2
+    );
+
+-- name: UnbanUser :exec
+DELETE FROM Bans
+WHERE Guild_ID = $1
+    AND User_ID = $2;

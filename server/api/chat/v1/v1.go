@@ -799,6 +799,12 @@ func (v1 *V1) JoinGuild(c echo.Context, r *chatv1.JoinGuildRequest) (*chatv1.Joi
 		}
 		return nil, err
 	}
+	if banned, err := v1.DB.IsBanned(guildID, ctx.UserID); banned || err != nil {
+		if err != nil {
+			return nil, responses.NewError(responses.InternalServerError)
+		}
+		return nil, responses.NewError(responses.BannedFromGuild)
+	}
 	if err := v1.DB.AddMemberToGuild(ctx.UserID, guildID); err != nil {
 		return nil, err
 	}
@@ -1674,4 +1680,85 @@ func (v1 *V1) sendMessage(guildID, channelID uint64, content, displayUsername st
 		},
 	})
 	return nil
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    4,
+		},
+		Location: middleware.GuildLocation,
+	}, "/protocol.chat.v1.ChatService/BanUser")
+}
+
+func (v1 *V1) BanUser(c echo.Context, r *chatv1.BanUserRequest) (*empty.Empty, error) {
+	if err := v1.DB.DeleteMember(r.GuildId, r.UserId); err != nil {
+		return nil, err
+	}
+	if err := v1.DB.BanUser(r.GuildId, r.UserId); err != nil {
+		return nil, err
+	}
+	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
+		Event: &chatv1.Event_LeftMember{
+			LeftMember: &chatv1.Event_MemberLeft{
+				MemberId:    r.UserId,
+				GuildId:     r.GuildId,
+				LeaveReason: chatv1.Event_banned,
+			},
+		},
+	})
+	return &emptypb.Empty{}, nil
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    4,
+		},
+		Location: middleware.GuildLocation,
+	}, "/protocol.chat.v1.ChatService/KickUser")
+}
+
+func (v1 *V1) KickUser(c echo.Context, r *chatv1.KickUserRequest) (*empty.Empty, error) {
+	if err := v1.DB.DeleteMember(r.GuildId, r.UserId); err != nil {
+		return nil, err
+	}
+	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
+		Event: &chatv1.Event_LeftMember{
+			LeftMember: &chatv1.Event_MemberLeft{
+				MemberId:    r.UserId,
+				GuildId:     r.GuildId,
+				LeaveReason: chatv1.Event_kicked,
+			},
+		},
+	})
+	return &emptypb.Empty{}, nil
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    4,
+		},
+		Location: middleware.GuildLocation,
+	}, "/protocol.chat.v1.ChatService/UnbanUser")
+}
+
+func (v1 *V1) UnbanUser(c echo.Context, r *chatv1.UnbanUserRequest) (*empty.Empty, error) {
+	if err := v1.DB.UnbanUser(r.GuildId, r.UserId); err != nil {
+		return nil, err
+	}
+	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
+		Event: &chatv1.Event_LeftMember{
+			LeftMember: &chatv1.Event_MemberLeft{
+				MemberId:    r.UserId,
+				GuildId:     r.GuildId,
+				LeaveReason: chatv1.Event_kicked,
+			},
+		},
+	})
+	return &emptypb.Empty{}, nil
 }

@@ -13,6 +13,11 @@ type AcquiredEmotePack struct {
 	UserID uint64 `json:"user_id"`
 }
 
+type Ban struct {
+	GuildID uint64 `json:"guild_id"`
+	UserID  uint64 `json:"user_id"`
+}
+
 type Channel struct {
 	ChannelID   uint64        `json:"channel_id"`
 	GuildID     sql.NullInt64 `json:"guild_id"`

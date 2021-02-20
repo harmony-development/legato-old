@@ -23,6 +23,21 @@ func (q *Queries) AddUserToGuild(ctx context.Context, arg AddUserToGuildParams) 
 	return err
 }
 
+const banUser = `-- name: BanUser :exec
+INSERT INTO Bans (Guild_ID, User_ID)
+VALUES ($1, $2) ON CONFLICT DO NOTHING
+`
+
+type BanUserParams struct {
+	GuildID uint64 `json:"guild_id"`
+	UserID  uint64 `json:"user_id"`
+}
+
+func (q *Queries) BanUser(ctx context.Context, arg BanUserParams) error {
+	_, err := q.exec(ctx, q.banUserStmt, banUser, arg.GuildID, arg.UserID)
+	return err
+}
+
 const countMembersInGuild = `-- name: CountMembersInGuild :one
 SELECT COUNT(*)
 FROM Guild_Members
@@ -376,6 +391,27 @@ func (q *Queries) GuildsForUserWithData(ctx context.Context, userID uint64) ([]G
 	return items, nil
 }
 
+const isBanned = `-- name: IsBanned :one
+SELECT EXISTS(
+        SELECT 1
+        FROM Bans
+        WHERE Guild_ID = $1
+            AND User_ID = $2
+    )
+`
+
+type IsBannedParams struct {
+	GuildID uint64 `json:"guild_id"`
+	UserID  uint64 `json:"user_id"`
+}
+
+func (q *Queries) IsBanned(ctx context.Context, arg IsBannedParams) (bool, error) {
+	row := q.queryRow(ctx, q.isBannedStmt, isBanned, arg.GuildID, arg.UserID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const moveChannel = `-- name: MoveChannel :exec
 UPDATE Channels
 SET Position = $1
@@ -474,6 +510,22 @@ type SetGuildPictureParams struct {
 
 func (q *Queries) SetGuildPicture(ctx context.Context, arg SetGuildPictureParams) error {
 	_, err := q.exec(ctx, q.setGuildPictureStmt, setGuildPicture, arg.PictureUrl, arg.GuildID)
+	return err
+}
+
+const unbanUser = `-- name: UnbanUser :exec
+DELETE FROM Bans
+WHERE Guild_ID = $1
+    AND User_ID = $2
+`
+
+type UnbanUserParams struct {
+	GuildID uint64 `json:"guild_id"`
+	UserID  uint64 `json:"user_id"`
+}
+
+func (q *Queries) UnbanUser(ctx context.Context, arg UnbanUserParams) error {
+	_, err := q.exec(ctx, q.unbanUserStmt, unbanUser, arg.GuildID, arg.UserID)
 	return err
 }
 

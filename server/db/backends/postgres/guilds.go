@@ -266,3 +266,24 @@ func (db *database) GetFirstChannel(guildID uint64) (uint64, error) {
 	data, err := db.queries.GetFirstChannel(ctx, utilities.ToSqlInt64(guildID))
 	return data, err
 }
+
+func (db *database) BanUser(guildID, userID uint64) error {
+	return db.queries.BanUser(ctx, queries.BanUserParams{
+		GuildID: guildID,
+		UserID:  userID,
+	})
+}
+
+func (db *database) UnbanUser(guildID, userID uint64) error {
+	return db.queries.UnbanUser(ctx, queries.UnbanUserParams{
+		GuildID: guildID,
+		UserID:  userID,
+	})
+}
+
+func (db *database) IsBanned(guildID, userID uint64) (bool, error) {
+	return db.queries.IsBanned(ctx, queries.IsBannedParams{
+		GuildID: guildID,
+		UserID:  userID,
+	})
+}

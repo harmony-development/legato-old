@@ -67,6 +67,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.addUserToRoleStmt, err = db.PrepareContext(ctx, addUserToRole); err != nil {
 		return nil, fmt.Errorf("error preparing query AddUserToRole: %w", err)
 	}
+	if q.banUserStmt, err = db.PrepareContext(ctx, banUser); err != nil {
+		return nil, fmt.Errorf("error preparing query BanUser: %w", err)
+	}
 	if q.countMembersInGuildStmt, err = db.PrepareContext(ctx, countMembersInGuild); err != nil {
 		return nil, fmt.Errorf("error preparing query CountMembersInGuild: %w", err)
 	}
@@ -226,6 +229,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.incrementInviteStmt, err = db.PrepareContext(ctx, incrementInvite); err != nil {
 		return nil, fmt.Errorf("error preparing query IncrementInvite: %w", err)
 	}
+	if q.isBannedStmt, err = db.PrepareContext(ctx, isBanned); err != nil {
+		return nil, fmt.Errorf("error preparing query IsBanned: %w", err)
+	}
 	if q.isBotStmt, err = db.PrepareContext(ctx, isBot); err != nil {
 		return nil, fmt.Errorf("error preparing query IsBot: %w", err)
 	}
@@ -315,6 +321,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.setStatusStmt, err = db.PrepareContext(ctx, setStatus); err != nil {
 		return nil, fmt.Errorf("error preparing query SetStatus: %w", err)
+	}
+	if q.unbanUserStmt, err = db.PrepareContext(ctx, unbanUser); err != nil {
+		return nil, fmt.Errorf("error preparing query UnbanUser: %w", err)
 	}
 	if q.updateAvatarStmt, err = db.PrepareContext(ctx, updateAvatar); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateAvatar: %w", err)
@@ -442,6 +451,11 @@ func (q *Queries) Close() error {
 	if q.addUserToRoleStmt != nil {
 		if cerr := q.addUserToRoleStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing addUserToRoleStmt: %w", cerr)
+		}
+	}
+	if q.banUserStmt != nil {
+		if cerr := q.banUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing banUserStmt: %w", cerr)
 		}
 	}
 	if q.countMembersInGuildStmt != nil {
@@ -709,6 +723,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing incrementInviteStmt: %w", cerr)
 		}
 	}
+	if q.isBannedStmt != nil {
+		if cerr := q.isBannedStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing isBannedStmt: %w", cerr)
+		}
+	}
 	if q.isBotStmt != nil {
 		if cerr := q.isBotStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing isBotStmt: %w", cerr)
@@ -859,6 +878,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing setStatusStmt: %w", cerr)
 		}
 	}
+	if q.unbanUserStmt != nil {
+		if cerr := q.unbanUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing unbanUserStmt: %w", cerr)
+		}
+	}
 	if q.updateAvatarStmt != nil {
 		if cerr := q.updateAvatarStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateAvatarStmt: %w", cerr)
@@ -993,6 +1017,7 @@ type Queries struct {
 	addUserStmt                                    *sql.Stmt
 	addUserToGuildStmt                             *sql.Stmt
 	addUserToRoleStmt                              *sql.Stmt
+	banUserStmt                                    *sql.Stmt
 	countMembersInGuildStmt                        *sql.Stmt
 	createChannelStmt                              *sql.Stmt
 	createEmotePackStmt                            *sql.Stmt
@@ -1046,6 +1071,7 @@ type Queries struct {
 	guildsForUserStmt                              *sql.Stmt
 	guildsForUserWithDataStmt                      *sql.Stmt
 	incrementInviteStmt                            *sql.Stmt
+	isBannedStmt                                   *sql.Stmt
 	isBotStmt                                      *sql.Stmt
 	isIPWhitelistedStmt                            *sql.Stmt
 	isUserWhitelistedStmt                          *sql.Stmt
@@ -1076,6 +1102,7 @@ type Queries struct {
 	setRoleNameStmt                                *sql.Stmt
 	setRolePingableStmt                            *sql.Stmt
 	setStatusStmt                                  *sql.Stmt
+	unbanUserStmt                                  *sql.Stmt
 	updateAvatarStmt                               *sql.Stmt
 	updateChannelMetadataStmt                      *sql.Stmt
 	updateChannelNameStmt                          *sql.Stmt
@@ -1113,6 +1140,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		addUserStmt:                      q.addUserStmt,
 		addUserToGuildStmt:               q.addUserToGuildStmt,
 		addUserToRoleStmt:                q.addUserToRoleStmt,
+		banUserStmt:                      q.banUserStmt,
 		countMembersInGuildStmt:          q.countMembersInGuildStmt,
 		createChannelStmt:                q.createChannelStmt,
 		createEmotePackStmt:              q.createEmotePackStmt,
@@ -1166,6 +1194,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		guildsForUserStmt:                              q.guildsForUserStmt,
 		guildsForUserWithDataStmt:                      q.guildsForUserWithDataStmt,
 		incrementInviteStmt:                            q.incrementInviteStmt,
+		isBannedStmt:                                   q.isBannedStmt,
 		isBotStmt:                                      q.isBotStmt,
 		isIPWhitelistedStmt:                            q.isIPWhitelistedStmt,
 		isUserWhitelistedStmt:                          q.isUserWhitelistedStmt,
@@ -1196,6 +1225,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		setRoleNameStmt:                                q.setRoleNameStmt,
 		setRolePingableStmt:                            q.setRolePingableStmt,
 		setStatusStmt:                                  q.setStatusStmt,
+		unbanUserStmt:                                  q.unbanUserStmt,
 		updateAvatarStmt:                               q.updateAvatarStmt,
 		updateChannelMetadataStmt:                      q.updateChannelMetadataStmt,
 		updateChannelNameStmt:                          q.updateChannelNameStmt,

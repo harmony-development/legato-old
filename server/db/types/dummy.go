@@ -362,3 +362,15 @@ func (d DummyDB) GetFirstChannel(guildID uint64) (uint64, error) {
 func (d DummyDB) ExtendSession(session string) error {
 	panic("unimplemented")
 }
+
+func (d DummyDB) BanUser(guildID, userID uint64) error {
+	panic("unimplemented")
+}
+
+func (d DummyDB) IsBanned(guildID, userID uint64) (bool, error) {
+	panic("unimplemented")
+}
+
+func (d DummyDB) UnbanUser(guildID, userID uint64) error {
+	panic("unimplemented")
+}

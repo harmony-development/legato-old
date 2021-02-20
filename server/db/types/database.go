@@ -36,6 +36,9 @@ type IHarmonyDB interface {
 	GetGuildPicture(guildID uint64) (string, error)
 	GetInvites(guildID uint64) ([]queries.Invite, error)
 	DeleteMember(guildID, userID uint64) error
+	BanUser(guildID, userID uint64) error
+	IsBanned(guildID, userID uint64) (bool, error)
+	UnbanUser(guildID, userID uint64) error
 	GetLocalGuilds(userID uint64) ([]uint64, error)
 	ChannelsForGuild(guildID uint64) ([]queries.Channel, error)
 	MembersInGuild(guildID uint64) ([]uint64, error)

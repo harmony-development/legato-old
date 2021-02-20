@@ -49,6 +49,8 @@ const (
 	BadChoice = "h.bad-auth-choice"
 
 	MissingForm = "h.missing-form"
+
+	BannedFromGuild = "h.banned-from-guild"
 )
 
 // Error is a wrapper around harmonytypesv1.Error implementing the Error interface

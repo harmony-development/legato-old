@@ -1423,6 +1423,8 @@ func (m *Event_MemberLeft) Validate() error {
 
 	// no validation rules for GuildId
 
+	// no validation rules for LeaveReason
+
 	return nil
 }
 
