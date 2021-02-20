@@ -59,6 +59,9 @@ func New(deps Dependencies) *API {
 	})
 
 	api.Echo.HTTPErrorHandler = func(e error, c echo.Context) {
+		if deps.Config.Server.Policies.Debug.LogErrors {
+			c.Logger().Error(e)
+		}
 		switch v := e.(type) {
 		case *responses.Error:
 			data, err := proto.Marshal((*harmonytypesv1.Error)(unsafe.Pointer(v)))
