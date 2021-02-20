@@ -15,7 +15,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/dyatlov/go-opengraph v0.0.0-20210112100619-dae8665a5b09
-	github.com/getsentry/sentry-go v0.10.0
+	github.com/harmony-development/sentry-go v0.11.0
 	github.com/go-errors/errors v1.1.1 // indirect
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/go-test/deep v1.0.7 // indirect

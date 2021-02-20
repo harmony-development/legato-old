@@ -7,7 +7,7 @@ import (
 
 	"github.com/harmony-development/legato/server/data"
 
-	"github.com/getsentry/sentry-go"
+	"github.com/harmony-development/sentry-go"
 	"github.com/sirupsen/logrus"
 	"github.com/ztrue/tracerr"
 )
