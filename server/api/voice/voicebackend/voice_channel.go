@@ -24,18 +24,23 @@ func (vc *VoiceChannel) NewPeer(userID uint64) (*webrtc.PeerConnection, error) {
 		return nil, err
 	}
 	vc.Lock()
-	vc.peerConnections[userID] = &Peer{
+	peer := &Peer{
 		pc:          pc,
 		addedTracks: map[uint64]*webrtc.RTPSender{},
 	}
+	vc.peerConnections[userID] = peer
 	vc.Unlock()
 	if _, err := pc.AddTransceiverFromKind(webrtc.RTPCodecTypeAudio, webrtc.RTPTransceiverInit{
 		Direction: webrtc.RTPTransceiverDirectionSendrecv,
 	}); err != nil {
 		return nil, err
 	}
-	for _, track := range vc.tracks {
-		pc.AddTrack(track)
+	for userID, track := range vc.tracks {
+		rtpSender, err := pc.AddTrack(track)
+		if err != nil {
+			return nil, err
+		}
+		peer.addedTracks[userID] = rtpSender
 	}
 	return pc, nil
 }
@@ -43,7 +48,9 @@ func (vc *VoiceChannel) NewPeer(userID uint64) (*webrtc.PeerConnection, error) {
 func (vc *VoiceChannel) DeletePeer(userID uint64) {
 	vc.Lock()
 	for _, peer := range vc.peerConnections {
-		peer.pc.RemoveTrack(peer.addedTracks[userID])
+		if err := peer.pc.RemoveTrack(peer.addedTracks[userID]); err != nil {
+			fmt.Println(err)
+		}
 	}
 	delete(vc.peerConnections, userID)
 	delete(vc.tracks, userID)

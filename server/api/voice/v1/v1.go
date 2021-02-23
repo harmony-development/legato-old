@@ -75,5 +75,4 @@ func (v1 *V1) Connect(c echo.Context, r *voicev1.ConnectRequest) (*voicev1.Conne
 }
 
 func (v1 *V1) StreamState(c echo.Context, r *voicev1.StreamStateRequest, out chan *voicev1.Signal) {
-	return
 }
