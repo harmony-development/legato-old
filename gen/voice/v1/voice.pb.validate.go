@@ -36,99 +36,6 @@ var (
 // define the regex for a UUID once up-front
 var _voice_uuidPattern = regexp.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 
-// Validate checks the field values on ClientSignal with the rules defined in
-// the proto definition for this message. If any rules are violated, an error
-// is returned.
-func (m *ClientSignal) Validate() error {
-	if m == nil {
-		return nil
-	}
-
-	switch m.Event.(type) {
-
-	case *ClientSignal_Answer_:
-
-		if v, ok := interface{}(m.GetAnswer()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return ClientSignalValidationError{
-					field:  "Answer",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	case *ClientSignal_Candidate_:
-
-		if v, ok := interface{}(m.GetCandidate()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return ClientSignalValidationError{
-					field:  "Candidate",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
-	return nil
-}
-
-// ClientSignalValidationError is the validation error returned by
-// ClientSignal.Validate if the designated constraints aren't met.
-type ClientSignalValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e ClientSignalValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e ClientSignalValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e ClientSignalValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e ClientSignalValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e ClientSignalValidationError) ErrorName() string { return "ClientSignalValidationError" }
-
-// Error satisfies the builtin error interface
-func (e ClientSignalValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sClientSignal.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = ClientSignalValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = ClientSignalValidationError{}
-
 // Validate checks the field values on Signal with the rules defined in the
 // proto definition for this message. If any rules are violated, an error is returned.
 func (m *Signal) Validate() error {
@@ -138,24 +45,15 @@ func (m *Signal) Validate() error {
 
 	switch m.Event.(type) {
 
-	case *Signal_Candidate:
+	case *Signal_IceCandidate:
+		// no validation rules for IceCandidate
 
-		if v, ok := interface{}(m.GetCandidate()).(interface{ Validate() error }); ok {
+	case *Signal_RenegotiationNeeded:
+
+		if v, ok := interface{}(m.GetRenegotiationNeeded()).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				return SignalValidationError{
-					field:  "Candidate",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	case *Signal_Offer_:
-
-		if v, ok := interface{}(m.GetOffer()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return SignalValidationError{
-					field:  "Offer",
+					field:  "RenegotiationNeeded",
 					reason: "embedded message failed validation",
 					cause:  err,
 				}
@@ -221,10 +119,79 @@ var _ interface {
 	ErrorName() string
 } = SignalValidationError{}
 
-// Validate checks the field values on ClientSignal_Answer with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
-func (m *ClientSignal_Answer) Validate() error {
+// Validate checks the field values on ConnectRequest with the rules defined in
+// the proto definition for this message. If any rules are violated, an error
+// is returned.
+func (m *ConnectRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for ChannelId
+
+	// no validation rules for Offer
+
+	return nil
+}
+
+// ConnectRequestValidationError is the validation error returned by
+// ConnectRequest.Validate if the designated constraints aren't met.
+type ConnectRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ConnectRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ConnectRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ConnectRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ConnectRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ConnectRequestValidationError) ErrorName() string { return "ConnectRequestValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ConnectRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sConnectRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ConnectRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ConnectRequestValidationError{}
+
+// Validate checks the field values on ConnectResponse with the rules defined
+// in the proto definition for this message. If any rules are violated, an
+// error is returned.
+func (m *ConnectResponse) Validate() error {
 	if m == nil {
 		return nil
 	}
@@ -234,9 +201,9 @@ func (m *ClientSignal_Answer) Validate() error {
 	return nil
 }
 
-// ClientSignal_AnswerValidationError is the validation error returned by
-// ClientSignal_Answer.Validate if the designated constraints aren't met.
-type ClientSignal_AnswerValidationError struct {
+// ConnectResponseValidationError is the validation error returned by
+// ConnectResponse.Validate if the designated constraints aren't met.
+type ConnectResponseValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -244,24 +211,22 @@ type ClientSignal_AnswerValidationError struct {
 }
 
 // Field function returns field value.
-func (e ClientSignal_AnswerValidationError) Field() string { return e.field }
+func (e ConnectResponseValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e ClientSignal_AnswerValidationError) Reason() string { return e.reason }
+func (e ConnectResponseValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e ClientSignal_AnswerValidationError) Cause() error { return e.cause }
+func (e ConnectResponseValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e ClientSignal_AnswerValidationError) Key() bool { return e.key }
+func (e ConnectResponseValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e ClientSignal_AnswerValidationError) ErrorName() string {
-	return "ClientSignal_AnswerValidationError"
-}
+func (e ConnectResponseValidationError) ErrorName() string { return "ConnectResponseValidationError" }
 
 // Error satisfies the builtin error interface
-func (e ClientSignal_AnswerValidationError) Error() string {
+func (e ConnectResponseValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -273,14 +238,14 @@ func (e ClientSignal_AnswerValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sClientSignal_Answer.%s: %s%s",
+		"invalid %sConnectResponse.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = ClientSignal_AnswerValidationError{}
+var _ error = ConnectResponseValidationError{}
 
 var _ interface {
 	Field() string
@@ -288,24 +253,24 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = ClientSignal_AnswerValidationError{}
+} = ConnectResponseValidationError{}
 
-// Validate checks the field values on ClientSignal_Candidate with the rules
+// Validate checks the field values on StreamStateRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
-func (m *ClientSignal_Candidate) Validate() error {
+func (m *StreamStateRequest) Validate() error {
 	if m == nil {
 		return nil
 	}
 
-	// no validation rules for Candidate
+	// no validation rules for ChannelId
 
 	return nil
 }
 
-// ClientSignal_CandidateValidationError is the validation error returned by
-// ClientSignal_Candidate.Validate if the designated constraints aren't met.
-type ClientSignal_CandidateValidationError struct {
+// StreamStateRequestValidationError is the validation error returned by
+// StreamStateRequest.Validate if the designated constraints aren't met.
+type StreamStateRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -313,24 +278,24 @@ type ClientSignal_CandidateValidationError struct {
 }
 
 // Field function returns field value.
-func (e ClientSignal_CandidateValidationError) Field() string { return e.field }
+func (e StreamStateRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e ClientSignal_CandidateValidationError) Reason() string { return e.reason }
+func (e StreamStateRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e ClientSignal_CandidateValidationError) Cause() error { return e.cause }
+func (e StreamStateRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e ClientSignal_CandidateValidationError) Key() bool { return e.key }
+func (e StreamStateRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e ClientSignal_CandidateValidationError) ErrorName() string {
-	return "ClientSignal_CandidateValidationError"
+func (e StreamStateRequestValidationError) ErrorName() string {
+	return "StreamStateRequestValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e ClientSignal_CandidateValidationError) Error() string {
+func (e StreamStateRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -342,14 +307,14 @@ func (e ClientSignal_CandidateValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sClientSignal_Candidate.%s: %s%s",
+		"invalid %sStreamStateRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = ClientSignal_CandidateValidationError{}
+var _ error = StreamStateRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -357,140 +322,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = ClientSignal_CandidateValidationError{}
-
-// Validate checks the field values on Signal_ICECandidate with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
-func (m *Signal_ICECandidate) Validate() error {
-	if m == nil {
-		return nil
-	}
-
-	// no validation rules for Candidate
-
-	return nil
-}
-
-// Signal_ICECandidateValidationError is the validation error returned by
-// Signal_ICECandidate.Validate if the designated constraints aren't met.
-type Signal_ICECandidateValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e Signal_ICECandidateValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e Signal_ICECandidateValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e Signal_ICECandidateValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e Signal_ICECandidateValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e Signal_ICECandidateValidationError) ErrorName() string {
-	return "Signal_ICECandidateValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e Signal_ICECandidateValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sSignal_ICECandidate.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = Signal_ICECandidateValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = Signal_ICECandidateValidationError{}
-
-// Validate checks the field values on Signal_Offer with the rules defined in
-// the proto definition for this message. If any rules are violated, an error
-// is returned.
-func (m *Signal_Offer) Validate() error {
-	if m == nil {
-		return nil
-	}
-
-	// no validation rules for Offer
-
-	return nil
-}
-
-// Signal_OfferValidationError is the validation error returned by
-// Signal_Offer.Validate if the designated constraints aren't met.
-type Signal_OfferValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e Signal_OfferValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e Signal_OfferValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e Signal_OfferValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e Signal_OfferValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e Signal_OfferValidationError) ErrorName() string { return "Signal_OfferValidationError" }
-
-// Error satisfies the builtin error interface
-func (e Signal_OfferValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sSignal_Offer.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = Signal_OfferValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = Signal_OfferValidationError{}
+} = StreamStateRequestValidationError{}

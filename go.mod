@@ -15,7 +15,6 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/dyatlov/go-opengraph v0.0.0-20210112100619-dae8665a5b09
-	github.com/harmony-development/sentry-go v0.11.0
 	github.com/go-errors/errors v1.1.1 // indirect
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/go-test/deep v1.0.7 // indirect
@@ -26,6 +25,7 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79
 	github.com/harmony-development/hrpc v0.0.0-20210220191619-a41fbf4db4e5
+	github.com/harmony-development/sentry-go v0.11.0
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/hashicorp/hcl/v2 v2.8.2
 	github.com/kr/text v0.2.0 // indirect
@@ -39,6 +39,8 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/muesli/smartcrop v0.3.0 // indirect
 	github.com/peterbourgon/diskv v0.0.0-20171120014656-2973218375c3
+	github.com/pion/interceptor v0.0.10 // indirect
+	github.com/pion/webrtc/v3 v3.0.11
 	github.com/prometheus/client_golang v1.9.0 // indirect
 	github.com/prometheus/common v0.17.0 // indirect
 	github.com/prometheus/procfs v0.6.0 // indirect
@@ -51,8 +53,8 @@ require (
 	github.com/ztrue/tracerr v0.3.0
 	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83
 	golang.org/x/image v0.0.0-20210220032944-ac19c3e999fb // indirect
-	golang.org/x/net v0.0.0-20210220033124-5f55cee0dc0d // indirect
-	golang.org/x/sys v0.0.0-20210220050731-9a76102bfb43 // indirect
+	golang.org/x/net v0.0.0-20210222171744-9060382bd457 // indirect
+	golang.org/x/sys v0.0.0-20210223095934-7937bea0104d // indirect
 	golang.org/x/text v0.3.5 // indirect
 	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba
 	google.golang.org/protobuf v1.25.1-0.20200805231151-a709e31e5d12

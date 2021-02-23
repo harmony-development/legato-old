@@ -1,10 +1,11 @@
 package v1
 
 import (
+	"bytes"
+	"fmt"
+	"io/ioutil"
 	"net/http"
-	"net/url"
 
-	"github.com/gorilla/websocket"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -27,64 +28,36 @@ func NewVoiceServiceClient(url string) *VoiceServiceClient {
 	}
 }
 
-func (client *VoiceServiceClient) Connect() (in chan<- *ClientSignal, out <-chan *Signal, err error) {
-	u := url.URL{Scheme: client.WSProto, Host: client.serverURL, Path: "/protocol.voice.v1.VoiceService/Connect"}
-
-	c, _, err := websocket.DefaultDialer.Dial(u.String(), client.Header)
+func (client *VoiceServiceClient) Connect(r *ConnectRequest) (*ConnectResponse, error) {
+	input, err := proto.Marshal(r)
 	if err != nil {
-		return nil, nil, err
+		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.voice.v1.VoiceService/Connect", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/hrpc")
+	resp, err := client.client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("error posting request: %w", err)
+	}
+	defer resp.Body.Close()
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response: %w", err)
+	}
+	output := &ConnectResponse{}
+	err = proto.Unmarshal(data, output)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshalling response: %w", err)
+	}
+	return output, nil
+}
 
-	inC := make(chan *ClientSignal)
-	outC := make(chan *Signal)
-
-	go func() {
-		defer c.Close()
-
-		msgs := make(chan []byte)
-
-		go func() {
-			for {
-				_, message, err := c.ReadMessage()
-				if err != nil {
-					close(msgs)
-					break
-				}
-				msgs <- message
-			}
-		}()
-
-		for {
-			select {
-			case msg, ok := <-msgs:
-				if !ok {
-					return
-				}
-
-				thing := new(Signal)
-				err = proto.Unmarshal(msg, thing)
-				if err != nil {
-					return
-				}
-
-				outC <- thing
-			case send, ok := <-inC:
-				if !ok {
-					return
-				}
-
-				data, err := proto.Marshal(send)
-				if err != nil {
-					return
-				}
-
-				err = c.WriteMessage(websocket.BinaryMessage, data)
-				if err != nil {
-					return
-				}
-			}
-		}
-	}()
-
-	return inC, outC, nil
+func (client *VoiceServiceClient) StreamState(r *StreamStateRequest) (chan *Signal, error) {
+	panic("unimplemented")
 }
