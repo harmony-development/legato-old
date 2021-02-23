@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	voicev1 "github.com/harmony-development/legato/gen/voice/v1"
 	"github.com/pion/webrtc/v3"
 )
 
@@ -11,6 +12,7 @@ type VoiceChannel struct {
 	sync.RWMutex
 	tracks          map[uint64]webrtc.TrackLocal
 	peerConnections map[uint64]*Peer
+	StateStreams    map[uint64]chan *voicev1.Signal
 }
 
 type Peer struct {

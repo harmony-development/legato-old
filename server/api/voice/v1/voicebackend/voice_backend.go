@@ -3,11 +3,13 @@ package voicebackend
 import (
 	"sync"
 
+	voicev1 "github.com/harmony-development/legato/gen/voice/v1"
 	"github.com/pion/webrtc/v3"
 )
 
 type VoiceBackend struct {
 	activeChannels map[uint64]*VoiceChannel
+	users          map[uint64]*chan *voicev1.Signal
 }
 
 // TODO: make STUN server customizable
@@ -28,4 +30,12 @@ func (backend *VoiceBackend) GetVoiceChannel(channelID uint64) *VoiceChannel {
 		}
 	}
 	return backend.activeChannels[channelID]
+}
+
+func (backend *VoiceBackend) RegisterUserStream(userID uint64, stream chan *voicev1.Signal) {
+	backend.users[userID] = &stream
+}
+
+func (backend *VoiceBackend) GetStream(userID uint64) *chan *voicev1.Signal {
+	return backend.users[userID]
 }
