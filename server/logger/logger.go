@@ -71,7 +71,7 @@ func (l Logger) Verbose(d DebugScope, format string, v ...interface{}) {
 		}
 	}
 
-	logrus.Infof("gr(%d): "+format, append([]interface{}{getGID()}, v...))
+	logrus.Infof("gr(%d): "+format, append([]interface{}{getGID()}, v...)...)
 }
 
 // Exception logs an exception
