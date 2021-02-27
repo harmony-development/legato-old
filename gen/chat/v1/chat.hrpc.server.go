@@ -2564,6 +2564,8 @@ func (h *ChatServiceHandler) StreamEventsHandler(c echo.Context) error {
 		select {
 		case data, ok := <-msgs:
 			if !ok {
+				close(in)
+				close(out)
 				return nil
 			}
 
@@ -2588,6 +2590,8 @@ func (h *ChatServiceHandler) StreamEventsHandler(c echo.Context) error {
 			in <- item
 		case msg, ok := <-out:
 			if !ok {
+				close(in)
+				close(out)
 				return nil
 			}
 
