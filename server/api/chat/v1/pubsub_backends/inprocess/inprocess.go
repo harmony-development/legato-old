@@ -42,7 +42,6 @@ func (s *StreamManager) Lock() {
 func (s *StreamManager) Unlock() {
 	s.logger.Verbose(logger.Streams, "Releasing write lock...")
 	s.RWMutex.Unlock()
-	s.logger.Verbose(logger.Streams, "Releasing write lock...")
 }
 
 func (s *StreamManager) RLock() {
@@ -54,7 +53,6 @@ func (s *StreamManager) RLock() {
 func (s *StreamManager) RUnlock() {
 	s.logger.Verbose(logger.Streams, "Releasing read lock...")
 	s.RWMutex.RUnlock()
-	s.logger.Verbose(logger.Streams, "Releasing read lock...")
 }
 
 // Init prepares a stream manager for use
