@@ -895,7 +895,8 @@ func init() {
 func (v1 *V1) StreamEvents(c echo.Context, in chan *chatv1.StreamEventsRequest, out chan *chatv1.Event) {
 	userID, err := v1.Middleware.AuthHandler(c)
 	if err != nil {
-		// TODO: error handling
+		close(in)
+		v1.Logger.Exception(err)
 		return
 	}
 	done := make(chan struct{})
