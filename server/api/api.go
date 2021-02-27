@@ -95,7 +95,9 @@ func New(deps Dependencies) *API {
 			}
 		}
 	}
-	api.Echo.Use(middleware.Logger())
+	if deps.Config.Server.Policies.Debug.LogRequests {
+		api.Echo.Use(middleware.Logger())
+	}
 	api.Echo.Use(middleware.AddTrailingSlash())
 	api.Echo.Use(middleware.Recover())
 
