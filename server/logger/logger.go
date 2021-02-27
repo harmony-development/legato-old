@@ -1,9 +1,12 @@
 package logger
 
 import (
+	"bytes"
 	"database/sql"
 	"errors"
 	"os"
+	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/alecthomas/repr"
@@ -51,6 +54,15 @@ func (l Logger) CheckException(err error) {
 	l.Exception(err)
 }
 
+func getGID() uint64 {
+	b := make([]byte, 64)
+	b = b[:runtime.Stack(b, false)]
+	b = bytes.TrimPrefix(b, []byte("goroutine "))
+	b = b[:bytes.IndexByte(b, ' ')]
+	n, _ := strconv.ParseUint(string(b), 10, 64)
+	return n
+}
+
 func (l Logger) Verbose(d DebugScope, format string, v ...interface{}) {
 	switch d {
 	case Streams:
@@ -59,7 +71,7 @@ func (l Logger) Verbose(d DebugScope, format string, v ...interface{}) {
 		}
 	}
 
-	logrus.Infof(format, v...)
+	logrus.Infof("gr(%d): "+format, append([]interface{}{getGID()}, v...))
 }
 
 // Exception logs an exception

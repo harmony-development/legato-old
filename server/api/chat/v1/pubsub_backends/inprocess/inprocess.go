@@ -33,6 +33,30 @@ type StreamManager struct {
 	sync.RWMutex
 }
 
+func (s *StreamManager) Lock() {
+	s.logger.Verbose(logger.Streams, "Acquiring write lock...")
+	s.RWMutex.Lock()
+	s.logger.Verbose(logger.Streams, "Acquired write lock...")
+}
+
+func (s *StreamManager) Unlock() {
+	s.logger.Verbose(logger.Streams, "Releasing write lock...")
+	s.RWMutex.Unlock()
+	s.logger.Verbose(logger.Streams, "Releasing write lock...")
+}
+
+func (s *StreamManager) RLock() {
+	s.logger.Verbose(logger.Streams, "Acquiring read lock...")
+	s.RWMutex.RLock()
+	s.logger.Verbose(logger.Streams, "Acquired read lock...")
+}
+
+func (s *StreamManager) RUnlock() {
+	s.logger.Verbose(logger.Streams, "Releasing read lock...")
+	s.RWMutex.RUnlock()
+	s.logger.Verbose(logger.Streams, "Releasing read lock...")
+}
+
 // Init prepares a stream manager for use
 func (s *StreamManager) Init(l logger.ILogger, db types.IHarmonyDB) {
 	l.Verbose(logger.Streams, "Initialising stream manager...")

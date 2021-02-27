@@ -40,7 +40,7 @@ require (
 	github.com/muesli/smartcrop v0.3.0 // indirect
 	github.com/peterbourgon/diskv v0.0.0-20171120014656-2973218375c3
 	github.com/pion/interceptor v0.0.10 // indirect
-	github.com/pion/rtcp v1.2.6 // indirect
+	github.com/pion/rtcp v1.2.6
 	github.com/pion/webrtc/v3 v3.0.11
 	github.com/prometheus/client_golang v1.9.0 // indirect
 	github.com/prometheus/common v0.17.0 // indirect
