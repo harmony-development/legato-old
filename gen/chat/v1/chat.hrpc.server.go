@@ -734,6 +734,9 @@ func NewChatServiceHandler(s ChatServiceServer) *ChatServiceHandler {
 		upgrader: websocket.Upgrader{
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,
+			CheckOrigin: func(_ *http.Request) bool {
+				return true
+			},
 		},
 	}
 }
@@ -2564,6 +2567,8 @@ func (h *ChatServiceHandler) StreamEventsHandler(c echo.Context) error {
 		select {
 		case data, ok := <-msgs:
 			if !ok {
+				close(in)
+				close(out)
 				return nil
 			}
 
@@ -2588,6 +2593,8 @@ func (h *ChatServiceHandler) StreamEventsHandler(c echo.Context) error {
 			in <- item
 		case msg, ok := <-out:
 			if !ok {
+				close(in)
+				close(out)
 				return nil
 			}
 

@@ -96,6 +96,9 @@ func NewVoiceServiceHandler(s VoiceServiceServer) *VoiceServiceHandler {
 		upgrader: websocket.Upgrader{
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,
+			CheckOrigin: func(_ *http.Request) bool {
+				return true
+			},
 		},
 	}
 }
