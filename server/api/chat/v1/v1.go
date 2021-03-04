@@ -3,6 +3,7 @@ package v1
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -194,7 +195,7 @@ func init() {
 func (v1 *V1) GetGuild(c echo.Context, r *chatv1.GetGuildRequest) (*chatv1.GetGuildResponse, error) {
 	guild, err := v1.DB.GetGuildByID(r.GuildId)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, responses.NewError(responses.BadGuildID)
 		}
 		return nil, err
@@ -794,7 +795,7 @@ func (v1 *V1) JoinGuild(c echo.Context, r *chatv1.JoinGuildRequest) (*chatv1.Joi
 	ctx := c.(middleware.HarmonyContext)
 	guildID, err := v1.DB.ResolveGuildID(r.InviteId)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, responses.NewError(responses.BadGuildID)
 		}
 		return nil, err
@@ -894,7 +895,8 @@ func init() {
 func (v1 *V1) StreamEvents(c echo.Context, in chan *chatv1.StreamEventsRequest, out chan *chatv1.Event) {
 	userID, err := v1.Middleware.AuthHandler(c)
 	if err != nil {
-		// TODO: error handling
+		close(in)
+		v1.Logger.Exception(err)
 		return
 	}
 	done := make(chan struct{})
@@ -1483,7 +1485,7 @@ func (v1 *V1) GetUser(c echo.Context, r *chatv1.GetUserRequest) (*chatv1.GetUser
 	}
 	res, err := v1.DB.GetUserByID(r.UserId)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, responses.NewError(responses.BadUserID)
 		}
 		v1.Logger.Exception(err)
@@ -1513,7 +1515,7 @@ func (v1 *V1) GetUserMetadata(c echo.Context, r *chatv1.GetUserMetadataRequest) 
 	}
 	meta, err := v1.DB.GetUserMetadata(0, r.AppId)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, responses.NewError(responses.NoMetadata)
 		}
 		v1.Logger.Exception(err)

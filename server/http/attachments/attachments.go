@@ -32,20 +32,17 @@ type API struct {
 	ImageProxy *imageproxy.Proxy
 }
 
-type UploadData struct {
-	Filename    string `validate:"required"`
-	ContentType string `validate:"required"`
-}
-
 type UploadResponse struct {
 	ID string `json:"id"`
 }
 
 func (a *API) UploadHandler(c echo.Context) error {
 	ctx := c.(hm.HarmonyContext)
-	data := ctx.Data.(UploadData)
 
-	if data.Filename == "" || data.ContentType == "" {
+	fname := c.Request().URL.Query().Get("filename")
+	ctype := c.Request().URL.Query().Get("contentType")
+
+	if fname == "" || ctype == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, responses.MissingFilename)
 	}
 
@@ -83,7 +80,7 @@ func (a *API) UploadHandler(c echo.Context) error {
 		}
 	}
 
-	id, err := a.FileBackend.SaveFile(data.Filename, data.ContentType, handle)
+	id, err := a.FileBackend.SaveFile(fname, ctype, handle)
 	if err != nil {
 		fmt.Println("unable to save file: ", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
@@ -186,7 +183,6 @@ func New(deps Dependencies) (*API, error) {
 				Burst:    3,
 			},
 			Method: routing.POST,
-			Schema: UploadData{},
 		},
 		{
 			Path:    "/download/:file_id",

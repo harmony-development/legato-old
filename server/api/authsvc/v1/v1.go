@@ -4,6 +4,7 @@ import (
 	"crypto/x509"
 	"database/sql"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"time"
 	"unicode"
@@ -170,7 +171,7 @@ func (v1 *V1) Federate(c echo.Context, r *authv1.FederateRequest) (*authv1.Feder
 
 	user, err := v1.DB.GetUserByID(ctx.UserID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, responses.NewError(responses.BadUserID)
 		}
 		return nil, err
@@ -398,7 +399,7 @@ func (v1 *V1) LocalLogin(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 
 	user, err := v1.DB.GetUserByEmail(email)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, responses.NewError(responses.BadEmail)
 		}
 		return nil, err

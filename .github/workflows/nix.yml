@@ -11,6 +11,12 @@ jobs:
       with:
           # Nix Flakes doesn't work on shallow clones
           fetch-depth: 0
+          
+    - uses: marceloprado/has-changed-path@v1
+      id: changed-front
+      with:
+        paths: go.mod go.sum
+
     - name: Install nix
       uses: cachix/install-nix-action@v12
       with:
@@ -23,5 +29,16 @@ jobs:
       with:
         name: harmony
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+
     - name: Build
+      if: steps.changed-front.outputs.changed == 'false'
       run: nix build -L --show-trace
+
+    - name: Update hash and build
+      if: steps.changed-front.outputs.changed == 'true'
+      run: bash nix/update-hash.sh
+
+    - uses: stefanzweifel/git-auto-commit-action@v4
+      if: steps.changed-front.outputs.changed == 'true'
+      with:
+        commit_message: "chore(nix): update go vendor hash"

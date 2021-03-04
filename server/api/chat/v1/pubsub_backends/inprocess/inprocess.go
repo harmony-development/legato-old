@@ -33,6 +33,28 @@ type StreamManager struct {
 	sync.RWMutex
 }
 
+func (s *StreamManager) Lock() {
+	s.logger.Verbose(logger.Streams, "Acquiring write lock...")
+	s.RWMutex.Lock()
+	s.logger.Verbose(logger.Streams, "Acquired write lock...")
+}
+
+func (s *StreamManager) Unlock() {
+	s.logger.Verbose(logger.Streams, "Releasing write lock...")
+	s.RWMutex.Unlock()
+}
+
+func (s *StreamManager) RLock() {
+	s.logger.Verbose(logger.Streams, "Acquiring read lock...")
+	s.RWMutex.RLock()
+	s.logger.Verbose(logger.Streams, "Acquired read lock...")
+}
+
+func (s *StreamManager) RUnlock() {
+	s.logger.Verbose(logger.Streams, "Releasing read lock...")
+	s.RWMutex.RUnlock()
+}
+
 // Init prepares a stream manager for use
 func (s *StreamManager) Init(l logger.ILogger, db types.IHarmonyDB) {
 	l.Verbose(logger.Streams, "Initialising stream manager...")
@@ -162,7 +184,11 @@ func (s *StreamManager) BroadcastGuild(to uint64, event *chatv1.Event) {
 			for serv := range s.userIDToServers[userID] {
 				if _, ok := s.serverToStreamData[serv].guilds[to]; ok {
 					s.logger.Verbose(logger.Streams, "Broadcasting guild event %+v to user %d server %+v for guild %d", event, userID, serv, to)
-					serv <- event
+					select {
+					case serv <- event:
+					default:
+						s.logger.Warn("Failed to send guild event into server %v of user %d for guild %d!", serv, userID, to)
+					}
 				} else {
 					s.logger.Verbose(logger.Streams, "Not broadcasting guild event %+v to user %d server %+v for guild %d", event, userID, serv, to)
 				}
@@ -183,7 +209,11 @@ func (s *StreamManager) BroadcastHomeserver(userid uint64, event *chatv1.Event) 
 		for server := range s.userIDToServers[userid] {
 			if s.serverToStreamData[server].homeserver {
 				s.logger.Verbose(logger.Streams, "Broadcasting HS event %+v to user %d server %+v", event, userid, server)
-				server <- event
+				select {
+				case server <- event:
+				default:
+					s.logger.Warn("Failed to send homeserver event into server %v of user %d!", server, userid)
+				}
 			} else {
 				s.logger.Verbose(logger.Streams, "Not broadcasting HS event %+v to user %d server %+v", event, userid, server)
 			}
@@ -204,7 +234,11 @@ func (s *StreamManager) BroadcastAction(userid uint64, event *chatv1.Event) {
 		for server := range s.userIDToServers[userid] {
 			if s.serverToStreamData[server].action {
 				s.logger.Verbose(logger.Streams, "Broadcasting action event %+v to user %d server %+v", event, userid, server)
-				server <- event
+				select {
+				case server <- event:
+				default:
+					s.logger.Warn("Failed to send action event into server %v of user %d!", server, userid)
+				}
 			} else {
 				s.logger.Verbose(logger.Streams, "Not broadcasting action event %+v to user %d server %+v", event, userid, server)
 			}

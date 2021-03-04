@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"database/sql"
+	"errors"
 	"math"
 	"time"
 
@@ -255,7 +256,7 @@ func (db *database) GetGuildListPosition(userID, guildID uint64, homeServer stri
 func (db *database) AddGuildToList(userID, guildID uint64, homeServer string) error {
 	pos, err := db.queries.GetLastGuildPositionInList(ctx, userID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			pos = ""
 		} else {
 			err = tracerr.Wrap(err)
@@ -283,7 +284,7 @@ func (db *database) MoveGuild(userID, guildID uint64, homeServer string, nextGui
 		HomeServer: nextHomeServer,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			nextPos = ""
 		} else {
 			err = tracerr.Wrap(err)
@@ -298,7 +299,7 @@ func (db *database) MoveGuild(userID, guildID uint64, homeServer string, nextGui
 		HomeServer: prevHomeServer,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			nextPos = ""
 		} else {
 			err = tracerr.Wrap(err)
