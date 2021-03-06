@@ -1292,6 +1292,8 @@ func (client *ChatServiceClient) StreamEvents() (in chan<- *StreamEventsRequest,
 			select {
 			case msg, ok := <-msgs:
 				if !ok {
+					close(inC)
+					close(outC)
 					return
 				}
 
@@ -1304,6 +1306,7 @@ func (client *ChatServiceClient) StreamEvents() (in chan<- *StreamEventsRequest,
 				outC <- thing
 			case send, ok := <-inC:
 				if !ok {
+					close(outC)
 					return
 				}
 

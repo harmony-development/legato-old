@@ -113,6 +113,75 @@ var _ interface {
 	ErrorName() string
 } = SiteMetadataValidationError{}
 
+// Validate checks the field values on MediaMetadata with the rules defined in
+// the proto definition for this message. If any rules are violated, an error
+// is returned.
+func (m *MediaMetadata) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Mimetype
+
+	// no validation rules for Filename
+
+	return nil
+}
+
+// MediaMetadataValidationError is the validation error returned by
+// MediaMetadata.Validate if the designated constraints aren't met.
+type MediaMetadataValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e MediaMetadataValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e MediaMetadataValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e MediaMetadataValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e MediaMetadataValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e MediaMetadataValidationError) ErrorName() string { return "MediaMetadataValidationError" }
+
+// Error satisfies the builtin error interface
+func (e MediaMetadataValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sMediaMetadata.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = MediaMetadataValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = MediaMetadataValidationError{}
+
 // Validate checks the field values on FetchLinkMetadataRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
@@ -181,6 +250,101 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = FetchLinkMetadataRequestValidationError{}
+
+// Validate checks the field values on FetchLinkMetadataResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *FetchLinkMetadataResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	switch m.Data.(type) {
+
+	case *FetchLinkMetadataResponse_IsSite:
+
+		if v, ok := interface{}(m.GetIsSite()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return FetchLinkMetadataResponseValidationError{
+					field:  "IsSite",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *FetchLinkMetadataResponse_IsMedia:
+
+		if v, ok := interface{}(m.GetIsMedia()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return FetchLinkMetadataResponseValidationError{
+					field:  "IsMedia",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// FetchLinkMetadataResponseValidationError is the validation error returned by
+// FetchLinkMetadataResponse.Validate if the designated constraints aren't met.
+type FetchLinkMetadataResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e FetchLinkMetadataResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e FetchLinkMetadataResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e FetchLinkMetadataResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e FetchLinkMetadataResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e FetchLinkMetadataResponseValidationError) ErrorName() string {
+	return "FetchLinkMetadataResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e FetchLinkMetadataResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sFetchLinkMetadataResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = FetchLinkMetadataResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = FetchLinkMetadataResponseValidationError{}
 
 // Validate checks the field values on InstantViewRequest with the rules
 // defined in the proto definition for this message. If any rules are

@@ -17,12 +17,10 @@ type Dependencies struct {
 // V1 contains the gRPC handler for v1
 type V1 struct {
 	Dependencies
-	instantViewData
-	linkData
+	dataLRU *lru.ARCCache
 }
 
 // Initialize initializes the V1 service
 func (v1 *V1) Initialize() {
-	v1.linkData.linkLRU, _ = lru.NewARC(v1.Config.Server.Policies.MaximumCacheSizes.LinkEmbeds)
-	v1.instantViewData.instantLRU, _ = lru.NewARC(v1.Config.Server.Policies.MaximumCacheSizes.InstantView)
+	v1.dataLRU, _ = lru.NewARC(v1.Config.Server.Policies.MaximumCacheSizes.LinkEmbeds)
 }

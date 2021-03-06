@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"net/http"
 	"time"
 
 	"github.com/dyatlov/go-opengraph/opengraph"
@@ -36,32 +35,42 @@ func copyOGIntoProtobuf(og *opengraph.OpenGraph, md *mediaproxyv1.SiteMetadata) 
 }
 
 func (v1 *V1) obtainOG(url string, out *mediaproxyv1.SiteMetadata) error {
-	if val, ok := v1.linkLRU.Get(url); ok {
-		data := val.(*opengraph.OpenGraph)
-		copyOGIntoProtobuf(data, out)
-	}
-
-	req, err := http.Get(url)
+	data, err := v1.fetch(url)
 	if err != nil {
 		return err
 	}
-	defer req.Body.Close()
-
-	og := opengraph.NewOpenGraph()
-	err = og.ProcessHTML(req.Body)
-	if err != nil {
-		return err
-	}
-
-	v1.linkLRU.Add(url, og)
-	copyOGIntoProtobuf(og, out)
+	copyOGIntoProtobuf((*opengraph.OpenGraph)(data.OG), out)
 
 	return nil
 }
 
 // FetchLinkMetadata implements the FetchLinkMetadata RPC
-func (v1 *V1) FetchLinkMetadata(c echo.Context, r *mediaproxyv1.FetchLinkMetadataRequest) (resp *mediaproxyv1.SiteMetadata, err error) {
-	resp = &mediaproxyv1.SiteMetadata{}
-	err = v1.obtainOG(r.Url, resp)
-	return
+func (v1 *V1) FetchLinkMetadata(c echo.Context, r *mediaproxyv1.FetchLinkMetadataRequest) (resp *mediaproxyv1.FetchLinkMetadataResponse, err error) {
+	resp = &mediaproxyv1.FetchLinkMetadataResponse{}
+
+	data, err := v1.fetch(r.Url)
+	if err != nil {
+		return nil, err
+	}
+
+	if data.MD != nil {
+		return &mediaproxyv1.FetchLinkMetadataResponse{
+			Data: &mediaproxyv1.FetchLinkMetadataResponse_IsMedia{
+				IsMedia: &mediaproxyv1.MediaMetadata{
+					Mimetype: data.MD.mimetype,
+					Filename: data.MD.filename,
+				},
+			},
+		}, nil
+	}
+
+	return &mediaproxyv1.FetchLinkMetadataResponse{
+		Data: &mediaproxyv1.FetchLinkMetadataResponse_IsSite{
+			IsSite: func() (r *mediaproxyv1.SiteMetadata) {
+				r = new(mediaproxyv1.SiteMetadata)
+				copyOGIntoProtobuf((*opengraph.OpenGraph)(data.OG), r)
+				return r
+			}(),
+		},
+	}, nil
 }

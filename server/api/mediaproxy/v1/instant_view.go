@@ -1,13 +1,10 @@
 package v1
 
 import (
-	"bytes"
-	"io"
-	"net/http"
 	"time"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
-	"github.com/cixtor/readability"
+	"github.com/dyatlov/go-opengraph/opengraph"
 	"github.com/labstack/echo/v4"
 
 	mediaproxyv1 "github.com/harmony-development/legato/gen/mediaproxy/v1"
@@ -36,85 +33,35 @@ func init() {
 }
 
 func (v1 *V1) CanInstantView(c echo.Context, r *mediaproxyv1.InstantViewRequest) (resp *mediaproxyv1.CanInstantViewResponse, err error) {
-	resp = &mediaproxyv1.CanInstantViewResponse{
-		CanInstantView: true,
-	}
-
-	if val, ok := v1.instantLRU.Get(r.Url); ok {
-		data := val.(instantViewResult)
-		resp.CanInstantView = data.ok
-		return
-	}
-
-	req, err := http.Get(r.Url)
+	data, err := v1.fetch(r.Url)
 	if err != nil {
-		return
-	}
-	defer req.Body.Close()
-
-	read := readability.New()
-	if !read.IsReadable(req.Body) {
-		v1.instantLRU.Add(r.Url, instantViewResult{
-			ok: false,
-		})
-		resp.CanInstantView = false
+		return nil, err
 	}
 
-	return
+	return &mediaproxyv1.CanInstantViewResponse{
+		CanInstantView: data.RD != nil,
+	}, nil
 }
 
 // InstantView implements the InstantView RPC
 func (v1 *V1) InstantView(c echo.Context, r *mediaproxyv1.InstantViewRequest) (resp *mediaproxyv1.InstantViewResponse, err error) {
-	resp = &mediaproxyv1.InstantViewResponse{
+	data, err := v1.fetch(r.Url)
+	if err != nil {
+		return nil, err
+	}
+
+	content := ""
+	if data.RD != nil {
+		content = *data.RD
+	}
+
+	sm := &mediaproxyv1.InstantViewResponse{
 		Metadata: &mediaproxyv1.SiteMetadata{},
-	}
-	err = v1.obtainOG(r.Url, resp.Metadata)
-	if err != nil {
-		return
+		Content:  content,
+		IsValid:  data.RD != nil,
 	}
 
-	if val, ok := v1.instantLRU.Get(r.Url); ok {
-		data := val.(instantViewResult)
-		resp.IsValid = data.ok
-		resp.Content = data.data
-		return
-	}
+	copyOGIntoProtobuf((*opengraph.OpenGraph)(data.OG), sm.Metadata)
 
-	req, err := http.Get(r.Url)
-	if err != nil {
-		return
-	}
-	defer req.Body.Close()
-
-	buffer := new(bytes.Buffer)
-	tee := io.TeeReader(req.Body, buffer)
-
-	read := readability.New()
-
-	if !read.IsReadable(tee) {
-		v1.instantLRU.Add(r.Url, instantViewResult{
-			ok: false,
-		})
-		resp.IsValid = false
-		return
-	}
-
-	body, err := read.Parse(io.MultiReader(buffer, tee), r.Url)
-	if err != nil {
-		return
-	}
-
-	converted, err := converter.ConvertString(body.Content)
-	if err != nil {
-		return
-	}
-
-	v1.instantLRU.Add(r.Url, instantViewResult{
-		ok:   true,
-		data: converted,
-	})
-	resp.IsValid = true
-	resp.Content = converted
-
-	return
+	return sm, nil
 }

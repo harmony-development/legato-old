@@ -28,7 +28,7 @@ func NewMediaProxyServiceClient(url string) *MediaProxyServiceClient {
 	}
 }
 
-func (client *MediaProxyServiceClient) FetchLinkMetadata(r *FetchLinkMetadataRequest) (*SiteMetadata, error) {
+func (client *MediaProxyServiceClient) FetchLinkMetadata(r *FetchLinkMetadataRequest) (*FetchLinkMetadataResponse, error) {
 	input, err := proto.Marshal(r)
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
@@ -50,7 +50,7 @@ func (client *MediaProxyServiceClient) FetchLinkMetadata(r *FetchLinkMetadataReq
 	if err != nil {
 		return nil, fmt.Errorf("error reading response: %w", err)
 	}
-	output := &SiteMetadata{}
+	output := &FetchLinkMetadataResponse{}
 	err = proto.Unmarshal(data, output)
 	if err != nil {
 		return nil, fmt.Errorf("error unmarshalling response: %w", err)
