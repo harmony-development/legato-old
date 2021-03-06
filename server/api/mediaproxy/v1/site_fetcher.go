@@ -48,9 +48,17 @@ func fetchSite(reqURL string) (d *data, err error) {
 	}
 	defer resp.Body.Close()
 
-	mimetype, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+	parsedURL, err := url.Parse(reqURL)
 	if err != nil {
 		return nil, err
+	}
+
+	mimetype, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+	if err != nil {
+		mimetype, _, err = mime.ParseMediaType(mime.TypeByExtension(path.Ext(path.Base(parsedURL.Path))))
+		if err != nil {
+			return nil, err
+		}
 	}
 	if !strings.Contains(mimetype, "text/html") {
 		_, params, err := mime.ParseMediaType(resp.Header.Get("Content-Disposition"))
@@ -66,10 +74,6 @@ func fetchSite(reqURL string) (d *data, err error) {
 					mimetype: mimetype,
 				},
 			}, nil
-		}
-		parsedURL, err := url.Parse(reqURL)
-		if err != nil {
-			return nil, err
 		}
 		return &data{
 			MD: &mediadata{
