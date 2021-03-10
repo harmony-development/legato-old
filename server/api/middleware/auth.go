@@ -2,6 +2,8 @@ package middleware
 
 import (
 	"errors"
+	"fmt"
+	"strings"
 
 	"github.com/harmony-development/legato/server/http/responses"
 	"github.com/labstack/echo/v4"
@@ -12,12 +14,13 @@ func (m *Middlewares) AuthHandler(c echo.Context) (uint64, error) {
 	session := c.Request().Header.Get("Authorization")
 
 	if session == "" {
-		session = c.Request().Header.Get("Sec-WebSocket-Protocol")
+		session = strings.Split(c.Request().Header.Get("Sec-WebSocket-Protocol"), " ")[1]
+		c.Response().Header().Add("Sec-WebSocket-Protocol", "access_token")
 	}
 
 	userID, err := m.DB.SessionToUserID(session)
 	if err != nil {
-		println("bad session")
+		fmt.Println("bad session", err)
 		return 0, errors.New(responses.InvalidSession)
 	}
 	go func() {
