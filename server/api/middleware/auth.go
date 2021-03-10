@@ -15,7 +15,6 @@ func (m *Middlewares) AuthHandler(c echo.Context) (uint64, error) {
 
 	if session == "" {
 		session = strings.Split(c.Request().Header.Get("Sec-WebSocket-Protocol"), " ")[1]
-		c.Response().Header().Add("Sec-WebSocket-Protocol", "access_token")
 	}
 
 	userID, err := m.DB.SessionToUserID(session)
