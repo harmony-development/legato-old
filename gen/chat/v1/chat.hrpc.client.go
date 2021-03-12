@@ -1360,6 +1360,36 @@ func (client *ChatServiceClient) GetUser(r *GetUserRequest) (*GetUserResponse, e
 	return output, nil
 }
 
+func (client *ChatServiceClient) GetUserBulk(r *GetUserBulkRequest) (*GetUserBulkResponse, error) {
+	input, err := proto.Marshal(r)
+	if err != nil {
+		return nil, fmt.Errorf("could not martial request: %w", err)
+	}
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/GetUserBulk", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	for k, v := range client.Header {
+		req.Header[k] = v
+	}
+	req.Header.Add("content-type", "application/hrpc")
+	resp, err := client.client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("error posting request: %w", err)
+	}
+	defer resp.Body.Close()
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response: %w", err)
+	}
+	output := &GetUserBulkResponse{}
+	err = proto.Unmarshal(data, output)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshalling response: %w", err)
+	}
+	return output, nil
+}
+
 func (client *ChatServiceClient) GetUserMetadata(r *GetUserMetadataRequest) (*GetUserMetadataResponse, error) {
 	input, err := proto.Marshal(r)
 	if err != nil {

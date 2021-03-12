@@ -1502,6 +1502,46 @@ func (v1 *V1) GetUser(c echo.Context, r *chatv1.GetUserRequest) (*chatv1.GetUser
 func init() {
 	middleware.RegisterRPCConfig(middleware.RPCConfig{
 		RateLimit: middleware.RateLimit{
+			Duration: 10 * time.Second,
+			Burst:    4,
+		},
+	}, "/protocol.chat.v1.ChatService/GetUserBulk")
+}
+
+// TODO: implemenet a more performant query to reduce round trips to the DB
+func (v1 *V1) GetUserBulk(c echo.Context, r *chatv1.GetUserBulkRequest) (*chatv1.GetUserBulkResponse, error) {
+	if err := r.Validate(); err != nil {
+		return nil, err
+	}
+	if len(r.UserIds) > 64 {
+		return nil, errors.New("too many user ids in request")
+	}
+	users := []*chatv1.GetUserResponse{}
+	for _, userID := range r.UserIds {
+		res, err := v1.DB.GetUserByID(userID)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return nil, responses.NewError(responses.BadUserID)
+			}
+			v1.Logger.Exception(err)
+			return nil, err
+		}
+		users = append(users, &chatv1.GetUserResponse{
+			UserName:   res.Username,
+			UserAvatar: res.Avatar.String,
+			UserStatus: harmonytypesv1.UserStatus(res.Status),
+			IsBot:      res.IsBot,
+		})
+	}
+
+	return &chatv1.GetUserBulkResponse{
+		Users: users,
+	}, nil
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
 			Duration: 1 * time.Second,
 			Burst:    4,
 		},

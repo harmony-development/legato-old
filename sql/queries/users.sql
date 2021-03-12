@@ -38,6 +38,16 @@ FROM Users
   INNER JOIN Profiles ON (Users.User_ID = Profiles.User_ID)
 WHERE Users.User_ID = $1;
 
+-- name: GetUsers :many
+SELECT Users.User_ID,
+  Profiles.Username,
+  Profiles.Avatar,
+  Profiles.Status,
+  Profiles.Is_Bot
+FROM Users
+  INNER JOIN Profiles ON (Users.User_ID = Profiles.User_ID)
+WHERE Users.User_ID = $1;
+
 -- name: GetLocalUserID :one
 SELECT Local_User_ID
 FROM Foreign_Users
