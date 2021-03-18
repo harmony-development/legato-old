@@ -334,23 +334,8 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.updateChannelNameStmt, err = db.PrepareContext(ctx, updateChannelName); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateChannelName: %w", err)
 	}
-	if q.updateMessageActionsStmt, err = db.PrepareContext(ctx, updateMessageActions); err != nil {
-		return nil, fmt.Errorf("error preparing query UpdateMessageActions: %w", err)
-	}
-	if q.updateMessageAttachmentsStmt, err = db.PrepareContext(ctx, updateMessageAttachments); err != nil {
-		return nil, fmt.Errorf("error preparing query UpdateMessageAttachments: %w", err)
-	}
 	if q.updateMessageContentStmt, err = db.PrepareContext(ctx, updateMessageContent); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateMessageContent: %w", err)
-	}
-	if q.updateMessageEmbedsStmt, err = db.PrepareContext(ctx, updateMessageEmbeds); err != nil {
-		return nil, fmt.Errorf("error preparing query UpdateMessageEmbeds: %w", err)
-	}
-	if q.updateMessageMetadataStmt, err = db.PrepareContext(ctx, updateMessageMetadata); err != nil {
-		return nil, fmt.Errorf("error preparing query UpdateMessageMetadata: %w", err)
-	}
-	if q.updateMessageOverridesStmt, err = db.PrepareContext(ctx, updateMessageOverrides); err != nil {
-		return nil, fmt.Errorf("error preparing query UpdateMessageOverrides: %w", err)
 	}
 	if q.updatePermissionsStmt, err = db.PrepareContext(ctx, updatePermissions); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdatePermissions: %w", err)
@@ -898,34 +883,9 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing updateChannelNameStmt: %w", cerr)
 		}
 	}
-	if q.updateMessageActionsStmt != nil {
-		if cerr := q.updateMessageActionsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing updateMessageActionsStmt: %w", cerr)
-		}
-	}
-	if q.updateMessageAttachmentsStmt != nil {
-		if cerr := q.updateMessageAttachmentsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing updateMessageAttachmentsStmt: %w", cerr)
-		}
-	}
 	if q.updateMessageContentStmt != nil {
 		if cerr := q.updateMessageContentStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateMessageContentStmt: %w", cerr)
-		}
-	}
-	if q.updateMessageEmbedsStmt != nil {
-		if cerr := q.updateMessageEmbedsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing updateMessageEmbedsStmt: %w", cerr)
-		}
-	}
-	if q.updateMessageMetadataStmt != nil {
-		if cerr := q.updateMessageMetadataStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing updateMessageMetadataStmt: %w", cerr)
-		}
-	}
-	if q.updateMessageOverridesStmt != nil {
-		if cerr := q.updateMessageOverridesStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing updateMessageOverridesStmt: %w", cerr)
 		}
 	}
 	if q.updatePermissionsStmt != nil {
@@ -1106,12 +1066,7 @@ type Queries struct {
 	updateAvatarStmt                               *sql.Stmt
 	updateChannelMetadataStmt                      *sql.Stmt
 	updateChannelNameStmt                          *sql.Stmt
-	updateMessageActionsStmt                       *sql.Stmt
-	updateMessageAttachmentsStmt                   *sql.Stmt
 	updateMessageContentStmt                       *sql.Stmt
-	updateMessageEmbedsStmt                        *sql.Stmt
-	updateMessageMetadataStmt                      *sql.Stmt
-	updateMessageOverridesStmt                     *sql.Stmt
 	updatePermissionsStmt                          *sql.Stmt
 	updatePermissionsWithoutChannelStmt            *sql.Stmt
 	updatePermissionsWithoutChannelWithoutRoleStmt *sql.Stmt
@@ -1229,12 +1184,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		updateAvatarStmt:                               q.updateAvatarStmt,
 		updateChannelMetadataStmt:                      q.updateChannelMetadataStmt,
 		updateChannelNameStmt:                          q.updateChannelNameStmt,
-		updateMessageActionsStmt:                       q.updateMessageActionsStmt,
-		updateMessageAttachmentsStmt:                   q.updateMessageAttachmentsStmt,
 		updateMessageContentStmt:                       q.updateMessageContentStmt,
-		updateMessageEmbedsStmt:                        q.updateMessageEmbedsStmt,
-		updateMessageMetadataStmt:                      q.updateMessageMetadataStmt,
-		updateMessageOverridesStmt:                     q.updateMessageOverridesStmt,
 		updatePermissionsStmt:                          q.updatePermissionsStmt,
 		updatePermissionsWithoutChannelStmt:            q.updatePermissionsWithoutChannelStmt,
 		updatePermissionsWithoutChannelWithoutRoleStmt: q.updatePermissionsWithoutChannelWithoutRoleStmt,

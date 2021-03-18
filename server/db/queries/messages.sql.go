@@ -6,10 +6,7 @@ package queries
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"time"
-
-	"github.com/lib/pq"
 )
 
 const addMessage = `-- name: AddMessage :one
@@ -19,29 +16,23 @@ INSERT INTO Messages (
     User_ID,
     Message_ID,
     Content,
-    Embeds,
-    Actions,
     Created_At,
     Reply_to_ID,
     Overrides,
-    Attachments,
     Metadata
   )
-VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), $8, $9, $10, $11) RETURNING message_id, guild_id, channel_id, user_id, created_at, edited_at, content, embeds, actions, overrides, reply_to_id, attachments, metadata
+VALUES ($1, $2, $3, $4, $5, NOW(), $6, $7, $8) RETURNING message_id, guild_id, channel_id, user_id, created_at, edited_at, content, overrides, reply_to_id, metadata
 `
 
 type AddMessageParams struct {
-	GuildID     uint64          `json:"guild_id"`
-	ChannelID   uint64          `json:"channel_id"`
-	UserID      uint64          `json:"user_id"`
-	MessageID   uint64          `json:"message_id"`
-	Content     string          `json:"content"`
-	Embeds      json.RawMessage `json:"embeds"`
-	Actions     json.RawMessage `json:"actions"`
-	ReplyToID   sql.NullInt64   `json:"reply_to_id"`
-	Overrides   []byte          `json:"overrides"`
-	Attachments []string        `json:"attachments"`
-	Metadata    []byte          `json:"metadata"`
+	GuildID   uint64        `json:"guild_id"`
+	ChannelID uint64        `json:"channel_id"`
+	UserID    uint64        `json:"user_id"`
+	MessageID uint64        `json:"message_id"`
+	Content   []byte        `json:"content"`
+	ReplyToID sql.NullInt64 `json:"reply_to_id"`
+	Overrides []byte        `json:"overrides"`
+	Metadata  []byte        `json:"metadata"`
 }
 
 func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) (Message, error) {
@@ -51,11 +42,8 @@ func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) (Message
 		arg.UserID,
 		arg.MessageID,
 		arg.Content,
-		arg.Embeds,
-		arg.Actions,
 		arg.ReplyToID,
 		arg.Overrides,
-		pq.Array(arg.Attachments),
 		arg.Metadata,
 	)
 	var i Message
@@ -67,11 +55,8 @@ func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) (Message
 		&i.CreatedAt,
 		&i.EditedAt,
 		&i.Content,
-		&i.Embeds,
-		&i.Actions,
 		&i.Overrides,
 		&i.ReplyToID,
-		pq.Array(&i.Attachments),
 		&i.Metadata,
 	)
 	return i, err
@@ -99,7 +84,7 @@ func (q *Queries) DeleteMessage(ctx context.Context, arg DeleteMessageParams) (i
 }
 
 const getMessage = `-- name: GetMessage :one
-SELECT message_id, guild_id, channel_id, user_id, created_at, edited_at, content, embeds, actions, overrides, reply_to_id, attachments, metadata
+SELECT message_id, guild_id, channel_id, user_id, created_at, edited_at, content, overrides, reply_to_id, metadata
 FROM Messages
 WHERE Message_ID = $1
 `
@@ -115,11 +100,8 @@ func (q *Queries) GetMessage(ctx context.Context, messageID uint64) (Message, er
 		&i.CreatedAt,
 		&i.EditedAt,
 		&i.Content,
-		&i.Embeds,
-		&i.Actions,
 		&i.Overrides,
 		&i.ReplyToID,
-		pq.Array(&i.Attachments),
 		&i.Metadata,
 	)
 	return i, err
@@ -152,7 +134,7 @@ func (q *Queries) GetMessageDate(ctx context.Context, messageID uint64) (time.Ti
 }
 
 const getMessages = `-- name: GetMessages :many
-SELECT message_id, guild_id, channel_id, user_id, created_at, edited_at, content, embeds, actions, overrides, reply_to_id, attachments, metadata
+SELECT message_id, guild_id, channel_id, user_id, created_at, edited_at, content, overrides, reply_to_id, metadata
 FROM Messages
 WHERE Guild_ID = $1
   AND Channel_ID = $2
@@ -190,11 +172,8 @@ func (q *Queries) GetMessages(ctx context.Context, arg GetMessagesParams) ([]Mes
 			&i.CreatedAt,
 			&i.EditedAt,
 			&i.Content,
-			&i.Embeds,
-			&i.Actions,
 			&i.Overrides,
 			&i.ReplyToID,
-			pq.Array(&i.Attachments),
 			&i.Metadata,
 		); err != nil {
 			return nil, err
@@ -233,47 +212,6 @@ func (q *Queries) MessageWithIDExists(ctx context.Context, arg MessageWithIDExis
 	return exists, err
 }
 
-const updateMessageActions = `-- name: UpdateMessageActions :one
-UPDATE Messages
-SET Actions = $2,
-  Edited_At = NOW()
-WHERE Message_ID = $1 RETURNING Actions,
-  Edited_At
-`
-
-type UpdateMessageActionsParams struct {
-	MessageID uint64          `json:"message_id"`
-	Actions   json.RawMessage `json:"actions"`
-}
-
-type UpdateMessageActionsRow struct {
-	Actions  json.RawMessage `json:"actions"`
-	EditedAt sql.NullTime    `json:"edited_at"`
-}
-
-func (q *Queries) UpdateMessageActions(ctx context.Context, arg UpdateMessageActionsParams) (UpdateMessageActionsRow, error) {
-	row := q.queryRow(ctx, q.updateMessageActionsStmt, updateMessageActions, arg.MessageID, arg.Actions)
-	var i UpdateMessageActionsRow
-	err := row.Scan(&i.Actions, &i.EditedAt)
-	return i, err
-}
-
-const updateMessageAttachments = `-- name: UpdateMessageAttachments :exec
-UPDATE Messages
-SET Attachments = $1
-WHERE Message_ID = $2
-`
-
-type UpdateMessageAttachmentsParams struct {
-	Attachments []string `json:"attachments"`
-	MessageID   uint64   `json:"message_id"`
-}
-
-func (q *Queries) UpdateMessageAttachments(ctx context.Context, arg UpdateMessageAttachmentsParams) error {
-	_, err := q.exec(ctx, q.updateMessageAttachmentsStmt, updateMessageAttachments, pq.Array(arg.Attachments), arg.MessageID)
-	return err
-}
-
 const updateMessageContent = `-- name: UpdateMessageContent :one
 UPDATE Messages
 SET Content = $2,
@@ -284,11 +222,11 @@ WHERE Message_ID = $1 RETURNING Content,
 
 type UpdateMessageContentParams struct {
 	MessageID uint64 `json:"message_id"`
-	Content   string `json:"content"`
+	Content   []byte `json:"content"`
 }
 
 type UpdateMessageContentRow struct {
-	Content  string       `json:"content"`
+	Content  []byte       `json:"content"`
 	EditedAt sql.NullTime `json:"edited_at"`
 }
 
@@ -297,61 +235,4 @@ func (q *Queries) UpdateMessageContent(ctx context.Context, arg UpdateMessageCon
 	var i UpdateMessageContentRow
 	err := row.Scan(&i.Content, &i.EditedAt)
 	return i, err
-}
-
-const updateMessageEmbeds = `-- name: UpdateMessageEmbeds :one
-UPDATE Messages
-SET Embeds = $2,
-  Edited_At = NOW()
-WHERE Message_ID = $1 RETURNING Embeds,
-  Edited_At
-`
-
-type UpdateMessageEmbedsParams struct {
-	MessageID uint64          `json:"message_id"`
-	Embeds    json.RawMessage `json:"embeds"`
-}
-
-type UpdateMessageEmbedsRow struct {
-	Embeds   json.RawMessage `json:"embeds"`
-	EditedAt sql.NullTime    `json:"edited_at"`
-}
-
-func (q *Queries) UpdateMessageEmbeds(ctx context.Context, arg UpdateMessageEmbedsParams) (UpdateMessageEmbedsRow, error) {
-	row := q.queryRow(ctx, q.updateMessageEmbedsStmt, updateMessageEmbeds, arg.MessageID, arg.Embeds)
-	var i UpdateMessageEmbedsRow
-	err := row.Scan(&i.Embeds, &i.EditedAt)
-	return i, err
-}
-
-const updateMessageMetadata = `-- name: UpdateMessageMetadata :exec
-UPDATE Messages
-SET Metadata = $1
-WHERE Message_ID = $2
-`
-
-type UpdateMessageMetadataParams struct {
-	Metadata  []byte `json:"metadata"`
-	MessageID uint64 `json:"message_id"`
-}
-
-func (q *Queries) UpdateMessageMetadata(ctx context.Context, arg UpdateMessageMetadataParams) error {
-	_, err := q.exec(ctx, q.updateMessageMetadataStmt, updateMessageMetadata, arg.Metadata, arg.MessageID)
-	return err
-}
-
-const updateMessageOverrides = `-- name: UpdateMessageOverrides :exec
-UPDATE Messages
-SET Overrides = $1
-WHERE Message_ID = $2
-`
-
-type UpdateMessageOverridesParams struct {
-	Overrides []byte `json:"overrides"`
-	MessageID uint64 `json:"message_id"`
-}
-
-func (q *Queries) UpdateMessageOverrides(ctx context.Context, arg UpdateMessageOverridesParams) error {
-	_, err := q.exec(ctx, q.updateMessageOverridesStmt, updateMessageOverrides, arg.Overrides, arg.MessageID)
-	return err
 }

@@ -5,15 +5,12 @@ INSERT INTO Messages (
     User_ID,
     Message_ID,
     Content,
-    Embeds,
-    Actions,
     Created_At,
     Reply_to_ID,
     Overrides,
-    Attachments,
     Metadata
   )
-VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), $8, $9, $10, $11) RETURNING *;
+VALUES ($1, $2, $3, $4, $5, NOW(), $6, $7, $8) RETURNING *;
 
 -- name: DeleteMessage :execrows
 DELETE FROM Messages
@@ -51,35 +48,6 @@ SET Content = $2,
   Edited_At = NOW()
 WHERE Message_ID = $1 RETURNING Content,
   Edited_At;
-
--- name: UpdateMessageEmbeds :one
-UPDATE Messages
-SET Embeds = $2,
-  Edited_At = NOW()
-WHERE Message_ID = $1 RETURNING Embeds,
-  Edited_At;
-
--- name: UpdateMessageActions :one
-UPDATE Messages
-SET Actions = $2,
-  Edited_At = NOW()
-WHERE Message_ID = $1 RETURNING Actions,
-  Edited_At;
-
--- name: UpdateMessageOverrides :exec
-UPDATE Messages
-SET Overrides = $1
-WHERE Message_ID = $2;
-
--- name: UpdateMessageAttachments :exec
-UPDATE Messages
-SET Attachments = $1
-WHERE Message_ID = $2;
-
--- name: UpdateMessageMetadata :exec
-UPDATE Messages
-SET Metadata = $1
-WHERE Message_ID = $2;
 
 -- name: MessageWithIDExists :one
 SELECT EXISTS (

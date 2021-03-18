@@ -12,5 +12,8 @@
       "username": "amadeus"
     }
   ],
+  "protoc": {
+    "options": ["-Iprotocol"]
+  },
   "nixEnvSelector.nixShellConfig": "${workspaceRoot}/shell.nix"
 }

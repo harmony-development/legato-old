@@ -595,11 +595,8 @@ func init() {
 }
 
 // UpdateMessage implements the UpdateMessage RPC
-func (v1 *V1) UpdateMessage(c echo.Context, r *chatv1.UpdateMessageRequest) (*empty.Empty, error) {
+func (v1 *V1) UpdateMessageText(c echo.Context, r *chatv1.UpdateMessageTextRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
-	if !r.UpdateActions && !r.UpdateEmbeds && !r.UpdateContent && !r.UpdateOverrides {
-		return nil, responses.NewError(responses.EntirelyBlank)
-	}
 
 	owner, err := v1.DB.GetMessageOwner(r.MessageId)
 	if err != nil {

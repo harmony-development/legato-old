@@ -758,6 +758,520 @@ var _ interface {
 	ErrorName() string
 } = MetadataValidationError{}
 
+// Validate checks the field values on ContentText with the rules defined in
+// the proto definition for this message. If any rules are violated, an error
+// is returned.
+func (m *ContentText) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Content
+
+	return nil
+}
+
+// ContentTextValidationError is the validation error returned by
+// ContentText.Validate if the designated constraints aren't met.
+type ContentTextValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContentTextValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContentTextValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContentTextValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContentTextValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContentTextValidationError) ErrorName() string { return "ContentTextValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ContentTextValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContentText.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContentTextValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContentTextValidationError{}
+
+// Validate checks the field values on Photo with the rules defined in the
+// proto definition for this message. If any rules are violated, an error is returned.
+func (m *Photo) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if v, ok := interface{}(m.GetPhoto()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return PhotoValidationError{
+				field:  "Photo",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for Caption
+
+	return nil
+}
+
+// PhotoValidationError is the validation error returned by Photo.Validate if
+// the designated constraints aren't met.
+type PhotoValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e PhotoValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e PhotoValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e PhotoValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e PhotoValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e PhotoValidationError) ErrorName() string { return "PhotoValidationError" }
+
+// Error satisfies the builtin error interface
+func (e PhotoValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sPhoto.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = PhotoValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = PhotoValidationError{}
+
+// Validate checks the field values on ContentPhoto with the rules defined in
+// the proto definition for this message. If any rules are violated, an error
+// is returned.
+func (m *ContentPhoto) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	for idx, item := range m.GetPhotos() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ContentPhotoValidationError{
+					field:  fmt.Sprintf("Photos[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContentPhotoValidationError is the validation error returned by
+// ContentPhoto.Validate if the designated constraints aren't met.
+type ContentPhotoValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContentPhotoValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContentPhotoValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContentPhotoValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContentPhotoValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContentPhotoValidationError) ErrorName() string { return "ContentPhotoValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ContentPhotoValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContentPhoto.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContentPhotoValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContentPhotoValidationError{}
+
+// Validate checks the field values on ContentEmbed with the rules defined in
+// the proto definition for this message. If any rules are violated, an error
+// is returned.
+func (m *ContentEmbed) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	for idx, item := range m.GetEmbeds() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ContentEmbedValidationError{
+					field:  fmt.Sprintf("Embeds[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContentEmbedValidationError is the validation error returned by
+// ContentEmbed.Validate if the designated constraints aren't met.
+type ContentEmbedValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContentEmbedValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContentEmbedValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContentEmbedValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContentEmbedValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContentEmbedValidationError) ErrorName() string { return "ContentEmbedValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ContentEmbedValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContentEmbed.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContentEmbedValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContentEmbedValidationError{}
+
+// Validate checks the field values on ContentFiles with the rules defined in
+// the proto definition for this message. If any rules are violated, an error
+// is returned.
+func (m *ContentFiles) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	for idx, item := range m.GetAttachments() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ContentFilesValidationError{
+					field:  fmt.Sprintf("Attachments[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContentFilesValidationError is the validation error returned by
+// ContentFiles.Validate if the designated constraints aren't met.
+type ContentFilesValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContentFilesValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContentFilesValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContentFilesValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContentFilesValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContentFilesValidationError) ErrorName() string { return "ContentFilesValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ContentFilesValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContentFiles.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContentFilesValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContentFilesValidationError{}
+
+// Validate checks the field values on Content with the rules defined in the
+// proto definition for this message. If any rules are violated, an error is returned.
+func (m *Content) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	for idx, item := range m.GetActions() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ContentValidationError{
+					field:  fmt.Sprintf("Actions[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	switch m.Content.(type) {
+
+	case *Content_TextMessage:
+
+		if v, ok := interface{}(m.GetTextMessage()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ContentValidationError{
+					field:  "TextMessage",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *Content_PhotoMessage:
+
+		if v, ok := interface{}(m.GetPhotoMessage()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ContentValidationError{
+					field:  "PhotoMessage",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *Content_EmbedMessage:
+
+		if v, ok := interface{}(m.GetEmbedMessage()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ContentValidationError{
+					field:  "EmbedMessage",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *Content_FilesMessage:
+
+		if v, ok := interface{}(m.GetFilesMessage()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ContentValidationError{
+					field:  "FilesMessage",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContentValidationError is the validation error returned by Content.Validate
+// if the designated constraints aren't met.
+type ContentValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContentValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContentValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContentValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContentValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContentValidationError) ErrorName() string { return "ContentValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ContentValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContent.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContentValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContentValidationError{}
+
 // Validate checks the field values on Message with the rules defined in the
 // proto definition for this message. If any rules are violated, an error is returned.
 func (m *Message) Validate() error {
@@ -769,6 +1283,16 @@ func (m *Message) Validate() error {
 		if err := v.Validate(); err != nil {
 			return MessageValidationError{
 				field:  "Metadata",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if v, ok := interface{}(m.GetOverrides()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return MessageValidationError{
+				field:  "Overrides",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}
@@ -803,59 +1327,12 @@ func (m *Message) Validate() error {
 		}
 	}
 
-	// no validation rules for Content
-
-	for idx, item := range m.GetEmbeds() {
-		_, _ = idx, item
-
-		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return MessageValidationError{
-					field:  fmt.Sprintf("Embeds[%v]", idx),
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
-	for idx, item := range m.GetActions() {
-		_, _ = idx, item
-
-		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return MessageValidationError{
-					field:  fmt.Sprintf("Actions[%v]", idx),
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
-	for idx, item := range m.GetAttachments() {
-		_, _ = idx, item
-
-		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return MessageValidationError{
-					field:  fmt.Sprintf("Attachments[%v]", idx),
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
 	// no validation rules for InReplyTo
 
-	if v, ok := interface{}(m.GetOverrides()).(interface{ Validate() error }); ok {
+	if v, ok := interface{}(m.GetContent()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return MessageValidationError{
-				field:  "Overrides",
+				field:  "Content",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}
