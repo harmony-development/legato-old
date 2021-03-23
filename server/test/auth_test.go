@@ -26,34 +26,50 @@ func newAPI() *v1.V1 {
 		Sonyflake:   sonyflake.NewSonyflake(sonyflake.Settings{}),
 		AuthManager: MockAuthManager{},
 		AuthState:   authstate.New(MockLogger{}),
-		Config: &config.Config{
-			Server: config.ServerConf{
-				Policies: config.ServerPolicies{
-					EnablePasswordResetForm: false,
-				},
+		Config:      defaultConf(),
+	})
+}
+
+func defaultConf() *config.Config {
+	return &config.Config{
+		Server: config.ServerConf{
+			Policies: config.ServerPolicies{
+				EnablePasswordResetForm: false,
 			},
 		},
-	})
+	}
 }
 
 func dummyContext(e *echo.Echo) echo.Context {
 	return e.NewContext(httptest.NewRequest(http.MethodGet, "https://127.0.0.1", nil), httptest.NewRecorder())
 }
 
-func login(c echo.Context, a *assert.Assertions, api *v1.V1, email string, password string) (*authv1.AuthStep, error) {
+func beginAuth(c echo.Context, a *assert.Assertions, api *v1.V1) (string, error) {
 	resp, err := api.BeginAuth(c, &emptypb.Empty{})
-	a.Nil(err)
-	a.Greater(len(resp.AuthId), 8)
-	initialPage, err := api.NextStep(c, &authv1.NextStepRequest{
-		AuthId: resp.AuthId,
+	if err != nil {
+		return "", err
+	}
+	return resp.AuthId, nil
+}
+
+func initialChoice(c echo.Context, a *assert.Assertions, api *v1.V1, authID string) (*authv1.AuthStep, error) {
+	return api.NextStep(c, &authv1.NextStepRequest{
+		AuthId: authID,
 	})
+}
+
+func login(c echo.Context, a *assert.Assertions, api *v1.V1, email string, password string) (*authv1.AuthStep, error) {
+	authID, err := beginAuth(c, a, api)
 	a.Nil(err)
-	a.False(initialPage.CanGoBack)
-	a.IsType(&authv1.AuthStep_Choice_{}, initialPage.Step)
-	a.Len(initialPage.GetChoice().Options, 3)
-	a.Equal("initial-choice", initialPage.GetChoice().Title)
+	a.NotEmpty(authID)
+	initialStep, err := initialChoice(c, a, api, authID)
+	a.Nil(err)
+	a.False(initialStep.CanGoBack)
+	a.IsType(&authv1.AuthStep_Choice_{}, initialStep.Step)
+	a.Len(initialStep.GetChoice().Options, 3)
+	a.Equal("initial-choice", initialStep.GetChoice().Title)
 	loginPage, err := api.NextStep(c, &authv1.NextStepRequest{
-		AuthId: resp.AuthId,
+		AuthId: authID,
 		Step: &authv1.NextStepRequest_Choice_{
 			Choice: &authv1.NextStepRequest_Choice{
 				Choice: "login",
@@ -66,7 +82,7 @@ func login(c echo.Context, a *assert.Assertions, api *v1.V1, email string, passw
 	a.Equal("login", loginPage.GetForm().Title)
 	a.Len(loginPage.GetForm().Fields, 2)
 	return api.NextStep(c, &authv1.NextStepRequest{
-		AuthId: resp.AuthId,
+		AuthId: authID,
 		Step: &authv1.NextStepRequest_Form_{
 			Form: &authv1.NextStepRequest_Form{
 				Fields: []*authv1.NextStepRequest_FormFields{
@@ -84,6 +100,53 @@ func login(c echo.Context, a *assert.Assertions, api *v1.V1, email string, passw
 			},
 		},
 	})
+}
+
+func TestInitialChoice(t *testing.T) {
+	a := assert.New(t)
+	api := newAPI()
+	ctx := dummyContext(echo.New())
+	authID, err := beginAuth(ctx, a, api)
+	a.Nil(err)
+	a.NotEmpty(authID)
+	step, err := api.NextStep(ctx, &authv1.NextStepRequest{
+		AuthId: authID,
+	})
+	a.Nil(err)
+	a.False(step.CanGoBack)
+	a.IsType(&authv1.AuthStep_Choice_{}, step.Step)
+	a.Equal("initial-choice", step.GetChoice().Title)
+	a.ElementsMatch(step.GetChoice().Options, []string{"login", "register", "other-options"})
+}
+
+func TestStepBack(t *testing.T) {
+	a := assert.New(t)
+	api := newAPI()
+	ctx := dummyContext(echo.New())
+	authID, _ := beginAuth(ctx, a, api)
+	api.NextStep(ctx, &authv1.NextStepRequest{
+		AuthId: authID,
+	})
+	_, err := api.StepBack(ctx, &authv1.StepBackRequest{
+		AuthId: authID,
+	})
+	a.NotNil(err)
+	_, err = api.NextStep(ctx, &authv1.NextStepRequest{
+		AuthId: authID,
+		Step: &authv1.NextStepRequest_Choice_{
+			Choice: &authv1.NextStepRequest_Choice{
+				Choice: "login",
+			},
+		},
+	})
+	a.Nil(err)
+	step, err := api.StepBack(ctx, &authv1.StepBackRequest{
+		AuthId: authID,
+	})
+	a.Nil(err)
+	a.IsType(&authv1.AuthStep_Choice_{}, step.Step)
+	a.Equal("initial-choice", step.GetChoice().Title)
+	a.Equal(step.CanGoBack, false)
 }
 
 func TestLogin(t *testing.T) {
@@ -105,7 +168,7 @@ func TestLogin(t *testing.T) {
 			api.DB.AddLocalUser(12345, test.email, "amadeus", hashed)
 			loginStep, err := login(dummyContext(e), a, api, test.email, test.password)
 			if test.shouldFail {
-				a.Error(err)
+				a.NotNil(err)
 			} else {
 				a.Nil(err)
 				a.NotNil(loginStep)
