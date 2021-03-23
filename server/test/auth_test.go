@@ -12,12 +12,16 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/sony/sonyflake"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 func newAPI() *v1.V1 {
 	return v1.New(v1.Dependencies{
-		DB:          MockDB{},
+		DB: MockDB{
+			users:       map[uint64]*User{},
+			userByEmail: map[string]*User{},
+		},
 		Logger:      MockLogger{},
 		Sonyflake:   sonyflake.NewSonyflake(sonyflake.Settings{}),
 		AuthManager: MockAuthManager{},
@@ -36,8 +40,50 @@ func dummyContext(e *echo.Echo) echo.Context {
 	return e.NewContext(httptest.NewRequest(http.MethodGet, "https://127.0.0.1", nil), httptest.NewRecorder())
 }
 
-func loginTester(t *testing.T) {
-
+func login(c echo.Context, a *assert.Assertions, api *v1.V1, email string, password string) (*authv1.AuthStep, error) {
+	resp, err := api.BeginAuth(c, &emptypb.Empty{})
+	a.Nil(err)
+	a.Greater(len(resp.AuthId), 8)
+	initialPage, err := api.NextStep(c, &authv1.NextStepRequest{
+		AuthId: resp.AuthId,
+	})
+	a.Nil(err)
+	a.False(initialPage.CanGoBack)
+	a.IsType(&authv1.AuthStep_Choice_{}, initialPage.Step)
+	a.Len(initialPage.GetChoice().Options, 3)
+	a.Equal("initial-choice", initialPage.GetChoice().Title)
+	loginPage, err := api.NextStep(c, &authv1.NextStepRequest{
+		AuthId: resp.AuthId,
+		Step: &authv1.NextStepRequest_Choice_{
+			Choice: &authv1.NextStepRequest_Choice{
+				Choice: "login",
+			},
+		},
+	})
+	a.Nil(err)
+	a.True(loginPage.CanGoBack)
+	a.IsType(&authv1.AuthStep_Form_{}, loginPage.Step)
+	a.Equal("login", loginPage.GetForm().Title)
+	a.Len(loginPage.GetForm().Fields, 2)
+	return api.NextStep(c, &authv1.NextStepRequest{
+		AuthId: resp.AuthId,
+		Step: &authv1.NextStepRequest_Form_{
+			Form: &authv1.NextStepRequest_Form{
+				Fields: []*authv1.NextStepRequest_FormFields{
+					{
+						Field: &authv1.NextStepRequest_FormFields_String_{
+							String_: email,
+						},
+					},
+					{
+						Field: &authv1.NextStepRequest_FormFields_Bytes{
+							Bytes: []byte(password),
+						},
+					},
+				},
+			},
+		},
+	})
 }
 
 func TestLogin(t *testing.T) {
@@ -46,7 +92,7 @@ func TestLogin(t *testing.T) {
 		password   string
 		shouldFail bool
 	}{
-		{"amadeus@viktorchondria.jp", "@&GyubhjA^GYUH", true},
+		{"amadeus@viktorchondria.jp", "@&GyubhjA^GYUH", false},
 	}
 
 	for _, test := range testMatrix {
@@ -54,56 +100,19 @@ func TestLogin(t *testing.T) {
 			a := assert.New(t)
 			api := newAPI()
 			e := echo.New()
-			resp, err := api.BeginAuth(dummyContext(e), &emptypb.Empty{})
-			assert.NoError(t, err)
-			assert.Greater(t, len(resp.AuthId), 8)
-			initialPage, err := api.NextStep(dummyContext(e), &authv1.NextStepRequest{
-				AuthId: resp.AuthId,
-			})
-			a.NoError(err)
-			a.False(initialPage.CanGoBack)
-			a.IsType(&authv1.AuthStep_Choice_{}, initialPage.Step)
-			a.Len(initialPage.GetChoice().Options, 3)
-			a.Equal("initial-choice", initialPage.GetChoice().Title)
-			loginPage, err := api.NextStep(dummyContext(e), &authv1.NextStepRequest{
-				AuthId: resp.AuthId,
-				Step: &authv1.NextStepRequest_Choice_{
-					Choice: &authv1.NextStepRequest_Choice{
-						Choice: "login",
-					},
-				},
-			})
-			a.NoError(err)
-			a.True(loginPage.CanGoBack)
-			a.IsType(&authv1.AuthStep_Form_{}, loginPage.Step)
-			a.Equal("login", loginPage.GetForm().Title)
-			a.Len(loginPage.GetForm().Fields, 2)
-			step, err := api.NextStep(dummyContext(e), &authv1.NextStepRequest{
-				AuthId: resp.AuthId,
-				Step: &authv1.NextStepRequest_Form_{
-					Form: &authv1.NextStepRequest_Form{
-						Fields: []*authv1.NextStepRequest_FormFields{
-							{
-								Field: &authv1.NextStepRequest_FormFields_String_{
-									String_: test.email,
-								},
-							},
-							{
-								Field: &authv1.NextStepRequest_FormFields_Bytes{
-									Bytes: []byte(test.password),
-								},
-							},
-						},
-					},
-				},
-			})
+			hashed, err := bcrypt.GenerateFromPassword([]byte(test.password), 0)
+			a.Nil(err)
+			api.DB.AddLocalUser(12345, test.email, "amadeus", hashed)
+			loginStep, err := login(dummyContext(e), a, api, test.email, test.password)
 			if test.shouldFail {
 				a.Error(err)
 			} else {
-				a.NoError(err)
-				a.IsType(&authv1.AuthStep_Session{}, step.Step)
-				a.NotZero(step.GetSession().UserId)
-				a.Greater(len(step.GetSession().SessionToken), 8)
+				a.Nil(err)
+				a.NotNil(loginStep)
+				a.True(loginStep.CanGoBack)
+				a.IsType(&authv1.AuthStep_Session{}, loginStep.Step)
+				a.Equal(uint64(12345), loginStep.GetSession().UserId)
+				a.Greater(len(loginStep.GetSession().SessionToken), 8)
 			}
 		})
 	}

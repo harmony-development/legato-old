@@ -11,7 +11,17 @@ import (
 	"github.com/harmony-development/legato/server/db/types"
 )
 
-type MockDB struct{}
+type User struct {
+	id       uint64
+	email    string
+	username string
+	password []byte
+}
+
+type MockDB struct {
+	users       map[uint64]*User
+	userByEmail map[string]*User
+}
 
 func (d MockDB) Migrate() error {
 	panic("unimplemented")
@@ -138,15 +148,36 @@ func (d MockDB) GetMessage(messageID uint64) (queries.Message, error) {
 }
 
 func (d MockDB) GetUserByEmail(email string) (queries.GetUserByEmailRow, error) {
-	return queries.GetUserByEmailRow{}, errors.New("user doesn't exist")
+	user := d.userByEmail[email]
+	if user == nil {
+		return queries.GetUserByEmailRow{}, errors.New("user does not exist")
+	}
+	return queries.GetUserByEmailRow{
+		UserID:   user.id,
+		Username: user.username,
+		Avatar:   sql.NullString{},
+		Status:   0,
+		Password: user.password,
+	}, nil
 }
 
 func (d MockDB) GetUserByID(userID uint64) (queries.GetUserRow, error) {
-	panic("unimplemented")
+	user := d.users[userID]
+	if user == nil {
+		return queries.GetUserRow{}, errors.New("user does not exist")
+	}
+	return queries.GetUserRow{
+		UserID:   user.id,
+		Username: user.username,
+		Avatar:   sql.NullString{},
+		IsBot:    false,
+		Status:   0,
+	}, nil
 }
 
 func (d MockDB) AddSession(userID uint64, session string) error {
-	panic("unimplemented")
+	// TODO: save the session
+	return nil
 }
 
 func (d MockDB) GetLocalUserForForeignUser(userID uint64, homeserver string) (uint64, error) {
@@ -154,7 +185,15 @@ func (d MockDB) GetLocalUserForForeignUser(userID uint64, homeserver string) (ui
 }
 
 func (d MockDB) AddLocalUser(userID uint64, email, username string, passwordHash []byte) error {
-	panic("unimplemented")
+	u := &User{
+		email:    email,
+		username: username,
+		password: passwordHash,
+		id:       userID,
+	}
+	d.users[userID] = u
+	d.userByEmail[email] = u
+	return nil
 }
 
 func (d MockDB) AddForeignUser(homeServer string, userID, localUserID uint64, username, avatar string) (uint64, error) {

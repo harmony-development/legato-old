@@ -337,6 +337,54 @@ func (q *Queries) GetUserMetadata(ctx context.Context, arg GetUserMetadataParams
 	return metadata, err
 }
 
+const getUsers = `-- name: GetUsers :many
+SELECT Users.User_ID,
+  Profiles.Username,
+  Profiles.Avatar,
+  Profiles.Status,
+  Profiles.Is_Bot
+FROM Users
+  INNER JOIN Profiles ON (Users.User_ID = Profiles.User_ID)
+WHERE Users.User_ID = $1
+`
+
+type GetUsersRow struct {
+	UserID   uint64         `json:"user_id"`
+	Username string         `json:"username"`
+	Avatar   sql.NullString `json:"avatar"`
+	Status   int16          `json:"status"`
+	IsBot    bool           `json:"is_bot"`
+}
+
+func (q *Queries) GetUsers(ctx context.Context, userID uint64) ([]GetUsersRow, error) {
+	rows, err := q.query(ctx, q.getUsersStmt, getUsers, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUsersRow
+	for rows.Next() {
+		var i GetUsersRow
+		if err := rows.Scan(
+			&i.UserID,
+			&i.Username,
+			&i.Avatar,
+			&i.Status,
+			&i.IsBot,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const isBot = `-- name: IsBot :one
 SELECT Is_Bot
 FROM Profiles

@@ -217,6 +217,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getUserMetadataStmt, err = db.PrepareContext(ctx, getUserMetadata); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUserMetadata: %w", err)
 	}
+	if q.getUsersStmt, err = db.PrepareContext(ctx, getUsers); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUsers: %w", err)
+	}
 	if q.guildWithIDExistsStmt, err = db.PrepareContext(ctx, guildWithIDExists); err != nil {
 		return nil, fmt.Errorf("error preparing query GuildWithIDExists: %w", err)
 	}
@@ -703,6 +706,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getUserMetadataStmt: %w", cerr)
 		}
 	}
+	if q.getUsersStmt != nil {
+		if cerr := q.getUsersStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUsersStmt: %w", cerr)
+		}
+	}
 	if q.guildWithIDExistsStmt != nil {
 		if cerr := q.guildWithIDExistsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing guildWithIDExistsStmt: %w", cerr)
@@ -1067,6 +1075,7 @@ type Queries struct {
 	getUserStmt                                    *sql.Stmt
 	getUserByEmailStmt                             *sql.Stmt
 	getUserMetadataStmt                            *sql.Stmt
+	getUsersStmt                                   *sql.Stmt
 	guildWithIDExistsStmt                          *sql.Stmt
 	guildsForUserStmt                              *sql.Stmt
 	guildsForUserWithDataStmt                      *sql.Stmt
@@ -1190,6 +1199,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getUserStmt:                                    q.getUserStmt,
 		getUserByEmailStmt:                             q.getUserByEmailStmt,
 		getUserMetadataStmt:                            q.getUserMetadataStmt,
+		getUsersStmt:                                   q.getUsersStmt,
 		guildWithIDExistsStmt:                          q.guildWithIDExistsStmt,
 		guildsForUserStmt:                              q.guildsForUserStmt,
 		guildsForUserWithDataStmt:                      q.guildsForUserWithDataStmt,
