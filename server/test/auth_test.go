@@ -115,7 +115,7 @@ func dummyContext(e *echo.Echo) echo.Context {
 	return e.NewContext(httptest.NewRequest(http.MethodGet, "https://127.0.0.1", nil), httptest.NewRecorder())
 }
 
-func beginAuth(c echo.Context, a *require.Assertions, api *v1.V1) (string, error) {
+func beginAuth(c echo.Context, api *v1.V1) (string, error) {
 	resp, err := api.BeginAuth(c, &emptypb.Empty{})
 	if err != nil {
 		return "", err
@@ -123,7 +123,7 @@ func beginAuth(c echo.Context, a *require.Assertions, api *v1.V1) (string, error
 	return resp.AuthId, nil
 }
 
-func initialChoice(c echo.Context, a *require.Assertions, api *v1.V1, authID string) (*authv1.AuthStep, error) {
+func initialChoice(c echo.Context, api *v1.V1, authID string) (*authv1.AuthStep, error) {
 	return api.NextStep(c, &authv1.NextStepRequest{
 		AuthId: authID,
 	})
@@ -133,7 +133,7 @@ func TestInitialChoice(t *testing.T) {
 	a := require.New(t)
 	api := newAPI()
 	ctx := dummyContext(echo.New())
-	authID, err := beginAuth(ctx, a, api)
+	authID, err := beginAuth(ctx, api)
 	a.NoError(err)
 	a.NotEmpty(authID)
 	step, err := api.NextStep(ctx, &authv1.NextStepRequest{
@@ -150,7 +150,7 @@ func TestStepBack(t *testing.T) {
 	a := require.New(t)
 	api := newAPI()
 	ctx := dummyContext(echo.New())
-	authID, _ := beginAuth(ctx, a, api)
+	authID, _ := beginAuth(ctx, api)
 	api.NextStep(ctx, &authv1.NextStepRequest{
 		AuthId: authID,
 	})
@@ -194,8 +194,8 @@ func TestLogin(t *testing.T) {
 			hashed, err := bcrypt.GenerateFromPassword([]byte(test.password), 0)
 			a.NoError(err)
 			api.DB.AddLocalUser(12345, test.email, "amadeus", hashed)
-			authID, _ := beginAuth(ctx, a, api)
-			initialChoice(ctx, a, api, authID)
+			authID, _ := beginAuth(ctx, api)
+			initialChoice(ctx, api, authID)
 			api.NextStep(ctx, &authv1.NextStepRequest{
 				AuthId: authID,
 				Step: &authv1.NextStepRequest_Choice_{
@@ -291,8 +291,8 @@ func TestRegister(t *testing.T) {
 			a := require.New(t)
 			api := newAPI()
 			ctx := dummyContext(echo.New())
-			authID, _ := beginAuth(ctx, a, api)
-			initialChoice(ctx, a, api, authID)
+			authID, _ := beginAuth(ctx, api)
+			initialChoice(ctx, api, authID)
 			api.NextStep(ctx, &authv1.NextStepRequest{
 				AuthId: authID,
 				Step: &authv1.NextStepRequest_Choice_{
@@ -341,4 +341,67 @@ func TestRegister(t *testing.T) {
 			}
 		})
 	}
+}
+
+func BenchmarkBeginAuth(b *testing.B) {
+	ctx := dummyContext(echo.New())
+	api := newAPI()
+	b.ResetTimer()
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			beginAuth(ctx, api)
+		}
+	})
+}
+
+func BenchmarkLogin(b *testing.B) {
+	ctx := dummyContext(echo.New())
+	api := newAPI()
+	hashed, err := bcrypt.GenerateFromPassword([]byte("@&GyubhjA^GYUH1"), 0)
+	if err != nil {
+		panic(err)
+	}
+	api.DB.AddLocalUser(12345, "amadeus@home.cern", "amadeus", hashed)
+	b.ResetTimer()
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			authID, err := beginAuth(ctx, api)
+			if err != nil {
+				panic(err)
+			}
+			_, err = api.NextStep(ctx, &authv1.NextStepRequest{
+				AuthId: authID,
+				Step: &authv1.NextStepRequest_Choice_{
+					Choice: &authv1.NextStepRequest_Choice{
+						Choice: "login",
+					},
+				},
+			})
+			if err != nil {
+				panic(err)
+			}
+			_, err = api.NextStep(ctx, &authv1.NextStepRequest{
+				AuthId: authID,
+				Step: &authv1.NextStepRequest_Form_{
+					Form: &authv1.NextStepRequest_Form{
+						Fields: []*authv1.NextStepRequest_FormFields{
+							{
+								Field: &authv1.NextStepRequest_FormFields_String_{
+									String_: "amadeus@home.cern",
+								},
+							},
+							{
+								Field: &authv1.NextStepRequest_FormFields_Bytes{
+									Bytes: []byte("@&GyubhjA^GYUH1"),
+								},
+							},
+						},
+					},
+				},
+			})
+			if err != nil {
+				panic(err)
+			}
+		}
+	})
 }
