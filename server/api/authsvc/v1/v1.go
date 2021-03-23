@@ -6,6 +6,9 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"net"
+	"regexp"
+	"strings"
 	"time"
 	"unicode"
 
@@ -38,6 +41,7 @@ type Dependencies struct {
 
 type V1 struct {
 	Dependencies
+	emailRegex *regexp.Regexp
 }
 
 var loginStep = authsteps.NewFormStep(
@@ -163,6 +167,7 @@ func New(deps Dependencies) *V1 {
 
 	return &V1{
 		Dependencies: deps,
+		emailRegex:   regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"),
 	}
 }
 
@@ -429,6 +434,21 @@ func (v1 *V1) LocalLogin(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 	return s, nil
 }
 
+func (v1 *V1) isValidEmail(e string) bool {
+	if len(e) < 3 || len(e) > 254 {
+		return false
+	}
+	if !v1.emailRegex.MatchString(e) {
+		return false
+	}
+	parts := strings.Split(e, "@")
+	mx, err := net.LookupMX(parts[1])
+	if err != nil || len(mx) == 0 {
+		return false
+	}
+	return true
+}
+
 func (v1 *V1) Register(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 	f := r.GetForm()
 	if f == nil {
@@ -439,8 +459,11 @@ func (v1 *V1) Register(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 	username := f.Fields[1].GetString_()
 	password := f.Fields[2].GetBytes()
 
+	if !v1.isValidEmail(email) {
+		return nil, responses.NewError(responses.BadEmail)
+	}
 	if len(username) < v1.Config.Server.Policies.Username.MinLength || len(username) > v1.Config.Server.Policies.Username.MaxLength {
-		return nil, responses.NewError(responses.BadPassword)
+		return nil, responses.NewError(responses.BadUsername)
 	}
 	if len(password) < v1.Config.Server.Policies.Password.MinLength || len(password) > v1.Config.Server.Policies.Password.MaxLength {
 		return nil, responses.NewError(responses.BadPassword)

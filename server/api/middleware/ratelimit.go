@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/harmony-development/hrpc/server"
-	"github.com/harmony-development/legato/server/http/responses"
+	"github.com/harmony-development/legato/server/responses"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/time/rate"
 	"google.golang.org/protobuf/reflect/protoreflect"

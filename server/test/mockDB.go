@@ -19,8 +19,9 @@ type User struct {
 }
 
 type MockDB struct {
-	users       map[uint64]*User
-	userByEmail map[string]*User
+	users         map[uint64]*User
+	userByEmail   map[string]*User
+	userBySession map[string]uint64
 }
 
 func (d MockDB) Migrate() error {
@@ -92,7 +93,10 @@ func (d MockDB) DeleteInvite(inviteID string) error {
 }
 
 func (d MockDB) SessionToUserID(session string) (uint64, error) {
-	panic("unimplemented")
+	if d.userBySession[session] == 0 {
+		return 0, errors.New("session does not exist")
+	}
+	return d.userBySession[session], nil
 }
 
 func (d MockDB) UserInGuild(userID, guildID uint64) (bool, error) {
@@ -176,7 +180,7 @@ func (d MockDB) GetUserByID(userID uint64) (queries.GetUserRow, error) {
 }
 
 func (d MockDB) AddSession(userID uint64, session string) error {
-	// TODO: save the session
+	d.userBySession[session] = userID
 	return nil
 }
 
@@ -201,7 +205,8 @@ func (d MockDB) AddForeignUser(homeServer string, userID, localUserID uint64, us
 }
 
 func (d MockDB) EmailExists(email string) (bool, error) {
-	panic("unimplemented")
+	_, exists := d.userByEmail[email]
+	return exists, nil
 }
 
 func (d MockDB) ExpireSessions() error {

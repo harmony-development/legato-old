@@ -5,7 +5,9 @@ import harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1
 // basically a list of API responses for i18n compatibility
 
 const (
+	TooManyRequests     = "h.too-many-requests"
 	InternalServerError = "h.internal-server-error"
+	BadRequest          = "h.bad-request"
 
 	NoSessionProvided = "h.blank-session"
 	BadSession        = "h.bad-session"
@@ -15,6 +17,8 @@ const (
 	MissingMessageID = "h.missing-message-id"
 	MissingUserID    = "h.bad-user-id"
 	MissingAuthID    = "h.missing-auth-id"
+	MissingFilename  = "h.missing-file-name"
+	MissingFiles     = "h.missing-files"
 
 	BadGuildID   = "h.bad-guild-id"
 	BadChannelID = "h.bad-channel-id"
@@ -50,6 +54,8 @@ const (
 
 	MissingForm = "h.missing-form"
 
+	TooManyFiles = "h.too-many-files"
+
 	BannedFromGuild = "h.banned-from-guild"
 )
 
@@ -57,7 +63,7 @@ const (
 type Error harmonytypesv1.Error
 
 func (e *Error) Error() string {
-	return e.HumanMessage
+	return e.Identifier
 }
 
 func NewError(code string) error {
