@@ -13,6 +13,12 @@ import (
 	"github.com/harmony-development/legato/server/intercom"
 )
 
+type IManager interface {
+	MakeAuthToken(userID uint64, target, username, avatar string) (string, error)
+	GetPublicKey(host string) (string, error)
+	GetOwnPublicKey() *rsa.PublicKey
+}
+
 // Manager wraps logic for authentication
 type Manager struct {
 	*Dependencies
@@ -57,6 +63,10 @@ func New(d *Dependencies) (*Manager, error) {
 		return nil, err
 	}
 	return m, nil
+}
+
+func (m Manager) GetOwnPublicKey() *rsa.PublicKey {
+	return m.PubKey
 }
 
 func (m Manager) MakeAuthToken(userID uint64, target, username, avatar string) (string, error) {

@@ -48,6 +48,7 @@ require (
 	github.com/sebdah/goldie/v2 v2.5.3 // indirect
 	github.com/sirupsen/logrus v1.8.0
 	github.com/sony/sonyflake v1.0.0
+	github.com/stretchr/testify v1.7.0
 	github.com/thanhpk/randstr v1.0.4
 	github.com/yuin/goldmark v1.3.1 // indirect
 	github.com/zclconf/go-cty v1.7.1 // indirect

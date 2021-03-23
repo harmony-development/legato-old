@@ -30,7 +30,7 @@ import (
 type Dependencies struct {
 	DB          types.IHarmonyDB
 	Logger      logger.ILogger
-	AuthManager *auth.Manager
+	AuthManager auth.IManager
 	Sonyflake   *sonyflake.Sonyflake
 	Config      *config.Config
 	AuthState   *authstate.AuthState
@@ -202,7 +202,7 @@ func init() {
 }
 
 func (v1 *V1) Key(c echo.Context, r *emptypb.Empty) (*authv1.KeyReply, error) {
-	keyBytes, err := x509.MarshalPKIXPublicKey(v1.AuthManager.PubKey)
+	keyBytes, err := x509.MarshalPKIXPublicKey(v1.AuthManager.GetOwnPublicKey())
 	if err != nil {
 		return nil, err
 	}
