@@ -6,7 +6,6 @@ import (
 	"github.com/dyatlov/go-opengraph/opengraph"
 	mediaproxyv1 "github.com/harmony-development/legato/gen/mediaproxy/v1"
 	"github.com/harmony-development/legato/server/api/middleware"
-	lru "github.com/hashicorp/golang-lru"
 	"github.com/labstack/echo/v4"
 )
 
@@ -19,9 +18,10 @@ func init() {
 	}, "/protocol.mediaproxy.v1.MediaProxyService/FetchLinkMetadata")
 }
 
-type linkData struct {
-	linkLRU *lru.ARCCache
-}
+// TODO use this struct somewhere
+// type linkData struct {
+// 	linkLRU *lru.ARCCache
+// }
 
 func copyOGIntoProtobuf(og *opengraph.OpenGraph, md *mediaproxyv1.SiteMetadata) {
 	md.Description = og.Description

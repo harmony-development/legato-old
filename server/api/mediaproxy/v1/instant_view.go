@@ -9,17 +9,17 @@ import (
 
 	mediaproxyv1 "github.com/harmony-development/legato/gen/mediaproxy/v1"
 	"github.com/harmony-development/legato/server/api/middleware"
-	lru "github.com/hashicorp/golang-lru"
 )
 
-type instantViewData struct {
-	instantLRU *lru.ARCCache
-}
+// TODO use these structs somewhere
+// type instantViewData struct {
+// 	instantLRU *lru.ARCCache
+// }
 
-type instantViewResult struct {
-	ok   bool
-	data string
-}
+// type instantViewResult struct {
+// 	ok   bool
+// 	data string
+// }
 
 var converter = md.NewConverter("", true, nil)
 

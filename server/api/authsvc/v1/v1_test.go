@@ -61,7 +61,7 @@ func TestStepBack(t *testing.T) {
 	api := newAuthAPI()
 	ctx := test.DummyContext(echo.New())
 	authID, _ := beginAuth(ctx, api)
-	api.NextStep(ctx, &authv1.NextStepRequest{
+	_, _ = api.NextStep(ctx, &authv1.NextStepRequest{
 		AuthId: authID,
 	})
 	_, err := api.StepBack(ctx, &authv1.StepBackRequest{
@@ -105,8 +105,8 @@ func TestLogin(t *testing.T) {
 			a.NoError(err)
 			api.DB.AddLocalUser(12345, testCase.email, "amadeus", hashed)
 			authID, _ := beginAuth(ctx, api)
-			initialChoice(ctx, api, authID)
-			api.NextStep(ctx, &authv1.NextStepRequest{
+			_, _ = initialChoice(ctx, api, authID)
+			_, _ = api.NextStep(ctx, &authv1.NextStepRequest{
 				AuthId: authID,
 				Step: &authv1.NextStepRequest_Choice_{
 					Choice: &authv1.NextStepRequest_Choice{
@@ -260,7 +260,7 @@ func BenchmarkBeginAuth(b *testing.B) {
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			beginAuth(ctx, api)
+			_, _ = beginAuth(ctx, api)
 		}
 	})
 }
@@ -272,7 +272,7 @@ func BenchmarkLogin(b *testing.B) {
 	if err != nil {
 		panic(err)
 	}
-	api.DB.AddLocalUser(12345, "amadeus@home.cern", "amadeus", hashed)
+	_, _ = api.DB.AddLocalUser(12345, "amadeus@home.cern", "amadeus", hashed)
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
