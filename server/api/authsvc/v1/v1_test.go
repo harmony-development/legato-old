@@ -1,16 +1,12 @@
-package test
+package v1
 
 import (
-	"net/http"
-	"net/http/httptest"
 	"testing"
-	"time"
 
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
-	v1 "github.com/harmony-development/legato/server/api/authsvc/v1"
 	authstate "github.com/harmony-development/legato/server/api/authsvc/v1/pubsub_backends/integrated"
-	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/responses"
+	"github.com/harmony-development/legato/server/test"
 	"github.com/labstack/echo/v4"
 	"github.com/sony/sonyflake"
 	"github.com/stretchr/testify/require"
@@ -18,104 +14,18 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-func newAPI() *v1.V1 {
-	return v1.New(v1.Dependencies{
-		DB: MockDB{
-			users:         map[uint64]*User{},
-			userByEmail:   map[string]*User{},
-			userBySession: map[string]uint64{},
-		},
-		Logger:      MockLogger{},
+func newAuthAPI() *V1 {
+	return New(Dependencies{
+		DB:          test.NewMockDB(),
+		Logger:      test.MockLogger{},
 		Sonyflake:   sonyflake.NewSonyflake(sonyflake.Settings{}),
-		AuthManager: MockAuthManager{},
-		AuthState:   authstate.New(MockLogger{}),
-		Config:      defaultConf(),
+		AuthManager: test.MockAuthManager{},
+		AuthState:   authstate.New(test.MockLogger{}),
+		Config:      test.DefaultConf(),
 	})
 }
 
-func defaultConf() *config.Config {
-	return &config.Config{
-		Server: config.ServerConf{
-			Host:           "0.0.0.0",
-			Port:           2289,
-			PrivateKeyPath: "harmony-key.pem",
-			PublicKeyPath:  "harmony-key.pub",
-			StorageBackend: "PureFlatfile",
-			UseCORS:        true,
-			UseTLS:         true,
-			TLSCert:        "./filestore/localhost.pem",
-			TLSKey:         "./filestore/localhost-key.pem",
-			Policies: config.ServerPolicies{
-				Avatar: config.AvatarPolicy{
-					Width:   256,
-					Height:  256,
-					Quality: 50,
-					Crop:    true,
-				},
-				Username: config.UsernamePolicy{
-					MinLength: 2,
-					MaxLength: 20,
-				},
-				Password: config.PasswordPolicy{
-					MinLength:  5,
-					MaxLength:  256,
-					MinLower:   1,
-					MinUpper:   1,
-					MinNumbers: 1,
-				},
-				Attachments: config.AttachmentPolicy{
-					MaximumCount: 10,
-				},
-				Debug: config.DebugPolicy{
-					LogErrors:                  true,
-					LogRequests:                true,
-					RespondWithErrors:          true,
-					ResponseErrorsIncludeTrace: true,
-					VerboseStreamHandling:      true,
-				},
-				Sessions: config.SessionPolicy{
-					Duration: time.Hour * 48,
-				},
-				MaximumCacheSizes: config.CachePolicy{
-					Owner:       5096,
-					Sessions:    5096,
-					LinkEmbeds:  65536,
-					InstantView: 65536,
-				},
-				APIs: config.APIPolicy{
-					Messages: config.MessagesPolicy{
-						MaximumGetAmount: 50,
-					},
-				},
-				Federation: config.FederationPolicy{
-					NonceLength:                       32,
-					GuildLeaveNotificationQueueLength: 64,
-				},
-			},
-		},
-		Database: config.DBConf{
-			Host:     "127.0.0.1",
-			Username: "amadeus",
-			Password: "password",
-			Port:     5432,
-			Name:     "harmony",
-			Backend:  "postgres",
-			Filename: "data.db",
-		},
-		Flatfile: config.FlatfileConf{
-			MediaPath: "flatfile",
-		},
-		Sentry: config.SentryConf{
-			AttachStacktraces: true,
-		},
-	}
-}
-
-func dummyContext(e *echo.Echo) echo.Context {
-	return e.NewContext(httptest.NewRequest(http.MethodGet, "https://127.0.0.1", nil), httptest.NewRecorder())
-}
-
-func beginAuth(c echo.Context, api *v1.V1) (string, error) {
+func beginAuth(c echo.Context, api *V1) (string, error) {
 	resp, err := api.BeginAuth(c, &emptypb.Empty{})
 	if err != nil {
 		return "", err
@@ -123,7 +33,7 @@ func beginAuth(c echo.Context, api *v1.V1) (string, error) {
 	return resp.AuthId, nil
 }
 
-func initialChoice(c echo.Context, api *v1.V1, authID string) (*authv1.AuthStep, error) {
+func initialChoice(c echo.Context, api *V1, authID string) (*authv1.AuthStep, error) {
 	return api.NextStep(c, &authv1.NextStepRequest{
 		AuthId: authID,
 	})
@@ -131,8 +41,8 @@ func initialChoice(c echo.Context, api *v1.V1, authID string) (*authv1.AuthStep,
 
 func TestInitialChoice(t *testing.T) {
 	a := require.New(t)
-	api := newAPI()
-	ctx := dummyContext(echo.New())
+	api := newAuthAPI()
+	ctx := test.DummyContext(echo.New())
 	authID, err := beginAuth(ctx, api)
 	a.NoError(err)
 	a.NotEmpty(authID)
@@ -148,8 +58,8 @@ func TestInitialChoice(t *testing.T) {
 
 func TestStepBack(t *testing.T) {
 	a := require.New(t)
-	api := newAPI()
-	ctx := dummyContext(echo.New())
+	api := newAuthAPI()
+	ctx := test.DummyContext(echo.New())
 	authID, _ := beginAuth(ctx, api)
 	api.NextStep(ctx, &authv1.NextStepRequest{
 		AuthId: authID,
@@ -177,7 +87,7 @@ func TestStepBack(t *testing.T) {
 }
 
 func TestLogin(t *testing.T) {
-	var testMatrix = []struct {
+	var testTable = []struct {
 		email       string
 		password    string
 		expectError string
@@ -186,14 +96,14 @@ func TestLogin(t *testing.T) {
 		{"amadeus@home.cern", "", ""},
 	}
 
-	for _, test := range testMatrix {
-		t.Run(test.email, func(t *testing.T) {
+	for _, testCase := range testTable {
+		t.Run(testCase.email, func(t *testing.T) {
 			a := require.New(t)
-			api := newAPI()
-			ctx := dummyContext(echo.New())
-			hashed, err := bcrypt.GenerateFromPassword([]byte(test.password), 0)
+			api := newAuthAPI()
+			ctx := test.DummyContext(echo.New())
+			hashed, err := bcrypt.GenerateFromPassword([]byte(testCase.password), 0)
 			a.NoError(err)
-			api.DB.AddLocalUser(12345, test.email, "amadeus", hashed)
+			api.DB.AddLocalUser(12345, testCase.email, "amadeus", hashed)
 			authID, _ := beginAuth(ctx, api)
 			initialChoice(ctx, api, authID)
 			api.NextStep(ctx, &authv1.NextStepRequest{
@@ -211,21 +121,21 @@ func TestLogin(t *testing.T) {
 						Fields: []*authv1.NextStepRequest_FormFields{
 							{
 								Field: &authv1.NextStepRequest_FormFields_String_{
-									String_: test.email,
+									String_: testCase.email,
 								},
 							},
 							{
 								Field: &authv1.NextStepRequest_FormFields_Bytes{
-									Bytes: []byte(test.password),
+									Bytes: []byte(testCase.password),
 								},
 							},
 						},
 					},
 				},
 			})
-			if test.expectError != "" {
+			if testCase.expectError != "" {
 				a.Error(err)
-				a.Equal(test.expectError, err.Error())
+				a.Equal(testCase.expectError, err.Error())
 			} else {
 				a.NoError(err)
 				a.NotNil(sessionStep)
@@ -242,7 +152,7 @@ func TestLogin(t *testing.T) {
 }
 
 func TestRegister(t *testing.T) {
-	var testMatrix = []struct {
+	var testTable = []struct {
 		email       string
 		username    string
 		password    string
@@ -286,11 +196,11 @@ func TestRegister(t *testing.T) {
 		},
 	}
 
-	for _, test := range testMatrix {
-		t.Run(test.name, func(t *testing.T) {
+	for _, testCase := range testTable {
+		t.Run(testCase.name, func(t *testing.T) {
 			a := require.New(t)
-			api := newAPI()
-			ctx := dummyContext(echo.New())
+			api := newAuthAPI()
+			ctx := test.DummyContext(echo.New())
 			authID, _ := beginAuth(ctx, api)
 			initialChoice(ctx, api, authID)
 			api.NextStep(ctx, &authv1.NextStepRequest{
@@ -308,25 +218,25 @@ func TestRegister(t *testing.T) {
 						Fields: []*authv1.NextStepRequest_FormFields{
 							{
 								Field: &authv1.NextStepRequest_FormFields_String_{
-									String_: test.email,
+									String_: testCase.email,
 								},
 							},
 							{
 								Field: &authv1.NextStepRequest_FormFields_String_{
-									String_: test.username,
+									String_: testCase.username,
 								},
 							},
 							{
 								Field: &authv1.NextStepRequest_FormFields_Bytes{
-									Bytes: []byte(test.password),
+									Bytes: []byte(testCase.password),
 								},
 							},
 						},
 					},
 				},
 			})
-			if test.expectError != "" {
-				a.EqualError(err, test.expectError)
+			if testCase.expectError != "" {
+				a.EqualError(err, testCase.expectError)
 			} else {
 				a.NoError(err)
 				a.NotNil(sessionStep)
@@ -334,8 +244,9 @@ func TestRegister(t *testing.T) {
 				a.IsType(&authv1.AuthStep_Session{}, sessionStep.Step)
 				user, err := api.DB.GetUserByID(sessionStep.GetSession().UserId)
 				a.NoError(err)
-				a.Equal(test.username, user.Username)
+				a.Equal(testCase.username, user.Username)
 				userID, err := api.DB.SessionToUserID(sessionStep.GetSession().SessionToken)
+				a.NoError(err)
 				a.Equal(sessionStep.GetSession().UserId, userID)
 				a.Greater(len(sessionStep.GetSession().SessionToken), 8)
 			}
@@ -344,8 +255,8 @@ func TestRegister(t *testing.T) {
 }
 
 func BenchmarkBeginAuth(b *testing.B) {
-	ctx := dummyContext(echo.New())
-	api := newAPI()
+	ctx := test.DummyContext(echo.New())
+	api := newAuthAPI()
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
@@ -355,8 +266,8 @@ func BenchmarkBeginAuth(b *testing.B) {
 }
 
 func BenchmarkLogin(b *testing.B) {
-	ctx := dummyContext(echo.New())
-	api := newAPI()
+	ctx := test.DummyContext(echo.New())
+	api := newAuthAPI()
 	hashed, err := bcrypt.GenerateFromPassword([]byte("@&GyubhjA^GYUH1"), 0)
 	if err != nil {
 		panic(err)

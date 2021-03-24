@@ -18,10 +18,27 @@ type User struct {
 	password []byte
 }
 
+type Guild struct {
+	id      uint64
+	owner   uint64
+	name    string
+	picture string
+}
+
 type MockDB struct {
 	users         map[uint64]*User
 	userByEmail   map[string]*User
 	userBySession map[string]uint64
+	guilds        map[uint64]*Guild
+}
+
+func NewMockDB() *MockDB {
+	return &MockDB{
+		users:         map[uint64]*User{},
+		userByEmail:   map[string]*User{},
+		userBySession: map[string]uint64{},
+		guilds:        map[uint64]*Guild{},
+	}
 }
 
 func (d MockDB) Migrate() error {
@@ -33,7 +50,19 @@ func (d MockDB) SessionExpireRoutine() {
 }
 
 func (d MockDB) CreateGuild(owner, id, channelID uint64, guildName, picture string) (*queries.Guild, error) {
-	panic("unimplemented")
+	d.guilds[id] = &Guild{
+		id:      id,
+		owner:   owner,
+		name:    guildName,
+		picture: picture,
+	}
+	return &queries.Guild{
+		GuildID:    id,
+		OwnerID:    owner,
+		GuildName:  guildName,
+		PictureUrl: picture,
+		Metadata:   []byte{},
+	}, nil
 }
 
 func (d MockDB) DeleteGuild(guildID uint64) error {
@@ -238,7 +267,16 @@ func (d MockDB) HasMessageWithID(guildID, channelID, messageID uint64) (bool, er
 }
 
 func (d MockDB) GetGuildByID(guildID uint64) (queries.Guild, error) {
-	panic("unimplemented")
+	guild, exists := d.guilds[guildID]
+	if !exists {
+		return queries.Guild{}, errors.New("guild doesn't exist")
+	}
+	return queries.Guild{
+		GuildID:    guild.id,
+		PictureUrl: guild.picture,
+		GuildName:  guild.name,
+		Metadata:   []byte{},
+	}, nil
 }
 
 func (d MockDB) UpdateMessage(messageID uint64, content *string, embeds, actions, overrides *[]byte, attachments *[]string, metadata *harmonytypesv1.Metadata, updateMetadata bool) (time.Time, error) {

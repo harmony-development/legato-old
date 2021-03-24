@@ -39,6 +39,7 @@ const (
 	BadEmail    = "h.bad-email"
 	BadPassword = "h.bad-password"
 	BadUsername = "h.bad-username"
+	NameTooLong = "h.name-too-long"
 
 	IncorrectPassword = "h.incorrect-password"
 

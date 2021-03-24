@@ -1,6 +1,10 @@
 package test
 
-import "github.com/harmony-development/legato/server/logger"
+import (
+	"fmt"
+
+	"github.com/harmony-development/legato/server/logger"
+)
 
 type MockLogger struct {
 }
@@ -15,7 +19,7 @@ func (m MockLogger) Debug(d logger.DebugScope, v ...interface{}) {
 	panic("unimplemented")
 }
 func (m MockLogger) Verbose(d logger.DebugScope, format string, v ...interface{}) {
-	panic("unimplemented")
+	fmt.Printf(format, v...)
 }
 func (m MockLogger) Fatal(err error) {
 	panic("unimplemented")
