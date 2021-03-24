@@ -34,19 +34,21 @@ func copyOGIntoProtobuf(og *opengraph.OpenGraph, md *mediaproxyv1.SiteMetadata) 
 	md.SiteTitle = og.SiteName
 }
 
-func (v1 *V1) obtainOG(url string, out *mediaproxyv1.SiteMetadata) error {
-	data, err := v1.fetch(url)
-	if err != nil {
-		return err
-	}
-	copyOGIntoProtobuf((*opengraph.OpenGraph)(data.OG), out)
+// TODO use this function
+// func (v1 *V1) obtainOG(url string, out *mediaproxyv1.SiteMetadata) error {
+// 	data, err := v1.fetch(url)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	copyOGIntoProtobuf((*opengraph.OpenGraph)(data.OG), out)
 
-	return nil
-}
+// 	return nil
+// }
 
 // FetchLinkMetadata implements the FetchLinkMetadata RPC
 func (v1 *V1) FetchLinkMetadata(c echo.Context, r *mediaproxyv1.FetchLinkMetadataRequest) (resp *mediaproxyv1.FetchLinkMetadataResponse, err error) {
-	resp = &mediaproxyv1.FetchLinkMetadataResponse{}
+	// TODO use this response
+	// resp = &mediaproxyv1.FetchLinkMetadataResponse{}
 
 	data, err := v1.fetch(r.Url)
 	if err != nil {

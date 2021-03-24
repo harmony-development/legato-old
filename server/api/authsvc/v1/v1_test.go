@@ -103,7 +103,7 @@ func TestLogin(t *testing.T) {
 			ctx := test.DummyContext(echo.New())
 			hashed, err := bcrypt.GenerateFromPassword([]byte(testCase.password), 0)
 			a.NoError(err)
-			api.DB.AddLocalUser(12345, testCase.email, "amadeus", hashed)
+			_ = api.DB.AddLocalUser(12345, testCase.email, "amadeus", hashed)
 			authID, _ := beginAuth(ctx, api)
 			_, _ = initialChoice(ctx, api, authID)
 			_, _ = api.NextStep(ctx, &authv1.NextStepRequest{
@@ -202,8 +202,8 @@ func TestRegister(t *testing.T) {
 			api := newAuthAPI()
 			ctx := test.DummyContext(echo.New())
 			authID, _ := beginAuth(ctx, api)
-			initialChoice(ctx, api, authID)
-			api.NextStep(ctx, &authv1.NextStepRequest{
+			_, _ = initialChoice(ctx, api, authID)
+			_, _ = api.NextStep(ctx, &authv1.NextStepRequest{
 				AuthId: authID,
 				Step: &authv1.NextStepRequest_Choice_{
 					Choice: &authv1.NextStepRequest_Choice{
