@@ -272,7 +272,7 @@ func BenchmarkLogin(b *testing.B) {
 	if err != nil {
 		panic(err)
 	}
-	_, _ = api.DB.AddLocalUser(12345, "amadeus@home.cern", "amadeus", hashed)
+	_ = api.DB.AddLocalUser(12345, "amadeus@home.cern", "amadeus", hashed)
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {

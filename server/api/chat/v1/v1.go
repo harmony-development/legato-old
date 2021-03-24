@@ -103,6 +103,9 @@ func init() {
 // CreateGuild implements the CreateGuild RPC
 func (v1 *V1) CreateGuild(c echo.Context, r *chatv1.CreateGuildRequest) (*chatv1.CreateGuildResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
+	if len(r.GuildName) > v1.Config.Server.Policies.Guild.MaxLength {
+		return nil, responses.NewError(responses.NameTooLong)
+	}
 	guildID, err := v1.Sonyflake.NextID()
 	if err != nil {
 		return nil, err
