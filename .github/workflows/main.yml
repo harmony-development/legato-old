@@ -41,11 +41,10 @@ jobs:
         run: go build -v .
       - 
         name: Test
-        run: go test ./...
-        continue-on-error: true
+        run: go test -race -covermode=atomic -coverprofile=coverage.out ./...
       - 
         name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+        run: bash <(curl -s https://codecov.io/bash)
       - 
         uses: actions/upload-artifact@v2
         with:
