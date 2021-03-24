@@ -35,6 +35,7 @@ const (
 	NotEnoughPermissions = "h.not-enough-permissions"
 
 	AlreadyRegistered = "h.already-registered"
+	AlreadyInGuild    = "h.already-in-guild"
 
 	BadEmail    = "h.bad-email"
 	BadPassword = "h.bad-password"

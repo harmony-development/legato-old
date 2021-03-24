@@ -809,6 +809,12 @@ func (v1 *V1) JoinGuild(c echo.Context, r *chatv1.JoinGuildRequest) (*chatv1.Joi
 		}
 		return nil, responses.NewError(responses.BannedFromGuild)
 	}
+	if inGuild, err := v1.DB.UserInGuild(ctx.UserID, guildID); inGuild || err != nil {
+		if err != nil {
+			return nil, responses.NewError(responses.InternalServerError)
+		}
+		return nil, responses.NewError(responses.AlreadyInGuild)
+	}
 	if err := v1.DB.AddMemberToGuild(ctx.UserID, guildID); err != nil {
 		return nil, err
 	}
@@ -852,7 +858,12 @@ func (v1 *V1) LeaveGuild(c echo.Context, r *chatv1.LeaveGuildRequest) (*empty.Em
 	} else if isOwner {
 		return nil, responses.NewError(responses.IsOwner)
 	}
-
+	if inGuild, err := v1.DB.UserInGuild(ctx.UserID, r.GuildId); !inGuild || err != nil {
+		if err != nil {
+			return nil, responses.NewError(responses.InternalServerError)
+		}
+		return nil, responses.NewError(responses.NotJoined)
+	}
 	if err := v1.DB.DeleteMember(r.GuildId, ctx.UserID); err != nil {
 		return nil, err
 	}

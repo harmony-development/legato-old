@@ -12,6 +12,9 @@ import (
 func DefaultConf() *config.Config {
 	var cfg config.Config
 	defaults.MustSet(&cfg)
+	cfg.Server.Policies.Debug.VerboseStreamHandling = false
+	cfg.Server.Policies.Debug.LogErrors = false
+	cfg.Server.Policies.Debug.LogRequests = false
 	return &cfg
 }
 

@@ -15,13 +15,14 @@ import (
 )
 
 func newAuthAPI(t testing.TB) *V1 {
+	cfg := test.DefaultConf()
 	return New(Dependencies{
 		DB:          test.NewMockDB(),
-		Logger:      test.MockLogger{T: t},
+		Logger:      test.MockLogger{T: t, Config: cfg},
 		Sonyflake:   sonyflake.NewSonyflake(sonyflake.Settings{}),
 		AuthManager: test.MockAuthManager{},
-		AuthState:   authstate.New(test.MockLogger{}),
-		Config:      test.DefaultConf(),
+		AuthState:   authstate.New(test.MockLogger{Config: cfg, T: t}),
+		Config:      cfg,
 	})
 }
 

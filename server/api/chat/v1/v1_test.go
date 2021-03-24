@@ -15,8 +15,8 @@ import (
 )
 
 func setupChatAPI(t testing.TB) *V1 {
-	conf := test.DefaultConf()
-	logger := test.MockLogger{T: t}
+	cfg := test.DefaultConf()
+	logger := test.MockLogger{T: t, Config: cfg}
 	db := test.NewMockDB()
 	perms := permissions.NewManager(db, logger)
 	md := middleware.New(middleware.Dependencies{
@@ -34,7 +34,7 @@ func setupChatAPI(t testing.TB) *V1 {
 			Logger:         logger,
 			Sonyflake:      sonyflake,
 			Perms:          perms,
-			Config:         conf,
+			Config:         cfg,
 			Middleware:     md,
 			StorageBackend: attachments,
 			Streams:        pubsub,
@@ -102,8 +102,13 @@ func TestJoinLeave(t *testing.T) {
 		Context: c,
 		UserID:  12345,
 	}
+	bannedMemberCTX := middleware.HarmonyContext{
+		Context: c,
+		UserID:  54321,
+	}
 	_, _ = chatAPI.DB.CreateGuild(ownerCTX.UserID, 727, 420, "Harmony", "")
 	inv, _ := chatAPI.DB.CreateInvite(727, -1, "harmony")
+	_ = chatAPI.DB.BanUser(727, bannedMemberCTX.UserID)
 
 	joinResp, err := chatAPI.JoinGuild(memberCTX, &chatv1.JoinGuildRequest{
 		InviteId: inv.InviteID,
@@ -121,6 +126,10 @@ func TestJoinLeave(t *testing.T) {
 		InviteId: inv.InviteID,
 	})
 	a.Error(err, "It should not allow the owner to join their own guild")
+	_, err = chatAPI.JoinGuild(bannedMemberCTX, &chatv1.JoinGuildRequest{
+		InviteId: inv.InviteID,
+	})
+	a.Error(err, "It should not let banned people join a guild")
 	_, err = chatAPI.LeaveGuild(memberCTX, &chatv1.LeaveGuildRequest{
 		GuildId: 727,
 	})
@@ -128,9 +137,9 @@ func TestJoinLeave(t *testing.T) {
 	_, err = chatAPI.LeaveGuild(memberCTX, &chatv1.LeaveGuildRequest{
 		GuildId: 727,
 	})
-	a.Equal(responses.NotJoined, err, "It should not allow a member to leave a guild they aren't in")
+	a.EqualError(err, responses.NotJoined, "It should not allow a member to leave a guild they aren't in")
 	_, err = chatAPI.LeaveGuild(ownerCTX, &chatv1.LeaveGuildRequest{
 		GuildId: 727,
 	})
-	a.Equal(responses.IsOwner, err.Error(), "It should not allow the owner to leave their guild")
+	a.EqualError(err, responses.IsOwner, "It should not allow the owner to leave their guild")
 }

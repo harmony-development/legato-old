@@ -118,7 +118,11 @@ func (d MockDB) GetOwner(guildID uint64) (uint64, error) {
 }
 
 func (d MockDB) IsOwner(guildID, userID uint64) (bool, error) {
-	panic("unimplemented")
+	if guild, ok := d.guilds[guildID]; !ok {
+		return false, errors.New("guild not found")
+	} else {
+		return guild.owner == userID, nil
+	}
 }
 
 func (d MockDB) CreateInvite(guildID uint64, possibleUses int32, name string) (queries.Invite, error) {
@@ -261,7 +265,12 @@ func (d MockDB) GetInvites(guildID uint64) ([]queries.Invite, error) {
 }
 
 func (d MockDB) DeleteMember(guildID, userID uint64) error {
-	panic("unimplemented")
+	if guild, ok := d.guilds[guildID]; !ok {
+		return errors.New("guild not found")
+	} else {
+		delete(guild.members, userID)
+		return nil
+	}
 }
 
 func (d MockDB) GetLocalGuilds(userID uint64) ([]uint64, error) {
@@ -459,7 +468,8 @@ func (d MockDB) MoveChannel(guildID, channelID, previousID, nextID uint64) error
 }
 
 func (d MockDB) RemoveGuildFromList(userID, guildID uint64, homeServer string) error {
-	panic("unimplemented")
+	// TODO: add guild list to mock DB
+	return nil
 }
 
 func (d MockDB) UserIsLocal(userID uint64) error {
@@ -578,7 +588,12 @@ func (d MockDB) ExtendSession(session string) error {
 }
 
 func (d MockDB) BanUser(guildID, userID uint64) error {
-	panic("unimplemented")
+	if guild, ok := d.guilds[guildID]; !ok {
+		return errors.New("guild not found")
+	} else {
+		guild.bans[userID] = struct{}{}
+		return nil
+	}
 }
 
 func (d MockDB) IsBanned(guildID, userID uint64) (bool, error) {
