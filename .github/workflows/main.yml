@@ -64,7 +64,8 @@ jobs:
           sudo apt update
           sudo apt install libvips libvips-dev --fix-missing --no-install-recommends
       - 
-        name: golangci-lint --timeout 10m0s
+        name: golangci-lint
         uses: golangci/golangci-lint-action@v2
         with:
           version: v1.29
+          args: --timeout 10m0s
