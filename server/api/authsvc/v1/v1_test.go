@@ -14,10 +14,10 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-func newAuthAPI() *V1 {
+func newAuthAPI(t testing.TB) *V1 {
 	return New(Dependencies{
 		DB:          test.NewMockDB(),
-		Logger:      test.MockLogger{},
+		Logger:      test.MockLogger{T: t},
 		Sonyflake:   sonyflake.NewSonyflake(sonyflake.Settings{}),
 		AuthManager: test.MockAuthManager{},
 		AuthState:   authstate.New(test.MockLogger{}),
@@ -41,24 +41,24 @@ func initialChoice(c echo.Context, api *V1, authID string) (*authv1.AuthStep, er
 
 func TestInitialChoice(t *testing.T) {
 	a := require.New(t)
-	api := newAuthAPI()
+	api := newAuthAPI(t)
 	ctx := test.DummyContext(echo.New())
 	authID, err := beginAuth(ctx, api)
-	a.NoError(err)
-	a.NotEmpty(authID)
+	a.NoError(err, "Should be able to BeginAuth successfully")
+	a.NotEmpty(authID, "Should return a non-empty Auth ID")
 	step, err := api.NextStep(ctx, &authv1.NextStepRequest{
 		AuthId: authID,
 	})
-	a.NoError(err)
-	a.False(step.CanGoBack)
-	a.IsType(&authv1.AuthStep_Choice_{}, step.Step)
-	a.Equal("initial-choice", step.GetChoice().Title)
-	a.ElementsMatch(step.GetChoice().Options, []string{"login", "register", "other-options"})
+	a.NoError(err, "Should be able to receive first step successfully")
+	a.False(step.CanGoBack, "First step should not allow user to go back")
+	a.IsType(&authv1.AuthStep_Choice_{}, step.Step, "First step should be a choice")
+	a.Equal("initial-choice", step.GetChoice().Title, "First step should have a title of initial-choice")
+	a.ElementsMatch(step.GetChoice().Options, []string{"login", "register", "other-options"}, "The initial choice should let you login, register, or try other options")
 }
 
 func TestStepBack(t *testing.T) {
 	a := require.New(t)
-	api := newAuthAPI()
+	api := newAuthAPI(t)
 	ctx := test.DummyContext(echo.New())
 	authID, _ := beginAuth(ctx, api)
 	_, _ = api.NextStep(ctx, &authv1.NextStepRequest{
@@ -67,7 +67,7 @@ func TestStepBack(t *testing.T) {
 	_, err := api.StepBack(ctx, &authv1.StepBackRequest{
 		AuthId: authID,
 	})
-	a.NotNil(err)
+	a.NotNil(err, "User should not be able to go back successfully on the first step")
 	_, err = api.NextStep(ctx, &authv1.NextStepRequest{
 		AuthId: authID,
 		Step: &authv1.NextStepRequest_Choice_{
@@ -76,30 +76,30 @@ func TestStepBack(t *testing.T) {
 			},
 		},
 	})
-	a.NoError(err)
+	a.NoError(err, "User should be able to navigate to the login screen")
 	step, err := api.StepBack(ctx, &authv1.StepBackRequest{
 		AuthId: authID,
 	})
-	a.NoError(err)
-	a.IsType(&authv1.AuthStep_Choice_{}, step.Step)
-	a.Equal("initial-choice", step.GetChoice().Title)
-	a.Equal(step.CanGoBack, false)
+	a.NoError(err, "User should be able to navigate away from the login screen")
+	a.IsType(&authv1.AuthStep_Choice_{}, step.Step, "Last step should a choice")
+	a.Equal("initial-choice", step.GetChoice().Title, "Last step should be the initial choice")
+	a.Equal(step.CanGoBack, false, "The initial choice should not allow you to go back when stepping back")
 }
 
 func TestLogin(t *testing.T) {
 	var testTable = []struct {
+		name        string
 		email       string
 		password    string
 		expectError string
 	}{
-		{"amadeus@home.cern", "@&GyubhjA^GYUH1", ""},
-		{"amadeus@home.cern", "", ""},
+		{"Should be able to login with email and password", "amadeus@home.cern", "@&GyubhjA^GYUH1", ""},
 	}
 
 	for _, testCase := range testTable {
-		t.Run(testCase.email, func(t *testing.T) {
+		t.Run(testCase.name, func(t *testing.T) {
 			a := require.New(t)
-			api := newAuthAPI()
+			api := newAuthAPI(t)
 			ctx := test.DummyContext(echo.New())
 			hashed, err := bcrypt.GenerateFromPassword([]byte(testCase.password), 0)
 			a.NoError(err)
@@ -199,7 +199,7 @@ func TestRegister(t *testing.T) {
 	for _, testCase := range testTable {
 		t.Run(testCase.name, func(t *testing.T) {
 			a := require.New(t)
-			api := newAuthAPI()
+			api := newAuthAPI(t)
 			ctx := test.DummyContext(echo.New())
 			authID, _ := beginAuth(ctx, api)
 			_, _ = initialChoice(ctx, api, authID)
@@ -256,7 +256,7 @@ func TestRegister(t *testing.T) {
 
 func BenchmarkBeginAuth(b *testing.B) {
 	ctx := test.DummyContext(echo.New())
-	api := newAuthAPI()
+	api := newAuthAPI(b)
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
@@ -267,7 +267,7 @@ func BenchmarkBeginAuth(b *testing.B) {
 
 func BenchmarkLogin(b *testing.B) {
 	ctx := test.DummyContext(echo.New())
-	api := newAuthAPI()
+	api := newAuthAPI(b)
 	hashed, err := bcrypt.GenerateFromPassword([]byte("@&GyubhjA^GYUH1"), 0)
 	if err != nil {
 		panic(err)

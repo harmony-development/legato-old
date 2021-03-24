@@ -26,6 +26,7 @@ type Guild struct {
 	picture  string
 	members  map[uint64]struct{}
 	channels map[uint64]struct{}
+	bans     map[uint64]struct{}
 }
 
 type Channel struct {
@@ -33,6 +34,25 @@ type Channel struct {
 	name     string
 	position string
 	category bool
+	messages []uint64
+}
+
+type Invite struct {
+	name         string
+	guildid      uint64
+	possibleUses int32
+	uses         int32
+}
+
+type Message struct {
+	id          uint64
+	author      uint64
+	content     string
+	attachments []string
+	embeds      []byte
+	actions     []byte
+	overrides   []byte
+	replyTo     int64
 }
 
 type MockDB struct {
@@ -41,6 +61,8 @@ type MockDB struct {
 	userBySession map[string]uint64
 	guilds        map[uint64]*Guild
 	channels      map[uint64]*Channel
+	invites       map[string]*Invite
+	messages      map[uint64]*Message
 }
 
 func NewMockDB() *MockDB {
@@ -50,6 +72,8 @@ func NewMockDB() *MockDB {
 		userBySession: map[string]uint64{},
 		guilds:        map[uint64]*Guild{},
 		channels:      map[uint64]*Channel{},
+		invites:       map[string]*Invite{},
+		messages:      map[uint64]*Message{},
 	}
 }
 
@@ -63,8 +87,9 @@ func (d MockDB) SessionExpireRoutine() {
 
 func (d MockDB) CreateGuild(owner, id, channelID uint64, guildName, picture string) (*queries.Guild, error) {
 	d.channels[channelID] = &Channel{
-		id:   channelID,
-		name: "general",
+		id:       channelID,
+		name:     "general",
+		messages: []uint64{},
 	}
 	d.guilds[id] = &Guild{
 		id:       id,
@@ -73,6 +98,7 @@ func (d MockDB) CreateGuild(owner, id, channelID uint64, guildName, picture stri
 		picture:  picture,
 		members:  map[uint64]struct{}{owner: {}},
 		channels: map[uint64]struct{}{channelID: {}},
+		bans:     map[uint64]struct{}{},
 	}
 	return &queries.Guild{
 		GuildID:    id,
@@ -96,7 +122,19 @@ func (d MockDB) IsOwner(guildID, userID uint64) (bool, error) {
 }
 
 func (d MockDB) CreateInvite(guildID uint64, possibleUses int32, name string) (queries.Invite, error) {
-	panic("unimplemented")
+	d.invites[name] = &Invite{
+		name:         name,
+		guildid:      guildID,
+		possibleUses: possibleUses,
+		uses:         0,
+	}
+
+	return queries.Invite{
+		InviteID:     name,
+		Uses:         0,
+		PossibleUses: sql.NullInt32{Int32: possibleUses},
+		GuildID:      guildID,
+	}, nil
 }
 
 func (d MockDB) UpdateChannelInformation(guildID, channelID uint64, name string, updateName bool, metadata *harmonytypesv1.Metadata, updateMetadata bool) error {
@@ -104,7 +142,12 @@ func (d MockDB) UpdateChannelInformation(guildID, channelID uint64, name string,
 }
 
 func (d MockDB) AddMemberToGuild(userID, guildID uint64) error {
-	panic("unimplemented")
+	guild, ok := d.guilds[guildID]
+	if !ok {
+		return errors.New("guild not found")
+	}
+	guild.members[userID] = struct{}{}
+	return nil
 }
 
 func (d MockDB) AddChannelToGuild(guildID uint64, channelName string, previous, next uint64, category bool, md *harmonytypesv1.Metadata) (queries.Channel, error) {
@@ -116,7 +159,36 @@ func (d MockDB) DeleteChannelFromGuild(guildID, channelID uint64) error {
 }
 
 func (d MockDB) AddMessage(channelID, guildID, userID, messageID uint64, message string, attachments []string, embeds, actions, overrides []byte, replyTo sql.NullInt64, md *harmonytypesv1.Metadata) (*queries.Message, error) {
-	panic("unimplemented")
+	if channel, ok := d.channels[channelID]; !ok {
+		return nil, errors.New("channel not found")
+	} else {
+		channel.messages = append(channel.messages, messageID)
+		d.messages[messageID] = &Message{
+			id:          messageID,
+			author:      userID,
+			content:     message,
+			attachments: attachments,
+			embeds:      embeds,
+			actions:     actions,
+			overrides:   overrides,
+			replyTo:     replyTo.Int64,
+		}
+		return &queries.Message{
+			MessageID:   messageID,
+			GuildID:     guildID,
+			ChannelID:   channelID,
+			UserID:      userID,
+			CreatedAt:   time.Now(),
+			EditedAt:    sql.NullTime{},
+			Content:     message,
+			Embeds:      embeds,
+			Actions:     actions,
+			Overrides:   overrides,
+			ReplyToID:   sql.NullInt64{},
+			Attachments: attachments,
+			Metadata:    []byte{},
+		}, nil
+	}
 }
 
 func (d MockDB) DeleteMessage(messageID, channelID, guildID uint64) error {
@@ -128,11 +200,20 @@ func (d MockDB) GetMessageOwner(messageID uint64) (uint64, error) {
 }
 
 func (d MockDB) ResolveGuildID(inviteID string) (uint64, error) {
-	panic("unimplemented")
+	inv, ok := d.invites[inviteID]
+	if !ok {
+		return 0, errors.New("invite not found")
+	}
+	return inv.guildid, nil
 }
 
 func (d MockDB) IncrementInvite(inviteID string) error {
-	panic("unimplemented")
+	if inv, ok := d.invites[inviteID]; !ok {
+		return errors.New("invite not found")
+	} else {
+		inv.uses++
+		return nil
+	}
 }
 
 func (d MockDB) DeleteInvite(inviteID string) error {
@@ -482,7 +563,14 @@ func (d MockDB) GetFileMetadata(fileID string) (queries.GetFileMetadataRow, erro
 }
 
 func (d MockDB) GetFirstChannel(guildID uint64) (uint64, error) {
-	panic("unimplemented")
+	if guild, ok := d.guilds[guildID]; !ok {
+		return 0, errors.New("guild not found")
+	} else {
+		for channel := range guild.channels {
+			return channel, nil
+		}
+	}
+	return 0, errors.New("guild has no channels")
 }
 
 func (d MockDB) ExtendSession(session string) error {
@@ -494,7 +582,12 @@ func (d MockDB) BanUser(guildID, userID uint64) error {
 }
 
 func (d MockDB) IsBanned(guildID, userID uint64) (bool, error) {
-	panic("unimplemented")
+	guild, ok := d.guilds[guildID]
+	if !ok {
+		return false, errors.New("guild not found")
+	}
+	_, ok = guild.bans[userID]
+	return ok, nil
 }
 
 func (d MockDB) UnbanUser(guildID, userID uint64) error {
