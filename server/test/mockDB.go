@@ -3,6 +3,7 @@ package test
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
@@ -19,10 +20,19 @@ type User struct {
 }
 
 type Guild struct {
-	id      uint64
-	owner   uint64
-	name    string
-	picture string
+	id       uint64
+	owner    uint64
+	name     string
+	picture  string
+	members  map[uint64]struct{}
+	channels map[uint64]struct{}
+}
+
+type Channel struct {
+	id       uint64
+	name     string
+	position string
+	category bool
 }
 
 type MockDB struct {
@@ -30,6 +40,7 @@ type MockDB struct {
 	userByEmail   map[string]*User
 	userBySession map[string]uint64
 	guilds        map[uint64]*Guild
+	channels      map[uint64]*Channel
 }
 
 func NewMockDB() *MockDB {
@@ -38,6 +49,7 @@ func NewMockDB() *MockDB {
 		userByEmail:   map[string]*User{},
 		userBySession: map[string]uint64{},
 		guilds:        map[uint64]*Guild{},
+		channels:      map[uint64]*Channel{},
 	}
 }
 
@@ -50,11 +62,17 @@ func (d MockDB) SessionExpireRoutine() {
 }
 
 func (d MockDB) CreateGuild(owner, id, channelID uint64, guildName, picture string) (*queries.Guild, error) {
+	d.channels[channelID] = &Channel{
+		id:   channelID,
+		name: "general",
+	}
 	d.guilds[id] = &Guild{
-		id:      id,
-		owner:   owner,
-		name:    guildName,
-		picture: picture,
+		id:       id,
+		owner:    owner,
+		name:     guildName,
+		picture:  picture,
+		members:  map[uint64]struct{}{owner: {}},
+		channels: map[uint64]struct{}{channelID: {}},
 	}
 	return &queries.Guild{
 		GuildID:    id,
@@ -129,7 +147,12 @@ func (d MockDB) SessionToUserID(session string) (uint64, error) {
 }
 
 func (d MockDB) UserInGuild(userID, guildID uint64) (bool, error) {
-	panic("unimplemented")
+	guild, ok := d.guilds[guildID]
+	if !ok {
+		return false, errors.New("guild does not exist")
+	}
+	_, hasMember := guild.members[userID]
+	return hasMember, nil
 }
 
 func (d MockDB) GetMessageDate(messageID uint64) (time.Time, error) {
@@ -165,7 +188,26 @@ func (d MockDB) GetLocalGuilds(userID uint64) ([]uint64, error) {
 }
 
 func (d MockDB) ChannelsForGuild(guildID uint64) ([]queries.Channel, error) {
-	panic("unimplemented")
+	guild, ok := d.guilds[guildID]
+	if !ok {
+		return nil, errors.New("guild does not exist")
+	}
+	channels := []queries.Channel{}
+	for channelID := range guild.channels {
+		c, ok := d.channels[channelID]
+		if !ok {
+			return nil, fmt.Errorf("channel %d does not exist on %d", channelID, guildID)
+		}
+		channels = append(channels, queries.Channel{
+			ChannelID:   channelID,
+			GuildID:     sql.NullInt64{Int64: int64(guildID)},
+			ChannelName: c.name,
+			Position:    c.position,
+			Category:    c.category,
+			Metadata:    []byte{},
+		})
+	}
+	return channels, nil
 }
 
 func (d MockDB) MembersInGuild(guildID uint64) ([]uint64, error) {

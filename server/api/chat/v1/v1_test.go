@@ -61,9 +61,10 @@ func TestCreateGuild(t *testing.T) {
 	c := test.DummyContext(echo.New())
 	ctx := middleware.HarmonyContext{
 		Context: c,
+		UserID:  12345,
 	}
 	for _, testCase := range testTable {
-		resp, err := chatAPI.CreateGuild(ctx, &chatv1.CreateGuildRequest{
+		createdGuild, err := chatAPI.CreateGuild(ctx, &chatv1.CreateGuildRequest{
 			GuildName: testCase.name,
 		})
 		if testCase.expectedError != "" {
@@ -71,11 +72,43 @@ func TestCreateGuild(t *testing.T) {
 			a.Equal(testCase.expectedError, err.Error())
 		} else {
 			a.NoError(err)
-			a.NotZero(resp.GuildId)
-			guild, err := chatAPI.DB.GetGuildByID(resp.GuildId)
+			a.NotZero(createdGuild.GuildId)
+			guild, err := chatAPI.DB.GetGuildByID(createdGuild.GuildId)
 			a.NoError(err)
 			a.Equal(testCase.name, guild.GuildName)
 			a.Empty(guild.PictureUrl)
+			channels, err := chatAPI.DB.ChannelsForGuild(createdGuild.GuildId)
+			a.NoError(err)
+			a.Len(channels, 1)
+			inGuild, err := chatAPI.DB.UserInGuild(12345, createdGuild.GuildId)
+			a.NoError(err)
+			a.True(inGuild)
 		}
 	}
+}
+
+func TestJoinLeave(t *testing.T) {
+	a := require.New(t)
+	chatAPI := setupChatAPI()
+	c := test.DummyContext(echo.New())
+	ctx := middleware.HarmonyContext{
+		Context: c,
+		UserID:  22321123,
+	}
+	_, err := chatAPI.DB.CreateGuild(12345, 727, 420, "Harmony", "")
+	a.NoError(err)
+	inv, err := chatAPI.DB.CreateInvite(727, -1, "harmony")
+	a.NoError(err)
+	joinResp, err := chatAPI.JoinGuild(ctx, &chatv1.JoinGuildRequest{
+		InviteId: inv.InviteID,
+	})
+	a.NoError(err)
+	a.Equal(727, joinResp.GuildId)
+	inGuild, err := chatAPI.DB.UserInGuild(ctx.UserID, 727)
+	a.NoError(err)
+	a.True(inGuild)
+	_, err = chatAPI.JoinGuild(ctx, &chatv1.JoinGuildRequest{
+		InviteId: inv.InviteID,
+	})
+	a.Error(err)
 }

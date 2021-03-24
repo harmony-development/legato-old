@@ -70,11 +70,16 @@ type FederationPolicy struct {
 	GuildLeaveNotificationQueueLength int `hcl:"GuildLeaveNotificationQueueLength,optional" default:"64"`
 }
 
+type GuildPolicy struct {
+	MaxLength int `hcl:"MaxLength,optional" default:"24"`
+}
+
 type ServerPolicies struct {
 	EnablePasswordResetForm bool             `hcl:"EnablePasswordResetForm,optional" default:"false"`
 	Avatar                  AvatarPolicy     `hcl:"Avatar,block"`
 	Username                UsernamePolicy   `hcl:"Username,block"`
 	Password                PasswordPolicy   `hcl:"Password,block"`
+	Guild                   GuildPolicy      `hcl:"Guild,block"`
 	Attachments             AttachmentPolicy `hcl:"Attachments,block"`
 	Debug                   DebugPolicy      `hcl:"Debug,block"`
 	Sessions                SessionPolicy    `hcl:"Sessions,block"`
