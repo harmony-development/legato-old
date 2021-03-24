@@ -9,6 +9,7 @@ import (
 	"github.com/harmony-development/legato/server/db/queries"
 	"github.com/harmony-development/legato/server/db/types"
 	"github.com/harmony-development/legato/server/db/utilities"
+	"github.com/harmony-development/legato/server/lexorank"
 	"github.com/ztrue/tracerr"
 )
 
@@ -52,7 +53,7 @@ func (db *database) GetRolePositions(guildID, before, previous uint64) (pos stri
 		retErr = err
 		return
 	}
-	pos = Rank(prevPos, nextPos)
+	pos = lexorank.Rank(prevPos, nextPos)
 	return
 }
 

@@ -10,6 +10,7 @@ import (
 	"github.com/harmony-development/legato/server/db/queries"
 	"github.com/harmony-development/legato/server/db/types"
 	"github.com/harmony-development/legato/server/db/utilities"
+	"github.com/harmony-development/legato/server/lexorank"
 	"github.com/ztrue/tracerr"
 )
 
@@ -269,7 +270,7 @@ func (db *database) AddGuildToList(userID, guildID uint64, homeServer string) er
 		UserID:     userID,
 		GuildID:    guildID,
 		HomeServer: homeServer,
-		Position:   Rank(pos, ""),
+		Position:   lexorank.Rank(pos, ""),
 	})
 	err = tracerr.Wrap(err)
 
@@ -309,7 +310,7 @@ func (db *database) MoveGuild(userID, guildID uint64, homeServer string, nextGui
 	}
 
 	err = db.queries.MoveGuild(ctx, queries.MoveGuildParams{
-		Position:   Rank(prevPos, nextPos),
+		Position:   lexorank.Rank(prevPos, nextPos),
 		GuildID:    guildID,
 		HomeServer: homeServer,
 	})

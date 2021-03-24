@@ -7,6 +7,7 @@ import (
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/queries"
 	"github.com/harmony-development/legato/server/db/utilities"
+	"github.com/harmony-development/legato/server/lexorank"
 	"github.com/ztrue/tracerr"
 )
 
@@ -138,7 +139,7 @@ func (db *database) GetChannelPositions(guildID, before, previous uint64) (pos s
 		retErr = err
 		return
 	}
-	pos = Rank(prevPos, nextPos)
+	pos = lexorank.Rank(prevPos, nextPos)
 	return
 }
 

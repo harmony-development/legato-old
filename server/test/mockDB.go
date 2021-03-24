@@ -10,13 +10,21 @@ import (
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/queries"
 	"github.com/harmony-development/legato/server/db/types"
+	"github.com/harmony-development/legato/server/lexorank"
 )
 
+type GuildEntry struct {
+	guildID  uint64
+	host     string
+	position string
+}
+
 type User struct {
-	id       uint64
-	email    string
-	username string
-	password []byte
+	id        uint64
+	email     string
+	username  string
+	password  []byte
+	guildList []GuildEntry
 }
 
 type Guild struct {
@@ -351,10 +359,11 @@ func (d MockDB) GetLocalUserForForeignUser(userID uint64, homeserver string) (ui
 
 func (d MockDB) AddLocalUser(userID uint64, email, username string, passwordHash []byte) error {
 	u := &User{
-		email:    email,
-		username: username,
-		password: passwordHash,
-		id:       userID,
+		email:     email,
+		username:  username,
+		password:  passwordHash,
+		id:        userID,
+		guildList: []GuildEntry{},
 	}
 	d.users[userID] = u
 	d.userByEmail[email] = u
@@ -451,8 +460,38 @@ func (d MockDB) GetGuildListPosition(userID, guildID uint64, homeServer string) 
 	panic("unimplemented")
 }
 
+func (d MockDB) getLastGuildInList(userID uint64) (string, error) {
+	if user, ok := d.users[userID]; !ok {
+		return "", errors.New("user not found")
+	} else {
+		if len(user.guildList) == 0 {
+			return "", nil
+		}
+		maxEntry := user.guildList[0]
+		for _, entry := range user.guildList {
+			if entry.position > maxEntry.position {
+				maxEntry = entry
+			}
+		}
+		return maxEntry.position, nil
+	}
+}
+
 func (d MockDB) AddGuildToList(userID, guildID uint64, homeServer string) error {
-	panic("unimplemented")
+	if user, ok := d.users[userID]; !ok {
+		return errors.New("user not found")
+	} else {
+		lastPosition, err := d.getLastGuildInList(userID)
+		if err != nil {
+			return err
+		}
+		user.guildList = append(user.guildList, GuildEntry{
+			host:     homeServer,
+			guildID:  guildID,
+			position: lexorank.Rank(lastPosition, ""),
+		})
+		return nil
+	}
 }
 
 func (d MockDB) MoveGuild(userID, guildID uint64, homeServer string, nextGuildID, prevGuildID uint64, nextHomeServer, prevHomeServer string) error {

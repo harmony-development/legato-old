@@ -1,4 +1,4 @@
-package postgres
+package lexorank
 
 const (
 	minChar = byte('0')

@@ -868,10 +868,6 @@ func (v1 *V1) LeaveGuild(c echo.Context, r *chatv1.LeaveGuildRequest) (*empty.Em
 		return nil, err
 	}
 
-	if err := v1.DB.RemoveGuildFromList(ctx.UserID, r.GuildId, ""); err != nil {
-		return nil, err
-	}
-
 	v1.Streams.RemoveGuildSubscription(r.GuildId, ctx.UserID)
 	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
 		Event: &chatv1.Event_LeftMember{
