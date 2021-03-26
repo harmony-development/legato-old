@@ -29,6 +29,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/hashicorp/hcl/v2 v2.8.2
 	github.com/kr/text v0.2.0 // indirect
+	github.com/kyleconroy/sqlc v1.7.0 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/labstack/echo/v4 v4.2.0
 	github.com/leodido/go-urn v1.2.1 // indirect

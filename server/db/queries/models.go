@@ -103,9 +103,10 @@ type Message struct {
 	UserID    uint64        `json:"user_id"`
 	CreatedAt time.Time     `json:"created_at"`
 	EditedAt  sql.NullTime  `json:"edited_at"`
+	ReplyToID sql.NullInt64 `json:"reply_to_id"`
+	Kind      int32         `json:"kind"`
 	Content   []byte        `json:"content"`
 	Overrides []byte        `json:"overrides"`
-	ReplyToID sql.NullInt64 `json:"reply_to_id"`
 	Metadata  []byte        `json:"metadata"`
 }
 

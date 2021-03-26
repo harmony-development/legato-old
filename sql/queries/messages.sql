@@ -8,9 +8,10 @@ INSERT INTO Messages (
     Created_At,
     Reply_to_ID,
     Overrides,
-    Metadata
+    Metadata,
+    Kind
   )
-VALUES ($1, $2, $3, $4, $5, NOW(), $6, $7, $8) RETURNING *;
+VALUES ($1, $2, $3, $4, $5, NOW(), $6, $7, $8, $9) RETURNING *;
 
 -- name: DeleteMessage :execrows
 DELETE FROM Messages

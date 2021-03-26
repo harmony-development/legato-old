@@ -8,33 +8,69 @@ import (
 	"github.com/harmony-development/legato/server/db/queries"
 	"github.com/harmony-development/legato/server/db/utilities"
 	"github.com/ztrue/tracerr"
+	"google.golang.org/protobuf/proto"
+)
+
+type MessageKind int32
+
+const (
+	MessageKindText = iota
+	MessageKindPhoto
+	MessageKindEmbed
+	MessageKindFiles
 )
 
 // AddMessage adds a message to a channel
-func (db *database) AddMessage(channelID, guildID, userID, messageID uint64, message string, attachments []string, embeds, actions, overrides []byte, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata) (*queries.Message, error) {
+func (db *database) AddMessage(guildID, channelID, userID, messageID uint64, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata, message *harmonytypesv1.Content) (*queries.Message, error) {
 	tx, err := db.Begin()
 	if err != nil {
 		err = tracerr.Wrap(err)
 		db.Logger.CheckException(err)
 		return nil, err
 	}
+	tq := db.queries.WithTx(tx)
 	data, err := utilities.SerializeMetadata(metadata)
 	if err != nil {
 		return nil, err
 	}
-	tq := db.queries.WithTx(tx)
+	var messageData []byte
+	var kind MessageKind
+	switch v := message.Content.(type) {
+	case *harmonytypesv1.Content_TextMessage:
+		kind = MessageKindText
+		messageData, err = proto.Marshal(v.TextMessage)
+		if err != nil {
+			return nil, err
+		}
+	case *harmonytypesv1.Content_PhotoMessage:
+		kind = MessageKindPhoto
+		messageData, err = proto.Marshal(v.PhotoMessage)
+		if err != nil {
+			return nil, err
+		}
+	case *harmonytypesv1.Content_EmbedMessage:
+		kind = MessageKindEmbed
+		messageData, err = proto.Marshal(v.EmbedMessage)
+		if err != nil {
+			return nil, err
+		}
+	case *harmonytypesv1.Content_FilesMessage:
+		kind = MessageKindFiles
+		messageData, err = proto.Marshal(v.FilesMessage)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	msg, err := tq.AddMessage(ctx, queries.AddMessageParams{
-		GuildID:     guildID,
-		ChannelID:   channelID,
-		UserID:      userID,
-		MessageID:   messageID,
-		Content:     message,
-		Embeds:      embeds,
-		Actions:     actions,
-		Overrides:   overrides,
-		Attachments: attachments,
-		ReplyToID:   replyTo,
-		Metadata:    data,
+		GuildID:   guildID,
+		ChannelID: channelID,
+		UserID:    userID,
+		MessageID: messageID,
+		Kind:      int32(kind),
+		Content:   messageData,
+		ReplyToID: replyTo,
+		Metadata:  data,
 	})
 	if err != nil {
 		err = tracerr.Wrap(err)

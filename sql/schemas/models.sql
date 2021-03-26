@@ -137,9 +137,10 @@ CREATE TABLE IF NOT EXISTS Messages (
     User_ID BIGSERIAL NOT NULL,
     Created_At TIMESTAMP NOT NULL,
     Edited_At TIMESTAMP,
+    Reply_To_ID BIGINT DEFAULT 0,
+    Kind INT NOT NULL,
     Content bytea,
     Overrides bytea,
-    Reply_To_ID BIGINT DEFAULT 0,
     Metadata bytea,
     FOREIGN KEY (Guild_ID) REFERENCES Guilds (Guild_ID) ON DELETE CASCADE,
     FOREIGN KEY (Channel_ID) REFERENCES Channels (Channel_ID) ON DELETE CASCADE

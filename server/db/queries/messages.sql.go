@@ -19,9 +19,10 @@ INSERT INTO Messages (
     Created_At,
     Reply_to_ID,
     Overrides,
-    Metadata
+    Metadata,
+    Kind
   )
-VALUES ($1, $2, $3, $4, $5, NOW(), $6, $7, $8) RETURNING message_id, guild_id, channel_id, user_id, created_at, edited_at, content, overrides, reply_to_id, metadata
+VALUES ($1, $2, $3, $4, $5, NOW(), $6, $7, $8, $9) RETURNING message_id, guild_id, channel_id, user_id, created_at, edited_at, reply_to_id, kind, content, overrides, metadata
 `
 
 type AddMessageParams struct {
@@ -33,6 +34,7 @@ type AddMessageParams struct {
 	ReplyToID sql.NullInt64 `json:"reply_to_id"`
 	Overrides []byte        `json:"overrides"`
 	Metadata  []byte        `json:"metadata"`
+	Kind      int32         `json:"kind"`
 }
 
 func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) (Message, error) {
@@ -45,6 +47,7 @@ func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) (Message
 		arg.ReplyToID,
 		arg.Overrides,
 		arg.Metadata,
+		arg.Kind,
 	)
 	var i Message
 	err := row.Scan(
@@ -54,9 +57,10 @@ func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) (Message
 		&i.UserID,
 		&i.CreatedAt,
 		&i.EditedAt,
+		&i.ReplyToID,
+		&i.Kind,
 		&i.Content,
 		&i.Overrides,
-		&i.ReplyToID,
 		&i.Metadata,
 	)
 	return i, err
@@ -84,7 +88,7 @@ func (q *Queries) DeleteMessage(ctx context.Context, arg DeleteMessageParams) (i
 }
 
 const getMessage = `-- name: GetMessage :one
-SELECT message_id, guild_id, channel_id, user_id, created_at, edited_at, content, overrides, reply_to_id, metadata
+SELECT message_id, guild_id, channel_id, user_id, created_at, edited_at, reply_to_id, kind, content, overrides, metadata
 FROM Messages
 WHERE Message_ID = $1
 `
@@ -99,9 +103,10 @@ func (q *Queries) GetMessage(ctx context.Context, messageID uint64) (Message, er
 		&i.UserID,
 		&i.CreatedAt,
 		&i.EditedAt,
+		&i.ReplyToID,
+		&i.Kind,
 		&i.Content,
 		&i.Overrides,
-		&i.ReplyToID,
 		&i.Metadata,
 	)
 	return i, err
@@ -134,7 +139,7 @@ func (q *Queries) GetMessageDate(ctx context.Context, messageID uint64) (time.Ti
 }
 
 const getMessages = `-- name: GetMessages :many
-SELECT message_id, guild_id, channel_id, user_id, created_at, edited_at, content, overrides, reply_to_id, metadata
+SELECT message_id, guild_id, channel_id, user_id, created_at, edited_at, reply_to_id, kind, content, overrides, metadata
 FROM Messages
 WHERE Guild_ID = $1
   AND Channel_ID = $2
@@ -171,9 +176,10 @@ func (q *Queries) GetMessages(ctx context.Context, arg GetMessagesParams) ([]Mes
 			&i.UserID,
 			&i.CreatedAt,
 			&i.EditedAt,
+			&i.ReplyToID,
+			&i.Kind,
 			&i.Content,
 			&i.Overrides,
-			&i.ReplyToID,
 			&i.Metadata,
 		); err != nil {
 			return nil, err
