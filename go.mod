@@ -1,6 +1,6 @@
 module github.com/harmony-development/legato
 
-go 1.14
+go 1.16
 
 require (
 	entgo.io/ent v0.6.0
@@ -19,6 +19,7 @@ require (
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/go-test/deep v1.0.7 // indirect
 	github.com/gobwas/glob v0.2.3
+	github.com/gocql/gocql v0.0.0-20210326125648-0cb4787106be // indirect
 	github.com/golang/protobuf v1.4.3
 	github.com/google/go-cmp v0.5.4 // indirect
 	github.com/google/uuid v1.2.0
@@ -45,6 +46,7 @@ require (
 	github.com/prometheus/client_golang v1.9.0 // indirect
 	github.com/prometheus/common v0.17.0 // indirect
 	github.com/prometheus/procfs v0.6.0 // indirect
+	github.com/scylladb/gocqlx/v2 v2.3.0
 	github.com/sebdah/goldie/v2 v2.5.3 // indirect
 	github.com/sirupsen/logrus v1.8.0
 	github.com/sony/sonyflake v1.0.0
