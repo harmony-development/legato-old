@@ -21,17 +21,27 @@ type IHarmonyDB interface {
 	AddMemberToGuild(userID, guildID uint64) error
 	AddChannelToGuild(guildID uint64, channelName string, previous, next uint64, category bool, md *harmonytypesv1.Metadata) (queries.Channel, error)
 	DeleteChannelFromGuild(guildID, channelID uint64) error
-	AddMessage(channelID, guildID, userID, messageID uint64, message string, attachments []string, embeds, actions, overrides []byte, replyTo sql.NullInt64, md *harmonytypesv1.Metadata) (*queries.Message, error)
+
+	AddTextMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata, content string) (time.Time, error)
+	AddPhotoMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata, photos []*harmonytypesv1.Photo) (time.Time, error)
+	AddFilesMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata, files []string) (time.Time, error)
+	AddEmbedMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata, embeds []*harmonytypesv1.Embed) (time.Time, error)
+
+	UpdateTextMessage(messageID uint64, content string) (time.Time, error)
+
 	DeleteMessage(messageID, channelID, guildID uint64) error
+
 	GetMessageOwner(messageID uint64) (uint64, error)
 	ResolveGuildID(inviteID string) (uint64, error)
 	IncrementInvite(inviteID string) error
 	DeleteInvite(inviteID string) error
 	SessionToUserID(session string) (uint64, error)
 	UserInGuild(userID, guildID uint64) (bool, error)
+
 	GetMessageDate(messageID uint64) (time.Time, error)
-	GetMessages(guildID, channelID uint64) ([]queries.Message, error)
-	GetMessagesBefore(guildID, channelID uint64, date time.Time) ([]queries.Message, error)
+	GetMessages(guildID, channelID uint64) ([]*harmonytypesv1.Message, error)
+	GetMessagesBefore(guildID, channelID uint64, date time.Time) ([]*harmonytypesv1.Message, error)
+
 	UpdateGuildInformation(guildID uint64, name, picture string, metadata *harmonytypesv1.Metadata, updateName, updatePicture, updateMetadata bool) error
 	GetGuildPicture(guildID uint64) (string, error)
 	GetInvites(guildID uint64) ([]queries.Invite, error)
@@ -60,7 +70,6 @@ type IHarmonyDB interface {
 	HasChannelWithID(guildID, channelID uint64) (bool, error)
 	HasMessageWithID(guildID, channelID, messageID uint64) (bool, error)
 	GetGuildByID(guildID uint64) (queries.Guild, error)
-	UpdateMessage(messageID uint64, content *string, embeds, actions, overrides *[]byte, attachments *[]string, metadata *harmonytypesv1.Metadata, updateMetadata bool) (time.Time, error)
 	SetStatus(userID uint64, status harmonytypesv1.UserStatus) error
 	SetUsername(userID uint64, username string) error
 	SetAvatar(userID uint64, avatar string) error

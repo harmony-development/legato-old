@@ -1,3 +1,5 @@
+// +build ignore
+
 package postgres
 
 import (
@@ -160,90 +162,8 @@ func (db *database) GetMessage(messageID uint64) (r queries.Message, err error) 
 	return
 }
 
-func (db *database) UpdateMessage(messageID uint64, content *string, embeds, actions, overrides *[]byte, attachments *[]string, metadata *harmonytypesv1.Metadata, updateMetadata bool) (time.Time, error) {
-	tx, err := db.Begin()
-	if err != nil {
-		err = tracerr.Wrap(err)
-		db.Logger.CheckException(err)
-		return time.Time{}, err
-	}
-	tq := db.queries.WithTx(tx)
-	var editedAt time.Time
-	e := utilities.Executor{}
-	if content != nil {
-		e.Execute(func() error {
-			data, err := tq.UpdateMessageContent(ctx, queries.UpdateMessageContentParams{
-				MessageID: messageID,
-				Content:   *content,
-			})
-			err = tracerr.Wrap(err)
-			editedAt = data.EditedAt.Time
-			return err
-		})
-	}
-	if embeds != nil {
-		e.Execute(func() error {
-			data, err := tq.UpdateMessageEmbeds(ctx, queries.UpdateMessageEmbedsParams{
-				MessageID: messageID,
-				Embeds:    *embeds,
-			})
-			err = tracerr.Wrap(err)
-			editedAt = data.EditedAt.Time
-			return err
-		})
-	}
-	if actions != nil {
-		e.Execute(func() error {
-			data, err := tq.UpdateMessageActions(ctx, queries.UpdateMessageActionsParams{
-				MessageID: messageID,
-				Actions:   *actions,
-			})
-			err = tracerr.Wrap(err)
-			editedAt = data.EditedAt.Time
-			return err
-		})
-	}
-	if overrides != nil {
-		e.Execute(func() error {
-			return tracerr.Wrap(tq.UpdateMessageOverrides(ctx, queries.UpdateMessageOverridesParams{
-				MessageID: messageID,
-				Overrides: *overrides,
-			}))
-		})
-	}
-	if attachments != nil {
-		e.Execute(func() error {
-			return tracerr.Wrap(tq.UpdateMessageAttachments(ctx, queries.UpdateMessageAttachmentsParams{
-				MessageID:   messageID,
-				Attachments: *attachments,
-			}))
-		})
-	}
-	if updateMetadata {
-		e.Execute(func() error {
-			data, err := utilities.SerializeMetadata(metadata)
-			if err != nil {
-				return err
-			}
-			return tracerr.Wrap(tq.UpdateMessageMetadata(ctx, queries.UpdateMessageMetadataParams{
-				MessageID: messageID,
-				Metadata:  data,
-			}))
-		})
-	}
-	if e.Err != nil {
-		if err := tx.Rollback(); err != nil {
-			err = tracerr.Wrap(err)
-			return time.Time{}, err
-		}
-		err = tracerr.Wrap(e.Err)
-		return time.Time{}, err
-	}
-	if err := tx.Commit(); err != nil {
-		err = tracerr.Wrap(err)
-		return time.Time{}, err
-	}
-	return editedAt, nil
+func (db *database) UpdateMessage(messageID uint64, content string) (time.Time, error) {
+
 }
 
 func (db database) HasMessageWithID(guildID, channelID, messageID uint64) (r bool, err error) {
