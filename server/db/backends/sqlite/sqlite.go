@@ -7,7 +7,7 @@ import (
 
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
-	"github.com/harmony-development/legato/server/db/backends/sqlite/ent"
+	"github.com/harmony-development/legato/server/db/ent/entgen"
 	"github.com/harmony-development/legato/server/db/types"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/ztrue/tracerr"
@@ -32,7 +32,7 @@ func init() {
 }
 
 type database struct {
-	*ent.Client
+	*entgen.Client
 	types.DummyDB
 }
 
@@ -73,7 +73,7 @@ func New(cfg *config.Config, logger logger.ILogger, idgen *sonyflake.Sonyflake) 
 	db := &database{}
 	var err error
 
-	db.Client, err = ent.Open("sqlite3", fmt.Sprintf("file:%s?_fk=1", cfg.Database.Filename))
+	db.Client, err = entgen.Open("sqlite3", fmt.Sprintf("file:%s?_fk=1", cfg.Database.Filename))
 	if err != nil {
 		return nil, tracerr.Wrap(err)
 	}

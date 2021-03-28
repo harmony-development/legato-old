@@ -3,7 +3,7 @@ module github.com/harmony-development/legato
 go 1.14
 
 require (
-	entgo.io/ent v0.6.0
+	entgo.io/ent v0.7.0
 	github.com/JohannesKaufmann/html-to-markdown v1.2.0
 	github.com/PuerkitoBio/goquery v1.6.1 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
@@ -33,7 +33,7 @@ require (
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/labstack/echo/v4 v4.2.0
 	github.com/leodido/go-urn v1.2.1 // indirect
-	github.com/lib/pq v1.9.0
+	github.com/lib/pq v1.10.0
 	github.com/magefile/mage v1.11.0 // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mattn/go-sqlite3 v1.14.6

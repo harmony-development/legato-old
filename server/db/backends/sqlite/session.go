@@ -1,6 +1,6 @@
 package sqlite
 
-import "github.com/harmony-development/legato/server/db/backends/sqlite/ent/session"
+import "github.com/harmony-development/legato/server/db/ent/entgen/session"
 
 func (d *database) AddSession(userID uint64, session string) (err error) {
 	defer doRecovery(&err)

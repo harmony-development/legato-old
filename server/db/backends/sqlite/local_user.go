@@ -3,7 +3,7 @@ package sqlite
 import (
 	"database/sql"
 
-	"github.com/harmony-development/legato/server/db/backends/sqlite/ent/localuser"
+	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
 	"github.com/harmony-development/legato/server/db/queries"
 )
 
