@@ -4,11 +4,15 @@ package entgen
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
+	"github.com/harmony-development/legato/server/db/ent/entgen/invite"
+	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
 
 // GuildCreate is the builder for creating a Guild entity.
@@ -16,6 +20,96 @@ type GuildCreate struct {
 	config
 	mutation *GuildMutation
 	hooks    []Hook
+}
+
+// SetOwner sets the "owner" field.
+func (gc *GuildCreate) SetOwner(u uint64) *GuildCreate {
+	gc.mutation.SetOwner(u)
+	return gc
+}
+
+// SetName sets the "name" field.
+func (gc *GuildCreate) SetName(s string) *GuildCreate {
+	gc.mutation.SetName(s)
+	return gc
+}
+
+// SetPicture sets the "picture" field.
+func (gc *GuildCreate) SetPicture(s string) *GuildCreate {
+	gc.mutation.SetPicture(s)
+	return gc
+}
+
+// SetMetadata sets the "metadata" field.
+func (gc *GuildCreate) SetMetadata(b []byte) *GuildCreate {
+	gc.mutation.SetMetadata(b)
+	return gc
+}
+
+// SetID sets the "id" field.
+func (gc *GuildCreate) SetID(u uint64) *GuildCreate {
+	gc.mutation.SetID(u)
+	return gc
+}
+
+// SetInviteID sets the "invite" edge to the Invite entity by ID.
+func (gc *GuildCreate) SetInviteID(id int) *GuildCreate {
+	gc.mutation.SetInviteID(id)
+	return gc
+}
+
+// SetNillableInviteID sets the "invite" edge to the Invite entity by ID if the given value is not nil.
+func (gc *GuildCreate) SetNillableInviteID(id *int) *GuildCreate {
+	if id != nil {
+		gc = gc.SetInviteID(*id)
+	}
+	return gc
+}
+
+// SetInvite sets the "invite" edge to the Invite entity.
+func (gc *GuildCreate) SetInvite(i *Invite) *GuildCreate {
+	return gc.SetInviteID(i.ID)
+}
+
+// SetUserID sets the "user" edge to the User entity by ID.
+func (gc *GuildCreate) SetUserID(id uint64) *GuildCreate {
+	gc.mutation.SetUserID(id)
+	return gc
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (gc *GuildCreate) SetUser(u *User) *GuildCreate {
+	return gc.SetUserID(u.ID)
+}
+
+// AddBanIDs adds the "bans" edge to the User entity by IDs.
+func (gc *GuildCreate) AddBanIDs(ids ...uint64) *GuildCreate {
+	gc.mutation.AddBanIDs(ids...)
+	return gc
+}
+
+// AddBans adds the "bans" edges to the User entity.
+func (gc *GuildCreate) AddBans(u ...*User) *GuildCreate {
+	ids := make([]uint64, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return gc.AddBanIDs(ids...)
+}
+
+// AddChannelIDs adds the "channel" edge to the Channel entity by IDs.
+func (gc *GuildCreate) AddChannelIDs(ids ...uint64) *GuildCreate {
+	gc.mutation.AddChannelIDs(ids...)
+	return gc
+}
+
+// AddChannel adds the "channel" edges to the Channel entity.
+func (gc *GuildCreate) AddChannel(c ...*Channel) *GuildCreate {
+	ids := make([]uint64, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return gc.AddChannelIDs(ids...)
 }
 
 // Mutation returns the GuildMutation object of the builder.
@@ -69,6 +163,21 @@ func (gc *GuildCreate) SaveX(ctx context.Context) *Guild {
 
 // check runs all checks and user-defined validators on the builder.
 func (gc *GuildCreate) check() error {
+	if _, ok := gc.mutation.Owner(); !ok {
+		return &ValidationError{Name: "owner", err: errors.New("entgen: missing required field \"owner\"")}
+	}
+	if _, ok := gc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New("entgen: missing required field \"name\"")}
+	}
+	if _, ok := gc.mutation.Picture(); !ok {
+		return &ValidationError{Name: "picture", err: errors.New("entgen: missing required field \"picture\"")}
+	}
+	if _, ok := gc.mutation.Metadata(); !ok {
+		return &ValidationError{Name: "metadata", err: errors.New("entgen: missing required field \"metadata\"")}
+	}
+	if _, ok := gc.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user", err: errors.New("entgen: missing required edge \"user\"")}
+	}
 	return nil
 }
 
@@ -80,8 +189,10 @@ func (gc *GuildCreate) sqlSave(ctx context.Context) (*Guild, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _node.ID == 0 {
+		id := _spec.ID.Value.(int64)
+		_node.ID = uint64(id)
+	}
 	return _node, nil
 }
 
@@ -91,11 +202,125 @@ func (gc *GuildCreate) createSpec() (*Guild, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: guild.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUint64,
 				Column: guild.FieldID,
 			},
 		}
 	)
+	if id, ok := gc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
+	if value, ok := gc.mutation.Owner(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint64,
+			Value:  value,
+			Column: guild.FieldOwner,
+		})
+		_node.Owner = value
+	}
+	if value, ok := gc.mutation.Name(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: guild.FieldName,
+		})
+		_node.Name = value
+	}
+	if value, ok := gc.mutation.Picture(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: guild.FieldPicture,
+		})
+		_node.Picture = value
+	}
+	if value, ok := gc.mutation.Metadata(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: guild.FieldMetadata,
+		})
+		_node.Metadata = value
+	}
+	if nodes := gc.mutation.InviteIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   guild.InviteTable,
+			Columns: []string{guild.InviteColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: invite.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.guild_invite = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := gc.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   guild.UserTable,
+			Columns: []string{guild.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.user_guild = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := gc.mutation.BansIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   guild.BansTable,
+			Columns: []string{guild.BansColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := gc.mutation.ChannelIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   guild.ChannelTable,
+			Columns: []string{guild.ChannelColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: channel.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	return _node, _spec
 }
 
@@ -138,8 +363,10 @@ func (gcb *GuildCreateBulk) Save(ctx context.Context) ([]*Guild, error) {
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
+				if nodes[i].ID == 0 {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = uint64(id)
+				}
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

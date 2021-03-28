@@ -12,9 +12,13 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/harmony-development/legato/server/db/ent/entgen/foreignuser"
+	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
+	"github.com/harmony-development/legato/server/db/ent/entgen/message"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 	"github.com/harmony-development/legato/server/db/ent/entgen/profile"
+	"github.com/harmony-development/legato/server/db/ent/entgen/session"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
 
@@ -27,9 +31,13 @@ type UserQuery struct {
 	fields     []string
 	predicates []predicate.User
 	// eager-loading edges.
-	withLocalUser *LocalUserQuery
-	withProfile   *ProfileQuery
-	withFKs       bool
+	withLocalUser   *LocalUserQuery
+	withForeignUser *ForeignUserQuery
+	withProfile     *ProfileQuery
+	withSessions    *SessionQuery
+	withMessage     *MessageQuery
+	withGuild       *GuildQuery
+	withFKs         bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -73,7 +81,29 @@ func (uq *UserQuery) QueryLocalUser() *LocalUserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(localuser.Table, localuser.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, user.LocalUserTable, user.LocalUserColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.LocalUserTable, user.LocalUserColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryForeignUser chains the current query on the "foreign_user" edge.
+func (uq *UserQuery) QueryForeignUser() *ForeignUserQuery {
+	query := &ForeignUserQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(foreignuser.Table, foreignuser.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.ForeignUserTable, user.ForeignUserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -96,6 +126,72 @@ func (uq *UserQuery) QueryProfile() *ProfileQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(profile.Table, profile.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.ProfileTable, user.ProfileColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySessions chains the current query on the "sessions" edge.
+func (uq *UserQuery) QuerySessions() *SessionQuery {
+	query := &SessionQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(session.Table, session.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.SessionsTable, user.SessionsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryMessage chains the current query on the "message" edge.
+func (uq *UserQuery) QueryMessage() *MessageQuery {
+	query := &MessageQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(message.Table, message.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.MessageTable, user.MessageColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryGuild chains the current query on the "guild" edge.
+func (uq *UserQuery) QueryGuild() *GuildQuery {
+	query := &GuildQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(guild.Table, guild.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.GuildTable, user.GuildColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -279,13 +375,17 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:        uq.config,
-		limit:         uq.limit,
-		offset:        uq.offset,
-		order:         append([]OrderFunc{}, uq.order...),
-		predicates:    append([]predicate.User{}, uq.predicates...),
-		withLocalUser: uq.withLocalUser.Clone(),
-		withProfile:   uq.withProfile.Clone(),
+		config:          uq.config,
+		limit:           uq.limit,
+		offset:          uq.offset,
+		order:           append([]OrderFunc{}, uq.order...),
+		predicates:      append([]predicate.User{}, uq.predicates...),
+		withLocalUser:   uq.withLocalUser.Clone(),
+		withForeignUser: uq.withForeignUser.Clone(),
+		withProfile:     uq.withProfile.Clone(),
+		withSessions:    uq.withSessions.Clone(),
+		withMessage:     uq.withMessage.Clone(),
+		withGuild:       uq.withGuild.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -303,6 +403,17 @@ func (uq *UserQuery) WithLocalUser(opts ...func(*LocalUserQuery)) *UserQuery {
 	return uq
 }
 
+// WithForeignUser tells the query-builder to eager-load the nodes that are connected to
+// the "foreign_user" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithForeignUser(opts ...func(*ForeignUserQuery)) *UserQuery {
+	query := &ForeignUserQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withForeignUser = query
+	return uq
+}
+
 // WithProfile tells the query-builder to eager-load the nodes that are connected to
 // the "profile" edge. The optional arguments are used to configure the query builder of the edge.
 func (uq *UserQuery) WithProfile(opts ...func(*ProfileQuery)) *UserQuery {
@@ -311,6 +422,39 @@ func (uq *UserQuery) WithProfile(opts ...func(*ProfileQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withProfile = query
+	return uq
+}
+
+// WithSessions tells the query-builder to eager-load the nodes that are connected to
+// the "sessions" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithSessions(opts ...func(*SessionQuery)) *UserQuery {
+	query := &SessionQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withSessions = query
+	return uq
+}
+
+// WithMessage tells the query-builder to eager-load the nodes that are connected to
+// the "message" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithMessage(opts ...func(*MessageQuery)) *UserQuery {
+	query := &MessageQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withMessage = query
+	return uq
+}
+
+// WithGuild tells the query-builder to eager-load the nodes that are connected to
+// the "guild" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithGuild(opts ...func(*GuildQuery)) *UserQuery {
+	query := &GuildQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withGuild = query
 	return uq
 }
 
@@ -356,14 +500,15 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		nodes       = []*User{}
 		withFKs     = uq.withFKs
 		_spec       = uq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [6]bool{
 			uq.withLocalUser != nil,
+			uq.withForeignUser != nil,
 			uq.withProfile != nil,
+			uq.withSessions != nil,
+			uq.withMessage != nil,
+			uq.withGuild != nil,
 		}
 	)
-	if uq.withLocalUser != nil {
-		withFKs = true
-	}
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, user.ForeignKeys...)
 	}
@@ -388,28 +533,58 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	}
 
 	if query := uq.withLocalUser; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*User)
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uint64]*User)
 		for i := range nodes {
-			fk := nodes[i].local_user_user
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
-			}
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
 		}
-		query.Where(localuser.IDIn(ids...))
+		query.withFKs = true
+		query.Where(predicate.LocalUser(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.LocalUserColumn, fks...))
+		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
+			fk := n.user_local_user
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "user_local_user" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "local_user_user" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "user_local_user" returned %v for node %v`, *fk, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.LocalUser = n
+			node.Edges.LocalUser = n
+		}
+	}
+
+	if query := uq.withForeignUser; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uint64]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.ForeignUser(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.ForeignUserColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.user_foreign_user
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "user_foreign_user" is nil for node %v`, n.ID)
 			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_foreign_user" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.ForeignUser = n
 		}
 	}
 
@@ -438,6 +613,93 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "user_profile" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Profile = n
+		}
+	}
+
+	if query := uq.withSessions; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uint64]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Sessions = []*Session{}
+		}
+		query.withFKs = true
+		query.Where(predicate.Session(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.SessionsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.user_sessions
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "user_sessions" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_sessions" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Sessions = append(node.Edges.Sessions, n)
+		}
+	}
+
+	if query := uq.withMessage; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uint64]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Message = []*Message{}
+		}
+		query.withFKs = true
+		query.Where(predicate.Message(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.MessageColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.user_message
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "user_message" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_message" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Message = append(node.Edges.Message, n)
+		}
+	}
+
+	if query := uq.withGuild; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uint64]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Guild = []*Guild{}
+		}
+		query.withFKs = true
+		query.Where(predicate.Guild(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.GuildColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.user_guild
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "user_guild" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_guild" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Guild = append(node.Edges.Guild, n)
 		}
 	}
 

@@ -28,9 +28,9 @@ func (su *SessionUpdate) Where(ps ...predicate.Session) *SessionUpdate {
 	return su
 }
 
-// SetSessionID sets the "sessionID" field.
-func (su *SessionUpdate) SetSessionID(s string) *SessionUpdate {
-	su.mutation.SetSessionID(s)
+// SetSessionid sets the "sessionid" field.
+func (su *SessionUpdate) SetSessionid(s string) *SessionUpdate {
+	su.mutation.SetSessionid(s)
 	return su
 }
 
@@ -147,11 +147,11 @@ func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := su.mutation.SessionID(); ok {
+	if value, ok := su.mutation.Sessionid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: session.FieldSessionID,
+			Column: session.FieldSessionid,
 		})
 	}
 	if value, ok := su.mutation.Expires(); ok {
@@ -214,9 +214,9 @@ type SessionUpdateOne struct {
 	mutation *SessionMutation
 }
 
-// SetSessionID sets the "sessionID" field.
-func (suo *SessionUpdateOne) SetSessionID(s string) *SessionUpdateOne {
-	suo.mutation.SetSessionID(s)
+// SetSessionid sets the "sessionid" field.
+func (suo *SessionUpdateOne) SetSessionid(s string) *SessionUpdateOne {
+	suo.mutation.SetSessionid(s)
 	return suo
 }
 
@@ -338,11 +338,11 @@ func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err e
 			}
 		}
 	}
-	if value, ok := suo.mutation.SessionID(); ok {
+	if value, ok := suo.mutation.Sessionid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: session.FieldSessionID,
+			Column: session.FieldSessionid,
 		})
 	}
 	if value, ok := suo.mutation.Expires(); ok {

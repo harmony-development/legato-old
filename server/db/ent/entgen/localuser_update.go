@@ -4,7 +4,6 @@ package entgen
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -35,12 +34,6 @@ func (luu *LocalUserUpdate) SetEmail(s string) *LocalUserUpdate {
 	return luu
 }
 
-// SetUsername sets the "username" field.
-func (luu *LocalUserUpdate) SetUsername(s string) *LocalUserUpdate {
-	luu.mutation.SetUsername(s)
-	return luu
-}
-
 // SetPassword sets the "password" field.
 func (luu *LocalUserUpdate) SetPassword(b []byte) *LocalUserUpdate {
 	luu.mutation.SetPassword(b)
@@ -50,6 +43,14 @@ func (luu *LocalUserUpdate) SetPassword(b []byte) *LocalUserUpdate {
 // SetUserID sets the "user" edge to the User entity by ID.
 func (luu *LocalUserUpdate) SetUserID(id uint64) *LocalUserUpdate {
 	luu.mutation.SetUserID(id)
+	return luu
+}
+
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (luu *LocalUserUpdate) SetNillableUserID(id *uint64) *LocalUserUpdate {
+	if id != nil {
+		luu = luu.SetUserID(*id)
+	}
 	return luu
 }
 
@@ -169,9 +170,6 @@ func (luu *LocalUserUpdate) check() error {
 			return &ValidationError{Name: "email", err: fmt.Errorf("entgen: validator failed for field \"email\": %w", err)}
 		}
 	}
-	if _, ok := luu.mutation.UserID(); luu.mutation.UserCleared() && !ok {
-		return errors.New("entgen: clearing a required unique edge \"user\"")
-	}
 	return nil
 }
 
@@ -200,13 +198,6 @@ func (luu *LocalUserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: localuser.FieldEmail,
 		})
 	}
-	if value, ok := luu.mutation.Username(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: localuser.FieldUsername,
-		})
-	}
 	if value, ok := luu.mutation.Password(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeBytes,
@@ -217,7 +208,7 @@ func (luu *LocalUserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if luu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   localuser.UserTable,
 			Columns: []string{localuser.UserColumn},
 			Bidi:    false,
@@ -233,7 +224,7 @@ func (luu *LocalUserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := luu.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   localuser.UserTable,
 			Columns: []string{localuser.UserColumn},
 			Bidi:    false,
@@ -327,12 +318,6 @@ func (luuo *LocalUserUpdateOne) SetEmail(s string) *LocalUserUpdateOne {
 	return luuo
 }
 
-// SetUsername sets the "username" field.
-func (luuo *LocalUserUpdateOne) SetUsername(s string) *LocalUserUpdateOne {
-	luuo.mutation.SetUsername(s)
-	return luuo
-}
-
 // SetPassword sets the "password" field.
 func (luuo *LocalUserUpdateOne) SetPassword(b []byte) *LocalUserUpdateOne {
 	luuo.mutation.SetPassword(b)
@@ -342,6 +327,14 @@ func (luuo *LocalUserUpdateOne) SetPassword(b []byte) *LocalUserUpdateOne {
 // SetUserID sets the "user" edge to the User entity by ID.
 func (luuo *LocalUserUpdateOne) SetUserID(id uint64) *LocalUserUpdateOne {
 	luuo.mutation.SetUserID(id)
+	return luuo
+}
+
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (luuo *LocalUserUpdateOne) SetNillableUserID(id *uint64) *LocalUserUpdateOne {
+	if id != nil {
+		luuo = luuo.SetUserID(*id)
+	}
 	return luuo
 }
 
@@ -461,9 +454,6 @@ func (luuo *LocalUserUpdateOne) check() error {
 			return &ValidationError{Name: "email", err: fmt.Errorf("entgen: validator failed for field \"email\": %w", err)}
 		}
 	}
-	if _, ok := luuo.mutation.UserID(); luuo.mutation.UserCleared() && !ok {
-		return errors.New("entgen: clearing a required unique edge \"user\"")
-	}
 	return nil
 }
 
@@ -497,13 +487,6 @@ func (luuo *LocalUserUpdateOne) sqlSave(ctx context.Context) (_node *LocalUser, 
 			Column: localuser.FieldEmail,
 		})
 	}
-	if value, ok := luuo.mutation.Username(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: localuser.FieldUsername,
-		})
-	}
 	if value, ok := luuo.mutation.Password(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeBytes,
@@ -514,7 +497,7 @@ func (luuo *LocalUserUpdateOne) sqlSave(ctx context.Context) (_node *LocalUser, 
 	if luuo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   localuser.UserTable,
 			Columns: []string{localuser.UserColumn},
 			Bidi:    false,
@@ -530,7 +513,7 @@ func (luuo *LocalUserUpdateOne) sqlSave(ctx context.Context) (_node *LocalUser, 
 	if nodes := luuo.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   localuser.UserTable,
 			Columns: []string{localuser.UserColumn},
 			Bidi:    false,

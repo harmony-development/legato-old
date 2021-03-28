@@ -5,7 +5,9 @@ package entgen
 import (
 	"time"
 
+	"github.com/harmony-development/legato/server/db/ent/entgen/invite"
 	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
+	"github.com/harmony-development/legato/server/db/ent/entgen/message"
 	"github.com/harmony-development/legato/server/db/ent/entgen/profile"
 	"github.com/harmony-development/legato/server/db/ent/entgen/schema"
 	"github.com/harmony-development/legato/server/db/ent/entgen/session"
@@ -15,17 +17,33 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	inviteFields := schema.Invite{}.Fields()
+	_ = inviteFields
+	// inviteDescUses is the schema descriptor for uses field.
+	inviteDescUses := inviteFields[1].Descriptor()
+	// invite.DefaultUses holds the default value on creation for the uses field.
+	invite.DefaultUses = inviteDescUses.Default.(int64)
+	// inviteDescPossibleUses is the schema descriptor for possible_uses field.
+	inviteDescPossibleUses := inviteFields[2].Descriptor()
+	// invite.DefaultPossibleUses holds the default value on creation for the possible_uses field.
+	invite.DefaultPossibleUses = inviteDescPossibleUses.Default.(int64)
 	localuserFields := schema.LocalUser{}.Fields()
 	_ = localuserFields
 	// localuserDescEmail is the schema descriptor for email field.
 	localuserDescEmail := localuserFields[0].Descriptor()
 	// localuser.EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	localuser.EmailValidator = localuserDescEmail.Validators[0].(func(string) error)
+	messageFields := schema.Message{}.Fields()
+	_ = messageFields
+	// messageDescReplyto is the schema descriptor for replyto field.
+	messageDescReplyto := messageFields[4].Descriptor()
+	// message.DefaultReplyto holds the default value on creation for the replyto field.
+	message.DefaultReplyto = messageDescReplyto.Default.(uint64)
 	profileFields := schema.Profile{}.Fields()
 	_ = profileFields
-	// profileDescIsBot is the schema descriptor for isBot field.
-	profileDescIsBot := profileFields[2].Descriptor()
-	// profile.DefaultIsBot holds the default value on creation for the isBot field.
+	// profileDescIsBot is the schema descriptor for is_bot field.
+	profileDescIsBot := profileFields[3].Descriptor()
+	// profile.DefaultIsBot holds the default value on creation for the is_bot field.
 	profile.DefaultIsBot = profileDescIsBot.Default.(bool)
 	sessionFields := schema.Session{}.Fields()
 	_ = sessionFields

@@ -8,8 +8,12 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/harmony-development/legato/server/db/ent/entgen/foreignuser"
+	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
+	"github.com/harmony-development/legato/server/db/ent/entgen/message"
 	"github.com/harmony-development/legato/server/db/ent/entgen/profile"
+	"github.com/harmony-development/legato/server/db/ent/entgen/session"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
 
@@ -45,6 +49,25 @@ func (uc *UserCreate) SetLocalUser(l *LocalUser) *UserCreate {
 	return uc.SetLocalUserID(l.ID)
 }
 
+// SetForeignUserID sets the "foreign_user" edge to the ForeignUser entity by ID.
+func (uc *UserCreate) SetForeignUserID(id int) *UserCreate {
+	uc.mutation.SetForeignUserID(id)
+	return uc
+}
+
+// SetNillableForeignUserID sets the "foreign_user" edge to the ForeignUser entity by ID if the given value is not nil.
+func (uc *UserCreate) SetNillableForeignUserID(id *int) *UserCreate {
+	if id != nil {
+		uc = uc.SetForeignUserID(*id)
+	}
+	return uc
+}
+
+// SetForeignUser sets the "foreign_user" edge to the ForeignUser entity.
+func (uc *UserCreate) SetForeignUser(f *ForeignUser) *UserCreate {
+	return uc.SetForeignUserID(f.ID)
+}
+
 // SetProfileID sets the "profile" edge to the Profile entity by ID.
 func (uc *UserCreate) SetProfileID(id int) *UserCreate {
 	uc.mutation.SetProfileID(id)
@@ -62,6 +85,51 @@ func (uc *UserCreate) SetNillableProfileID(id *int) *UserCreate {
 // SetProfile sets the "profile" edge to the Profile entity.
 func (uc *UserCreate) SetProfile(p *Profile) *UserCreate {
 	return uc.SetProfileID(p.ID)
+}
+
+// AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
+func (uc *UserCreate) AddSessionIDs(ids ...int) *UserCreate {
+	uc.mutation.AddSessionIDs(ids...)
+	return uc
+}
+
+// AddSessions adds the "sessions" edges to the Session entity.
+func (uc *UserCreate) AddSessions(s ...*Session) *UserCreate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return uc.AddSessionIDs(ids...)
+}
+
+// AddMessageIDs adds the "message" edge to the Message entity by IDs.
+func (uc *UserCreate) AddMessageIDs(ids ...uint64) *UserCreate {
+	uc.mutation.AddMessageIDs(ids...)
+	return uc
+}
+
+// AddMessage adds the "message" edges to the Message entity.
+func (uc *UserCreate) AddMessage(m ...*Message) *UserCreate {
+	ids := make([]uint64, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return uc.AddMessageIDs(ids...)
+}
+
+// AddGuildIDs adds the "guild" edge to the Guild entity by IDs.
+func (uc *UserCreate) AddGuildIDs(ids ...uint64) *UserCreate {
+	uc.mutation.AddGuildIDs(ids...)
+	return uc
+}
+
+// AddGuild adds the "guild" edges to the Guild entity.
+func (uc *UserCreate) AddGuild(g ...*Guild) *UserCreate {
+	ids := make([]uint64, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return uc.AddGuildIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -151,7 +219,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if nodes := uc.mutation.LocalUserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   user.LocalUserTable,
 			Columns: []string{user.LocalUserColumn},
 			Bidi:    false,
@@ -165,7 +233,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.local_user_user = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.ForeignUserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.ForeignUserTable,
+			Columns: []string{user.ForeignUserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: foreignuser.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := uc.mutation.ProfileIDs(); len(nodes) > 0 {
@@ -179,6 +265,63 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: profile.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.SessionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SessionsTable,
+			Columns: []string{user.SessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: session.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.MessageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.MessageTable,
+			Columns: []string{user.MessageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: message.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.GuildIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.GuildTable,
+			Columns: []string{user.GuildColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: guild.FieldID,
 				},
 			},
 		}

@@ -11,8 +11,8 @@ const (
 	Label = "session"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldSessionID holds the string denoting the sessionid field in the database.
-	FieldSessionID = "session_id"
+	// FieldSessionid holds the string denoting the sessionid field in the database.
+	FieldSessionid = "sessionid"
 	// FieldExpires holds the string denoting the expires field in the database.
 	FieldExpires = "expires"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -31,7 +31,7 @@ const (
 // Columns holds all SQL columns for session fields.
 var Columns = []string{
 	FieldID,
-	FieldSessionID,
+	FieldSessionid,
 	FieldExpires,
 }
 
@@ -39,6 +39,7 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"local_user_sessions",
+	"user_sessions",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

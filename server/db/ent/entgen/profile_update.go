@@ -28,6 +28,26 @@ func (pu *ProfileUpdate) Where(ps ...predicate.Profile) *ProfileUpdate {
 	return pu
 }
 
+// SetUsername sets the "username" field.
+func (pu *ProfileUpdate) SetUsername(s string) *ProfileUpdate {
+	pu.mutation.SetUsername(s)
+	return pu
+}
+
+// SetNillableUsername sets the "username" field if the given value is not nil.
+func (pu *ProfileUpdate) SetNillableUsername(s *string) *ProfileUpdate {
+	if s != nil {
+		pu.SetUsername(*s)
+	}
+	return pu
+}
+
+// ClearUsername clears the value of the "username" field.
+func (pu *ProfileUpdate) ClearUsername() *ProfileUpdate {
+	pu.mutation.ClearUsername()
+	return pu
+}
+
 // SetStatus sets the "status" field.
 func (pu *ProfileUpdate) SetStatus(i int16) *ProfileUpdate {
 	pu.mutation.ResetStatus()
@@ -75,13 +95,13 @@ func (pu *ProfileUpdate) ClearAvatar() *ProfileUpdate {
 	return pu
 }
 
-// SetIsBot sets the "isBot" field.
+// SetIsBot sets the "is_bot" field.
 func (pu *ProfileUpdate) SetIsBot(b bool) *ProfileUpdate {
 	pu.mutation.SetIsBot(b)
 	return pu
 }
 
-// SetNillableIsBot sets the "isBot" field if the given value is not nil.
+// SetNillableIsBot sets the "is_bot" field if the given value is not nil.
 func (pu *ProfileUpdate) SetNillableIsBot(b *bool) *ProfileUpdate {
 	if b != nil {
 		pu.SetIsBot(*b)
@@ -194,6 +214,19 @@ func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := pu.mutation.Username(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: profile.FieldUsername,
+		})
+	}
+	if pu.mutation.UsernameCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: profile.FieldUsername,
+		})
+	}
 	if value, ok := pu.mutation.Status(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt16,
@@ -287,6 +320,26 @@ type ProfileUpdateOne struct {
 	mutation *ProfileMutation
 }
 
+// SetUsername sets the "username" field.
+func (puo *ProfileUpdateOne) SetUsername(s string) *ProfileUpdateOne {
+	puo.mutation.SetUsername(s)
+	return puo
+}
+
+// SetNillableUsername sets the "username" field if the given value is not nil.
+func (puo *ProfileUpdateOne) SetNillableUsername(s *string) *ProfileUpdateOne {
+	if s != nil {
+		puo.SetUsername(*s)
+	}
+	return puo
+}
+
+// ClearUsername clears the value of the "username" field.
+func (puo *ProfileUpdateOne) ClearUsername() *ProfileUpdateOne {
+	puo.mutation.ClearUsername()
+	return puo
+}
+
 // SetStatus sets the "status" field.
 func (puo *ProfileUpdateOne) SetStatus(i int16) *ProfileUpdateOne {
 	puo.mutation.ResetStatus()
@@ -334,13 +387,13 @@ func (puo *ProfileUpdateOne) ClearAvatar() *ProfileUpdateOne {
 	return puo
 }
 
-// SetIsBot sets the "isBot" field.
+// SetIsBot sets the "is_bot" field.
 func (puo *ProfileUpdateOne) SetIsBot(b bool) *ProfileUpdateOne {
 	puo.mutation.SetIsBot(b)
 	return puo
 }
 
-// SetNillableIsBot sets the "isBot" field if the given value is not nil.
+// SetNillableIsBot sets the "is_bot" field if the given value is not nil.
 func (puo *ProfileUpdateOne) SetNillableIsBot(b *bool) *ProfileUpdateOne {
 	if b != nil {
 		puo.SetIsBot(*b)
@@ -457,6 +510,19 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := puo.mutation.Username(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: profile.FieldUsername,
+		})
+	}
+	if puo.mutation.UsernameCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: profile.FieldUsername,
+		})
 	}
 	if value, ok := puo.mutation.Status(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{

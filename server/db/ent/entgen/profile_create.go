@@ -20,6 +20,20 @@ type ProfileCreate struct {
 	hooks    []Hook
 }
 
+// SetUsername sets the "username" field.
+func (pc *ProfileCreate) SetUsername(s string) *ProfileCreate {
+	pc.mutation.SetUsername(s)
+	return pc
+}
+
+// SetNillableUsername sets the "username" field if the given value is not nil.
+func (pc *ProfileCreate) SetNillableUsername(s *string) *ProfileCreate {
+	if s != nil {
+		pc.SetUsername(*s)
+	}
+	return pc
+}
+
 // SetStatus sets the "status" field.
 func (pc *ProfileCreate) SetStatus(i int16) *ProfileCreate {
 	pc.mutation.SetStatus(i)
@@ -48,13 +62,13 @@ func (pc *ProfileCreate) SetNillableAvatar(s *string) *ProfileCreate {
 	return pc
 }
 
-// SetIsBot sets the "isBot" field.
+// SetIsBot sets the "is_bot" field.
 func (pc *ProfileCreate) SetIsBot(b bool) *ProfileCreate {
 	pc.mutation.SetIsBot(b)
 	return pc
 }
 
-// SetNillableIsBot sets the "isBot" field if the given value is not nil.
+// SetNillableIsBot sets the "is_bot" field if the given value is not nil.
 func (pc *ProfileCreate) SetNillableIsBot(b *bool) *ProfileCreate {
 	if b != nil {
 		pc.SetIsBot(*b)
@@ -134,7 +148,7 @@ func (pc *ProfileCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (pc *ProfileCreate) check() error {
 	if _, ok := pc.mutation.IsBot(); !ok {
-		return &ValidationError{Name: "isBot", err: errors.New("entgen: missing required field \"isBot\"")}
+		return &ValidationError{Name: "is_bot", err: errors.New("entgen: missing required field \"is_bot\"")}
 	}
 	if _, ok := pc.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user", err: errors.New("entgen: missing required edge \"user\"")}
@@ -166,6 +180,14 @@ func (pc *ProfileCreate) createSpec() (*Profile, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+	if value, ok := pc.mutation.Username(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: profile.FieldUsername,
+		})
+		_node.Username = value
+	}
 	if value, ok := pc.mutation.Status(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt16,

@@ -16,7 +16,6 @@ type LocalUser struct {
 func (LocalUser) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("email").Unique().Validate(checkmail.ValidateFormat),
-		field.String("username").Unique(),
 		field.Bytes("password"),
 	}
 }
@@ -25,8 +24,8 @@ func (LocalUser) Fields() []ent.Field {
 func (LocalUser) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.
-			To("user", User.Type).
-			Required().
+			From("user", User.Type).
+			Ref("local_user").
 			Unique(),
 		edge.
 			To("sessions", Session.Type),

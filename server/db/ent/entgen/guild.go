@@ -8,13 +8,89 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
+	"github.com/harmony-development/legato/server/db/ent/entgen/invite"
+	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
 
 // Guild is the model entity for the Guild schema.
 type Guild struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uint64 `json:"id,omitempty"`
+	// Owner holds the value of the "owner" field.
+	Owner uint64 `json:"owner,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty"`
+	// Picture holds the value of the "picture" field.
+	Picture string `json:"picture,omitempty"`
+	// Metadata holds the value of the "metadata" field.
+	Metadata []byte `json:"metadata,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the GuildQuery when eager-loading is set.
+	Edges        GuildEdges `json:"edges"`
+	guild_invite *int
+	user_guild   *uint64
+}
+
+// GuildEdges holds the relations/edges for other nodes in the graph.
+type GuildEdges struct {
+	// Invite holds the value of the invite edge.
+	Invite *Invite `json:"invite,omitempty"`
+	// User holds the value of the user edge.
+	User *User `json:"user,omitempty"`
+	// Bans holds the value of the bans edge.
+	Bans []*User `json:"bans,omitempty"`
+	// Channel holds the value of the channel edge.
+	Channel []*Channel `json:"channel,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [4]bool
+}
+
+// InviteOrErr returns the Invite value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e GuildEdges) InviteOrErr() (*Invite, error) {
+	if e.loadedTypes[0] {
+		if e.Invite == nil {
+			// The edge invite was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: invite.Label}
+		}
+		return e.Invite, nil
+	}
+	return nil, &NotLoadedError{edge: "invite"}
+}
+
+// UserOrErr returns the User value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e GuildEdges) UserOrErr() (*User, error) {
+	if e.loadedTypes[1] {
+		if e.User == nil {
+			// The edge user was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: user.Label}
+		}
+		return e.User, nil
+	}
+	return nil, &NotLoadedError{edge: "user"}
+}
+
+// BansOrErr returns the Bans value or an error if the edge
+// was not loaded in eager-loading.
+func (e GuildEdges) BansOrErr() ([]*User, error) {
+	if e.loadedTypes[2] {
+		return e.Bans, nil
+	}
+	return nil, &NotLoadedError{edge: "bans"}
+}
+
+// ChannelOrErr returns the Channel value or an error if the edge
+// was not loaded in eager-loading.
+func (e GuildEdges) ChannelOrErr() ([]*Channel, error) {
+	if e.loadedTypes[3] {
+		return e.Channel, nil
+	}
+	return nil, &NotLoadedError{edge: "channel"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -22,7 +98,15 @@ func (*Guild) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case guild.FieldID:
+		case guild.FieldMetadata:
+			values[i] = &[]byte{}
+		case guild.FieldID, guild.FieldOwner:
+			values[i] = &sql.NullInt64{}
+		case guild.FieldName, guild.FieldPicture:
+			values[i] = &sql.NullString{}
+		case guild.ForeignKeys[0]: // guild_invite
+			values[i] = &sql.NullInt64{}
+		case guild.ForeignKeys[1]: // user_guild
 			values[i] = &sql.NullInt64{}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Guild", columns[i])
@@ -44,10 +128,68 @@ func (gu *Guild) assignValues(columns []string, values []interface{}) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			gu.ID = int(value.Int64)
+			gu.ID = uint64(value.Int64)
+		case guild.FieldOwner:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field owner", values[i])
+			} else if value.Valid {
+				gu.Owner = uint64(value.Int64)
+			}
+		case guild.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				gu.Name = value.String
+			}
+		case guild.FieldPicture:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field picture", values[i])
+			} else if value.Valid {
+				gu.Picture = value.String
+			}
+		case guild.FieldMetadata:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field metadata", values[i])
+			} else if value != nil {
+				gu.Metadata = *value
+			}
+		case guild.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field guild_invite", value)
+			} else if value.Valid {
+				gu.guild_invite = new(int)
+				*gu.guild_invite = int(value.Int64)
+			}
+		case guild.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field user_guild", value)
+			} else if value.Valid {
+				gu.user_guild = new(uint64)
+				*gu.user_guild = uint64(value.Int64)
+			}
 		}
 	}
 	return nil
+}
+
+// QueryInvite queries the "invite" edge of the Guild entity.
+func (gu *Guild) QueryInvite() *InviteQuery {
+	return (&GuildClient{config: gu.config}).QueryInvite(gu)
+}
+
+// QueryUser queries the "user" edge of the Guild entity.
+func (gu *Guild) QueryUser() *UserQuery {
+	return (&GuildClient{config: gu.config}).QueryUser(gu)
+}
+
+// QueryBans queries the "bans" edge of the Guild entity.
+func (gu *Guild) QueryBans() *UserQuery {
+	return (&GuildClient{config: gu.config}).QueryBans(gu)
+}
+
+// QueryChannel queries the "channel" edge of the Guild entity.
+func (gu *Guild) QueryChannel() *ChannelQuery {
+	return (&GuildClient{config: gu.config}).QueryChannel(gu)
 }
 
 // Update returns a builder for updating this Guild.
@@ -73,6 +215,14 @@ func (gu *Guild) String() string {
 	var builder strings.Builder
 	builder.WriteString("Guild(")
 	builder.WriteString(fmt.Sprintf("id=%v", gu.ID))
+	builder.WriteString(", owner=")
+	builder.WriteString(fmt.Sprintf("%v", gu.Owner))
+	builder.WriteString(", name=")
+	builder.WriteString(gu.Name)
+	builder.WriteString(", picture=")
+	builder.WriteString(gu.Picture)
+	builder.WriteString(", metadata=")
+	builder.WriteString(fmt.Sprintf("%v", gu.Metadata))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -9,8 +9,13 @@ import (
 
 	"github.com/harmony-development/legato/server/db/ent/entgen/migrate"
 
+	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
+	"github.com/harmony-development/legato/server/db/ent/entgen/foreignuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
+	"github.com/harmony-development/legato/server/db/ent/entgen/invite"
 	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
+	"github.com/harmony-development/legato/server/db/ent/entgen/message"
+	"github.com/harmony-development/legato/server/db/ent/entgen/override"
 	"github.com/harmony-development/legato/server/db/ent/entgen/profile"
 	"github.com/harmony-development/legato/server/db/ent/entgen/session"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
@@ -25,10 +30,20 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Channel is the client for interacting with the Channel builders.
+	Channel *ChannelClient
+	// ForeignUser is the client for interacting with the ForeignUser builders.
+	ForeignUser *ForeignUserClient
 	// Guild is the client for interacting with the Guild builders.
 	Guild *GuildClient
+	// Invite is the client for interacting with the Invite builders.
+	Invite *InviteClient
 	// LocalUser is the client for interacting with the LocalUser builders.
 	LocalUser *LocalUserClient
+	// Message is the client for interacting with the Message builders.
+	Message *MessageClient
+	// Override is the client for interacting with the Override builders.
+	Override *OverrideClient
 	// Profile is the client for interacting with the Profile builders.
 	Profile *ProfileClient
 	// Session is the client for interacting with the Session builders.
@@ -48,8 +63,13 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Channel = NewChannelClient(c.config)
+	c.ForeignUser = NewForeignUserClient(c.config)
 	c.Guild = NewGuildClient(c.config)
+	c.Invite = NewInviteClient(c.config)
 	c.LocalUser = NewLocalUserClient(c.config)
+	c.Message = NewMessageClient(c.config)
+	c.Override = NewOverrideClient(c.config)
 	c.Profile = NewProfileClient(c.config)
 	c.Session = NewSessionClient(c.config)
 	c.User = NewUserClient(c.config)
@@ -84,13 +104,18 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:       ctx,
-		config:    cfg,
-		Guild:     NewGuildClient(cfg),
-		LocalUser: NewLocalUserClient(cfg),
-		Profile:   NewProfileClient(cfg),
-		Session:   NewSessionClient(cfg),
-		User:      NewUserClient(cfg),
+		ctx:         ctx,
+		config:      cfg,
+		Channel:     NewChannelClient(cfg),
+		ForeignUser: NewForeignUserClient(cfg),
+		Guild:       NewGuildClient(cfg),
+		Invite:      NewInviteClient(cfg),
+		LocalUser:   NewLocalUserClient(cfg),
+		Message:     NewMessageClient(cfg),
+		Override:    NewOverrideClient(cfg),
+		Profile:     NewProfileClient(cfg),
+		Session:     NewSessionClient(cfg),
+		User:        NewUserClient(cfg),
 	}, nil
 }
 
@@ -108,19 +133,24 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		config:    cfg,
-		Guild:     NewGuildClient(cfg),
-		LocalUser: NewLocalUserClient(cfg),
-		Profile:   NewProfileClient(cfg),
-		Session:   NewSessionClient(cfg),
-		User:      NewUserClient(cfg),
+		config:      cfg,
+		Channel:     NewChannelClient(cfg),
+		ForeignUser: NewForeignUserClient(cfg),
+		Guild:       NewGuildClient(cfg),
+		Invite:      NewInviteClient(cfg),
+		LocalUser:   NewLocalUserClient(cfg),
+		Message:     NewMessageClient(cfg),
+		Override:    NewOverrideClient(cfg),
+		Profile:     NewProfileClient(cfg),
+		Session:     NewSessionClient(cfg),
+		User:        NewUserClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Guild.
+//		Channel.
 //		Query().
 //		Count(ctx)
 //
@@ -143,11 +173,240 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Channel.Use(hooks...)
+	c.ForeignUser.Use(hooks...)
 	c.Guild.Use(hooks...)
+	c.Invite.Use(hooks...)
 	c.LocalUser.Use(hooks...)
+	c.Message.Use(hooks...)
+	c.Override.Use(hooks...)
 	c.Profile.Use(hooks...)
 	c.Session.Use(hooks...)
 	c.User.Use(hooks...)
+}
+
+// ChannelClient is a client for the Channel schema.
+type ChannelClient struct {
+	config
+}
+
+// NewChannelClient returns a client for the Channel from the given config.
+func NewChannelClient(c config) *ChannelClient {
+	return &ChannelClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `channel.Hooks(f(g(h())))`.
+func (c *ChannelClient) Use(hooks ...Hook) {
+	c.hooks.Channel = append(c.hooks.Channel, hooks...)
+}
+
+// Create returns a create builder for Channel.
+func (c *ChannelClient) Create() *ChannelCreate {
+	mutation := newChannelMutation(c.config, OpCreate)
+	return &ChannelCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Channel entities.
+func (c *ChannelClient) CreateBulk(builders ...*ChannelCreate) *ChannelCreateBulk {
+	return &ChannelCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Channel.
+func (c *ChannelClient) Update() *ChannelUpdate {
+	mutation := newChannelMutation(c.config, OpUpdate)
+	return &ChannelUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ChannelClient) UpdateOne(ch *Channel) *ChannelUpdateOne {
+	mutation := newChannelMutation(c.config, OpUpdateOne, withChannel(ch))
+	return &ChannelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ChannelClient) UpdateOneID(id uint64) *ChannelUpdateOne {
+	mutation := newChannelMutation(c.config, OpUpdateOne, withChannelID(id))
+	return &ChannelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Channel.
+func (c *ChannelClient) Delete() *ChannelDelete {
+	mutation := newChannelMutation(c.config, OpDelete)
+	return &ChannelDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ChannelClient) DeleteOne(ch *Channel) *ChannelDeleteOne {
+	return c.DeleteOneID(ch.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ChannelClient) DeleteOneID(id uint64) *ChannelDeleteOne {
+	builder := c.Delete().Where(channel.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ChannelDeleteOne{builder}
+}
+
+// Query returns a query builder for Channel.
+func (c *ChannelClient) Query() *ChannelQuery {
+	return &ChannelQuery{config: c.config}
+}
+
+// Get returns a Channel entity by its id.
+func (c *ChannelClient) Get(ctx context.Context, id uint64) (*Channel, error) {
+	return c.Query().Where(channel.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ChannelClient) GetX(ctx context.Context, id uint64) *Channel {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryGuild queries the guild edge of a Channel.
+func (c *ChannelClient) QueryGuild(ch *Channel) *GuildQuery {
+	query := &GuildQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ch.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(channel.Table, channel.FieldID, id),
+			sqlgraph.To(guild.Table, guild.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, channel.GuildTable, channel.GuildColumn),
+		)
+		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMessage queries the message edge of a Channel.
+func (c *ChannelClient) QueryMessage(ch *Channel) *MessageQuery {
+	query := &MessageQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ch.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(channel.Table, channel.FieldID, id),
+			sqlgraph.To(message.Table, message.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, channel.MessageTable, channel.MessageColumn),
+		)
+		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ChannelClient) Hooks() []Hook {
+	return c.hooks.Channel
+}
+
+// ForeignUserClient is a client for the ForeignUser schema.
+type ForeignUserClient struct {
+	config
+}
+
+// NewForeignUserClient returns a client for the ForeignUser from the given config.
+func NewForeignUserClient(c config) *ForeignUserClient {
+	return &ForeignUserClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `foreignuser.Hooks(f(g(h())))`.
+func (c *ForeignUserClient) Use(hooks ...Hook) {
+	c.hooks.ForeignUser = append(c.hooks.ForeignUser, hooks...)
+}
+
+// Create returns a create builder for ForeignUser.
+func (c *ForeignUserClient) Create() *ForeignUserCreate {
+	mutation := newForeignUserMutation(c.config, OpCreate)
+	return &ForeignUserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ForeignUser entities.
+func (c *ForeignUserClient) CreateBulk(builders ...*ForeignUserCreate) *ForeignUserCreateBulk {
+	return &ForeignUserCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ForeignUser.
+func (c *ForeignUserClient) Update() *ForeignUserUpdate {
+	mutation := newForeignUserMutation(c.config, OpUpdate)
+	return &ForeignUserUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ForeignUserClient) UpdateOne(fu *ForeignUser) *ForeignUserUpdateOne {
+	mutation := newForeignUserMutation(c.config, OpUpdateOne, withForeignUser(fu))
+	return &ForeignUserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ForeignUserClient) UpdateOneID(id int) *ForeignUserUpdateOne {
+	mutation := newForeignUserMutation(c.config, OpUpdateOne, withForeignUserID(id))
+	return &ForeignUserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ForeignUser.
+func (c *ForeignUserClient) Delete() *ForeignUserDelete {
+	mutation := newForeignUserMutation(c.config, OpDelete)
+	return &ForeignUserDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ForeignUserClient) DeleteOne(fu *ForeignUser) *ForeignUserDeleteOne {
+	return c.DeleteOneID(fu.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ForeignUserClient) DeleteOneID(id int) *ForeignUserDeleteOne {
+	builder := c.Delete().Where(foreignuser.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ForeignUserDeleteOne{builder}
+}
+
+// Query returns a query builder for ForeignUser.
+func (c *ForeignUserClient) Query() *ForeignUserQuery {
+	return &ForeignUserQuery{config: c.config}
+}
+
+// Get returns a ForeignUser entity by its id.
+func (c *ForeignUserClient) Get(ctx context.Context, id int) (*ForeignUser, error) {
+	return c.Query().Where(foreignuser.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ForeignUserClient) GetX(ctx context.Context, id int) *ForeignUser {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a ForeignUser.
+func (c *ForeignUserClient) QueryUser(fu *ForeignUser) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := fu.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(foreignuser.Table, foreignuser.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, foreignuser.UserTable, foreignuser.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(fu.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ForeignUserClient) Hooks() []Hook {
+	return c.hooks.ForeignUser
 }
 
 // GuildClient is a client for the Guild schema.
@@ -190,7 +449,7 @@ func (c *GuildClient) UpdateOne(gu *Guild) *GuildUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *GuildClient) UpdateOneID(id int) *GuildUpdateOne {
+func (c *GuildClient) UpdateOneID(id uint64) *GuildUpdateOne {
 	mutation := newGuildMutation(c.config, OpUpdateOne, withGuildID(id))
 	return &GuildUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -207,7 +466,7 @@ func (c *GuildClient) DeleteOne(gu *Guild) *GuildDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *GuildClient) DeleteOneID(id int) *GuildDeleteOne {
+func (c *GuildClient) DeleteOneID(id uint64) *GuildDeleteOne {
 	builder := c.Delete().Where(guild.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -220,12 +479,12 @@ func (c *GuildClient) Query() *GuildQuery {
 }
 
 // Get returns a Guild entity by its id.
-func (c *GuildClient) Get(ctx context.Context, id int) (*Guild, error) {
+func (c *GuildClient) Get(ctx context.Context, id uint64) (*Guild, error) {
 	return c.Query().Where(guild.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *GuildClient) GetX(ctx context.Context, id int) *Guild {
+func (c *GuildClient) GetX(ctx context.Context, id uint64) *Guild {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -233,9 +492,177 @@ func (c *GuildClient) GetX(ctx context.Context, id int) *Guild {
 	return obj
 }
 
+// QueryInvite queries the invite edge of a Guild.
+func (c *GuildClient) QueryInvite(gu *Guild) *InviteQuery {
+	query := &InviteQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := gu.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(guild.Table, guild.FieldID, id),
+			sqlgraph.To(invite.Table, invite.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, guild.InviteTable, guild.InviteColumn),
+		)
+		fromV = sqlgraph.Neighbors(gu.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUser queries the user edge of a Guild.
+func (c *GuildClient) QueryUser(gu *Guild) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := gu.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(guild.Table, guild.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, guild.UserTable, guild.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(gu.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryBans queries the bans edge of a Guild.
+func (c *GuildClient) QueryBans(gu *Guild) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := gu.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(guild.Table, guild.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, guild.BansTable, guild.BansColumn),
+		)
+		fromV = sqlgraph.Neighbors(gu.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryChannel queries the channel edge of a Guild.
+func (c *GuildClient) QueryChannel(gu *Guild) *ChannelQuery {
+	query := &ChannelQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := gu.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(guild.Table, guild.FieldID, id),
+			sqlgraph.To(channel.Table, channel.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, guild.ChannelTable, guild.ChannelColumn),
+		)
+		fromV = sqlgraph.Neighbors(gu.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *GuildClient) Hooks() []Hook {
 	return c.hooks.Guild
+}
+
+// InviteClient is a client for the Invite schema.
+type InviteClient struct {
+	config
+}
+
+// NewInviteClient returns a client for the Invite from the given config.
+func NewInviteClient(c config) *InviteClient {
+	return &InviteClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `invite.Hooks(f(g(h())))`.
+func (c *InviteClient) Use(hooks ...Hook) {
+	c.hooks.Invite = append(c.hooks.Invite, hooks...)
+}
+
+// Create returns a create builder for Invite.
+func (c *InviteClient) Create() *InviteCreate {
+	mutation := newInviteMutation(c.config, OpCreate)
+	return &InviteCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Invite entities.
+func (c *InviteClient) CreateBulk(builders ...*InviteCreate) *InviteCreateBulk {
+	return &InviteCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Invite.
+func (c *InviteClient) Update() *InviteUpdate {
+	mutation := newInviteMutation(c.config, OpUpdate)
+	return &InviteUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *InviteClient) UpdateOne(i *Invite) *InviteUpdateOne {
+	mutation := newInviteMutation(c.config, OpUpdateOne, withInvite(i))
+	return &InviteUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *InviteClient) UpdateOneID(id int) *InviteUpdateOne {
+	mutation := newInviteMutation(c.config, OpUpdateOne, withInviteID(id))
+	return &InviteUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Invite.
+func (c *InviteClient) Delete() *InviteDelete {
+	mutation := newInviteMutation(c.config, OpDelete)
+	return &InviteDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *InviteClient) DeleteOne(i *Invite) *InviteDeleteOne {
+	return c.DeleteOneID(i.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *InviteClient) DeleteOneID(id int) *InviteDeleteOne {
+	builder := c.Delete().Where(invite.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &InviteDeleteOne{builder}
+}
+
+// Query returns a query builder for Invite.
+func (c *InviteClient) Query() *InviteQuery {
+	return &InviteQuery{config: c.config}
+}
+
+// Get returns a Invite entity by its id.
+func (c *InviteClient) Get(ctx context.Context, id int) (*Invite, error) {
+	return c.Query().Where(invite.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *InviteClient) GetX(ctx context.Context, id int) *Invite {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryGuild queries the guild edge of a Invite.
+func (c *InviteClient) QueryGuild(i *Invite) *GuildQuery {
+	query := &GuildQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := i.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(invite.Table, invite.FieldID, id),
+			sqlgraph.To(guild.Table, guild.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, invite.GuildTable, invite.GuildColumn),
+		)
+		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *InviteClient) Hooks() []Hook {
+	return c.hooks.Invite
 }
 
 // LocalUserClient is a client for the LocalUser schema.
@@ -329,7 +756,7 @@ func (c *LocalUserClient) QueryUser(lu *LocalUser) *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(localuser.Table, localuser.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, localuser.UserTable, localuser.UserColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, localuser.UserTable, localuser.UserColumn),
 		)
 		fromV = sqlgraph.Neighbors(lu.driver.Dialect(), step)
 		return fromV, nil
@@ -356,6 +783,230 @@ func (c *LocalUserClient) QuerySessions(lu *LocalUser) *SessionQuery {
 // Hooks returns the client hooks.
 func (c *LocalUserClient) Hooks() []Hook {
 	return c.hooks.LocalUser
+}
+
+// MessageClient is a client for the Message schema.
+type MessageClient struct {
+	config
+}
+
+// NewMessageClient returns a client for the Message from the given config.
+func NewMessageClient(c config) *MessageClient {
+	return &MessageClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `message.Hooks(f(g(h())))`.
+func (c *MessageClient) Use(hooks ...Hook) {
+	c.hooks.Message = append(c.hooks.Message, hooks...)
+}
+
+// Create returns a create builder for Message.
+func (c *MessageClient) Create() *MessageCreate {
+	mutation := newMessageMutation(c.config, OpCreate)
+	return &MessageCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Message entities.
+func (c *MessageClient) CreateBulk(builders ...*MessageCreate) *MessageCreateBulk {
+	return &MessageCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Message.
+func (c *MessageClient) Update() *MessageUpdate {
+	mutation := newMessageMutation(c.config, OpUpdate)
+	return &MessageUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MessageClient) UpdateOne(m *Message) *MessageUpdateOne {
+	mutation := newMessageMutation(c.config, OpUpdateOne, withMessage(m))
+	return &MessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MessageClient) UpdateOneID(id uint64) *MessageUpdateOne {
+	mutation := newMessageMutation(c.config, OpUpdateOne, withMessageID(id))
+	return &MessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Message.
+func (c *MessageClient) Delete() *MessageDelete {
+	mutation := newMessageMutation(c.config, OpDelete)
+	return &MessageDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *MessageClient) DeleteOne(m *Message) *MessageDeleteOne {
+	return c.DeleteOneID(m.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *MessageClient) DeleteOneID(id uint64) *MessageDeleteOne {
+	builder := c.Delete().Where(message.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MessageDeleteOne{builder}
+}
+
+// Query returns a query builder for Message.
+func (c *MessageClient) Query() *MessageQuery {
+	return &MessageQuery{config: c.config}
+}
+
+// Get returns a Message entity by its id.
+func (c *MessageClient) Get(ctx context.Context, id uint64) (*Message, error) {
+	return c.Query().Where(message.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MessageClient) GetX(ctx context.Context, id uint64) *Message {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a Message.
+func (c *MessageClient) QueryUser(m *Message) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(message.Table, message.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, message.UserTable, message.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryOverride queries the override edge of a Message.
+func (c *MessageClient) QueryOverride(m *Message) *OverrideQuery {
+	query := &OverrideQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(message.Table, message.FieldID, id),
+			sqlgraph.To(override.Table, override.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, message.OverrideTable, message.OverridePrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *MessageClient) Hooks() []Hook {
+	return c.hooks.Message
+}
+
+// OverrideClient is a client for the Override schema.
+type OverrideClient struct {
+	config
+}
+
+// NewOverrideClient returns a client for the Override from the given config.
+func NewOverrideClient(c config) *OverrideClient {
+	return &OverrideClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `override.Hooks(f(g(h())))`.
+func (c *OverrideClient) Use(hooks ...Hook) {
+	c.hooks.Override = append(c.hooks.Override, hooks...)
+}
+
+// Create returns a create builder for Override.
+func (c *OverrideClient) Create() *OverrideCreate {
+	mutation := newOverrideMutation(c.config, OpCreate)
+	return &OverrideCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Override entities.
+func (c *OverrideClient) CreateBulk(builders ...*OverrideCreate) *OverrideCreateBulk {
+	return &OverrideCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Override.
+func (c *OverrideClient) Update() *OverrideUpdate {
+	mutation := newOverrideMutation(c.config, OpUpdate)
+	return &OverrideUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *OverrideClient) UpdateOne(o *Override) *OverrideUpdateOne {
+	mutation := newOverrideMutation(c.config, OpUpdateOne, withOverride(o))
+	return &OverrideUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *OverrideClient) UpdateOneID(id int) *OverrideUpdateOne {
+	mutation := newOverrideMutation(c.config, OpUpdateOne, withOverrideID(id))
+	return &OverrideUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Override.
+func (c *OverrideClient) Delete() *OverrideDelete {
+	mutation := newOverrideMutation(c.config, OpDelete)
+	return &OverrideDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *OverrideClient) DeleteOne(o *Override) *OverrideDeleteOne {
+	return c.DeleteOneID(o.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *OverrideClient) DeleteOneID(id int) *OverrideDeleteOne {
+	builder := c.Delete().Where(override.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &OverrideDeleteOne{builder}
+}
+
+// Query returns a query builder for Override.
+func (c *OverrideClient) Query() *OverrideQuery {
+	return &OverrideQuery{config: c.config}
+}
+
+// Get returns a Override entity by its id.
+func (c *OverrideClient) Get(ctx context.Context, id int) (*Override, error) {
+	return c.Query().Where(override.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *OverrideClient) GetX(ctx context.Context, id int) *Override {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryMessage queries the message edge of a Override.
+func (c *OverrideClient) QueryMessage(o *Override) *MessageQuery {
+	query := &MessageQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := o.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(override.Table, override.FieldID, id),
+			sqlgraph.To(message.Table, message.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, override.MessageTable, override.MessagePrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(o.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *OverrideClient) Hooks() []Hook {
+	return c.hooks.Override
 }
 
 // ProfileClient is a client for the Profile schema.
@@ -657,7 +1308,23 @@ func (c *UserClient) QueryLocalUser(u *User) *LocalUserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(localuser.Table, localuser.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, user.LocalUserTable, user.LocalUserColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.LocalUserTable, user.LocalUserColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryForeignUser queries the foreign_user edge of a User.
+func (c *UserClient) QueryForeignUser(u *User) *ForeignUserQuery {
+	query := &ForeignUserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(foreignuser.Table, foreignuser.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.ForeignUserTable, user.ForeignUserColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
@@ -674,6 +1341,54 @@ func (c *UserClient) QueryProfile(u *User) *ProfileQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(profile.Table, profile.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.ProfileTable, user.ProfileColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySessions queries the sessions edge of a User.
+func (c *UserClient) QuerySessions(u *User) *SessionQuery {
+	query := &SessionQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(session.Table, session.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.SessionsTable, user.SessionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMessage queries the message edge of a User.
+func (c *UserClient) QueryMessage(u *User) *MessageQuery {
+	query := &MessageQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(message.Table, message.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.MessageTable, user.MessageColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGuild queries the guild edge of a User.
+func (c *UserClient) QueryGuild(u *User) *GuildQuery {
+	query := &GuildQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(guild.Table, guild.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.GuildTable, user.GuildColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

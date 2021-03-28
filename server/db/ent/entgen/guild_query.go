@@ -4,6 +4,7 @@ package entgen
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -11,8 +12,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
+	"github.com/harmony-development/legato/server/db/ent/entgen/invite"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
+	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
 
 // GuildQuery is the builder for querying Guild entities.
@@ -23,6 +27,12 @@ type GuildQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Guild
+	// eager-loading edges.
+	withInvite  *InviteQuery
+	withUser    *UserQuery
+	withBans    *UserQuery
+	withChannel *ChannelQuery
+	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -52,6 +62,94 @@ func (gq *GuildQuery) Order(o ...OrderFunc) *GuildQuery {
 	return gq
 }
 
+// QueryInvite chains the current query on the "invite" edge.
+func (gq *GuildQuery) QueryInvite() *InviteQuery {
+	query := &InviteQuery{config: gq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := gq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(guild.Table, guild.FieldID, selector),
+			sqlgraph.To(invite.Table, invite.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, guild.InviteTable, guild.InviteColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryUser chains the current query on the "user" edge.
+func (gq *GuildQuery) QueryUser() *UserQuery {
+	query := &UserQuery{config: gq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := gq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(guild.Table, guild.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, guild.UserTable, guild.UserColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryBans chains the current query on the "bans" edge.
+func (gq *GuildQuery) QueryBans() *UserQuery {
+	query := &UserQuery{config: gq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := gq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(guild.Table, guild.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, guild.BansTable, guild.BansColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryChannel chains the current query on the "channel" edge.
+func (gq *GuildQuery) QueryChannel() *ChannelQuery {
+	query := &ChannelQuery{config: gq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := gq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(guild.Table, guild.FieldID, selector),
+			sqlgraph.To(channel.Table, channel.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, guild.ChannelTable, guild.ChannelColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first Guild entity from the query.
 // Returns a *NotFoundError when no Guild was found.
 func (gq *GuildQuery) First(ctx context.Context) (*Guild, error) {
@@ -76,8 +174,8 @@ func (gq *GuildQuery) FirstX(ctx context.Context) *Guild {
 
 // FirstID returns the first Guild ID from the query.
 // Returns a *NotFoundError when no Guild ID was found.
-func (gq *GuildQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (gq *GuildQuery) FirstID(ctx context.Context) (id uint64, err error) {
+	var ids []uint64
 	if ids, err = gq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -89,7 +187,7 @@ func (gq *GuildQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (gq *GuildQuery) FirstIDX(ctx context.Context) int {
+func (gq *GuildQuery) FirstIDX(ctx context.Context) uint64 {
 	id, err := gq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -127,8 +225,8 @@ func (gq *GuildQuery) OnlyX(ctx context.Context) *Guild {
 // OnlyID is like Only, but returns the only Guild ID in the query.
 // Returns a *NotSingularError when exactly one Guild ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (gq *GuildQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (gq *GuildQuery) OnlyID(ctx context.Context) (id uint64, err error) {
+	var ids []uint64
 	if ids, err = gq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -144,7 +242,7 @@ func (gq *GuildQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (gq *GuildQuery) OnlyIDX(ctx context.Context) int {
+func (gq *GuildQuery) OnlyIDX(ctx context.Context) uint64 {
 	id, err := gq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -170,8 +268,8 @@ func (gq *GuildQuery) AllX(ctx context.Context) []*Guild {
 }
 
 // IDs executes the query and returns a list of Guild IDs.
-func (gq *GuildQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (gq *GuildQuery) IDs(ctx context.Context) ([]uint64, error) {
+	var ids []uint64
 	if err := gq.Select(guild.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -179,7 +277,7 @@ func (gq *GuildQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (gq *GuildQuery) IDsX(ctx context.Context) []int {
+func (gq *GuildQuery) IDsX(ctx context.Context) []uint64 {
 	ids, err := gq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -228,19 +326,80 @@ func (gq *GuildQuery) Clone() *GuildQuery {
 		return nil
 	}
 	return &GuildQuery{
-		config:     gq.config,
-		limit:      gq.limit,
-		offset:     gq.offset,
-		order:      append([]OrderFunc{}, gq.order...),
-		predicates: append([]predicate.Guild{}, gq.predicates...),
+		config:      gq.config,
+		limit:       gq.limit,
+		offset:      gq.offset,
+		order:       append([]OrderFunc{}, gq.order...),
+		predicates:  append([]predicate.Guild{}, gq.predicates...),
+		withInvite:  gq.withInvite.Clone(),
+		withUser:    gq.withUser.Clone(),
+		withBans:    gq.withBans.Clone(),
+		withChannel: gq.withChannel.Clone(),
 		// clone intermediate query.
 		sql:  gq.sql.Clone(),
 		path: gq.path,
 	}
 }
 
+// WithInvite tells the query-builder to eager-load the nodes that are connected to
+// the "invite" edge. The optional arguments are used to configure the query builder of the edge.
+func (gq *GuildQuery) WithInvite(opts ...func(*InviteQuery)) *GuildQuery {
+	query := &InviteQuery{config: gq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	gq.withInvite = query
+	return gq
+}
+
+// WithUser tells the query-builder to eager-load the nodes that are connected to
+// the "user" edge. The optional arguments are used to configure the query builder of the edge.
+func (gq *GuildQuery) WithUser(opts ...func(*UserQuery)) *GuildQuery {
+	query := &UserQuery{config: gq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	gq.withUser = query
+	return gq
+}
+
+// WithBans tells the query-builder to eager-load the nodes that are connected to
+// the "bans" edge. The optional arguments are used to configure the query builder of the edge.
+func (gq *GuildQuery) WithBans(opts ...func(*UserQuery)) *GuildQuery {
+	query := &UserQuery{config: gq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	gq.withBans = query
+	return gq
+}
+
+// WithChannel tells the query-builder to eager-load the nodes that are connected to
+// the "channel" edge. The optional arguments are used to configure the query builder of the edge.
+func (gq *GuildQuery) WithChannel(opts ...func(*ChannelQuery)) *GuildQuery {
+	query := &ChannelQuery{config: gq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	gq.withChannel = query
+	return gq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		Owner uint64 `json:"owner,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.Guild.Query().
+//		GroupBy(guild.FieldOwner).
+//		Aggregate(entgen.Count()).
+//		Scan(ctx, &v)
+//
 func (gq *GuildQuery) GroupBy(field string, fields ...string) *GuildGroupBy {
 	group := &GuildGroupBy{config: gq.config}
 	group.fields = append([]string{field}, fields...)
@@ -255,6 +414,17 @@ func (gq *GuildQuery) GroupBy(field string, fields ...string) *GuildGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		Owner uint64 `json:"owner,omitempty"`
+//	}
+//
+//	client.Guild.Query().
+//		Select(guild.FieldOwner).
+//		Scan(ctx, &v)
+//
 func (gq *GuildQuery) Select(field string, fields ...string) *GuildSelect {
 	gq.fields = append([]string{field}, fields...)
 	return &GuildSelect{GuildQuery: gq}
@@ -278,9 +448,22 @@ func (gq *GuildQuery) prepareQuery(ctx context.Context) error {
 
 func (gq *GuildQuery) sqlAll(ctx context.Context) ([]*Guild, error) {
 	var (
-		nodes = []*Guild{}
-		_spec = gq.querySpec()
+		nodes       = []*Guild{}
+		withFKs     = gq.withFKs
+		_spec       = gq.querySpec()
+		loadedTypes = [4]bool{
+			gq.withInvite != nil,
+			gq.withUser != nil,
+			gq.withBans != nil,
+			gq.withChannel != nil,
+		}
 	)
+	if gq.withInvite != nil || gq.withUser != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, guild.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Guild{config: gq.config}
 		nodes = append(nodes, node)
@@ -291,6 +474,7 @@ func (gq *GuildQuery) sqlAll(ctx context.Context) ([]*Guild, error) {
 			return fmt.Errorf("entgen: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if err := sqlgraph.QueryNodes(ctx, gq.driver, _spec); err != nil {
@@ -299,6 +483,117 @@ func (gq *GuildQuery) sqlAll(ctx context.Context) ([]*Guild, error) {
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := gq.withInvite; query != nil {
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Guild)
+		for i := range nodes {
+			fk := nodes[i].guild_invite
+			if fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
+		}
+		query.Where(invite.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "guild_invite" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Invite = n
+			}
+		}
+	}
+
+	if query := gq.withUser; query != nil {
+		ids := make([]uint64, 0, len(nodes))
+		nodeids := make(map[uint64][]*Guild)
+		for i := range nodes {
+			fk := nodes[i].user_guild
+			if fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
+		}
+		query.Where(user.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_guild" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.User = n
+			}
+		}
+	}
+
+	if query := gq.withBans; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uint64]*Guild)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Bans = []*User{}
+		}
+		query.withFKs = true
+		query.Where(predicate.User(func(s *sql.Selector) {
+			s.Where(sql.InValues(guild.BansColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.guild_bans
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "guild_bans" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "guild_bans" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Bans = append(node.Edges.Bans, n)
+		}
+	}
+
+	if query := gq.withChannel; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uint64]*Guild)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Channel = []*Channel{}
+		}
+		query.withFKs = true
+		query.Where(predicate.Channel(func(s *sql.Selector) {
+			s.Where(sql.InValues(guild.ChannelColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.guild_channel
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "guild_channel" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "guild_channel" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Channel = append(node.Edges.Channel, n)
+		}
+	}
+
 	return nodes, nil
 }
 
@@ -321,7 +616,7 @@ func (gq *GuildQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   guild.Table,
 			Columns: guild.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUint64,
 				Column: guild.FieldID,
 			},
 		},

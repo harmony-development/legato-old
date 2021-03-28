@@ -29,6 +29,7 @@ type LocalUserQuery struct {
 	// eager-loading edges.
 	withUser     *UserQuery
 	withSessions *SessionQuery
+	withFKs      bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -72,7 +73,7 @@ func (luq *LocalUserQuery) QueryUser() *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(localuser.Table, localuser.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, localuser.UserTable, localuser.UserColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, localuser.UserTable, localuser.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(luq.driver.Dialect(), step)
 		return fromU, nil
@@ -377,12 +378,19 @@ func (luq *LocalUserQuery) prepareQuery(ctx context.Context) error {
 func (luq *LocalUserQuery) sqlAll(ctx context.Context) ([]*LocalUser, error) {
 	var (
 		nodes       = []*LocalUser{}
+		withFKs     = luq.withFKs
 		_spec       = luq.querySpec()
 		loadedTypes = [2]bool{
 			luq.withUser != nil,
 			luq.withSessions != nil,
 		}
 	)
+	if luq.withUser != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, localuser.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &LocalUser{config: luq.config}
 		nodes = append(nodes, node)
@@ -404,30 +412,28 @@ func (luq *LocalUserQuery) sqlAll(ctx context.Context) ([]*LocalUser, error) {
 	}
 
 	if query := luq.withUser; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*LocalUser)
+		ids := make([]uint64, 0, len(nodes))
+		nodeids := make(map[uint64][]*LocalUser)
 		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
+			fk := nodes[i].user_local_user
+			if fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
 		}
-		query.withFKs = true
-		query.Where(predicate.User(func(s *sql.Selector) {
-			s.Where(sql.InValues(localuser.UserColumn, fks...))
-		}))
+		query.Where(user.IDIn(ids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.local_user_user
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "local_user_user" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "local_user_user" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "user_local_user" returned %v`, n.ID)
 			}
-			node.Edges.User = n
+			for i := range nodes {
+				nodes[i].Edges.User = n
+			}
 		}
 	}
 

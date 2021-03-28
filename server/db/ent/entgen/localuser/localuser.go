@@ -9,8 +9,6 @@ const (
 	FieldID = "id"
 	// FieldEmail holds the string denoting the email field in the database.
 	FieldEmail = "email"
-	// FieldUsername holds the string denoting the username field in the database.
-	FieldUsername = "username"
 	// FieldPassword holds the string denoting the password field in the database.
 	FieldPassword = "password"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -20,12 +18,12 @@ const (
 	// Table holds the table name of the localuser in the database.
 	Table = "local_users"
 	// UserTable is the table the holds the user relation/edge.
-	UserTable = "users"
+	UserTable = "local_users"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
-	UserColumn = "local_user_user"
+	UserColumn = "user_local_user"
 	// SessionsTable is the table the holds the sessions relation/edge.
 	SessionsTable = "sessions"
 	// SessionsInverseTable is the table name for the Session entity.
@@ -39,14 +37,24 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldEmail,
-	FieldUsername,
 	FieldPassword,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the "local_users"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"user_local_user",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}

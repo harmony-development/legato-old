@@ -21,9 +21,9 @@ type SessionCreate struct {
 	hooks    []Hook
 }
 
-// SetSessionID sets the "sessionID" field.
-func (sc *SessionCreate) SetSessionID(s string) *SessionCreate {
-	sc.mutation.SetSessionID(s)
+// SetSessionid sets the "sessionid" field.
+func (sc *SessionCreate) SetSessionid(s string) *SessionCreate {
+	sc.mutation.SetSessionid(s)
 	return sc
 }
 
@@ -120,8 +120,8 @@ func (sc *SessionCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (sc *SessionCreate) check() error {
-	if _, ok := sc.mutation.SessionID(); !ok {
-		return &ValidationError{Name: "sessionID", err: errors.New("entgen: missing required field \"sessionID\"")}
+	if _, ok := sc.mutation.Sessionid(); !ok {
+		return &ValidationError{Name: "sessionid", err: errors.New("entgen: missing required field \"sessionid\"")}
 	}
 	if _, ok := sc.mutation.Expires(); !ok {
 		return &ValidationError{Name: "expires", err: errors.New("entgen: missing required field \"expires\"")}
@@ -153,13 +153,13 @@ func (sc *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
-	if value, ok := sc.mutation.SessionID(); ok {
+	if value, ok := sc.mutation.Sessionid(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: session.FieldSessionID,
+			Column: session.FieldSessionid,
 		})
-		_node.SessionID = value
+		_node.Sessionid = value
 	}
 	if value, ok := sc.mutation.Expires(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

@@ -16,12 +16,14 @@ type Profile struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// Username holds the value of the "username" field.
+	Username string `json:"username,omitempty"`
 	// Status holds the value of the "status" field.
 	Status int16 `json:"status,omitempty"`
 	// Avatar holds the value of the "avatar" field.
 	Avatar string `json:"avatar,omitempty"`
-	// IsBot holds the value of the "isBot" field.
-	IsBot bool `json:"isBot,omitempty"`
+	// IsBot holds the value of the "is_bot" field.
+	IsBot bool `json:"is_bot,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ProfileQuery when eager-loading is set.
 	Edges        ProfileEdges `json:"edges"`
@@ -60,7 +62,7 @@ func (*Profile) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = &sql.NullBool{}
 		case profile.FieldID, profile.FieldStatus:
 			values[i] = &sql.NullInt64{}
-		case profile.FieldAvatar:
+		case profile.FieldUsername, profile.FieldAvatar:
 			values[i] = &sql.NullString{}
 		case profile.ForeignKeys[0]: // user_profile
 			values[i] = &sql.NullInt64{}
@@ -85,6 +87,12 @@ func (pr *Profile) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			pr.ID = int(value.Int64)
+		case profile.FieldUsername:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field username", values[i])
+			} else if value.Valid {
+				pr.Username = value.String
+			}
 		case profile.FieldStatus:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
@@ -99,7 +107,7 @@ func (pr *Profile) assignValues(columns []string, values []interface{}) error {
 			}
 		case profile.FieldIsBot:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field isBot", values[i])
+				return fmt.Errorf("unexpected type %T for field is_bot", values[i])
 			} else if value.Valid {
 				pr.IsBot = value.Bool
 			}
@@ -143,11 +151,13 @@ func (pr *Profile) String() string {
 	var builder strings.Builder
 	builder.WriteString("Profile(")
 	builder.WriteString(fmt.Sprintf("id=%v", pr.ID))
+	builder.WriteString(", username=")
+	builder.WriteString(pr.Username)
 	builder.WriteString(", status=")
 	builder.WriteString(fmt.Sprintf("%v", pr.Status))
 	builder.WriteString(", avatar=")
 	builder.WriteString(pr.Avatar)
-	builder.WriteString(", isBot=")
+	builder.WriteString(", is_bot=")
 	builder.WriteString(fmt.Sprintf("%v", pr.IsBot))
 	builder.WriteByte(')')
 	return builder.String()

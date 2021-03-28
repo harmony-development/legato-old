@@ -18,13 +18,12 @@ type LocalUser struct {
 	ID int `json:"id,omitempty"`
 	// Email holds the value of the "email" field.
 	Email string `json:"email,omitempty"`
-	// Username holds the value of the "username" field.
-	Username string `json:"username,omitempty"`
 	// Password holds the value of the "password" field.
 	Password []byte `json:"password,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the LocalUserQuery when eager-loading is set.
-	Edges LocalUserEdges `json:"edges"`
+	Edges           LocalUserEdges `json:"edges"`
+	user_local_user *uint64
 }
 
 // LocalUserEdges holds the relations/edges for other nodes in the graph.
@@ -70,8 +69,10 @@ func (*LocalUser) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = &[]byte{}
 		case localuser.FieldID:
 			values[i] = &sql.NullInt64{}
-		case localuser.FieldEmail, localuser.FieldUsername:
+		case localuser.FieldEmail:
 			values[i] = &sql.NullString{}
+		case localuser.ForeignKeys[0]: // user_local_user
+			values[i] = &sql.NullInt64{}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type LocalUser", columns[i])
 		}
@@ -99,17 +100,18 @@ func (lu *LocalUser) assignValues(columns []string, values []interface{}) error 
 			} else if value.Valid {
 				lu.Email = value.String
 			}
-		case localuser.FieldUsername:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field username", values[i])
-			} else if value.Valid {
-				lu.Username = value.String
-			}
 		case localuser.FieldPassword:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field password", values[i])
 			} else if value != nil {
 				lu.Password = *value
+			}
+		case localuser.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field user_local_user", value)
+			} else if value.Valid {
+				lu.user_local_user = new(uint64)
+				*lu.user_local_user = uint64(value.Int64)
 			}
 		}
 	}
@@ -151,8 +153,6 @@ func (lu *LocalUser) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", lu.ID))
 	builder.WriteString(", email=")
 	builder.WriteString(lu.Email)
-	builder.WriteString(", username=")
-	builder.WriteString(lu.Username)
 	builder.WriteString(", password=")
 	builder.WriteString(fmt.Sprintf("%v", lu.Password))
 	builder.WriteByte(')')

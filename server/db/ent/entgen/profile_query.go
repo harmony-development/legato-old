@@ -283,12 +283,12 @@ func (pq *ProfileQuery) WithUser(opts ...func(*UserQuery)) *ProfileQuery {
 // Example:
 //
 //	var v []struct {
-//		Status int16 `json:"status,omitempty"`
+//		Username string `json:"username,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Profile.Query().
-//		GroupBy(profile.FieldStatus).
+//		GroupBy(profile.FieldUsername).
 //		Aggregate(entgen.Count()).
 //		Scan(ctx, &v)
 //
@@ -310,11 +310,11 @@ func (pq *ProfileQuery) GroupBy(field string, fields ...string) *ProfileGroupBy 
 // Example:
 //
 //	var v []struct {
-//		Status int16 `json:"status,omitempty"`
+//		Username string `json:"username,omitempty"`
 //	}
 //
 //	client.Profile.Query().
-//		Select(profile.FieldStatus).
+//		Select(profile.FieldUsername).
 //		Scan(ctx, &v)
 //
 func (pq *ProfileQuery) Select(field string, fields ...string) *ProfileSelect {

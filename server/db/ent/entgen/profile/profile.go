@@ -7,11 +7,13 @@ const (
 	Label = "profile"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldUsername holds the string denoting the username field in the database.
+	FieldUsername = "username"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
 	// FieldAvatar holds the string denoting the avatar field in the database.
 	FieldAvatar = "avatar"
-	// FieldIsBot holds the string denoting the isbot field in the database.
+	// FieldIsBot holds the string denoting the is_bot field in the database.
 	FieldIsBot = "is_bot"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
@@ -29,6 +31,7 @@ const (
 // Columns holds all SQL columns for profile fields.
 var Columns = []string{
 	FieldID,
+	FieldUsername,
 	FieldStatus,
 	FieldAvatar,
 	FieldIsBot,
@@ -56,6 +59,6 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultIsBot holds the default value on creation for the "isBot" field.
+	// DefaultIsBot holds the default value on creation for the "is_bot" field.
 	DefaultIsBot bool
 )

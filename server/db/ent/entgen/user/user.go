@@ -9,17 +9,32 @@ const (
 	FieldID = "id"
 	// EdgeLocalUser holds the string denoting the local_user edge name in mutations.
 	EdgeLocalUser = "local_user"
+	// EdgeForeignUser holds the string denoting the foreign_user edge name in mutations.
+	EdgeForeignUser = "foreign_user"
 	// EdgeProfile holds the string denoting the profile edge name in mutations.
 	EdgeProfile = "profile"
+	// EdgeSessions holds the string denoting the sessions edge name in mutations.
+	EdgeSessions = "sessions"
+	// EdgeMessage holds the string denoting the message edge name in mutations.
+	EdgeMessage = "message"
+	// EdgeGuild holds the string denoting the guild edge name in mutations.
+	EdgeGuild = "guild"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// LocalUserTable is the table the holds the local_user relation/edge.
-	LocalUserTable = "users"
+	LocalUserTable = "local_users"
 	// LocalUserInverseTable is the table name for the LocalUser entity.
 	// It exists in this package in order to avoid circular dependency with the "localuser" package.
 	LocalUserInverseTable = "local_users"
 	// LocalUserColumn is the table column denoting the local_user relation/edge.
-	LocalUserColumn = "local_user_user"
+	LocalUserColumn = "user_local_user"
+	// ForeignUserTable is the table the holds the foreign_user relation/edge.
+	ForeignUserTable = "foreign_users"
+	// ForeignUserInverseTable is the table name for the ForeignUser entity.
+	// It exists in this package in order to avoid circular dependency with the "foreignuser" package.
+	ForeignUserInverseTable = "foreign_users"
+	// ForeignUserColumn is the table column denoting the foreign_user relation/edge.
+	ForeignUserColumn = "user_foreign_user"
 	// ProfileTable is the table the holds the profile relation/edge.
 	ProfileTable = "profiles"
 	// ProfileInverseTable is the table name for the Profile entity.
@@ -27,6 +42,27 @@ const (
 	ProfileInverseTable = "profiles"
 	// ProfileColumn is the table column denoting the profile relation/edge.
 	ProfileColumn = "user_profile"
+	// SessionsTable is the table the holds the sessions relation/edge.
+	SessionsTable = "sessions"
+	// SessionsInverseTable is the table name for the Session entity.
+	// It exists in this package in order to avoid circular dependency with the "session" package.
+	SessionsInverseTable = "sessions"
+	// SessionsColumn is the table column denoting the sessions relation/edge.
+	SessionsColumn = "user_sessions"
+	// MessageTable is the table the holds the message relation/edge.
+	MessageTable = "messages"
+	// MessageInverseTable is the table name for the Message entity.
+	// It exists in this package in order to avoid circular dependency with the "message" package.
+	MessageInverseTable = "messages"
+	// MessageColumn is the table column denoting the message relation/edge.
+	MessageColumn = "user_message"
+	// GuildTable is the table the holds the guild relation/edge.
+	GuildTable = "guilds"
+	// GuildInverseTable is the table name for the Guild entity.
+	// It exists in this package in order to avoid circular dependency with the "guild" package.
+	GuildInverseTable = "guilds"
+	// GuildColumn is the table column denoting the guild relation/edge.
+	GuildColumn = "user_guild"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -37,7 +73,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "users"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"local_user_user",
+	"guild_bans",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

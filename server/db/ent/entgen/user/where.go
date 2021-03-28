@@ -97,7 +97,7 @@ func HasLocalUser() predicate.User {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(LocalUserTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, LocalUserTable, LocalUserColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, LocalUserTable, LocalUserColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -109,7 +109,35 @@ func HasLocalUserWith(preds ...predicate.LocalUser) predicate.User {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(LocalUserInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, LocalUserTable, LocalUserColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, LocalUserTable, LocalUserColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasForeignUser applies the HasEdge predicate on the "foreign_user" edge.
+func HasForeignUser() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ForeignUserTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, ForeignUserTable, ForeignUserColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasForeignUserWith applies the HasEdge predicate on the "foreign_user" edge with a given conditions (other predicates).
+func HasForeignUserWith(preds ...predicate.ForeignUser) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ForeignUserInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, ForeignUserTable, ForeignUserColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -138,6 +166,90 @@ func HasProfileWith(preds ...predicate.Profile) predicate.User {
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(ProfileInverseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, ProfileTable, ProfileColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasSessions applies the HasEdge predicate on the "sessions" edge.
+func HasSessions() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(SessionsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, SessionsTable, SessionsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSessionsWith applies the HasEdge predicate on the "sessions" edge with a given conditions (other predicates).
+func HasSessionsWith(preds ...predicate.Session) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(SessionsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, SessionsTable, SessionsColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasMessage applies the HasEdge predicate on the "message" edge.
+func HasMessage() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(MessageTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, MessageTable, MessageColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasMessageWith applies the HasEdge predicate on the "message" edge with a given conditions (other predicates).
+func HasMessageWith(preds ...predicate.Message) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(MessageInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, MessageTable, MessageColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasGuild applies the HasEdge predicate on the "guild" edge.
+func HasGuild() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(GuildTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, GuildTable, GuildColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasGuildWith applies the HasEdge predicate on the "guild" edge with a given conditions (other predicates).
+func HasGuildWith(preds ...predicate.Guild) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(GuildInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, GuildTable, GuildColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

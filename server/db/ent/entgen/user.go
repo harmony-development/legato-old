@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/harmony-development/legato/server/db/ent/entgen/foreignuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/profile"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
@@ -19,19 +20,27 @@ type User struct {
 	ID uint64 `json:"id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges           UserEdges `json:"edges"`
-	local_user_user *int
+	Edges      UserEdges `json:"edges"`
+	guild_bans *uint64
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
 	// LocalUser holds the value of the local_user edge.
 	LocalUser *LocalUser `json:"local_user,omitempty"`
+	// ForeignUser holds the value of the foreign_user edge.
+	ForeignUser *ForeignUser `json:"foreign_user,omitempty"`
 	// Profile holds the value of the profile edge.
 	Profile *Profile `json:"profile,omitempty"`
+	// Sessions holds the value of the sessions edge.
+	Sessions []*Session `json:"sessions,omitempty"`
+	// Message holds the value of the message edge.
+	Message []*Message `json:"message,omitempty"`
+	// Guild holds the value of the guild edge.
+	Guild []*Guild `json:"guild,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [6]bool
 }
 
 // LocalUserOrErr returns the LocalUser value or an error if the edge
@@ -48,10 +57,24 @@ func (e UserEdges) LocalUserOrErr() (*LocalUser, error) {
 	return nil, &NotLoadedError{edge: "local_user"}
 }
 
+// ForeignUserOrErr returns the ForeignUser value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) ForeignUserOrErr() (*ForeignUser, error) {
+	if e.loadedTypes[1] {
+		if e.ForeignUser == nil {
+			// The edge foreign_user was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: foreignuser.Label}
+		}
+		return e.ForeignUser, nil
+	}
+	return nil, &NotLoadedError{edge: "foreign_user"}
+}
+
 // ProfileOrErr returns the Profile value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e UserEdges) ProfileOrErr() (*Profile, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		if e.Profile == nil {
 			// The edge profile was loaded in eager-loading,
 			// but was not found.
@@ -62,6 +85,33 @@ func (e UserEdges) ProfileOrErr() (*Profile, error) {
 	return nil, &NotLoadedError{edge: "profile"}
 }
 
+// SessionsOrErr returns the Sessions value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) SessionsOrErr() ([]*Session, error) {
+	if e.loadedTypes[3] {
+		return e.Sessions, nil
+	}
+	return nil, &NotLoadedError{edge: "sessions"}
+}
+
+// MessageOrErr returns the Message value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) MessageOrErr() ([]*Message, error) {
+	if e.loadedTypes[4] {
+		return e.Message, nil
+	}
+	return nil, &NotLoadedError{edge: "message"}
+}
+
+// GuildOrErr returns the Guild value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) GuildOrErr() ([]*Guild, error) {
+	if e.loadedTypes[5] {
+		return e.Guild, nil
+	}
+	return nil, &NotLoadedError{edge: "guild"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
@@ -69,7 +119,7 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case user.FieldID:
 			values[i] = &sql.NullInt64{}
-		case user.ForeignKeys[0]: // local_user_user
+		case user.ForeignKeys[0]: // guild_bans
 			values[i] = &sql.NullInt64{}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
@@ -94,10 +144,10 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			u.ID = uint64(value.Int64)
 		case user.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field local_user_user", value)
+				return fmt.Errorf("unexpected type %T for edge-field guild_bans", value)
 			} else if value.Valid {
-				u.local_user_user = new(int)
-				*u.local_user_user = int(value.Int64)
+				u.guild_bans = new(uint64)
+				*u.guild_bans = uint64(value.Int64)
 			}
 		}
 	}
@@ -109,9 +159,29 @@ func (u *User) QueryLocalUser() *LocalUserQuery {
 	return (&UserClient{config: u.config}).QueryLocalUser(u)
 }
 
+// QueryForeignUser queries the "foreign_user" edge of the User entity.
+func (u *User) QueryForeignUser() *ForeignUserQuery {
+	return (&UserClient{config: u.config}).QueryForeignUser(u)
+}
+
 // QueryProfile queries the "profile" edge of the User entity.
 func (u *User) QueryProfile() *ProfileQuery {
 	return (&UserClient{config: u.config}).QueryProfile(u)
+}
+
+// QuerySessions queries the "sessions" edge of the User entity.
+func (u *User) QuerySessions() *SessionQuery {
+	return (&UserClient{config: u.config}).QuerySessions(u)
+}
+
+// QueryMessage queries the "message" edge of the User entity.
+func (u *User) QueryMessage() *MessageQuery {
+	return (&UserClient{config: u.config}).QueryMessage(u)
+}
+
+// QueryGuild queries the "guild" edge of the User entity.
+func (u *User) QueryGuild() *GuildQuery {
+	return (&UserClient{config: u.config}).QueryGuild(u)
 }
 
 // Update returns a builder for updating this User.

@@ -27,12 +27,6 @@ func (luc *LocalUserCreate) SetEmail(s string) *LocalUserCreate {
 	return luc
 }
 
-// SetUsername sets the "username" field.
-func (luc *LocalUserCreate) SetUsername(s string) *LocalUserCreate {
-	luc.mutation.SetUsername(s)
-	return luc
-}
-
 // SetPassword sets the "password" field.
 func (luc *LocalUserCreate) SetPassword(b []byte) *LocalUserCreate {
 	luc.mutation.SetPassword(b)
@@ -42,6 +36,14 @@ func (luc *LocalUserCreate) SetPassword(b []byte) *LocalUserCreate {
 // SetUserID sets the "user" edge to the User entity by ID.
 func (luc *LocalUserCreate) SetUserID(id uint64) *LocalUserCreate {
 	luc.mutation.SetUserID(id)
+	return luc
+}
+
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (luc *LocalUserCreate) SetNillableUserID(id *uint64) *LocalUserCreate {
+	if id != nil {
+		luc = luc.SetUserID(*id)
+	}
 	return luc
 }
 
@@ -124,14 +126,8 @@ func (luc *LocalUserCreate) check() error {
 			return &ValidationError{Name: "email", err: fmt.Errorf("entgen: validator failed for field \"email\": %w", err)}
 		}
 	}
-	if _, ok := luc.mutation.Username(); !ok {
-		return &ValidationError{Name: "username", err: errors.New("entgen: missing required field \"username\"")}
-	}
 	if _, ok := luc.mutation.Password(); !ok {
 		return &ValidationError{Name: "password", err: errors.New("entgen: missing required field \"password\"")}
-	}
-	if _, ok := luc.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user", err: errors.New("entgen: missing required edge \"user\"")}
 	}
 	return nil
 }
@@ -168,14 +164,6 @@ func (luc *LocalUserCreate) createSpec() (*LocalUser, *sqlgraph.CreateSpec) {
 		})
 		_node.Email = value
 	}
-	if value, ok := luc.mutation.Username(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: localuser.FieldUsername,
-		})
-		_node.Username = value
-	}
 	if value, ok := luc.mutation.Password(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeBytes,
@@ -187,7 +175,7 @@ func (luc *LocalUserCreate) createSpec() (*LocalUser, *sqlgraph.CreateSpec) {
 	if nodes := luc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   localuser.UserTable,
 			Columns: []string{localuser.UserColumn},
 			Bidi:    false,
@@ -201,6 +189,7 @@ func (luc *LocalUserCreate) createSpec() (*LocalUser, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.user_local_user = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := luc.mutation.SessionsIDs(); len(nodes) > 0 {

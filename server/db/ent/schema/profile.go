@@ -14,9 +14,10 @@ type Profile struct {
 // Fields of the Profile.
 func (Profile) Fields() []ent.Field {
 	return []ent.Field{
+		field.String("username").Unique().Optional(),
 		field.Int16("status").Optional(),
 		field.String("avatar").Optional(),
-		field.Bool("isBot").Default(false),
+		field.Bool("is_bot").Default(false),
 	}
 }
 

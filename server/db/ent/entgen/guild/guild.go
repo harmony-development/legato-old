@@ -7,19 +7,79 @@ const (
 	Label = "guild"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldOwner holds the string denoting the owner field in the database.
+	FieldOwner = "owner"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
+	// FieldPicture holds the string denoting the picture field in the database.
+	FieldPicture = "picture"
+	// FieldMetadata holds the string denoting the metadata field in the database.
+	FieldMetadata = "metadata"
+	// EdgeInvite holds the string denoting the invite edge name in mutations.
+	EdgeInvite = "invite"
+	// EdgeUser holds the string denoting the user edge name in mutations.
+	EdgeUser = "user"
+	// EdgeBans holds the string denoting the bans edge name in mutations.
+	EdgeBans = "bans"
+	// EdgeChannel holds the string denoting the channel edge name in mutations.
+	EdgeChannel = "channel"
 	// Table holds the table name of the guild in the database.
 	Table = "guilds"
+	// InviteTable is the table the holds the invite relation/edge.
+	InviteTable = "guilds"
+	// InviteInverseTable is the table name for the Invite entity.
+	// It exists in this package in order to avoid circular dependency with the "invite" package.
+	InviteInverseTable = "invites"
+	// InviteColumn is the table column denoting the invite relation/edge.
+	InviteColumn = "guild_invite"
+	// UserTable is the table the holds the user relation/edge.
+	UserTable = "guilds"
+	// UserInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	UserInverseTable = "users"
+	// UserColumn is the table column denoting the user relation/edge.
+	UserColumn = "user_guild"
+	// BansTable is the table the holds the bans relation/edge.
+	BansTable = "users"
+	// BansInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	BansInverseTable = "users"
+	// BansColumn is the table column denoting the bans relation/edge.
+	BansColumn = "guild_bans"
+	// ChannelTable is the table the holds the channel relation/edge.
+	ChannelTable = "channels"
+	// ChannelInverseTable is the table name for the Channel entity.
+	// It exists in this package in order to avoid circular dependency with the "channel" package.
+	ChannelInverseTable = "channels"
+	// ChannelColumn is the table column denoting the channel relation/edge.
+	ChannelColumn = "guild_channel"
 )
 
 // Columns holds all SQL columns for guild fields.
 var Columns = []string{
 	FieldID,
+	FieldOwner,
+	FieldName,
+	FieldPicture,
+	FieldMetadata,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the "guilds"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"guild_invite",
+	"user_guild",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}

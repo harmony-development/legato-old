@@ -9,6 +9,32 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen"
 )
 
+// The ChannelFunc type is an adapter to allow the use of ordinary
+// function as Channel mutator.
+type ChannelFunc func(context.Context, *entgen.ChannelMutation) (entgen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ChannelFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	mv, ok := m.(*entgen.ChannelMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.ChannelMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The ForeignUserFunc type is an adapter to allow the use of ordinary
+// function as ForeignUser mutator.
+type ForeignUserFunc func(context.Context, *entgen.ForeignUserMutation) (entgen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ForeignUserFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	mv, ok := m.(*entgen.ForeignUserMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.ForeignUserMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The GuildFunc type is an adapter to allow the use of ordinary
 // function as Guild mutator.
 type GuildFunc func(context.Context, *entgen.GuildMutation) (entgen.Value, error)
@@ -22,6 +48,19 @@ func (f GuildFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value,
 	return f(ctx, mv)
 }
 
+// The InviteFunc type is an adapter to allow the use of ordinary
+// function as Invite mutator.
+type InviteFunc func(context.Context, *entgen.InviteMutation) (entgen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f InviteFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	mv, ok := m.(*entgen.InviteMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.InviteMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The LocalUserFunc type is an adapter to allow the use of ordinary
 // function as LocalUser mutator.
 type LocalUserFunc func(context.Context, *entgen.LocalUserMutation) (entgen.Value, error)
@@ -31,6 +70,32 @@ func (f LocalUserFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Va
 	mv, ok := m.(*entgen.LocalUserMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.LocalUserMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The MessageFunc type is an adapter to allow the use of ordinary
+// function as Message mutator.
+type MessageFunc func(context.Context, *entgen.MessageMutation) (entgen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f MessageFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	mv, ok := m.(*entgen.MessageMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.MessageMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The OverrideFunc type is an adapter to allow the use of ordinary
+// function as Override mutator.
+type OverrideFunc func(context.Context, *entgen.OverrideMutation) (entgen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f OverrideFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	mv, ok := m.(*entgen.OverrideMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.OverrideMutation", m)
 	}
 	return f(ctx, mv)
 }

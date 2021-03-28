@@ -93,10 +93,10 @@ func IDLTE(id int) predicate.Session {
 	})
 }
 
-// SessionID applies equality check predicate on the "sessionID" field. It's identical to SessionIDEQ.
-func SessionID(v string) predicate.Session {
+// Sessionid applies equality check predicate on the "sessionid" field. It's identical to SessionidEQ.
+func Sessionid(v string) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldSessionID), v))
+		s.Where(sql.EQ(s.C(FieldSessionid), v))
 	})
 }
 
@@ -107,22 +107,22 @@ func Expires(v time.Time) predicate.Session {
 	})
 }
 
-// SessionIDEQ applies the EQ predicate on the "sessionID" field.
-func SessionIDEQ(v string) predicate.Session {
+// SessionidEQ applies the EQ predicate on the "sessionid" field.
+func SessionidEQ(v string) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldSessionID), v))
+		s.Where(sql.EQ(s.C(FieldSessionid), v))
 	})
 }
 
-// SessionIDNEQ applies the NEQ predicate on the "sessionID" field.
-func SessionIDNEQ(v string) predicate.Session {
+// SessionidNEQ applies the NEQ predicate on the "sessionid" field.
+func SessionidNEQ(v string) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldSessionID), v))
+		s.Where(sql.NEQ(s.C(FieldSessionid), v))
 	})
 }
 
-// SessionIDIn applies the In predicate on the "sessionID" field.
-func SessionIDIn(vs ...string) predicate.Session {
+// SessionidIn applies the In predicate on the "sessionid" field.
+func SessionidIn(vs ...string) predicate.Session {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -134,12 +134,12 @@ func SessionIDIn(vs ...string) predicate.Session {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldSessionID), v...))
+		s.Where(sql.In(s.C(FieldSessionid), v...))
 	})
 }
 
-// SessionIDNotIn applies the NotIn predicate on the "sessionID" field.
-func SessionIDNotIn(vs ...string) predicate.Session {
+// SessionidNotIn applies the NotIn predicate on the "sessionid" field.
+func SessionidNotIn(vs ...string) predicate.Session {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -151,70 +151,70 @@ func SessionIDNotIn(vs ...string) predicate.Session {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldSessionID), v...))
+		s.Where(sql.NotIn(s.C(FieldSessionid), v...))
 	})
 }
 
-// SessionIDGT applies the GT predicate on the "sessionID" field.
-func SessionIDGT(v string) predicate.Session {
+// SessionidGT applies the GT predicate on the "sessionid" field.
+func SessionidGT(v string) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldSessionID), v))
+		s.Where(sql.GT(s.C(FieldSessionid), v))
 	})
 }
 
-// SessionIDGTE applies the GTE predicate on the "sessionID" field.
-func SessionIDGTE(v string) predicate.Session {
+// SessionidGTE applies the GTE predicate on the "sessionid" field.
+func SessionidGTE(v string) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldSessionID), v))
+		s.Where(sql.GTE(s.C(FieldSessionid), v))
 	})
 }
 
-// SessionIDLT applies the LT predicate on the "sessionID" field.
-func SessionIDLT(v string) predicate.Session {
+// SessionidLT applies the LT predicate on the "sessionid" field.
+func SessionidLT(v string) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldSessionID), v))
+		s.Where(sql.LT(s.C(FieldSessionid), v))
 	})
 }
 
-// SessionIDLTE applies the LTE predicate on the "sessionID" field.
-func SessionIDLTE(v string) predicate.Session {
+// SessionidLTE applies the LTE predicate on the "sessionid" field.
+func SessionidLTE(v string) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldSessionID), v))
+		s.Where(sql.LTE(s.C(FieldSessionid), v))
 	})
 }
 
-// SessionIDContains applies the Contains predicate on the "sessionID" field.
-func SessionIDContains(v string) predicate.Session {
+// SessionidContains applies the Contains predicate on the "sessionid" field.
+func SessionidContains(v string) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldSessionID), v))
+		s.Where(sql.Contains(s.C(FieldSessionid), v))
 	})
 }
 
-// SessionIDHasPrefix applies the HasPrefix predicate on the "sessionID" field.
-func SessionIDHasPrefix(v string) predicate.Session {
+// SessionidHasPrefix applies the HasPrefix predicate on the "sessionid" field.
+func SessionidHasPrefix(v string) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldSessionID), v))
+		s.Where(sql.HasPrefix(s.C(FieldSessionid), v))
 	})
 }
 
-// SessionIDHasSuffix applies the HasSuffix predicate on the "sessionID" field.
-func SessionIDHasSuffix(v string) predicate.Session {
+// SessionidHasSuffix applies the HasSuffix predicate on the "sessionid" field.
+func SessionidHasSuffix(v string) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldSessionID), v))
+		s.Where(sql.HasSuffix(s.C(FieldSessionid), v))
 	})
 }
 
-// SessionIDEqualFold applies the EqualFold predicate on the "sessionID" field.
-func SessionIDEqualFold(v string) predicate.Session {
+// SessionidEqualFold applies the EqualFold predicate on the "sessionid" field.
+func SessionidEqualFold(v string) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldSessionID), v))
+		s.Where(sql.EqualFold(s.C(FieldSessionid), v))
 	})
 }
 
-// SessionIDContainsFold applies the ContainsFold predicate on the "sessionID" field.
-func SessionIDContainsFold(v string) predicate.Session {
+// SessionidContainsFold applies the ContainsFold predicate on the "sessionid" field.
+func SessionidContainsFold(v string) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldSessionID), v))
+		s.Where(sql.ContainsFold(s.C(FieldSessionid), v))
 	})
 }
 

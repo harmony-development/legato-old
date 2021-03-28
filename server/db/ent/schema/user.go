@@ -21,12 +21,14 @@ func (User) Fields() []ent.Field {
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.
-			From("local_user", LocalUser.Type).
-			Ref("user").
-			Unique(),
+		edge.To("local_user", LocalUser.Type).Unique(),
+		edge.To("foreign_user", ForeignUser.Type).Unique(),
 		edge.
 			To("profile", Profile.Type).
 			Unique(),
+		edge.
+			To("sessions", Session.Type),
+		edge.To("message", Message.Type),
+		edge.To("guild", Guild.Type),
 	}
 }

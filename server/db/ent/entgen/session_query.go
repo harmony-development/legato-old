@@ -283,12 +283,12 @@ func (sq *SessionQuery) WithUser(opts ...func(*LocalUserQuery)) *SessionQuery {
 // Example:
 //
 //	var v []struct {
-//		SessionID string `json:"sessionID,omitempty"`
+//		Sessionid string `json:"sessionid,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Session.Query().
-//		GroupBy(session.FieldSessionID).
+//		GroupBy(session.FieldSessionid).
 //		Aggregate(entgen.Count()).
 //		Scan(ctx, &v)
 //
@@ -310,11 +310,11 @@ func (sq *SessionQuery) GroupBy(field string, fields ...string) *SessionGroupBy 
 // Example:
 //
 //	var v []struct {
-//		SessionID string `json:"sessionID,omitempty"`
+//		Sessionid string `json:"sessionid,omitempty"`
 //	}
 //
 //	client.Session.Query().
-//		Select(session.FieldSessionID).
+//		Select(session.FieldSessionid).
 //		Scan(ctx, &v)
 //
 func (sq *SessionQuery) Select(field string, fields ...string) *SessionSelect {

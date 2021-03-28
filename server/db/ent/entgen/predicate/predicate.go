@@ -6,11 +6,26 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Channel is the predicate function for channel builders.
+type Channel func(*sql.Selector)
+
+// ForeignUser is the predicate function for foreignuser builders.
+type ForeignUser func(*sql.Selector)
+
 // Guild is the predicate function for guild builders.
 type Guild func(*sql.Selector)
 
+// Invite is the predicate function for invite builders.
+type Invite func(*sql.Selector)
+
 // LocalUser is the predicate function for localuser builders.
 type LocalUser func(*sql.Selector)
+
+// Message is the predicate function for message builders.
+type Message func(*sql.Selector)
+
+// Override is the predicate function for override builders.
+type Override func(*sql.Selector)
 
 // Profile is the predicate function for profile builders.
 type Profile func(*sql.Selector)
