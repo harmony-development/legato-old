@@ -26,6 +26,7 @@ func (ForeignUser) Edges() []ent.Edge {
 		edge.
 			From("user", User.Type).
 			Ref("foreign_user").
-			Unique(),
+			Unique().
+			Required(),
 	}
 }

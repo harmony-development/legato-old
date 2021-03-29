@@ -23,6 +23,9 @@ func (Override) Fields() []ent.Field {
 // Edges of the Override.
 func (Override) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("message", Message.Type).Ref("override"),
+		edge.
+			From("message", Message.Type).
+			Ref("override").
+			Unique(),
 	}
 }

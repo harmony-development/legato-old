@@ -25,9 +25,13 @@ func (Guild) Fields() []ent.Field {
 // Edges of the Guild.
 func (Guild) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("invite", Invite.Type).Unique(),
-		edge.From("user", User.Type).Ref("guild").Unique().Required(),
-		edge.To("bans", User.Type),
-		edge.To("channel", Channel.Type),
+		edge.
+			To("invite", Invite.Type),
+		edge.
+			To("bans", User.Type),
+		edge.
+			To("channel", Channel.Type),
+		edge.
+			From("user", User.Type).Ref("guild").Required(),
 	}
 }

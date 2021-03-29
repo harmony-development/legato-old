@@ -16,18 +16,34 @@ type Message struct {
 func (Message) Fields() []ent.Field {
 	return []ent.Field{
 		field.Uint64("id").Unique(),
-		field.Uint64("author"),
 		field.Time("createdat"),
 		field.Time("editedat"),
-		field.Uint64("replyto").Default(0),
 	}
 }
 
 // Edges of the Message.
 func (Message) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user", User.Type).Ref("message").Unique(),
-		edge.To("override", Override.Type),
+		edge.
+			From("user", User.Type).
+			Ref("message").
+			Unique(),
+		edge.
+			To("override", Override.Type).
+			Unique(),
+		edge.
+			To("replies", Message.Type).
+			From("parent").
+			Unique(),
+		edge.
+			To("textmessage", TextMessage.Type).
+			Unique(),
+		edge.
+			To("filemessage", FileMessage.Type).
+			Unique(),
+		edge.
+			To("embedmessage", EmbedMessage.Type).
+			Unique(),
 	}
 }
 

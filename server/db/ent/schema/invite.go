@@ -23,6 +23,9 @@ func (Invite) Fields() []ent.Field {
 // Edges of the Invites.
 func (Invite) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("guild", Guild.Type).Ref("invite"),
+		edge.
+			From("guild", Guild.Type).
+			Ref("invite").
+			Unique(),
 	}
 }

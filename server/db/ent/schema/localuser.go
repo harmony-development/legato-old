@@ -26,7 +26,8 @@ func (LocalUser) Edges() []ent.Edge {
 		edge.
 			From("user", User.Type).
 			Ref("local_user").
-			Unique(),
+			Unique().
+			Required(),
 		edge.
 			To("sessions", Session.Type),
 	}
