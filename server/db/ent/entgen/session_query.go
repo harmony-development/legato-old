@@ -11,9 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 	"github.com/harmony-development/legato/server/db/ent/entgen/session"
+	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
 
 // SessionQuery is the builder for querying Session entities.
@@ -25,7 +25,7 @@ type SessionQuery struct {
 	fields     []string
 	predicates []predicate.Session
 	// eager-loading edges.
-	withUser *LocalUserQuery
+	withUser *UserQuery
 	withFKs  bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -57,8 +57,8 @@ func (sq *SessionQuery) Order(o ...OrderFunc) *SessionQuery {
 }
 
 // QueryUser chains the current query on the "user" edge.
-func (sq *SessionQuery) QueryUser() *LocalUserQuery {
-	query := &LocalUserQuery{config: sq.config}
+func (sq *SessionQuery) QueryUser() *UserQuery {
+	query := &UserQuery{config: sq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := sq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -69,7 +69,7 @@ func (sq *SessionQuery) QueryUser() *LocalUserQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(session.Table, session.FieldID, selector),
-			sqlgraph.To(localuser.Table, localuser.FieldID),
+			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, session.UserTable, session.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
@@ -268,8 +268,8 @@ func (sq *SessionQuery) Clone() *SessionQuery {
 
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
-func (sq *SessionQuery) WithUser(opts ...func(*LocalUserQuery)) *SessionQuery {
-	query := &LocalUserQuery{config: sq.config}
+func (sq *SessionQuery) WithUser(opts ...func(*UserQuery)) *SessionQuery {
+	query := &UserQuery{config: sq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -374,16 +374,16 @@ func (sq *SessionQuery) sqlAll(ctx context.Context) ([]*Session, error) {
 	}
 
 	if query := sq.withUser; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Session)
+		ids := make([]uint64, 0, len(nodes))
+		nodeids := make(map[uint64][]*Session)
 		for i := range nodes {
-			fk := nodes[i].local_user_sessions
+			fk := nodes[i].user_sessions
 			if fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
 		}
-		query.Where(localuser.IDIn(ids...))
+		query.Where(user.IDIn(ids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
@@ -391,7 +391,7 @@ func (sq *SessionQuery) sqlAll(ctx context.Context) ([]*Session, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "local_user_sessions" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "user_sessions" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.User = n

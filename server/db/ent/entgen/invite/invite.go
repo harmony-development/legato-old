@@ -18,7 +18,7 @@ const (
 	// Table holds the table name of the invite in the database.
 	Table = "invites"
 	// GuildTable is the table the holds the guild relation/edge.
-	GuildTable = "guilds"
+	GuildTable = "invites"
 	// GuildInverseTable is the table name for the Guild entity.
 	// It exists in this package in order to avoid circular dependency with the "guild" package.
 	GuildInverseTable = "guilds"
@@ -34,10 +34,21 @@ var Columns = []string{
 	FieldPossibleUses,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "invites"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"guild_invite",
+}
+
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}

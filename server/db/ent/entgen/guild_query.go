@@ -29,10 +29,9 @@ type GuildQuery struct {
 	predicates []predicate.Guild
 	// eager-loading edges.
 	withInvite  *InviteQuery
-	withUser    *UserQuery
 	withBans    *UserQuery
 	withChannel *ChannelQuery
-	withFKs     bool
+	withUser    *UserQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -76,29 +75,7 @@ func (gq *GuildQuery) QueryInvite() *InviteQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(guild.Table, guild.FieldID, selector),
 			sqlgraph.To(invite.Table, invite.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, guild.InviteTable, guild.InviteColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryUser chains the current query on the "user" edge.
-func (gq *GuildQuery) QueryUser() *UserQuery {
-	query := &UserQuery{config: gq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := gq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := gq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(guild.Table, guild.FieldID, selector),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, guild.UserTable, guild.UserColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, guild.InviteTable, guild.InviteColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 		return fromU, nil
@@ -143,6 +120,28 @@ func (gq *GuildQuery) QueryChannel() *ChannelQuery {
 			sqlgraph.From(guild.Table, guild.FieldID, selector),
 			sqlgraph.To(channel.Table, channel.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, guild.ChannelTable, guild.ChannelColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryUser chains the current query on the "user" edge.
+func (gq *GuildQuery) QueryUser() *UserQuery {
+	query := &UserQuery{config: gq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := gq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(guild.Table, guild.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, guild.UserTable, guild.UserPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 		return fromU, nil
@@ -332,9 +331,9 @@ func (gq *GuildQuery) Clone() *GuildQuery {
 		order:       append([]OrderFunc{}, gq.order...),
 		predicates:  append([]predicate.Guild{}, gq.predicates...),
 		withInvite:  gq.withInvite.Clone(),
-		withUser:    gq.withUser.Clone(),
 		withBans:    gq.withBans.Clone(),
 		withChannel: gq.withChannel.Clone(),
+		withUser:    gq.withUser.Clone(),
 		// clone intermediate query.
 		sql:  gq.sql.Clone(),
 		path: gq.path,
@@ -349,17 +348,6 @@ func (gq *GuildQuery) WithInvite(opts ...func(*InviteQuery)) *GuildQuery {
 		opt(query)
 	}
 	gq.withInvite = query
-	return gq
-}
-
-// WithUser tells the query-builder to eager-load the nodes that are connected to
-// the "user" edge. The optional arguments are used to configure the query builder of the edge.
-func (gq *GuildQuery) WithUser(opts ...func(*UserQuery)) *GuildQuery {
-	query := &UserQuery{config: gq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	gq.withUser = query
 	return gq
 }
 
@@ -382,6 +370,17 @@ func (gq *GuildQuery) WithChannel(opts ...func(*ChannelQuery)) *GuildQuery {
 		opt(query)
 	}
 	gq.withChannel = query
+	return gq
+}
+
+// WithUser tells the query-builder to eager-load the nodes that are connected to
+// the "user" edge. The optional arguments are used to configure the query builder of the edge.
+func (gq *GuildQuery) WithUser(opts ...func(*UserQuery)) *GuildQuery {
+	query := &UserQuery{config: gq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	gq.withUser = query
 	return gq
 }
 
@@ -449,21 +448,14 @@ func (gq *GuildQuery) prepareQuery(ctx context.Context) error {
 func (gq *GuildQuery) sqlAll(ctx context.Context) ([]*Guild, error) {
 	var (
 		nodes       = []*Guild{}
-		withFKs     = gq.withFKs
 		_spec       = gq.querySpec()
 		loadedTypes = [4]bool{
 			gq.withInvite != nil,
-			gq.withUser != nil,
 			gq.withBans != nil,
 			gq.withChannel != nil,
+			gq.withUser != nil,
 		}
 	)
-	if gq.withInvite != nil || gq.withUser != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, guild.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Guild{config: gq.config}
 		nodes = append(nodes, node)
@@ -485,54 +477,31 @@ func (gq *GuildQuery) sqlAll(ctx context.Context) ([]*Guild, error) {
 	}
 
 	if query := gq.withInvite; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Guild)
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uint64]*Guild)
 		for i := range nodes {
-			fk := nodes[i].guild_invite
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
-			}
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Invite = []*Invite{}
 		}
-		query.Where(invite.IDIn(ids...))
+		query.withFKs = true
+		query.Where(predicate.Invite(func(s *sql.Selector) {
+			s.Where(sql.InValues(guild.InviteColumn, fks...))
+		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
+			fk := n.guild_invite
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "guild_invite" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "guild_invite" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "guild_invite" returned %v for node %v`, *fk, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.Invite = n
-			}
-		}
-	}
-
-	if query := gq.withUser; query != nil {
-		ids := make([]uint64, 0, len(nodes))
-		nodeids := make(map[uint64][]*Guild)
-		for i := range nodes {
-			fk := nodes[i].user_guild
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
-			}
-		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_guild" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.User = n
-			}
+			node.Edges.Invite = append(node.Edges.Invite, n)
 		}
 	}
 
@@ -591,6 +560,70 @@ func (gq *GuildQuery) sqlAll(ctx context.Context) ([]*Guild, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "guild_channel" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Channel = append(node.Edges.Channel, n)
+		}
+	}
+
+	if query := gq.withUser; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		ids := make(map[uint64]*Guild, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+			node.Edges.User = []*User{}
+		}
+		var (
+			edgeids []uint64
+			edges   = make(map[uint64][]*Guild)
+		)
+		_spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: true,
+				Table:   guild.UserTable,
+				Columns: guild.UserPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(guild.UserPrimaryKey[1], fks...))
+			},
+
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*sql.NullInt64)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*sql.NullInt64)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := uint64(eout.Int64)
+				inValue := uint64(ein.Int64)
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				edgeids = append(edgeids, inValue)
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, gq.driver, _spec); err != nil {
+			return nil, fmt.Errorf(`query edges "user": %w`, err)
+		}
+		query.Where(user.IDIn(edgeids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := edges[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "user" node returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.User = append(nodes[i].Edges.User, n)
+			}
 		}
 	}
 

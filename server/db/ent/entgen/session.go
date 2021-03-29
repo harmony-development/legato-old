@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/session"
+	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
 
 // Session is the model entity for the Session schema.
@@ -31,7 +31,7 @@ type Session struct {
 // SessionEdges holds the relations/edges for other nodes in the graph.
 type SessionEdges struct {
 	// User holds the value of the user edge.
-	User *LocalUser `json:"user,omitempty"`
+	User *User `json:"user,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
@@ -39,12 +39,12 @@ type SessionEdges struct {
 
 // UserOrErr returns the User value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e SessionEdges) UserOrErr() (*LocalUser, error) {
+func (e SessionEdges) UserOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.User == nil {
 			// The edge user was loaded in eager-loading,
 			// but was not found.
-			return nil, &NotFoundError{label: localuser.Label}
+			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.User, nil
 	}
@@ -119,7 +119,7 @@ func (s *Session) assignValues(columns []string, values []interface{}) error {
 }
 
 // QueryUser queries the "user" edge of the Session entity.
-func (s *Session) QueryUser() *LocalUserQuery {
+func (s *Session) QueryUser() *UserQuery {
 	return (&SessionClient{config: s.config}).QueryUser(s)
 }
 

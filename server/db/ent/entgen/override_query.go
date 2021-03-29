@@ -4,7 +4,6 @@ package entgen
 
 import (
 	"context"
-	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -27,6 +26,7 @@ type OverrideQuery struct {
 	predicates []predicate.Override
 	// eager-loading edges.
 	withMessage *MessageQuery
+	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -70,7 +70,7 @@ func (oq *OverrideQuery) QueryMessage() *MessageQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(override.Table, override.FieldID, selector),
 			sqlgraph.To(message.Table, message.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, override.MessageTable, override.MessagePrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2O, true, override.MessageTable, override.MessageColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(oq.driver.Dialect(), step)
 		return fromU, nil
@@ -341,11 +341,18 @@ func (oq *OverrideQuery) prepareQuery(ctx context.Context) error {
 func (oq *OverrideQuery) sqlAll(ctx context.Context) ([]*Override, error) {
 	var (
 		nodes       = []*Override{}
+		withFKs     = oq.withFKs
 		_spec       = oq.querySpec()
 		loadedTypes = [1]bool{
 			oq.withMessage != nil,
 		}
 	)
+	if oq.withMessage != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, override.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Override{config: oq.config}
 		nodes = append(nodes, node)
@@ -367,65 +374,27 @@ func (oq *OverrideQuery) sqlAll(ctx context.Context) ([]*Override, error) {
 	}
 
 	if query := oq.withMessage; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[int]*Override, len(nodes))
-		for _, node := range nodes {
-			ids[node.ID] = node
-			fks = append(fks, node.ID)
-			node.Edges.Message = []*Message{}
+		ids := make([]uint64, 0, len(nodes))
+		nodeids := make(map[uint64][]*Override)
+		for i := range nodes {
+			fk := nodes[i].message_override
+			if fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
 		}
-		var (
-			edgeids []uint64
-			edges   = make(map[uint64][]*Override)
-		)
-		_spec := &sqlgraph.EdgeQuerySpec{
-			Edge: &sqlgraph.EdgeSpec{
-				Inverse: true,
-				Table:   override.MessageTable,
-				Columns: override.MessagePrimaryKey,
-			},
-			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(override.MessagePrimaryKey[1], fks...))
-			},
-
-			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
-			},
-			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*sql.NullInt64)
-				if !ok || eout == nil {
-					return fmt.Errorf("unexpected id value for edge-out")
-				}
-				ein, ok := in.(*sql.NullInt64)
-				if !ok || ein == nil {
-					return fmt.Errorf("unexpected id value for edge-in")
-				}
-				outValue := int(eout.Int64)
-				inValue := uint64(ein.Int64)
-				node, ok := ids[outValue]
-				if !ok {
-					return fmt.Errorf("unexpected node id in edges: %v", outValue)
-				}
-				edgeids = append(edgeids, inValue)
-				edges[inValue] = append(edges[inValue], node)
-				return nil
-			},
-		}
-		if err := sqlgraph.QueryEdges(ctx, oq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "message": %w`, err)
-		}
-		query.Where(message.IDIn(edgeids...))
+		query.Where(message.IDIn(ids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := edges[n.ID]
+			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected "message" node returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "message_override" returned %v`, n.ID)
 			}
 			for i := range nodes {
-				nodes[i].Edges.Message = append(nodes[i].Edges.Message, n)
+				nodes[i].Edges.Message = n
 			}
 		}
 	}

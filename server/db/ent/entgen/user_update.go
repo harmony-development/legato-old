@@ -9,12 +9,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/harmony-development/legato/server/db/ent/entgen/emotepack"
 	"github.com/harmony-development/legato/server/db/ent/entgen/foreignuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 	"github.com/harmony-development/legato/server/db/ent/entgen/profile"
+	"github.com/harmony-development/legato/server/db/ent/entgen/role"
 	"github.com/harmony-development/legato/server/db/ent/entgen/session"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
@@ -134,6 +136,36 @@ func (uu *UserUpdate) AddGuild(g ...*Guild) *UserUpdate {
 	return uu.AddGuildIDs(ids...)
 }
 
+// AddEmotepackIDs adds the "emotepack" edge to the EmotePack entity by IDs.
+func (uu *UserUpdate) AddEmotepackIDs(ids ...uint64) *UserUpdate {
+	uu.mutation.AddEmotepackIDs(ids...)
+	return uu
+}
+
+// AddEmotepack adds the "emotepack" edges to the EmotePack entity.
+func (uu *UserUpdate) AddEmotepack(e ...*EmotePack) *UserUpdate {
+	ids := make([]uint64, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return uu.AddEmotepackIDs(ids...)
+}
+
+// AddRoleIDs adds the "role" edge to the Role entity by IDs.
+func (uu *UserUpdate) AddRoleIDs(ids ...uint64) *UserUpdate {
+	uu.mutation.AddRoleIDs(ids...)
+	return uu
+}
+
+// AddRole adds the "role" edges to the Role entity.
+func (uu *UserUpdate) AddRole(r ...*Role) *UserUpdate {
+	ids := make([]uint64, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uu.AddRoleIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -218,6 +250,48 @@ func (uu *UserUpdate) RemoveGuild(g ...*Guild) *UserUpdate {
 		ids[i] = g[i].ID
 	}
 	return uu.RemoveGuildIDs(ids...)
+}
+
+// ClearEmotepack clears all "emotepack" edges to the EmotePack entity.
+func (uu *UserUpdate) ClearEmotepack() *UserUpdate {
+	uu.mutation.ClearEmotepack()
+	return uu
+}
+
+// RemoveEmotepackIDs removes the "emotepack" edge to EmotePack entities by IDs.
+func (uu *UserUpdate) RemoveEmotepackIDs(ids ...uint64) *UserUpdate {
+	uu.mutation.RemoveEmotepackIDs(ids...)
+	return uu
+}
+
+// RemoveEmotepack removes "emotepack" edges to EmotePack entities.
+func (uu *UserUpdate) RemoveEmotepack(e ...*EmotePack) *UserUpdate {
+	ids := make([]uint64, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return uu.RemoveEmotepackIDs(ids...)
+}
+
+// ClearRole clears all "role" edges to the Role entity.
+func (uu *UserUpdate) ClearRole() *UserUpdate {
+	uu.mutation.ClearRole()
+	return uu
+}
+
+// RemoveRoleIDs removes the "role" edge to Role entities by IDs.
+func (uu *UserUpdate) RemoveRoleIDs(ids ...uint64) *UserUpdate {
+	uu.mutation.RemoveRoleIDs(ids...)
+	return uu
+}
+
+// RemoveRole removes "role" edges to Role entities.
+func (uu *UserUpdate) RemoveRole(r ...*Role) *UserUpdate {
+	ids := make([]uint64, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uu.RemoveRoleIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -504,10 +578,10 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if uu.mutation.GuildCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   user.GuildTable,
-			Columns: []string{user.GuildColumn},
+			Columns: user.GuildPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -520,10 +594,10 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := uu.mutation.RemovedGuildIDs(); len(nodes) > 0 && !uu.mutation.GuildCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   user.GuildTable,
-			Columns: []string{user.GuildColumn},
+			Columns: user.GuildPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -539,15 +613,123 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := uu.mutation.GuildIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   user.GuildTable,
-			Columns: []string{user.GuildColumn},
+			Columns: user.GuildPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUint64,
 					Column: guild.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.EmotepackCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.EmotepackTable,
+			Columns: []string{user.EmotepackColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: emotepack.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedEmotepackIDs(); len(nodes) > 0 && !uu.mutation.EmotepackCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.EmotepackTable,
+			Columns: []string{user.EmotepackColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: emotepack.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.EmotepackIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.EmotepackTable,
+			Columns: []string{user.EmotepackColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: emotepack.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.RoleCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.RoleTable,
+			Columns: user.RolePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: role.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedRoleIDs(); len(nodes) > 0 && !uu.mutation.RoleCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.RoleTable,
+			Columns: user.RolePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: role.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RoleIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.RoleTable,
+			Columns: user.RolePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: role.FieldID,
 				},
 			},
 		}
@@ -676,6 +858,36 @@ func (uuo *UserUpdateOne) AddGuild(g ...*Guild) *UserUpdateOne {
 	return uuo.AddGuildIDs(ids...)
 }
 
+// AddEmotepackIDs adds the "emotepack" edge to the EmotePack entity by IDs.
+func (uuo *UserUpdateOne) AddEmotepackIDs(ids ...uint64) *UserUpdateOne {
+	uuo.mutation.AddEmotepackIDs(ids...)
+	return uuo
+}
+
+// AddEmotepack adds the "emotepack" edges to the EmotePack entity.
+func (uuo *UserUpdateOne) AddEmotepack(e ...*EmotePack) *UserUpdateOne {
+	ids := make([]uint64, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return uuo.AddEmotepackIDs(ids...)
+}
+
+// AddRoleIDs adds the "role" edge to the Role entity by IDs.
+func (uuo *UserUpdateOne) AddRoleIDs(ids ...uint64) *UserUpdateOne {
+	uuo.mutation.AddRoleIDs(ids...)
+	return uuo
+}
+
+// AddRole adds the "role" edges to the Role entity.
+func (uuo *UserUpdateOne) AddRole(r ...*Role) *UserUpdateOne {
+	ids := make([]uint64, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uuo.AddRoleIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -760,6 +972,48 @@ func (uuo *UserUpdateOne) RemoveGuild(g ...*Guild) *UserUpdateOne {
 		ids[i] = g[i].ID
 	}
 	return uuo.RemoveGuildIDs(ids...)
+}
+
+// ClearEmotepack clears all "emotepack" edges to the EmotePack entity.
+func (uuo *UserUpdateOne) ClearEmotepack() *UserUpdateOne {
+	uuo.mutation.ClearEmotepack()
+	return uuo
+}
+
+// RemoveEmotepackIDs removes the "emotepack" edge to EmotePack entities by IDs.
+func (uuo *UserUpdateOne) RemoveEmotepackIDs(ids ...uint64) *UserUpdateOne {
+	uuo.mutation.RemoveEmotepackIDs(ids...)
+	return uuo
+}
+
+// RemoveEmotepack removes "emotepack" edges to EmotePack entities.
+func (uuo *UserUpdateOne) RemoveEmotepack(e ...*EmotePack) *UserUpdateOne {
+	ids := make([]uint64, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return uuo.RemoveEmotepackIDs(ids...)
+}
+
+// ClearRole clears all "role" edges to the Role entity.
+func (uuo *UserUpdateOne) ClearRole() *UserUpdateOne {
+	uuo.mutation.ClearRole()
+	return uuo
+}
+
+// RemoveRoleIDs removes the "role" edge to Role entities by IDs.
+func (uuo *UserUpdateOne) RemoveRoleIDs(ids ...uint64) *UserUpdateOne {
+	uuo.mutation.RemoveRoleIDs(ids...)
+	return uuo
+}
+
+// RemoveRole removes "role" edges to Role entities.
+func (uuo *UserUpdateOne) RemoveRole(r ...*Role) *UserUpdateOne {
+	ids := make([]uint64, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uuo.RemoveRoleIDs(ids...)
 }
 
 // Save executes the query and returns the updated User entity.
@@ -1051,10 +1305,10 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if uuo.mutation.GuildCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   user.GuildTable,
-			Columns: []string{user.GuildColumn},
+			Columns: user.GuildPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -1067,10 +1321,10 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if nodes := uuo.mutation.RemovedGuildIDs(); len(nodes) > 0 && !uuo.mutation.GuildCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   user.GuildTable,
-			Columns: []string{user.GuildColumn},
+			Columns: user.GuildPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -1086,15 +1340,123 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if nodes := uuo.mutation.GuildIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   user.GuildTable,
-			Columns: []string{user.GuildColumn},
+			Columns: user.GuildPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUint64,
 					Column: guild.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.EmotepackCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.EmotepackTable,
+			Columns: []string{user.EmotepackColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: emotepack.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedEmotepackIDs(); len(nodes) > 0 && !uuo.mutation.EmotepackCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.EmotepackTable,
+			Columns: []string{user.EmotepackColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: emotepack.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.EmotepackIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.EmotepackTable,
+			Columns: []string{user.EmotepackColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: emotepack.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.RoleCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.RoleTable,
+			Columns: user.RolePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: role.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedRoleIDs(); len(nodes) > 0 && !uuo.mutation.RoleCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.RoleTable,
+			Columns: user.RolePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: role.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RoleIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.RoleTable,
+			Columns: user.RolePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: role.FieldID,
 				},
 			},
 		}

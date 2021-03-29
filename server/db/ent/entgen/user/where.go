@@ -237,7 +237,7 @@ func HasGuild() predicate.User {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(GuildTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, GuildTable, GuildColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, GuildTable, GuildPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -249,7 +249,63 @@ func HasGuildWith(preds ...predicate.Guild) predicate.User {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(GuildInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, GuildTable, GuildColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, GuildTable, GuildPrimaryKey...),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasEmotepack applies the HasEdge predicate on the "emotepack" edge.
+func HasEmotepack() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(EmotepackTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, EmotepackTable, EmotepackColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasEmotepackWith applies the HasEdge predicate on the "emotepack" edge with a given conditions (other predicates).
+func HasEmotepackWith(preds ...predicate.EmotePack) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(EmotepackInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, EmotepackTable, EmotepackColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasRole applies the HasEdge predicate on the "role" edge.
+func HasRole() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(RoleTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, RoleTable, RolePrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRoleWith applies the HasEdge predicate on the "role" edge with a given conditions (other predicates).
+func HasRoleWith(preds ...predicate.Role) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(RoleInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, RoleTable, RolePrimaryKey...),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

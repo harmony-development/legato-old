@@ -54,19 +54,23 @@ func (ic *InviteCreate) SetNillablePossibleUses(i *int64) *InviteCreate {
 	return ic
 }
 
-// AddGuildIDs adds the "guild" edge to the Guild entity by IDs.
-func (ic *InviteCreate) AddGuildIDs(ids ...uint64) *InviteCreate {
-	ic.mutation.AddGuildIDs(ids...)
+// SetGuildID sets the "guild" edge to the Guild entity by ID.
+func (ic *InviteCreate) SetGuildID(id uint64) *InviteCreate {
+	ic.mutation.SetGuildID(id)
 	return ic
 }
 
-// AddGuild adds the "guild" edges to the Guild entity.
-func (ic *InviteCreate) AddGuild(g ...*Guild) *InviteCreate {
-	ids := make([]uint64, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+// SetNillableGuildID sets the "guild" edge to the Guild entity by ID if the given value is not nil.
+func (ic *InviteCreate) SetNillableGuildID(id *uint64) *InviteCreate {
+	if id != nil {
+		ic = ic.SetGuildID(*id)
 	}
-	return ic.AddGuildIDs(ids...)
+	return ic
+}
+
+// SetGuild sets the "guild" edge to the Guild entity.
+func (ic *InviteCreate) SetGuild(g *Guild) *InviteCreate {
+	return ic.SetGuildID(g.ID)
 }
 
 // Mutation returns the InviteMutation object of the builder.
@@ -195,7 +199,7 @@ func (ic *InviteCreate) createSpec() (*Invite, *sqlgraph.CreateSpec) {
 	}
 	if nodes := ic.mutation.GuildIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   invite.GuildTable,
 			Columns: []string{invite.GuildColumn},
@@ -210,6 +214,7 @@ func (ic *InviteCreate) createSpec() (*Invite, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.guild_invite = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

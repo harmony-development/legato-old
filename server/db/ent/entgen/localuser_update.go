@@ -4,6 +4,7 @@ package entgen
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -43,14 +44,6 @@ func (luu *LocalUserUpdate) SetPassword(b []byte) *LocalUserUpdate {
 // SetUserID sets the "user" edge to the User entity by ID.
 func (luu *LocalUserUpdate) SetUserID(id uint64) *LocalUserUpdate {
 	luu.mutation.SetUserID(id)
-	return luu
-}
-
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (luu *LocalUserUpdate) SetNillableUserID(id *uint64) *LocalUserUpdate {
-	if id != nil {
-		luu = luu.SetUserID(*id)
-	}
 	return luu
 }
 
@@ -169,6 +162,9 @@ func (luu *LocalUserUpdate) check() error {
 		if err := localuser.EmailValidator(v); err != nil {
 			return &ValidationError{Name: "email", err: fmt.Errorf("entgen: validator failed for field \"email\": %w", err)}
 		}
+	}
+	if _, ok := luu.mutation.UserID(); luu.mutation.UserCleared() && !ok {
+		return errors.New("entgen: clearing a required unique edge \"user\"")
 	}
 	return nil
 }
@@ -330,14 +326,6 @@ func (luuo *LocalUserUpdateOne) SetUserID(id uint64) *LocalUserUpdateOne {
 	return luuo
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (luuo *LocalUserUpdateOne) SetNillableUserID(id *uint64) *LocalUserUpdateOne {
-	if id != nil {
-		luuo = luuo.SetUserID(*id)
-	}
-	return luuo
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (luuo *LocalUserUpdateOne) SetUser(u *User) *LocalUserUpdateOne {
 	return luuo.SetUserID(u.ID)
@@ -453,6 +441,9 @@ func (luuo *LocalUserUpdateOne) check() error {
 		if err := localuser.EmailValidator(v); err != nil {
 			return &ValidationError{Name: "email", err: fmt.Errorf("entgen: validator failed for field \"email\": %w", err)}
 		}
+	}
+	if _, ok := luuo.mutation.UserID(); luuo.mutation.UserCleared() && !ok {
+		return errors.New("entgen: clearing a required unique edge \"user\"")
 	}
 	return nil
 }

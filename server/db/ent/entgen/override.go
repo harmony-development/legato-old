@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/harmony-development/legato/server/db/ent/entgen/message"
 	"github.com/harmony-development/legato/server/db/ent/entgen/override"
 )
 
@@ -23,22 +24,28 @@ type Override struct {
 	Reason int64 `json:"reason,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the OverrideQuery when eager-loading is set.
-	Edges OverrideEdges `json:"edges"`
+	Edges            OverrideEdges `json:"edges"`
+	message_override *uint64
 }
 
 // OverrideEdges holds the relations/edges for other nodes in the graph.
 type OverrideEdges struct {
 	// Message holds the value of the message edge.
-	Message []*Message `json:"message,omitempty"`
+	Message *Message `json:"message,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
 // MessageOrErr returns the Message value or an error if the edge
-// was not loaded in eager-loading.
-func (e OverrideEdges) MessageOrErr() ([]*Message, error) {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e OverrideEdges) MessageOrErr() (*Message, error) {
 	if e.loadedTypes[0] {
+		if e.Message == nil {
+			// The edge message was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: message.Label}
+		}
 		return e.Message, nil
 	}
 	return nil, &NotLoadedError{edge: "message"}
@@ -53,6 +60,8 @@ func (*Override) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = &sql.NullInt64{}
 		case override.FieldUsername, override.FieldAvatar:
 			values[i] = &sql.NullString{}
+		case override.ForeignKeys[0]: // message_override
+			values[i] = &sql.NullInt64{}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Override", columns[i])
 		}
@@ -91,6 +100,13 @@ func (o *Override) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field reason", values[i])
 			} else if value.Valid {
 				o.Reason = value.Int64
+			}
+		case override.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field message_override", value)
+			} else if value.Valid {
+				o.message_override = new(uint64)
+				*o.message_override = uint64(value.Int64)
 			}
 		}
 	}

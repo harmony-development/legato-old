@@ -17,28 +17,21 @@ const (
 	FieldMetadata = "metadata"
 	// EdgeInvite holds the string denoting the invite edge name in mutations.
 	EdgeInvite = "invite"
-	// EdgeUser holds the string denoting the user edge name in mutations.
-	EdgeUser = "user"
 	// EdgeBans holds the string denoting the bans edge name in mutations.
 	EdgeBans = "bans"
 	// EdgeChannel holds the string denoting the channel edge name in mutations.
 	EdgeChannel = "channel"
+	// EdgeUser holds the string denoting the user edge name in mutations.
+	EdgeUser = "user"
 	// Table holds the table name of the guild in the database.
 	Table = "guilds"
 	// InviteTable is the table the holds the invite relation/edge.
-	InviteTable = "guilds"
+	InviteTable = "invites"
 	// InviteInverseTable is the table name for the Invite entity.
 	// It exists in this package in order to avoid circular dependency with the "invite" package.
 	InviteInverseTable = "invites"
 	// InviteColumn is the table column denoting the invite relation/edge.
 	InviteColumn = "guild_invite"
-	// UserTable is the table the holds the user relation/edge.
-	UserTable = "guilds"
-	// UserInverseTable is the table name for the User entity.
-	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UserInverseTable = "users"
-	// UserColumn is the table column denoting the user relation/edge.
-	UserColumn = "user_guild"
 	// BansTable is the table the holds the bans relation/edge.
 	BansTable = "users"
 	// BansInverseTable is the table name for the User entity.
@@ -53,6 +46,11 @@ const (
 	ChannelInverseTable = "channels"
 	// ChannelColumn is the table column denoting the channel relation/edge.
 	ChannelColumn = "guild_channel"
+	// UserTable is the table the holds the user relation/edge. The primary key declared below.
+	UserTable = "user_guild"
+	// UserInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	UserInverseTable = "users"
 )
 
 // Columns holds all SQL columns for guild fields.
@@ -64,22 +62,16 @@ var Columns = []string{
 	FieldMetadata,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "guilds"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"guild_invite",
-	"user_guild",
-}
+var (
+	// UserPrimaryKey and UserColumn2 are the table columns denoting the
+	// primary key for the user relation (M2M).
+	UserPrimaryKey = []string{"user_id", "guild_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}

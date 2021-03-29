@@ -416,7 +416,7 @@ func HasMessage() predicate.Override {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(MessageTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, MessageTable, MessagePrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2O, true, MessageTable, MessageColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -428,7 +428,7 @@ func HasMessageWith(preds ...predicate.Message) predicate.Override {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(MessageInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, MessageTable, MessagePrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2O, true, MessageTable, MessageColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

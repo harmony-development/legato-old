@@ -4,7 +4,6 @@ package entgen
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -61,34 +60,19 @@ func (gu *GuildUpdate) SetMetadata(b []byte) *GuildUpdate {
 	return gu
 }
 
-// SetInviteID sets the "invite" edge to the Invite entity by ID.
-func (gu *GuildUpdate) SetInviteID(id int) *GuildUpdate {
-	gu.mutation.SetInviteID(id)
+// AddInviteIDs adds the "invite" edge to the Invite entity by IDs.
+func (gu *GuildUpdate) AddInviteIDs(ids ...int) *GuildUpdate {
+	gu.mutation.AddInviteIDs(ids...)
 	return gu
 }
 
-// SetNillableInviteID sets the "invite" edge to the Invite entity by ID if the given value is not nil.
-func (gu *GuildUpdate) SetNillableInviteID(id *int) *GuildUpdate {
-	if id != nil {
-		gu = gu.SetInviteID(*id)
+// AddInvite adds the "invite" edges to the Invite entity.
+func (gu *GuildUpdate) AddInvite(i ...*Invite) *GuildUpdate {
+	ids := make([]int, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
 	}
-	return gu
-}
-
-// SetInvite sets the "invite" edge to the Invite entity.
-func (gu *GuildUpdate) SetInvite(i *Invite) *GuildUpdate {
-	return gu.SetInviteID(i.ID)
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (gu *GuildUpdate) SetUserID(id uint64) *GuildUpdate {
-	gu.mutation.SetUserID(id)
-	return gu
-}
-
-// SetUser sets the "user" edge to the User entity.
-func (gu *GuildUpdate) SetUser(u *User) *GuildUpdate {
-	return gu.SetUserID(u.ID)
+	return gu.AddInviteIDs(ids...)
 }
 
 // AddBanIDs adds the "bans" edge to the User entity by IDs.
@@ -121,21 +105,45 @@ func (gu *GuildUpdate) AddChannel(c ...*Channel) *GuildUpdate {
 	return gu.AddChannelIDs(ids...)
 }
 
+// AddUserIDs adds the "user" edge to the User entity by IDs.
+func (gu *GuildUpdate) AddUserIDs(ids ...uint64) *GuildUpdate {
+	gu.mutation.AddUserIDs(ids...)
+	return gu
+}
+
+// AddUser adds the "user" edges to the User entity.
+func (gu *GuildUpdate) AddUser(u ...*User) *GuildUpdate {
+	ids := make([]uint64, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return gu.AddUserIDs(ids...)
+}
+
 // Mutation returns the GuildMutation object of the builder.
 func (gu *GuildUpdate) Mutation() *GuildMutation {
 	return gu.mutation
 }
 
-// ClearInvite clears the "invite" edge to the Invite entity.
+// ClearInvite clears all "invite" edges to the Invite entity.
 func (gu *GuildUpdate) ClearInvite() *GuildUpdate {
 	gu.mutation.ClearInvite()
 	return gu
 }
 
-// ClearUser clears the "user" edge to the User entity.
-func (gu *GuildUpdate) ClearUser() *GuildUpdate {
-	gu.mutation.ClearUser()
+// RemoveInviteIDs removes the "invite" edge to Invite entities by IDs.
+func (gu *GuildUpdate) RemoveInviteIDs(ids ...int) *GuildUpdate {
+	gu.mutation.RemoveInviteIDs(ids...)
 	return gu
+}
+
+// RemoveInvite removes "invite" edges to Invite entities.
+func (gu *GuildUpdate) RemoveInvite(i ...*Invite) *GuildUpdate {
+	ids := make([]int, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return gu.RemoveInviteIDs(ids...)
 }
 
 // ClearBans clears all "bans" edges to the User entity.
@@ -180,6 +188,27 @@ func (gu *GuildUpdate) RemoveChannel(c ...*Channel) *GuildUpdate {
 	return gu.RemoveChannelIDs(ids...)
 }
 
+// ClearUser clears all "user" edges to the User entity.
+func (gu *GuildUpdate) ClearUser() *GuildUpdate {
+	gu.mutation.ClearUser()
+	return gu
+}
+
+// RemoveUserIDs removes the "user" edge to User entities by IDs.
+func (gu *GuildUpdate) RemoveUserIDs(ids ...uint64) *GuildUpdate {
+	gu.mutation.RemoveUserIDs(ids...)
+	return gu
+}
+
+// RemoveUser removes "user" edges to User entities.
+func (gu *GuildUpdate) RemoveUser(u ...*User) *GuildUpdate {
+	ids := make([]uint64, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return gu.RemoveUserIDs(ids...)
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (gu *GuildUpdate) Save(ctx context.Context) (int, error) {
 	var (
@@ -187,18 +216,12 @@ func (gu *GuildUpdate) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	if len(gu.hooks) == 0 {
-		if err = gu.check(); err != nil {
-			return 0, err
-		}
 		affected, err = gu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*GuildMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = gu.check(); err != nil {
-				return 0, err
 			}
 			gu.mutation = mutation
 			affected, err = gu.sqlSave(ctx)
@@ -235,14 +258,6 @@ func (gu *GuildUpdate) ExecX(ctx context.Context) {
 	if err := gu.Exec(ctx); err != nil {
 		panic(err)
 	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (gu *GuildUpdate) check() error {
-	if _, ok := gu.mutation.UserID(); gu.mutation.UserCleared() && !ok {
-		return errors.New("entgen: clearing a required unique edge \"user\"")
-	}
-	return nil
 }
 
 func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -300,7 +315,7 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if gu.mutation.InviteCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   guild.InviteTable,
 			Columns: []string{guild.InviteColumn},
@@ -314,9 +329,9 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gu.mutation.InviteIDs(); len(nodes) > 0 {
+	if nodes := gu.mutation.RemovedInviteIDs(); len(nodes) > 0 && !gu.mutation.InviteCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   guild.InviteTable,
 			Columns: []string{guild.InviteColumn},
@@ -331,35 +346,19 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if gu.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   guild.UserTable,
-			Columns: []string{guild.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint64,
-					Column: user.FieldID,
-				},
-			},
-		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gu.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := gu.mutation.InviteIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   guild.UserTable,
-			Columns: []string{guild.UserColumn},
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   guild.InviteTable,
+			Columns: []string{guild.InviteColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint64,
-					Column: user.FieldID,
+					Type:   field.TypeInt,
+					Column: invite.FieldID,
 				},
 			},
 		}
@@ -476,6 +475,60 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if gu.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   guild.UserTable,
+			Columns: guild.UserPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := gu.mutation.RemovedUserIDs(); len(nodes) > 0 && !gu.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   guild.UserTable,
+			Columns: guild.UserPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := gu.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   guild.UserTable,
+			Columns: guild.UserPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, gu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{guild.Label}
@@ -525,34 +578,19 @@ func (guo *GuildUpdateOne) SetMetadata(b []byte) *GuildUpdateOne {
 	return guo
 }
 
-// SetInviteID sets the "invite" edge to the Invite entity by ID.
-func (guo *GuildUpdateOne) SetInviteID(id int) *GuildUpdateOne {
-	guo.mutation.SetInviteID(id)
+// AddInviteIDs adds the "invite" edge to the Invite entity by IDs.
+func (guo *GuildUpdateOne) AddInviteIDs(ids ...int) *GuildUpdateOne {
+	guo.mutation.AddInviteIDs(ids...)
 	return guo
 }
 
-// SetNillableInviteID sets the "invite" edge to the Invite entity by ID if the given value is not nil.
-func (guo *GuildUpdateOne) SetNillableInviteID(id *int) *GuildUpdateOne {
-	if id != nil {
-		guo = guo.SetInviteID(*id)
+// AddInvite adds the "invite" edges to the Invite entity.
+func (guo *GuildUpdateOne) AddInvite(i ...*Invite) *GuildUpdateOne {
+	ids := make([]int, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
 	}
-	return guo
-}
-
-// SetInvite sets the "invite" edge to the Invite entity.
-func (guo *GuildUpdateOne) SetInvite(i *Invite) *GuildUpdateOne {
-	return guo.SetInviteID(i.ID)
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (guo *GuildUpdateOne) SetUserID(id uint64) *GuildUpdateOne {
-	guo.mutation.SetUserID(id)
-	return guo
-}
-
-// SetUser sets the "user" edge to the User entity.
-func (guo *GuildUpdateOne) SetUser(u *User) *GuildUpdateOne {
-	return guo.SetUserID(u.ID)
+	return guo.AddInviteIDs(ids...)
 }
 
 // AddBanIDs adds the "bans" edge to the User entity by IDs.
@@ -585,21 +623,45 @@ func (guo *GuildUpdateOne) AddChannel(c ...*Channel) *GuildUpdateOne {
 	return guo.AddChannelIDs(ids...)
 }
 
+// AddUserIDs adds the "user" edge to the User entity by IDs.
+func (guo *GuildUpdateOne) AddUserIDs(ids ...uint64) *GuildUpdateOne {
+	guo.mutation.AddUserIDs(ids...)
+	return guo
+}
+
+// AddUser adds the "user" edges to the User entity.
+func (guo *GuildUpdateOne) AddUser(u ...*User) *GuildUpdateOne {
+	ids := make([]uint64, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return guo.AddUserIDs(ids...)
+}
+
 // Mutation returns the GuildMutation object of the builder.
 func (guo *GuildUpdateOne) Mutation() *GuildMutation {
 	return guo.mutation
 }
 
-// ClearInvite clears the "invite" edge to the Invite entity.
+// ClearInvite clears all "invite" edges to the Invite entity.
 func (guo *GuildUpdateOne) ClearInvite() *GuildUpdateOne {
 	guo.mutation.ClearInvite()
 	return guo
 }
 
-// ClearUser clears the "user" edge to the User entity.
-func (guo *GuildUpdateOne) ClearUser() *GuildUpdateOne {
-	guo.mutation.ClearUser()
+// RemoveInviteIDs removes the "invite" edge to Invite entities by IDs.
+func (guo *GuildUpdateOne) RemoveInviteIDs(ids ...int) *GuildUpdateOne {
+	guo.mutation.RemoveInviteIDs(ids...)
 	return guo
+}
+
+// RemoveInvite removes "invite" edges to Invite entities.
+func (guo *GuildUpdateOne) RemoveInvite(i ...*Invite) *GuildUpdateOne {
+	ids := make([]int, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return guo.RemoveInviteIDs(ids...)
 }
 
 // ClearBans clears all "bans" edges to the User entity.
@@ -644,6 +706,27 @@ func (guo *GuildUpdateOne) RemoveChannel(c ...*Channel) *GuildUpdateOne {
 	return guo.RemoveChannelIDs(ids...)
 }
 
+// ClearUser clears all "user" edges to the User entity.
+func (guo *GuildUpdateOne) ClearUser() *GuildUpdateOne {
+	guo.mutation.ClearUser()
+	return guo
+}
+
+// RemoveUserIDs removes the "user" edge to User entities by IDs.
+func (guo *GuildUpdateOne) RemoveUserIDs(ids ...uint64) *GuildUpdateOne {
+	guo.mutation.RemoveUserIDs(ids...)
+	return guo
+}
+
+// RemoveUser removes "user" edges to User entities.
+func (guo *GuildUpdateOne) RemoveUser(u ...*User) *GuildUpdateOne {
+	ids := make([]uint64, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return guo.RemoveUserIDs(ids...)
+}
+
 // Save executes the query and returns the updated Guild entity.
 func (guo *GuildUpdateOne) Save(ctx context.Context) (*Guild, error) {
 	var (
@@ -651,18 +734,12 @@ func (guo *GuildUpdateOne) Save(ctx context.Context) (*Guild, error) {
 		node *Guild
 	)
 	if len(guo.hooks) == 0 {
-		if err = guo.check(); err != nil {
-			return nil, err
-		}
 		node, err = guo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*GuildMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = guo.check(); err != nil {
-				return nil, err
 			}
 			guo.mutation = mutation
 			node, err = guo.sqlSave(ctx)
@@ -699,14 +776,6 @@ func (guo *GuildUpdateOne) ExecX(ctx context.Context) {
 	if err := guo.Exec(ctx); err != nil {
 		panic(err)
 	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (guo *GuildUpdateOne) check() error {
-	if _, ok := guo.mutation.UserID(); guo.mutation.UserCleared() && !ok {
-		return errors.New("entgen: clearing a required unique edge \"user\"")
-	}
-	return nil
 }
 
 func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error) {
@@ -769,7 +838,7 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 	}
 	if guo.mutation.InviteCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   guild.InviteTable,
 			Columns: []string{guild.InviteColumn},
@@ -783,9 +852,9 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := guo.mutation.InviteIDs(); len(nodes) > 0 {
+	if nodes := guo.mutation.RemovedInviteIDs(); len(nodes) > 0 && !guo.mutation.InviteCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   guild.InviteTable,
 			Columns: []string{guild.InviteColumn},
@@ -800,35 +869,19 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if guo.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   guild.UserTable,
-			Columns: []string{guild.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint64,
-					Column: user.FieldID,
-				},
-			},
-		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := guo.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := guo.mutation.InviteIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   guild.UserTable,
-			Columns: []string{guild.UserColumn},
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   guild.InviteTable,
+			Columns: []string{guild.InviteColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint64,
-					Column: user.FieldID,
+					Type:   field.TypeInt,
+					Column: invite.FieldID,
 				},
 			},
 		}
@@ -937,6 +990,60 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUint64,
 					Column: channel.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if guo.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   guild.UserTable,
+			Columns: guild.UserPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := guo.mutation.RemovedUserIDs(); len(nodes) > 0 && !guo.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   guild.UserTable,
+			Columns: guild.UserPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := guo.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   guild.UserTable,
+			Columns: guild.UserPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
 				},
 			},
 		}

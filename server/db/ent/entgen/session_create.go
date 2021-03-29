@@ -10,8 +10,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/session"
+	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
 
 // SessionCreate is the builder for creating a Session entity.
@@ -41,23 +41,23 @@ func (sc *SessionCreate) SetNillableExpires(t *time.Time) *SessionCreate {
 	return sc
 }
 
-// SetUserID sets the "user" edge to the LocalUser entity by ID.
-func (sc *SessionCreate) SetUserID(id int) *SessionCreate {
+// SetUserID sets the "user" edge to the User entity by ID.
+func (sc *SessionCreate) SetUserID(id uint64) *SessionCreate {
 	sc.mutation.SetUserID(id)
 	return sc
 }
 
-// SetNillableUserID sets the "user" edge to the LocalUser entity by ID if the given value is not nil.
-func (sc *SessionCreate) SetNillableUserID(id *int) *SessionCreate {
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (sc *SessionCreate) SetNillableUserID(id *uint64) *SessionCreate {
 	if id != nil {
 		sc = sc.SetUserID(*id)
 	}
 	return sc
 }
 
-// SetUser sets the "user" edge to the LocalUser entity.
-func (sc *SessionCreate) SetUser(l *LocalUser) *SessionCreate {
-	return sc.SetUserID(l.ID)
+// SetUser sets the "user" edge to the User entity.
+func (sc *SessionCreate) SetUser(u *User) *SessionCreate {
+	return sc.SetUserID(u.ID)
 }
 
 // Mutation returns the SessionMutation object of the builder.
@@ -178,15 +178,15 @@ func (sc *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: localuser.FieldID,
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.local_user_sessions = &nodes[0]
+		_node.user_sessions = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

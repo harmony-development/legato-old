@@ -24,16 +24,25 @@ type config struct {
 
 // hooks per client, for fast access.
 type hooks struct {
-	Channel     []ent.Hook
-	ForeignUser []ent.Hook
-	Guild       []ent.Hook
-	Invite      []ent.Hook
-	LocalUser   []ent.Hook
-	Message     []ent.Hook
-	Override    []ent.Hook
-	Profile     []ent.Hook
-	Session     []ent.Hook
-	User        []ent.Hook
+	Channel      []ent.Hook
+	EmbedMessage []ent.Hook
+	Emote        []ent.Hook
+	EmotePack    []ent.Hook
+	File         []ent.Hook
+	FileHash     []ent.Hook
+	FileMessage  []ent.Hook
+	ForeignUser  []ent.Hook
+	Guild        []ent.Hook
+	Invite       []ent.Hook
+	LocalUser    []ent.Hook
+	Message      []ent.Hook
+	Override     []ent.Hook
+	Permission   []ent.Hook
+	Profile      []ent.Hook
+	Role         []ent.Hook
+	Session      []ent.Hook
+	TextMessage  []ent.Hook
+	User         []ent.Hook
 }
 
 // Options applies the options on the config object.

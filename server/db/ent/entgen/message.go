@@ -8,7 +8,12 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
+	"github.com/harmony-development/legato/server/db/ent/entgen/embedmessage"
+	"github.com/harmony-development/legato/server/db/ent/entgen/filemessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
+	"github.com/harmony-development/legato/server/db/ent/entgen/override"
+	"github.com/harmony-development/legato/server/db/ent/entgen/textmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
 
@@ -17,30 +22,41 @@ type Message struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uint64 `json:"id,omitempty"`
-	// Author holds the value of the "author" field.
-	Author uint64 `json:"author,omitempty"`
 	// Createdat holds the value of the "createdat" field.
 	Createdat time.Time `json:"createdat,omitempty"`
 	// Editedat holds the value of the "editedat" field.
 	Editedat time.Time `json:"editedat,omitempty"`
-	// Replyto holds the value of the "replyto" field.
-	Replyto uint64 `json:"replyto,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MessageQuery when eager-loading is set.
-	Edges           MessageEdges `json:"edges"`
-	channel_message *uint64
-	user_message    *uint64
+	Edges                MessageEdges `json:"edges"`
+	channel_message      *uint64
+	message_replies      *uint64
+	message_filemessage  *int
+	message_embedmessage *int
+	user_message         *uint64
 }
 
 // MessageEdges holds the relations/edges for other nodes in the graph.
 type MessageEdges struct {
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
+	// Channel holds the value of the channel edge.
+	Channel *Channel `json:"channel,omitempty"`
 	// Override holds the value of the override edge.
-	Override []*Override `json:"override,omitempty"`
+	Override *Override `json:"override,omitempty"`
+	// Parent holds the value of the parent edge.
+	Parent *Message `json:"parent,omitempty"`
+	// Replies holds the value of the replies edge.
+	Replies []*Message `json:"replies,omitempty"`
+	// Textmessage holds the value of the textmessage edge.
+	Textmessage *TextMessage `json:"textmessage,omitempty"`
+	// Filemessage holds the value of the filemessage edge.
+	Filemessage *FileMessage `json:"filemessage,omitempty"`
+	// Embedmessage holds the value of the embedmessage edge.
+	Embedmessage *EmbedMessage `json:"embedmessage,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [8]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -57,13 +73,97 @@ func (e MessageEdges) UserOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "user"}
 }
 
-// OverrideOrErr returns the Override value or an error if the edge
-// was not loaded in eager-loading.
-func (e MessageEdges) OverrideOrErr() ([]*Override, error) {
+// ChannelOrErr returns the Channel value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e MessageEdges) ChannelOrErr() (*Channel, error) {
 	if e.loadedTypes[1] {
+		if e.Channel == nil {
+			// The edge channel was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: channel.Label}
+		}
+		return e.Channel, nil
+	}
+	return nil, &NotLoadedError{edge: "channel"}
+}
+
+// OverrideOrErr returns the Override value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e MessageEdges) OverrideOrErr() (*Override, error) {
+	if e.loadedTypes[2] {
+		if e.Override == nil {
+			// The edge override was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: override.Label}
+		}
 		return e.Override, nil
 	}
 	return nil, &NotLoadedError{edge: "override"}
+}
+
+// ParentOrErr returns the Parent value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e MessageEdges) ParentOrErr() (*Message, error) {
+	if e.loadedTypes[3] {
+		if e.Parent == nil {
+			// The edge parent was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: message.Label}
+		}
+		return e.Parent, nil
+	}
+	return nil, &NotLoadedError{edge: "parent"}
+}
+
+// RepliesOrErr returns the Replies value or an error if the edge
+// was not loaded in eager-loading.
+func (e MessageEdges) RepliesOrErr() ([]*Message, error) {
+	if e.loadedTypes[4] {
+		return e.Replies, nil
+	}
+	return nil, &NotLoadedError{edge: "replies"}
+}
+
+// TextmessageOrErr returns the Textmessage value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e MessageEdges) TextmessageOrErr() (*TextMessage, error) {
+	if e.loadedTypes[5] {
+		if e.Textmessage == nil {
+			// The edge textmessage was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: textmessage.Label}
+		}
+		return e.Textmessage, nil
+	}
+	return nil, &NotLoadedError{edge: "textmessage"}
+}
+
+// FilemessageOrErr returns the Filemessage value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e MessageEdges) FilemessageOrErr() (*FileMessage, error) {
+	if e.loadedTypes[6] {
+		if e.Filemessage == nil {
+			// The edge filemessage was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: filemessage.Label}
+		}
+		return e.Filemessage, nil
+	}
+	return nil, &NotLoadedError{edge: "filemessage"}
+}
+
+// EmbedmessageOrErr returns the Embedmessage value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e MessageEdges) EmbedmessageOrErr() (*EmbedMessage, error) {
+	if e.loadedTypes[7] {
+		if e.Embedmessage == nil {
+			// The edge embedmessage was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: embedmessage.Label}
+		}
+		return e.Embedmessage, nil
+	}
+	return nil, &NotLoadedError{edge: "embedmessage"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -71,13 +171,19 @@ func (*Message) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case message.FieldID, message.FieldAuthor, message.FieldReplyto:
+		case message.FieldID:
 			values[i] = &sql.NullInt64{}
 		case message.FieldCreatedat, message.FieldEditedat:
 			values[i] = &sql.NullTime{}
 		case message.ForeignKeys[0]: // channel_message
 			values[i] = &sql.NullInt64{}
-		case message.ForeignKeys[1]: // user_message
+		case message.ForeignKeys[1]: // message_replies
+			values[i] = &sql.NullInt64{}
+		case message.ForeignKeys[2]: // message_filemessage
+			values[i] = &sql.NullInt64{}
+		case message.ForeignKeys[3]: // message_embedmessage
+			values[i] = &sql.NullInt64{}
+		case message.ForeignKeys[4]: // user_message
 			values[i] = &sql.NullInt64{}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Message", columns[i])
@@ -100,12 +206,6 @@ func (m *Message) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			m.ID = uint64(value.Int64)
-		case message.FieldAuthor:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field author", values[i])
-			} else if value.Valid {
-				m.Author = uint64(value.Int64)
-			}
 		case message.FieldCreatedat:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field createdat", values[i])
@@ -118,12 +218,6 @@ func (m *Message) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				m.Editedat = value.Time
 			}
-		case message.FieldReplyto:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field replyto", values[i])
-			} else if value.Valid {
-				m.Replyto = uint64(value.Int64)
-			}
 		case message.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field channel_message", value)
@@ -132,6 +226,27 @@ func (m *Message) assignValues(columns []string, values []interface{}) error {
 				*m.channel_message = uint64(value.Int64)
 			}
 		case message.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field message_replies", value)
+			} else if value.Valid {
+				m.message_replies = new(uint64)
+				*m.message_replies = uint64(value.Int64)
+			}
+		case message.ForeignKeys[2]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field message_filemessage", value)
+			} else if value.Valid {
+				m.message_filemessage = new(int)
+				*m.message_filemessage = int(value.Int64)
+			}
+		case message.ForeignKeys[3]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field message_embedmessage", value)
+			} else if value.Valid {
+				m.message_embedmessage = new(int)
+				*m.message_embedmessage = int(value.Int64)
+			}
+		case message.ForeignKeys[4]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field user_message", value)
 			} else if value.Valid {
@@ -148,9 +263,39 @@ func (m *Message) QueryUser() *UserQuery {
 	return (&MessageClient{config: m.config}).QueryUser(m)
 }
 
+// QueryChannel queries the "channel" edge of the Message entity.
+func (m *Message) QueryChannel() *ChannelQuery {
+	return (&MessageClient{config: m.config}).QueryChannel(m)
+}
+
 // QueryOverride queries the "override" edge of the Message entity.
 func (m *Message) QueryOverride() *OverrideQuery {
 	return (&MessageClient{config: m.config}).QueryOverride(m)
+}
+
+// QueryParent queries the "parent" edge of the Message entity.
+func (m *Message) QueryParent() *MessageQuery {
+	return (&MessageClient{config: m.config}).QueryParent(m)
+}
+
+// QueryReplies queries the "replies" edge of the Message entity.
+func (m *Message) QueryReplies() *MessageQuery {
+	return (&MessageClient{config: m.config}).QueryReplies(m)
+}
+
+// QueryTextmessage queries the "textmessage" edge of the Message entity.
+func (m *Message) QueryTextmessage() *TextMessageQuery {
+	return (&MessageClient{config: m.config}).QueryTextmessage(m)
+}
+
+// QueryFilemessage queries the "filemessage" edge of the Message entity.
+func (m *Message) QueryFilemessage() *FileMessageQuery {
+	return (&MessageClient{config: m.config}).QueryFilemessage(m)
+}
+
+// QueryEmbedmessage queries the "embedmessage" edge of the Message entity.
+func (m *Message) QueryEmbedmessage() *EmbedMessageQuery {
+	return (&MessageClient{config: m.config}).QueryEmbedmessage(m)
 }
 
 // Update returns a builder for updating this Message.
@@ -176,14 +321,10 @@ func (m *Message) String() string {
 	var builder strings.Builder
 	builder.WriteString("Message(")
 	builder.WriteString(fmt.Sprintf("id=%v", m.ID))
-	builder.WriteString(", author=")
-	builder.WriteString(fmt.Sprintf("%v", m.Author))
 	builder.WriteString(", createdat=")
 	builder.WriteString(m.Createdat.Format(time.ANSIC))
 	builder.WriteString(", editedat=")
 	builder.WriteString(m.Editedat.Format(time.ANSIC))
-	builder.WriteString(", replyto=")
-	builder.WriteString(fmt.Sprintf("%v", m.Replyto))
 	builder.WriteByte(')')
 	return builder.String()
 }

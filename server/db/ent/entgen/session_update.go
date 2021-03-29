@@ -10,9 +10,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 	"github.com/harmony-development/legato/server/db/ent/entgen/session"
+	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
 
 // SessionUpdate is the builder for updating Session entities.
@@ -48,23 +48,23 @@ func (su *SessionUpdate) SetNillableExpires(t *time.Time) *SessionUpdate {
 	return su
 }
 
-// SetUserID sets the "user" edge to the LocalUser entity by ID.
-func (su *SessionUpdate) SetUserID(id int) *SessionUpdate {
+// SetUserID sets the "user" edge to the User entity by ID.
+func (su *SessionUpdate) SetUserID(id uint64) *SessionUpdate {
 	su.mutation.SetUserID(id)
 	return su
 }
 
-// SetNillableUserID sets the "user" edge to the LocalUser entity by ID if the given value is not nil.
-func (su *SessionUpdate) SetNillableUserID(id *int) *SessionUpdate {
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (su *SessionUpdate) SetNillableUserID(id *uint64) *SessionUpdate {
 	if id != nil {
 		su = su.SetUserID(*id)
 	}
 	return su
 }
 
-// SetUser sets the "user" edge to the LocalUser entity.
-func (su *SessionUpdate) SetUser(l *LocalUser) *SessionUpdate {
-	return su.SetUserID(l.ID)
+// SetUser sets the "user" edge to the User entity.
+func (su *SessionUpdate) SetUser(u *User) *SessionUpdate {
+	return su.SetUserID(u.ID)
 }
 
 // Mutation returns the SessionMutation object of the builder.
@@ -72,7 +72,7 @@ func (su *SessionUpdate) Mutation() *SessionMutation {
 	return su.mutation
 }
 
-// ClearUser clears the "user" edge to the LocalUser entity.
+// ClearUser clears the "user" edge to the User entity.
 func (su *SessionUpdate) ClearUser() *SessionUpdate {
 	su.mutation.ClearUser()
 	return su
@@ -170,8 +170,8 @@ func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: localuser.FieldID,
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -186,8 +186,8 @@ func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: localuser.FieldID,
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -234,23 +234,23 @@ func (suo *SessionUpdateOne) SetNillableExpires(t *time.Time) *SessionUpdateOne 
 	return suo
 }
 
-// SetUserID sets the "user" edge to the LocalUser entity by ID.
-func (suo *SessionUpdateOne) SetUserID(id int) *SessionUpdateOne {
+// SetUserID sets the "user" edge to the User entity by ID.
+func (suo *SessionUpdateOne) SetUserID(id uint64) *SessionUpdateOne {
 	suo.mutation.SetUserID(id)
 	return suo
 }
 
-// SetNillableUserID sets the "user" edge to the LocalUser entity by ID if the given value is not nil.
-func (suo *SessionUpdateOne) SetNillableUserID(id *int) *SessionUpdateOne {
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (suo *SessionUpdateOne) SetNillableUserID(id *uint64) *SessionUpdateOne {
 	if id != nil {
 		suo = suo.SetUserID(*id)
 	}
 	return suo
 }
 
-// SetUser sets the "user" edge to the LocalUser entity.
-func (suo *SessionUpdateOne) SetUser(l *LocalUser) *SessionUpdateOne {
-	return suo.SetUserID(l.ID)
+// SetUser sets the "user" edge to the User entity.
+func (suo *SessionUpdateOne) SetUser(u *User) *SessionUpdateOne {
+	return suo.SetUserID(u.ID)
 }
 
 // Mutation returns the SessionMutation object of the builder.
@@ -258,7 +258,7 @@ func (suo *SessionUpdateOne) Mutation() *SessionMutation {
 	return suo.mutation
 }
 
-// ClearUser clears the "user" edge to the LocalUser entity.
+// ClearUser clears the "user" edge to the User entity.
 func (suo *SessionUpdateOne) ClearUser() *SessionUpdateOne {
 	suo.mutation.ClearUser()
 	return suo
@@ -361,8 +361,8 @@ func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: localuser.FieldID,
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -377,8 +377,8 @@ func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: localuser.FieldID,
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
 				},
 			},
 		}

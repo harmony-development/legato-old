@@ -381,7 +381,7 @@ func HasGuild() predicate.Invite {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(GuildTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, GuildTable, GuildColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, GuildTable, GuildColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -393,7 +393,7 @@ func HasGuildWith(preds ...predicate.Guild) predicate.Invite {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(GuildInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, GuildTable, GuildColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, GuildTable, GuildColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

@@ -10,14 +10,23 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/migrate"
 
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
+	"github.com/harmony-development/legato/server/db/ent/entgen/embedmessage"
+	"github.com/harmony-development/legato/server/db/ent/entgen/emote"
+	"github.com/harmony-development/legato/server/db/ent/entgen/emotepack"
+	"github.com/harmony-development/legato/server/db/ent/entgen/file"
+	"github.com/harmony-development/legato/server/db/ent/entgen/filehash"
+	"github.com/harmony-development/legato/server/db/ent/entgen/filemessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/foreignuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/invite"
 	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
 	"github.com/harmony-development/legato/server/db/ent/entgen/override"
+	"github.com/harmony-development/legato/server/db/ent/entgen/permission"
 	"github.com/harmony-development/legato/server/db/ent/entgen/profile"
+	"github.com/harmony-development/legato/server/db/ent/entgen/role"
 	"github.com/harmony-development/legato/server/db/ent/entgen/session"
+	"github.com/harmony-development/legato/server/db/ent/entgen/textmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 
 	"entgo.io/ent/dialect"
@@ -32,6 +41,18 @@ type Client struct {
 	Schema *migrate.Schema
 	// Channel is the client for interacting with the Channel builders.
 	Channel *ChannelClient
+	// EmbedMessage is the client for interacting with the EmbedMessage builders.
+	EmbedMessage *EmbedMessageClient
+	// Emote is the client for interacting with the Emote builders.
+	Emote *EmoteClient
+	// EmotePack is the client for interacting with the EmotePack builders.
+	EmotePack *EmotePackClient
+	// File is the client for interacting with the File builders.
+	File *FileClient
+	// FileHash is the client for interacting with the FileHash builders.
+	FileHash *FileHashClient
+	// FileMessage is the client for interacting with the FileMessage builders.
+	FileMessage *FileMessageClient
 	// ForeignUser is the client for interacting with the ForeignUser builders.
 	ForeignUser *ForeignUserClient
 	// Guild is the client for interacting with the Guild builders.
@@ -44,10 +65,16 @@ type Client struct {
 	Message *MessageClient
 	// Override is the client for interacting with the Override builders.
 	Override *OverrideClient
+	// Permission is the client for interacting with the Permission builders.
+	Permission *PermissionClient
 	// Profile is the client for interacting with the Profile builders.
 	Profile *ProfileClient
+	// Role is the client for interacting with the Role builders.
+	Role *RoleClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
+	// TextMessage is the client for interacting with the TextMessage builders.
+	TextMessage *TextMessageClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -64,14 +91,23 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Channel = NewChannelClient(c.config)
+	c.EmbedMessage = NewEmbedMessageClient(c.config)
+	c.Emote = NewEmoteClient(c.config)
+	c.EmotePack = NewEmotePackClient(c.config)
+	c.File = NewFileClient(c.config)
+	c.FileHash = NewFileHashClient(c.config)
+	c.FileMessage = NewFileMessageClient(c.config)
 	c.ForeignUser = NewForeignUserClient(c.config)
 	c.Guild = NewGuildClient(c.config)
 	c.Invite = NewInviteClient(c.config)
 	c.LocalUser = NewLocalUserClient(c.config)
 	c.Message = NewMessageClient(c.config)
 	c.Override = NewOverrideClient(c.config)
+	c.Permission = NewPermissionClient(c.config)
 	c.Profile = NewProfileClient(c.config)
+	c.Role = NewRoleClient(c.config)
 	c.Session = NewSessionClient(c.config)
+	c.TextMessage = NewTextMessageClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -104,18 +140,27 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:         ctx,
-		config:      cfg,
-		Channel:     NewChannelClient(cfg),
-		ForeignUser: NewForeignUserClient(cfg),
-		Guild:       NewGuildClient(cfg),
-		Invite:      NewInviteClient(cfg),
-		LocalUser:   NewLocalUserClient(cfg),
-		Message:     NewMessageClient(cfg),
-		Override:    NewOverrideClient(cfg),
-		Profile:     NewProfileClient(cfg),
-		Session:     NewSessionClient(cfg),
-		User:        NewUserClient(cfg),
+		ctx:          ctx,
+		config:       cfg,
+		Channel:      NewChannelClient(cfg),
+		EmbedMessage: NewEmbedMessageClient(cfg),
+		Emote:        NewEmoteClient(cfg),
+		EmotePack:    NewEmotePackClient(cfg),
+		File:         NewFileClient(cfg),
+		FileHash:     NewFileHashClient(cfg),
+		FileMessage:  NewFileMessageClient(cfg),
+		ForeignUser:  NewForeignUserClient(cfg),
+		Guild:        NewGuildClient(cfg),
+		Invite:       NewInviteClient(cfg),
+		LocalUser:    NewLocalUserClient(cfg),
+		Message:      NewMessageClient(cfg),
+		Override:     NewOverrideClient(cfg),
+		Permission:   NewPermissionClient(cfg),
+		Profile:      NewProfileClient(cfg),
+		Role:         NewRoleClient(cfg),
+		Session:      NewSessionClient(cfg),
+		TextMessage:  NewTextMessageClient(cfg),
+		User:         NewUserClient(cfg),
 	}, nil
 }
 
@@ -133,17 +178,26 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		config:      cfg,
-		Channel:     NewChannelClient(cfg),
-		ForeignUser: NewForeignUserClient(cfg),
-		Guild:       NewGuildClient(cfg),
-		Invite:      NewInviteClient(cfg),
-		LocalUser:   NewLocalUserClient(cfg),
-		Message:     NewMessageClient(cfg),
-		Override:    NewOverrideClient(cfg),
-		Profile:     NewProfileClient(cfg),
-		Session:     NewSessionClient(cfg),
-		User:        NewUserClient(cfg),
+		config:       cfg,
+		Channel:      NewChannelClient(cfg),
+		EmbedMessage: NewEmbedMessageClient(cfg),
+		Emote:        NewEmoteClient(cfg),
+		EmotePack:    NewEmotePackClient(cfg),
+		File:         NewFileClient(cfg),
+		FileHash:     NewFileHashClient(cfg),
+		FileMessage:  NewFileMessageClient(cfg),
+		ForeignUser:  NewForeignUserClient(cfg),
+		Guild:        NewGuildClient(cfg),
+		Invite:       NewInviteClient(cfg),
+		LocalUser:    NewLocalUserClient(cfg),
+		Message:      NewMessageClient(cfg),
+		Override:     NewOverrideClient(cfg),
+		Permission:   NewPermissionClient(cfg),
+		Profile:      NewProfileClient(cfg),
+		Role:         NewRoleClient(cfg),
+		Session:      NewSessionClient(cfg),
+		TextMessage:  NewTextMessageClient(cfg),
+		User:         NewUserClient(cfg),
 	}, nil
 }
 
@@ -174,14 +228,23 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Channel.Use(hooks...)
+	c.EmbedMessage.Use(hooks...)
+	c.Emote.Use(hooks...)
+	c.EmotePack.Use(hooks...)
+	c.File.Use(hooks...)
+	c.FileHash.Use(hooks...)
+	c.FileMessage.Use(hooks...)
 	c.ForeignUser.Use(hooks...)
 	c.Guild.Use(hooks...)
 	c.Invite.Use(hooks...)
 	c.LocalUser.Use(hooks...)
 	c.Message.Use(hooks...)
 	c.Override.Use(hooks...)
+	c.Permission.Use(hooks...)
 	c.Profile.Use(hooks...)
+	c.Role.Use(hooks...)
 	c.Session.Use(hooks...)
+	c.TextMessage.Use(hooks...)
 	c.User.Use(hooks...)
 }
 
@@ -303,6 +366,646 @@ func (c *ChannelClient) QueryMessage(ch *Channel) *MessageQuery {
 // Hooks returns the client hooks.
 func (c *ChannelClient) Hooks() []Hook {
 	return c.hooks.Channel
+}
+
+// EmbedMessageClient is a client for the EmbedMessage schema.
+type EmbedMessageClient struct {
+	config
+}
+
+// NewEmbedMessageClient returns a client for the EmbedMessage from the given config.
+func NewEmbedMessageClient(c config) *EmbedMessageClient {
+	return &EmbedMessageClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `embedmessage.Hooks(f(g(h())))`.
+func (c *EmbedMessageClient) Use(hooks ...Hook) {
+	c.hooks.EmbedMessage = append(c.hooks.EmbedMessage, hooks...)
+}
+
+// Create returns a create builder for EmbedMessage.
+func (c *EmbedMessageClient) Create() *EmbedMessageCreate {
+	mutation := newEmbedMessageMutation(c.config, OpCreate)
+	return &EmbedMessageCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of EmbedMessage entities.
+func (c *EmbedMessageClient) CreateBulk(builders ...*EmbedMessageCreate) *EmbedMessageCreateBulk {
+	return &EmbedMessageCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for EmbedMessage.
+func (c *EmbedMessageClient) Update() *EmbedMessageUpdate {
+	mutation := newEmbedMessageMutation(c.config, OpUpdate)
+	return &EmbedMessageUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EmbedMessageClient) UpdateOne(em *EmbedMessage) *EmbedMessageUpdateOne {
+	mutation := newEmbedMessageMutation(c.config, OpUpdateOne, withEmbedMessage(em))
+	return &EmbedMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EmbedMessageClient) UpdateOneID(id int) *EmbedMessageUpdateOne {
+	mutation := newEmbedMessageMutation(c.config, OpUpdateOne, withEmbedMessageID(id))
+	return &EmbedMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for EmbedMessage.
+func (c *EmbedMessageClient) Delete() *EmbedMessageDelete {
+	mutation := newEmbedMessageMutation(c.config, OpDelete)
+	return &EmbedMessageDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *EmbedMessageClient) DeleteOne(em *EmbedMessage) *EmbedMessageDeleteOne {
+	return c.DeleteOneID(em.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *EmbedMessageClient) DeleteOneID(id int) *EmbedMessageDeleteOne {
+	builder := c.Delete().Where(embedmessage.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EmbedMessageDeleteOne{builder}
+}
+
+// Query returns a query builder for EmbedMessage.
+func (c *EmbedMessageClient) Query() *EmbedMessageQuery {
+	return &EmbedMessageQuery{config: c.config}
+}
+
+// Get returns a EmbedMessage entity by its id.
+func (c *EmbedMessageClient) Get(ctx context.Context, id int) (*EmbedMessage, error) {
+	return c.Query().Where(embedmessage.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EmbedMessageClient) GetX(ctx context.Context, id int) *EmbedMessage {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *EmbedMessageClient) Hooks() []Hook {
+	return c.hooks.EmbedMessage
+}
+
+// EmoteClient is a client for the Emote schema.
+type EmoteClient struct {
+	config
+}
+
+// NewEmoteClient returns a client for the Emote from the given config.
+func NewEmoteClient(c config) *EmoteClient {
+	return &EmoteClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `emote.Hooks(f(g(h())))`.
+func (c *EmoteClient) Use(hooks ...Hook) {
+	c.hooks.Emote = append(c.hooks.Emote, hooks...)
+}
+
+// Create returns a create builder for Emote.
+func (c *EmoteClient) Create() *EmoteCreate {
+	mutation := newEmoteMutation(c.config, OpCreate)
+	return &EmoteCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Emote entities.
+func (c *EmoteClient) CreateBulk(builders ...*EmoteCreate) *EmoteCreateBulk {
+	return &EmoteCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Emote.
+func (c *EmoteClient) Update() *EmoteUpdate {
+	mutation := newEmoteMutation(c.config, OpUpdate)
+	return &EmoteUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EmoteClient) UpdateOne(e *Emote) *EmoteUpdateOne {
+	mutation := newEmoteMutation(c.config, OpUpdateOne, withEmote(e))
+	return &EmoteUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EmoteClient) UpdateOneID(id int) *EmoteUpdateOne {
+	mutation := newEmoteMutation(c.config, OpUpdateOne, withEmoteID(id))
+	return &EmoteUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Emote.
+func (c *EmoteClient) Delete() *EmoteDelete {
+	mutation := newEmoteMutation(c.config, OpDelete)
+	return &EmoteDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *EmoteClient) DeleteOne(e *Emote) *EmoteDeleteOne {
+	return c.DeleteOneID(e.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *EmoteClient) DeleteOneID(id int) *EmoteDeleteOne {
+	builder := c.Delete().Where(emote.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EmoteDeleteOne{builder}
+}
+
+// Query returns a query builder for Emote.
+func (c *EmoteClient) Query() *EmoteQuery {
+	return &EmoteQuery{config: c.config}
+}
+
+// Get returns a Emote entity by its id.
+func (c *EmoteClient) Get(ctx context.Context, id int) (*Emote, error) {
+	return c.Query().Where(emote.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EmoteClient) GetX(ctx context.Context, id int) *Emote {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryEmotepack queries the emotepack edge of a Emote.
+func (c *EmoteClient) QueryEmotepack(e *Emote) *EmotePackQuery {
+	query := &EmotePackQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := e.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(emote.Table, emote.FieldID, id),
+			sqlgraph.To(emotepack.Table, emotepack.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, emote.EmotepackTable, emote.EmotepackColumn),
+		)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFile queries the file edge of a Emote.
+func (c *EmoteClient) QueryFile(e *Emote) *FileQuery {
+	query := &FileQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := e.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(emote.Table, emote.FieldID, id),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, emote.FileTable, emote.FileColumn),
+		)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *EmoteClient) Hooks() []Hook {
+	return c.hooks.Emote
+}
+
+// EmotePackClient is a client for the EmotePack schema.
+type EmotePackClient struct {
+	config
+}
+
+// NewEmotePackClient returns a client for the EmotePack from the given config.
+func NewEmotePackClient(c config) *EmotePackClient {
+	return &EmotePackClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `emotepack.Hooks(f(g(h())))`.
+func (c *EmotePackClient) Use(hooks ...Hook) {
+	c.hooks.EmotePack = append(c.hooks.EmotePack, hooks...)
+}
+
+// Create returns a create builder for EmotePack.
+func (c *EmotePackClient) Create() *EmotePackCreate {
+	mutation := newEmotePackMutation(c.config, OpCreate)
+	return &EmotePackCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of EmotePack entities.
+func (c *EmotePackClient) CreateBulk(builders ...*EmotePackCreate) *EmotePackCreateBulk {
+	return &EmotePackCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for EmotePack.
+func (c *EmotePackClient) Update() *EmotePackUpdate {
+	mutation := newEmotePackMutation(c.config, OpUpdate)
+	return &EmotePackUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EmotePackClient) UpdateOne(ep *EmotePack) *EmotePackUpdateOne {
+	mutation := newEmotePackMutation(c.config, OpUpdateOne, withEmotePack(ep))
+	return &EmotePackUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EmotePackClient) UpdateOneID(id uint64) *EmotePackUpdateOne {
+	mutation := newEmotePackMutation(c.config, OpUpdateOne, withEmotePackID(id))
+	return &EmotePackUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for EmotePack.
+func (c *EmotePackClient) Delete() *EmotePackDelete {
+	mutation := newEmotePackMutation(c.config, OpDelete)
+	return &EmotePackDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *EmotePackClient) DeleteOne(ep *EmotePack) *EmotePackDeleteOne {
+	return c.DeleteOneID(ep.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *EmotePackClient) DeleteOneID(id uint64) *EmotePackDeleteOne {
+	builder := c.Delete().Where(emotepack.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EmotePackDeleteOne{builder}
+}
+
+// Query returns a query builder for EmotePack.
+func (c *EmotePackClient) Query() *EmotePackQuery {
+	return &EmotePackQuery{config: c.config}
+}
+
+// Get returns a EmotePack entity by its id.
+func (c *EmotePackClient) Get(ctx context.Context, id uint64) (*EmotePack, error) {
+	return c.Query().Where(emotepack.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EmotePackClient) GetX(ctx context.Context, id uint64) *EmotePack {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a EmotePack.
+func (c *EmotePackClient) QueryUser(ep *EmotePack) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ep.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(emotepack.Table, emotepack.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, emotepack.UserTable, emotepack.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(ep.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryEmote queries the emote edge of a EmotePack.
+func (c *EmotePackClient) QueryEmote(ep *EmotePack) *EmoteQuery {
+	query := &EmoteQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ep.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(emotepack.Table, emotepack.FieldID, id),
+			sqlgraph.To(emote.Table, emote.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, emotepack.EmoteTable, emotepack.EmoteColumn),
+		)
+		fromV = sqlgraph.Neighbors(ep.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *EmotePackClient) Hooks() []Hook {
+	return c.hooks.EmotePack
+}
+
+// FileClient is a client for the File schema.
+type FileClient struct {
+	config
+}
+
+// NewFileClient returns a client for the File from the given config.
+func NewFileClient(c config) *FileClient {
+	return &FileClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `file.Hooks(f(g(h())))`.
+func (c *FileClient) Use(hooks ...Hook) {
+	c.hooks.File = append(c.hooks.File, hooks...)
+}
+
+// Create returns a create builder for File.
+func (c *FileClient) Create() *FileCreate {
+	mutation := newFileMutation(c.config, OpCreate)
+	return &FileCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of File entities.
+func (c *FileClient) CreateBulk(builders ...*FileCreate) *FileCreateBulk {
+	return &FileCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for File.
+func (c *FileClient) Update() *FileUpdate {
+	mutation := newFileMutation(c.config, OpUpdate)
+	return &FileUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FileClient) UpdateOne(f *File) *FileUpdateOne {
+	mutation := newFileMutation(c.config, OpUpdateOne, withFile(f))
+	return &FileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FileClient) UpdateOneID(id string) *FileUpdateOne {
+	mutation := newFileMutation(c.config, OpUpdateOne, withFileID(id))
+	return &FileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for File.
+func (c *FileClient) Delete() *FileDelete {
+	mutation := newFileMutation(c.config, OpDelete)
+	return &FileDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *FileClient) DeleteOne(f *File) *FileDeleteOne {
+	return c.DeleteOneID(f.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *FileClient) DeleteOneID(id string) *FileDeleteOne {
+	builder := c.Delete().Where(file.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &FileDeleteOne{builder}
+}
+
+// Query returns a query builder for File.
+func (c *FileClient) Query() *FileQuery {
+	return &FileQuery{config: c.config}
+}
+
+// Get returns a File entity by its id.
+func (c *FileClient) Get(ctx context.Context, id string) (*File, error) {
+	return c.Query().Where(file.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FileClient) GetX(ctx context.Context, id string) *File {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryFilehash queries the filehash edge of a File.
+func (c *FileClient) QueryFilehash(f *File) *FileHashQuery {
+	query := &FileHashQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := f.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(file.Table, file.FieldID, id),
+			sqlgraph.To(filehash.Table, filehash.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, file.FilehashTable, file.FilehashColumn),
+		)
+		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryEmote queries the emote edge of a File.
+func (c *FileClient) QueryEmote(f *File) *EmoteQuery {
+	query := &EmoteQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := f.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(file.Table, file.FieldID, id),
+			sqlgraph.To(emote.Table, emote.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, file.EmoteTable, file.EmoteColumn),
+		)
+		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *FileClient) Hooks() []Hook {
+	return c.hooks.File
+}
+
+// FileHashClient is a client for the FileHash schema.
+type FileHashClient struct {
+	config
+}
+
+// NewFileHashClient returns a client for the FileHash from the given config.
+func NewFileHashClient(c config) *FileHashClient {
+	return &FileHashClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `filehash.Hooks(f(g(h())))`.
+func (c *FileHashClient) Use(hooks ...Hook) {
+	c.hooks.FileHash = append(c.hooks.FileHash, hooks...)
+}
+
+// Create returns a create builder for FileHash.
+func (c *FileHashClient) Create() *FileHashCreate {
+	mutation := newFileHashMutation(c.config, OpCreate)
+	return &FileHashCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of FileHash entities.
+func (c *FileHashClient) CreateBulk(builders ...*FileHashCreate) *FileHashCreateBulk {
+	return &FileHashCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for FileHash.
+func (c *FileHashClient) Update() *FileHashUpdate {
+	mutation := newFileHashMutation(c.config, OpUpdate)
+	return &FileHashUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FileHashClient) UpdateOne(fh *FileHash) *FileHashUpdateOne {
+	mutation := newFileHashMutation(c.config, OpUpdateOne, withFileHash(fh))
+	return &FileHashUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FileHashClient) UpdateOneID(id int) *FileHashUpdateOne {
+	mutation := newFileHashMutation(c.config, OpUpdateOne, withFileHashID(id))
+	return &FileHashUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for FileHash.
+func (c *FileHashClient) Delete() *FileHashDelete {
+	mutation := newFileHashMutation(c.config, OpDelete)
+	return &FileHashDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *FileHashClient) DeleteOne(fh *FileHash) *FileHashDeleteOne {
+	return c.DeleteOneID(fh.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *FileHashClient) DeleteOneID(id int) *FileHashDeleteOne {
+	builder := c.Delete().Where(filehash.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &FileHashDeleteOne{builder}
+}
+
+// Query returns a query builder for FileHash.
+func (c *FileHashClient) Query() *FileHashQuery {
+	return &FileHashQuery{config: c.config}
+}
+
+// Get returns a FileHash entity by its id.
+func (c *FileHashClient) Get(ctx context.Context, id int) (*FileHash, error) {
+	return c.Query().Where(filehash.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FileHashClient) GetX(ctx context.Context, id int) *FileHash {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryFile queries the file edge of a FileHash.
+func (c *FileHashClient) QueryFile(fh *FileHash) *FileQuery {
+	query := &FileQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := fh.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(filehash.Table, filehash.FieldID, id),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, filehash.FileTable, filehash.FileColumn),
+		)
+		fromV = sqlgraph.Neighbors(fh.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *FileHashClient) Hooks() []Hook {
+	return c.hooks.FileHash
+}
+
+// FileMessageClient is a client for the FileMessage schema.
+type FileMessageClient struct {
+	config
+}
+
+// NewFileMessageClient returns a client for the FileMessage from the given config.
+func NewFileMessageClient(c config) *FileMessageClient {
+	return &FileMessageClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `filemessage.Hooks(f(g(h())))`.
+func (c *FileMessageClient) Use(hooks ...Hook) {
+	c.hooks.FileMessage = append(c.hooks.FileMessage, hooks...)
+}
+
+// Create returns a create builder for FileMessage.
+func (c *FileMessageClient) Create() *FileMessageCreate {
+	mutation := newFileMessageMutation(c.config, OpCreate)
+	return &FileMessageCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of FileMessage entities.
+func (c *FileMessageClient) CreateBulk(builders ...*FileMessageCreate) *FileMessageCreateBulk {
+	return &FileMessageCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for FileMessage.
+func (c *FileMessageClient) Update() *FileMessageUpdate {
+	mutation := newFileMessageMutation(c.config, OpUpdate)
+	return &FileMessageUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FileMessageClient) UpdateOne(fm *FileMessage) *FileMessageUpdateOne {
+	mutation := newFileMessageMutation(c.config, OpUpdateOne, withFileMessage(fm))
+	return &FileMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FileMessageClient) UpdateOneID(id int) *FileMessageUpdateOne {
+	mutation := newFileMessageMutation(c.config, OpUpdateOne, withFileMessageID(id))
+	return &FileMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for FileMessage.
+func (c *FileMessageClient) Delete() *FileMessageDelete {
+	mutation := newFileMessageMutation(c.config, OpDelete)
+	return &FileMessageDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *FileMessageClient) DeleteOne(fm *FileMessage) *FileMessageDeleteOne {
+	return c.DeleteOneID(fm.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *FileMessageClient) DeleteOneID(id int) *FileMessageDeleteOne {
+	builder := c.Delete().Where(filemessage.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &FileMessageDeleteOne{builder}
+}
+
+// Query returns a query builder for FileMessage.
+func (c *FileMessageClient) Query() *FileMessageQuery {
+	return &FileMessageQuery{config: c.config}
+}
+
+// Get returns a FileMessage entity by its id.
+func (c *FileMessageClient) Get(ctx context.Context, id int) (*FileMessage, error) {
+	return c.Query().Where(filemessage.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FileMessageClient) GetX(ctx context.Context, id int) *FileMessage {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *FileMessageClient) Hooks() []Hook {
+	return c.hooks.FileMessage
 }
 
 // ForeignUserClient is a client for the ForeignUser schema.
@@ -500,23 +1203,7 @@ func (c *GuildClient) QueryInvite(gu *Guild) *InviteQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(guild.Table, guild.FieldID, id),
 			sqlgraph.To(invite.Table, invite.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, guild.InviteTable, guild.InviteColumn),
-		)
-		fromV = sqlgraph.Neighbors(gu.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryUser queries the user edge of a Guild.
-func (c *GuildClient) QueryUser(gu *Guild) *UserQuery {
-	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := gu.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(guild.Table, guild.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, guild.UserTable, guild.UserColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, guild.InviteTable, guild.InviteColumn),
 		)
 		fromV = sqlgraph.Neighbors(gu.driver.Dialect(), step)
 		return fromV, nil
@@ -549,6 +1236,22 @@ func (c *GuildClient) QueryChannel(gu *Guild) *ChannelQuery {
 			sqlgraph.From(guild.Table, guild.FieldID, id),
 			sqlgraph.To(channel.Table, channel.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, guild.ChannelTable, guild.ChannelColumn),
+		)
+		fromV = sqlgraph.Neighbors(gu.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUser queries the user edge of a Guild.
+func (c *GuildClient) QueryUser(gu *Guild) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := gu.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(guild.Table, guild.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, guild.UserTable, guild.UserPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(gu.driver.Dialect(), step)
 		return fromV, nil
@@ -652,7 +1355,7 @@ func (c *InviteClient) QueryGuild(i *Invite) *GuildQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(invite.Table, invite.FieldID, id),
 			sqlgraph.To(guild.Table, guild.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, invite.GuildTable, invite.GuildColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, invite.GuildTable, invite.GuildColumn),
 		)
 		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
 		return fromV, nil
@@ -884,6 +1587,22 @@ func (c *MessageClient) QueryUser(m *Message) *UserQuery {
 	return query
 }
 
+// QueryChannel queries the channel edge of a Message.
+func (c *MessageClient) QueryChannel(m *Message) *ChannelQuery {
+	query := &ChannelQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(message.Table, message.FieldID, id),
+			sqlgraph.To(channel.Table, channel.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, message.ChannelTable, message.ChannelColumn),
+		)
+		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryOverride queries the override edge of a Message.
 func (c *MessageClient) QueryOverride(m *Message) *OverrideQuery {
 	query := &OverrideQuery{config: c.config}
@@ -892,7 +1611,87 @@ func (c *MessageClient) QueryOverride(m *Message) *OverrideQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(message.Table, message.FieldID, id),
 			sqlgraph.To(override.Table, override.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, message.OverrideTable, message.OverridePrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2O, false, message.OverrideTable, message.OverrideColumn),
+		)
+		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryParent queries the parent edge of a Message.
+func (c *MessageClient) QueryParent(m *Message) *MessageQuery {
+	query := &MessageQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(message.Table, message.FieldID, id),
+			sqlgraph.To(message.Table, message.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, message.ParentTable, message.ParentColumn),
+		)
+		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryReplies queries the replies edge of a Message.
+func (c *MessageClient) QueryReplies(m *Message) *MessageQuery {
+	query := &MessageQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(message.Table, message.FieldID, id),
+			sqlgraph.To(message.Table, message.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, message.RepliesTable, message.RepliesColumn),
+		)
+		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTextmessage queries the textmessage edge of a Message.
+func (c *MessageClient) QueryTextmessage(m *Message) *TextMessageQuery {
+	query := &TextMessageQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(message.Table, message.FieldID, id),
+			sqlgraph.To(textmessage.Table, textmessage.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, message.TextmessageTable, message.TextmessageColumn),
+		)
+		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFilemessage queries the filemessage edge of a Message.
+func (c *MessageClient) QueryFilemessage(m *Message) *FileMessageQuery {
+	query := &FileMessageQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(message.Table, message.FieldID, id),
+			sqlgraph.To(filemessage.Table, filemessage.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, message.FilemessageTable, message.FilemessageColumn),
+		)
+		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryEmbedmessage queries the embedmessage edge of a Message.
+func (c *MessageClient) QueryEmbedmessage(m *Message) *EmbedMessageQuery {
+	query := &EmbedMessageQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(message.Table, message.FieldID, id),
+			sqlgraph.To(embedmessage.Table, embedmessage.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, message.EmbedmessageTable, message.EmbedmessageColumn),
 		)
 		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
 		return fromV, nil
@@ -996,7 +1795,7 @@ func (c *OverrideClient) QueryMessage(o *Override) *MessageQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(override.Table, override.FieldID, id),
 			sqlgraph.To(message.Table, message.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, override.MessageTable, override.MessagePrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2O, true, override.MessageTable, override.MessageColumn),
 		)
 		fromV = sqlgraph.Neighbors(o.driver.Dialect(), step)
 		return fromV, nil
@@ -1007,6 +1806,110 @@ func (c *OverrideClient) QueryMessage(o *Override) *MessageQuery {
 // Hooks returns the client hooks.
 func (c *OverrideClient) Hooks() []Hook {
 	return c.hooks.Override
+}
+
+// PermissionClient is a client for the Permission schema.
+type PermissionClient struct {
+	config
+}
+
+// NewPermissionClient returns a client for the Permission from the given config.
+func NewPermissionClient(c config) *PermissionClient {
+	return &PermissionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `permission.Hooks(f(g(h())))`.
+func (c *PermissionClient) Use(hooks ...Hook) {
+	c.hooks.Permission = append(c.hooks.Permission, hooks...)
+}
+
+// Create returns a create builder for Permission.
+func (c *PermissionClient) Create() *PermissionCreate {
+	mutation := newPermissionMutation(c.config, OpCreate)
+	return &PermissionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Permission entities.
+func (c *PermissionClient) CreateBulk(builders ...*PermissionCreate) *PermissionCreateBulk {
+	return &PermissionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Permission.
+func (c *PermissionClient) Update() *PermissionUpdate {
+	mutation := newPermissionMutation(c.config, OpUpdate)
+	return &PermissionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PermissionClient) UpdateOne(pe *Permission) *PermissionUpdateOne {
+	mutation := newPermissionMutation(c.config, OpUpdateOne, withPermission(pe))
+	return &PermissionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PermissionClient) UpdateOneID(id uint64) *PermissionUpdateOne {
+	mutation := newPermissionMutation(c.config, OpUpdateOne, withPermissionID(id))
+	return &PermissionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Permission.
+func (c *PermissionClient) Delete() *PermissionDelete {
+	mutation := newPermissionMutation(c.config, OpDelete)
+	return &PermissionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *PermissionClient) DeleteOne(pe *Permission) *PermissionDeleteOne {
+	return c.DeleteOneID(pe.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *PermissionClient) DeleteOneID(id uint64) *PermissionDeleteOne {
+	builder := c.Delete().Where(permission.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PermissionDeleteOne{builder}
+}
+
+// Query returns a query builder for Permission.
+func (c *PermissionClient) Query() *PermissionQuery {
+	return &PermissionQuery{config: c.config}
+}
+
+// Get returns a Permission entity by its id.
+func (c *PermissionClient) Get(ctx context.Context, id uint64) (*Permission, error) {
+	return c.Query().Where(permission.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PermissionClient) GetX(ctx context.Context, id uint64) *Permission {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryRole queries the role edge of a Permission.
+func (c *PermissionClient) QueryRole(pe *Permission) *RoleQuery {
+	query := &RoleQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := pe.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(permission.Table, permission.FieldID, id),
+			sqlgraph.To(role.Table, role.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, permission.RoleTable, permission.RoleColumn),
+		)
+		fromV = sqlgraph.Neighbors(pe.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PermissionClient) Hooks() []Hook {
+	return c.hooks.Permission
 }
 
 // ProfileClient is a client for the Profile schema.
@@ -1113,6 +2016,126 @@ func (c *ProfileClient) Hooks() []Hook {
 	return c.hooks.Profile
 }
 
+// RoleClient is a client for the Role schema.
+type RoleClient struct {
+	config
+}
+
+// NewRoleClient returns a client for the Role from the given config.
+func NewRoleClient(c config) *RoleClient {
+	return &RoleClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `role.Hooks(f(g(h())))`.
+func (c *RoleClient) Use(hooks ...Hook) {
+	c.hooks.Role = append(c.hooks.Role, hooks...)
+}
+
+// Create returns a create builder for Role.
+func (c *RoleClient) Create() *RoleCreate {
+	mutation := newRoleMutation(c.config, OpCreate)
+	return &RoleCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Role entities.
+func (c *RoleClient) CreateBulk(builders ...*RoleCreate) *RoleCreateBulk {
+	return &RoleCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Role.
+func (c *RoleClient) Update() *RoleUpdate {
+	mutation := newRoleMutation(c.config, OpUpdate)
+	return &RoleUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *RoleClient) UpdateOne(r *Role) *RoleUpdateOne {
+	mutation := newRoleMutation(c.config, OpUpdateOne, withRole(r))
+	return &RoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *RoleClient) UpdateOneID(id uint64) *RoleUpdateOne {
+	mutation := newRoleMutation(c.config, OpUpdateOne, withRoleID(id))
+	return &RoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Role.
+func (c *RoleClient) Delete() *RoleDelete {
+	mutation := newRoleMutation(c.config, OpDelete)
+	return &RoleDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *RoleClient) DeleteOne(r *Role) *RoleDeleteOne {
+	return c.DeleteOneID(r.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *RoleClient) DeleteOneID(id uint64) *RoleDeleteOne {
+	builder := c.Delete().Where(role.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &RoleDeleteOne{builder}
+}
+
+// Query returns a query builder for Role.
+func (c *RoleClient) Query() *RoleQuery {
+	return &RoleQuery{config: c.config}
+}
+
+// Get returns a Role entity by its id.
+func (c *RoleClient) Get(ctx context.Context, id uint64) (*Role, error) {
+	return c.Query().Where(role.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *RoleClient) GetX(ctx context.Context, id uint64) *Role {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryMembers queries the members edge of a Role.
+func (c *RoleClient) QueryMembers(r *Role) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(role.Table, role.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, role.MembersTable, role.MembersPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPermission queries the permission edge of a Role.
+func (c *RoleClient) QueryPermission(r *Role) *PermissionQuery {
+	query := &PermissionQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(role.Table, role.FieldID, id),
+			sqlgraph.To(permission.Table, permission.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, role.PermissionTable, role.PermissionColumn),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *RoleClient) Hooks() []Hook {
+	return c.hooks.Role
+}
+
 // SessionClient is a client for the Session schema.
 type SessionClient struct {
 	config
@@ -1197,13 +2220,13 @@ func (c *SessionClient) GetX(ctx context.Context, id int) *Session {
 }
 
 // QueryUser queries the user edge of a Session.
-func (c *SessionClient) QueryUser(s *Session) *LocalUserQuery {
-	query := &LocalUserQuery{config: c.config}
+func (c *SessionClient) QueryUser(s *Session) *UserQuery {
+	query := &UserQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := s.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(session.Table, session.FieldID, id),
-			sqlgraph.To(localuser.Table, localuser.FieldID),
+			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, session.UserTable, session.UserColumn),
 		)
 		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
@@ -1215,6 +2238,110 @@ func (c *SessionClient) QueryUser(s *Session) *LocalUserQuery {
 // Hooks returns the client hooks.
 func (c *SessionClient) Hooks() []Hook {
 	return c.hooks.Session
+}
+
+// TextMessageClient is a client for the TextMessage schema.
+type TextMessageClient struct {
+	config
+}
+
+// NewTextMessageClient returns a client for the TextMessage from the given config.
+func NewTextMessageClient(c config) *TextMessageClient {
+	return &TextMessageClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `textmessage.Hooks(f(g(h())))`.
+func (c *TextMessageClient) Use(hooks ...Hook) {
+	c.hooks.TextMessage = append(c.hooks.TextMessage, hooks...)
+}
+
+// Create returns a create builder for TextMessage.
+func (c *TextMessageClient) Create() *TextMessageCreate {
+	mutation := newTextMessageMutation(c.config, OpCreate)
+	return &TextMessageCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TextMessage entities.
+func (c *TextMessageClient) CreateBulk(builders ...*TextMessageCreate) *TextMessageCreateBulk {
+	return &TextMessageCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TextMessage.
+func (c *TextMessageClient) Update() *TextMessageUpdate {
+	mutation := newTextMessageMutation(c.config, OpUpdate)
+	return &TextMessageUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TextMessageClient) UpdateOne(tm *TextMessage) *TextMessageUpdateOne {
+	mutation := newTextMessageMutation(c.config, OpUpdateOne, withTextMessage(tm))
+	return &TextMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TextMessageClient) UpdateOneID(id int) *TextMessageUpdateOne {
+	mutation := newTextMessageMutation(c.config, OpUpdateOne, withTextMessageID(id))
+	return &TextMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TextMessage.
+func (c *TextMessageClient) Delete() *TextMessageDelete {
+	mutation := newTextMessageMutation(c.config, OpDelete)
+	return &TextMessageDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *TextMessageClient) DeleteOne(tm *TextMessage) *TextMessageDeleteOne {
+	return c.DeleteOneID(tm.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *TextMessageClient) DeleteOneID(id int) *TextMessageDeleteOne {
+	builder := c.Delete().Where(textmessage.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TextMessageDeleteOne{builder}
+}
+
+// Query returns a query builder for TextMessage.
+func (c *TextMessageClient) Query() *TextMessageQuery {
+	return &TextMessageQuery{config: c.config}
+}
+
+// Get returns a TextMessage entity by its id.
+func (c *TextMessageClient) Get(ctx context.Context, id int) (*TextMessage, error) {
+	return c.Query().Where(textmessage.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TextMessageClient) GetX(ctx context.Context, id int) *TextMessage {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTextmessage queries the textmessage edge of a TextMessage.
+func (c *TextMessageClient) QueryTextmessage(tm *TextMessage) *MessageQuery {
+	query := &MessageQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := tm.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(textmessage.Table, textmessage.FieldID, id),
+			sqlgraph.To(message.Table, message.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, textmessage.TextmessageTable, textmessage.TextmessageColumn),
+		)
+		fromV = sqlgraph.Neighbors(tm.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TextMessageClient) Hooks() []Hook {
+	return c.hooks.TextMessage
 }
 
 // UserClient is a client for the User schema.
@@ -1388,7 +2515,39 @@ func (c *UserClient) QueryGuild(u *User) *GuildQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(guild.Table, guild.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.GuildTable, user.GuildColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.GuildTable, user.GuildPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryEmotepack queries the emotepack edge of a User.
+func (c *UserClient) QueryEmotepack(u *User) *EmotePackQuery {
+	query := &EmotePackQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(emotepack.Table, emotepack.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.EmotepackTable, user.EmotepackColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRole queries the role edge of a User.
+func (c *UserClient) QueryRole(u *User) *RoleQuery {
+	query := &RoleQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(role.Table, role.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.RoleTable, user.RolePrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

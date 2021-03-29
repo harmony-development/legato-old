@@ -36,7 +36,10 @@ func (User) Edges() []ent.Edge {
 			To("message", Message.Type),
 		edge.
 			To("guild", Guild.Type),
-		edge.From("role", Role.Type).Ref("members"),
-		edge.To("emotepack", EmotePack.Type),
+		edge.
+			To("emotepack", EmotePack.Type),
+		edge.
+			From("role", Role.Type).
+			Ref("members"),
 	}
 }

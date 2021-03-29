@@ -10,8 +10,12 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
+	"github.com/harmony-development/legato/server/db/ent/entgen/embedmessage"
+	"github.com/harmony-development/legato/server/db/ent/entgen/filemessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
 	"github.com/harmony-development/legato/server/db/ent/entgen/override"
+	"github.com/harmony-development/legato/server/db/ent/entgen/textmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
 
@@ -20,12 +24,6 @@ type MessageCreate struct {
 	config
 	mutation *MessageMutation
 	hooks    []Hook
-}
-
-// SetAuthor sets the "author" field.
-func (mc *MessageCreate) SetAuthor(u uint64) *MessageCreate {
-	mc.mutation.SetAuthor(u)
-	return mc
 }
 
 // SetCreatedat sets the "createdat" field.
@@ -37,20 +35,6 @@ func (mc *MessageCreate) SetCreatedat(t time.Time) *MessageCreate {
 // SetEditedat sets the "editedat" field.
 func (mc *MessageCreate) SetEditedat(t time.Time) *MessageCreate {
 	mc.mutation.SetEditedat(t)
-	return mc
-}
-
-// SetReplyto sets the "replyto" field.
-func (mc *MessageCreate) SetReplyto(u uint64) *MessageCreate {
-	mc.mutation.SetReplyto(u)
-	return mc
-}
-
-// SetNillableReplyto sets the "replyto" field if the given value is not nil.
-func (mc *MessageCreate) SetNillableReplyto(u *uint64) *MessageCreate {
-	if u != nil {
-		mc.SetReplyto(*u)
-	}
 	return mc
 }
 
@@ -79,19 +63,133 @@ func (mc *MessageCreate) SetUser(u *User) *MessageCreate {
 	return mc.SetUserID(u.ID)
 }
 
-// AddOverrideIDs adds the "override" edge to the Override entity by IDs.
-func (mc *MessageCreate) AddOverrideIDs(ids ...int) *MessageCreate {
-	mc.mutation.AddOverrideIDs(ids...)
+// SetChannelID sets the "channel" edge to the Channel entity by ID.
+func (mc *MessageCreate) SetChannelID(id uint64) *MessageCreate {
+	mc.mutation.SetChannelID(id)
 	return mc
 }
 
-// AddOverride adds the "override" edges to the Override entity.
-func (mc *MessageCreate) AddOverride(o ...*Override) *MessageCreate {
-	ids := make([]int, len(o))
-	for i := range o {
-		ids[i] = o[i].ID
+// SetNillableChannelID sets the "channel" edge to the Channel entity by ID if the given value is not nil.
+func (mc *MessageCreate) SetNillableChannelID(id *uint64) *MessageCreate {
+	if id != nil {
+		mc = mc.SetChannelID(*id)
 	}
-	return mc.AddOverrideIDs(ids...)
+	return mc
+}
+
+// SetChannel sets the "channel" edge to the Channel entity.
+func (mc *MessageCreate) SetChannel(c *Channel) *MessageCreate {
+	return mc.SetChannelID(c.ID)
+}
+
+// SetOverrideID sets the "override" edge to the Override entity by ID.
+func (mc *MessageCreate) SetOverrideID(id int) *MessageCreate {
+	mc.mutation.SetOverrideID(id)
+	return mc
+}
+
+// SetNillableOverrideID sets the "override" edge to the Override entity by ID if the given value is not nil.
+func (mc *MessageCreate) SetNillableOverrideID(id *int) *MessageCreate {
+	if id != nil {
+		mc = mc.SetOverrideID(*id)
+	}
+	return mc
+}
+
+// SetOverride sets the "override" edge to the Override entity.
+func (mc *MessageCreate) SetOverride(o *Override) *MessageCreate {
+	return mc.SetOverrideID(o.ID)
+}
+
+// SetParentID sets the "parent" edge to the Message entity by ID.
+func (mc *MessageCreate) SetParentID(id uint64) *MessageCreate {
+	mc.mutation.SetParentID(id)
+	return mc
+}
+
+// SetNillableParentID sets the "parent" edge to the Message entity by ID if the given value is not nil.
+func (mc *MessageCreate) SetNillableParentID(id *uint64) *MessageCreate {
+	if id != nil {
+		mc = mc.SetParentID(*id)
+	}
+	return mc
+}
+
+// SetParent sets the "parent" edge to the Message entity.
+func (mc *MessageCreate) SetParent(m *Message) *MessageCreate {
+	return mc.SetParentID(m.ID)
+}
+
+// AddReplyIDs adds the "replies" edge to the Message entity by IDs.
+func (mc *MessageCreate) AddReplyIDs(ids ...uint64) *MessageCreate {
+	mc.mutation.AddReplyIDs(ids...)
+	return mc
+}
+
+// AddReplies adds the "replies" edges to the Message entity.
+func (mc *MessageCreate) AddReplies(m ...*Message) *MessageCreate {
+	ids := make([]uint64, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return mc.AddReplyIDs(ids...)
+}
+
+// SetTextmessageID sets the "textmessage" edge to the TextMessage entity by ID.
+func (mc *MessageCreate) SetTextmessageID(id int) *MessageCreate {
+	mc.mutation.SetTextmessageID(id)
+	return mc
+}
+
+// SetNillableTextmessageID sets the "textmessage" edge to the TextMessage entity by ID if the given value is not nil.
+func (mc *MessageCreate) SetNillableTextmessageID(id *int) *MessageCreate {
+	if id != nil {
+		mc = mc.SetTextmessageID(*id)
+	}
+	return mc
+}
+
+// SetTextmessage sets the "textmessage" edge to the TextMessage entity.
+func (mc *MessageCreate) SetTextmessage(t *TextMessage) *MessageCreate {
+	return mc.SetTextmessageID(t.ID)
+}
+
+// SetFilemessageID sets the "filemessage" edge to the FileMessage entity by ID.
+func (mc *MessageCreate) SetFilemessageID(id int) *MessageCreate {
+	mc.mutation.SetFilemessageID(id)
+	return mc
+}
+
+// SetNillableFilemessageID sets the "filemessage" edge to the FileMessage entity by ID if the given value is not nil.
+func (mc *MessageCreate) SetNillableFilemessageID(id *int) *MessageCreate {
+	if id != nil {
+		mc = mc.SetFilemessageID(*id)
+	}
+	return mc
+}
+
+// SetFilemessage sets the "filemessage" edge to the FileMessage entity.
+func (mc *MessageCreate) SetFilemessage(f *FileMessage) *MessageCreate {
+	return mc.SetFilemessageID(f.ID)
+}
+
+// SetEmbedmessageID sets the "embedmessage" edge to the EmbedMessage entity by ID.
+func (mc *MessageCreate) SetEmbedmessageID(id int) *MessageCreate {
+	mc.mutation.SetEmbedmessageID(id)
+	return mc
+}
+
+// SetNillableEmbedmessageID sets the "embedmessage" edge to the EmbedMessage entity by ID if the given value is not nil.
+func (mc *MessageCreate) SetNillableEmbedmessageID(id *int) *MessageCreate {
+	if id != nil {
+		mc = mc.SetEmbedmessageID(*id)
+	}
+	return mc
+}
+
+// SetEmbedmessage sets the "embedmessage" edge to the EmbedMessage entity.
+func (mc *MessageCreate) SetEmbedmessage(e *EmbedMessage) *MessageCreate {
+	return mc.SetEmbedmessageID(e.ID)
 }
 
 // Mutation returns the MessageMutation object of the builder.
@@ -105,7 +203,6 @@ func (mc *MessageCreate) Save(ctx context.Context) (*Message, error) {
 		err  error
 		node *Message
 	)
-	mc.defaults()
 	if len(mc.hooks) == 0 {
 		if err = mc.check(); err != nil {
 			return nil, err
@@ -144,27 +241,13 @@ func (mc *MessageCreate) SaveX(ctx context.Context) *Message {
 	return v
 }
 
-// defaults sets the default values of the builder before save.
-func (mc *MessageCreate) defaults() {
-	if _, ok := mc.mutation.Replyto(); !ok {
-		v := message.DefaultReplyto
-		mc.mutation.SetReplyto(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (mc *MessageCreate) check() error {
-	if _, ok := mc.mutation.Author(); !ok {
-		return &ValidationError{Name: "author", err: errors.New("entgen: missing required field \"author\"")}
-	}
 	if _, ok := mc.mutation.Createdat(); !ok {
 		return &ValidationError{Name: "createdat", err: errors.New("entgen: missing required field \"createdat\"")}
 	}
 	if _, ok := mc.mutation.Editedat(); !ok {
 		return &ValidationError{Name: "editedat", err: errors.New("entgen: missing required field \"editedat\"")}
-	}
-	if _, ok := mc.mutation.Replyto(); !ok {
-		return &ValidationError{Name: "replyto", err: errors.New("entgen: missing required field \"replyto\"")}
 	}
 	return nil
 }
@@ -199,14 +282,6 @@ func (mc *MessageCreate) createSpec() (*Message, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := mc.mutation.Author(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: message.FieldAuthor,
-		})
-		_node.Author = value
-	}
 	if value, ok := mc.mutation.Createdat(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -222,14 +297,6 @@ func (mc *MessageCreate) createSpec() (*Message, *sqlgraph.CreateSpec) {
 			Column: message.FieldEditedat,
 		})
 		_node.Editedat = value
-	}
-	if value, ok := mc.mutation.Replyto(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: message.FieldReplyto,
-		})
-		_node.Replyto = value
 	}
 	if nodes := mc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -251,12 +318,32 @@ func (mc *MessageCreate) createSpec() (*Message, *sqlgraph.CreateSpec) {
 		_node.user_message = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := mc.mutation.ChannelIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   message.ChannelTable,
+			Columns: []string{message.ChannelColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: channel.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.channel_message = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := mc.mutation.OverrideIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   message.OverrideTable,
-			Columns: message.OverridePrimaryKey,
+			Columns: []string{message.OverrideColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -268,6 +355,104 @@ func (mc *MessageCreate) createSpec() (*Message, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := mc.mutation.ParentIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   message.ParentTable,
+			Columns: []string{message.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: message.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.message_replies = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := mc.mutation.RepliesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   message.RepliesTable,
+			Columns: []string{message.RepliesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: message.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := mc.mutation.TextmessageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   message.TextmessageTable,
+			Columns: []string{message.TextmessageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: textmessage.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := mc.mutation.FilemessageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   message.FilemessageTable,
+			Columns: []string{message.FilemessageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: filemessage.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.message_filemessage = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := mc.mutation.EmbedmessageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   message.EmbedmessageTable,
+			Columns: []string{message.EmbedmessageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: embedmessage.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.message_embedmessage = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -287,7 +472,6 @@ func (mcb *MessageCreateBulk) Save(ctx context.Context) ([]*Message, error) {
 	for i := range mcb.builders {
 		func(i int, root context.Context) {
 			builder := mcb.builders[i]
-			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*MessageMutation)
 				if !ok {

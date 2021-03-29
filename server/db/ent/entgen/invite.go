@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/invite"
 )
 
@@ -23,22 +24,28 @@ type Invite struct {
 	PossibleUses int64 `json:"possible_uses,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the InviteQuery when eager-loading is set.
-	Edges InviteEdges `json:"edges"`
+	Edges        InviteEdges `json:"edges"`
+	guild_invite *uint64
 }
 
 // InviteEdges holds the relations/edges for other nodes in the graph.
 type InviteEdges struct {
 	// Guild holds the value of the guild edge.
-	Guild []*Guild `json:"guild,omitempty"`
+	Guild *Guild `json:"guild,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
 // GuildOrErr returns the Guild value or an error if the edge
-// was not loaded in eager-loading.
-func (e InviteEdges) GuildOrErr() ([]*Guild, error) {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e InviteEdges) GuildOrErr() (*Guild, error) {
 	if e.loadedTypes[0] {
+		if e.Guild == nil {
+			// The edge guild was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: guild.Label}
+		}
 		return e.Guild, nil
 	}
 	return nil, &NotLoadedError{edge: "guild"}
@@ -53,6 +60,8 @@ func (*Invite) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = &sql.NullInt64{}
 		case invite.FieldCode:
 			values[i] = &sql.NullString{}
+		case invite.ForeignKeys[0]: // guild_invite
+			values[i] = &sql.NullInt64{}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Invite", columns[i])
 		}
@@ -91,6 +100,13 @@ func (i *Invite) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field possible_uses", values[j])
 			} else if value.Valid {
 				i.PossibleUses = value.Int64
+			}
+		case invite.ForeignKeys[0]:
+			if value, ok := values[j].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field guild_invite", value)
+			} else if value.Valid {
+				i.guild_invite = new(uint64)
+				*i.guild_invite = uint64(value.Int64)
 			}
 		}
 	}

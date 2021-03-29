@@ -38,19 +38,23 @@ func (oc *OverrideCreate) SetReason(i int64) *OverrideCreate {
 	return oc
 }
 
-// AddMessageIDs adds the "message" edge to the Message entity by IDs.
-func (oc *OverrideCreate) AddMessageIDs(ids ...uint64) *OverrideCreate {
-	oc.mutation.AddMessageIDs(ids...)
+// SetMessageID sets the "message" edge to the Message entity by ID.
+func (oc *OverrideCreate) SetMessageID(id uint64) *OverrideCreate {
+	oc.mutation.SetMessageID(id)
 	return oc
 }
 
-// AddMessage adds the "message" edges to the Message entity.
-func (oc *OverrideCreate) AddMessage(m ...*Message) *OverrideCreate {
-	ids := make([]uint64, len(m))
-	for i := range m {
-		ids[i] = m[i].ID
+// SetNillableMessageID sets the "message" edge to the Message entity by ID if the given value is not nil.
+func (oc *OverrideCreate) SetNillableMessageID(id *uint64) *OverrideCreate {
+	if id != nil {
+		oc = oc.SetMessageID(*id)
 	}
-	return oc.AddMessageIDs(ids...)
+	return oc
+}
+
+// SetMessage sets the "message" edge to the Message entity.
+func (oc *OverrideCreate) SetMessage(m *Message) *OverrideCreate {
+	return oc.SetMessageID(m.ID)
 }
 
 // Mutation returns the OverrideMutation object of the builder.
@@ -166,10 +170,10 @@ func (oc *OverrideCreate) createSpec() (*Override, *sqlgraph.CreateSpec) {
 	}
 	if nodes := oc.mutation.MessageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   override.MessageTable,
-			Columns: override.MessagePrimaryKey,
+			Columns: []string{override.MessageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -181,6 +185,7 @@ func (oc *OverrideCreate) createSpec() (*Override, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.message_override = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

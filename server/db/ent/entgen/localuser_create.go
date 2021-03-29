@@ -39,14 +39,6 @@ func (luc *LocalUserCreate) SetUserID(id uint64) *LocalUserCreate {
 	return luc
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (luc *LocalUserCreate) SetNillableUserID(id *uint64) *LocalUserCreate {
-	if id != nil {
-		luc = luc.SetUserID(*id)
-	}
-	return luc
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (luc *LocalUserCreate) SetUser(u *User) *LocalUserCreate {
 	return luc.SetUserID(u.ID)
@@ -128,6 +120,9 @@ func (luc *LocalUserCreate) check() error {
 	}
 	if _, ok := luc.mutation.Password(); !ok {
 		return &ValidationError{Name: "password", err: errors.New("entgen: missing required field \"password\"")}
+	}
+	if _, ok := luc.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user", err: errors.New("entgen: missing required edge \"user\"")}
 	}
 	return nil
 }

@@ -17,11 +17,13 @@ const (
 	EdgeMessage = "message"
 	// Table holds the table name of the override in the database.
 	Table = "overrides"
-	// MessageTable is the table the holds the message relation/edge. The primary key declared below.
-	MessageTable = "message_override"
+	// MessageTable is the table the holds the message relation/edge.
+	MessageTable = "overrides"
 	// MessageInverseTable is the table name for the Message entity.
 	// It exists in this package in order to avoid circular dependency with the "message" package.
 	MessageInverseTable = "messages"
+	// MessageColumn is the table column denoting the message relation/edge.
+	MessageColumn = "message_override"
 )
 
 // Columns holds all SQL columns for override fields.
@@ -32,16 +34,21 @@ var Columns = []string{
 	FieldReason,
 }
 
-var (
-	// MessagePrimaryKey and MessageColumn2 are the table columns denoting the
-	// primary key for the message relation (M2M).
-	MessagePrimaryKey = []string{"message_id", "override_id"}
-)
+// ForeignKeys holds the SQL foreign-keys that are owned by the "overrides"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"message_override",
+}
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}

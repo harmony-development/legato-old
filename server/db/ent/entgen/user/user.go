@@ -19,6 +19,10 @@ const (
 	EdgeMessage = "message"
 	// EdgeGuild holds the string denoting the guild edge name in mutations.
 	EdgeGuild = "guild"
+	// EdgeEmotepack holds the string denoting the emotepack edge name in mutations.
+	EdgeEmotepack = "emotepack"
+	// EdgeRole holds the string denoting the role edge name in mutations.
+	EdgeRole = "role"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// LocalUserTable is the table the holds the local_user relation/edge.
@@ -56,13 +60,23 @@ const (
 	MessageInverseTable = "messages"
 	// MessageColumn is the table column denoting the message relation/edge.
 	MessageColumn = "user_message"
-	// GuildTable is the table the holds the guild relation/edge.
-	GuildTable = "guilds"
+	// GuildTable is the table the holds the guild relation/edge. The primary key declared below.
+	GuildTable = "user_guild"
 	// GuildInverseTable is the table name for the Guild entity.
 	// It exists in this package in order to avoid circular dependency with the "guild" package.
 	GuildInverseTable = "guilds"
-	// GuildColumn is the table column denoting the guild relation/edge.
-	GuildColumn = "user_guild"
+	// EmotepackTable is the table the holds the emotepack relation/edge.
+	EmotepackTable = "emote_packs"
+	// EmotepackInverseTable is the table name for the EmotePack entity.
+	// It exists in this package in order to avoid circular dependency with the "emotepack" package.
+	EmotepackInverseTable = "emote_packs"
+	// EmotepackColumn is the table column denoting the emotepack relation/edge.
+	EmotepackColumn = "user_emotepack"
+	// RoleTable is the table the holds the role relation/edge. The primary key declared below.
+	RoleTable = "role_members"
+	// RoleInverseTable is the table name for the Role entity.
+	// It exists in this package in order to avoid circular dependency with the "role" package.
+	RoleInverseTable = "roles"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -75,6 +89,15 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"guild_bans",
 }
+
+var (
+	// GuildPrimaryKey and GuildColumn2 are the table columns denoting the
+	// primary key for the guild relation (M2M).
+	GuildPrimaryKey = []string{"user_id", "guild_id"}
+	// RolePrimaryKey and RoleColumn2 are the table columns denoting the
+	// primary key for the role relation (M2M).
+	RolePrimaryKey = []string{"role_id", "user_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {

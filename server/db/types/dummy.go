@@ -59,6 +59,19 @@ func (d DummyDB) AddMessage(channelID, guildID, userID, messageID uint64, messag
 	panic("unimplemented")
 }
 
+func (d DummyDB) AddTextMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata, content string) (time.Time, error) {
+	panic("unimplemented")
+}
+func (d DummyDB) AddPhotoMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata, photos []*harmonytypesv1.Photo) (time.Time, error) {
+	panic("unimplemented")
+}
+func (d DummyDB) AddFilesMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata, files []string) (time.Time, error) {
+	panic("unimplemented")
+}
+func (d DummyDB) AddEmbedMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata, embeds []*harmonytypesv1.Embed) (time.Time, error) {
+	panic("unimplemented")
+}
+
 func (d DummyDB) DeleteMessage(messageID, channelID, guildID uint64) error {
 	panic("unimplemented")
 }
@@ -91,11 +104,11 @@ func (d DummyDB) GetMessageDate(messageID uint64) (time.Time, error) {
 	panic("unimplemented")
 }
 
-func (d DummyDB) GetMessages(guildID, channelID uint64) ([]queries.Message, error) {
+func (d DummyDB) GetMessages(guildID, channelID uint64) ([]*queries.Message, error) {
 	panic("unimplemented")
 }
 
-func (d DummyDB) GetMessagesBefore(guildID, channelID uint64, date time.Time) ([]queries.Message, error) {
+func (d DummyDB) GetMessagesBefore(guildID, channelID uint64, date time.Time) ([]*queries.Message, error) {
 	panic("unimplemented")
 }
 

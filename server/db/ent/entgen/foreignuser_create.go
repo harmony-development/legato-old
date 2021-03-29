@@ -44,14 +44,6 @@ func (fuc *ForeignUserCreate) SetUserID(id uint64) *ForeignUserCreate {
 	return fuc
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (fuc *ForeignUserCreate) SetNillableUserID(id *uint64) *ForeignUserCreate {
-	if id != nil {
-		fuc = fuc.SetUserID(*id)
-	}
-	return fuc
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (fuc *ForeignUserCreate) SetUser(u *User) *ForeignUserCreate {
 	return fuc.SetUserID(u.ID)
@@ -116,6 +108,9 @@ func (fuc *ForeignUserCreate) check() error {
 	}
 	if _, ok := fuc.mutation.Host(); !ok {
 		return &ValidationError{Name: "host", err: errors.New("entgen: missing required field \"host\"")}
+	}
+	if _, ok := fuc.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user", err: errors.New("entgen: missing required edge \"user\"")}
 	}
 	return nil
 }

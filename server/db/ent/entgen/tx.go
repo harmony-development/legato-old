@@ -14,6 +14,18 @@ type Tx struct {
 	config
 	// Channel is the client for interacting with the Channel builders.
 	Channel *ChannelClient
+	// EmbedMessage is the client for interacting with the EmbedMessage builders.
+	EmbedMessage *EmbedMessageClient
+	// Emote is the client for interacting with the Emote builders.
+	Emote *EmoteClient
+	// EmotePack is the client for interacting with the EmotePack builders.
+	EmotePack *EmotePackClient
+	// File is the client for interacting with the File builders.
+	File *FileClient
+	// FileHash is the client for interacting with the FileHash builders.
+	FileHash *FileHashClient
+	// FileMessage is the client for interacting with the FileMessage builders.
+	FileMessage *FileMessageClient
 	// ForeignUser is the client for interacting with the ForeignUser builders.
 	ForeignUser *ForeignUserClient
 	// Guild is the client for interacting with the Guild builders.
@@ -26,10 +38,16 @@ type Tx struct {
 	Message *MessageClient
 	// Override is the client for interacting with the Override builders.
 	Override *OverrideClient
+	// Permission is the client for interacting with the Permission builders.
+	Permission *PermissionClient
 	// Profile is the client for interacting with the Profile builders.
 	Profile *ProfileClient
+	// Role is the client for interacting with the Role builders.
+	Role *RoleClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
+	// TextMessage is the client for interacting with the TextMessage builders.
+	TextMessage *TextMessageClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -168,14 +186,23 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Channel = NewChannelClient(tx.config)
+	tx.EmbedMessage = NewEmbedMessageClient(tx.config)
+	tx.Emote = NewEmoteClient(tx.config)
+	tx.EmotePack = NewEmotePackClient(tx.config)
+	tx.File = NewFileClient(tx.config)
+	tx.FileHash = NewFileHashClient(tx.config)
+	tx.FileMessage = NewFileMessageClient(tx.config)
 	tx.ForeignUser = NewForeignUserClient(tx.config)
 	tx.Guild = NewGuildClient(tx.config)
 	tx.Invite = NewInviteClient(tx.config)
 	tx.LocalUser = NewLocalUserClient(tx.config)
 	tx.Message = NewMessageClient(tx.config)
 	tx.Override = NewOverrideClient(tx.config)
+	tx.Permission = NewPermissionClient(tx.config)
 	tx.Profile = NewProfileClient(tx.config)
+	tx.Role = NewRoleClient(tx.config)
 	tx.Session = NewSessionClient(tx.config)
+	tx.TextMessage = NewTextMessageClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 

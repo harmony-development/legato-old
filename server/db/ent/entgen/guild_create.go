@@ -52,34 +52,19 @@ func (gc *GuildCreate) SetID(u uint64) *GuildCreate {
 	return gc
 }
 
-// SetInviteID sets the "invite" edge to the Invite entity by ID.
-func (gc *GuildCreate) SetInviteID(id int) *GuildCreate {
-	gc.mutation.SetInviteID(id)
+// AddInviteIDs adds the "invite" edge to the Invite entity by IDs.
+func (gc *GuildCreate) AddInviteIDs(ids ...int) *GuildCreate {
+	gc.mutation.AddInviteIDs(ids...)
 	return gc
 }
 
-// SetNillableInviteID sets the "invite" edge to the Invite entity by ID if the given value is not nil.
-func (gc *GuildCreate) SetNillableInviteID(id *int) *GuildCreate {
-	if id != nil {
-		gc = gc.SetInviteID(*id)
+// AddInvite adds the "invite" edges to the Invite entity.
+func (gc *GuildCreate) AddInvite(i ...*Invite) *GuildCreate {
+	ids := make([]int, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
 	}
-	return gc
-}
-
-// SetInvite sets the "invite" edge to the Invite entity.
-func (gc *GuildCreate) SetInvite(i *Invite) *GuildCreate {
-	return gc.SetInviteID(i.ID)
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (gc *GuildCreate) SetUserID(id uint64) *GuildCreate {
-	gc.mutation.SetUserID(id)
-	return gc
-}
-
-// SetUser sets the "user" edge to the User entity.
-func (gc *GuildCreate) SetUser(u *User) *GuildCreate {
-	return gc.SetUserID(u.ID)
+	return gc.AddInviteIDs(ids...)
 }
 
 // AddBanIDs adds the "bans" edge to the User entity by IDs.
@@ -110,6 +95,21 @@ func (gc *GuildCreate) AddChannel(c ...*Channel) *GuildCreate {
 		ids[i] = c[i].ID
 	}
 	return gc.AddChannelIDs(ids...)
+}
+
+// AddUserIDs adds the "user" edge to the User entity by IDs.
+func (gc *GuildCreate) AddUserIDs(ids ...uint64) *GuildCreate {
+	gc.mutation.AddUserIDs(ids...)
+	return gc
+}
+
+// AddUser adds the "user" edges to the User entity.
+func (gc *GuildCreate) AddUser(u ...*User) *GuildCreate {
+	ids := make([]uint64, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return gc.AddUserIDs(ids...)
 }
 
 // Mutation returns the GuildMutation object of the builder.
@@ -175,7 +175,7 @@ func (gc *GuildCreate) check() error {
 	if _, ok := gc.mutation.Metadata(); !ok {
 		return &ValidationError{Name: "metadata", err: errors.New("entgen: missing required field \"metadata\"")}
 	}
-	if _, ok := gc.mutation.UserID(); !ok {
+	if len(gc.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New("entgen: missing required edge \"user\"")}
 	}
 	return nil
@@ -245,7 +245,7 @@ func (gc *GuildCreate) createSpec() (*Guild, *sqlgraph.CreateSpec) {
 	}
 	if nodes := gc.mutation.InviteIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   guild.InviteTable,
 			Columns: []string{guild.InviteColumn},
@@ -260,27 +260,6 @@ func (gc *GuildCreate) createSpec() (*Guild, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.guild_invite = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := gc.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   guild.UserTable,
-			Columns: []string{guild.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint64,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.user_guild = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := gc.mutation.BansIDs(); len(nodes) > 0 {
@@ -313,6 +292,25 @@ func (gc *GuildCreate) createSpec() (*Guild, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUint64,
 					Column: channel.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := gc.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   guild.UserTable,
+			Columns: guild.UserPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
 				},
 			},
 		}

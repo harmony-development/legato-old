@@ -8,11 +8,13 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/harmony-development/legato/server/db/ent/entgen/emotepack"
 	"github.com/harmony-development/legato/server/db/ent/entgen/foreignuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
 	"github.com/harmony-development/legato/server/db/ent/entgen/profile"
+	"github.com/harmony-development/legato/server/db/ent/entgen/role"
 	"github.com/harmony-development/legato/server/db/ent/entgen/session"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
@@ -130,6 +132,36 @@ func (uc *UserCreate) AddGuild(g ...*Guild) *UserCreate {
 		ids[i] = g[i].ID
 	}
 	return uc.AddGuildIDs(ids...)
+}
+
+// AddEmotepackIDs adds the "emotepack" edge to the EmotePack entity by IDs.
+func (uc *UserCreate) AddEmotepackIDs(ids ...uint64) *UserCreate {
+	uc.mutation.AddEmotepackIDs(ids...)
+	return uc
+}
+
+// AddEmotepack adds the "emotepack" edges to the EmotePack entity.
+func (uc *UserCreate) AddEmotepack(e ...*EmotePack) *UserCreate {
+	ids := make([]uint64, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return uc.AddEmotepackIDs(ids...)
+}
+
+// AddRoleIDs adds the "role" edge to the Role entity by IDs.
+func (uc *UserCreate) AddRoleIDs(ids ...uint64) *UserCreate {
+	uc.mutation.AddRoleIDs(ids...)
+	return uc
+}
+
+// AddRole adds the "role" edges to the Role entity.
+func (uc *UserCreate) AddRole(r ...*Role) *UserCreate {
+	ids := make([]uint64, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uc.AddRoleIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -313,15 +345,53 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	}
 	if nodes := uc.mutation.GuildIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   user.GuildTable,
-			Columns: []string{user.GuildColumn},
+			Columns: user.GuildPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUint64,
 					Column: guild.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.EmotepackIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.EmotepackTable,
+			Columns: []string{user.EmotepackColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: emotepack.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.RoleIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.RoleTable,
+			Columns: user.RolePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: role.FieldID,
 				},
 			},
 		}

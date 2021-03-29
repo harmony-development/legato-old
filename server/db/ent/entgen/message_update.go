@@ -10,9 +10,13 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
+	"github.com/harmony-development/legato/server/db/ent/entgen/embedmessage"
+	"github.com/harmony-development/legato/server/db/ent/entgen/filemessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
 	"github.com/harmony-development/legato/server/db/ent/entgen/override"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
+	"github.com/harmony-development/legato/server/db/ent/entgen/textmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
 
@@ -29,19 +33,6 @@ func (mu *MessageUpdate) Where(ps ...predicate.Message) *MessageUpdate {
 	return mu
 }
 
-// SetAuthor sets the "author" field.
-func (mu *MessageUpdate) SetAuthor(u uint64) *MessageUpdate {
-	mu.mutation.ResetAuthor()
-	mu.mutation.SetAuthor(u)
-	return mu
-}
-
-// AddAuthor adds u to the "author" field.
-func (mu *MessageUpdate) AddAuthor(u uint64) *MessageUpdate {
-	mu.mutation.AddAuthor(u)
-	return mu
-}
-
 // SetCreatedat sets the "createdat" field.
 func (mu *MessageUpdate) SetCreatedat(t time.Time) *MessageUpdate {
 	mu.mutation.SetCreatedat(t)
@@ -51,27 +42,6 @@ func (mu *MessageUpdate) SetCreatedat(t time.Time) *MessageUpdate {
 // SetEditedat sets the "editedat" field.
 func (mu *MessageUpdate) SetEditedat(t time.Time) *MessageUpdate {
 	mu.mutation.SetEditedat(t)
-	return mu
-}
-
-// SetReplyto sets the "replyto" field.
-func (mu *MessageUpdate) SetReplyto(u uint64) *MessageUpdate {
-	mu.mutation.ResetReplyto()
-	mu.mutation.SetReplyto(u)
-	return mu
-}
-
-// SetNillableReplyto sets the "replyto" field if the given value is not nil.
-func (mu *MessageUpdate) SetNillableReplyto(u *uint64) *MessageUpdate {
-	if u != nil {
-		mu.SetReplyto(*u)
-	}
-	return mu
-}
-
-// AddReplyto adds u to the "replyto" field.
-func (mu *MessageUpdate) AddReplyto(u uint64) *MessageUpdate {
-	mu.mutation.AddReplyto(u)
 	return mu
 }
 
@@ -94,19 +64,133 @@ func (mu *MessageUpdate) SetUser(u *User) *MessageUpdate {
 	return mu.SetUserID(u.ID)
 }
 
-// AddOverrideIDs adds the "override" edge to the Override entity by IDs.
-func (mu *MessageUpdate) AddOverrideIDs(ids ...int) *MessageUpdate {
-	mu.mutation.AddOverrideIDs(ids...)
+// SetChannelID sets the "channel" edge to the Channel entity by ID.
+func (mu *MessageUpdate) SetChannelID(id uint64) *MessageUpdate {
+	mu.mutation.SetChannelID(id)
 	return mu
 }
 
-// AddOverride adds the "override" edges to the Override entity.
-func (mu *MessageUpdate) AddOverride(o ...*Override) *MessageUpdate {
-	ids := make([]int, len(o))
-	for i := range o {
-		ids[i] = o[i].ID
+// SetNillableChannelID sets the "channel" edge to the Channel entity by ID if the given value is not nil.
+func (mu *MessageUpdate) SetNillableChannelID(id *uint64) *MessageUpdate {
+	if id != nil {
+		mu = mu.SetChannelID(*id)
 	}
-	return mu.AddOverrideIDs(ids...)
+	return mu
+}
+
+// SetChannel sets the "channel" edge to the Channel entity.
+func (mu *MessageUpdate) SetChannel(c *Channel) *MessageUpdate {
+	return mu.SetChannelID(c.ID)
+}
+
+// SetOverrideID sets the "override" edge to the Override entity by ID.
+func (mu *MessageUpdate) SetOverrideID(id int) *MessageUpdate {
+	mu.mutation.SetOverrideID(id)
+	return mu
+}
+
+// SetNillableOverrideID sets the "override" edge to the Override entity by ID if the given value is not nil.
+func (mu *MessageUpdate) SetNillableOverrideID(id *int) *MessageUpdate {
+	if id != nil {
+		mu = mu.SetOverrideID(*id)
+	}
+	return mu
+}
+
+// SetOverride sets the "override" edge to the Override entity.
+func (mu *MessageUpdate) SetOverride(o *Override) *MessageUpdate {
+	return mu.SetOverrideID(o.ID)
+}
+
+// SetParentID sets the "parent" edge to the Message entity by ID.
+func (mu *MessageUpdate) SetParentID(id uint64) *MessageUpdate {
+	mu.mutation.SetParentID(id)
+	return mu
+}
+
+// SetNillableParentID sets the "parent" edge to the Message entity by ID if the given value is not nil.
+func (mu *MessageUpdate) SetNillableParentID(id *uint64) *MessageUpdate {
+	if id != nil {
+		mu = mu.SetParentID(*id)
+	}
+	return mu
+}
+
+// SetParent sets the "parent" edge to the Message entity.
+func (mu *MessageUpdate) SetParent(m *Message) *MessageUpdate {
+	return mu.SetParentID(m.ID)
+}
+
+// AddReplyIDs adds the "replies" edge to the Message entity by IDs.
+func (mu *MessageUpdate) AddReplyIDs(ids ...uint64) *MessageUpdate {
+	mu.mutation.AddReplyIDs(ids...)
+	return mu
+}
+
+// AddReplies adds the "replies" edges to the Message entity.
+func (mu *MessageUpdate) AddReplies(m ...*Message) *MessageUpdate {
+	ids := make([]uint64, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return mu.AddReplyIDs(ids...)
+}
+
+// SetTextmessageID sets the "textmessage" edge to the TextMessage entity by ID.
+func (mu *MessageUpdate) SetTextmessageID(id int) *MessageUpdate {
+	mu.mutation.SetTextmessageID(id)
+	return mu
+}
+
+// SetNillableTextmessageID sets the "textmessage" edge to the TextMessage entity by ID if the given value is not nil.
+func (mu *MessageUpdate) SetNillableTextmessageID(id *int) *MessageUpdate {
+	if id != nil {
+		mu = mu.SetTextmessageID(*id)
+	}
+	return mu
+}
+
+// SetTextmessage sets the "textmessage" edge to the TextMessage entity.
+func (mu *MessageUpdate) SetTextmessage(t *TextMessage) *MessageUpdate {
+	return mu.SetTextmessageID(t.ID)
+}
+
+// SetFilemessageID sets the "filemessage" edge to the FileMessage entity by ID.
+func (mu *MessageUpdate) SetFilemessageID(id int) *MessageUpdate {
+	mu.mutation.SetFilemessageID(id)
+	return mu
+}
+
+// SetNillableFilemessageID sets the "filemessage" edge to the FileMessage entity by ID if the given value is not nil.
+func (mu *MessageUpdate) SetNillableFilemessageID(id *int) *MessageUpdate {
+	if id != nil {
+		mu = mu.SetFilemessageID(*id)
+	}
+	return mu
+}
+
+// SetFilemessage sets the "filemessage" edge to the FileMessage entity.
+func (mu *MessageUpdate) SetFilemessage(f *FileMessage) *MessageUpdate {
+	return mu.SetFilemessageID(f.ID)
+}
+
+// SetEmbedmessageID sets the "embedmessage" edge to the EmbedMessage entity by ID.
+func (mu *MessageUpdate) SetEmbedmessageID(id int) *MessageUpdate {
+	mu.mutation.SetEmbedmessageID(id)
+	return mu
+}
+
+// SetNillableEmbedmessageID sets the "embedmessage" edge to the EmbedMessage entity by ID if the given value is not nil.
+func (mu *MessageUpdate) SetNillableEmbedmessageID(id *int) *MessageUpdate {
+	if id != nil {
+		mu = mu.SetEmbedmessageID(*id)
+	}
+	return mu
+}
+
+// SetEmbedmessage sets the "embedmessage" edge to the EmbedMessage entity.
+func (mu *MessageUpdate) SetEmbedmessage(e *EmbedMessage) *MessageUpdate {
+	return mu.SetEmbedmessageID(e.ID)
 }
 
 // Mutation returns the MessageMutation object of the builder.
@@ -120,25 +204,61 @@ func (mu *MessageUpdate) ClearUser() *MessageUpdate {
 	return mu
 }
 
-// ClearOverride clears all "override" edges to the Override entity.
+// ClearChannel clears the "channel" edge to the Channel entity.
+func (mu *MessageUpdate) ClearChannel() *MessageUpdate {
+	mu.mutation.ClearChannel()
+	return mu
+}
+
+// ClearOverride clears the "override" edge to the Override entity.
 func (mu *MessageUpdate) ClearOverride() *MessageUpdate {
 	mu.mutation.ClearOverride()
 	return mu
 }
 
-// RemoveOverrideIDs removes the "override" edge to Override entities by IDs.
-func (mu *MessageUpdate) RemoveOverrideIDs(ids ...int) *MessageUpdate {
-	mu.mutation.RemoveOverrideIDs(ids...)
+// ClearParent clears the "parent" edge to the Message entity.
+func (mu *MessageUpdate) ClearParent() *MessageUpdate {
+	mu.mutation.ClearParent()
 	return mu
 }
 
-// RemoveOverride removes "override" edges to Override entities.
-func (mu *MessageUpdate) RemoveOverride(o ...*Override) *MessageUpdate {
-	ids := make([]int, len(o))
-	for i := range o {
-		ids[i] = o[i].ID
+// ClearReplies clears all "replies" edges to the Message entity.
+func (mu *MessageUpdate) ClearReplies() *MessageUpdate {
+	mu.mutation.ClearReplies()
+	return mu
+}
+
+// RemoveReplyIDs removes the "replies" edge to Message entities by IDs.
+func (mu *MessageUpdate) RemoveReplyIDs(ids ...uint64) *MessageUpdate {
+	mu.mutation.RemoveReplyIDs(ids...)
+	return mu
+}
+
+// RemoveReplies removes "replies" edges to Message entities.
+func (mu *MessageUpdate) RemoveReplies(m ...*Message) *MessageUpdate {
+	ids := make([]uint64, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
 	}
-	return mu.RemoveOverrideIDs(ids...)
+	return mu.RemoveReplyIDs(ids...)
+}
+
+// ClearTextmessage clears the "textmessage" edge to the TextMessage entity.
+func (mu *MessageUpdate) ClearTextmessage() *MessageUpdate {
+	mu.mutation.ClearTextmessage()
+	return mu
+}
+
+// ClearFilemessage clears the "filemessage" edge to the FileMessage entity.
+func (mu *MessageUpdate) ClearFilemessage() *MessageUpdate {
+	mu.mutation.ClearFilemessage()
+	return mu
+}
+
+// ClearEmbedmessage clears the "embedmessage" edge to the EmbedMessage entity.
+func (mu *MessageUpdate) ClearEmbedmessage() *MessageUpdate {
+	mu.mutation.ClearEmbedmessage()
+	return mu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -210,20 +330,6 @@ func (mu *MessageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := mu.mutation.Author(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: message.FieldAuthor,
-		})
-	}
-	if value, ok := mu.mutation.AddedAuthor(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: message.FieldAuthor,
-		})
-	}
 	if value, ok := mu.mutation.Createdat(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -236,20 +342,6 @@ func (mu *MessageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: message.FieldEditedat,
-		})
-	}
-	if value, ok := mu.mutation.Replyto(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: message.FieldReplyto,
-		})
-	}
-	if value, ok := mu.mutation.AddedReplyto(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: message.FieldReplyto,
 		})
 	}
 	if mu.mutation.UserCleared() {
@@ -287,12 +379,47 @@ func (mu *MessageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if mu.mutation.ChannelCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   message.ChannelTable,
+			Columns: []string{message.ChannelColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: channel.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := mu.mutation.ChannelIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   message.ChannelTable,
+			Columns: []string{message.ChannelColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: channel.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if mu.mutation.OverrideCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   message.OverrideTable,
-			Columns: message.OverridePrimaryKey,
+			Columns: []string{message.OverrideColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -303,12 +430,12 @@ func (mu *MessageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := mu.mutation.RemovedOverrideIDs(); len(nodes) > 0 && !mu.mutation.OverrideCleared() {
+	if nodes := mu.mutation.OverrideIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   message.OverrideTable,
-			Columns: message.OverridePrimaryKey,
+			Columns: []string{message.OverrideColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -320,19 +447,194 @@ func (mu *MessageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if mu.mutation.ParentCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   message.ParentTable,
+			Columns: []string{message.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: message.FieldID,
+				},
+			},
+		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := mu.mutation.OverrideIDs(); len(nodes) > 0 {
+	if nodes := mu.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   message.ParentTable,
+			Columns: []string{message.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: message.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if mu.mutation.RepliesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   message.OverrideTable,
-			Columns: message.OverridePrimaryKey,
+			Table:   message.RepliesTable,
+			Columns: []string{message.RepliesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: message.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := mu.mutation.RemovedRepliesIDs(); len(nodes) > 0 && !mu.mutation.RepliesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   message.RepliesTable,
+			Columns: []string{message.RepliesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: message.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := mu.mutation.RepliesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   message.RepliesTable,
+			Columns: []string{message.RepliesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: message.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if mu.mutation.TextmessageCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   message.TextmessageTable,
+			Columns: []string{message.TextmessageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: override.FieldID,
+					Column: textmessage.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := mu.mutation.TextmessageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   message.TextmessageTable,
+			Columns: []string{message.TextmessageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: textmessage.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if mu.mutation.FilemessageCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   message.FilemessageTable,
+			Columns: []string{message.FilemessageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: filemessage.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := mu.mutation.FilemessageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   message.FilemessageTable,
+			Columns: []string{message.FilemessageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: filemessage.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if mu.mutation.EmbedmessageCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   message.EmbedmessageTable,
+			Columns: []string{message.EmbedmessageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: embedmessage.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := mu.mutation.EmbedmessageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   message.EmbedmessageTable,
+			Columns: []string{message.EmbedmessageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: embedmessage.FieldID,
 				},
 			},
 		}
@@ -359,19 +661,6 @@ type MessageUpdateOne struct {
 	mutation *MessageMutation
 }
 
-// SetAuthor sets the "author" field.
-func (muo *MessageUpdateOne) SetAuthor(u uint64) *MessageUpdateOne {
-	muo.mutation.ResetAuthor()
-	muo.mutation.SetAuthor(u)
-	return muo
-}
-
-// AddAuthor adds u to the "author" field.
-func (muo *MessageUpdateOne) AddAuthor(u uint64) *MessageUpdateOne {
-	muo.mutation.AddAuthor(u)
-	return muo
-}
-
 // SetCreatedat sets the "createdat" field.
 func (muo *MessageUpdateOne) SetCreatedat(t time.Time) *MessageUpdateOne {
 	muo.mutation.SetCreatedat(t)
@@ -381,27 +670,6 @@ func (muo *MessageUpdateOne) SetCreatedat(t time.Time) *MessageUpdateOne {
 // SetEditedat sets the "editedat" field.
 func (muo *MessageUpdateOne) SetEditedat(t time.Time) *MessageUpdateOne {
 	muo.mutation.SetEditedat(t)
-	return muo
-}
-
-// SetReplyto sets the "replyto" field.
-func (muo *MessageUpdateOne) SetReplyto(u uint64) *MessageUpdateOne {
-	muo.mutation.ResetReplyto()
-	muo.mutation.SetReplyto(u)
-	return muo
-}
-
-// SetNillableReplyto sets the "replyto" field if the given value is not nil.
-func (muo *MessageUpdateOne) SetNillableReplyto(u *uint64) *MessageUpdateOne {
-	if u != nil {
-		muo.SetReplyto(*u)
-	}
-	return muo
-}
-
-// AddReplyto adds u to the "replyto" field.
-func (muo *MessageUpdateOne) AddReplyto(u uint64) *MessageUpdateOne {
-	muo.mutation.AddReplyto(u)
 	return muo
 }
 
@@ -424,19 +692,133 @@ func (muo *MessageUpdateOne) SetUser(u *User) *MessageUpdateOne {
 	return muo.SetUserID(u.ID)
 }
 
-// AddOverrideIDs adds the "override" edge to the Override entity by IDs.
-func (muo *MessageUpdateOne) AddOverrideIDs(ids ...int) *MessageUpdateOne {
-	muo.mutation.AddOverrideIDs(ids...)
+// SetChannelID sets the "channel" edge to the Channel entity by ID.
+func (muo *MessageUpdateOne) SetChannelID(id uint64) *MessageUpdateOne {
+	muo.mutation.SetChannelID(id)
 	return muo
 }
 
-// AddOverride adds the "override" edges to the Override entity.
-func (muo *MessageUpdateOne) AddOverride(o ...*Override) *MessageUpdateOne {
-	ids := make([]int, len(o))
-	for i := range o {
-		ids[i] = o[i].ID
+// SetNillableChannelID sets the "channel" edge to the Channel entity by ID if the given value is not nil.
+func (muo *MessageUpdateOne) SetNillableChannelID(id *uint64) *MessageUpdateOne {
+	if id != nil {
+		muo = muo.SetChannelID(*id)
 	}
-	return muo.AddOverrideIDs(ids...)
+	return muo
+}
+
+// SetChannel sets the "channel" edge to the Channel entity.
+func (muo *MessageUpdateOne) SetChannel(c *Channel) *MessageUpdateOne {
+	return muo.SetChannelID(c.ID)
+}
+
+// SetOverrideID sets the "override" edge to the Override entity by ID.
+func (muo *MessageUpdateOne) SetOverrideID(id int) *MessageUpdateOne {
+	muo.mutation.SetOverrideID(id)
+	return muo
+}
+
+// SetNillableOverrideID sets the "override" edge to the Override entity by ID if the given value is not nil.
+func (muo *MessageUpdateOne) SetNillableOverrideID(id *int) *MessageUpdateOne {
+	if id != nil {
+		muo = muo.SetOverrideID(*id)
+	}
+	return muo
+}
+
+// SetOverride sets the "override" edge to the Override entity.
+func (muo *MessageUpdateOne) SetOverride(o *Override) *MessageUpdateOne {
+	return muo.SetOverrideID(o.ID)
+}
+
+// SetParentID sets the "parent" edge to the Message entity by ID.
+func (muo *MessageUpdateOne) SetParentID(id uint64) *MessageUpdateOne {
+	muo.mutation.SetParentID(id)
+	return muo
+}
+
+// SetNillableParentID sets the "parent" edge to the Message entity by ID if the given value is not nil.
+func (muo *MessageUpdateOne) SetNillableParentID(id *uint64) *MessageUpdateOne {
+	if id != nil {
+		muo = muo.SetParentID(*id)
+	}
+	return muo
+}
+
+// SetParent sets the "parent" edge to the Message entity.
+func (muo *MessageUpdateOne) SetParent(m *Message) *MessageUpdateOne {
+	return muo.SetParentID(m.ID)
+}
+
+// AddReplyIDs adds the "replies" edge to the Message entity by IDs.
+func (muo *MessageUpdateOne) AddReplyIDs(ids ...uint64) *MessageUpdateOne {
+	muo.mutation.AddReplyIDs(ids...)
+	return muo
+}
+
+// AddReplies adds the "replies" edges to the Message entity.
+func (muo *MessageUpdateOne) AddReplies(m ...*Message) *MessageUpdateOne {
+	ids := make([]uint64, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return muo.AddReplyIDs(ids...)
+}
+
+// SetTextmessageID sets the "textmessage" edge to the TextMessage entity by ID.
+func (muo *MessageUpdateOne) SetTextmessageID(id int) *MessageUpdateOne {
+	muo.mutation.SetTextmessageID(id)
+	return muo
+}
+
+// SetNillableTextmessageID sets the "textmessage" edge to the TextMessage entity by ID if the given value is not nil.
+func (muo *MessageUpdateOne) SetNillableTextmessageID(id *int) *MessageUpdateOne {
+	if id != nil {
+		muo = muo.SetTextmessageID(*id)
+	}
+	return muo
+}
+
+// SetTextmessage sets the "textmessage" edge to the TextMessage entity.
+func (muo *MessageUpdateOne) SetTextmessage(t *TextMessage) *MessageUpdateOne {
+	return muo.SetTextmessageID(t.ID)
+}
+
+// SetFilemessageID sets the "filemessage" edge to the FileMessage entity by ID.
+func (muo *MessageUpdateOne) SetFilemessageID(id int) *MessageUpdateOne {
+	muo.mutation.SetFilemessageID(id)
+	return muo
+}
+
+// SetNillableFilemessageID sets the "filemessage" edge to the FileMessage entity by ID if the given value is not nil.
+func (muo *MessageUpdateOne) SetNillableFilemessageID(id *int) *MessageUpdateOne {
+	if id != nil {
+		muo = muo.SetFilemessageID(*id)
+	}
+	return muo
+}
+
+// SetFilemessage sets the "filemessage" edge to the FileMessage entity.
+func (muo *MessageUpdateOne) SetFilemessage(f *FileMessage) *MessageUpdateOne {
+	return muo.SetFilemessageID(f.ID)
+}
+
+// SetEmbedmessageID sets the "embedmessage" edge to the EmbedMessage entity by ID.
+func (muo *MessageUpdateOne) SetEmbedmessageID(id int) *MessageUpdateOne {
+	muo.mutation.SetEmbedmessageID(id)
+	return muo
+}
+
+// SetNillableEmbedmessageID sets the "embedmessage" edge to the EmbedMessage entity by ID if the given value is not nil.
+func (muo *MessageUpdateOne) SetNillableEmbedmessageID(id *int) *MessageUpdateOne {
+	if id != nil {
+		muo = muo.SetEmbedmessageID(*id)
+	}
+	return muo
+}
+
+// SetEmbedmessage sets the "embedmessage" edge to the EmbedMessage entity.
+func (muo *MessageUpdateOne) SetEmbedmessage(e *EmbedMessage) *MessageUpdateOne {
+	return muo.SetEmbedmessageID(e.ID)
 }
 
 // Mutation returns the MessageMutation object of the builder.
@@ -450,25 +832,61 @@ func (muo *MessageUpdateOne) ClearUser() *MessageUpdateOne {
 	return muo
 }
 
-// ClearOverride clears all "override" edges to the Override entity.
+// ClearChannel clears the "channel" edge to the Channel entity.
+func (muo *MessageUpdateOne) ClearChannel() *MessageUpdateOne {
+	muo.mutation.ClearChannel()
+	return muo
+}
+
+// ClearOverride clears the "override" edge to the Override entity.
 func (muo *MessageUpdateOne) ClearOverride() *MessageUpdateOne {
 	muo.mutation.ClearOverride()
 	return muo
 }
 
-// RemoveOverrideIDs removes the "override" edge to Override entities by IDs.
-func (muo *MessageUpdateOne) RemoveOverrideIDs(ids ...int) *MessageUpdateOne {
-	muo.mutation.RemoveOverrideIDs(ids...)
+// ClearParent clears the "parent" edge to the Message entity.
+func (muo *MessageUpdateOne) ClearParent() *MessageUpdateOne {
+	muo.mutation.ClearParent()
 	return muo
 }
 
-// RemoveOverride removes "override" edges to Override entities.
-func (muo *MessageUpdateOne) RemoveOverride(o ...*Override) *MessageUpdateOne {
-	ids := make([]int, len(o))
-	for i := range o {
-		ids[i] = o[i].ID
+// ClearReplies clears all "replies" edges to the Message entity.
+func (muo *MessageUpdateOne) ClearReplies() *MessageUpdateOne {
+	muo.mutation.ClearReplies()
+	return muo
+}
+
+// RemoveReplyIDs removes the "replies" edge to Message entities by IDs.
+func (muo *MessageUpdateOne) RemoveReplyIDs(ids ...uint64) *MessageUpdateOne {
+	muo.mutation.RemoveReplyIDs(ids...)
+	return muo
+}
+
+// RemoveReplies removes "replies" edges to Message entities.
+func (muo *MessageUpdateOne) RemoveReplies(m ...*Message) *MessageUpdateOne {
+	ids := make([]uint64, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
 	}
-	return muo.RemoveOverrideIDs(ids...)
+	return muo.RemoveReplyIDs(ids...)
+}
+
+// ClearTextmessage clears the "textmessage" edge to the TextMessage entity.
+func (muo *MessageUpdateOne) ClearTextmessage() *MessageUpdateOne {
+	muo.mutation.ClearTextmessage()
+	return muo
+}
+
+// ClearFilemessage clears the "filemessage" edge to the FileMessage entity.
+func (muo *MessageUpdateOne) ClearFilemessage() *MessageUpdateOne {
+	muo.mutation.ClearFilemessage()
+	return muo
+}
+
+// ClearEmbedmessage clears the "embedmessage" edge to the EmbedMessage entity.
+func (muo *MessageUpdateOne) ClearEmbedmessage() *MessageUpdateOne {
+	muo.mutation.ClearEmbedmessage()
+	return muo
 }
 
 // Save executes the query and returns the updated Message entity.
@@ -545,20 +963,6 @@ func (muo *MessageUpdateOne) sqlSave(ctx context.Context) (_node *Message, err e
 			}
 		}
 	}
-	if value, ok := muo.mutation.Author(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: message.FieldAuthor,
-		})
-	}
-	if value, ok := muo.mutation.AddedAuthor(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: message.FieldAuthor,
-		})
-	}
 	if value, ok := muo.mutation.Createdat(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -571,20 +975,6 @@ func (muo *MessageUpdateOne) sqlSave(ctx context.Context) (_node *Message, err e
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: message.FieldEditedat,
-		})
-	}
-	if value, ok := muo.mutation.Replyto(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: message.FieldReplyto,
-		})
-	}
-	if value, ok := muo.mutation.AddedReplyto(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: message.FieldReplyto,
 		})
 	}
 	if muo.mutation.UserCleared() {
@@ -622,12 +1012,47 @@ func (muo *MessageUpdateOne) sqlSave(ctx context.Context) (_node *Message, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if muo.mutation.ChannelCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   message.ChannelTable,
+			Columns: []string{message.ChannelColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: channel.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := muo.mutation.ChannelIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   message.ChannelTable,
+			Columns: []string{message.ChannelColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: channel.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if muo.mutation.OverrideCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   message.OverrideTable,
-			Columns: message.OverridePrimaryKey,
+			Columns: []string{message.OverrideColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -638,12 +1063,12 @@ func (muo *MessageUpdateOne) sqlSave(ctx context.Context) (_node *Message, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := muo.mutation.RemovedOverrideIDs(); len(nodes) > 0 && !muo.mutation.OverrideCleared() {
+	if nodes := muo.mutation.OverrideIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   message.OverrideTable,
-			Columns: message.OverridePrimaryKey,
+			Columns: []string{message.OverrideColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -655,19 +1080,194 @@ func (muo *MessageUpdateOne) sqlSave(ctx context.Context) (_node *Message, err e
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if muo.mutation.ParentCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   message.ParentTable,
+			Columns: []string{message.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: message.FieldID,
+				},
+			},
+		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := muo.mutation.OverrideIDs(); len(nodes) > 0 {
+	if nodes := muo.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   message.ParentTable,
+			Columns: []string{message.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: message.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if muo.mutation.RepliesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   message.OverrideTable,
-			Columns: message.OverridePrimaryKey,
+			Table:   message.RepliesTable,
+			Columns: []string{message.RepliesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: message.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := muo.mutation.RemovedRepliesIDs(); len(nodes) > 0 && !muo.mutation.RepliesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   message.RepliesTable,
+			Columns: []string{message.RepliesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: message.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := muo.mutation.RepliesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   message.RepliesTable,
+			Columns: []string{message.RepliesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: message.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if muo.mutation.TextmessageCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   message.TextmessageTable,
+			Columns: []string{message.TextmessageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: override.FieldID,
+					Column: textmessage.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := muo.mutation.TextmessageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   message.TextmessageTable,
+			Columns: []string{message.TextmessageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: textmessage.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if muo.mutation.FilemessageCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   message.FilemessageTable,
+			Columns: []string{message.FilemessageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: filemessage.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := muo.mutation.FilemessageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   message.FilemessageTable,
+			Columns: []string{message.FilemessageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: filemessage.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if muo.mutation.EmbedmessageCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   message.EmbedmessageTable,
+			Columns: []string{message.EmbedmessageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: embedmessage.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := muo.mutation.EmbedmessageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   message.EmbedmessageTable,
+			Columns: []string{message.EmbedmessageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: embedmessage.FieldID,
 				},
 			},
 		}

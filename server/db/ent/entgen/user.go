@@ -38,9 +38,13 @@ type UserEdges struct {
 	Message []*Message `json:"message,omitempty"`
 	// Guild holds the value of the guild edge.
 	Guild []*Guild `json:"guild,omitempty"`
+	// Emotepack holds the value of the emotepack edge.
+	Emotepack []*EmotePack `json:"emotepack,omitempty"`
+	// Role holds the value of the role edge.
+	Role []*Role `json:"role,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [8]bool
 }
 
 // LocalUserOrErr returns the LocalUser value or an error if the edge
@@ -110,6 +114,24 @@ func (e UserEdges) GuildOrErr() ([]*Guild, error) {
 		return e.Guild, nil
 	}
 	return nil, &NotLoadedError{edge: "guild"}
+}
+
+// EmotepackOrErr returns the Emotepack value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) EmotepackOrErr() ([]*EmotePack, error) {
+	if e.loadedTypes[6] {
+		return e.Emotepack, nil
+	}
+	return nil, &NotLoadedError{edge: "emotepack"}
+}
+
+// RoleOrErr returns the Role value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) RoleOrErr() ([]*Role, error) {
+	if e.loadedTypes[7] {
+		return e.Role, nil
+	}
+	return nil, &NotLoadedError{edge: "role"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -182,6 +204,16 @@ func (u *User) QueryMessage() *MessageQuery {
 // QueryGuild queries the "guild" edge of the User entity.
 func (u *User) QueryGuild() *GuildQuery {
 	return (&UserClient{config: u.config}).QueryGuild(u)
+}
+
+// QueryEmotepack queries the "emotepack" edge of the User entity.
+func (u *User) QueryEmotepack() *EmotePackQuery {
+	return (&UserClient{config: u.config}).QueryEmotepack(u)
+}
+
+// QueryRole queries the "role" edge of the User entity.
+func (u *User) QueryRole() *RoleQuery {
+	return (&UserClient{config: u.config}).QueryRole(u)
 }
 
 // Update returns a builder for updating this User.

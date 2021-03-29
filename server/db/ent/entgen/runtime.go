@@ -7,7 +7,6 @@ import (
 
 	"github.com/harmony-development/legato/server/db/ent/entgen/invite"
 	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
-	"github.com/harmony-development/legato/server/db/ent/entgen/message"
 	"github.com/harmony-development/legato/server/db/ent/entgen/profile"
 	"github.com/harmony-development/legato/server/db/ent/entgen/schema"
 	"github.com/harmony-development/legato/server/db/ent/entgen/session"
@@ -33,12 +32,6 @@ func init() {
 	localuserDescEmail := localuserFields[0].Descriptor()
 	// localuser.EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	localuser.EmailValidator = localuserDescEmail.Validators[0].(func(string) error)
-	messageFields := schema.Message{}.Fields()
-	_ = messageFields
-	// messageDescReplyto is the schema descriptor for replyto field.
-	messageDescReplyto := messageFields[4].Descriptor()
-	// message.DefaultReplyto holds the default value on creation for the replyto field.
-	message.DefaultReplyto = messageDescReplyto.Default.(uint64)
 	profileFields := schema.Profile{}.Fields()
 	_ = profileFields
 	// profileDescIsBot is the schema descriptor for is_bot field.

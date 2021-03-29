@@ -9,6 +9,24 @@ import (
 // Channel is the predicate function for channel builders.
 type Channel func(*sql.Selector)
 
+// EmbedMessage is the predicate function for embedmessage builders.
+type EmbedMessage func(*sql.Selector)
+
+// Emote is the predicate function for emote builders.
+type Emote func(*sql.Selector)
+
+// EmotePack is the predicate function for emotepack builders.
+type EmotePack func(*sql.Selector)
+
+// File is the predicate function for file builders.
+type File func(*sql.Selector)
+
+// FileHash is the predicate function for filehash builders.
+type FileHash func(*sql.Selector)
+
+// FileMessage is the predicate function for filemessage builders.
+type FileMessage func(*sql.Selector)
+
 // ForeignUser is the predicate function for foreignuser builders.
 type ForeignUser func(*sql.Selector)
 
@@ -27,11 +45,20 @@ type Message func(*sql.Selector)
 // Override is the predicate function for override builders.
 type Override func(*sql.Selector)
 
+// Permission is the predicate function for permission builders.
+type Permission func(*sql.Selector)
+
 // Profile is the predicate function for profile builders.
 type Profile func(*sql.Selector)
 
+// Role is the predicate function for role builders.
+type Role func(*sql.Selector)
+
 // Session is the predicate function for session builders.
 type Session func(*sql.Selector)
+
+// TextMessage is the predicate function for textmessage builders.
+type TextMessage func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

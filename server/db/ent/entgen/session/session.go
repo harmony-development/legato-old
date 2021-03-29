@@ -21,11 +21,11 @@ const (
 	Table = "sessions"
 	// UserTable is the table the holds the user relation/edge.
 	UserTable = "sessions"
-	// UserInverseTable is the table name for the LocalUser entity.
-	// It exists in this package in order to avoid circular dependency with the "localuser" package.
-	UserInverseTable = "local_users"
+	// UserInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
-	UserColumn = "local_user_sessions"
+	UserColumn = "user_sessions"
 )
 
 // Columns holds all SQL columns for session fields.

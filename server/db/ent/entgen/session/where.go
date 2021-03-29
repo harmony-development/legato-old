@@ -307,7 +307,7 @@ func HasUser() predicate.Session {
 }
 
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
-func HasUserWith(preds ...predicate.LocalUser) predicate.Session {
+func HasUserWith(preds ...predicate.User) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),

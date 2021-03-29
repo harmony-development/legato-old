@@ -12,12 +12,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/harmony-development/legato/server/db/ent/entgen/emotepack"
 	"github.com/harmony-development/legato/server/db/ent/entgen/foreignuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 	"github.com/harmony-development/legato/server/db/ent/entgen/profile"
+	"github.com/harmony-development/legato/server/db/ent/entgen/role"
 	"github.com/harmony-development/legato/server/db/ent/entgen/session"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
@@ -37,6 +39,8 @@ type UserQuery struct {
 	withSessions    *SessionQuery
 	withMessage     *MessageQuery
 	withGuild       *GuildQuery
+	withEmotepack   *EmotePackQuery
+	withRole        *RoleQuery
 	withFKs         bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -191,7 +195,51 @@ func (uq *UserQuery) QueryGuild() *GuildQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(guild.Table, guild.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.GuildTable, user.GuildColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.GuildTable, user.GuildPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryEmotepack chains the current query on the "emotepack" edge.
+func (uq *UserQuery) QueryEmotepack() *EmotePackQuery {
+	query := &EmotePackQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(emotepack.Table, emotepack.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.EmotepackTable, user.EmotepackColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryRole chains the current query on the "role" edge.
+func (uq *UserQuery) QueryRole() *RoleQuery {
+	query := &RoleQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(role.Table, role.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.RoleTable, user.RolePrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -386,6 +434,8 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withSessions:    uq.withSessions.Clone(),
 		withMessage:     uq.withMessage.Clone(),
 		withGuild:       uq.withGuild.Clone(),
+		withEmotepack:   uq.withEmotepack.Clone(),
+		withRole:        uq.withRole.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -458,6 +508,28 @@ func (uq *UserQuery) WithGuild(opts ...func(*GuildQuery)) *UserQuery {
 	return uq
 }
 
+// WithEmotepack tells the query-builder to eager-load the nodes that are connected to
+// the "emotepack" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithEmotepack(opts ...func(*EmotePackQuery)) *UserQuery {
+	query := &EmotePackQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withEmotepack = query
+	return uq
+}
+
+// WithRole tells the query-builder to eager-load the nodes that are connected to
+// the "role" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithRole(opts ...func(*RoleQuery)) *UserQuery {
+	query := &RoleQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withRole = query
+	return uq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
@@ -500,13 +572,15 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		nodes       = []*User{}
 		withFKs     = uq.withFKs
 		_spec       = uq.querySpec()
-		loadedTypes = [6]bool{
+		loadedTypes = [8]bool{
 			uq.withLocalUser != nil,
 			uq.withForeignUser != nil,
 			uq.withProfile != nil,
 			uq.withSessions != nil,
 			uq.withMessage != nil,
 			uq.withGuild != nil,
+			uq.withEmotepack != nil,
+			uq.withRole != nil,
 		}
 	)
 	if withFKs {
@@ -676,30 +750,158 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 
 	if query := uq.withGuild; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
+		ids := make(map[uint64]*User, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+			node.Edges.Guild = []*Guild{}
+		}
+		var (
+			edgeids []uint64
+			edges   = make(map[uint64][]*User)
+		)
+		_spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: false,
+				Table:   user.GuildTable,
+				Columns: user.GuildPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(user.GuildPrimaryKey[0], fks...))
+			},
+
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*sql.NullInt64)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*sql.NullInt64)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := uint64(eout.Int64)
+				inValue := uint64(ein.Int64)
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				edgeids = append(edgeids, inValue)
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, uq.driver, _spec); err != nil {
+			return nil, fmt.Errorf(`query edges "guild": %w`, err)
+		}
+		query.Where(guild.IDIn(edgeids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := edges[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "guild" node returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Guild = append(nodes[i].Edges.Guild, n)
+			}
+		}
+	}
+
+	if query := uq.withEmotepack; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[uint64]*User)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Guild = []*Guild{}
+			nodes[i].Edges.Emotepack = []*EmotePack{}
 		}
 		query.withFKs = true
-		query.Where(predicate.Guild(func(s *sql.Selector) {
-			s.Where(sql.InValues(user.GuildColumn, fks...))
+		query.Where(predicate.EmotePack(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.EmotepackColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.user_guild
+			fk := n.user_emotepack
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "user_guild" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "user_emotepack" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_guild" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "user_emotepack" returned %v for node %v`, *fk, n.ID)
 			}
-			node.Edges.Guild = append(node.Edges.Guild, n)
+			node.Edges.Emotepack = append(node.Edges.Emotepack, n)
+		}
+	}
+
+	if query := uq.withRole; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		ids := make(map[uint64]*User, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+			node.Edges.Role = []*Role{}
+		}
+		var (
+			edgeids []uint64
+			edges   = make(map[uint64][]*User)
+		)
+		_spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: true,
+				Table:   user.RoleTable,
+				Columns: user.RolePrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(user.RolePrimaryKey[1], fks...))
+			},
+
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*sql.NullInt64)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*sql.NullInt64)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := uint64(eout.Int64)
+				inValue := uint64(ein.Int64)
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				edgeids = append(edgeids, inValue)
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, uq.driver, _spec); err != nil {
+			return nil, fmt.Errorf(`query edges "role": %w`, err)
+		}
+		query.Where(role.IDIn(edgeids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := edges[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "role" node returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Role = append(nodes[i].Edges.Role, n)
+			}
 		}
 	}
 

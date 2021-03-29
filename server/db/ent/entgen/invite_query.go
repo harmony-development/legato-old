@@ -4,7 +4,6 @@ package entgen
 
 import (
 	"context"
-	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -27,6 +26,7 @@ type InviteQuery struct {
 	predicates []predicate.Invite
 	// eager-loading edges.
 	withGuild *GuildQuery
+	withFKs   bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -70,7 +70,7 @@ func (iq *InviteQuery) QueryGuild() *GuildQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(invite.Table, invite.FieldID, selector),
 			sqlgraph.To(guild.Table, guild.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, invite.GuildTable, invite.GuildColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, invite.GuildTable, invite.GuildColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(iq.driver.Dialect(), step)
 		return fromU, nil
@@ -341,11 +341,18 @@ func (iq *InviteQuery) prepareQuery(ctx context.Context) error {
 func (iq *InviteQuery) sqlAll(ctx context.Context) ([]*Invite, error) {
 	var (
 		nodes       = []*Invite{}
+		withFKs     = iq.withFKs
 		_spec       = iq.querySpec()
 		loadedTypes = [1]bool{
 			iq.withGuild != nil,
 		}
 	)
+	if iq.withGuild != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, invite.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Invite{config: iq.config}
 		nodes = append(nodes, node)
@@ -367,31 +374,28 @@ func (iq *InviteQuery) sqlAll(ctx context.Context) ([]*Invite, error) {
 	}
 
 	if query := iq.withGuild; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*Invite)
+		ids := make([]uint64, 0, len(nodes))
+		nodeids := make(map[uint64][]*Invite)
 		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Guild = []*Guild{}
+			fk := nodes[i].guild_invite
+			if fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
 		}
-		query.withFKs = true
-		query.Where(predicate.Guild(func(s *sql.Selector) {
-			s.Where(sql.InValues(invite.GuildColumn, fks...))
-		}))
+		query.Where(guild.IDIn(ids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.guild_invite
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "guild_invite" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "guild_invite" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "guild_invite" returned %v`, n.ID)
 			}
-			node.Edges.Guild = append(node.Edges.Guild, n)
+			for i := range nodes {
+				nodes[i].Edges.Guild = n
+			}
 		}
 	}
 

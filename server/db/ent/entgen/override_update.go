@@ -52,19 +52,23 @@ func (ou *OverrideUpdate) AddReason(i int64) *OverrideUpdate {
 	return ou
 }
 
-// AddMessageIDs adds the "message" edge to the Message entity by IDs.
-func (ou *OverrideUpdate) AddMessageIDs(ids ...uint64) *OverrideUpdate {
-	ou.mutation.AddMessageIDs(ids...)
+// SetMessageID sets the "message" edge to the Message entity by ID.
+func (ou *OverrideUpdate) SetMessageID(id uint64) *OverrideUpdate {
+	ou.mutation.SetMessageID(id)
 	return ou
 }
 
-// AddMessage adds the "message" edges to the Message entity.
-func (ou *OverrideUpdate) AddMessage(m ...*Message) *OverrideUpdate {
-	ids := make([]uint64, len(m))
-	for i := range m {
-		ids[i] = m[i].ID
+// SetNillableMessageID sets the "message" edge to the Message entity by ID if the given value is not nil.
+func (ou *OverrideUpdate) SetNillableMessageID(id *uint64) *OverrideUpdate {
+	if id != nil {
+		ou = ou.SetMessageID(*id)
 	}
-	return ou.AddMessageIDs(ids...)
+	return ou
+}
+
+// SetMessage sets the "message" edge to the Message entity.
+func (ou *OverrideUpdate) SetMessage(m *Message) *OverrideUpdate {
+	return ou.SetMessageID(m.ID)
 }
 
 // Mutation returns the OverrideMutation object of the builder.
@@ -72,25 +76,10 @@ func (ou *OverrideUpdate) Mutation() *OverrideMutation {
 	return ou.mutation
 }
 
-// ClearMessage clears all "message" edges to the Message entity.
+// ClearMessage clears the "message" edge to the Message entity.
 func (ou *OverrideUpdate) ClearMessage() *OverrideUpdate {
 	ou.mutation.ClearMessage()
 	return ou
-}
-
-// RemoveMessageIDs removes the "message" edge to Message entities by IDs.
-func (ou *OverrideUpdate) RemoveMessageIDs(ids ...uint64) *OverrideUpdate {
-	ou.mutation.RemoveMessageIDs(ids...)
-	return ou
-}
-
-// RemoveMessage removes "message" edges to Message entities.
-func (ou *OverrideUpdate) RemoveMessage(m ...*Message) *OverrideUpdate {
-	ids := make([]uint64, len(m))
-	for i := range m {
-		ids[i] = m[i].ID
-	}
-	return ou.RemoveMessageIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -192,10 +181,10 @@ func (ou *OverrideUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if ou.mutation.MessageCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   override.MessageTable,
-			Columns: override.MessagePrimaryKey,
+			Columns: []string{override.MessageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -203,34 +192,15 @@ func (ou *OverrideUpdate) sqlSave(ctx context.Context) (n int, err error) {
 					Column: message.FieldID,
 				},
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := ou.mutation.RemovedMessageIDs(); len(nodes) > 0 && !ou.mutation.MessageCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   override.MessageTable,
-			Columns: override.MessagePrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint64,
-					Column: message.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := ou.mutation.MessageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   override.MessageTable,
-			Columns: override.MessagePrimaryKey,
+			Columns: []string{override.MessageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -287,19 +257,23 @@ func (ouo *OverrideUpdateOne) AddReason(i int64) *OverrideUpdateOne {
 	return ouo
 }
 
-// AddMessageIDs adds the "message" edge to the Message entity by IDs.
-func (ouo *OverrideUpdateOne) AddMessageIDs(ids ...uint64) *OverrideUpdateOne {
-	ouo.mutation.AddMessageIDs(ids...)
+// SetMessageID sets the "message" edge to the Message entity by ID.
+func (ouo *OverrideUpdateOne) SetMessageID(id uint64) *OverrideUpdateOne {
+	ouo.mutation.SetMessageID(id)
 	return ouo
 }
 
-// AddMessage adds the "message" edges to the Message entity.
-func (ouo *OverrideUpdateOne) AddMessage(m ...*Message) *OverrideUpdateOne {
-	ids := make([]uint64, len(m))
-	for i := range m {
-		ids[i] = m[i].ID
+// SetNillableMessageID sets the "message" edge to the Message entity by ID if the given value is not nil.
+func (ouo *OverrideUpdateOne) SetNillableMessageID(id *uint64) *OverrideUpdateOne {
+	if id != nil {
+		ouo = ouo.SetMessageID(*id)
 	}
-	return ouo.AddMessageIDs(ids...)
+	return ouo
+}
+
+// SetMessage sets the "message" edge to the Message entity.
+func (ouo *OverrideUpdateOne) SetMessage(m *Message) *OverrideUpdateOne {
+	return ouo.SetMessageID(m.ID)
 }
 
 // Mutation returns the OverrideMutation object of the builder.
@@ -307,25 +281,10 @@ func (ouo *OverrideUpdateOne) Mutation() *OverrideMutation {
 	return ouo.mutation
 }
 
-// ClearMessage clears all "message" edges to the Message entity.
+// ClearMessage clears the "message" edge to the Message entity.
 func (ouo *OverrideUpdateOne) ClearMessage() *OverrideUpdateOne {
 	ouo.mutation.ClearMessage()
 	return ouo
-}
-
-// RemoveMessageIDs removes the "message" edge to Message entities by IDs.
-func (ouo *OverrideUpdateOne) RemoveMessageIDs(ids ...uint64) *OverrideUpdateOne {
-	ouo.mutation.RemoveMessageIDs(ids...)
-	return ouo
-}
-
-// RemoveMessage removes "message" edges to Message entities.
-func (ouo *OverrideUpdateOne) RemoveMessage(m ...*Message) *OverrideUpdateOne {
-	ids := make([]uint64, len(m))
-	for i := range m {
-		ids[i] = m[i].ID
-	}
-	return ouo.RemoveMessageIDs(ids...)
 }
 
 // Save executes the query and returns the updated Override entity.
@@ -432,10 +391,10 @@ func (ouo *OverrideUpdateOne) sqlSave(ctx context.Context) (_node *Override, err
 	}
 	if ouo.mutation.MessageCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   override.MessageTable,
-			Columns: override.MessagePrimaryKey,
+			Columns: []string{override.MessageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -443,34 +402,15 @@ func (ouo *OverrideUpdateOne) sqlSave(ctx context.Context) (_node *Override, err
 					Column: message.FieldID,
 				},
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := ouo.mutation.RemovedMessageIDs(); len(nodes) > 0 && !ouo.mutation.MessageCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   override.MessageTable,
-			Columns: override.MessagePrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint64,
-					Column: message.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := ouo.mutation.MessageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   override.MessageTable,
-			Columns: override.MessagePrimaryKey,
+			Columns: []string{override.MessageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

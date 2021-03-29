@@ -75,19 +75,23 @@ func (iu *InviteUpdate) AddPossibleUses(i int64) *InviteUpdate {
 	return iu
 }
 
-// AddGuildIDs adds the "guild" edge to the Guild entity by IDs.
-func (iu *InviteUpdate) AddGuildIDs(ids ...uint64) *InviteUpdate {
-	iu.mutation.AddGuildIDs(ids...)
+// SetGuildID sets the "guild" edge to the Guild entity by ID.
+func (iu *InviteUpdate) SetGuildID(id uint64) *InviteUpdate {
+	iu.mutation.SetGuildID(id)
 	return iu
 }
 
-// AddGuild adds the "guild" edges to the Guild entity.
-func (iu *InviteUpdate) AddGuild(g ...*Guild) *InviteUpdate {
-	ids := make([]uint64, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+// SetNillableGuildID sets the "guild" edge to the Guild entity by ID if the given value is not nil.
+func (iu *InviteUpdate) SetNillableGuildID(id *uint64) *InviteUpdate {
+	if id != nil {
+		iu = iu.SetGuildID(*id)
 	}
-	return iu.AddGuildIDs(ids...)
+	return iu
+}
+
+// SetGuild sets the "guild" edge to the Guild entity.
+func (iu *InviteUpdate) SetGuild(g *Guild) *InviteUpdate {
+	return iu.SetGuildID(g.ID)
 }
 
 // Mutation returns the InviteMutation object of the builder.
@@ -95,25 +99,10 @@ func (iu *InviteUpdate) Mutation() *InviteMutation {
 	return iu.mutation
 }
 
-// ClearGuild clears all "guild" edges to the Guild entity.
+// ClearGuild clears the "guild" edge to the Guild entity.
 func (iu *InviteUpdate) ClearGuild() *InviteUpdate {
 	iu.mutation.ClearGuild()
 	return iu
-}
-
-// RemoveGuildIDs removes the "guild" edge to Guild entities by IDs.
-func (iu *InviteUpdate) RemoveGuildIDs(ids ...uint64) *InviteUpdate {
-	iu.mutation.RemoveGuildIDs(ids...)
-	return iu
-}
-
-// RemoveGuild removes "guild" edges to Guild entities.
-func (iu *InviteUpdate) RemoveGuild(g ...*Guild) *InviteUpdate {
-	ids := make([]uint64, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
-	}
-	return iu.RemoveGuildIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -222,7 +211,7 @@ func (iu *InviteUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if iu.mutation.GuildCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   invite.GuildTable,
 			Columns: []string{invite.GuildColumn},
@@ -233,31 +222,12 @@ func (iu *InviteUpdate) sqlSave(ctx context.Context) (n int, err error) {
 					Column: guild.FieldID,
 				},
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := iu.mutation.RemovedGuildIDs(); len(nodes) > 0 && !iu.mutation.GuildCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   invite.GuildTable,
-			Columns: []string{invite.GuildColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint64,
-					Column: guild.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := iu.mutation.GuildIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   invite.GuildTable,
 			Columns: []string{invite.GuildColumn},
@@ -340,19 +310,23 @@ func (iuo *InviteUpdateOne) AddPossibleUses(i int64) *InviteUpdateOne {
 	return iuo
 }
 
-// AddGuildIDs adds the "guild" edge to the Guild entity by IDs.
-func (iuo *InviteUpdateOne) AddGuildIDs(ids ...uint64) *InviteUpdateOne {
-	iuo.mutation.AddGuildIDs(ids...)
+// SetGuildID sets the "guild" edge to the Guild entity by ID.
+func (iuo *InviteUpdateOne) SetGuildID(id uint64) *InviteUpdateOne {
+	iuo.mutation.SetGuildID(id)
 	return iuo
 }
 
-// AddGuild adds the "guild" edges to the Guild entity.
-func (iuo *InviteUpdateOne) AddGuild(g ...*Guild) *InviteUpdateOne {
-	ids := make([]uint64, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+// SetNillableGuildID sets the "guild" edge to the Guild entity by ID if the given value is not nil.
+func (iuo *InviteUpdateOne) SetNillableGuildID(id *uint64) *InviteUpdateOne {
+	if id != nil {
+		iuo = iuo.SetGuildID(*id)
 	}
-	return iuo.AddGuildIDs(ids...)
+	return iuo
+}
+
+// SetGuild sets the "guild" edge to the Guild entity.
+func (iuo *InviteUpdateOne) SetGuild(g *Guild) *InviteUpdateOne {
+	return iuo.SetGuildID(g.ID)
 }
 
 // Mutation returns the InviteMutation object of the builder.
@@ -360,25 +334,10 @@ func (iuo *InviteUpdateOne) Mutation() *InviteMutation {
 	return iuo.mutation
 }
 
-// ClearGuild clears all "guild" edges to the Guild entity.
+// ClearGuild clears the "guild" edge to the Guild entity.
 func (iuo *InviteUpdateOne) ClearGuild() *InviteUpdateOne {
 	iuo.mutation.ClearGuild()
 	return iuo
-}
-
-// RemoveGuildIDs removes the "guild" edge to Guild entities by IDs.
-func (iuo *InviteUpdateOne) RemoveGuildIDs(ids ...uint64) *InviteUpdateOne {
-	iuo.mutation.RemoveGuildIDs(ids...)
-	return iuo
-}
-
-// RemoveGuild removes "guild" edges to Guild entities.
-func (iuo *InviteUpdateOne) RemoveGuild(g ...*Guild) *InviteUpdateOne {
-	ids := make([]uint64, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
-	}
-	return iuo.RemoveGuildIDs(ids...)
 }
 
 // Save executes the query and returns the updated Invite entity.
@@ -492,7 +451,7 @@ func (iuo *InviteUpdateOne) sqlSave(ctx context.Context) (_node *Invite, err err
 	}
 	if iuo.mutation.GuildCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   invite.GuildTable,
 			Columns: []string{invite.GuildColumn},
@@ -503,31 +462,12 @@ func (iuo *InviteUpdateOne) sqlSave(ctx context.Context) (_node *Invite, err err
 					Column: guild.FieldID,
 				},
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := iuo.mutation.RemovedGuildIDs(); len(nodes) > 0 && !iuo.mutation.GuildCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   invite.GuildTable,
-			Columns: []string{invite.GuildColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint64,
-					Column: guild.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := iuo.mutation.GuildIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   invite.GuildTable,
 			Columns: []string{invite.GuildColumn},

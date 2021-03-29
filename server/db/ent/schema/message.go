@@ -29,6 +29,10 @@ func (Message) Edges() []ent.Edge {
 			Ref("message").
 			Unique(),
 		edge.
+			From("channel", Channel.Type).
+			Ref("message").
+			Unique(),
+		edge.
 			To("override", Override.Type).
 			Unique(),
 		edge.

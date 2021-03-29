@@ -22,6 +22,84 @@ func (f ChannelFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Valu
 	return f(ctx, mv)
 }
 
+// The EmbedMessageFunc type is an adapter to allow the use of ordinary
+// function as EmbedMessage mutator.
+type EmbedMessageFunc func(context.Context, *entgen.EmbedMessageMutation) (entgen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f EmbedMessageFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	mv, ok := m.(*entgen.EmbedMessageMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.EmbedMessageMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The EmoteFunc type is an adapter to allow the use of ordinary
+// function as Emote mutator.
+type EmoteFunc func(context.Context, *entgen.EmoteMutation) (entgen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f EmoteFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	mv, ok := m.(*entgen.EmoteMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.EmoteMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The EmotePackFunc type is an adapter to allow the use of ordinary
+// function as EmotePack mutator.
+type EmotePackFunc func(context.Context, *entgen.EmotePackMutation) (entgen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f EmotePackFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	mv, ok := m.(*entgen.EmotePackMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.EmotePackMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The FileFunc type is an adapter to allow the use of ordinary
+// function as File mutator.
+type FileFunc func(context.Context, *entgen.FileMutation) (entgen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f FileFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	mv, ok := m.(*entgen.FileMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.FileMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The FileHashFunc type is an adapter to allow the use of ordinary
+// function as FileHash mutator.
+type FileHashFunc func(context.Context, *entgen.FileHashMutation) (entgen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f FileHashFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	mv, ok := m.(*entgen.FileHashMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.FileHashMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The FileMessageFunc type is an adapter to allow the use of ordinary
+// function as FileMessage mutator.
+type FileMessageFunc func(context.Context, *entgen.FileMessageMutation) (entgen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f FileMessageFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	mv, ok := m.(*entgen.FileMessageMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.FileMessageMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The ForeignUserFunc type is an adapter to allow the use of ordinary
 // function as ForeignUser mutator.
 type ForeignUserFunc func(context.Context, *entgen.ForeignUserMutation) (entgen.Value, error)
@@ -100,6 +178,19 @@ func (f OverrideFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Val
 	return f(ctx, mv)
 }
 
+// The PermissionFunc type is an adapter to allow the use of ordinary
+// function as Permission mutator.
+type PermissionFunc func(context.Context, *entgen.PermissionMutation) (entgen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PermissionFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	mv, ok := m.(*entgen.PermissionMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.PermissionMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The ProfileFunc type is an adapter to allow the use of ordinary
 // function as Profile mutator.
 type ProfileFunc func(context.Context, *entgen.ProfileMutation) (entgen.Value, error)
@@ -113,6 +204,19 @@ func (f ProfileFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Valu
 	return f(ctx, mv)
 }
 
+// The RoleFunc type is an adapter to allow the use of ordinary
+// function as Role mutator.
+type RoleFunc func(context.Context, *entgen.RoleMutation) (entgen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RoleFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	mv, ok := m.(*entgen.RoleMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.RoleMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The SessionFunc type is an adapter to allow the use of ordinary
 // function as Session mutator.
 type SessionFunc func(context.Context, *entgen.SessionMutation) (entgen.Value, error)
@@ -122,6 +226,19 @@ func (f SessionFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Valu
 	mv, ok := m.(*entgen.SessionMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.SessionMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The TextMessageFunc type is an adapter to allow the use of ordinary
+// function as TextMessage mutator.
+type TextMessageFunc func(context.Context, *entgen.TextMessageMutation) (entgen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TextMessageFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	mv, ok := m.(*entgen.TextMessageMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.TextMessageMutation", m)
 	}
 	return f(ctx, mv)
 }

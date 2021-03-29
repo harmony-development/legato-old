@@ -4,6 +4,7 @@ package entgen
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -51,14 +52,6 @@ func (fuu *ForeignUserUpdate) SetUserID(id uint64) *ForeignUserUpdate {
 	return fuu
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (fuu *ForeignUserUpdate) SetNillableUserID(id *uint64) *ForeignUserUpdate {
-	if id != nil {
-		fuu = fuu.SetUserID(*id)
-	}
-	return fuu
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (fuu *ForeignUserUpdate) SetUser(u *User) *ForeignUserUpdate {
 	return fuu.SetUserID(u.ID)
@@ -82,12 +75,18 @@ func (fuu *ForeignUserUpdate) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	if len(fuu.hooks) == 0 {
+		if err = fuu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = fuu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ForeignUserMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = fuu.check(); err != nil {
+				return 0, err
 			}
 			fuu.mutation = mutation
 			affected, err = fuu.sqlSave(ctx)
@@ -124,6 +123,14 @@ func (fuu *ForeignUserUpdate) ExecX(ctx context.Context) {
 	if err := fuu.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (fuu *ForeignUserUpdate) check() error {
+	if _, ok := fuu.mutation.UserID(); fuu.mutation.UserCleared() && !ok {
+		return errors.New("entgen: clearing a required unique edge \"user\"")
+	}
+	return nil
 }
 
 func (fuu *ForeignUserUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -242,14 +249,6 @@ func (fuuo *ForeignUserUpdateOne) SetUserID(id uint64) *ForeignUserUpdateOne {
 	return fuuo
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (fuuo *ForeignUserUpdateOne) SetNillableUserID(id *uint64) *ForeignUserUpdateOne {
-	if id != nil {
-		fuuo = fuuo.SetUserID(*id)
-	}
-	return fuuo
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (fuuo *ForeignUserUpdateOne) SetUser(u *User) *ForeignUserUpdateOne {
 	return fuuo.SetUserID(u.ID)
@@ -273,12 +272,18 @@ func (fuuo *ForeignUserUpdateOne) Save(ctx context.Context) (*ForeignUser, error
 		node *ForeignUser
 	)
 	if len(fuuo.hooks) == 0 {
+		if err = fuuo.check(); err != nil {
+			return nil, err
+		}
 		node, err = fuuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ForeignUserMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = fuuo.check(); err != nil {
+				return nil, err
 			}
 			fuuo.mutation = mutation
 			node, err = fuuo.sqlSave(ctx)
@@ -315,6 +320,14 @@ func (fuuo *ForeignUserUpdateOne) ExecX(ctx context.Context) {
 	if err := fuuo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (fuuo *ForeignUserUpdateOne) check() error {
+	if _, ok := fuuo.mutation.UserID(); fuuo.mutation.UserCleared() && !ok {
+		return errors.New("entgen: clearing a required unique edge \"user\"")
+	}
+	return nil
 }
 
 func (fuuo *ForeignUserUpdateOne) sqlSave(ctx context.Context) (_node *ForeignUser, err error) {

@@ -1,18 +1,32 @@
 package sqlite
 
-import "github.com/harmony-development/legato/server/db/ent/entgen/session"
+import (
+	"github.com/harmony-development/legato/server/db/ent/entgen/session"
+	"github.com/harmony-development/legato/server/db/ent/entgen/user"
+	"github.com/ztrue/tracerr"
+)
 
-func (d *database) AddSession(userID uint64, session string) (err error) {
-	defer doRecovery(&err)
+func (d *database) AddSession(userID uint64, session string) error {
+	user, err := d.User.Query().Where(user.ID(userID), user.HasLocalUser()).Only(ctx)
+	if err != nil {
+		return tracerr.Wrap(err)
+	}
 
-	user := d.User.GetX(ctx, userID).QueryLocalUser().OnlyX(ctx)
-	d.Session.Create().SetUser(user).SetSessionID(session).SaveX(ctx)
+	if _, err := d.Session.Create().SetUser(user).SetSessionid(session).Save(ctx); err != nil {
+		return tracerr.Wrap(err)
+	}
 
-	return
+	return nil
 }
 
-func (d *database) SessionToUserID(sid string) (uid uint64, err error) {
-	defer doRecovery(&err)
-
-	return uint64(d.Client.Session.Query().WithUser().Where(session.SessionID(sid)).OnlyX(ctx).Edges.User.ID), nil
+func (d *database) SessionToUserID(sid string) (uint64, error) {
+	s, err := d.Client.Session.
+		Query().
+		Where(session.Sessionid(sid)).
+		QueryUser().
+		Only(ctx)
+	if err != nil {
+		return 0, tracerr.Wrap(err)
+	}
+	return s.ID, nil
 }
