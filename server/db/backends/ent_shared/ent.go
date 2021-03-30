@@ -35,6 +35,14 @@ func New(c *entgen.Client, cfg *config.Config, logger logger.ILogger, idgen *son
 	return db, nil
 }
 
+func (db *database) TxX() *entgen.Tx {
+	tx, err := db.Tx(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return tx
+}
+
 func doRecovery(err *error) {
 	r := recover()
 	if r == nil {
