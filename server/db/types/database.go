@@ -50,12 +50,12 @@ type IHarmonyDB interface {
 	IsBanned(guildID, userID uint64) (bool, error)
 	UnbanUser(guildID, userID uint64) error
 	GetLocalGuilds(userID uint64) ([]uint64, error)
-	ChannelsForGuild(guildID uint64) ([]queries.Channel, error)
+	ChannelsForGuild(guildID uint64) ([]*chatv1.GetGuildChannelsResponse_Channel, error)
 	MembersInGuild(guildID uint64) ([]uint64, error)
 	CountMembersInGuild(guildID uint64) (int64, error)
-	GetMessage(messageID uint64) (queries.Message, error)
-	GetUserByEmail(email string) (queries.GetUserByEmailRow, error)
-	GetUserByID(userID uint64) (queries.GetUserRow, error)
+	GetMessage(messageID uint64) (*harmonytypesv1.Message, error)
+	GetUserByEmail(email string) (UserData, error)
+	GetUserByID(userID uint64) (UserData, error)
 	AddSession(userID uint64, session string) error
 	ExtendSession(session string) error
 	GetLocalUserForForeignUser(userID uint64, homeserver string) (uint64, error)
@@ -69,7 +69,7 @@ type IHarmonyDB interface {
 	HasGuildWithID(guildID uint64) (bool, error)
 	HasChannelWithID(guildID, channelID uint64) (bool, error)
 	HasMessageWithID(guildID, channelID, messageID uint64) (bool, error)
-	GetGuildByID(guildID uint64) (queries.Guild, error)
+	GetGuildByID(guildID uint64) (*chatv1.GetGuildResponse, error)
 	SetStatus(userID uint64, status harmonytypesv1.UserStatus) error
 	SetUsername(userID uint64, username string) error
 	SetAvatar(userID uint64, avatar string) error

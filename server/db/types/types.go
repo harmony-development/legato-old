@@ -1,6 +1,7 @@
 package types
 
 import (
+	"database/sql"
 	"fmt"
 	"strings"
 )
@@ -40,4 +41,13 @@ type PermissionsData struct {
 	Roles      map[uint64][]PermissionsNode
 	Categories map[uint64][]uint64
 	Channels   map[uint64]map[uint64][]PermissionsNode
+}
+
+type UserData struct {
+	UserID   uint64
+	Email    string
+	Username string
+	Avatar   sql.NullString
+	Status   int16
+	Password []byte
 }
