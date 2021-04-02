@@ -343,6 +343,143 @@ var _ interface {
 	ErrorName() string
 } = GetMessageResponseValidationError{}
 
+// Validate checks the field values on UpdateMessageRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *UpdateMessageRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for GuildId
+
+	// no validation rules for ChannelId
+
+	// no validation rules for MessageId
+
+	// no validation rules for Content
+
+	// no validation rules for UpdateContent
+
+	for idx, item := range m.GetEmbeds() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return UpdateMessageRequestValidationError{
+					field:  fmt.Sprintf("Embeds[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	// no validation rules for UpdateEmbeds
+
+	for idx, item := range m.GetActions() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return UpdateMessageRequestValidationError{
+					field:  fmt.Sprintf("Actions[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	// no validation rules for UpdateActions
+
+	// no validation rules for UpdateAttachments
+
+	if v, ok := interface{}(m.GetOverrides()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UpdateMessageRequestValidationError{
+				field:  "Overrides",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for UpdateOverrides
+
+	if v, ok := interface{}(m.GetMetadata()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UpdateMessageRequestValidationError{
+				field:  "Metadata",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for UpdateMetadata
+
+	return nil
+}
+
+// UpdateMessageRequestValidationError is the validation error returned by
+// UpdateMessageRequest.Validate if the designated constraints aren't met.
+type UpdateMessageRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateMessageRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateMessageRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateMessageRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateMessageRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateMessageRequestValidationError) ErrorName() string {
+	return "UpdateMessageRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateMessageRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateMessageRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateMessageRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateMessageRequestValidationError{}
+
 // Validate checks the field values on DeleteMessageRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
@@ -505,19 +642,48 @@ func (m *SendMessageRequest) Validate() error {
 
 	// no validation rules for ChannelId
 
-	for idx, item := range m.GetContent() {
+	// no validation rules for Content
+
+	for idx, item := range m.GetActions() {
 		_, _ = idx, item
 
 		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				return SendMessageRequestValidationError{
-					field:  fmt.Sprintf("Content[%v]", idx),
+					field:  fmt.Sprintf("Actions[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
 				}
 			}
 		}
 
+	}
+
+	for idx, item := range m.GetEmbeds() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return SendMessageRequestValidationError{
+					field:  fmt.Sprintf("Embeds[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	// no validation rules for InReplyTo
+
+	if v, ok := interface{}(m.GetOverrides()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return SendMessageRequestValidationError{
+				field:  "Overrides",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
 	}
 
 	// no validation rules for EchoId
@@ -659,78 +825,3 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = SendMessageResponseValidationError{}
-
-// Validate checks the field values on UpdateMessageTextRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
-func (m *UpdateMessageTextRequest) Validate() error {
-	if m == nil {
-		return nil
-	}
-
-	// no validation rules for GuildId
-
-	// no validation rules for ChannelId
-
-	// no validation rules for MessageId
-
-	// no validation rules for NewContent
-
-	return nil
-}
-
-// UpdateMessageTextRequestValidationError is the validation error returned by
-// UpdateMessageTextRequest.Validate if the designated constraints aren't met.
-type UpdateMessageTextRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e UpdateMessageTextRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e UpdateMessageTextRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e UpdateMessageTextRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e UpdateMessageTextRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e UpdateMessageTextRequestValidationError) ErrorName() string {
-	return "UpdateMessageTextRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e UpdateMessageTextRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sUpdateMessageTextRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = UpdateMessageTextRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = UpdateMessageTextRequestValidationError{}

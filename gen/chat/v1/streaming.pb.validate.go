@@ -720,83 +720,6 @@ func (m *Event_MessageUpdated) Validate() error {
 
 	// no validation rules for Content
 
-	// no validation rules for UpdateContent
-
-	for idx, item := range m.GetEmbeds() {
-		_, _ = idx, item
-
-		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return Event_MessageUpdatedValidationError{
-					field:  fmt.Sprintf("Embeds[%v]", idx),
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
-	// no validation rules for UpdateEmbeds
-
-	for idx, item := range m.GetActions() {
-		_, _ = idx, item
-
-		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return Event_MessageUpdatedValidationError{
-					field:  fmt.Sprintf("Actions[%v]", idx),
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
-	// no validation rules for UpdateActions
-
-	for idx, item := range m.GetAttachments() {
-		_, _ = idx, item
-
-		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return Event_MessageUpdatedValidationError{
-					field:  fmt.Sprintf("Attachments[%v]", idx),
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
-	// no validation rules for UpdateAttachments
-
-	if v, ok := interface{}(m.GetOverrides()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return Event_MessageUpdatedValidationError{
-				field:  "Overrides",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	// no validation rules for UpdateOverrides
-
-	if v, ok := interface{}(m.GetMetadata()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return Event_MessageUpdatedValidationError{
-				field:  "Metadata",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	// no validation rules for UpdateMetadata
-
 	return nil
 }
 
@@ -1422,8 +1345,6 @@ func (m *Event_MemberLeft) Validate() error {
 	// no validation rules for MemberId
 
 	// no validation rules for GuildId
-
-	// no validation rules for LeaveReason
 
 	return nil
 }

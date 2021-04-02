@@ -14,9 +14,7 @@ import (
 	"github.com/harmony-development/legato/server/api/chat/v1/permissions"
 	"github.com/harmony-development/legato/server/api/middleware"
 	"github.com/harmony-development/legato/server/config"
-	"github.com/harmony-development/legato/server/db/queries"
 	"github.com/harmony-development/legato/server/db/types"
-	"github.com/harmony-development/legato/server/db/utilities"
 	"github.com/harmony-development/legato/server/http/attachments/backend"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/harmony-development/legato/server/responses"
@@ -24,7 +22,6 @@ import (
 	"github.com/sony/sonyflake"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // Dependencies are the backend services this package needs
@@ -202,8 +199,8 @@ func (v1 *V1) GetGuild(c echo.Context, r *chatv1.GetGuildRequest) (*chatv1.GetGu
 	}
 	return &chatv1.GetGuildResponse{
 		GuildName:    guild.GuildName,
-		GuildOwner:   guild.OwnerID,
-		GuildPicture: guild.PictureUrl,
+		GuildOwner:   guild.GuildOwner,
+		GuildPicture: guild.GuildPicture,
 	}, nil
 }
 
@@ -289,13 +286,8 @@ func (v1 *V1) GetGuildChannels(c echo.Context, r *chatv1.GetGuildChannelsRequest
 	roles := ctx.UserRoles
 
 	for _, channel := range chans {
-		if ctx.IsOwner || v1.Perms.Check("messages.view", roles, r.GuildId, channel.ChannelID) {
-			ret = append(ret, &chatv1.GetGuildChannelsResponse_Channel{
-				ChannelId:   channel.ChannelID,
-				ChannelName: channel.ChannelName,
-				IsCategory:  channel.Category,
-				Metadata:    utilities.DeserializeMetadata(channel.Metadata),
-			})
+		if ctx.IsOwner || v1.Perms.Check("messages.view", roles, r.GuildId, channel.ChannelId) {
+			ret = append(ret, channel)
 		}
 	}
 	return &chatv1.GetGuildChannelsResponse{
@@ -316,57 +308,12 @@ func init() {
 
 // GetMessage implements the GetMessage RPC
 func (v1 *V1) GetMessage(c echo.Context, r *chatv1.GetMessageRequest) (*chatv1.GetMessageResponse, error) {
-	message, err := v1.DB.GetMessage(r.MessageId)
+	data, err := v1.DB.GetMessage(r.MessageId)
 	if err != nil {
 		return nil, err
 	}
-	createdAt, _ := ptypes.TimestampProto(message.CreatedAt.UTC())
-	var editedAt *timestamppb.Timestamp
-	if message.EditedAt.Valid {
-		editedAt, _ = ptypes.TimestampProto(editedAt.AsTime().UTC())
-	}
-	var embeds []*harmonytypesv1.Embed
-	var actions []*harmonytypesv1.Action
-	attachments := []*harmonytypesv1.Attachment{}
-	var override *harmonytypesv1.Override
-	if err := json.Unmarshal(message.Embeds, &embeds); err != nil {
-		return nil, err
-	}
-	if err := json.Unmarshal(message.Actions, &actions); err != nil {
-		return nil, err
-	}
-	if len(message.Overrides) > 0 {
-		override = new(harmonytypesv1.Override)
-		if err := proto.Unmarshal(message.Overrides, override); err != nil {
-			return nil, err
-		}
-	}
-	for _, a := range message.Attachments {
-		contentType, fileName, size, err := v1.StorageBackend.GetMetadata(a)
-		if err == nil {
-			attachments = append(attachments, &harmonytypesv1.Attachment{
-				Id:   a,
-				Name: fileName,
-				Type: contentType,
-				Size: size,
-			})
-		}
-	}
 	return &chatv1.GetMessageResponse{
-		Message: &harmonytypesv1.Message{
-			GuildId:     message.GuildID,
-			ChannelId:   message.ChannelID,
-			MessageId:   message.MessageID,
-			AuthorId:    message.UserID,
-			CreatedAt:   createdAt,
-			EditedAt:    editedAt,
-			Content:     message.Content,
-			Embeds:      embeds,
-			Attachments: attachments,
-			Actions:     actions,
-			Overrides:   override,
-			InReplyTo:   uint64(message.ReplyToID.Int64),
-		},
+		Message: data,
 	}, nil
 }
 
@@ -391,7 +338,7 @@ func (v1 *V1) PreviewGuild(c echo.Context, r *chatv1.PreviewGuildRequest) (*chat
 		return nil, err
 	}
 
-	ret.Avatar = guildData.PictureUrl
+	ret.Avatar = guildData.GuildPicture
 	ret.Name = guildData.GuildName
 	count := int64(0)
 	count, err = v1.DB.CountMembersInGuild(data)
@@ -417,7 +364,7 @@ func init() {
 // GetChannelMessages implements the GetChannelMessages RPC
 func (v1 *V1) GetChannelMessages(c echo.Context, r *chatv1.GetChannelMessagesRequest) (*chatv1.GetChannelMessagesResponse, error) {
 	var err error
-	var messages []queries.Message
+	var messages []*harmonytypesv1.Message
 	if r.BeforeMessage != 0 {
 		time, err := v1.DB.GetMessageDate(r.BeforeMessage)
 		if err != nil {
@@ -435,57 +382,7 @@ func (v1 *V1) GetChannelMessages(c echo.Context, r *chatv1.GetChannelMessagesReq
 	}
 	return &chatv1.GetChannelMessagesResponse{
 		ReachedTop: len(messages) < v1.Config.Server.Policies.APIs.Messages.MaximumGetAmount,
-		Messages: func() (ret []*harmonytypesv1.Message) {
-			for _, message := range messages {
-				createdAt, _ := ptypes.TimestampProto(message.CreatedAt.UTC())
-				var editedAt *timestamppb.Timestamp
-				if message.EditedAt.Valid {
-					editedAt, _ = ptypes.TimestampProto(editedAt.AsTime().UTC())
-				}
-				var embeds []*harmonytypesv1.Embed
-				var actions []*harmonytypesv1.Action
-				var overrides *harmonytypesv1.Override
-				attachments := []*harmonytypesv1.Attachment{}
-				if err := json.Unmarshal(message.Embeds, &embeds); err != nil {
-					continue
-				}
-				if err := json.Unmarshal(message.Actions, &actions); err != nil {
-					continue
-				}
-				if len(message.Overrides) > 0 {
-					overrides = new(harmonytypesv1.Override)
-					if err := proto.Unmarshal(message.Overrides, overrides); err != nil {
-						continue
-					}
-				}
-				for _, a := range message.Attachments {
-					contentType, fileName, size, err := v1.StorageBackend.GetMetadata(a)
-					if err == nil {
-						attachments = append(attachments, &harmonytypesv1.Attachment{
-							Id:   a,
-							Name: fileName,
-							Type: contentType,
-							Size: size,
-						})
-					}
-				}
-				ret = append(ret, &harmonytypesv1.Message{
-					GuildId:     message.GuildID,
-					ChannelId:   message.ChannelID,
-					MessageId:   message.MessageID,
-					AuthorId:    message.UserID,
-					CreatedAt:   createdAt,
-					EditedAt:    editedAt,
-					Content:     message.Content,
-					Attachments: attachments,
-					Embeds:      embeds,
-					Actions:     actions,
-					Overrides:   overrides,
-					InReplyTo:   uint64(message.ReplyToID.Int64),
-				})
-			}
-			return
-		}(),
+		Messages:   messages,
 	}, nil
 }
 
@@ -606,60 +503,17 @@ func (v1 *V1) UpdateMessageText(c echo.Context, r *chatv1.UpdateMessageTextReque
 		return nil, responses.NewError(responses.NotOwner)
 	}
 
-	var actions *[]byte
-	var embeds *[]byte
-	var overrides *[]byte
-	var attachments *[]string
-	attachmentsData := []*harmonytypesv1.Attachment{}
-	if r.UpdateActions {
-		val := v1.ProtoToActions(r.Actions)
-		actions = &val
-	}
-	if r.UpdateEmbeds {
-		val := v1.ProtoToEmbeds(r.Embeds)
-		embeds = &val
-	}
-	if r.UpdateOverrides {
-		val := v1.ProtoToOverrides(r.Overrides)
-		overrides = &val
-	}
-	if r.UpdateAttachments {
-		attachments = &r.Attachments
+	tenpo, err := v1.DB.UpdateTextMessage(r.MessageId, r.NewContent)
+	editedAt, _ := ptypes.TimestampProto(tenpo.UTC())
 
-		for _, a := range r.Attachments {
-			contentType, fileName, size, err := v1.StorageBackend.GetMetadata(a)
-			if err == nil {
-				attachmentsData = append(attachmentsData, &harmonytypesv1.Attachment{
-					Id:   a,
-					Name: fileName,
-					Type: contentType,
-					Size: size,
-				})
-			}
-		}
-	}
-	tiempo, err := v1.DB.UpdateMessage(r.MessageId, &r.Content, embeds, actions, overrides, attachments, r.Metadata, r.UpdateMetadata)
-	if err != nil {
-		return nil, err
-	}
-	editedAt, _ := ptypes.TimestampProto(tiempo.UTC())
 	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
 		Event: &chatv1.Event_EditedMessage{
 			EditedMessage: &chatv1.Event_MessageUpdated{
-				GuildId:        r.GuildId,
-				ChannelId:      r.ChannelId,
-				MessageId:      r.MessageId,
-				Content:        r.Content,
-				UpdateContent:  r.UpdateContent,
-				Embeds:         r.Embeds,
-				UpdateEmbeds:   r.UpdateEmbeds,
-				Actions:        r.Actions,
-				UpdateActions:  r.UpdateActions,
-				Overrides:      r.Overrides,
-				EditedAt:       editedAt,
-				Attachments:    attachmentsData,
-				Metadata:       r.Metadata,
-				UpdateMetadata: r.UpdateMetadata,
+				GuildId:   r.GuildId,
+				ChannelId: r.ChannelId,
+				MessageId: r.MessageId,
+				Content:   r.Content,
+				EditedAt:  editedAt,
 			},
 		},
 	})
@@ -950,10 +804,10 @@ func (v1 *V1) TriggerAction(c echo.Context, r *chatv1.TriggerActionRequest) (*em
 	if err != nil {
 		return nil, err
 	}
-	if msg.ChannelID != r.ChannelId || msg.GuildID != r.GuildId {
+	if msg.ChannelId != r.ChannelId || msg.GuildId != r.GuildId {
 		return nil, responses.NewError(responses.BadAction)
 	}
-	for _, action := range v1.ActionsToProto(msg.Actions) {
+	for _, action := range msg.Content.Actions {
 		if action.Id == r.ActionId {
 			v1.Streams.BroadcastAction(ctx.UserID, &chatv1.Event{
 				Event: &chatv1.Event_ActionPerformed_{

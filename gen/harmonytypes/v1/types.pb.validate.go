@@ -618,6 +618,8 @@ func (m *Attachment) Validate() error {
 
 	// no validation rules for Size
 
+	// no validation rules for Caption
+
 	return nil
 }
 
@@ -825,162 +827,6 @@ var _ interface {
 	ErrorName() string
 } = ContentTextValidationError{}
 
-// Validate checks the field values on Photo with the rules defined in the
-// proto definition for this message. If any rules are violated, an error is returned.
-func (m *Photo) Validate() error {
-	if m == nil {
-		return nil
-	}
-
-	if v, ok := interface{}(m.GetPhoto()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return PhotoValidationError{
-				field:  "Photo",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	// no validation rules for Caption
-
-	return nil
-}
-
-// PhotoValidationError is the validation error returned by Photo.Validate if
-// the designated constraints aren't met.
-type PhotoValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e PhotoValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e PhotoValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e PhotoValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e PhotoValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e PhotoValidationError) ErrorName() string { return "PhotoValidationError" }
-
-// Error satisfies the builtin error interface
-func (e PhotoValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sPhoto.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = PhotoValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = PhotoValidationError{}
-
-// Validate checks the field values on ContentPhoto with the rules defined in
-// the proto definition for this message. If any rules are violated, an error
-// is returned.
-func (m *ContentPhoto) Validate() error {
-	if m == nil {
-		return nil
-	}
-
-	for idx, item := range m.GetPhotos() {
-		_, _ = idx, item
-
-		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return ContentPhotoValidationError{
-					field:  fmt.Sprintf("Photos[%v]", idx),
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
-	return nil
-}
-
-// ContentPhotoValidationError is the validation error returned by
-// ContentPhoto.Validate if the designated constraints aren't met.
-type ContentPhotoValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e ContentPhotoValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e ContentPhotoValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e ContentPhotoValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e ContentPhotoValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e ContentPhotoValidationError) ErrorName() string { return "ContentPhotoValidationError" }
-
-// Error satisfies the builtin error interface
-func (e ContentPhotoValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sContentPhoto.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = ContentPhotoValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = ContentPhotoValidationError{}
-
 // Validate checks the field values on ContentEmbed with the rules defined in
 // the proto definition for this message. If any rules are violated, an error
 // is returned.
@@ -1171,18 +1017,6 @@ func (m *Content) Validate() error {
 			if err := v.Validate(); err != nil {
 				return ContentValidationError{
 					field:  "TextMessage",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	case *Content_PhotoMessage:
-
-		if v, ok := interface{}(m.GetPhotoMessage()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return ContentValidationError{
-					field:  "PhotoMessage",
 					reason: "embedded message failed validation",
 					cause:  err,
 				}
