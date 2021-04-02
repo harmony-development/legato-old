@@ -209,25 +209,25 @@ func ContentContainsFold(v string) predicate.TextMessage {
 	})
 }
 
-// HasTextmessage applies the HasEdge predicate on the "textmessage" edge.
-func HasTextmessage() predicate.TextMessage {
+// HasMessage applies the HasEdge predicate on the "message" edge.
+func HasMessage() predicate.TextMessage {
 	return predicate.TextMessage(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TextmessageTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, TextmessageTable, TextmessageColumn),
+			sqlgraph.To(MessageTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, MessageTable, MessageColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasTextmessageWith applies the HasEdge predicate on the "textmessage" edge with a given conditions (other predicates).
-func HasTextmessageWith(preds ...predicate.Message) predicate.TextMessage {
+// HasMessageWith applies the HasEdge predicate on the "message" edge with a given conditions (other predicates).
+func HasMessageWith(preds ...predicate.Message) predicate.TextMessage {
 	return predicate.TextMessage(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TextmessageInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, TextmessageTable, TextmessageColumn),
+			sqlgraph.To(MessageInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, MessageTable, MessageColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

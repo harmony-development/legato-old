@@ -26,23 +26,23 @@ func (tmc *TextMessageCreate) SetContent(s string) *TextMessageCreate {
 	return tmc
 }
 
-// SetTextmessageID sets the "textmessage" edge to the Message entity by ID.
-func (tmc *TextMessageCreate) SetTextmessageID(id uint64) *TextMessageCreate {
-	tmc.mutation.SetTextmessageID(id)
+// SetMessageID sets the "message" edge to the Message entity by ID.
+func (tmc *TextMessageCreate) SetMessageID(id uint64) *TextMessageCreate {
+	tmc.mutation.SetMessageID(id)
 	return tmc
 }
 
-// SetNillableTextmessageID sets the "textmessage" edge to the Message entity by ID if the given value is not nil.
-func (tmc *TextMessageCreate) SetNillableTextmessageID(id *uint64) *TextMessageCreate {
+// SetNillableMessageID sets the "message" edge to the Message entity by ID if the given value is not nil.
+func (tmc *TextMessageCreate) SetNillableMessageID(id *uint64) *TextMessageCreate {
 	if id != nil {
-		tmc = tmc.SetTextmessageID(*id)
+		tmc = tmc.SetMessageID(*id)
 	}
 	return tmc
 }
 
-// SetTextmessage sets the "textmessage" edge to the Message entity.
-func (tmc *TextMessageCreate) SetTextmessage(m *Message) *TextMessageCreate {
-	return tmc.SetTextmessageID(m.ID)
+// SetMessage sets the "message" edge to the Message entity.
+func (tmc *TextMessageCreate) SetMessage(m *Message) *TextMessageCreate {
+	return tmc.SetMessageID(m.ID)
 }
 
 // Mutation returns the TextMessageMutation object of the builder.
@@ -134,12 +134,12 @@ func (tmc *TextMessageCreate) createSpec() (*TextMessage, *sqlgraph.CreateSpec) 
 		})
 		_node.Content = value
 	}
-	if nodes := tmc.mutation.TextmessageIDs(); len(nodes) > 0 {
+	if nodes := tmc.mutation.MessageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   textmessage.TextmessageTable,
-			Columns: []string{textmessage.TextmessageColumn},
+			Table:   textmessage.MessageTable,
+			Columns: []string{textmessage.MessageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

@@ -9,17 +9,17 @@ const (
 	FieldID = "id"
 	// FieldContent holds the string denoting the content field in the database.
 	FieldContent = "content"
-	// EdgeTextmessage holds the string denoting the textmessage edge name in mutations.
-	EdgeTextmessage = "textmessage"
+	// EdgeMessage holds the string denoting the message edge name in mutations.
+	EdgeMessage = "message"
 	// Table holds the table name of the textmessage in the database.
 	Table = "text_messages"
-	// TextmessageTable is the table the holds the textmessage relation/edge.
-	TextmessageTable = "text_messages"
-	// TextmessageInverseTable is the table name for the Message entity.
+	// MessageTable is the table the holds the message relation/edge.
+	MessageTable = "text_messages"
+	// MessageInverseTable is the table name for the Message entity.
 	// It exists in this package in order to avoid circular dependency with the "message" package.
-	TextmessageInverseTable = "messages"
-	// TextmessageColumn is the table column denoting the textmessage relation/edge.
-	TextmessageColumn = "message_textmessage"
+	MessageInverseTable = "messages"
+	// MessageColumn is the table column denoting the message relation/edge.
+	MessageColumn = "message_textmessage"
 )
 
 // Columns holds all SQL columns for textmessage fields.

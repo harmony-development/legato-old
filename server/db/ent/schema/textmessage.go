@@ -22,7 +22,7 @@ func (TextMessage) Fields() []ent.Field {
 func (TextMessage) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.
-			From("textmessage", Message.Type).
+			From("message", Message.Type).
 			Ref("textmessage").
 			Unique(),
 	}

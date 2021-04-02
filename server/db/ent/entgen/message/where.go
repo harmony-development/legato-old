@@ -107,6 +107,13 @@ func Editedat(v time.Time) predicate.Message {
 	})
 }
 
+// Overrides applies equality check predicate on the "overrides" field. It's identical to OverridesEQ.
+func Overrides(v []byte) predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOverrides), v))
+	})
+}
+
 // CreatedatEQ applies the EQ predicate on the "createdat" field.
 func CreatedatEQ(v time.Time) predicate.Message {
 	return predicate.Message(func(s *sql.Selector) {
@@ -256,6 +263,138 @@ func EditedatLT(v time.Time) predicate.Message {
 func EditedatLTE(v time.Time) predicate.Message {
 	return predicate.Message(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldEditedat), v))
+	})
+}
+
+// EditedatIsNil applies the IsNil predicate on the "editedat" field.
+func EditedatIsNil() predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldEditedat)))
+	})
+}
+
+// EditedatNotNil applies the NotNil predicate on the "editedat" field.
+func EditedatNotNil() predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldEditedat)))
+	})
+}
+
+// ActionsIsNil applies the IsNil predicate on the "actions" field.
+func ActionsIsNil() predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldActions)))
+	})
+}
+
+// ActionsNotNil applies the NotNil predicate on the "actions" field.
+func ActionsNotNil() predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldActions)))
+	})
+}
+
+// MetadataIsNil applies the IsNil predicate on the "metadata" field.
+func MetadataIsNil() predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldMetadata)))
+	})
+}
+
+// MetadataNotNil applies the NotNil predicate on the "metadata" field.
+func MetadataNotNil() predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldMetadata)))
+	})
+}
+
+// OverridesEQ applies the EQ predicate on the "overrides" field.
+func OverridesEQ(v []byte) predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOverrides), v))
+	})
+}
+
+// OverridesNEQ applies the NEQ predicate on the "overrides" field.
+func OverridesNEQ(v []byte) predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldOverrides), v))
+	})
+}
+
+// OverridesIn applies the In predicate on the "overrides" field.
+func OverridesIn(vs ...[]byte) predicate.Message {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Message(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldOverrides), v...))
+	})
+}
+
+// OverridesNotIn applies the NotIn predicate on the "overrides" field.
+func OverridesNotIn(vs ...[]byte) predicate.Message {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Message(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldOverrides), v...))
+	})
+}
+
+// OverridesGT applies the GT predicate on the "overrides" field.
+func OverridesGT(v []byte) predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldOverrides), v))
+	})
+}
+
+// OverridesGTE applies the GTE predicate on the "overrides" field.
+func OverridesGTE(v []byte) predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldOverrides), v))
+	})
+}
+
+// OverridesLT applies the LT predicate on the "overrides" field.
+func OverridesLT(v []byte) predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldOverrides), v))
+	})
+}
+
+// OverridesLTE applies the LTE predicate on the "overrides" field.
+func OverridesLTE(v []byte) predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldOverrides), v))
+	})
+}
+
+// OverridesIsNil applies the IsNil predicate on the "overrides" field.
+func OverridesIsNil() predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldOverrides)))
+	})
+}
+
+// OverridesNotNil applies the NotNil predicate on the "overrides" field.
+func OverridesNotNil() predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldOverrides)))
 	})
 }
 

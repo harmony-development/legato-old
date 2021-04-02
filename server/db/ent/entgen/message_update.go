@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	v1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/ent/entgen/embedmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/filemessage"
@@ -39,9 +40,67 @@ func (mu *MessageUpdate) SetCreatedat(t time.Time) *MessageUpdate {
 	return mu
 }
 
+// SetNillableCreatedat sets the "createdat" field if the given value is not nil.
+func (mu *MessageUpdate) SetNillableCreatedat(t *time.Time) *MessageUpdate {
+	if t != nil {
+		mu.SetCreatedat(*t)
+	}
+	return mu
+}
+
 // SetEditedat sets the "editedat" field.
 func (mu *MessageUpdate) SetEditedat(t time.Time) *MessageUpdate {
 	mu.mutation.SetEditedat(t)
+	return mu
+}
+
+// SetNillableEditedat sets the "editedat" field if the given value is not nil.
+func (mu *MessageUpdate) SetNillableEditedat(t *time.Time) *MessageUpdate {
+	if t != nil {
+		mu.SetEditedat(*t)
+	}
+	return mu
+}
+
+// ClearEditedat clears the value of the "editedat" field.
+func (mu *MessageUpdate) ClearEditedat() *MessageUpdate {
+	mu.mutation.ClearEditedat()
+	return mu
+}
+
+// SetActions sets the "actions" field.
+func (mu *MessageUpdate) SetActions(v []*v1.Action) *MessageUpdate {
+	mu.mutation.SetActions(v)
+	return mu
+}
+
+// ClearActions clears the value of the "actions" field.
+func (mu *MessageUpdate) ClearActions() *MessageUpdate {
+	mu.mutation.ClearActions()
+	return mu
+}
+
+// SetMetadata sets the "metadata" field.
+func (mu *MessageUpdate) SetMetadata(v *v1.Metadata) *MessageUpdate {
+	mu.mutation.SetMetadata(v)
+	return mu
+}
+
+// ClearMetadata clears the value of the "metadata" field.
+func (mu *MessageUpdate) ClearMetadata() *MessageUpdate {
+	mu.mutation.ClearMetadata()
+	return mu
+}
+
+// SetOverrides sets the "overrides" field.
+func (mu *MessageUpdate) SetOverrides(b []byte) *MessageUpdate {
+	mu.mutation.SetOverrides(b)
+	return mu
+}
+
+// ClearOverrides clears the value of the "overrides" field.
+func (mu *MessageUpdate) ClearOverrides() *MessageUpdate {
+	mu.mutation.ClearOverrides()
 	return mu
 }
 
@@ -342,6 +401,51 @@ func (mu *MessageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: message.FieldEditedat,
+		})
+	}
+	if mu.mutation.EditedatCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: message.FieldEditedat,
+		})
+	}
+	if value, ok := mu.mutation.Actions(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: message.FieldActions,
+		})
+	}
+	if mu.mutation.ActionsCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: message.FieldActions,
+		})
+	}
+	if value, ok := mu.mutation.Metadata(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: message.FieldMetadata,
+		})
+	}
+	if mu.mutation.MetadataCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: message.FieldMetadata,
+		})
+	}
+	if value, ok := mu.mutation.Overrides(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: message.FieldOverrides,
+		})
+	}
+	if mu.mutation.OverridesCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Column: message.FieldOverrides,
 		})
 	}
 	if mu.mutation.UserCleared() {
@@ -667,9 +771,67 @@ func (muo *MessageUpdateOne) SetCreatedat(t time.Time) *MessageUpdateOne {
 	return muo
 }
 
+// SetNillableCreatedat sets the "createdat" field if the given value is not nil.
+func (muo *MessageUpdateOne) SetNillableCreatedat(t *time.Time) *MessageUpdateOne {
+	if t != nil {
+		muo.SetCreatedat(*t)
+	}
+	return muo
+}
+
 // SetEditedat sets the "editedat" field.
 func (muo *MessageUpdateOne) SetEditedat(t time.Time) *MessageUpdateOne {
 	muo.mutation.SetEditedat(t)
+	return muo
+}
+
+// SetNillableEditedat sets the "editedat" field if the given value is not nil.
+func (muo *MessageUpdateOne) SetNillableEditedat(t *time.Time) *MessageUpdateOne {
+	if t != nil {
+		muo.SetEditedat(*t)
+	}
+	return muo
+}
+
+// ClearEditedat clears the value of the "editedat" field.
+func (muo *MessageUpdateOne) ClearEditedat() *MessageUpdateOne {
+	muo.mutation.ClearEditedat()
+	return muo
+}
+
+// SetActions sets the "actions" field.
+func (muo *MessageUpdateOne) SetActions(v []*v1.Action) *MessageUpdateOne {
+	muo.mutation.SetActions(v)
+	return muo
+}
+
+// ClearActions clears the value of the "actions" field.
+func (muo *MessageUpdateOne) ClearActions() *MessageUpdateOne {
+	muo.mutation.ClearActions()
+	return muo
+}
+
+// SetMetadata sets the "metadata" field.
+func (muo *MessageUpdateOne) SetMetadata(v *v1.Metadata) *MessageUpdateOne {
+	muo.mutation.SetMetadata(v)
+	return muo
+}
+
+// ClearMetadata clears the value of the "metadata" field.
+func (muo *MessageUpdateOne) ClearMetadata() *MessageUpdateOne {
+	muo.mutation.ClearMetadata()
+	return muo
+}
+
+// SetOverrides sets the "overrides" field.
+func (muo *MessageUpdateOne) SetOverrides(b []byte) *MessageUpdateOne {
+	muo.mutation.SetOverrides(b)
+	return muo
+}
+
+// ClearOverrides clears the value of the "overrides" field.
+func (muo *MessageUpdateOne) ClearOverrides() *MessageUpdateOne {
+	muo.mutation.ClearOverrides()
 	return muo
 }
 
@@ -975,6 +1137,51 @@ func (muo *MessageUpdateOne) sqlSave(ctx context.Context) (_node *Message, err e
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: message.FieldEditedat,
+		})
+	}
+	if muo.mutation.EditedatCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: message.FieldEditedat,
+		})
+	}
+	if value, ok := muo.mutation.Actions(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: message.FieldActions,
+		})
+	}
+	if muo.mutation.ActionsCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: message.FieldActions,
+		})
+	}
+	if value, ok := muo.mutation.Metadata(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: message.FieldMetadata,
+		})
+	}
+	if muo.mutation.MetadataCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: message.FieldMetadata,
+		})
+	}
+	if value, ok := muo.mutation.Overrides(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: message.FieldOverrides,
+		})
+	}
+	if muo.mutation.OverridesCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Column: message.FieldOverrides,
 		})
 	}
 	if muo.mutation.UserCleared() {

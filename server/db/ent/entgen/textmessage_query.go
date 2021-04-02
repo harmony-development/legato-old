@@ -25,8 +25,8 @@ type TextMessageQuery struct {
 	fields     []string
 	predicates []predicate.TextMessage
 	// eager-loading edges.
-	withTextmessage *MessageQuery
-	withFKs         bool
+	withMessage *MessageQuery
+	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -56,8 +56,8 @@ func (tmq *TextMessageQuery) Order(o ...OrderFunc) *TextMessageQuery {
 	return tmq
 }
 
-// QueryTextmessage chains the current query on the "textmessage" edge.
-func (tmq *TextMessageQuery) QueryTextmessage() *MessageQuery {
+// QueryMessage chains the current query on the "message" edge.
+func (tmq *TextMessageQuery) QueryMessage() *MessageQuery {
 	query := &MessageQuery{config: tmq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tmq.prepareQuery(ctx); err != nil {
@@ -70,7 +70,7 @@ func (tmq *TextMessageQuery) QueryTextmessage() *MessageQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(textmessage.Table, textmessage.FieldID, selector),
 			sqlgraph.To(message.Table, message.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, textmessage.TextmessageTable, textmessage.TextmessageColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, textmessage.MessageTable, textmessage.MessageColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tmq.driver.Dialect(), step)
 		return fromU, nil
@@ -254,26 +254,26 @@ func (tmq *TextMessageQuery) Clone() *TextMessageQuery {
 		return nil
 	}
 	return &TextMessageQuery{
-		config:          tmq.config,
-		limit:           tmq.limit,
-		offset:          tmq.offset,
-		order:           append([]OrderFunc{}, tmq.order...),
-		predicates:      append([]predicate.TextMessage{}, tmq.predicates...),
-		withTextmessage: tmq.withTextmessage.Clone(),
+		config:      tmq.config,
+		limit:       tmq.limit,
+		offset:      tmq.offset,
+		order:       append([]OrderFunc{}, tmq.order...),
+		predicates:  append([]predicate.TextMessage{}, tmq.predicates...),
+		withMessage: tmq.withMessage.Clone(),
 		// clone intermediate query.
 		sql:  tmq.sql.Clone(),
 		path: tmq.path,
 	}
 }
 
-// WithTextmessage tells the query-builder to eager-load the nodes that are connected to
-// the "textmessage" edge. The optional arguments are used to configure the query builder of the edge.
-func (tmq *TextMessageQuery) WithTextmessage(opts ...func(*MessageQuery)) *TextMessageQuery {
+// WithMessage tells the query-builder to eager-load the nodes that are connected to
+// the "message" edge. The optional arguments are used to configure the query builder of the edge.
+func (tmq *TextMessageQuery) WithMessage(opts ...func(*MessageQuery)) *TextMessageQuery {
 	query := &MessageQuery{config: tmq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	tmq.withTextmessage = query
+	tmq.withMessage = query
 	return tmq
 }
 
@@ -344,10 +344,10 @@ func (tmq *TextMessageQuery) sqlAll(ctx context.Context) ([]*TextMessage, error)
 		withFKs     = tmq.withFKs
 		_spec       = tmq.querySpec()
 		loadedTypes = [1]bool{
-			tmq.withTextmessage != nil,
+			tmq.withMessage != nil,
 		}
 	)
-	if tmq.withTextmessage != nil {
+	if tmq.withMessage != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -373,7 +373,7 @@ func (tmq *TextMessageQuery) sqlAll(ctx context.Context) ([]*TextMessage, error)
 		return nodes, nil
 	}
 
-	if query := tmq.withTextmessage; query != nil {
+	if query := tmq.withMessage; query != nil {
 		ids := make([]uint64, 0, len(nodes))
 		nodeids := make(map[uint64][]*TextMessage)
 		for i := range nodes {
@@ -394,7 +394,7 @@ func (tmq *TextMessageQuery) sqlAll(ctx context.Context) ([]*TextMessage, error)
 				return nil, fmt.Errorf(`unexpected foreign-key "message_textmessage" returned %v`, n.ID)
 			}
 			for i := range nodes {
-				nodes[i].Edges.Textmessage = n
+				nodes[i].Edges.Message = n
 			}
 		}
 	}

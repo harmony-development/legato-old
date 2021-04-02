@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	v1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/ent/entgen/emote"
 	"github.com/harmony-development/legato/server/db/ent/entgen/emotepack"
@@ -5205,6 +5206,9 @@ type MessageMutation struct {
 	id                  *uint64
 	createdat           *time.Time
 	editedat            *time.Time
+	actions             *[]*v1.Action
+	metadata            **v1.Metadata
+	overrides           *[]byte
 	clearedFields       map[string]struct{}
 	user                *uint64
 	cleareduser         bool
@@ -5380,9 +5384,169 @@ func (m *MessageMutation) OldEditedat(ctx context.Context) (v time.Time, err err
 	return oldValue.Editedat, nil
 }
 
+// ClearEditedat clears the value of the "editedat" field.
+func (m *MessageMutation) ClearEditedat() {
+	m.editedat = nil
+	m.clearedFields[message.FieldEditedat] = struct{}{}
+}
+
+// EditedatCleared returns if the "editedat" field was cleared in this mutation.
+func (m *MessageMutation) EditedatCleared() bool {
+	_, ok := m.clearedFields[message.FieldEditedat]
+	return ok
+}
+
 // ResetEditedat resets all changes to the "editedat" field.
 func (m *MessageMutation) ResetEditedat() {
 	m.editedat = nil
+	delete(m.clearedFields, message.FieldEditedat)
+}
+
+// SetActions sets the "actions" field.
+func (m *MessageMutation) SetActions(v []*v1.Action) {
+	m.actions = &v
+}
+
+// Actions returns the value of the "actions" field in the mutation.
+func (m *MessageMutation) Actions() (r []*v1.Action, exists bool) {
+	v := m.actions
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActions returns the old "actions" field's value of the Message entity.
+// If the Message object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessageMutation) OldActions(ctx context.Context) (v []*v1.Action, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldActions is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldActions requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActions: %w", err)
+	}
+	return oldValue.Actions, nil
+}
+
+// ClearActions clears the value of the "actions" field.
+func (m *MessageMutation) ClearActions() {
+	m.actions = nil
+	m.clearedFields[message.FieldActions] = struct{}{}
+}
+
+// ActionsCleared returns if the "actions" field was cleared in this mutation.
+func (m *MessageMutation) ActionsCleared() bool {
+	_, ok := m.clearedFields[message.FieldActions]
+	return ok
+}
+
+// ResetActions resets all changes to the "actions" field.
+func (m *MessageMutation) ResetActions() {
+	m.actions = nil
+	delete(m.clearedFields, message.FieldActions)
+}
+
+// SetMetadata sets the "metadata" field.
+func (m *MessageMutation) SetMetadata(v *v1.Metadata) {
+	m.metadata = &v
+}
+
+// Metadata returns the value of the "metadata" field in the mutation.
+func (m *MessageMutation) Metadata() (r *v1.Metadata, exists bool) {
+	v := m.metadata
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMetadata returns the old "metadata" field's value of the Message entity.
+// If the Message object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessageMutation) OldMetadata(ctx context.Context) (v *v1.Metadata, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldMetadata is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldMetadata requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMetadata: %w", err)
+	}
+	return oldValue.Metadata, nil
+}
+
+// ClearMetadata clears the value of the "metadata" field.
+func (m *MessageMutation) ClearMetadata() {
+	m.metadata = nil
+	m.clearedFields[message.FieldMetadata] = struct{}{}
+}
+
+// MetadataCleared returns if the "metadata" field was cleared in this mutation.
+func (m *MessageMutation) MetadataCleared() bool {
+	_, ok := m.clearedFields[message.FieldMetadata]
+	return ok
+}
+
+// ResetMetadata resets all changes to the "metadata" field.
+func (m *MessageMutation) ResetMetadata() {
+	m.metadata = nil
+	delete(m.clearedFields, message.FieldMetadata)
+}
+
+// SetOverrides sets the "overrides" field.
+func (m *MessageMutation) SetOverrides(b []byte) {
+	m.overrides = &b
+}
+
+// Overrides returns the value of the "overrides" field in the mutation.
+func (m *MessageMutation) Overrides() (r []byte, exists bool) {
+	v := m.overrides
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOverrides returns the old "overrides" field's value of the Message entity.
+// If the Message object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessageMutation) OldOverrides(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldOverrides is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldOverrides requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOverrides: %w", err)
+	}
+	return oldValue.Overrides, nil
+}
+
+// ClearOverrides clears the value of the "overrides" field.
+func (m *MessageMutation) ClearOverrides() {
+	m.overrides = nil
+	m.clearedFields[message.FieldOverrides] = struct{}{}
+}
+
+// OverridesCleared returns if the "overrides" field was cleared in this mutation.
+func (m *MessageMutation) OverridesCleared() bool {
+	_, ok := m.clearedFields[message.FieldOverrides]
+	return ok
+}
+
+// ResetOverrides resets all changes to the "overrides" field.
+func (m *MessageMutation) ResetOverrides() {
+	m.overrides = nil
+	delete(m.clearedFields, message.FieldOverrides)
 }
 
 // SetUserID sets the "user" edge to the User entity by id.
@@ -5725,12 +5889,21 @@ func (m *MessageMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MessageMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 5)
 	if m.createdat != nil {
 		fields = append(fields, message.FieldCreatedat)
 	}
 	if m.editedat != nil {
 		fields = append(fields, message.FieldEditedat)
+	}
+	if m.actions != nil {
+		fields = append(fields, message.FieldActions)
+	}
+	if m.metadata != nil {
+		fields = append(fields, message.FieldMetadata)
+	}
+	if m.overrides != nil {
+		fields = append(fields, message.FieldOverrides)
 	}
 	return fields
 }
@@ -5744,6 +5917,12 @@ func (m *MessageMutation) Field(name string) (ent.Value, bool) {
 		return m.Createdat()
 	case message.FieldEditedat:
 		return m.Editedat()
+	case message.FieldActions:
+		return m.Actions()
+	case message.FieldMetadata:
+		return m.Metadata()
+	case message.FieldOverrides:
+		return m.Overrides()
 	}
 	return nil, false
 }
@@ -5757,6 +5936,12 @@ func (m *MessageMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldCreatedat(ctx)
 	case message.FieldEditedat:
 		return m.OldEditedat(ctx)
+	case message.FieldActions:
+		return m.OldActions(ctx)
+	case message.FieldMetadata:
+		return m.OldMetadata(ctx)
+	case message.FieldOverrides:
+		return m.OldOverrides(ctx)
 	}
 	return nil, fmt.Errorf("unknown Message field %s", name)
 }
@@ -5779,6 +5964,27 @@ func (m *MessageMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetEditedat(v)
+		return nil
+	case message.FieldActions:
+		v, ok := value.([]*v1.Action)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActions(v)
+		return nil
+	case message.FieldMetadata:
+		v, ok := value.(*v1.Metadata)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMetadata(v)
+		return nil
+	case message.FieldOverrides:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOverrides(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Message field %s", name)
@@ -5809,7 +6015,20 @@ func (m *MessageMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *MessageMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(message.FieldEditedat) {
+		fields = append(fields, message.FieldEditedat)
+	}
+	if m.FieldCleared(message.FieldActions) {
+		fields = append(fields, message.FieldActions)
+	}
+	if m.FieldCleared(message.FieldMetadata) {
+		fields = append(fields, message.FieldMetadata)
+	}
+	if m.FieldCleared(message.FieldOverrides) {
+		fields = append(fields, message.FieldOverrides)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -5822,6 +6041,20 @@ func (m *MessageMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *MessageMutation) ClearField(name string) error {
+	switch name {
+	case message.FieldEditedat:
+		m.ClearEditedat()
+		return nil
+	case message.FieldActions:
+		m.ClearActions()
+		return nil
+	case message.FieldMetadata:
+		m.ClearMetadata()
+		return nil
+	case message.FieldOverrides:
+		m.ClearOverrides()
+		return nil
+	}
 	return fmt.Errorf("unknown Message nullable field %s", name)
 }
 
@@ -5834,6 +6067,15 @@ func (m *MessageMutation) ResetField(name string) error {
 		return nil
 	case message.FieldEditedat:
 		m.ResetEditedat()
+		return nil
+	case message.FieldActions:
+		m.ResetActions()
+		return nil
+	case message.FieldMetadata:
+		m.ResetMetadata()
+		return nil
+	case message.FieldOverrides:
+		m.ResetOverrides()
 		return nil
 	}
 	return fmt.Errorf("unknown Message field %s", name)
@@ -8596,16 +8838,16 @@ func (m *SessionMutation) ResetEdge(name string) error {
 // TextMessageMutation represents an operation that mutates the TextMessage nodes in the graph.
 type TextMessageMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *int
-	content            *string
-	clearedFields      map[string]struct{}
-	textmessage        *uint64
-	clearedtextmessage bool
-	done               bool
-	oldValue           func(context.Context) (*TextMessage, error)
-	predicates         []predicate.TextMessage
+	op             Op
+	typ            string
+	id             *int
+	content        *string
+	clearedFields  map[string]struct{}
+	message        *uint64
+	clearedmessage bool
+	done           bool
+	oldValue       func(context.Context) (*TextMessage, error)
+	predicates     []predicate.TextMessage
 }
 
 var _ ent.Mutation = (*TextMessageMutation)(nil)
@@ -8723,43 +8965,43 @@ func (m *TextMessageMutation) ResetContent() {
 	m.content = nil
 }
 
-// SetTextmessageID sets the "textmessage" edge to the Message entity by id.
-func (m *TextMessageMutation) SetTextmessageID(id uint64) {
-	m.textmessage = &id
+// SetMessageID sets the "message" edge to the Message entity by id.
+func (m *TextMessageMutation) SetMessageID(id uint64) {
+	m.message = &id
 }
 
-// ClearTextmessage clears the "textmessage" edge to the Message entity.
-func (m *TextMessageMutation) ClearTextmessage() {
-	m.clearedtextmessage = true
+// ClearMessage clears the "message" edge to the Message entity.
+func (m *TextMessageMutation) ClearMessage() {
+	m.clearedmessage = true
 }
 
-// TextmessageCleared returns if the "textmessage" edge to the Message entity was cleared.
-func (m *TextMessageMutation) TextmessageCleared() bool {
-	return m.clearedtextmessage
+// MessageCleared returns if the "message" edge to the Message entity was cleared.
+func (m *TextMessageMutation) MessageCleared() bool {
+	return m.clearedmessage
 }
 
-// TextmessageID returns the "textmessage" edge ID in the mutation.
-func (m *TextMessageMutation) TextmessageID() (id uint64, exists bool) {
-	if m.textmessage != nil {
-		return *m.textmessage, true
+// MessageID returns the "message" edge ID in the mutation.
+func (m *TextMessageMutation) MessageID() (id uint64, exists bool) {
+	if m.message != nil {
+		return *m.message, true
 	}
 	return
 }
 
-// TextmessageIDs returns the "textmessage" edge IDs in the mutation.
+// MessageIDs returns the "message" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// TextmessageID instead. It exists only for internal usage by the builders.
-func (m *TextMessageMutation) TextmessageIDs() (ids []uint64) {
-	if id := m.textmessage; id != nil {
+// MessageID instead. It exists only for internal usage by the builders.
+func (m *TextMessageMutation) MessageIDs() (ids []uint64) {
+	if id := m.message; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetTextmessage resets all changes to the "textmessage" edge.
-func (m *TextMessageMutation) ResetTextmessage() {
-	m.textmessage = nil
-	m.clearedtextmessage = false
+// ResetMessage resets all changes to the "message" edge.
+func (m *TextMessageMutation) ResetMessage() {
+	m.message = nil
+	m.clearedmessage = false
 }
 
 // Op returns the operation name.
@@ -8876,8 +9118,8 @@ func (m *TextMessageMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TextMessageMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.textmessage != nil {
-		edges = append(edges, textmessage.EdgeTextmessage)
+	if m.message != nil {
+		edges = append(edges, textmessage.EdgeMessage)
 	}
 	return edges
 }
@@ -8886,8 +9128,8 @@ func (m *TextMessageMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *TextMessageMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case textmessage.EdgeTextmessage:
-		if id := m.textmessage; id != nil {
+	case textmessage.EdgeMessage:
+		if id := m.message; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -8911,8 +9153,8 @@ func (m *TextMessageMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TextMessageMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.clearedtextmessage {
-		edges = append(edges, textmessage.EdgeTextmessage)
+	if m.clearedmessage {
+		edges = append(edges, textmessage.EdgeMessage)
 	}
 	return edges
 }
@@ -8921,8 +9163,8 @@ func (m *TextMessageMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *TextMessageMutation) EdgeCleared(name string) bool {
 	switch name {
-	case textmessage.EdgeTextmessage:
-		return m.clearedtextmessage
+	case textmessage.EdgeMessage:
+		return m.clearedmessage
 	}
 	return false
 }
@@ -8931,8 +9173,8 @@ func (m *TextMessageMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *TextMessageMutation) ClearEdge(name string) error {
 	switch name {
-	case textmessage.EdgeTextmessage:
-		m.ClearTextmessage()
+	case textmessage.EdgeMessage:
+		m.ClearMessage()
 		return nil
 	}
 	return fmt.Errorf("unknown TextMessage unique edge %s", name)
@@ -8942,8 +9184,8 @@ func (m *TextMessageMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *TextMessageMutation) ResetEdge(name string) error {
 	switch name {
-	case textmessage.EdgeTextmessage:
-		m.ResetTextmessage()
+	case textmessage.EdgeMessage:
+		m.ResetMessage()
 		return nil
 	}
 	return fmt.Errorf("unknown TextMessage edge %s", name)

@@ -26,25 +26,25 @@ type TextMessage struct {
 
 // TextMessageEdges holds the relations/edges for other nodes in the graph.
 type TextMessageEdges struct {
-	// Textmessage holds the value of the textmessage edge.
-	Textmessage *Message `json:"textmessage,omitempty"`
+	// Message holds the value of the message edge.
+	Message *Message `json:"message,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// TextmessageOrErr returns the Textmessage value or an error if the edge
+// MessageOrErr returns the Message value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e TextMessageEdges) TextmessageOrErr() (*Message, error) {
+func (e TextMessageEdges) MessageOrErr() (*Message, error) {
 	if e.loadedTypes[0] {
-		if e.Textmessage == nil {
-			// The edge textmessage was loaded in eager-loading,
+		if e.Message == nil {
+			// The edge message was loaded in eager-loading,
 			// but was not found.
 			return nil, &NotFoundError{label: message.Label}
 		}
-		return e.Textmessage, nil
+		return e.Message, nil
 	}
-	return nil, &NotLoadedError{edge: "textmessage"}
+	return nil, &NotLoadedError{edge: "message"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -97,9 +97,9 @@ func (tm *TextMessage) assignValues(columns []string, values []interface{}) erro
 	return nil
 }
 
-// QueryTextmessage queries the "textmessage" edge of the TextMessage entity.
-func (tm *TextMessage) QueryTextmessage() *MessageQuery {
-	return (&TextMessageClient{config: tm.config}).QueryTextmessage(tm)
+// QueryMessage queries the "message" edge of the TextMessage entity.
+func (tm *TextMessage) QueryMessage() *MessageQuery {
+	return (&TextMessageClient{config: tm.config}).QueryMessage(tm)
 }
 
 // Update returns a builder for updating this TextMessage.
