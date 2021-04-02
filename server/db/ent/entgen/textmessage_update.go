@@ -33,23 +33,23 @@ func (tmu *TextMessageUpdate) SetContent(s string) *TextMessageUpdate {
 	return tmu
 }
 
-// SetTextmessageID sets the "textmessage" edge to the Message entity by ID.
-func (tmu *TextMessageUpdate) SetTextmessageID(id uint64) *TextMessageUpdate {
-	tmu.mutation.SetTextmessageID(id)
+// SetMessageID sets the "message" edge to the Message entity by ID.
+func (tmu *TextMessageUpdate) SetMessageID(id uint64) *TextMessageUpdate {
+	tmu.mutation.SetMessageID(id)
 	return tmu
 }
 
-// SetNillableTextmessageID sets the "textmessage" edge to the Message entity by ID if the given value is not nil.
-func (tmu *TextMessageUpdate) SetNillableTextmessageID(id *uint64) *TextMessageUpdate {
+// SetNillableMessageID sets the "message" edge to the Message entity by ID if the given value is not nil.
+func (tmu *TextMessageUpdate) SetNillableMessageID(id *uint64) *TextMessageUpdate {
 	if id != nil {
-		tmu = tmu.SetTextmessageID(*id)
+		tmu = tmu.SetMessageID(*id)
 	}
 	return tmu
 }
 
-// SetTextmessage sets the "textmessage" edge to the Message entity.
-func (tmu *TextMessageUpdate) SetTextmessage(m *Message) *TextMessageUpdate {
-	return tmu.SetTextmessageID(m.ID)
+// SetMessage sets the "message" edge to the Message entity.
+func (tmu *TextMessageUpdate) SetMessage(m *Message) *TextMessageUpdate {
+	return tmu.SetMessageID(m.ID)
 }
 
 // Mutation returns the TextMessageMutation object of the builder.
@@ -57,9 +57,9 @@ func (tmu *TextMessageUpdate) Mutation() *TextMessageMutation {
 	return tmu.mutation
 }
 
-// ClearTextmessage clears the "textmessage" edge to the Message entity.
-func (tmu *TextMessageUpdate) ClearTextmessage() *TextMessageUpdate {
-	tmu.mutation.ClearTextmessage()
+// ClearMessage clears the "message" edge to the Message entity.
+func (tmu *TextMessageUpdate) ClearMessage() *TextMessageUpdate {
+	tmu.mutation.ClearMessage()
 	return tmu
 }
 
@@ -139,12 +139,12 @@ func (tmu *TextMessageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: textmessage.FieldContent,
 		})
 	}
-	if tmu.mutation.TextmessageCleared() {
+	if tmu.mutation.MessageCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   textmessage.TextmessageTable,
-			Columns: []string{textmessage.TextmessageColumn},
+			Table:   textmessage.MessageTable,
+			Columns: []string{textmessage.MessageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -155,12 +155,12 @@ func (tmu *TextMessageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tmu.mutation.TextmessageIDs(); len(nodes) > 0 {
+	if nodes := tmu.mutation.MessageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   textmessage.TextmessageTable,
-			Columns: []string{textmessage.TextmessageColumn},
+			Table:   textmessage.MessageTable,
+			Columns: []string{textmessage.MessageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -198,23 +198,23 @@ func (tmuo *TextMessageUpdateOne) SetContent(s string) *TextMessageUpdateOne {
 	return tmuo
 }
 
-// SetTextmessageID sets the "textmessage" edge to the Message entity by ID.
-func (tmuo *TextMessageUpdateOne) SetTextmessageID(id uint64) *TextMessageUpdateOne {
-	tmuo.mutation.SetTextmessageID(id)
+// SetMessageID sets the "message" edge to the Message entity by ID.
+func (tmuo *TextMessageUpdateOne) SetMessageID(id uint64) *TextMessageUpdateOne {
+	tmuo.mutation.SetMessageID(id)
 	return tmuo
 }
 
-// SetNillableTextmessageID sets the "textmessage" edge to the Message entity by ID if the given value is not nil.
-func (tmuo *TextMessageUpdateOne) SetNillableTextmessageID(id *uint64) *TextMessageUpdateOne {
+// SetNillableMessageID sets the "message" edge to the Message entity by ID if the given value is not nil.
+func (tmuo *TextMessageUpdateOne) SetNillableMessageID(id *uint64) *TextMessageUpdateOne {
 	if id != nil {
-		tmuo = tmuo.SetTextmessageID(*id)
+		tmuo = tmuo.SetMessageID(*id)
 	}
 	return tmuo
 }
 
-// SetTextmessage sets the "textmessage" edge to the Message entity.
-func (tmuo *TextMessageUpdateOne) SetTextmessage(m *Message) *TextMessageUpdateOne {
-	return tmuo.SetTextmessageID(m.ID)
+// SetMessage sets the "message" edge to the Message entity.
+func (tmuo *TextMessageUpdateOne) SetMessage(m *Message) *TextMessageUpdateOne {
+	return tmuo.SetMessageID(m.ID)
 }
 
 // Mutation returns the TextMessageMutation object of the builder.
@@ -222,9 +222,9 @@ func (tmuo *TextMessageUpdateOne) Mutation() *TextMessageMutation {
 	return tmuo.mutation
 }
 
-// ClearTextmessage clears the "textmessage" edge to the Message entity.
-func (tmuo *TextMessageUpdateOne) ClearTextmessage() *TextMessageUpdateOne {
-	tmuo.mutation.ClearTextmessage()
+// ClearMessage clears the "message" edge to the Message entity.
+func (tmuo *TextMessageUpdateOne) ClearMessage() *TextMessageUpdateOne {
+	tmuo.mutation.ClearMessage()
 	return tmuo
 }
 
@@ -309,12 +309,12 @@ func (tmuo *TextMessageUpdateOne) sqlSave(ctx context.Context) (_node *TextMessa
 			Column: textmessage.FieldContent,
 		})
 	}
-	if tmuo.mutation.TextmessageCleared() {
+	if tmuo.mutation.MessageCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   textmessage.TextmessageTable,
-			Columns: []string{textmessage.TextmessageColumn},
+			Table:   textmessage.MessageTable,
+			Columns: []string{textmessage.MessageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -325,12 +325,12 @@ func (tmuo *TextMessageUpdateOne) sqlSave(ctx context.Context) (_node *TextMessa
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tmuo.mutation.TextmessageIDs(); len(nodes) > 0 {
+	if nodes := tmuo.mutation.MessageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   textmessage.TextmessageTable,
-			Columns: []string{textmessage.TextmessageColumn},
+			Table:   textmessage.MessageTable,
+			Columns: []string{textmessage.MessageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

@@ -2,6 +2,10 @@
 
 package message
 
+import (
+	"time"
+)
+
 const (
 	// Label holds the string label denoting the message type in the database.
 	Label = "message"
@@ -11,6 +15,12 @@ const (
 	FieldCreatedat = "createdat"
 	// FieldEditedat holds the string denoting the editedat field in the database.
 	FieldEditedat = "editedat"
+	// FieldActions holds the string denoting the actions field in the database.
+	FieldActions = "actions"
+	// FieldMetadata holds the string denoting the metadata field in the database.
+	FieldMetadata = "metadata"
+	// FieldOverrides holds the string denoting the overrides field in the database.
+	FieldOverrides = "overrides"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// EdgeChannel holds the string denoting the channel edge name in mutations.
@@ -86,6 +96,9 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedat,
 	FieldEditedat,
+	FieldActions,
+	FieldMetadata,
+	FieldOverrides,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "messages"
@@ -112,3 +125,8 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultCreatedat holds the default value on creation for the "createdat" field.
+	DefaultCreatedat func() time.Time
+)

@@ -218,7 +218,10 @@ var (
 	MessagesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint64, Increment: true},
 		{Name: "createdat", Type: field.TypeTime},
-		{Name: "editedat", Type: field.TypeTime},
+		{Name: "editedat", Type: field.TypeTime, Nullable: true},
+		{Name: "actions", Type: field.TypeJSON, Nullable: true},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+		{Name: "overrides", Type: field.TypeBytes, Nullable: true},
 		{Name: "channel_message", Type: field.TypeUint64, Nullable: true},
 		{Name: "message_replies", Type: field.TypeUint64, Nullable: true},
 		{Name: "message_filemessage", Type: field.TypeInt, Nullable: true},
@@ -233,31 +236,31 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "messages_channels_message",
-				Columns:    []*schema.Column{MessagesColumns[3]},
+				Columns:    []*schema.Column{MessagesColumns[6]},
 				RefColumns: []*schema.Column{ChannelsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "messages_messages_replies",
-				Columns:    []*schema.Column{MessagesColumns[4]},
+				Columns:    []*schema.Column{MessagesColumns[7]},
 				RefColumns: []*schema.Column{MessagesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "messages_file_messages_filemessage",
-				Columns:    []*schema.Column{MessagesColumns[5]},
+				Columns:    []*schema.Column{MessagesColumns[8]},
 				RefColumns: []*schema.Column{FileMessagesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "messages_embed_messages_embedmessage",
-				Columns:    []*schema.Column{MessagesColumns[6]},
+				Columns:    []*schema.Column{MessagesColumns[9]},
 				RefColumns: []*schema.Column{EmbedMessagesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "messages_users_message",
-				Columns:    []*schema.Column{MessagesColumns[7]},
+				Columns:    []*schema.Column{MessagesColumns[10]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

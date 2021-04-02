@@ -2323,15 +2323,15 @@ func (c *TextMessageClient) GetX(ctx context.Context, id int) *TextMessage {
 	return obj
 }
 
-// QueryTextmessage queries the textmessage edge of a TextMessage.
-func (c *TextMessageClient) QueryTextmessage(tm *TextMessage) *MessageQuery {
+// QueryMessage queries the message edge of a TextMessage.
+func (c *TextMessageClient) QueryMessage(tm *TextMessage) *MessageQuery {
 	query := &MessageQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := tm.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(textmessage.Table, textmessage.FieldID, id),
 			sqlgraph.To(message.Table, message.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, textmessage.TextmessageTable, textmessage.TextmessageColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, textmessage.MessageTable, textmessage.MessageColumn),
 		)
 		fromV = sqlgraph.Neighbors(tm.driver.Dialect(), step)
 		return fromV, nil

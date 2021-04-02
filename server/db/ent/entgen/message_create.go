@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	v1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/ent/entgen/embedmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/filemessage"
@@ -32,9 +33,43 @@ func (mc *MessageCreate) SetCreatedat(t time.Time) *MessageCreate {
 	return mc
 }
 
+// SetNillableCreatedat sets the "createdat" field if the given value is not nil.
+func (mc *MessageCreate) SetNillableCreatedat(t *time.Time) *MessageCreate {
+	if t != nil {
+		mc.SetCreatedat(*t)
+	}
+	return mc
+}
+
 // SetEditedat sets the "editedat" field.
 func (mc *MessageCreate) SetEditedat(t time.Time) *MessageCreate {
 	mc.mutation.SetEditedat(t)
+	return mc
+}
+
+// SetNillableEditedat sets the "editedat" field if the given value is not nil.
+func (mc *MessageCreate) SetNillableEditedat(t *time.Time) *MessageCreate {
+	if t != nil {
+		mc.SetEditedat(*t)
+	}
+	return mc
+}
+
+// SetActions sets the "actions" field.
+func (mc *MessageCreate) SetActions(v []*v1.Action) *MessageCreate {
+	mc.mutation.SetActions(v)
+	return mc
+}
+
+// SetMetadata sets the "metadata" field.
+func (mc *MessageCreate) SetMetadata(v *v1.Metadata) *MessageCreate {
+	mc.mutation.SetMetadata(v)
+	return mc
+}
+
+// SetOverrides sets the "overrides" field.
+func (mc *MessageCreate) SetOverrides(b []byte) *MessageCreate {
+	mc.mutation.SetOverrides(b)
 	return mc
 }
 
@@ -203,6 +238,7 @@ func (mc *MessageCreate) Save(ctx context.Context) (*Message, error) {
 		err  error
 		node *Message
 	)
+	mc.defaults()
 	if len(mc.hooks) == 0 {
 		if err = mc.check(); err != nil {
 			return nil, err
@@ -241,13 +277,18 @@ func (mc *MessageCreate) SaveX(ctx context.Context) *Message {
 	return v
 }
 
+// defaults sets the default values of the builder before save.
+func (mc *MessageCreate) defaults() {
+	if _, ok := mc.mutation.Createdat(); !ok {
+		v := message.DefaultCreatedat()
+		mc.mutation.SetCreatedat(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (mc *MessageCreate) check() error {
 	if _, ok := mc.mutation.Createdat(); !ok {
 		return &ValidationError{Name: "createdat", err: errors.New("entgen: missing required field \"createdat\"")}
-	}
-	if _, ok := mc.mutation.Editedat(); !ok {
-		return &ValidationError{Name: "editedat", err: errors.New("entgen: missing required field \"editedat\"")}
 	}
 	return nil
 }
@@ -297,6 +338,30 @@ func (mc *MessageCreate) createSpec() (*Message, *sqlgraph.CreateSpec) {
 			Column: message.FieldEditedat,
 		})
 		_node.Editedat = value
+	}
+	if value, ok := mc.mutation.Actions(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: message.FieldActions,
+		})
+		_node.Actions = value
+	}
+	if value, ok := mc.mutation.Metadata(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: message.FieldMetadata,
+		})
+		_node.Metadata = value
+	}
+	if value, ok := mc.mutation.Overrides(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: message.FieldOverrides,
+		})
+		_node.Overrides = value
 	}
 	if nodes := mc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -472,6 +537,7 @@ func (mcb *MessageCreateBulk) Save(ctx context.Context) ([]*Message, error) {
 	for i := range mcb.builders {
 		func(i int, root context.Context) {
 			builder := mcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*MessageMutation)
 				if !ok {

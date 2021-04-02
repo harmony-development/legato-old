@@ -3,15 +3,18 @@
 package entgen
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/harmony-development/legato/server/db/ent/entgen/message"
+
+	v1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/ent/entgen/embedmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/filemessage"
-	"github.com/harmony-development/legato/server/db/ent/entgen/message"
 	"github.com/harmony-development/legato/server/db/ent/entgen/override"
 	"github.com/harmony-development/legato/server/db/ent/entgen/textmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
@@ -26,6 +29,12 @@ type Message struct {
 	Createdat time.Time `json:"createdat,omitempty"`
 	// Editedat holds the value of the "editedat" field.
 	Editedat time.Time `json:"editedat,omitempty"`
+	// Actions holds the value of the "actions" field.
+	Actions []*v1.Action `json:"actions,omitempty"`
+	// Metadata holds the value of the "metadata" field.
+	Metadata *v1.Metadata `json:"metadata,omitempty"`
+	// Overrides holds the value of the "overrides" field.
+	Overrides []byte `json:"overrides,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MessageQuery when eager-loading is set.
 	Edges                MessageEdges `json:"edges"`
@@ -171,6 +180,8 @@ func (*Message) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case message.FieldActions, message.FieldMetadata, message.FieldOverrides:
+			values[i] = &[]byte{}
 		case message.FieldID:
 			values[i] = &sql.NullInt64{}
 		case message.FieldCreatedat, message.FieldEditedat:
@@ -217,6 +228,30 @@ func (m *Message) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field editedat", values[i])
 			} else if value.Valid {
 				m.Editedat = value.Time
+			}
+		case message.FieldActions:
+
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field actions", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &m.Actions); err != nil {
+					return fmt.Errorf("unmarshal field actions: %w", err)
+				}
+			}
+		case message.FieldMetadata:
+
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field metadata", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &m.Metadata); err != nil {
+					return fmt.Errorf("unmarshal field metadata: %w", err)
+				}
+			}
+		case message.FieldOverrides:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field overrides", values[i])
+			} else if value != nil {
+				m.Overrides = *value
 			}
 		case message.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -325,6 +360,12 @@ func (m *Message) String() string {
 	builder.WriteString(m.Createdat.Format(time.ANSIC))
 	builder.WriteString(", editedat=")
 	builder.WriteString(m.Editedat.Format(time.ANSIC))
+	builder.WriteString(", actions=")
+	builder.WriteString(fmt.Sprintf("%v", m.Actions))
+	builder.WriteString(", metadata=")
+	builder.WriteString(fmt.Sprintf("%v", m.Metadata))
+	builder.WriteString(", overrides=")
+	builder.WriteString(fmt.Sprintf("%v", m.Overrides))
 	builder.WriteByte(')')
 	return builder.String()
 }
