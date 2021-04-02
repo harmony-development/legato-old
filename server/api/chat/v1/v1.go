@@ -156,15 +156,22 @@ func init() {
 
 // CreateChannel implements the CreateChannel RPC
 func (v1 *V1) CreateChannel(c echo.Context, r *chatv1.CreateChannelRequest) (*chatv1.CreateChannelResponse, error) {
-	channel, err := v1.DB.AddChannelToGuild(r.GuildId, r.ChannelName, r.PreviousId, r.NextId, r.IsCategory, r.Metadata)
+	channelID, err := v1.Sonyflake.NextID()
 	if err != nil {
+		return nil, err
+	}
+	md, err := proto.Marshal(r.Metadata)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := v1.DB.AddChannelToGuild(r.GuildId, channelID, r.ChannelName, &r.PreviousId, &r.NextId, types.ChannelKindText, md); err != nil {
 		return nil, err
 	}
 	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
 		Event: &chatv1.Event_CreatedChannel{
 			CreatedChannel: &chatv1.Event_ChannelCreated{
 				GuildId:    r.GuildId,
-				ChannelId:  channel.ChannelID,
+				ChannelId:  channelID,
 				Name:       r.ChannelName,
 				PreviousId: r.PreviousId,
 				NextId:     r.NextId,
@@ -173,7 +180,7 @@ func (v1 *V1) CreateChannel(c echo.Context, r *chatv1.CreateChannelRequest) (*ch
 		},
 	})
 	return &chatv1.CreateChannelResponse{
-		ChannelId: channel.ChannelID,
+		ChannelId: channelID,
 	}, nil
 }
 
@@ -286,8 +293,17 @@ func (v1 *V1) GetGuildChannels(c echo.Context, r *chatv1.GetGuildChannelsRequest
 	roles := ctx.UserRoles
 
 	for _, channel := range chans {
-		if ctx.IsOwner || v1.Perms.Check("messages.view", roles, r.GuildId, channel.ChannelId) {
-			ret = append(ret, channel)
+		if ctx.IsOwner || v1.Perms.Check("messages.view", roles, r.GuildId, channel.ID) {
+			var md *harmonytypesv1.Metadata
+			if err := proto.Unmarshal(channel.Metadata, &harmonytypesv1.Metadata{}); err != nil {
+				return nil, err
+			}
+			ret = append(ret, &chatv1.GetGuildChannelsResponse_Channel{
+				ChannelId:   channel.ID,
+				ChannelName: channel.Name,
+				IsCategory:  false,
+				Metadata:    md,
+			})
 		}
 	}
 	return &chatv1.GetGuildChannelsResponse{
@@ -432,7 +448,19 @@ func init() {
 
 // UpdateChannelInformation implements the UpdateChannelInformation RPC
 func (v1 *V1) UpdateChannelInformation(c echo.Context, r *chatv1.UpdateChannelInformationRequest) (*empty.Empty, error) {
-	if err := v1.DB.UpdateChannelInformation(r.GuildId, r.ChannelId, r.Name, r.UpdateName, r.Metadata, r.UpdateMetadata); err != nil {
+	var name *string
+	var metadata []byte
+	if r.UpdateName {
+		name = &r.Name
+	}
+	if r.UpdateMetadata {
+		if md, err := proto.Marshal(r.Metadata); err != nil {
+			return nil, err
+		} else {
+			metadata = md
+		}
+	}
+	if err := v1.DB.UpdateChannelInformation(r.GuildId, r.ChannelId, name, metadata); err != nil {
 		return nil, err
 	}
 	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
@@ -463,7 +491,7 @@ func init() {
 
 // UpdateChannelOrder implements the UpdateChannelOrder RPC
 func (v1 *V1) UpdateChannelOrder(c echo.Context, r *chatv1.UpdateChannelOrderRequest) (*empty.Empty, error) {
-	if err := v1.DB.MoveChannel(r.GuildId, r.ChannelId, r.PreviousId, r.NextId); err != nil {
+	if err := v1.DB.MoveChannel(r.ChannelId, &r.PreviousId, &r.NextId); err != nil {
 		return nil, err
 	}
 	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
@@ -504,6 +532,9 @@ func (v1 *V1) UpdateMessageText(c echo.Context, r *chatv1.UpdateMessageTextReque
 	}
 
 	tenpo, err := v1.DB.UpdateTextMessage(r.MessageId, r.NewContent)
+	if err != nil {
+		return nil, err
+	}
 	editedAt, _ := ptypes.TimestampProto(tenpo.UTC())
 
 	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{

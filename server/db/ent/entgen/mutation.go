@@ -68,8 +68,8 @@ type ChannelMutation struct {
 	typ            string
 	id             *uint64
 	name           *string
-	kind           *int64
-	addkind        *int64
+	kind           *uint64
+	addkind        *uint64
 	position       *string
 	metadata       *[]byte
 	clearedFields  map[string]struct{}
@@ -205,13 +205,13 @@ func (m *ChannelMutation) ResetName() {
 }
 
 // SetKind sets the "kind" field.
-func (m *ChannelMutation) SetKind(i int64) {
-	m.kind = &i
+func (m *ChannelMutation) SetKind(u uint64) {
+	m.kind = &u
 	m.addkind = nil
 }
 
 // Kind returns the value of the "kind" field in the mutation.
-func (m *ChannelMutation) Kind() (r int64, exists bool) {
+func (m *ChannelMutation) Kind() (r uint64, exists bool) {
 	v := m.kind
 	if v == nil {
 		return
@@ -222,7 +222,7 @@ func (m *ChannelMutation) Kind() (r int64, exists bool) {
 // OldKind returns the old "kind" field's value of the Channel entity.
 // If the Channel object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ChannelMutation) OldKind(ctx context.Context) (v int64, err error) {
+func (m *ChannelMutation) OldKind(ctx context.Context) (v uint64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldKind is only allowed on UpdateOne operations")
 	}
@@ -236,17 +236,17 @@ func (m *ChannelMutation) OldKind(ctx context.Context) (v int64, err error) {
 	return oldValue.Kind, nil
 }
 
-// AddKind adds i to the "kind" field.
-func (m *ChannelMutation) AddKind(i int64) {
+// AddKind adds u to the "kind" field.
+func (m *ChannelMutation) AddKind(u uint64) {
 	if m.addkind != nil {
-		*m.addkind += i
+		*m.addkind += u
 	} else {
-		m.addkind = &i
+		m.addkind = &u
 	}
 }
 
 // AddedKind returns the value that was added to the "kind" field in this mutation.
-func (m *ChannelMutation) AddedKind() (r int64, exists bool) {
+func (m *ChannelMutation) AddedKind() (r uint64, exists bool) {
 	v := m.addkind
 	if v == nil {
 		return
@@ -501,7 +501,7 @@ func (m *ChannelMutation) SetField(name string, value ent.Value) error {
 		m.SetName(v)
 		return nil
 	case channel.FieldKind:
-		v, ok := value.(int64)
+		v, ok := value.(uint64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -552,7 +552,7 @@ func (m *ChannelMutation) AddedField(name string) (ent.Value, bool) {
 func (m *ChannelMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	case channel.FieldKind:
-		v, ok := value.(int64)
+		v, ok := value.(uint64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

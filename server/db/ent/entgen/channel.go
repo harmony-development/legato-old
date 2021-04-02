@@ -19,7 +19,7 @@ type Channel struct {
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Kind holds the value of the "kind" field.
-	Kind int64 `json:"kind,omitempty"`
+	Kind uint64 `json:"kind,omitempty"`
 	// Position holds the value of the "position" field.
 	Position string `json:"position,omitempty"`
 	// Metadata holds the value of the "metadata" field.
@@ -108,7 +108,7 @@ func (c *Channel) assignValues(columns []string, values []interface{}) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field kind", values[i])
 			} else if value.Valid {
-				c.Kind = value.Int64
+				c.Kind = uint64(value.Int64)
 			}
 		case channel.FieldPosition:
 			if value, ok := values[i].(*sql.NullString); !ok {

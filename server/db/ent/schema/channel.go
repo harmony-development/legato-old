@@ -16,7 +16,7 @@ func (Channel) Fields() []ent.Field {
 	return []ent.Field{
 		field.Uint64("id"),
 		field.String("name"),
-		field.Int64("kind"),
+		field.Uint64("kind"),
 		field.String("position"),
 		field.Bytes("metadata"),
 	}

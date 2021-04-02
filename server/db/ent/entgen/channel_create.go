@@ -28,8 +28,8 @@ func (cc *ChannelCreate) SetName(s string) *ChannelCreate {
 }
 
 // SetKind sets the "kind" field.
-func (cc *ChannelCreate) SetKind(i int64) *ChannelCreate {
-	cc.mutation.SetKind(i)
+func (cc *ChannelCreate) SetKind(u uint64) *ChannelCreate {
+	cc.mutation.SetKind(u)
 	return cc
 }
 
@@ -191,7 +191,7 @@ func (cc *ChannelCreate) createSpec() (*Channel, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := cc.mutation.Kind(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
+			Type:   field.TypeUint64,
 			Value:  value,
 			Column: channel.FieldKind,
 		})

@@ -35,15 +35,15 @@ func (cu *ChannelUpdate) SetName(s string) *ChannelUpdate {
 }
 
 // SetKind sets the "kind" field.
-func (cu *ChannelUpdate) SetKind(i int64) *ChannelUpdate {
+func (cu *ChannelUpdate) SetKind(u uint64) *ChannelUpdate {
 	cu.mutation.ResetKind()
-	cu.mutation.SetKind(i)
+	cu.mutation.SetKind(u)
 	return cu
 }
 
-// AddKind adds i to the "kind" field.
-func (cu *ChannelUpdate) AddKind(i int64) *ChannelUpdate {
-	cu.mutation.AddKind(i)
+// AddKind adds u to the "kind" field.
+func (cu *ChannelUpdate) AddKind(u uint64) *ChannelUpdate {
+	cu.mutation.AddKind(u)
 	return cu
 }
 
@@ -203,14 +203,14 @@ func (cu *ChannelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := cu.mutation.Kind(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
+			Type:   field.TypeUint64,
 			Value:  value,
 			Column: channel.FieldKind,
 		})
 	}
 	if value, ok := cu.mutation.AddedKind(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
+			Type:   field.TypeUint64,
 			Value:  value,
 			Column: channel.FieldKind,
 		})
@@ -343,15 +343,15 @@ func (cuo *ChannelUpdateOne) SetName(s string) *ChannelUpdateOne {
 }
 
 // SetKind sets the "kind" field.
-func (cuo *ChannelUpdateOne) SetKind(i int64) *ChannelUpdateOne {
+func (cuo *ChannelUpdateOne) SetKind(u uint64) *ChannelUpdateOne {
 	cuo.mutation.ResetKind()
-	cuo.mutation.SetKind(i)
+	cuo.mutation.SetKind(u)
 	return cuo
 }
 
-// AddKind adds i to the "kind" field.
-func (cuo *ChannelUpdateOne) AddKind(i int64) *ChannelUpdateOne {
-	cuo.mutation.AddKind(i)
+// AddKind adds u to the "kind" field.
+func (cuo *ChannelUpdateOne) AddKind(u uint64) *ChannelUpdateOne {
+	cuo.mutation.AddKind(u)
 	return cuo
 }
 
@@ -516,14 +516,14 @@ func (cuo *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err e
 	}
 	if value, ok := cuo.mutation.Kind(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
+			Type:   field.TypeUint64,
 			Value:  value,
 			Column: channel.FieldKind,
 		})
 	}
 	if value, ok := cuo.mutation.AddedKind(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
+			Type:   field.TypeUint64,
 			Value:  value,
 			Column: channel.FieldKind,
 		})

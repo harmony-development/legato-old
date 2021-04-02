@@ -12,7 +12,7 @@ var (
 	ChannelsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint64, Increment: true},
 		{Name: "name", Type: field.TypeString},
-		{Name: "kind", Type: field.TypeInt64},
+		{Name: "kind", Type: field.TypeUint64},
 		{Name: "position", Type: field.TypeString},
 		{Name: "metadata", Type: field.TypeBytes},
 		{Name: "guild_channel", Type: field.TypeUint64, Nullable: true},

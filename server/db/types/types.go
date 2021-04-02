@@ -52,3 +52,11 @@ type UserData struct {
 	IsBot    bool
 	Password []byte
 }
+
+type ChannelKind uint64
+
+const (
+	ChannelKindText ChannelKind = iota
+	ChannelKindCategory
+	ChannelKindVoice
+)

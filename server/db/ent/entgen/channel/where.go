@@ -99,7 +99,7 @@ func Name(v string) predicate.Channel {
 }
 
 // Kind applies equality check predicate on the "kind" field. It's identical to KindEQ.
-func Kind(v int64) predicate.Channel {
+func Kind(v uint64) predicate.Channel {
 	return predicate.Channel(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldKind), v))
 	})
@@ -231,21 +231,21 @@ func NameContainsFold(v string) predicate.Channel {
 }
 
 // KindEQ applies the EQ predicate on the "kind" field.
-func KindEQ(v int64) predicate.Channel {
+func KindEQ(v uint64) predicate.Channel {
 	return predicate.Channel(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldKind), v))
 	})
 }
 
 // KindNEQ applies the NEQ predicate on the "kind" field.
-func KindNEQ(v int64) predicate.Channel {
+func KindNEQ(v uint64) predicate.Channel {
 	return predicate.Channel(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldKind), v))
 	})
 }
 
 // KindIn applies the In predicate on the "kind" field.
-func KindIn(vs ...int64) predicate.Channel {
+func KindIn(vs ...uint64) predicate.Channel {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -262,7 +262,7 @@ func KindIn(vs ...int64) predicate.Channel {
 }
 
 // KindNotIn applies the NotIn predicate on the "kind" field.
-func KindNotIn(vs ...int64) predicate.Channel {
+func KindNotIn(vs ...uint64) predicate.Channel {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -279,28 +279,28 @@ func KindNotIn(vs ...int64) predicate.Channel {
 }
 
 // KindGT applies the GT predicate on the "kind" field.
-func KindGT(v int64) predicate.Channel {
+func KindGT(v uint64) predicate.Channel {
 	return predicate.Channel(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldKind), v))
 	})
 }
 
 // KindGTE applies the GTE predicate on the "kind" field.
-func KindGTE(v int64) predicate.Channel {
+func KindGTE(v uint64) predicate.Channel {
 	return predicate.Channel(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldKind), v))
 	})
 }
 
 // KindLT applies the LT predicate on the "kind" field.
-func KindLT(v int64) predicate.Channel {
+func KindLT(v uint64) predicate.Channel {
 	return predicate.Channel(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldKind), v))
 	})
 }
 
 // KindLTE applies the LTE predicate on the "kind" field.
-func KindLTE(v int64) predicate.Channel {
+func KindLTE(v uint64) predicate.Channel {
 	return predicate.Channel(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldKind), v))
 	})

@@ -18,9 +18,9 @@ type IHarmonyDB interface {
 	GetOwner(guildID uint64) (uint64, error)
 	IsOwner(guildID, userID uint64) (bool, error)
 	CreateInvite(guildID uint64, possibleUses int32, name string) (queries.Invite, error)
-	UpdateChannelInformation(guildID, channelID uint64, name string, updateName bool, metadata *harmonytypesv1.Metadata, updateMetadata bool) error
+	UpdateChannelInformation(guildID, channelID uint64, name *string, metadata []byte) error
 	AddMemberToGuild(userID, guildID uint64) error
-	AddChannelToGuild(guildID uint64, channelName string, previous, next uint64, category bool, md *harmonytypesv1.Metadata) (queries.Channel, error)
+	AddChannelToGuild(guildID, channelID uint64, channelName string, previous, next *uint64, kind ChannelKind, md []byte) (c entgen.Channel, err error)
 	DeleteChannelFromGuild(guildID, channelID uint64) error
 
 	AddTextMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata, content string) (time.Time, error)
@@ -50,7 +50,7 @@ type IHarmonyDB interface {
 	IsBanned(guildID, userID uint64) (bool, error)
 	UnbanUser(guildID, userID uint64) error
 	GetLocalGuilds(userID uint64) ([]uint64, error)
-	ChannelsForGuild(guildID uint64) ([]*chatv1.GetGuildChannelsResponse_Channel, error)
+	ChannelsForGuild(guildID uint64) ([]*entgen.Channel, error)
 	MembersInGuild(guildID uint64) ([]uint64, error)
 	CountMembersInGuild(guildID uint64) (int64, error)
 	GetMessage(messageID uint64) (*harmonytypesv1.Message, error)
@@ -81,8 +81,8 @@ type IHarmonyDB interface {
 	GetGuildListPosition(userID, guildID uint64, homeServer string) (string, error)
 	AddGuildToList(userID, guildID uint64, homeServer string) error
 	MoveGuild(userID, guildID uint64, homeServer string, nextGuildID, prevGuildID uint64, nextHomeServer, prevHomeServer string) error
-	GetChannelListPosition(guildID, channelID uint64) (string, error)
-	MoveChannel(guildID, channelID, previousID, nextID uint64) error
+	GetChannelListPosition(channelID uint64) (string, error)
+	MoveChannel(channelID uint64, previousID, nextID *uint64) error
 	RemoveGuildFromList(userID, guildID uint64, homeServer string) error
 	UserIsLocal(userID uint64) error
 	CreateEmotePack(userID, packID uint64, packName string) error
