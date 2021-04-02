@@ -14,6 +14,7 @@ type Emote struct {
 // Fields of the Emote.
 func (Emote) Fields() []ent.Field {
 	return []ent.Field{
+		field.String("id").Unique(),
 		field.String("name"),
 	}
 }
@@ -22,6 +23,5 @@ func (Emote) Fields() []ent.Field {
 func (Emote) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("emotepack", EmotePack.Type).Ref("emote").Unique(),
-		edge.To("file", File.Type).Unique(),
 	}
 }

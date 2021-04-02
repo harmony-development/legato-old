@@ -20,19 +20,22 @@ type EmotePack struct {
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the EmotePackQuery when eager-loading is set.
-	Edges          EmotePackEdges `json:"edges"`
-	user_emotepack *uint64
+	Edges             EmotePackEdges `json:"edges"`
+	user_emotepack    *uint64
+	user_createdpacks *uint64
 }
 
 // EmotePackEdges holds the relations/edges for other nodes in the graph.
 type EmotePackEdges struct {
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
+	// Owner holds the value of the owner edge.
+	Owner *User `json:"owner,omitempty"`
 	// Emote holds the value of the emote edge.
 	Emote []*Emote `json:"emote,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -49,10 +52,24 @@ func (e EmotePackEdges) UserOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "user"}
 }
 
+// OwnerOrErr returns the Owner value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e EmotePackEdges) OwnerOrErr() (*User, error) {
+	if e.loadedTypes[1] {
+		if e.Owner == nil {
+			// The edge owner was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: user.Label}
+		}
+		return e.Owner, nil
+	}
+	return nil, &NotLoadedError{edge: "owner"}
+}
+
 // EmoteOrErr returns the Emote value or an error if the edge
 // was not loaded in eager-loading.
 func (e EmotePackEdges) EmoteOrErr() ([]*Emote, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		return e.Emote, nil
 	}
 	return nil, &NotLoadedError{edge: "emote"}
@@ -68,6 +85,8 @@ func (*EmotePack) scanValues(columns []string) ([]interface{}, error) {
 		case emotepack.FieldName:
 			values[i] = &sql.NullString{}
 		case emotepack.ForeignKeys[0]: // user_emotepack
+			values[i] = &sql.NullInt64{}
+		case emotepack.ForeignKeys[1]: // user_createdpacks
 			values[i] = &sql.NullInt64{}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type EmotePack", columns[i])
@@ -103,6 +122,13 @@ func (ep *EmotePack) assignValues(columns []string, values []interface{}) error 
 				ep.user_emotepack = new(uint64)
 				*ep.user_emotepack = uint64(value.Int64)
 			}
+		case emotepack.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field user_createdpacks", value)
+			} else if value.Valid {
+				ep.user_createdpacks = new(uint64)
+				*ep.user_createdpacks = uint64(value.Int64)
+			}
 		}
 	}
 	return nil
@@ -111,6 +137,11 @@ func (ep *EmotePack) assignValues(columns []string, values []interface{}) error 
 // QueryUser queries the "user" edge of the EmotePack entity.
 func (ep *EmotePack) QueryUser() *UserQuery {
 	return (&EmotePackClient{config: ep.config}).QueryUser(ep)
+}
+
+// QueryOwner queries the "owner" edge of the EmotePack entity.
+func (ep *EmotePack) QueryOwner() *UserQuery {
+	return (&EmotePackClient{config: ep.config}).QueryOwner(ep)
 }
 
 // QueryEmote queries the "emote" edge of the EmotePack entity.

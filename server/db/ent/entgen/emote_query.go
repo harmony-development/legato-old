@@ -4,7 +4,6 @@ package entgen
 
 import (
 	"context"
-	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -14,7 +13,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/harmony-development/legato/server/db/ent/entgen/emote"
 	"github.com/harmony-development/legato/server/db/ent/entgen/emotepack"
-	"github.com/harmony-development/legato/server/db/ent/entgen/file"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 )
 
@@ -28,7 +26,6 @@ type EmoteQuery struct {
 	predicates []predicate.Emote
 	// eager-loading edges.
 	withEmotepack *EmotePackQuery
-	withFile      *FileQuery
 	withFKs       bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -81,28 +78,6 @@ func (eq *EmoteQuery) QueryEmotepack() *EmotePackQuery {
 	return query
 }
 
-// QueryFile chains the current query on the "file" edge.
-func (eq *EmoteQuery) QueryFile() *FileQuery {
-	query := &FileQuery{config: eq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := eq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := eq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(emote.Table, emote.FieldID, selector),
-			sqlgraph.To(file.Table, file.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, emote.FileTable, emote.FileColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(eq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
 // First returns the first Emote entity from the query.
 // Returns a *NotFoundError when no Emote was found.
 func (eq *EmoteQuery) First(ctx context.Context) (*Emote, error) {
@@ -127,8 +102,8 @@ func (eq *EmoteQuery) FirstX(ctx context.Context) *Emote {
 
 // FirstID returns the first Emote ID from the query.
 // Returns a *NotFoundError when no Emote ID was found.
-func (eq *EmoteQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (eq *EmoteQuery) FirstID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = eq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -140,7 +115,7 @@ func (eq *EmoteQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (eq *EmoteQuery) FirstIDX(ctx context.Context) int {
+func (eq *EmoteQuery) FirstIDX(ctx context.Context) string {
 	id, err := eq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -178,8 +153,8 @@ func (eq *EmoteQuery) OnlyX(ctx context.Context) *Emote {
 // OnlyID is like Only, but returns the only Emote ID in the query.
 // Returns a *NotSingularError when exactly one Emote ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (eq *EmoteQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (eq *EmoteQuery) OnlyID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = eq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -195,7 +170,7 @@ func (eq *EmoteQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (eq *EmoteQuery) OnlyIDX(ctx context.Context) int {
+func (eq *EmoteQuery) OnlyIDX(ctx context.Context) string {
 	id, err := eq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -221,8 +196,8 @@ func (eq *EmoteQuery) AllX(ctx context.Context) []*Emote {
 }
 
 // IDs executes the query and returns a list of Emote IDs.
-func (eq *EmoteQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (eq *EmoteQuery) IDs(ctx context.Context) ([]string, error) {
+	var ids []string
 	if err := eq.Select(emote.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -230,7 +205,7 @@ func (eq *EmoteQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (eq *EmoteQuery) IDsX(ctx context.Context) []int {
+func (eq *EmoteQuery) IDsX(ctx context.Context) []string {
 	ids, err := eq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -285,7 +260,6 @@ func (eq *EmoteQuery) Clone() *EmoteQuery {
 		order:         append([]OrderFunc{}, eq.order...),
 		predicates:    append([]predicate.Emote{}, eq.predicates...),
 		withEmotepack: eq.withEmotepack.Clone(),
-		withFile:      eq.withFile.Clone(),
 		// clone intermediate query.
 		sql:  eq.sql.Clone(),
 		path: eq.path,
@@ -300,17 +274,6 @@ func (eq *EmoteQuery) WithEmotepack(opts ...func(*EmotePackQuery)) *EmoteQuery {
 		opt(query)
 	}
 	eq.withEmotepack = query
-	return eq
-}
-
-// WithFile tells the query-builder to eager-load the nodes that are connected to
-// the "file" edge. The optional arguments are used to configure the query builder of the edge.
-func (eq *EmoteQuery) WithFile(opts ...func(*FileQuery)) *EmoteQuery {
-	query := &FileQuery{config: eq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	eq.withFile = query
 	return eq
 }
 
@@ -380,9 +343,8 @@ func (eq *EmoteQuery) sqlAll(ctx context.Context) ([]*Emote, error) {
 		nodes       = []*Emote{}
 		withFKs     = eq.withFKs
 		_spec       = eq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [1]bool{
 			eq.withEmotepack != nil,
-			eq.withFile != nil,
 		}
 	)
 	if eq.withEmotepack != nil {
@@ -437,34 +399,6 @@ func (eq *EmoteQuery) sqlAll(ctx context.Context) ([]*Emote, error) {
 		}
 	}
 
-	if query := eq.withFile; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*Emote)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-		}
-		query.withFKs = true
-		query.Where(predicate.File(func(s *sql.Selector) {
-			s.Where(sql.InValues(emote.FileColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			fk := n.emote_file
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "emote_file" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "emote_file" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.File = n
-		}
-	}
-
 	return nodes, nil
 }
 
@@ -487,7 +421,7 @@ func (eq *EmoteQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   emote.Table,
 			Columns: emote.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeString,
 				Column: emote.FieldID,
 			},
 		},

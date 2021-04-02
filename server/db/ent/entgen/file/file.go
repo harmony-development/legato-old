@@ -15,8 +15,6 @@ const (
 	FieldSize = "size"
 	// EdgeFilehash holds the string denoting the filehash edge name in mutations.
 	EdgeFilehash = "filehash"
-	// EdgeEmote holds the string denoting the emote edge name in mutations.
-	EdgeEmote = "emote"
 	// Table holds the table name of the file in the database.
 	Table = "files"
 	// FilehashTable is the table the holds the filehash relation/edge.
@@ -26,13 +24,6 @@ const (
 	FilehashInverseTable = "file_hashes"
 	// FilehashColumn is the table column denoting the filehash relation/edge.
 	FilehashColumn = "file_hash_file"
-	// EmoteTable is the table the holds the emote relation/edge.
-	EmoteTable = "files"
-	// EmoteInverseTable is the table name for the Emote entity.
-	// It exists in this package in order to avoid circular dependency with the "emote" package.
-	EmoteInverseTable = "emotes"
-	// EmoteColumn is the table column denoting the emote relation/edge.
-	EmoteColumn = "emote_file"
 )
 
 // Columns holds all SQL columns for file fields.
@@ -46,7 +37,6 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "files"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"emote_file",
 	"file_hash_file",
 }
 

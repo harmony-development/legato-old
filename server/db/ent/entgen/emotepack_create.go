@@ -52,15 +52,34 @@ func (epc *EmotePackCreate) SetUser(u *User) *EmotePackCreate {
 	return epc.SetUserID(u.ID)
 }
 
+// SetOwnerID sets the "owner" edge to the User entity by ID.
+func (epc *EmotePackCreate) SetOwnerID(id uint64) *EmotePackCreate {
+	epc.mutation.SetOwnerID(id)
+	return epc
+}
+
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
+func (epc *EmotePackCreate) SetNillableOwnerID(id *uint64) *EmotePackCreate {
+	if id != nil {
+		epc = epc.SetOwnerID(*id)
+	}
+	return epc
+}
+
+// SetOwner sets the "owner" edge to the User entity.
+func (epc *EmotePackCreate) SetOwner(u *User) *EmotePackCreate {
+	return epc.SetOwnerID(u.ID)
+}
+
 // AddEmoteIDs adds the "emote" edge to the Emote entity by IDs.
-func (epc *EmotePackCreate) AddEmoteIDs(ids ...int) *EmotePackCreate {
+func (epc *EmotePackCreate) AddEmoteIDs(ids ...string) *EmotePackCreate {
 	epc.mutation.AddEmoteIDs(ids...)
 	return epc
 }
 
 // AddEmote adds the "emote" edges to the Emote entity.
 func (epc *EmotePackCreate) AddEmote(e ...*Emote) *EmotePackCreate {
-	ids := make([]int, len(e))
+	ids := make([]string, len(e))
 	for i := range e {
 		ids[i] = e[i].ID
 	}
@@ -182,6 +201,26 @@ func (epc *EmotePackCreate) createSpec() (*EmotePack, *sqlgraph.CreateSpec) {
 		_node.user_emotepack = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := epc.mutation.OwnerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   emotepack.OwnerTable,
+			Columns: []string{emotepack.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.user_createdpacks = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := epc.mutation.EmoteIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -191,7 +230,7 @@ func (epc *EmotePackCreate) createSpec() (*EmotePack, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: emote.FieldID,
 				},
 			},

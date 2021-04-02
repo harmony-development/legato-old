@@ -28,6 +28,7 @@ type EmotePackQuery struct {
 	predicates []predicate.EmotePack
 	// eager-loading edges.
 	withUser  *UserQuery
+	withOwner *UserQuery
 	withEmote *EmoteQuery
 	withFKs   bool
 	// intermediate query (i.e. traversal path).
@@ -74,6 +75,28 @@ func (epq *EmotePackQuery) QueryUser() *UserQuery {
 			sqlgraph.From(emotepack.Table, emotepack.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, emotepack.UserTable, emotepack.UserColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(epq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryOwner chains the current query on the "owner" edge.
+func (epq *EmotePackQuery) QueryOwner() *UserQuery {
+	query := &UserQuery{config: epq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := epq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := epq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(emotepack.Table, emotepack.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, emotepack.OwnerTable, emotepack.OwnerColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(epq.driver.Dialect(), step)
 		return fromU, nil
@@ -285,6 +308,7 @@ func (epq *EmotePackQuery) Clone() *EmotePackQuery {
 		order:      append([]OrderFunc{}, epq.order...),
 		predicates: append([]predicate.EmotePack{}, epq.predicates...),
 		withUser:   epq.withUser.Clone(),
+		withOwner:  epq.withOwner.Clone(),
 		withEmote:  epq.withEmote.Clone(),
 		// clone intermediate query.
 		sql:  epq.sql.Clone(),
@@ -300,6 +324,17 @@ func (epq *EmotePackQuery) WithUser(opts ...func(*UserQuery)) *EmotePackQuery {
 		opt(query)
 	}
 	epq.withUser = query
+	return epq
+}
+
+// WithOwner tells the query-builder to eager-load the nodes that are connected to
+// the "owner" edge. The optional arguments are used to configure the query builder of the edge.
+func (epq *EmotePackQuery) WithOwner(opts ...func(*UserQuery)) *EmotePackQuery {
+	query := &UserQuery{config: epq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	epq.withOwner = query
 	return epq
 }
 
@@ -380,12 +415,13 @@ func (epq *EmotePackQuery) sqlAll(ctx context.Context) ([]*EmotePack, error) {
 		nodes       = []*EmotePack{}
 		withFKs     = epq.withFKs
 		_spec       = epq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			epq.withUser != nil,
+			epq.withOwner != nil,
 			epq.withEmote != nil,
 		}
 	)
-	if epq.withUser != nil {
+	if epq.withUser != nil || epq.withOwner != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -433,6 +469,32 @@ func (epq *EmotePackQuery) sqlAll(ctx context.Context) ([]*EmotePack, error) {
 			}
 			for i := range nodes {
 				nodes[i].Edges.User = n
+			}
+		}
+	}
+
+	if query := epq.withOwner; query != nil {
+		ids := make([]uint64, 0, len(nodes))
+		nodeids := make(map[uint64][]*EmotePack)
+		for i := range nodes {
+			fk := nodes[i].user_createdpacks
+			if fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
+		}
+		query.Where(user.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_createdpacks" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Owner = n
 			}
 		}
 	}

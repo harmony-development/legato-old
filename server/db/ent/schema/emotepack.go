@@ -23,6 +23,7 @@ func (EmotePack) Fields() []ent.Field {
 func (EmotePack) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("user", User.Type).Ref("emotepack").Unique(),
+		edge.From("owner", User.Type).Ref("createdpacks").Unique(),
 		edge.To("emote", Emote.Type),
 	}
 }

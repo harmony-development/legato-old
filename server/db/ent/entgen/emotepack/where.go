@@ -237,6 +237,34 @@ func HasUserWith(preds ...predicate.User) predicate.EmotePack {
 	})
 }
 
+// HasOwner applies the HasEdge predicate on the "owner" edge.
+func HasOwner() predicate.EmotePack {
+	return predicate.EmotePack(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(OwnerTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, OwnerTable, OwnerColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasOwnerWith applies the HasEdge predicate on the "owner" edge with a given conditions (other predicates).
+func HasOwnerWith(preds ...predicate.User) predicate.EmotePack {
+	return predicate.EmotePack(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(OwnerInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, OwnerTable, OwnerColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasEmote applies the HasEdge predicate on the "emote" edge.
 func HasEmote() predicate.EmotePack {
 	return predicate.EmotePack(func(s *sql.Selector) {

@@ -932,13 +932,11 @@ type EmoteMutation struct {
 	config
 	op               Op
 	typ              string
-	id               *int
+	id               *string
 	name             *string
 	clearedFields    map[string]struct{}
 	emotepack        *uint64
 	clearedemotepack bool
-	file             *string
-	clearedfile      bool
 	done             bool
 	oldValue         func(context.Context) (*Emote, error)
 	predicates       []predicate.Emote
@@ -964,7 +962,7 @@ func newEmoteMutation(c config, op Op, opts ...emoteOption) *EmoteMutation {
 }
 
 // withEmoteID sets the ID field of the mutation.
-func withEmoteID(id int) emoteOption {
+func withEmoteID(id string) emoteOption {
 	return func(m *EmoteMutation) {
 		var (
 			err   error
@@ -1014,9 +1012,15 @@ func (m EmoteMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Emote entities.
+func (m *EmoteMutation) SetID(id string) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID
 // is only available if it was provided to the builder.
-func (m *EmoteMutation) ID() (id int, exists bool) {
+func (m *EmoteMutation) ID() (id string, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -1096,45 +1100,6 @@ func (m *EmoteMutation) EmotepackIDs() (ids []uint64) {
 func (m *EmoteMutation) ResetEmotepack() {
 	m.emotepack = nil
 	m.clearedemotepack = false
-}
-
-// SetFileID sets the "file" edge to the File entity by id.
-func (m *EmoteMutation) SetFileID(id string) {
-	m.file = &id
-}
-
-// ClearFile clears the "file" edge to the File entity.
-func (m *EmoteMutation) ClearFile() {
-	m.clearedfile = true
-}
-
-// FileCleared returns if the "file" edge to the File entity was cleared.
-func (m *EmoteMutation) FileCleared() bool {
-	return m.clearedfile
-}
-
-// FileID returns the "file" edge ID in the mutation.
-func (m *EmoteMutation) FileID() (id string, exists bool) {
-	if m.file != nil {
-		return *m.file, true
-	}
-	return
-}
-
-// FileIDs returns the "file" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// FileID instead. It exists only for internal usage by the builders.
-func (m *EmoteMutation) FileIDs() (ids []string) {
-	if id := m.file; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetFile resets all changes to the "file" edge.
-func (m *EmoteMutation) ResetFile() {
-	m.file = nil
-	m.clearedfile = false
 }
 
 // Op returns the operation name.
@@ -1250,12 +1215,9 @@ func (m *EmoteMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *EmoteMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 1)
 	if m.emotepack != nil {
 		edges = append(edges, emote.EdgeEmotepack)
-	}
-	if m.file != nil {
-		edges = append(edges, emote.EdgeFile)
 	}
 	return edges
 }
@@ -1268,17 +1230,13 @@ func (m *EmoteMutation) AddedIDs(name string) []ent.Value {
 		if id := m.emotepack; id != nil {
 			return []ent.Value{*id}
 		}
-	case emote.EdgeFile:
-		if id := m.file; id != nil {
-			return []ent.Value{*id}
-		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *EmoteMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 1)
 	return edges
 }
 
@@ -1292,12 +1250,9 @@ func (m *EmoteMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *EmoteMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 1)
 	if m.clearedemotepack {
 		edges = append(edges, emote.EdgeEmotepack)
-	}
-	if m.clearedfile {
-		edges = append(edges, emote.EdgeFile)
 	}
 	return edges
 }
@@ -1308,8 +1263,6 @@ func (m *EmoteMutation) EdgeCleared(name string) bool {
 	switch name {
 	case emote.EdgeEmotepack:
 		return m.clearedemotepack
-	case emote.EdgeFile:
-		return m.clearedfile
 	}
 	return false
 }
@@ -1321,9 +1274,6 @@ func (m *EmoteMutation) ClearEdge(name string) error {
 	case emote.EdgeEmotepack:
 		m.ClearEmotepack()
 		return nil
-	case emote.EdgeFile:
-		m.ClearFile()
-		return nil
 	}
 	return fmt.Errorf("unknown Emote unique edge %s", name)
 }
@@ -1334,9 +1284,6 @@ func (m *EmoteMutation) ResetEdge(name string) error {
 	switch name {
 	case emote.EdgeEmotepack:
 		m.ResetEmotepack()
-		return nil
-	case emote.EdgeFile:
-		m.ResetFile()
 		return nil
 	}
 	return fmt.Errorf("unknown Emote edge %s", name)
@@ -1352,8 +1299,10 @@ type EmotePackMutation struct {
 	clearedFields map[string]struct{}
 	user          *uint64
 	cleareduser   bool
-	emote         map[int]struct{}
-	removedemote  map[int]struct{}
+	owner         *uint64
+	clearedowner  bool
+	emote         map[string]struct{}
+	removedemote  map[string]struct{}
 	clearedemote  bool
 	done          bool
 	oldValue      func(context.Context) (*EmotePack, error)
@@ -1520,10 +1469,49 @@ func (m *EmotePackMutation) ResetUser() {
 	m.cleareduser = false
 }
 
+// SetOwnerID sets the "owner" edge to the User entity by id.
+func (m *EmotePackMutation) SetOwnerID(id uint64) {
+	m.owner = &id
+}
+
+// ClearOwner clears the "owner" edge to the User entity.
+func (m *EmotePackMutation) ClearOwner() {
+	m.clearedowner = true
+}
+
+// OwnerCleared returns if the "owner" edge to the User entity was cleared.
+func (m *EmotePackMutation) OwnerCleared() bool {
+	return m.clearedowner
+}
+
+// OwnerID returns the "owner" edge ID in the mutation.
+func (m *EmotePackMutation) OwnerID() (id uint64, exists bool) {
+	if m.owner != nil {
+		return *m.owner, true
+	}
+	return
+}
+
+// OwnerIDs returns the "owner" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// OwnerID instead. It exists only for internal usage by the builders.
+func (m *EmotePackMutation) OwnerIDs() (ids []uint64) {
+	if id := m.owner; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetOwner resets all changes to the "owner" edge.
+func (m *EmotePackMutation) ResetOwner() {
+	m.owner = nil
+	m.clearedowner = false
+}
+
 // AddEmoteIDs adds the "emote" edge to the Emote entity by ids.
-func (m *EmotePackMutation) AddEmoteIDs(ids ...int) {
+func (m *EmotePackMutation) AddEmoteIDs(ids ...string) {
 	if m.emote == nil {
-		m.emote = make(map[int]struct{})
+		m.emote = make(map[string]struct{})
 	}
 	for i := range ids {
 		m.emote[ids[i]] = struct{}{}
@@ -1541,9 +1529,9 @@ func (m *EmotePackMutation) EmoteCleared() bool {
 }
 
 // RemoveEmoteIDs removes the "emote" edge to the Emote entity by IDs.
-func (m *EmotePackMutation) RemoveEmoteIDs(ids ...int) {
+func (m *EmotePackMutation) RemoveEmoteIDs(ids ...string) {
 	if m.removedemote == nil {
-		m.removedemote = make(map[int]struct{})
+		m.removedemote = make(map[string]struct{})
 	}
 	for i := range ids {
 		m.removedemote[ids[i]] = struct{}{}
@@ -1551,7 +1539,7 @@ func (m *EmotePackMutation) RemoveEmoteIDs(ids ...int) {
 }
 
 // RemovedEmote returns the removed IDs of the "emote" edge to the Emote entity.
-func (m *EmotePackMutation) RemovedEmoteIDs() (ids []int) {
+func (m *EmotePackMutation) RemovedEmoteIDs() (ids []string) {
 	for id := range m.removedemote {
 		ids = append(ids, id)
 	}
@@ -1559,7 +1547,7 @@ func (m *EmotePackMutation) RemovedEmoteIDs() (ids []int) {
 }
 
 // EmoteIDs returns the "emote" edge IDs in the mutation.
-func (m *EmotePackMutation) EmoteIDs() (ids []int) {
+func (m *EmotePackMutation) EmoteIDs() (ids []string) {
 	for id := range m.emote {
 		ids = append(ids, id)
 	}
@@ -1686,9 +1674,12 @@ func (m *EmotePackMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *EmotePackMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.user != nil {
 		edges = append(edges, emotepack.EdgeUser)
+	}
+	if m.owner != nil {
+		edges = append(edges, emotepack.EdgeOwner)
 	}
 	if m.emote != nil {
 		edges = append(edges, emotepack.EdgeEmote)
@@ -1704,6 +1695,10 @@ func (m *EmotePackMutation) AddedIDs(name string) []ent.Value {
 		if id := m.user; id != nil {
 			return []ent.Value{*id}
 		}
+	case emotepack.EdgeOwner:
+		if id := m.owner; id != nil {
+			return []ent.Value{*id}
+		}
 	case emotepack.EdgeEmote:
 		ids := make([]ent.Value, 0, len(m.emote))
 		for id := range m.emote {
@@ -1716,7 +1711,7 @@ func (m *EmotePackMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *EmotePackMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removedemote != nil {
 		edges = append(edges, emotepack.EdgeEmote)
 	}
@@ -1739,9 +1734,12 @@ func (m *EmotePackMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *EmotePackMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.cleareduser {
 		edges = append(edges, emotepack.EdgeUser)
+	}
+	if m.clearedowner {
+		edges = append(edges, emotepack.EdgeOwner)
 	}
 	if m.clearedemote {
 		edges = append(edges, emotepack.EdgeEmote)
@@ -1755,6 +1753,8 @@ func (m *EmotePackMutation) EdgeCleared(name string) bool {
 	switch name {
 	case emotepack.EdgeUser:
 		return m.cleareduser
+	case emotepack.EdgeOwner:
+		return m.clearedowner
 	case emotepack.EdgeEmote:
 		return m.clearedemote
 	}
@@ -1768,6 +1768,9 @@ func (m *EmotePackMutation) ClearEdge(name string) error {
 	case emotepack.EdgeUser:
 		m.ClearUser()
 		return nil
+	case emotepack.EdgeOwner:
+		m.ClearOwner()
+		return nil
 	}
 	return fmt.Errorf("unknown EmotePack unique edge %s", name)
 }
@@ -1778,6 +1781,9 @@ func (m *EmotePackMutation) ResetEdge(name string) error {
 	switch name {
 	case emotepack.EdgeUser:
 		m.ResetUser()
+		return nil
+	case emotepack.EdgeOwner:
+		m.ResetOwner()
 		return nil
 	case emotepack.EdgeEmote:
 		m.ResetEmote()
@@ -1799,8 +1805,6 @@ type FileMutation struct {
 	clearedFields   map[string]struct{}
 	filehash        *int
 	clearedfilehash bool
-	emote           *int
-	clearedemote    bool
 	done            bool
 	oldValue        func(context.Context) (*File, error)
 	predicates      []predicate.File
@@ -2058,45 +2062,6 @@ func (m *FileMutation) ResetFilehash() {
 	m.clearedfilehash = false
 }
 
-// SetEmoteID sets the "emote" edge to the Emote entity by id.
-func (m *FileMutation) SetEmoteID(id int) {
-	m.emote = &id
-}
-
-// ClearEmote clears the "emote" edge to the Emote entity.
-func (m *FileMutation) ClearEmote() {
-	m.clearedemote = true
-}
-
-// EmoteCleared returns if the "emote" edge to the Emote entity was cleared.
-func (m *FileMutation) EmoteCleared() bool {
-	return m.clearedemote
-}
-
-// EmoteID returns the "emote" edge ID in the mutation.
-func (m *FileMutation) EmoteID() (id int, exists bool) {
-	if m.emote != nil {
-		return *m.emote, true
-	}
-	return
-}
-
-// EmoteIDs returns the "emote" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// EmoteID instead. It exists only for internal usage by the builders.
-func (m *FileMutation) EmoteIDs() (ids []int) {
-	if id := m.emote; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetEmote resets all changes to the "emote" edge.
-func (m *FileMutation) ResetEmote() {
-	m.emote = nil
-	m.clearedemote = false
-}
-
 // Op returns the operation name.
 func (m *FileMutation) Op() Op {
 	return m.op
@@ -2259,12 +2224,9 @@ func (m *FileMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *FileMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 1)
 	if m.filehash != nil {
 		edges = append(edges, file.EdgeFilehash)
-	}
-	if m.emote != nil {
-		edges = append(edges, file.EdgeEmote)
 	}
 	return edges
 }
@@ -2277,17 +2239,13 @@ func (m *FileMutation) AddedIDs(name string) []ent.Value {
 		if id := m.filehash; id != nil {
 			return []ent.Value{*id}
 		}
-	case file.EdgeEmote:
-		if id := m.emote; id != nil {
-			return []ent.Value{*id}
-		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *FileMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 1)
 	return edges
 }
 
@@ -2301,12 +2259,9 @@ func (m *FileMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *FileMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 1)
 	if m.clearedfilehash {
 		edges = append(edges, file.EdgeFilehash)
-	}
-	if m.clearedemote {
-		edges = append(edges, file.EdgeEmote)
 	}
 	return edges
 }
@@ -2317,8 +2272,6 @@ func (m *FileMutation) EdgeCleared(name string) bool {
 	switch name {
 	case file.EdgeFilehash:
 		return m.clearedfilehash
-	case file.EdgeEmote:
-		return m.clearedemote
 	}
 	return false
 }
@@ -2330,9 +2283,6 @@ func (m *FileMutation) ClearEdge(name string) error {
 	case file.EdgeFilehash:
 		m.ClearFilehash()
 		return nil
-	case file.EdgeEmote:
-		m.ClearEmote()
-		return nil
 	}
 	return fmt.Errorf("unknown File unique edge %s", name)
 }
@@ -2343,9 +2293,6 @@ func (m *FileMutation) ResetEdge(name string) error {
 	switch name {
 	case file.EdgeFilehash:
 		m.ResetFilehash()
-		return nil
-	case file.EdgeEmote:
-		m.ResetEmote()
 		return nil
 	}
 	return fmt.Errorf("unknown File edge %s", name)
@@ -9027,6 +8974,9 @@ type UserMutation struct {
 	emotepack           map[uint64]struct{}
 	removedemotepack    map[uint64]struct{}
 	clearedemotepack    bool
+	createdpacks        map[uint64]struct{}
+	removedcreatedpacks map[uint64]struct{}
+	clearedcreatedpacks bool
 	role                map[uint64]struct{}
 	removedrole         map[uint64]struct{}
 	clearedrole         bool
@@ -9449,6 +9399,59 @@ func (m *UserMutation) ResetEmotepack() {
 	m.removedemotepack = nil
 }
 
+// AddCreatedpackIDs adds the "createdpacks" edge to the EmotePack entity by ids.
+func (m *UserMutation) AddCreatedpackIDs(ids ...uint64) {
+	if m.createdpacks == nil {
+		m.createdpacks = make(map[uint64]struct{})
+	}
+	for i := range ids {
+		m.createdpacks[ids[i]] = struct{}{}
+	}
+}
+
+// ClearCreatedpacks clears the "createdpacks" edge to the EmotePack entity.
+func (m *UserMutation) ClearCreatedpacks() {
+	m.clearedcreatedpacks = true
+}
+
+// CreatedpacksCleared returns if the "createdpacks" edge to the EmotePack entity was cleared.
+func (m *UserMutation) CreatedpacksCleared() bool {
+	return m.clearedcreatedpacks
+}
+
+// RemoveCreatedpackIDs removes the "createdpacks" edge to the EmotePack entity by IDs.
+func (m *UserMutation) RemoveCreatedpackIDs(ids ...uint64) {
+	if m.removedcreatedpacks == nil {
+		m.removedcreatedpacks = make(map[uint64]struct{})
+	}
+	for i := range ids {
+		m.removedcreatedpacks[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedCreatedpacks returns the removed IDs of the "createdpacks" edge to the EmotePack entity.
+func (m *UserMutation) RemovedCreatedpacksIDs() (ids []uint64) {
+	for id := range m.removedcreatedpacks {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// CreatedpacksIDs returns the "createdpacks" edge IDs in the mutation.
+func (m *UserMutation) CreatedpacksIDs() (ids []uint64) {
+	for id := range m.createdpacks {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetCreatedpacks resets all changes to the "createdpacks" edge.
+func (m *UserMutation) ResetCreatedpacks() {
+	m.createdpacks = nil
+	m.clearedcreatedpacks = false
+	m.removedcreatedpacks = nil
+}
+
 // AddRoleIDs adds the "role" edge to the Role entity by ids.
 func (m *UserMutation) AddRoleIDs(ids ...uint64) {
 	if m.role == nil {
@@ -9590,7 +9593,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 8)
+	edges := make([]string, 0, 9)
 	if m.local_user != nil {
 		edges = append(edges, user.EdgeLocalUser)
 	}
@@ -9611,6 +9614,9 @@ func (m *UserMutation) AddedEdges() []string {
 	}
 	if m.emotepack != nil {
 		edges = append(edges, user.EdgeEmotepack)
+	}
+	if m.createdpacks != nil {
+		edges = append(edges, user.EdgeCreatedpacks)
 	}
 	if m.role != nil {
 		edges = append(edges, user.EdgeRole)
@@ -9658,6 +9664,12 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeCreatedpacks:
+		ids := make([]ent.Value, 0, len(m.createdpacks))
+		for id := range m.createdpacks {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgeRole:
 		ids := make([]ent.Value, 0, len(m.role))
 		for id := range m.role {
@@ -9670,7 +9682,7 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 8)
+	edges := make([]string, 0, 9)
 	if m.removedsessions != nil {
 		edges = append(edges, user.EdgeSessions)
 	}
@@ -9682,6 +9694,9 @@ func (m *UserMutation) RemovedEdges() []string {
 	}
 	if m.removedemotepack != nil {
 		edges = append(edges, user.EdgeEmotepack)
+	}
+	if m.removedcreatedpacks != nil {
+		edges = append(edges, user.EdgeCreatedpacks)
 	}
 	if m.removedrole != nil {
 		edges = append(edges, user.EdgeRole)
@@ -9717,6 +9732,12 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeCreatedpacks:
+		ids := make([]ent.Value, 0, len(m.removedcreatedpacks))
+		for id := range m.removedcreatedpacks {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgeRole:
 		ids := make([]ent.Value, 0, len(m.removedrole))
 		for id := range m.removedrole {
@@ -9729,7 +9750,7 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 8)
+	edges := make([]string, 0, 9)
 	if m.clearedlocal_user {
 		edges = append(edges, user.EdgeLocalUser)
 	}
@@ -9750,6 +9771,9 @@ func (m *UserMutation) ClearedEdges() []string {
 	}
 	if m.clearedemotepack {
 		edges = append(edges, user.EdgeEmotepack)
+	}
+	if m.clearedcreatedpacks {
+		edges = append(edges, user.EdgeCreatedpacks)
 	}
 	if m.clearedrole {
 		edges = append(edges, user.EdgeRole)
@@ -9775,6 +9799,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedguild
 	case user.EdgeEmotepack:
 		return m.clearedemotepack
+	case user.EdgeCreatedpacks:
+		return m.clearedcreatedpacks
 	case user.EdgeRole:
 		return m.clearedrole
 	}
@@ -9822,6 +9848,9 @@ func (m *UserMutation) ResetEdge(name string) error {
 		return nil
 	case user.EdgeEmotepack:
 		m.ResetEmotepack()
+		return nil
+	case user.EdgeCreatedpacks:
+		m.ResetCreatedpacks()
 		return nil
 	case user.EdgeRole:
 		m.ResetRole()

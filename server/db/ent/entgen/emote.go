@@ -9,14 +9,13 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/harmony-development/legato/server/db/ent/entgen/emote"
 	"github.com/harmony-development/legato/server/db/ent/entgen/emotepack"
-	"github.com/harmony-development/legato/server/db/ent/entgen/file"
 )
 
 // Emote is the model entity for the Emote schema.
 type Emote struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -29,11 +28,9 @@ type Emote struct {
 type EmoteEdges struct {
 	// Emotepack holds the value of the emotepack edge.
 	Emotepack *EmotePack `json:"emotepack,omitempty"`
-	// File holds the value of the file edge.
-	File *File `json:"file,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [1]bool
 }
 
 // EmotepackOrErr returns the Emotepack value or an error if the edge
@@ -50,28 +47,12 @@ func (e EmoteEdges) EmotepackOrErr() (*EmotePack, error) {
 	return nil, &NotLoadedError{edge: "emotepack"}
 }
 
-// FileOrErr returns the File value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e EmoteEdges) FileOrErr() (*File, error) {
-	if e.loadedTypes[1] {
-		if e.File == nil {
-			// The edge file was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: file.Label}
-		}
-		return e.File, nil
-	}
-	return nil, &NotLoadedError{edge: "file"}
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Emote) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case emote.FieldID:
-			values[i] = &sql.NullInt64{}
-		case emote.FieldName:
+		case emote.FieldID, emote.FieldName:
 			values[i] = &sql.NullString{}
 		case emote.ForeignKeys[0]: // emote_pack_emote
 			values[i] = &sql.NullInt64{}
@@ -91,11 +72,11 @@ func (e *Emote) assignValues(columns []string, values []interface{}) error {
 	for i := range columns {
 		switch columns[i] {
 		case emote.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value.Valid {
+				e.ID = value.String
 			}
-			e.ID = int(value.Int64)
 		case emote.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
@@ -117,11 +98,6 @@ func (e *Emote) assignValues(columns []string, values []interface{}) error {
 // QueryEmotepack queries the "emotepack" edge of the Emote entity.
 func (e *Emote) QueryEmotepack() *EmotePackQuery {
 	return (&EmoteClient{config: e.config}).QueryEmotepack(e)
-}
-
-// QueryFile queries the "file" edge of the Emote entity.
-func (e *Emote) QueryFile() *FileQuery {
-	return (&EmoteClient{config: e.config}).QueryFile(e)
 }
 
 // Update returns a builder for updating this Emote.

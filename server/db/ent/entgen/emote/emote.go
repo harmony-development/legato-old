@@ -11,8 +11,6 @@ const (
 	FieldName = "name"
 	// EdgeEmotepack holds the string denoting the emotepack edge name in mutations.
 	EdgeEmotepack = "emotepack"
-	// EdgeFile holds the string denoting the file edge name in mutations.
-	EdgeFile = "file"
 	// Table holds the table name of the emote in the database.
 	Table = "emotes"
 	// EmotepackTable is the table the holds the emotepack relation/edge.
@@ -22,13 +20,6 @@ const (
 	EmotepackInverseTable = "emote_packs"
 	// EmotepackColumn is the table column denoting the emotepack relation/edge.
 	EmotepackColumn = "emote_pack_emote"
-	// FileTable is the table the holds the file relation/edge.
-	FileTable = "files"
-	// FileInverseTable is the table name for the File entity.
-	// It exists in this package in order to avoid circular dependency with the "file" package.
-	FileInverseTable = "files"
-	// FileColumn is the table column denoting the file relation/edge.
-	FileColumn = "emote_file"
 )
 
 // Columns holds all SQL columns for emote fields.

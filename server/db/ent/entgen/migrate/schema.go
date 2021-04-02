@@ -44,7 +44,7 @@ var (
 	}
 	// EmotesColumns holds the columns for the "emotes" table.
 	EmotesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeString, Unique: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "emote_pack_emote", Type: field.TypeUint64, Nullable: true},
 	}
@@ -67,6 +67,7 @@ var (
 		{Name: "id", Type: field.TypeUint64, Increment: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "user_emotepack", Type: field.TypeUint64, Nullable: true},
+		{Name: "user_createdpacks", Type: field.TypeUint64, Nullable: true},
 	}
 	// EmotePacksTable holds the schema information for the "emote_packs" table.
 	EmotePacksTable = &schema.Table{
@@ -80,6 +81,12 @@ var (
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
+			{
+				Symbol:     "emote_packs_users_createdpacks",
+				Columns:    []*schema.Column{EmotePacksColumns[3]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
 		},
 	}
 	// FilesColumns holds the columns for the "files" table.
@@ -88,7 +95,6 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "contenttype", Type: field.TypeString},
 		{Name: "size", Type: field.TypeInt},
-		{Name: "emote_file", Type: field.TypeInt, Unique: true, Nullable: true},
 		{Name: "file_hash_file", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// FilesTable holds the schema information for the "files" table.
@@ -98,14 +104,8 @@ var (
 		PrimaryKey: []*schema.Column{FilesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "files_emotes_file",
-				Columns:    []*schema.Column{FilesColumns[4]},
-				RefColumns: []*schema.Column{EmotesColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
 				Symbol:     "files_file_hashes_file",
-				Columns:    []*schema.Column{FilesColumns[5]},
+				Columns:    []*schema.Column{FilesColumns[4]},
 				RefColumns: []*schema.Column{FileHashesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -490,8 +490,8 @@ func init() {
 	ChannelsTable.ForeignKeys[0].RefTable = GuildsTable
 	EmotesTable.ForeignKeys[0].RefTable = EmotePacksTable
 	EmotePacksTable.ForeignKeys[0].RefTable = UsersTable
-	FilesTable.ForeignKeys[0].RefTable = EmotesTable
-	FilesTable.ForeignKeys[1].RefTable = FileHashesTable
+	EmotePacksTable.ForeignKeys[1].RefTable = UsersTable
+	FilesTable.ForeignKeys[0].RefTable = FileHashesTable
 	ForeignUsersTable.ForeignKeys[0].RefTable = UsersTable
 	InvitesTable.ForeignKeys[0].RefTable = GuildsTable
 	LocalUsersTable.ForeignKeys[0].RefTable = UsersTable

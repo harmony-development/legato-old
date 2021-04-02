@@ -9,7 +9,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/harmony-development/legato/server/db/ent/entgen/emote"
 	"github.com/harmony-development/legato/server/db/ent/entgen/file"
 	"github.com/harmony-development/legato/server/db/ent/entgen/filehash"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
@@ -72,25 +71,6 @@ func (fu *FileUpdate) SetFilehash(f *FileHash) *FileUpdate {
 	return fu.SetFilehashID(f.ID)
 }
 
-// SetEmoteID sets the "emote" edge to the Emote entity by ID.
-func (fu *FileUpdate) SetEmoteID(id int) *FileUpdate {
-	fu.mutation.SetEmoteID(id)
-	return fu
-}
-
-// SetNillableEmoteID sets the "emote" edge to the Emote entity by ID if the given value is not nil.
-func (fu *FileUpdate) SetNillableEmoteID(id *int) *FileUpdate {
-	if id != nil {
-		fu = fu.SetEmoteID(*id)
-	}
-	return fu
-}
-
-// SetEmote sets the "emote" edge to the Emote entity.
-func (fu *FileUpdate) SetEmote(e *Emote) *FileUpdate {
-	return fu.SetEmoteID(e.ID)
-}
-
 // Mutation returns the FileMutation object of the builder.
 func (fu *FileUpdate) Mutation() *FileMutation {
 	return fu.mutation
@@ -99,12 +79,6 @@ func (fu *FileUpdate) Mutation() *FileMutation {
 // ClearFilehash clears the "filehash" edge to the FileHash entity.
 func (fu *FileUpdate) ClearFilehash() *FileUpdate {
 	fu.mutation.ClearFilehash()
-	return fu
-}
-
-// ClearEmote clears the "emote" edge to the Emote entity.
-func (fu *FileUpdate) ClearEmote() *FileUpdate {
-	fu.mutation.ClearEmote()
 	return fu
 }
 
@@ -240,41 +214,6 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if fu.mutation.EmoteCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   file.EmoteTable,
-			Columns: []string{file.EmoteColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: emote.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := fu.mutation.EmoteIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   file.EmoteTable,
-			Columns: []string{file.EmoteColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: emote.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if n, err = sqlgraph.UpdateNodes(ctx, fu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{file.Label}
@@ -337,25 +276,6 @@ func (fuo *FileUpdateOne) SetFilehash(f *FileHash) *FileUpdateOne {
 	return fuo.SetFilehashID(f.ID)
 }
 
-// SetEmoteID sets the "emote" edge to the Emote entity by ID.
-func (fuo *FileUpdateOne) SetEmoteID(id int) *FileUpdateOne {
-	fuo.mutation.SetEmoteID(id)
-	return fuo
-}
-
-// SetNillableEmoteID sets the "emote" edge to the Emote entity by ID if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableEmoteID(id *int) *FileUpdateOne {
-	if id != nil {
-		fuo = fuo.SetEmoteID(*id)
-	}
-	return fuo
-}
-
-// SetEmote sets the "emote" edge to the Emote entity.
-func (fuo *FileUpdateOne) SetEmote(e *Emote) *FileUpdateOne {
-	return fuo.SetEmoteID(e.ID)
-}
-
 // Mutation returns the FileMutation object of the builder.
 func (fuo *FileUpdateOne) Mutation() *FileMutation {
 	return fuo.mutation
@@ -364,12 +284,6 @@ func (fuo *FileUpdateOne) Mutation() *FileMutation {
 // ClearFilehash clears the "filehash" edge to the FileHash entity.
 func (fuo *FileUpdateOne) ClearFilehash() *FileUpdateOne {
 	fuo.mutation.ClearFilehash()
-	return fuo
-}
-
-// ClearEmote clears the "emote" edge to the Emote entity.
-func (fuo *FileUpdateOne) ClearEmote() *FileUpdateOne {
-	fuo.mutation.ClearEmote()
 	return fuo
 }
 
@@ -502,41 +416,6 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: filehash.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if fuo.mutation.EmoteCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   file.EmoteTable,
-			Columns: []string{file.EmoteColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: emote.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := fuo.mutation.EmoteIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   file.EmoteTable,
-			Columns: []string{file.EmoteColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: emote.FieldID,
 				},
 			},
 		}

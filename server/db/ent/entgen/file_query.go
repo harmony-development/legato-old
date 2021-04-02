@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/harmony-development/legato/server/db/ent/entgen/emote"
 	"github.com/harmony-development/legato/server/db/ent/entgen/file"
 	"github.com/harmony-development/legato/server/db/ent/entgen/filehash"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
@@ -27,7 +26,6 @@ type FileQuery struct {
 	predicates []predicate.File
 	// eager-loading edges.
 	withFilehash *FileHashQuery
-	withEmote    *EmoteQuery
 	withFKs      bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -73,28 +71,6 @@ func (fq *FileQuery) QueryFilehash() *FileHashQuery {
 			sqlgraph.From(file.Table, file.FieldID, selector),
 			sqlgraph.To(filehash.Table, filehash.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, file.FilehashTable, file.FilehashColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryEmote chains the current query on the "emote" edge.
-func (fq *FileQuery) QueryEmote() *EmoteQuery {
-	query := &EmoteQuery{config: fq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := fq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := fq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(file.Table, file.FieldID, selector),
-			sqlgraph.To(emote.Table, emote.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, file.EmoteTable, file.EmoteColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
 		return fromU, nil
@@ -284,7 +260,6 @@ func (fq *FileQuery) Clone() *FileQuery {
 		order:        append([]OrderFunc{}, fq.order...),
 		predicates:   append([]predicate.File{}, fq.predicates...),
 		withFilehash: fq.withFilehash.Clone(),
-		withEmote:    fq.withEmote.Clone(),
 		// clone intermediate query.
 		sql:  fq.sql.Clone(),
 		path: fq.path,
@@ -299,17 +274,6 @@ func (fq *FileQuery) WithFilehash(opts ...func(*FileHashQuery)) *FileQuery {
 		opt(query)
 	}
 	fq.withFilehash = query
-	return fq
-}
-
-// WithEmote tells the query-builder to eager-load the nodes that are connected to
-// the "emote" edge. The optional arguments are used to configure the query builder of the edge.
-func (fq *FileQuery) WithEmote(opts ...func(*EmoteQuery)) *FileQuery {
-	query := &EmoteQuery{config: fq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	fq.withEmote = query
 	return fq
 }
 
@@ -379,12 +343,11 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		nodes       = []*File{}
 		withFKs     = fq.withFKs
 		_spec       = fq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [1]bool{
 			fq.withFilehash != nil,
-			fq.withEmote != nil,
 		}
 	)
-	if fq.withFilehash != nil || fq.withEmote != nil {
+	if fq.withFilehash != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -432,32 +395,6 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 			}
 			for i := range nodes {
 				nodes[i].Edges.Filehash = n
-			}
-		}
-	}
-
-	if query := fq.withEmote; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*File)
-		for i := range nodes {
-			fk := nodes[i].emote_file
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
-			}
-		}
-		query.Where(emote.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "emote_file" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Emote = n
 			}
 		}
 	}

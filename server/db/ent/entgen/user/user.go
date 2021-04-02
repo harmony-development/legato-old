@@ -21,6 +21,8 @@ const (
 	EdgeGuild = "guild"
 	// EdgeEmotepack holds the string denoting the emotepack edge name in mutations.
 	EdgeEmotepack = "emotepack"
+	// EdgeCreatedpacks holds the string denoting the createdpacks edge name in mutations.
+	EdgeCreatedpacks = "createdpacks"
 	// EdgeRole holds the string denoting the role edge name in mutations.
 	EdgeRole = "role"
 	// Table holds the table name of the user in the database.
@@ -72,6 +74,13 @@ const (
 	EmotepackInverseTable = "emote_packs"
 	// EmotepackColumn is the table column denoting the emotepack relation/edge.
 	EmotepackColumn = "user_emotepack"
+	// CreatedpacksTable is the table the holds the createdpacks relation/edge.
+	CreatedpacksTable = "emote_packs"
+	// CreatedpacksInverseTable is the table name for the EmotePack entity.
+	// It exists in this package in order to avoid circular dependency with the "emotepack" package.
+	CreatedpacksInverseTable = "emote_packs"
+	// CreatedpacksColumn is the table column denoting the createdpacks relation/edge.
+	CreatedpacksColumn = "user_createdpacks"
 	// RoleTable is the table the holds the role relation/edge. The primary key declared below.
 	RoleTable = "role_members"
 	// RoleInverseTable is the table name for the Role entity.

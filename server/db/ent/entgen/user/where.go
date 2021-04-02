@@ -287,6 +287,34 @@ func HasEmotepackWith(preds ...predicate.EmotePack) predicate.User {
 	})
 }
 
+// HasCreatedpacks applies the HasEdge predicate on the "createdpacks" edge.
+func HasCreatedpacks() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(CreatedpacksTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CreatedpacksTable, CreatedpacksColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCreatedpacksWith applies the HasEdge predicate on the "createdpacks" edge with a given conditions (other predicates).
+func HasCreatedpacksWith(preds ...predicate.EmotePack) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(CreatedpacksInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CreatedpacksTable, CreatedpacksColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasRole applies the HasEdge predicate on the "role" edge.
 func HasRole() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

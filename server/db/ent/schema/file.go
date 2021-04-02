@@ -25,6 +25,5 @@ func (File) Fields() []ent.Field {
 func (File) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("filehash", FileHash.Type).Ref("file").Unique(),
-		edge.From("emote", Emote.Type).Ref("file").Unique(),
 	}
 }

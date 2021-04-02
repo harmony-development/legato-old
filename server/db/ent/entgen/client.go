@@ -496,7 +496,7 @@ func (c *EmoteClient) UpdateOne(e *Emote) *EmoteUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *EmoteClient) UpdateOneID(id int) *EmoteUpdateOne {
+func (c *EmoteClient) UpdateOneID(id string) *EmoteUpdateOne {
 	mutation := newEmoteMutation(c.config, OpUpdateOne, withEmoteID(id))
 	return &EmoteUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -513,7 +513,7 @@ func (c *EmoteClient) DeleteOne(e *Emote) *EmoteDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *EmoteClient) DeleteOneID(id int) *EmoteDeleteOne {
+func (c *EmoteClient) DeleteOneID(id string) *EmoteDeleteOne {
 	builder := c.Delete().Where(emote.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -526,12 +526,12 @@ func (c *EmoteClient) Query() *EmoteQuery {
 }
 
 // Get returns a Emote entity by its id.
-func (c *EmoteClient) Get(ctx context.Context, id int) (*Emote, error) {
+func (c *EmoteClient) Get(ctx context.Context, id string) (*Emote, error) {
 	return c.Query().Where(emote.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *EmoteClient) GetX(ctx context.Context, id int) *Emote {
+func (c *EmoteClient) GetX(ctx context.Context, id string) *Emote {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -548,22 +548,6 @@ func (c *EmoteClient) QueryEmotepack(e *Emote) *EmotePackQuery {
 			sqlgraph.From(emote.Table, emote.FieldID, id),
 			sqlgraph.To(emotepack.Table, emotepack.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, emote.EmotepackTable, emote.EmotepackColumn),
-		)
-		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryFile queries the file edge of a Emote.
-func (c *EmoteClient) QueryFile(e *Emote) *FileQuery {
-	query := &FileQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := e.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(emote.Table, emote.FieldID, id),
-			sqlgraph.To(file.Table, file.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, emote.FileTable, emote.FileColumn),
 		)
 		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
 		return fromV, nil
@@ -668,6 +652,22 @@ func (c *EmotePackClient) QueryUser(ep *EmotePack) *UserQuery {
 			sqlgraph.From(emotepack.Table, emotepack.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, emotepack.UserTable, emotepack.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(ep.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryOwner queries the owner edge of a EmotePack.
+func (c *EmotePackClient) QueryOwner(ep *EmotePack) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ep.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(emotepack.Table, emotepack.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, emotepack.OwnerTable, emotepack.OwnerColumn),
 		)
 		fromV = sqlgraph.Neighbors(ep.driver.Dialect(), step)
 		return fromV, nil
@@ -788,22 +788,6 @@ func (c *FileClient) QueryFilehash(f *File) *FileHashQuery {
 			sqlgraph.From(file.Table, file.FieldID, id),
 			sqlgraph.To(filehash.Table, filehash.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, file.FilehashTable, file.FilehashColumn),
-		)
-		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryEmote queries the emote edge of a File.
-func (c *FileClient) QueryEmote(f *File) *EmoteQuery {
-	query := &EmoteQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := f.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(file.Table, file.FieldID, id),
-			sqlgraph.To(emote.Table, emote.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, file.EmoteTable, file.EmoteColumn),
 		)
 		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
 		return fromV, nil
@@ -2532,6 +2516,22 @@ func (c *UserClient) QueryEmotepack(u *User) *EmotePackQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(emotepack.Table, emotepack.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.EmotepackTable, user.EmotepackColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCreatedpacks queries the createdpacks edge of a User.
+func (c *UserClient) QueryCreatedpacks(u *User) *EmotePackQuery {
+	query := &EmotePackQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(emotepack.Table, emotepack.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.CreatedpacksTable, user.CreatedpacksColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

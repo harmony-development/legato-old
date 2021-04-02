@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/harmony-development/legato/server/db/ent/entgen/emote"
 	"github.com/harmony-development/legato/server/db/ent/entgen/file"
 	"github.com/harmony-development/legato/server/db/ent/entgen/filehash"
 )
@@ -26,7 +25,6 @@ type File struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FileQuery when eager-loading is set.
 	Edges          FileEdges `json:"edges"`
-	emote_file     *int
 	file_hash_file *int
 }
 
@@ -34,11 +32,9 @@ type File struct {
 type FileEdges struct {
 	// Filehash holds the value of the filehash edge.
 	Filehash *FileHash `json:"filehash,omitempty"`
-	// Emote holds the value of the emote edge.
-	Emote *Emote `json:"emote,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [1]bool
 }
 
 // FilehashOrErr returns the Filehash value or an error if the edge
@@ -55,20 +51,6 @@ func (e FileEdges) FilehashOrErr() (*FileHash, error) {
 	return nil, &NotLoadedError{edge: "filehash"}
 }
 
-// EmoteOrErr returns the Emote value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e FileEdges) EmoteOrErr() (*Emote, error) {
-	if e.loadedTypes[1] {
-		if e.Emote == nil {
-			// The edge emote was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: emote.Label}
-		}
-		return e.Emote, nil
-	}
-	return nil, &NotLoadedError{edge: "emote"}
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*File) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
@@ -78,9 +60,7 @@ func (*File) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = &sql.NullInt64{}
 		case file.FieldID, file.FieldName, file.FieldContenttype:
 			values[i] = &sql.NullString{}
-		case file.ForeignKeys[0]: // emote_file
-			values[i] = &sql.NullInt64{}
-		case file.ForeignKeys[1]: // file_hash_file
+		case file.ForeignKeys[0]: // file_hash_file
 			values[i] = &sql.NullInt64{}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type File", columns[i])
@@ -123,13 +103,6 @@ func (f *File) assignValues(columns []string, values []interface{}) error {
 			}
 		case file.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field emote_file", value)
-			} else if value.Valid {
-				f.emote_file = new(int)
-				*f.emote_file = int(value.Int64)
-			}
-		case file.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field file_hash_file", value)
 			} else if value.Valid {
 				f.file_hash_file = new(int)
@@ -143,11 +116,6 @@ func (f *File) assignValues(columns []string, values []interface{}) error {
 // QueryFilehash queries the "filehash" edge of the File entity.
 func (f *File) QueryFilehash() *FileHashQuery {
 	return (&FileClient{config: f.config}).QueryFilehash(f)
-}
-
-// QueryEmote queries the "emote" edge of the File entity.
-func (f *File) QueryEmote() *EmoteQuery {
-	return (&FileClient{config: f.config}).QueryEmote(f)
 }
 
 // Update returns a builder for updating this File.

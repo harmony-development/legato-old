@@ -33,15 +33,16 @@ type UserQuery struct {
 	fields     []string
 	predicates []predicate.User
 	// eager-loading edges.
-	withLocalUser   *LocalUserQuery
-	withForeignUser *ForeignUserQuery
-	withProfile     *ProfileQuery
-	withSessions    *SessionQuery
-	withMessage     *MessageQuery
-	withGuild       *GuildQuery
-	withEmotepack   *EmotePackQuery
-	withRole        *RoleQuery
-	withFKs         bool
+	withLocalUser    *LocalUserQuery
+	withForeignUser  *ForeignUserQuery
+	withProfile      *ProfileQuery
+	withSessions     *SessionQuery
+	withMessage      *MessageQuery
+	withGuild        *GuildQuery
+	withEmotepack    *EmotePackQuery
+	withCreatedpacks *EmotePackQuery
+	withRole         *RoleQuery
+	withFKs          bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -218,6 +219,28 @@ func (uq *UserQuery) QueryEmotepack() *EmotePackQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(emotepack.Table, emotepack.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.EmotepackTable, user.EmotepackColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCreatedpacks chains the current query on the "createdpacks" edge.
+func (uq *UserQuery) QueryCreatedpacks() *EmotePackQuery {
+	query := &EmotePackQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(emotepack.Table, emotepack.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.CreatedpacksTable, user.CreatedpacksColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -423,19 +446,20 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:          uq.config,
-		limit:           uq.limit,
-		offset:          uq.offset,
-		order:           append([]OrderFunc{}, uq.order...),
-		predicates:      append([]predicate.User{}, uq.predicates...),
-		withLocalUser:   uq.withLocalUser.Clone(),
-		withForeignUser: uq.withForeignUser.Clone(),
-		withProfile:     uq.withProfile.Clone(),
-		withSessions:    uq.withSessions.Clone(),
-		withMessage:     uq.withMessage.Clone(),
-		withGuild:       uq.withGuild.Clone(),
-		withEmotepack:   uq.withEmotepack.Clone(),
-		withRole:        uq.withRole.Clone(),
+		config:           uq.config,
+		limit:            uq.limit,
+		offset:           uq.offset,
+		order:            append([]OrderFunc{}, uq.order...),
+		predicates:       append([]predicate.User{}, uq.predicates...),
+		withLocalUser:    uq.withLocalUser.Clone(),
+		withForeignUser:  uq.withForeignUser.Clone(),
+		withProfile:      uq.withProfile.Clone(),
+		withSessions:     uq.withSessions.Clone(),
+		withMessage:      uq.withMessage.Clone(),
+		withGuild:        uq.withGuild.Clone(),
+		withEmotepack:    uq.withEmotepack.Clone(),
+		withCreatedpacks: uq.withCreatedpacks.Clone(),
+		withRole:         uq.withRole.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -519,6 +543,17 @@ func (uq *UserQuery) WithEmotepack(opts ...func(*EmotePackQuery)) *UserQuery {
 	return uq
 }
 
+// WithCreatedpacks tells the query-builder to eager-load the nodes that are connected to
+// the "createdpacks" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithCreatedpacks(opts ...func(*EmotePackQuery)) *UserQuery {
+	query := &EmotePackQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withCreatedpacks = query
+	return uq
+}
+
 // WithRole tells the query-builder to eager-load the nodes that are connected to
 // the "role" edge. The optional arguments are used to configure the query builder of the edge.
 func (uq *UserQuery) WithRole(opts ...func(*RoleQuery)) *UserQuery {
@@ -572,7 +607,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		nodes       = []*User{}
 		withFKs     = uq.withFKs
 		_spec       = uq.querySpec()
-		loadedTypes = [8]bool{
+		loadedTypes = [9]bool{
 			uq.withLocalUser != nil,
 			uq.withForeignUser != nil,
 			uq.withProfile != nil,
@@ -580,6 +615,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			uq.withMessage != nil,
 			uq.withGuild != nil,
 			uq.withEmotepack != nil,
+			uq.withCreatedpacks != nil,
 			uq.withRole != nil,
 		}
 	)
@@ -838,6 +874,35 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "user_emotepack" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Emotepack = append(node.Edges.Emotepack, n)
+		}
+	}
+
+	if query := uq.withCreatedpacks; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uint64]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Createdpacks = []*EmotePack{}
+		}
+		query.withFKs = true
+		query.Where(predicate.EmotePack(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.CreatedpacksColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.user_createdpacks
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "user_createdpacks" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_createdpacks" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Createdpacks = append(node.Edges.Createdpacks, n)
 		}
 	}
 

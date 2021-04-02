@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/harmony-development/legato/server/db/ent/entgen/emote"
 	"github.com/harmony-development/legato/server/db/ent/entgen/emotepack"
-	"github.com/harmony-development/legato/server/db/ent/entgen/file"
 )
 
 // EmoteCreate is the builder for creating a Emote entity.
@@ -24,6 +23,12 @@ type EmoteCreate struct {
 // SetName sets the "name" field.
 func (ec *EmoteCreate) SetName(s string) *EmoteCreate {
 	ec.mutation.SetName(s)
+	return ec
+}
+
+// SetID sets the "id" field.
+func (ec *EmoteCreate) SetID(s string) *EmoteCreate {
+	ec.mutation.SetID(s)
 	return ec
 }
 
@@ -44,25 +49,6 @@ func (ec *EmoteCreate) SetNillableEmotepackID(id *uint64) *EmoteCreate {
 // SetEmotepack sets the "emotepack" edge to the EmotePack entity.
 func (ec *EmoteCreate) SetEmotepack(e *EmotePack) *EmoteCreate {
 	return ec.SetEmotepackID(e.ID)
-}
-
-// SetFileID sets the "file" edge to the File entity by ID.
-func (ec *EmoteCreate) SetFileID(id string) *EmoteCreate {
-	ec.mutation.SetFileID(id)
-	return ec
-}
-
-// SetNillableFileID sets the "file" edge to the File entity by ID if the given value is not nil.
-func (ec *EmoteCreate) SetNillableFileID(id *string) *EmoteCreate {
-	if id != nil {
-		ec = ec.SetFileID(*id)
-	}
-	return ec
-}
-
-// SetFile sets the "file" edge to the File entity.
-func (ec *EmoteCreate) SetFile(f *File) *EmoteCreate {
-	return ec.SetFileID(f.ID)
 }
 
 // Mutation returns the EmoteMutation object of the builder.
@@ -130,8 +116,6 @@ func (ec *EmoteCreate) sqlSave(ctx context.Context) (*Emote, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -141,11 +125,15 @@ func (ec *EmoteCreate) createSpec() (*Emote, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: emote.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeString,
 				Column: emote.FieldID,
 			},
 		}
 	)
+	if id, ok := ec.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := ec.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -172,25 +160,6 @@ func (ec *EmoteCreate) createSpec() (*Emote, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.emote_pack_emote = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := ec.mutation.FileIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   emote.FileTable,
-			Columns: []string{emote.FileColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: file.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -235,8 +204,6 @@ func (ecb *EmoteCreateBulk) Save(ctx context.Context) ([]*Emote, error) {
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

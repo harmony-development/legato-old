@@ -11,6 +11,8 @@ const (
 	FieldName = "name"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
+	// EdgeOwner holds the string denoting the owner edge name in mutations.
+	EdgeOwner = "owner"
 	// EdgeEmote holds the string denoting the emote edge name in mutations.
 	EdgeEmote = "emote"
 	// Table holds the table name of the emotepack in the database.
@@ -22,6 +24,13 @@ const (
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_emotepack"
+	// OwnerTable is the table the holds the owner relation/edge.
+	OwnerTable = "emote_packs"
+	// OwnerInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	OwnerInverseTable = "users"
+	// OwnerColumn is the table column denoting the owner relation/edge.
+	OwnerColumn = "user_createdpacks"
 	// EmoteTable is the table the holds the emote relation/edge.
 	EmoteTable = "emotes"
 	// EmoteInverseTable is the table name for the Emote entity.
@@ -41,6 +50,7 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"user_emotepack",
+	"user_createdpacks",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

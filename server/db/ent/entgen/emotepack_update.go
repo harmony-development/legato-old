@@ -53,15 +53,34 @@ func (epu *EmotePackUpdate) SetUser(u *User) *EmotePackUpdate {
 	return epu.SetUserID(u.ID)
 }
 
+// SetOwnerID sets the "owner" edge to the User entity by ID.
+func (epu *EmotePackUpdate) SetOwnerID(id uint64) *EmotePackUpdate {
+	epu.mutation.SetOwnerID(id)
+	return epu
+}
+
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
+func (epu *EmotePackUpdate) SetNillableOwnerID(id *uint64) *EmotePackUpdate {
+	if id != nil {
+		epu = epu.SetOwnerID(*id)
+	}
+	return epu
+}
+
+// SetOwner sets the "owner" edge to the User entity.
+func (epu *EmotePackUpdate) SetOwner(u *User) *EmotePackUpdate {
+	return epu.SetOwnerID(u.ID)
+}
+
 // AddEmoteIDs adds the "emote" edge to the Emote entity by IDs.
-func (epu *EmotePackUpdate) AddEmoteIDs(ids ...int) *EmotePackUpdate {
+func (epu *EmotePackUpdate) AddEmoteIDs(ids ...string) *EmotePackUpdate {
 	epu.mutation.AddEmoteIDs(ids...)
 	return epu
 }
 
 // AddEmote adds the "emote" edges to the Emote entity.
 func (epu *EmotePackUpdate) AddEmote(e ...*Emote) *EmotePackUpdate {
-	ids := make([]int, len(e))
+	ids := make([]string, len(e))
 	for i := range e {
 		ids[i] = e[i].ID
 	}
@@ -79,6 +98,12 @@ func (epu *EmotePackUpdate) ClearUser() *EmotePackUpdate {
 	return epu
 }
 
+// ClearOwner clears the "owner" edge to the User entity.
+func (epu *EmotePackUpdate) ClearOwner() *EmotePackUpdate {
+	epu.mutation.ClearOwner()
+	return epu
+}
+
 // ClearEmote clears all "emote" edges to the Emote entity.
 func (epu *EmotePackUpdate) ClearEmote() *EmotePackUpdate {
 	epu.mutation.ClearEmote()
@@ -86,14 +111,14 @@ func (epu *EmotePackUpdate) ClearEmote() *EmotePackUpdate {
 }
 
 // RemoveEmoteIDs removes the "emote" edge to Emote entities by IDs.
-func (epu *EmotePackUpdate) RemoveEmoteIDs(ids ...int) *EmotePackUpdate {
+func (epu *EmotePackUpdate) RemoveEmoteIDs(ids ...string) *EmotePackUpdate {
 	epu.mutation.RemoveEmoteIDs(ids...)
 	return epu
 }
 
 // RemoveEmote removes "emote" edges to Emote entities.
 func (epu *EmotePackUpdate) RemoveEmote(e ...*Emote) *EmotePackUpdate {
-	ids := make([]int, len(e))
+	ids := make([]string, len(e))
 	for i := range e {
 		ids[i] = e[i].ID
 	}
@@ -211,6 +236,41 @@ func (epu *EmotePackUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if epu.mutation.OwnerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   emotepack.OwnerTable,
+			Columns: []string{emotepack.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := epu.mutation.OwnerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   emotepack.OwnerTable,
+			Columns: []string{emotepack.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if epu.mutation.EmoteCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -220,7 +280,7 @@ func (epu *EmotePackUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: emote.FieldID,
 				},
 			},
@@ -236,7 +296,7 @@ func (epu *EmotePackUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: emote.FieldID,
 				},
 			},
@@ -255,7 +315,7 @@ func (epu *EmotePackUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: emote.FieldID,
 				},
 			},
@@ -308,15 +368,34 @@ func (epuo *EmotePackUpdateOne) SetUser(u *User) *EmotePackUpdateOne {
 	return epuo.SetUserID(u.ID)
 }
 
+// SetOwnerID sets the "owner" edge to the User entity by ID.
+func (epuo *EmotePackUpdateOne) SetOwnerID(id uint64) *EmotePackUpdateOne {
+	epuo.mutation.SetOwnerID(id)
+	return epuo
+}
+
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
+func (epuo *EmotePackUpdateOne) SetNillableOwnerID(id *uint64) *EmotePackUpdateOne {
+	if id != nil {
+		epuo = epuo.SetOwnerID(*id)
+	}
+	return epuo
+}
+
+// SetOwner sets the "owner" edge to the User entity.
+func (epuo *EmotePackUpdateOne) SetOwner(u *User) *EmotePackUpdateOne {
+	return epuo.SetOwnerID(u.ID)
+}
+
 // AddEmoteIDs adds the "emote" edge to the Emote entity by IDs.
-func (epuo *EmotePackUpdateOne) AddEmoteIDs(ids ...int) *EmotePackUpdateOne {
+func (epuo *EmotePackUpdateOne) AddEmoteIDs(ids ...string) *EmotePackUpdateOne {
 	epuo.mutation.AddEmoteIDs(ids...)
 	return epuo
 }
 
 // AddEmote adds the "emote" edges to the Emote entity.
 func (epuo *EmotePackUpdateOne) AddEmote(e ...*Emote) *EmotePackUpdateOne {
-	ids := make([]int, len(e))
+	ids := make([]string, len(e))
 	for i := range e {
 		ids[i] = e[i].ID
 	}
@@ -334,6 +413,12 @@ func (epuo *EmotePackUpdateOne) ClearUser() *EmotePackUpdateOne {
 	return epuo
 }
 
+// ClearOwner clears the "owner" edge to the User entity.
+func (epuo *EmotePackUpdateOne) ClearOwner() *EmotePackUpdateOne {
+	epuo.mutation.ClearOwner()
+	return epuo
+}
+
 // ClearEmote clears all "emote" edges to the Emote entity.
 func (epuo *EmotePackUpdateOne) ClearEmote() *EmotePackUpdateOne {
 	epuo.mutation.ClearEmote()
@@ -341,14 +426,14 @@ func (epuo *EmotePackUpdateOne) ClearEmote() *EmotePackUpdateOne {
 }
 
 // RemoveEmoteIDs removes the "emote" edge to Emote entities by IDs.
-func (epuo *EmotePackUpdateOne) RemoveEmoteIDs(ids ...int) *EmotePackUpdateOne {
+func (epuo *EmotePackUpdateOne) RemoveEmoteIDs(ids ...string) *EmotePackUpdateOne {
 	epuo.mutation.RemoveEmoteIDs(ids...)
 	return epuo
 }
 
 // RemoveEmote removes "emote" edges to Emote entities.
 func (epuo *EmotePackUpdateOne) RemoveEmote(e ...*Emote) *EmotePackUpdateOne {
-	ids := make([]int, len(e))
+	ids := make([]string, len(e))
 	for i := range e {
 		ids[i] = e[i].ID
 	}
@@ -471,6 +556,41 @@ func (epuo *EmotePackUpdateOne) sqlSave(ctx context.Context) (_node *EmotePack, 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if epuo.mutation.OwnerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   emotepack.OwnerTable,
+			Columns: []string{emotepack.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := epuo.mutation.OwnerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   emotepack.OwnerTable,
+			Columns: []string{emotepack.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if epuo.mutation.EmoteCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -480,7 +600,7 @@ func (epuo *EmotePackUpdateOne) sqlSave(ctx context.Context) (_node *EmotePack, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: emote.FieldID,
 				},
 			},
@@ -496,7 +616,7 @@ func (epuo *EmotePackUpdateOne) sqlSave(ctx context.Context) (_node *EmotePack, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: emote.FieldID,
 				},
 			},
@@ -515,7 +635,7 @@ func (epuo *EmotePackUpdateOne) sqlSave(ctx context.Context) (_node *EmotePack, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: emote.FieldID,
 				},
 			},

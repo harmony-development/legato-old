@@ -149,6 +149,21 @@ func (uc *UserCreate) AddEmotepack(e ...*EmotePack) *UserCreate {
 	return uc.AddEmotepackIDs(ids...)
 }
 
+// AddCreatedpackIDs adds the "createdpacks" edge to the EmotePack entity by IDs.
+func (uc *UserCreate) AddCreatedpackIDs(ids ...uint64) *UserCreate {
+	uc.mutation.AddCreatedpackIDs(ids...)
+	return uc
+}
+
+// AddCreatedpacks adds the "createdpacks" edges to the EmotePack entity.
+func (uc *UserCreate) AddCreatedpacks(e ...*EmotePack) *UserCreate {
+	ids := make([]uint64, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return uc.AddCreatedpackIDs(ids...)
+}
+
 // AddRoleIDs adds the "role" edge to the Role entity by IDs.
 func (uc *UserCreate) AddRoleIDs(ids ...uint64) *UserCreate {
 	uc.mutation.AddRoleIDs(ids...)
@@ -368,6 +383,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Inverse: false,
 			Table:   user.EmotepackTable,
 			Columns: []string{user.EmotepackColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: emotepack.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.CreatedpacksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CreatedpacksTable,
+			Columns: []string{user.CreatedpacksColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

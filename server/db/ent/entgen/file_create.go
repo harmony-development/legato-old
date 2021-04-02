@@ -9,7 +9,6 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/harmony-development/legato/server/db/ent/entgen/emote"
 	"github.com/harmony-development/legato/server/db/ent/entgen/file"
 	"github.com/harmony-development/legato/server/db/ent/entgen/filehash"
 )
@@ -62,25 +61,6 @@ func (fc *FileCreate) SetNillableFilehashID(id *int) *FileCreate {
 // SetFilehash sets the "filehash" edge to the FileHash entity.
 func (fc *FileCreate) SetFilehash(f *FileHash) *FileCreate {
 	return fc.SetFilehashID(f.ID)
-}
-
-// SetEmoteID sets the "emote" edge to the Emote entity by ID.
-func (fc *FileCreate) SetEmoteID(id int) *FileCreate {
-	fc.mutation.SetEmoteID(id)
-	return fc
-}
-
-// SetNillableEmoteID sets the "emote" edge to the Emote entity by ID if the given value is not nil.
-func (fc *FileCreate) SetNillableEmoteID(id *int) *FileCreate {
-	if id != nil {
-		fc = fc.SetEmoteID(*id)
-	}
-	return fc
-}
-
-// SetEmote sets the "emote" edge to the Emote entity.
-func (fc *FileCreate) SetEmote(e *Emote) *FileCreate {
-	return fc.SetEmoteID(e.ID)
 }
 
 // Mutation returns the FileMutation object of the builder.
@@ -214,26 +194,6 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.file_hash_file = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := fc.mutation.EmoteIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   file.EmoteTable,
-			Columns: []string{file.EmoteColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: emote.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.emote_file = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

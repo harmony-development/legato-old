@@ -6,6 +6,7 @@ import (
 
 	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
+	"github.com/harmony-development/legato/server/db/ent/entgen"
 	"github.com/harmony-development/legato/server/db/queries"
 )
 
@@ -87,10 +88,10 @@ type IHarmonyDB interface {
 	CreateEmotePack(userID, packID uint64, packName string) error
 	IsPackOwner(userID, packID uint64) (bool, error)
 	AddEmoteToPack(packID uint64, imageID string, name string) error
-	DeleteEmoteFromPack(packID uint64, imageID string) error
+	DeleteEmoteFromPack(packID uint64, emoteID string) error
 	DeleteEmotePack(packID uint64) error
-	GetEmotePacks(userID uint64) ([]queries.GetEmotePacksRow, error)
-	GetEmotePackEmotes(packID uint64) ([]queries.GetEmotePackEmotesRow, error)
+	GetEmotePacks(userID uint64) ([]*entgen.EmotePack, error)
+	GetEmotePackEmotes(packID uint64) ([]*entgen.Emote, error)
 	DequipEmotePack(userID, packID uint64) error
 	AddRoleToGuild(guildID uint64, role *chatv1.Role) error
 	RemoveRoleFromGuild(guildID, roleID uint64) error

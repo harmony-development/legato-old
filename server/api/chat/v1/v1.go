@@ -1073,9 +1073,9 @@ func (v1 *V1) GetEmotePacks(c echo.Context, r *chatv1.GetEmotePacksRequest) (*ch
 	outPacks := []*chatv1.GetEmotePacksResponse_EmotePack{}
 	for _, pack := range packs {
 		outPacks = append(outPacks, &chatv1.GetEmotePacksResponse_EmotePack{
-			PackId:    pack.PackID,
-			PackOwner: pack.UserID,
-			PackName:  pack.PackName,
+			PackId:    pack.ID,
+			PackOwner: pack.Edges.Owner.ID,
+			PackName:  pack.Name,
 		})
 	}
 	return &chatv1.GetEmotePacksResponse{
@@ -1092,8 +1092,8 @@ func (v1 *V1) GetEmotePackEmotes(c echo.Context, r *chatv1.GetEmotePackEmotesReq
 	outEmotes := []*chatv1.GetEmotePackEmotesResponse_Emote{}
 	for _, emote := range emotes {
 		outEmotes = append(outEmotes, &chatv1.GetEmotePackEmotesResponse_Emote{
-			ImageId: emote.ImageID,
-			Name:    emote.EmoteName,
+			ImageId: emote.ID,
+			Name:    emote.Name,
 		})
 	}
 	return &chatv1.GetEmotePackEmotesResponse{

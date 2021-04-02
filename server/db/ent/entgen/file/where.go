@@ -438,34 +438,6 @@ func HasFilehashWith(preds ...predicate.FileHash) predicate.File {
 	})
 }
 
-// HasEmote applies the HasEdge predicate on the "emote" edge.
-func HasEmote() predicate.File {
-	return predicate.File(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(EmoteTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, EmoteTable, EmoteColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasEmoteWith applies the HasEdge predicate on the "emote" edge with a given conditions (other predicates).
-func HasEmoteWith(preds ...predicate.Emote) predicate.File {
-	return predicate.File(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(EmoteInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, EmoteTable, EmoteColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.File) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
