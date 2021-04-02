@@ -1768,6 +1768,213 @@ var _ interface {
 	ErrorName() string
 } = RemoveGuildFromGuildListResponseValidationError{}
 
+// Validate checks the field values on BanUserRequest with the rules defined in
+// the proto definition for this message. If any rules are violated, an error
+// is returned.
+func (m *BanUserRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for GuildId
+
+	// no validation rules for UserId
+
+	return nil
+}
+
+// BanUserRequestValidationError is the validation error returned by
+// BanUserRequest.Validate if the designated constraints aren't met.
+type BanUserRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e BanUserRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e BanUserRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e BanUserRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e BanUserRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e BanUserRequestValidationError) ErrorName() string { return "BanUserRequestValidationError" }
+
+// Error satisfies the builtin error interface
+func (e BanUserRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sBanUserRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = BanUserRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = BanUserRequestValidationError{}
+
+// Validate checks the field values on KickUserRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, an
+// error is returned.
+func (m *KickUserRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for GuildId
+
+	// no validation rules for UserId
+
+	return nil
+}
+
+// KickUserRequestValidationError is the validation error returned by
+// KickUserRequest.Validate if the designated constraints aren't met.
+type KickUserRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e KickUserRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e KickUserRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e KickUserRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e KickUserRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e KickUserRequestValidationError) ErrorName() string { return "KickUserRequestValidationError" }
+
+// Error satisfies the builtin error interface
+func (e KickUserRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sKickUserRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = KickUserRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = KickUserRequestValidationError{}
+
+// Validate checks the field values on UnbanUserRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, an
+// error is returned.
+func (m *UnbanUserRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for GuildId
+
+	// no validation rules for UserId
+
+	return nil
+}
+
+// UnbanUserRequestValidationError is the validation error returned by
+// UnbanUserRequest.Validate if the designated constraints aren't met.
+type UnbanUserRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UnbanUserRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UnbanUserRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UnbanUserRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UnbanUserRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UnbanUserRequestValidationError) ErrorName() string { return "UnbanUserRequestValidationError" }
+
+// Error satisfies the builtin error interface
+func (e UnbanUserRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUnbanUserRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UnbanUserRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UnbanUserRequestValidationError{}
+
 // Validate checks the field values on GetGuildListResponse_GuildListEntry with
 // the rules defined in the proto definition for this message. If any rules
 // are violated, an error is returned.

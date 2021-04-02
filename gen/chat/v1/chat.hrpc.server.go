@@ -37,7 +37,7 @@ func BindPB(obj interface{}, c echo.Context) error {
 var Chatᐳv1ᐳchat *descriptorpb.FileDescriptorProto = new(descriptorpb.FileDescriptorProto)
 
 func init() {
-	data := []byte("\n\x12chat/v1/chat.proto\x12\x10protocol.chat.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1bharmonytypes/v1/types.proto\x1a\x15chat/v1/profile.proto\x1a\x14chat/v1/guilds.proto\x1a\x16chat/v1/channels.proto\x1a\x16chat/v1/messages.proto\x1a\x14chat/v1/emotes.proto\x1a\x19chat/v1/permissions.proto\x1a\x17chat/v1/streaming.proto2\xe2\"\n\vChatService\x12\\\n\vCreateGuild\x12$.protocol.chat.v1.CreateGuildRequest\x1a%.protocol.chat.v1.CreateGuildResponse\"\x00\x12_\n\fCreateInvite\x12%.protocol.chat.v1.CreateInviteRequest\x1a&.protocol.chat.v1.CreateInviteResponse\"\x00\x12b\n\rCreateChannel\x12&.protocol.chat.v1.CreateChannelRequest\x1a'.protocol.chat.v1.CreateChannelResponse\"\x00\x12h\n\x0fCreateEmotePack\x12(.protocol.chat.v1.CreateEmotePackRequest\x1a).protocol.chat.v1.CreateEmotePackResponse\"\x00\x12_\n\fGetGuildList\x12%.protocol.chat.v1.GetGuildListRequest\x1a&.protocol.chat.v1.GetGuildListResponse\"\x00\x12t\n\x13AddGuildToGuildList\x12,.protocol.chat.v1.AddGuildToGuildListRequest\x1a-.protocol.chat.v1.AddGuildToGuildListResponse\"\x00\x12\x83\x01\n\x18RemoveGuildFromGuildList\x121.protocol.chat.v1.RemoveGuildFromGuildListRequest\x1a2.protocol.chat.v1.RemoveGuildFromGuildListResponse\"\x00\x12S\n\bGetGuild\x12!.protocol.chat.v1.GetGuildRequest\x1a\".protocol.chat.v1.GetGuildResponse\"\x00\x12h\n\x0fGetGuildInvites\x12(.protocol.chat.v1.GetGuildInvitesRequest\x1a).protocol.chat.v1.GetGuildInvitesResponse\"\x00\x12h\n\x0fGetGuildMembers\x12(.protocol.chat.v1.GetGuildMembersRequest\x1a).protocol.chat.v1.GetGuildMembersResponse\"\x00\x12k\n\x10GetGuildChannels\x12).protocol.chat.v1.GetGuildChannelsRequest\x1a*.protocol.chat.v1.GetGuildChannelsResponse\"\x00\x12q\n\x12GetChannelMessages\x12+.protocol.chat.v1.GetChannelMessagesRequest\x1a,.protocol.chat.v1.GetChannelMessagesResponse\"\x00\x12Y\n\nGetMessage\x12#.protocol.chat.v1.GetMessageRequest\x1a$.protocol.chat.v1.GetMessageResponse\"\x00\x12b\n\rGetEmotePacks\x12&.protocol.chat.v1.GetEmotePacksRequest\x1a'.protocol.chat.v1.GetEmotePacksResponse\"\x00\x12q\n\x12GetEmotePackEmotes\x12+.protocol.chat.v1.GetEmotePackEmotesRequest\x1a,.protocol.chat.v1.GetEmotePackEmotesResponse\"\x00\x12c\n\x16UpdateGuildInformation\x12/.protocol.chat.v1.UpdateGuildInformationRequest\x1a\x16.google.protobuf.Empty\"\x00\x12g\n\x18UpdateChannelInformation\x121.protocol.chat.v1.UpdateChannelInformationRequest\x1a\x16.google.protobuf.Empty\"\x00\x12[\n\x12UpdateChannelOrder\x12+.protocol.chat.v1.UpdateChannelOrderRequest\x1a\x16.google.protobuf.Empty\"\x00\x12Q\n\rUpdateMessage\x12&.protocol.chat.v1.UpdateMessageRequest\x1a\x16.google.protobuf.Empty\"\x00\x12S\n\x0eAddEmoteToPack\x12'.protocol.chat.v1.AddEmoteToPackRequest\x1a\x16.google.protobuf.Empty\"\x00\x12M\n\vDeleteGuild\x12$.protocol.chat.v1.DeleteGuildRequest\x1a\x16.google.protobuf.Empty\"\x00\x12O\n\fDeleteInvite\x12%.protocol.chat.v1.DeleteInviteRequest\x1a\x16.google.protobuf.Empty\"\x00\x12Q\n\rDeleteChannel\x12&.protocol.chat.v1.DeleteChannelRequest\x1a\x16.google.protobuf.Empty\"\x00\x12Q\n\rDeleteMessage\x12&.protocol.chat.v1.DeleteMessageRequest\x1a\x16.google.protobuf.Empty\"\x00\x12]\n\x13DeleteEmoteFromPack\x12,.protocol.chat.v1.DeleteEmoteFromPackRequest\x1a\x16.google.protobuf.Empty\"\x00\x12U\n\x0fDeleteEmotePack\x12(.protocol.chat.v1.DeleteEmotePackRequest\x1a\x16.google.protobuf.Empty\"\x00\x12U\n\x0fDequipEmotePack\x12(.protocol.chat.v1.DequipEmotePackRequest\x1a\x16.google.protobuf.Empty\"\x00\x12V\n\tJoinGuild\x12\".protocol.chat.v1.JoinGuildRequest\x1a#.protocol.chat.v1.JoinGuildResponse\"\x00\x12K\n\nLeaveGuild\x12#.protocol.chat.v1.LeaveGuildRequest\x1a\x16.google.protobuf.Empty\"\x00\x12Q\n\rTriggerAction\x12&.protocol.chat.v1.TriggerActionRequest\x1a\x16.google.protobuf.Empty\"\x00\x12\\\n\vSendMessage\x12$.protocol.chat.v1.SendMessageRequest\x1a%.protocol.chat.v1.SendMessageResponse\"\x00\x12m\n\x12QueryHasPermission\x12).protocol.chat.v1.QueryPermissionsRequest\x1a*.protocol.chat.v1.QueryPermissionsResponse\"\x00\x12S\n\x0eSetPermissions\x12'.protocol.chat.v1.SetPermissionsRequest\x1a\x16.google.protobuf.Empty\"\x00\x12e\n\x0eGetPermissions\x12'.protocol.chat.v1.GetPermissionsRequest\x1a(.protocol.chat.v1.GetPermissionsResponse\"\x00\x12S\n\bMoveRole\x12!.protocol.chat.v1.MoveRoleRequest\x1a\".protocol.chat.v1.MoveRoleResponse\"\x00\x12b\n\rGetGuildRoles\x12&.protocol.chat.v1.GetGuildRolesRequest\x1a'.protocol.chat.v1.GetGuildRolesResponse\"\x00\x12_\n\fAddGuildRole\x12%.protocol.chat.v1.AddGuildRoleRequest\x1a&.protocol.chat.v1.AddGuildRoleResponse\"\x00\x12U\n\x0fModifyGuildRole\x12(.protocol.chat.v1.ModifyGuildRoleRequest\x1a\x16.google.protobuf.Empty\"\x00\x12U\n\x0fDeleteGuildRole\x12(.protocol.chat.v1.DeleteGuildRoleRequest\x1a\x16.google.protobuf.Empty\"\x00\x12U\n\x0fManageUserRoles\x12(.protocol.chat.v1.ManageUserRolesRequest\x1a\x16.google.protobuf.Empty\"\x00\x12_\n\fGetUserRoles\x12%.protocol.chat.v1.GetUserRolesRequest\x1a&.protocol.chat.v1.GetUserRolesResponse\"\x00\x12T\n\fStreamEvents\x12%.protocol.chat.v1.StreamEventsRequest\x1a\x17.protocol.chat.v1.Event\"\x00(\x010\x01\x12P\n\aGetUser\x12 .protocol.chat.v1.GetUserRequest\x1a!.protocol.chat.v1.GetUserResponse\"\x00\x12h\n\x0fGetUserMetadata\x12(.protocol.chat.v1.GetUserMetadataRequest\x1a).protocol.chat.v1.GetUserMetadataResponse\"\x00\x12Q\n\rProfileUpdate\x12&.protocol.chat.v1.ProfileUpdateRequest\x1a\x16.google.protobuf.Empty\"\x00\x12C\n\x06Typing\x12\x1f.protocol.chat.v1.TypingRequest\x1a\x16.google.protobuf.Empty\"\x00\x12]\n\fPreviewGuild\x12%.protocol.chat.v1.PreviewGuildRequest\x1a&.protocol.chat.v1.PreviewGuildResponseB3Z1github.com/harmony-development/legato/gen/chat/v1J\x9c\"\n\a\x12\x05\x00\x00\x83\x01\x01\n\b\n\x01\f\x12\x03\x00\x00\x12\n\t\n\x02\x03\x00\x12\x03\x02\x00%\n.\n\x02\x03\x01\x12\x03\x04\x00%\x1a# import \"validate/validate.proto\";\n\n\t\n\x02\x03\x02\x12\x03\x05\x00\x1f\n\t\n\x02\x03\x03\x12\x03\x06\x00\x1e\n\t\n\x02\x03\x04\x12\x03\a\x00 \n\t\n\x02\x03\x05\x12\x03\b\x00 \n\t\n\x02\x03\x06\x12\x03\t\x00\x1e\n\t\n\x02\x03\a\x12\x03\n\x00#\n\t\n\x02\x03\b\x12\x03\v\x00!\n\b\n\x01\x02\x12\x03\r\x00\x19\n\b\n\x01\b\x12\x03\x0f\x00H\n\t\n\x02\b\v\x12\x03\x0f\x00H\n\v\n\x02\x06\x00\x12\x05\x11\x00\x83\x01\x01\n\n\n\x03\x06\x00\x01\x12\x03\x11\b\x13\n4\n\x04\x06\x00\x02\x00\x12\x03\x13\x02E\x1a' This doesn't require any permissions.\n\n\f\n\x05\x06\x00\x02\x00\x01\x12\x03\x13\x06\x11\n\f\n\x05\x06\x00\x02\x00\x02\x12\x03\x13\x12$\n\f\n\x05\x06\x00\x02\x00\x03\x12\x03\x13.A\nD\n\x04\x06\x00\x02\x01\x12\x03\x15\x02H\x1a7 This requires the \"invites.manage.create\" permission.\n\n\f\n\x05\x06\x00\x02\x01\x01\x12\x03\x15\x06\x12\n\f\n\x05\x06\x00\x02\x01\x02\x12\x03\x15\x13&\n\f\n\x05\x06\x00\x02\x01\x03\x12\x03\x150D\nE\n\x04\x06\x00\x02\x02\x12\x03\x17\x02K\x1a8 This requires the \"channels.manage.create\" permission.\n\n\f\n\x05\x06\x00\x02\x02\x01\x12\x03\x17\x06\x13\n\f\n\x05\x06\x00\x02\x02\x02\x12\x03\x17\x14(\n\f\n\x05\x06\x00\x02\x02\x03\x12\x03\x172G\n\f\n\x04\x06\x00\x02\x03\x12\x04\x18\x02\x19\x03\n\f\n\x05\x06\x00\x02\x03\x01\x12\x03\x18\x06\x15\n\f\n\x05\x06\x00\x02\x03\x02\x12\x03\x18\x16,\n\f\n\x05\x06\x00\x02\x03\x03\x12\x03\x186M\n\v\n\x04\x06\x00\x02\x04\x12\x03\x1b\x02H\n\f\n\x05\x06\x00\x02\x04\x01\x12\x03\x1b\x06\x12\n\f\n\x05\x06\x00\x02\x04\x02\x12\x03\x1b\x13&\n\f\n\x05\x06\x00\x02\x04\x03\x12\x03\x1b0D\n\f\n\x04\x06\x00\x02\x05\x12\x04\x1c\x02\x1d-\n\f\n\x05\x06\x00\x02\x05\x01\x12\x03\x1c\x06\x19\n\f\n\x05\x06\x00\x02\x05\x02\x12\x03\x1c\x1a4\n\f\n\x05\x06\x00\x02\x05\x03\x12\x03\x1d\x0e)\n\f\n\x04\x06\x00\x02\x06\x12\x04\x1e\x02\x1f2\n\f\n\x05\x06\x00\x02\x06\x01\x12\x03\x1e\x06\x1e\n\f\n\x05\x06\x00\x02\x06\x02\x12\x03\x1e\x1f>\n\f\n\x05\x06\x00\x02\x06\x03\x12\x03\x1f\x0e.\n\v\n\x04\x06\x00\x02\a\x12\x03!\x02<\n\f\n\x05\x06\x00\x02\a\x01\x12\x03!\x06\x0e\n\f\n\x05\x06\x00\x02\a\x02\x12\x03!\x0f\x1e\n\f\n\x05\x06\x00\x02\a\x03\x12\x03!(8\n<\n\x04\x06\x00\x02\b\x12\x04#\x02$\x03\x1a. This requires the \"invites.view\" permission.\n\n\f\n\x05\x06\x00\x02\b\x01\x12\x03#\x06\x15\n\f\n\x05\x06\x00\x02\b\x02\x12\x03#\x16,\n\f\n\x05\x06\x00\x02\b\x03\x12\x03#6M\n\f\n\x04\x06\x00\x02\t\x12\x04%\x02&\x03\n\f\n\x05\x06\x00\x02\t\x01\x12\x03%\x06\x15\n\f\n\x05\x06\x00\x02\t\x02\x12\x03%\x16,\n\f\n\x05\x06\x00\x02\t\x03\x12\x03%6M\nc\n\x04\x06\x00\x02\n\x12\x04)\x02**\x1aU You will only be informed of channels you have the \"messages.view\"\n permission for.\n\n\f\n\x05\x06\x00\x02\n\x01\x12\x03)\x06\x16\n\f\n\x05\x06\x00\x02\n\x02\x12\x03)\x17.\n\f\n\x05\x06\x00\x02\n\x03\x12\x03*\x0e&\n=\n\x04\x06\x00\x02\v\x12\x04,\x02-,\x1a/ This requires the \"messages.view\" permission.\n\n\f\n\x05\x06\x00\x02\v\x01\x12\x03,\x06\x18\n\f\n\x05\x06\x00\x02\v\x02\x12\x03,\x192\n\f\n\x05\x06\x00\x02\v\x03\x12\x03-\x0e(\n<\n\x04\x06\x00\x02\f\x12\x03/\x02B\x1a/ This requires the \"messages.view\" permission.\n\n\f\n\x05\x06\x00\x02\f\x01\x12\x03/\x06\x10\n\f\n\x05\x06\x00\x02\f\x02\x12\x03/\x11\"\n\f\n\x05\x06\x00\x02\f\x03\x12\x03/,>\n\v\n\x04\x06\x00\x02\r\x12\x030\x02K\n\f\n\x05\x06\x00\x02\r\x01\x12\x030\x06\x13\n\f\n\x05\x06\x00\x02\r\x02\x12\x030\x14(\n\f\n\x05\x06\x00\x02\r\x03\x12\x0302G\n\f\n\x04\x06\x00\x02\x0e\x12\x041\x022,\n\f\n\x05\x06\x00\x02\x0e\x01\x12\x031\x06\x18\n\f\n\x05\x06\x00\x02\x0e\x02\x12\x031\x192\n\f\n\x05\x06\x00\x02\x0e\x03\x12\x032\x0e(\nO\n\x04\x06\x00\x02\x0f\x12\x045\x026'\x1aA This requires the \"guild.manage.change-information\" permission.\n\n\f\n\x05\x06\x00\x02\x0f\x01\x12\x035\x06\x1c\n\f\n\x05\x06\x00\x02\x0f\x02\x12\x035\x1d:\n\f\n\x05\x06\x00\x02\x0f\x03\x12\x036\x0e#\nR\n\x04\x06\x00\x02\x10\x12\x048\x029'\x1aD This requires the \"channels.manage.change-information\" permission.\n\n\f\n\x05\x06\x00\x02\x10\x01\x12\x038\x06\x1e\n\f\n\x05\x06\x00\x02\x10\x02\x12\x038\x1f>\n\f\n\x05\x06\x00\x02\x10\x03\x12\x039\x0e#\nD\n\x04\x06\x00\x02\x11\x12\x04;\x02<'\x1a6 This requires the \"channels.manage.move\" permission.\n\n\f\n\x05\x06\x00\x02\x11\x01\x12\x03;\x06\x18\n\f\n\x05\x06\x00\x02\x11\x02\x12\x03;\x192\n\f\n\x05\x06\x00\x02\x11\x03\x12\x03<\x0e#\n<\n\x04\x06\x00\x02\x12\x12\x03>\x02K\x1a/ This requires the \"messages.send\" permission.\n\n\f\n\x05\x06\x00\x02\x12\x01\x12\x03>\x06\x13\n\f\n\x05\x06\x00\x02\x12\x02\x12\x03>\x14(\n\f\n\x05\x06\x00\x02\x12\x03\x12\x03>2G\n\v\n\x04\x06\x00\x02\x13\x12\x03?\x02M\n\f\n\x05\x06\x00\x02\x13\x01\x12\x03?\x06\x14\n\f\n\x05\x06\x00\x02\x13\x02\x12\x03?\x15*\n\f\n\x05\x06\x00\x02\x13\x03\x12\x03?4I\nB\n\x04\x06\x00\x02\x14\x12\x03B\x02G\x1a5 This requires the \"guild.manage.delete\" permission.\n\n\f\n\x05\x06\x00\x02\x14\x01\x12\x03B\x06\x11\n\f\n\x05\x06\x00\x02\x14\x02\x12\x03B\x12$\n\f\n\x05\x06\x00\x02\x14\x03\x12\x03B.C\nD\n\x04\x06\x00\x02\x15\x12\x03D\x02I\x1a7 This requires the \"invites.manage.delete\" permission.\n\n\f\n\x05\x06\x00\x02\x15\x01\x12\x03D\x06\x12\n\f\n\x05\x06\x00\x02\x15\x02\x12\x03D\x13&\n\f\n\x05\x06\x00\x02\x15\x03\x12\x03D0E\nE\n\x04\x06\x00\x02\x16\x12\x03F\x02K\x1a8 This requires the \"channels.manage.delete\" permission.\n\n\f\n\x05\x06\x00\x02\x16\x01\x12\x03F\x06\x13\n\f\n\x05\x06\x00\x02\x16\x02\x12\x03F\x14(\n\f\n\x05\x06\x00\x02\x16\x03\x12\x03F2G\nh\n\x04\x06\x00\x02\x17\x12\x03I\x02K\x1a[ This requires the \"messages.manage.delete\" permission if you are not the\n message author.\n\n\f\n\x05\x06\x00\x02\x17\x01\x12\x03I\x06\x13\n\f\n\x05\x06\x00\x02\x17\x02\x12\x03I\x14(\n\f\n\x05\x06\x00\x02\x17\x03\x12\x03I2G\n\f\n\x04\x06\x00\x02\x18\x12\x04J\x02K'\n\f\n\x05\x06\x00\x02\x18\x01\x12\x03J\x06\x19\n\f\n\x05\x06\x00\x02\x18\x02\x12\x03J\x1a4\n\f\n\x05\x06\x00\x02\x18\x03\x12\x03K\x0e#\n\v\n\x04\x06\x00\x02\x19\x12\x03L\x02O\n\f\n\x05\x06\x00\x02\x19\x01\x12\x03L\x06\x15\n\f\n\x05\x06\x00\x02\x19\x02\x12\x03L\x16,\n\f\n\x05\x06\x00\x02\x19\x03\x12\x03L6K\n\v\n\x04\x06\x00\x02\x1a\x12\x03M\x02O\n\f\n\x05\x06\x00\x02\x1a\x01\x12\x03M\x06\x15\n\f\n\x05\x06\x00\x02\x1a\x02\x12\x03M\x16,\n\f\n\x05\x06\x00\x02\x1a\x03\x12\x03M6K\n\v\n\x04\x06\x00\x02\x1b\x12\x03O\x02?\n\f\n\x05\x06\x00\x02\x1b\x01\x12\x03O\x06\x0f\n\f\n\x05\x06\x00\x02\x1b\x02\x12\x03O\x10 \n\f\n\x05\x06\x00\x02\x1b\x03\x12\x03O*;\n\v\n\x04\x06\x00\x02\x1c\x12\x03P\x02E\n\f\n\x05\x06\x00\x02\x1c\x01\x12\x03P\x06\x10\n\f\n\x05\x06\x00\x02\x1c\x02\x12\x03P\x11\"\n\f\n\x05\x06\x00\x02\x1c\x03\x12\x03P,A\n>\n\x04\x06\x00\x02\x1d\x12\x03S\x02K\x1a1 This requires the \"actions.trigger\" permission.\n\n\f\n\x05\x06\x00\x02\x1d\x01\x12\x03S\x06\x13\n\f\n\x05\x06\x00\x02\x1d\x02\x12\x03S\x14(\n\f\n\x05\x06\x00\x02\x1d\x03\x12\x03S2G\n<\n\x04\x06\x00\x02\x1e\x12\x03V\x02E\x1a/ This requires the \"messages.send\" permission.\n\n\f\n\x05\x06\x00\x02\x1e\x01\x12\x03V\x06\x11\n\f\n\x05\x06\x00\x02\x1e\x02\x12\x03V\x12$\n\f\n\x05\x06\x00\x02\x1e\x03\x12\x03V.A\n^\n\x04\x06\x00\x02\x1f\x12\x04Z\x02[*\x1aP This requires the \"permissions.query\" permission if you specify the As\n field.\n\n\f\n\x05\x06\x00\x02\x1f\x01\x12\x03Z\x06\x18\n\f\n\x05\x06\x00\x02\x1f\x02\x12\x03Z\x190\n\f\n\x05\x06\x00\x02\x1f\x03\x12\x03[\x0e&\nE\n\x04\x06\x00\x02 \x12\x03^\x02M\x1a8 This requires the \"permissions.manage.set\" permission.\n\n\f\n\x05\x06\x00\x02 \x01\x12\x03^\x06\x14\n\f\n\x05\x06\x00\x02 \x02\x12\x03^\x15*\n\f\n\x05\x06\x00\x02 \x03\x12\x03^4I\nE\n\x04\x06\x00\x02!\x12\x03a\x02N\x1a8 This requires the \"permissions.manage.get\" permission.\n\n\f\n\x05\x06\x00\x02!\x01\x12\x03a\x06\x14\n\f\n\x05\x06\x00\x02!\x02\x12\x03a\x15*\n\f\n\x05\x06\x00\x02!\x03\x12\x03a4J\n;\n\x04\x06\x00\x02\"\x12\x03d\x02<\x1a. This requires the \"roles.manage\" permission.\n\n\f\n\x05\x06\x00\x02\"\x01\x12\x03d\x06\x0e\n\f\n\x05\x06\x00\x02\"\x02\x12\x03d\x0f\x1e\n\f\n\x05\x06\x00\x02\"\x03\x12\x03d(8\n8\n\x04\x06\x00\x02#\x12\x03g\x02K\x1a+ This requires the \"roles.get\" permission.\n\n\f\n\x05\x06\x00\x02#\x01\x12\x03g\x06\x13\n\f\n\x05\x06\x00\x02#\x02\x12\x03g\x14(\n\f\n\x05\x06\x00\x02#\x03\x12\x03g2G\n;\n\x04\x06\x00\x02$\x12\x03j\x02H\x1a. This requires the \"roles.manage\" permission.\n\n\f\n\x05\x06\x00\x02$\x01\x12\x03j\x06\x12\n\f\n\x05\x06\x00\x02$\x02\x12\x03j\x13&\n\f\n\x05\x06\x00\x02$\x03\x12\x03j0D\n;\n\x04\x06\x00\x02%\x12\x03m\x02O\x1a. This requires the \"roles.manage\" permission.\n\n\f\n\x05\x06\x00\x02%\x01\x12\x03m\x06\x15\n\f\n\x05\x06\x00\x02%\x02\x12\x03m\x16,\n\f\n\x05\x06\x00\x02%\x03\x12\x03m6K\n;\n\x04\x06\x00\x02&\x12\x03p\x02O\x1a. This requires the \"roles.manage\" permission.\n\n\f\n\x05\x06\x00\x02&\x01\x12\x03p\x06\x15\n\f\n\x05\x06\x00\x02&\x02\x12\x03p\x16,\n\f\n\x05\x06\x00\x02&\x03\x12\x03p6K\nA\n\x04\x06\x00\x02'\x12\x03s\x02O\x1a4 This requires the \"roles.users.manage\" permission.\n\n\f\n\x05\x06\x00\x02'\x01\x12\x03s\x06\x15\n\f\n\x05\x06\x00\x02'\x02\x12\x03s\x16,\n\f\n\x05\x06\x00\x02'\x03\x12\x03s6K\n>\n\x04\x06\x00\x02(\x12\x03v\x02H\x1a1 This requires the \"roles.users.get\" permission.\n\n\f\n\x05\x06\x00\x02(\x01\x12\x03v\x06\x12\n\f\n\x05\x06\x00\x02(\x02\x12\x03v\x13&\n\f\n\x05\x06\x00\x02(\x03\x12\x03v0D\n\v\n\x04\x06\x00\x02)\x12\x03x\x02G\n\f\n\x05\x06\x00\x02)\x01\x12\x03x\x06\x12\n\f\n\x05\x06\x00\x02)\x05\x12\x03x\x13\x19\n\f\n\x05\x06\x00\x02)\x02\x12\x03x\x1a-\n\f\n\x05\x06\x00\x02)\x06\x12\x03x7=\n\f\n\x05\x06\x00\x02)\x03\x12\x03x>C\n\v\n\x04\x06\x00\x02*\x12\x03z\x029\n\f\n\x05\x06\x00\x02*\x01\x12\x03z\x06\r\n\f\n\x05\x06\x00\x02*\x02\x12\x03z\x0e\x1c\n\f\n\x05\x06\x00\x02*\x03\x12\x03z&5\n\f\n\x04\x06\x00\x02+\x12\x04{\x02|\x03\n\f\n\x05\x06\x00\x02+\x01\x12\x03{\x06\x15\n\f\n\x05\x06\x00\x02+\x02\x12\x03{\x16,\n\f\n\x05\x06\x00\x02+\x03\x12\x03{6M\n\v\n\x04\x06\x00\x02,\x12\x03~\x02K\n\f\n\x05\x06\x00\x02,\x01\x12\x03~\x06\x13\n\f\n\x05\x06\x00\x02,\x02\x12\x03~\x14(\n\f\n\x05\x06\x00\x02,\x03\x12\x03~2G\n\f\n\x04\x06\x00\x02-\x12\x04\x80\x01\x02=\n\r\n\x05\x06\x00\x02-\x01\x12\x04\x80\x01\x06\f\n\r\n\x05\x06\x00\x02-\x02\x12\x04\x80\x01\r\x1a\n\r\n\x05\x06\x00\x02-\x03\x12\x04\x80\x01$9\n\f\n\x04\x06\x00\x02.\x12\x04\x82\x01\x02G\n\r\n\x05\x06\x00\x02.\x01\x12\x04\x82\x01\x06\x12\n\r\n\x05\x06\x00\x02.\x02\x12\x04\x82\x01\x13&\n\r\n\x05\x06\x00\x02.\x03\x12\x04\x82\x011Eb\x06proto3")
+	data := []byte("\n\x12chat/v1/chat.proto\x12\x10protocol.chat.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1bharmonytypes/v1/types.proto\x1a\x15chat/v1/profile.proto\x1a\x14chat/v1/guilds.proto\x1a\x16chat/v1/channels.proto\x1a\x16chat/v1/messages.proto\x1a\x14chat/v1/emotes.proto\x1a\x19chat/v1/permissions.proto\x1a\x17chat/v1/streaming.proto2\xf5+\n\vChatService\x12f\n\vCreateGuild\x12$.protocol.chat.v1.CreateGuildRequest\x1a%.protocol.chat.v1.CreateGuildResponse\"\n\x9aD\x02\b\x01\x9aD\x02\x1a\x00\x12~\n\fCreateInvite\x12%.protocol.chat.v1.CreateInviteRequest\x1a&.protocol.chat.v1.CreateInviteResponse\"\x1f\x9aD\x02\b\x01\x9aD\x17\x1a\x15invites.manage.create\x12\x82\x01\n\rCreateChannel\x12&.protocol.chat.v1.CreateChannelRequest\x1a'.protocol.chat.v1.CreateChannelResponse\" \x9aD\x02\b\x01\x9aD\x18\x1a\x16channels.manage.create\x12m\n\x0fCreateEmotePack\x12(.protocol.chat.v1.CreateEmotePackRequest\x1a).protocol.chat.v1.CreateEmotePackResponse\"\x05\x9aD\x02\b\x01\x12d\n\fGetGuildList\x12%.protocol.chat.v1.GetGuildListRequest\x1a&.protocol.chat.v1.GetGuildListResponse\"\x05\x9aD\x02\b\x01\x12~\n\x13AddGuildToGuildList\x12,.protocol.chat.v1.AddGuildToGuildListRequest\x1a-.protocol.chat.v1.AddGuildToGuildListResponse\"\n\x9aD\x02\b\x01\x9aD\x02\x10\x01\x12\x8d\x01\n\x18RemoveGuildFromGuildList\x121.protocol.chat.v1.RemoveGuildFromGuildListRequest\x1a2.protocol.chat.v1.RemoveGuildFromGuildListResponse\"\n\x9aD\x02\b\x01\x9aD\x02\x10\x01\x12X\n\bGetGuild\x12!.protocol.chat.v1.GetGuildRequest\x1a\".protocol.chat.v1.GetGuildResponse\"\x05\x9aD\x02\b\x01\x12~\n\x0fGetGuildInvites\x12(.protocol.chat.v1.GetGuildInvitesRequest\x1a).protocol.chat.v1.GetGuildInvitesResponse\"\x16\x9aD\x02\b\x01\x9aD\x0e\x1a\finvites.view\x12m\n\x0fGetGuildMembers\x12(.protocol.chat.v1.GetGuildMembersRequest\x1a).protocol.chat.v1.GetGuildMembersResponse\"\x05\x9aD\x02\b\x01\x12k\n\x10GetGuildChannels\x12).protocol.chat.v1.GetGuildChannelsRequest\x1a*.protocol.chat.v1.GetGuildChannelsResponse\"\x00\x12\x88\x01\n\x12GetChannelMessages\x12+.protocol.chat.v1.GetChannelMessagesRequest\x1a,.protocol.chat.v1.GetChannelMessagesResponse\"\x17\x9aD\x02\b\x01\x9aD\x0f\x1a\rmessages.view\x12p\n\nGetMessage\x12#.protocol.chat.v1.GetMessageRequest\x1a$.protocol.chat.v1.GetMessageResponse\"\x17\x9aD\x02\b\x01\x9aD\x0f\x1a\rmessages.view\x12g\n\rGetEmotePacks\x12&.protocol.chat.v1.GetEmotePacksRequest\x1a'.protocol.chat.v1.GetEmotePacksResponse\"\x05\x9aD\x02\b\x01\x12v\n\x12GetEmotePackEmotes\x12+.protocol.chat.v1.GetEmotePackEmotesRequest\x1a,.protocol.chat.v1.GetEmotePackEmotesResponse\"\x05\x9aD\x02\b\x01\x12\x8c\x01\n\x16UpdateGuildInformation\x12/.protocol.chat.v1.UpdateGuildInformationRequest\x1a\x16.google.protobuf.Empty\")\x9aD\x02\b\x01\x9aD!\x1a\x1fguild.manage.change-information\x12\x93\x01\n\x18UpdateChannelInformation\x121.protocol.chat.v1.UpdateChannelInformationRequest\x1a\x16.google.protobuf.Empty\",\x9aD\x02\b\x01\x9aD$\x1a\"channels.manage.change-information\x12y\n\x12UpdateChannelOrder\x12+.protocol.chat.v1.UpdateChannelOrderRequest\x1a\x16.google.protobuf.Empty\"\x1e\x9aD\x02\b\x01\x9aD\x16\x1a\x14channels.manage.move\x12p\n\x11UpdateMessageText\x12*.protocol.chat.v1.UpdateMessageTextRequest\x1a\x16.google.protobuf.Empty\"\x17\x9aD\x02\b\x01\x9aD\x0f\x1a\rmessages.send\x12X\n\x0eAddEmoteToPack\x12'.protocol.chat.v1.AddEmoteToPackRequest\x1a\x16.google.protobuf.Empty\"\x05\x9aD\x02\b\x01\x12j\n\vDeleteGuild\x12$.protocol.chat.v1.DeleteGuildRequest\x1a\x16.google.protobuf.Empty\"\x1d\x9aD\x02\b\x01\x9aD\x15\x1a\x13guild.manage.delete\x12n\n\fDeleteInvite\x12%.protocol.chat.v1.DeleteInviteRequest\x1a\x16.google.protobuf.Empty\"\x1f\x9aD\x02\b\x01\x9aD\x17\x1a\x15invites.manage.delete\x12q\n\rDeleteChannel\x12&.protocol.chat.v1.DeleteChannelRequest\x1a\x16.google.protobuf.Empty\" \x9aD\x02\b\x01\x9aD\x18\x1a\x16channels.manage.delete\x12V\n\rDeleteMessage\x12&.protocol.chat.v1.DeleteMessageRequest\x1a\x16.google.protobuf.Empty\"\x05\x9aD\x02\b\x01\x12b\n\x13DeleteEmoteFromPack\x12,.protocol.chat.v1.DeleteEmoteFromPackRequest\x1a\x16.google.protobuf.Empty\"\x05\x9aD\x02\b\x01\x12Z\n\x0fDeleteEmotePack\x12(.protocol.chat.v1.DeleteEmotePackRequest\x1a\x16.google.protobuf.Empty\"\x05\x9aD\x02\b\x01\x12Z\n\x0fDequipEmotePack\x12(.protocol.chat.v1.DequipEmotePackRequest\x1a\x16.google.protobuf.Empty\"\x05\x9aD\x02\b\x01\x12[\n\tJoinGuild\x12\".protocol.chat.v1.JoinGuildRequest\x1a#.protocol.chat.v1.JoinGuildResponse\"\x05\x9aD\x02\b\x01\x12P\n\nLeaveGuild\x12#.protocol.chat.v1.LeaveGuildRequest\x1a\x16.google.protobuf.Empty\"\x05\x9aD\x02\b\x01\x12j\n\rTriggerAction\x12&.protocol.chat.v1.TriggerActionRequest\x1a\x16.google.protobuf.Empty\"\x19\x9aD\x02\b\x01\x9aD\x11\x1a\x0factions.trigger\x12s\n\vSendMessage\x12$.protocol.chat.v1.SendMessageRequest\x1a%.protocol.chat.v1.SendMessageResponse\"\x17\x9aD\x02\b\x01\x9aD\x0f\x1a\rmessages.send\x12r\n\x12QueryHasPermission\x12).protocol.chat.v1.QueryPermissionsRequest\x1a*.protocol.chat.v1.QueryPermissionsResponse\"\x05\x9aD\x02\b\x01\x12s\n\x0eSetPermissions\x12'.protocol.chat.v1.SetPermissionsRequest\x1a\x16.google.protobuf.Empty\" \x9aD\x02\b\x01\x9aD\x18\x1a\x16permissions.manage.set\x12\x85\x01\n\x0eGetPermissions\x12'.protocol.chat.v1.GetPermissionsRequest\x1a(.protocol.chat.v1.GetPermissionsResponse\" \x9aD\x02\b\x01\x9aD\x18\x1a\x16permissions.manage.get\x12i\n\bMoveRole\x12!.protocol.chat.v1.MoveRoleRequest\x1a\".protocol.chat.v1.MoveRoleResponse\"\x16\x9aD\x02\b\x01\x9aD\x0e\x1a\froles.manage\x12u\n\rGetGuildRoles\x12&.protocol.chat.v1.GetGuildRolesRequest\x1a'.protocol.chat.v1.GetGuildRolesResponse\"\x13\x9aD\x02\b\x01\x9aD\v\x1a\troles.get\x12u\n\fAddGuildRole\x12%.protocol.chat.v1.AddGuildRoleRequest\x1a&.protocol.chat.v1.AddGuildRoleResponse\"\x16\x9aD\x02\b\x01\x9aD\x0e\x1a\froles.manage\x12k\n\x0fModifyGuildRole\x12(.protocol.chat.v1.ModifyGuildRoleRequest\x1a\x16.google.protobuf.Empty\"\x16\x9aD\x02\b\x01\x9aD\x0e\x1a\froles.manage\x12k\n\x0fDeleteGuildRole\x12(.protocol.chat.v1.DeleteGuildRoleRequest\x1a\x16.google.protobuf.Empty\"\x16\x9aD\x02\b\x01\x9aD\x0e\x1a\froles.manage\x12p\n\x0fManageUserRoles\x12(.protocol.chat.v1.ManageUserRolesRequest\x1a\x16.google.protobuf.Empty\"\x1b\x9aD\x02\b\x01\x9aD\x13\x1a\x11roles.user.manage\x12d\n\fGetUserRoles\x12%.protocol.chat.v1.GetUserRolesRequest\x1a&.protocol.chat.v1.GetUserRolesResponse\"\x05\x9aD\x02\b\x01\x12Y\n\fStreamEvents\x12%.protocol.chat.v1.StreamEventsRequest\x1a\x17.protocol.chat.v1.Event\"\x05\x9aD\x02\b\x01(\x010\x01\x12U\n\aGetUser\x12 .protocol.chat.v1.GetUserRequest\x1a!.protocol.chat.v1.GetUserResponse\"\x05\x9aD\x02\b\x01\x12a\n\vGetUserBulk\x12$.protocol.chat.v1.GetUserBulkRequest\x1a%.protocol.chat.v1.GetUserBulkResponse\"\x05\x9aD\x02\b\x01\x12m\n\x0fGetUserMetadata\x12(.protocol.chat.v1.GetUserMetadataRequest\x1a).protocol.chat.v1.GetUserMetadataResponse\"\x05\x9aD\x02\b\x01\x12V\n\rProfileUpdate\x12&.protocol.chat.v1.ProfileUpdateRequest\x1a\x16.google.protobuf.Empty\"\x05\x9aD\x02\b\x01\x12Z\n\x06Typing\x12\x1f.protocol.chat.v1.TypingRequest\x1a\x16.google.protobuf.Empty\"\x17\x9aD\x02\b\x01\x9aD\x0f\x1a\rmessages.send\x12d\n\fPreviewGuild\x12%.protocol.chat.v1.PreviewGuildRequest\x1a&.protocol.chat.v1.PreviewGuildResponse\"\x05\x9aD\x02\b\x00\x12^\n\aBanUser\x12 .protocol.chat.v1.BanUserRequest\x1a\x16.google.protobuf.Empty\"\x19\x9aD\x02\b\x01\x9aD\x11\x1a\x0fuser.manage.ban\x12a\n\bKickUser\x12!.protocol.chat.v1.KickUserRequest\x1a\x16.google.protobuf.Empty\"\x1a\x9aD\x02\b\x01\x9aD\x12\x1a\x10user.manage.kick\x12d\n\tUnbanUser\x12\".protocol.chat.v1.UnbanUserRequest\x1a\x16.google.protobuf.Empty\"\x1b\x9aD\x02\b\x01\x9aD\x13\x1a\x11user.manage.unbanB3Z1github.com/harmony-development/legato/gen/chat/v1J\xc22\n\a\x12\x05\x00\x00\x97\x02\x01\n\b\n\x01\f\x12\x03\x00\x00\x12\n\t\n\x02\x03\x00\x12\x03\x02\x00%\n.\n\x02\x03\x01\x12\x03\x04\x00%\x1a# import \"validate/validate.proto\";\n\n\t\n\x02\x03\x02\x12\x03\x05\x00\x1f\n\t\n\x02\x03\x03\x12\x03\x06\x00\x1e\n\t\n\x02\x03\x04\x12\x03\a\x00 \n\t\n\x02\x03\x05\x12\x03\b\x00 \n\t\n\x02\x03\x06\x12\x03\t\x00\x1e\n\t\n\x02\x03\a\x12\x03\n\x00#\n\t\n\x02\x03\b\x12\x03\v\x00!\n\b\n\x01\x02\x12\x03\r\x00\x19\n\b\n\x01\b\x12\x03\x0f\x00H\n\t\n\x02\b\v\x12\x03\x0f\x00H\n\v\n\x02\x06\x00\x12\x05\x11\x00\x97\x02\x01\n\n\n\x03\x06\x00\x01\x12\x03\x11\b\x13\n\f\n\x04\x06\x00\x02\x00\x12\x04\x12\x02\x15\x03\n\f\n\x05\x06\x00\x02\x00\x01\x12\x03\x12\x06\x11\n\f\n\x05\x06\x00\x02\x00\x02\x12\x03\x12\x12$\n\f\n\x05\x06\x00\x02\x00\x03\x12\x03\x12/B\n\f\n\x05\x06\x00\x02\x00\x04\x12\x03\x13\x04E\n\x0f\n\b\x06\x00\x02\x00\x04\xc3\b\x01\x12\x03\x13\x04E\n\f\n\x05\x06\x00\x02\x00\x04\x12\x03\x14\x04D\n\x0f\n\b\x06\x00\x02\x00\x04\xc3\b\x03\x12\x03\x14\x04D\n\f\n\x04\x06\x00\x02\x01\x12\x04\x17\x02\x1b\x03\n\f\n\x05\x06\x00\x02\x01\x01\x12\x03\x17\x06\x12\n\f\n\x05\x06\x00\x02\x01\x02\x12\x03\x17\x13&\n\f\n\x05\x06\x00\x02\x01\x03\x12\x03\x171E\n\f\n\x05\x06\x00\x02\x01\x04\x12\x03\x18\x04E\n\x0f\n\b\x06\x00\x02\x01\x04\xc3\b\x01\x12\x03\x18\x04E\n\r\n\x05\x06\x00\x02\x01\x04\x12\x04\x19\x04\x1a \n\x10\n\b\x06\x00\x02\x01\x04\xc3\b\x03\x12\x04\x19\x04\x1a \n\f\n\x04\x06\x00\x02\x02\x12\x04\x1d\x02!\x03\n\f\n\x05\x06\x00\x02\x02\x01\x12\x03\x1d\x06\x13\n\f\n\x05\x06\x00\x02\x02\x02\x12\x03\x1d\x14(\n\f\n\x05\x06\x00\x02\x02\x03\x12\x03\x1d3H\n\f\n\x05\x06\x00\x02\x02\x04\x12\x03\x1e\x04E\n\x0f\n\b\x06\x00\x02\x02\x04\xc3\b\x01\x12\x03\x1e\x04E\n\r\n\x05\x06\x00\x02\x02\x04\x12\x04\x1f\x04 !\n\x10\n\b\x06\x00\x02\x02\x04\xc3\b\x03\x12\x04\x1f\x04 !\n\f\n\x04\x06\x00\x02\x03\x12\x04\"\x02%\x03\n\f\n\x05\x06\x00\x02\x03\x01\x12\x03\"\x06\x15\n\f\n\x05\x06\x00\x02\x03\x02\x12\x03\"\x16,\n\f\n\x05\x06\x00\x02\x03\x03\x12\x03#\x0f&\n\f\n\x05\x06\x00\x02\x03\x04\x12\x03$\x04E\n\x0f\n\b\x06\x00\x02\x03\x04\xc3\b\x01\x12\x03$\x04E\n\f\n\x04\x06\x00\x02\x04\x12\x04'\x02)\x03\n\f\n\x05\x06\x00\x02\x04\x01\x12\x03'\x06\x12\n\f\n\x05\x06\x00\x02\x04\x02\x12\x03'\x13&\n\f\n\x05\x06\x00\x02\x04\x03\x12\x03'1E\n\f\n\x05\x06\x00\x02\x04\x04\x12\x03(\x04E\n\x0f\n\b\x06\x00\x02\x04\x04\xc3\b\x01\x12\x03(\x04E\n\f\n\x04\x06\x00\x02\x05\x12\x04*\x02.\x03\n\f\n\x05\x06\x00\x02\x05\x01\x12\x03*\x06\x19\n\f\n\x05\x06\x00\x02\x05\x02\x12\x03*\x1a4\n\f\n\x05\x06\x00\x02\x05\x03\x12\x03+\x0f*\n\f\n\x05\x06\x00\x02\x05\x04\x12\x03,\x04E\n\x0f\n\b\x06\x00\x02\x05\x04\xc3\b\x01\x12\x03,\x04E\n\f\n\x05\x06\x00\x02\x05\x04\x12\x03-\x04<\n\x0f\n\b\x06\x00\x02\x05\x04\xc3\b\x02\x12\x03-\x04<\n\f\n\x04\x06\x00\x02\x06\x12\x04/\x023\x03\n\f\n\x05\x06\x00\x02\x06\x01\x12\x03/\x06\x1e\n\f\n\x05\x06\x00\x02\x06\x02\x12\x03/\x1f>\n\f\n\x05\x06\x00\x02\x06\x03\x12\x030\x0f/\n\f\n\x05\x06\x00\x02\x06\x04\x12\x031\x04E\n\x0f\n\b\x06\x00\x02\x06\x04\xc3\b\x01\x12\x031\x04E\n\f\n\x05\x06\x00\x02\x06\x04\x12\x032\x04<\n\x0f\n\b\x06\x00\x02\x06\x04\xc3\b\x02\x12\x032\x04<\n\f\n\x04\x06\x00\x02\a\x12\x045\x027\x03\n\f\n\x05\x06\x00\x02\a\x01\x12\x035\x06\x0e\n\f\n\x05\x06\x00\x02\a\x02\x12\x035\x0f\x1e\n\f\n\x05\x06\x00\x02\a\x03\x12\x035)9\n\f\n\x05\x06\x00\x02\a\x04\x12\x036\x04E\n\x0f\n\b\x06\x00\x02\a\x04\xc3\b\x01\x12\x036\x04E\n<\n\x04\x06\x00\x02\b\x12\x049\x02=\x03\x1a. This requires the \"invites.view\" permission.\n\n\f\n\x05\x06\x00\x02\b\x01\x12\x039\x06\x15\n\f\n\x05\x06\x00\x02\b\x02\x12\x039\x16,\n\f\n\x05\x06\x00\x02\b\x03\x12\x03:\x0f&\n\f\n\x05\x06\x00\x02\b\x04\x12\x03;\x04E\n\x0f\n\b\x06\x00\x02\b\x04\xc3\b\x01\x12\x03;\x04E\n\f\n\x05\x06\x00\x02\b\x04\x12\x03<\x04P\n\x0f\n\b\x06\x00\x02\b\x04\xc3\b\x03\x12\x03<\x04P\n\f\n\x04\x06\x00\x02\t\x12\x04>\x02A\x03\n\f\n\x05\x06\x00\x02\t\x01\x12\x03>\x06\x15\n\f\n\x05\x06\x00\x02\t\x02\x12\x03>\x16,\n\f\n\x05\x06\x00\x02\t\x03\x12\x03?\x0f&\n\f\n\x05\x06\x00\x02\t\x04\x12\x03@\x04E\n\x0f\n\b\x06\x00\x02\t\x04\xc3\b\x01\x12\x03@\x04E\nc\n\x04\x06\x00\x02\n\x12\x04E\x02F+\x1aU You will only be informed of channels you have the \"messages.view\"\n permission for.\n\n\f\n\x05\x06\x00\x02\n\x01\x12\x03E\x06\x16\n\f\n\x05\x06\x00\x02\n\x02\x12\x03E\x17.\n\f\n\x05\x06\x00\x02\n\x03\x12\x03F\x0f'\n\f\n\x04\x06\x00\x02\v\x12\x04H\x02M\x03\n\f\n\x05\x06\x00\x02\v\x01\x12\x03H\x06\x18\n\f\n\x05\x06\x00\x02\v\x02\x12\x03H\x192\n\f\n\x05\x06\x00\x02\v\x03\x12\x03I\x0f)\n\f\n\x05\x06\x00\x02\v\x04\x12\x03J\x04E\n\x0f\n\b\x06\x00\x02\v\x04\xc3\b\x01\x12\x03J\x04E\n\r\n\x05\x06\x00\x02\v\x04\x12\x04K\x04L\x18\n\x10\n\b\x06\x00\x02\v\x04\xc3\b\x03\x12\x04K\x04L\x18\n\f\n\x04\x06\x00\x02\f\x12\x04O\x02S\x03\n\f\n\x05\x06\x00\x02\f\x01\x12\x03O\x06\x10\n\f\n\x05\x06\x00\x02\f\x02\x12\x03O\x11\"\n\f\n\x05\x06\x00\x02\f\x03\x12\x03O-?\n\f\n\x05\x06\x00\x02\f\x04\x12\x03P\x04E\n\x0f\n\b\x06\x00\x02\f\x04\xc3\b\x01\x12\x03P\x04E\n\r\n\x05\x06\x00\x02\f\x04\x12\x04Q\x04R\x18\n\x10\n\b\x06\x00\x02\f\x04\xc3\b\x03\x12\x04Q\x04R\x18\n\f\n\x04\x06\x00\x02\r\x12\x04T\x02V\x03\n\f\n\x05\x06\x00\x02\r\x01\x12\x03T\x06\x13\n\f\n\x05\x06\x00\x02\r\x02\x12\x03T\x14(\n\f\n\x05\x06\x00\x02\r\x03\x12\x03T3H\n\f\n\x05\x06\x00\x02\r\x04\x12\x03U\x04E\n\x0f\n\b\x06\x00\x02\r\x04\xc3\b\x01\x12\x03U\x04E\n\f\n\x04\x06\x00\x02\x0e\x12\x04W\x02Z\x03\n\f\n\x05\x06\x00\x02\x0e\x01\x12\x03W\x06\x18\n\f\n\x05\x06\x00\x02\x0e\x02\x12\x03W\x192\n\f\n\x05\x06\x00\x02\x0e\x03\x12\x03X\x0f)\n\f\n\x05\x06\x00\x02\x0e\x04\x12\x03Y\x04E\n\x0f\n\b\x06\x00\x02\x0e\x04\xc3\b\x01\x12\x03Y\x04E\n\f\n\x04\x06\x00\x02\x0f\x12\x04\\\x02a\x03\n\f\n\x05\x06\x00\x02\x0f\x01\x12\x03\\\x06\x1c\n\f\n\x05\x06\x00\x02\x0f\x02\x12\x03\\\x1d:\n\f\n\x05\x06\x00\x02\x0f\x03\x12\x03]\x0f$\n\f\n\x05\x06\x00\x02\x0f\x04\x12\x03^\x04E\n\x0f\n\b\x06\x00\x02\x0f\x04\xc3\b\x01\x12\x03^\x04E\n\r\n\x05\x06\x00\x02\x0f\x04\x12\x04_\x04`*\n\x10\n\b\x06\x00\x02\x0f\x04\xc3\b\x03\x12\x04_\x04`*\n\f\n\x04\x06\x00\x02\x10\x12\x04b\x02g\x03\n\f\n\x05\x06\x00\x02\x10\x01\x12\x03b\x06\x1e\n\f\n\x05\x06\x00\x02\x10\x02\x12\x03b\x1f>\n\f\n\x05\x06\x00\x02\x10\x03\x12\x03c\x0f$\n\f\n\x05\x06\x00\x02\x10\x04\x12\x03d\x04E\n\x0f\n\b\x06\x00\x02\x10\x04\xc3\b\x01\x12\x03d\x04E\n\r\n\x05\x06\x00\x02\x10\x04\x12\x04e\x04f-\n\x10\n\b\x06\x00\x02\x10\x04\xc3\b\x03\x12\x04e\x04f-\n\f\n\x04\x06\x00\x02\x11\x12\x04h\x02m\x03\n\f\n\x05\x06\x00\x02\x11\x01\x12\x03h\x06\x18\n\f\n\x05\x06\x00\x02\x11\x02\x12\x03h\x192\n\f\n\x05\x06\x00\x02\x11\x03\x12\x03i\x0f$\n\f\n\x05\x06\x00\x02\x11\x04\x12\x03j\x04E\n\x0f\n\b\x06\x00\x02\x11\x04\xc3\b\x01\x12\x03j\x04E\n\r\n\x05\x06\x00\x02\x11\x04\x12\x04k\x04l\x1f\n\x10\n\b\x06\x00\x02\x11\x04\xc3\b\x03\x12\x04k\x04l\x1f\n\f\n\x04\x06\x00\x02\x12\x12\x04n\x02r\x03\n\f\n\x05\x06\x00\x02\x12\x01\x12\x03n\x06\x17\n\f\n\x05\x06\x00\x02\x12\x02\x12\x03n\x180\n\f\n\x05\x06\x00\x02\x12\x03\x12\x03n;P\n\f\n\x05\x06\x00\x02\x12\x04\x12\x03o\x04E\n\x0f\n\b\x06\x00\x02\x12\x04\xc3\b\x01\x12\x03o\x04E\n\r\n\x05\x06\x00\x02\x12\x04\x12\x04p\x04q\x18\n\x10\n\b\x06\x00\x02\x12\x04\xc3\b\x03\x12\x04p\x04q\x18\n\f\n\x04\x06\x00\x02\x13\x12\x04s\x02u\x03\n\f\n\x05\x06\x00\x02\x13\x01\x12\x03s\x06\x14\n\f\n\x05\x06\x00\x02\x13\x02\x12\x03s\x15*\n\f\n\x05\x06\x00\x02\x13\x03\x12\x03s5J\n\f\n\x05\x06\x00\x02\x13\x04\x12\x03t\x04E\n\x0f\n\b\x06\x00\x02\x13\x04\xc3\b\x01\x12\x03t\x04E\n\f\n\x04\x06\x00\x02\x14\x12\x04w\x02{\x03\n\f\n\x05\x06\x00\x02\x14\x01\x12\x03w\x06\x11\n\f\n\x05\x06\x00\x02\x14\x02\x12\x03w\x12$\n\f\n\x05\x06\x00\x02\x14\x03\x12\x03w/D\n\f\n\x05\x06\x00\x02\x14\x04\x12\x03x\x04E\n\x0f\n\b\x06\x00\x02\x14\x04\xc3\b\x01\x12\x03x\x04E\n\r\n\x05\x06\x00\x02\x14\x04\x12\x04y\x04z\x1e\n\x10\n\b\x06\x00\x02\x14\x04\xc3\b\x03\x12\x04y\x04z\x1e\n\r\n\x04\x06\x00\x02\x15\x12\x05|\x02\x80\x01\x03\n\f\n\x05\x06\x00\x02\x15\x01\x12\x03|\x06\x12\n\f\n\x05\x06\x00\x02\x15\x02\x12\x03|\x13&\n\f\n\x05\x06\x00\x02\x15\x03\x12\x03|1F\n\f\n\x05\x06\x00\x02\x15\x04\x12\x03}\x04E\n\x0f\n\b\x06\x00\x02\x15\x04\xc3\b\x01\x12\x03}\x04E\n\r\n\x05\x06\x00\x02\x15\x04\x12\x04~\x04\u007f \n\x10\n\b\x06\x00\x02\x15\x04\xc3\b\x03\x12\x04~\x04\u007f \n\x0e\n\x04\x06\x00\x02\x16\x12\x06\x81\x01\x02\x85\x01\x03\n\r\n\x05\x06\x00\x02\x16\x01\x12\x04\x81\x01\x06\x13\n\r\n\x05\x06\x00\x02\x16\x02\x12\x04\x81\x01\x14(\n\r\n\x05\x06\x00\x02\x16\x03\x12\x04\x81\x013H\n\r\n\x05\x06\x00\x02\x16\x04\x12\x04\x82\x01\x04E\n\x10\n\b\x06\x00\x02\x16\x04\xc3\b\x01\x12\x04\x82\x01\x04E\n\x0f\n\x05\x06\x00\x02\x16\x04\x12\x06\x83\x01\x04\x84\x01!\n\x12\n\b\x06\x00\x02\x16\x04\xc3\b\x03\x12\x06\x83\x01\x04\x84\x01!\nk\n\x04\x06\x00\x02\x17\x12\x06\x88\x01\x02\x8a\x01\x03\x1a[ This requires the \"messages.manage.delete\" permission if you are not the\n message author.\n\n\r\n\x05\x06\x00\x02\x17\x01\x12\x04\x88\x01\x06\x13\n\r\n\x05\x06\x00\x02\x17\x02\x12\x04\x88\x01\x14(\n\r\n\x05\x06\x00\x02\x17\x03\x12\x04\x88\x013H\n\r\n\x05\x06\x00\x02\x17\x04\x12\x04\x89\x01\x04E\n\x10\n\b\x06\x00\x02\x17\x04\xc3\b\x01\x12\x04\x89\x01\x04E\n\x0e\n\x04\x06\x00\x02\x18\x12\x06\x8b\x01\x02\x8e\x01\x03\n\r\n\x05\x06\x00\x02\x18\x01\x12\x04\x8b\x01\x06\x19\n\r\n\x05\x06\x00\x02\x18\x02\x12\x04\x8b\x01\x1a4\n\r\n\x05\x06\x00\x02\x18\x03\x12\x04\x8c\x01\x0f$\n\r\n\x05\x06\x00\x02\x18\x04\x12\x04\x8d\x01\x04E\n\x10\n\b\x06\x00\x02\x18\x04\xc3\b\x01\x12\x04\x8d\x01\x04E\n\x0e\n\x04\x06\x00\x02\x19\x12\x06\x8f\x01\x02\x91\x01\x03\n\r\n\x05\x06\x00\x02\x19\x01\x12\x04\x8f\x01\x06\x15\n\r\n\x05\x06\x00\x02\x19\x02\x12\x04\x8f\x01\x16,\n\r\n\x05\x06\x00\x02\x19\x03\x12\x04\x8f\x017L\n\r\n\x05\x06\x00\x02\x19\x04\x12\x04\x90\x01\x04E\n\x10\n\b\x06\x00\x02\x19\x04\xc3\b\x01\x12\x04\x90\x01\x04E\n\x0e\n\x04\x06\x00\x02\x1a\x12\x06\x92\x01\x02\x94\x01\x03\n\r\n\x05\x06\x00\x02\x1a\x01\x12\x04\x92\x01\x06\x15\n\r\n\x05\x06\x00\x02\x1a\x02\x12\x04\x92\x01\x16,\n\r\n\x05\x06\x00\x02\x1a\x03\x12\x04\x92\x017L\n\r\n\x05\x06\x00\x02\x1a\x04\x12\x04\x93\x01\x04E\n\x10\n\b\x06\x00\x02\x1a\x04\xc3\b\x01\x12\x04\x93\x01\x04E\n\x0e\n\x04\x06\x00\x02\x1b\x12\x06\x96\x01\x02\x98\x01\x03\n\r\n\x05\x06\x00\x02\x1b\x01\x12\x04\x96\x01\x06\x0f\n\r\n\x05\x06\x00\x02\x1b\x02\x12\x04\x96\x01\x10 \n\r\n\x05\x06\x00\x02\x1b\x03\x12\x04\x96\x01+<\n\r\n\x05\x06\x00\x02\x1b\x04\x12\x04\x97\x01\x04E\n\x10\n\b\x06\x00\x02\x1b\x04\xc3\b\x01\x12\x04\x97\x01\x04E\n\x0e\n\x04\x06\x00\x02\x1c\x12\x06\x99\x01\x02\x9b\x01\x03\n\r\n\x05\x06\x00\x02\x1c\x01\x12\x04\x99\x01\x06\x10\n\r\n\x05\x06\x00\x02\x1c\x02\x12\x04\x99\x01\x11\"\n\r\n\x05\x06\x00\x02\x1c\x03\x12\x04\x99\x01-B\n\r\n\x05\x06\x00\x02\x1c\x04\x12\x04\x9a\x01\x04E\n\x10\n\b\x06\x00\x02\x1c\x04\xc3\b\x01\x12\x04\x9a\x01\x04E\n\x0e\n\x04\x06\x00\x02\x1d\x12\x06\x9d\x01\x02\xa1\x01\x03\n\r\n\x05\x06\x00\x02\x1d\x01\x12\x04\x9d\x01\x06\x13\n\r\n\x05\x06\x00\x02\x1d\x02\x12\x04\x9d\x01\x14(\n\r\n\x05\x06\x00\x02\x1d\x03\x12\x04\x9d\x013H\n\r\n\x05\x06\x00\x02\x1d\x04\x12\x04\x9e\x01\x04E\n\x10\n\b\x06\x00\x02\x1d\x04\xc3\b\x01\x12\x04\x9e\x01\x04E\n\x0f\n\x05\x06\x00\x02\x1d\x04\x12\x06\x9f\x01\x04\xa0\x01\x1a\n\x12\n\b\x06\x00\x02\x1d\x04\xc3\b\x03\x12\x06\x9f\x01\x04\xa0\x01\x1a\n\x0e\n\x04\x06\x00\x02\x1e\x12\x06\xa3\x01\x02\xa7\x01\x03\n\r\n\x05\x06\x00\x02\x1e\x01\x12\x04\xa3\x01\x06\x11\n\r\n\x05\x06\x00\x02\x1e\x02\x12\x04\xa3\x01\x12$\n\r\n\x05\x06\x00\x02\x1e\x03\x12\x04\xa3\x01/B\n\r\n\x05\x06\x00\x02\x1e\x04\x12\x04\xa4\x01\x04E\n\x10\n\b\x06\x00\x02\x1e\x04\xc3\b\x01\x12\x04\xa4\x01\x04E\n\x0f\n\x05\x06\x00\x02\x1e\x04\x12\x06\xa5\x01\x04\xa6\x01\x18\n\x12\n\b\x06\x00\x02\x1e\x04\xc3\b\x03\x12\x06\xa5\x01\x04\xa6\x01\x18\n\x0e\n\x04\x06\x00\x02\x1f\x12\x06\xa9\x01\x02\xb1\x01\x03\n\r\n\x05\x06\x00\x02\x1f\x01\x12\x04\xa9\x01\x06\x18\n\r\n\x05\x06\x00\x02\x1f\x02\x12\x04\xa9\x01\x190\n\r\n\x05\x06\x00\x02\x1f\x03\x12\x04\xaa\x01\x0f'\n\r\n\x05\x06\x00\x02\x1f\x04\x12\x04\xab\x01\x04E\n\xdb\x01\n\b\x06\x00\x02\x1f\x04\xc3\b\x01\x12\x04\xab\x01\x04E\"\xc8\x01 This permissions node is only required if you're trying\n to see if someone besides yourself has a permission.\n\n option (harmonytypes.v1.metadata).requires_permission_node =\n     \"permissions.query\";\n\n\x0e\n\x04\x06\x00\x02 \x12\x06\xb3\x01\x02\xb7\x01\x03\n\r\n\x05\x06\x00\x02 \x01\x12\x04\xb3\x01\x06\x14\n\r\n\x05\x06\x00\x02 \x02\x12\x04\xb3\x01\x15*\n\r\n\x05\x06\x00\x02 \x03\x12\x04\xb3\x015J\n\r\n\x05\x06\x00\x02 \x04\x12\x04\xb4\x01\x04E\n\x10\n\b\x06\x00\x02 \x04\xc3\b\x01\x12\x04\xb4\x01\x04E\n\x0f\n\x05\x06\x00\x02 \x04\x12\x06\xb5\x01\x04\xb6\x01!\n\x12\n\b\x06\x00\x02 \x04\xc3\b\x03\x12\x06\xb5\x01\x04\xb6\x01!\n\x0e\n\x04\x06\x00\x02!\x12\x06\xb9\x01\x02\xbd\x01\x03\n\r\n\x05\x06\x00\x02!\x01\x12\x04\xb9\x01\x06\x14\n\r\n\x05\x06\x00\x02!\x02\x12\x04\xb9\x01\x15*\n\r\n\x05\x06\x00\x02!\x03\x12\x04\xb9\x015K\n\r\n\x05\x06\x00\x02!\x04\x12\x04\xba\x01\x04E\n\x10\n\b\x06\x00\x02!\x04\xc3\b\x01\x12\x04\xba\x01\x04E\n\x0f\n\x05\x06\x00\x02!\x04\x12\x06\xbb\x01\x04\xbc\x01!\n\x12\n\b\x06\x00\x02!\x04\xc3\b\x03\x12\x06\xbb\x01\x04\xbc\x01!\n\x0e\n\x04\x06\x00\x02\"\x12\x06\xbf\x01\x02\xc2\x01\x03\n\r\n\x05\x06\x00\x02\"\x01\x12\x04\xbf\x01\x06\x0e\n\r\n\x05\x06\x00\x02\"\x02\x12\x04\xbf\x01\x0f\x1e\n\r\n\x05\x06\x00\x02\"\x03\x12\x04\xbf\x01)9\n\r\n\x05\x06\x00\x02\"\x04\x12\x04\xc0\x01\x04E\n\x10\n\b\x06\x00\x02\"\x04\xc3\b\x01\x12\x04\xc0\x01\x04E\n\r\n\x05\x06\x00\x02\"\x04\x12\x04\xc1\x01\x04P\n\x10\n\b\x06\x00\x02\"\x04\xc3\b\x03\x12\x04\xc1\x01\x04P\n\x0e\n\x04\x06\x00\x02#\x12\x06\xc4\x01\x02\xc7\x01\x03\n\r\n\x05\x06\x00\x02#\x01\x12\x04\xc4\x01\x06\x13\n\r\n\x05\x06\x00\x02#\x02\x12\x04\xc4\x01\x14(\n\r\n\x05\x06\x00\x02#\x03\x12\x04\xc4\x013H\n\r\n\x05\x06\x00\x02#\x04\x12\x04\xc5\x01\x04E\n\x10\n\b\x06\x00\x02#\x04\xc3\b\x01\x12\x04\xc5\x01\x04E\n\r\n\x05\x06\x00\x02#\x04\x12\x04\xc6\x01\x04M\n\x10\n\b\x06\x00\x02#\x04\xc3\b\x03\x12\x04\xc6\x01\x04M\n\x0e\n\x04\x06\x00\x02$\x12\x06\xc9\x01\x02\xcc\x01\x03\n\r\n\x05\x06\x00\x02$\x01\x12\x04\xc9\x01\x06\x12\n\r\n\x05\x06\x00\x02$\x02\x12\x04\xc9\x01\x13&\n\r\n\x05\x06\x00\x02$\x03\x12\x04\xc9\x011E\n\r\n\x05\x06\x00\x02$\x04\x12\x04\xca\x01\x04E\n\x10\n\b\x06\x00\x02$\x04\xc3\b\x01\x12\x04\xca\x01\x04E\n\r\n\x05\x06\x00\x02$\x04\x12\x04\xcb\x01\x04P\n\x10\n\b\x06\x00\x02$\x04\xc3\b\x03\x12\x04\xcb\x01\x04P\n\x0e\n\x04\x06\x00\x02%\x12\x06\xce\x01\x02\xd1\x01\x03\n\r\n\x05\x06\x00\x02%\x01\x12\x04\xce\x01\x06\x15\n\r\n\x05\x06\x00\x02%\x02\x12\x04\xce\x01\x16,\n\r\n\x05\x06\x00\x02%\x03\x12\x04\xce\x017L\n\r\n\x05\x06\x00\x02%\x04\x12\x04\xcf\x01\x04E\n\x10\n\b\x06\x00\x02%\x04\xc3\b\x01\x12\x04\xcf\x01\x04E\n\r\n\x05\x06\x00\x02%\x04\x12\x04\xd0\x01\x04P\n\x10\n\b\x06\x00\x02%\x04\xc3\b\x03\x12\x04\xd0\x01\x04P\n\x0e\n\x04\x06\x00\x02&\x12\x06\xd3\x01\x02\xd6\x01\x03\n\r\n\x05\x06\x00\x02&\x01\x12\x04\xd3\x01\x06\x15\n\r\n\x05\x06\x00\x02&\x02\x12\x04\xd3\x01\x16,\n\r\n\x05\x06\x00\x02&\x03\x12\x04\xd3\x017L\n\r\n\x05\x06\x00\x02&\x04\x12\x04\xd4\x01\x04E\n\x10\n\b\x06\x00\x02&\x04\xc3\b\x01\x12\x04\xd4\x01\x04E\n\r\n\x05\x06\x00\x02&\x04\x12\x04\xd5\x01\x04P\n\x10\n\b\x06\x00\x02&\x04\xc3\b\x03\x12\x04\xd5\x01\x04P\n\x0e\n\x04\x06\x00\x02'\x12\x06\xd8\x01\x02\xdc\x01\x03\n\r\n\x05\x06\x00\x02'\x01\x12\x04\xd8\x01\x06\x15\n\r\n\x05\x06\x00\x02'\x02\x12\x04\xd8\x01\x16,\n\r\n\x05\x06\x00\x02'\x03\x12\x04\xd8\x017L\n\r\n\x05\x06\x00\x02'\x04\x12\x04\xd9\x01\x04E\n\x10\n\b\x06\x00\x02'\x04\xc3\b\x01\x12\x04\xd9\x01\x04E\n\x0f\n\x05\x06\x00\x02'\x04\x12\x06\xda\x01\x04\xdb\x01\x1c\n\x12\n\b\x06\x00\x02'\x04\xc3\b\x03\x12\x06\xda\x01\x04\xdb\x01\x1c\n\x0e\n\x04\x06\x00\x02(\x12\x06\xde\x01\x02\xe5\x01\x03\n\r\n\x05\x06\x00\x02(\x01\x12\x04\xde\x01\x06\x12\n\r\n\x05\x06\x00\x02(\x02\x12\x04\xde\x01\x13&\n\r\n\x05\x06\x00\x02(\x03\x12\x04\xde\x011E\n\r\n\x05\x06\x00\x02(\x04\x12\x04\xdf\x01\x04E\n\xd1\x01\n\b\x06\x00\x02(\x04\xc3\b\x01\x12\x04\xdf\x01\x04E\"\xbe\x01 This permissions node is only required if you are trying to get the roles\n of someone other than yourself.\n\n option (harmonytypes.v1.metadata).requires_permission_node =\n \"roles.user.get\";\n\n\x0e\n\x04\x06\x00\x02)\x12\x06\xe7\x01\x02\xe9\x01\x03\n\r\n\x05\x06\x00\x02)\x01\x12\x04\xe7\x01\x06\x12\n\r\n\x05\x06\x00\x02)\x05\x12\x04\xe7\x01\x13\x19\n\r\n\x05\x06\x00\x02)\x02\x12\x04\xe7\x01\x1a-\n\r\n\x05\x06\x00\x02)\x06\x12\x04\xe7\x018>\n\r\n\x05\x06\x00\x02)\x03\x12\x04\xe7\x01?D\n\r\n\x05\x06\x00\x02)\x04\x12\x04\xe8\x01\x04E\n\x10\n\b\x06\x00\x02)\x04\xc3\b\x01\x12\x04\xe8\x01\x04E\n\x0e\n\x04\x06\x00\x02*\x12\x06\xeb\x01\x02\xed\x01\x03\n\r\n\x05\x06\x00\x02*\x01\x12\x04\xeb\x01\x06\r\n\r\n\x05\x06\x00\x02*\x02\x12\x04\xeb\x01\x0e\x1c\n\r\n\x05\x06\x00\x02*\x03\x12\x04\xeb\x01'6\n\r\n\x05\x06\x00\x02*\x04\x12\x04\xec\x01\x04E\n\x10\n\b\x06\x00\x02*\x04\xc3\b\x01\x12\x04\xec\x01\x04E\n\x0e\n\x04\x06\x00\x02+\x12\x06\xef\x01\x02\xf1\x01\x03\n\r\n\x05\x06\x00\x02+\x01\x12\x04\xef\x01\x06\x11\n\r\n\x05\x06\x00\x02+\x02\x12\x04\xef\x01\x12$\n\r\n\x05\x06\x00\x02+\x03\x12\x04\xef\x01/B\n\r\n\x05\x06\x00\x02+\x04\x12\x04\xf0\x01\x04E\n\x10\n\b\x06\x00\x02+\x04\xc3\b\x01\x12\x04\xf0\x01\x04E\n\x0e\n\x04\x06\x00\x02,\x12\x06\xf3\x01\x02\xf6\x01\x03\n\r\n\x05\x06\x00\x02,\x01\x12\x04\xf3\x01\x06\x15\n\r\n\x05\x06\x00\x02,\x02\x12\x04\xf3\x01\x16,\n\r\n\x05\x06\x00\x02,\x03\x12\x04\xf4\x01\x0f&\n\r\n\x05\x06\x00\x02,\x04\x12\x04\xf5\x01\x04E\n\x10\n\b\x06\x00\x02,\x04\xc3\b\x01\x12\x04\xf5\x01\x04E\n\x0e\n\x04\x06\x00\x02-\x12\x06\xf8\x01\x02\xfa\x01\x03\n\r\n\x05\x06\x00\x02-\x01\x12\x04\xf8\x01\x06\x13\n\r\n\x05\x06\x00\x02-\x02\x12\x04\xf8\x01\x14(\n\r\n\x05\x06\x00\x02-\x03\x12\x04\xf8\x013H\n\r\n\x05\x06\x00\x02-\x04\x12\x04\xf9\x01\x04E\n\x10\n\b\x06\x00\x02-\x04\xc3\b\x01\x12\x04\xf9\x01\x04E\n\x0e\n\x04\x06\x00\x02.\x12\x06\xfc\x01\x02\x80\x02\x03\n\r\n\x05\x06\x00\x02.\x01\x12\x04\xfc\x01\x06\f\n\r\n\x05\x06\x00\x02.\x02\x12\x04\xfc\x01\r\x1a\n\r\n\x05\x06\x00\x02.\x03\x12\x04\xfc\x01%:\n\r\n\x05\x06\x00\x02.\x04\x12\x04\xfd\x01\x04E\n\x10\n\b\x06\x00\x02.\x04\xc3\b\x01\x12\x04\xfd\x01\x04E\n\x0f\n\x05\x06\x00\x02.\x04\x12\x06\xfe\x01\x04\xff\x01\x18\n\x12\n\b\x06\x00\x02.\x04\xc3\b\x03\x12\x06\xfe\x01\x04\xff\x01\x18\n\x0e\n\x04\x06\x00\x02/\x12\x06\x82\x02\x02\x84\x02\x03\n\r\n\x05\x06\x00\x02/\x01\x12\x04\x82\x02\x06\x12\n\r\n\x05\x06\x00\x02/\x02\x12\x04\x82\x02\x13&\n\r\n\x05\x06\x00\x02/\x03\x12\x04\x82\x021E\n\r\n\x05\x06\x00\x02/\x04\x12\x04\x83\x02\x04F\n\x10\n\b\x06\x00\x02/\x04\xc3\b\x01\x12\x04\x83\x02\x04F\n\x0e\n\x04\x06\x00\x020\x12\x06\x86\x02\x02\x8a\x02\x03\n\r\n\x05\x06\x00\x020\x01\x12\x04\x86\x02\x06\r\n\r\n\x05\x06\x00\x020\x02\x12\x04\x86\x02\x0e\x1c\n\r\n\x05\x06\x00\x020\x03\x12\x04\x86\x02'<\n\r\n\x05\x06\x00\x020\x04\x12\x04\x87\x02\x04E\n\x10\n\b\x06\x00\x020\x04\xc3\b\x01\x12\x04\x87\x02\x04E\n\x0f\n\x05\x06\x00\x020\x04\x12\x06\x88\x02\x04\x89\x02\x1a\n\x12\n\b\x06\x00\x020\x04\xc3\b\x03\x12\x06\x88\x02\x04\x89\x02\x1a\n\x0e\n\x04\x06\x00\x021\x12\x06\x8c\x02\x02\x90\x02\x03\n\r\n\x05\x06\x00\x021\x01\x12\x04\x8c\x02\x06\x0e\n\r\n\x05\x06\x00\x021\x02\x12\x04\x8c\x02\x0f\x1e\n\r\n\x05\x06\x00\x021\x03\x12\x04\x8c\x02)>\n\r\n\x05\x06\x00\x021\x04\x12\x04\x8d\x02\x04E\n\x10\n\b\x06\x00\x021\x04\xc3\b\x01\x12\x04\x8d\x02\x04E\n\x0f\n\x05\x06\x00\x021\x04\x12\x06\x8e\x02\x04\x8f\x02\x1b\n\x12\n\b\x06\x00\x021\x04\xc3\b\x03\x12\x06\x8e\x02\x04\x8f\x02\x1b\n\x0e\n\x04\x06\x00\x022\x12\x06\x92\x02\x02\x96\x02\x03\n\r\n\x05\x06\x00\x022\x01\x12\x04\x92\x02\x06\x0f\n\r\n\x05\x06\x00\x022\x02\x12\x04\x92\x02\x10 \n\r\n\x05\x06\x00\x022\x03\x12\x04\x92\x02+@\n\r\n\x05\x06\x00\x022\x04\x12\x04\x93\x02\x04E\n\x10\n\b\x06\x00\x022\x04\xc3\b\x01\x12\x04\x93\x02\x04E\n\x0f\n\x05\x06\x00\x022\x04\x12\x06\x94\x02\x04\x95\x02\x1c\n\x12\n\b\x06\x00\x022\x04\xc3\b\x03\x12\x06\x94\x02\x04\x95\x02\x1cb\x06proto3")
 
 	err := proto.Unmarshal(data, Chatᐳv1ᐳchat)
 	if err != nil {
@@ -48,7 +48,7 @@ func init() {
 var ChatServiceData *descriptorpb.ServiceDescriptorProto = new(descriptorpb.ServiceDescriptorProto)
 
 func init() {
-	data := []byte("\n\vChatService\x12\\\n\vCreateGuild\x12$.protocol.chat.v1.CreateGuildRequest\x1a%.protocol.chat.v1.CreateGuildResponse\"\x00\x12_\n\fCreateInvite\x12%.protocol.chat.v1.CreateInviteRequest\x1a&.protocol.chat.v1.CreateInviteResponse\"\x00\x12b\n\rCreateChannel\x12&.protocol.chat.v1.CreateChannelRequest\x1a'.protocol.chat.v1.CreateChannelResponse\"\x00\x12h\n\x0fCreateEmotePack\x12(.protocol.chat.v1.CreateEmotePackRequest\x1a).protocol.chat.v1.CreateEmotePackResponse\"\x00\x12_\n\fGetGuildList\x12%.protocol.chat.v1.GetGuildListRequest\x1a&.protocol.chat.v1.GetGuildListResponse\"\x00\x12t\n\x13AddGuildToGuildList\x12,.protocol.chat.v1.AddGuildToGuildListRequest\x1a-.protocol.chat.v1.AddGuildToGuildListResponse\"\x00\x12\x83\x01\n\x18RemoveGuildFromGuildList\x121.protocol.chat.v1.RemoveGuildFromGuildListRequest\x1a2.protocol.chat.v1.RemoveGuildFromGuildListResponse\"\x00\x12S\n\bGetGuild\x12!.protocol.chat.v1.GetGuildRequest\x1a\".protocol.chat.v1.GetGuildResponse\"\x00\x12h\n\x0fGetGuildInvites\x12(.protocol.chat.v1.GetGuildInvitesRequest\x1a).protocol.chat.v1.GetGuildInvitesResponse\"\x00\x12h\n\x0fGetGuildMembers\x12(.protocol.chat.v1.GetGuildMembersRequest\x1a).protocol.chat.v1.GetGuildMembersResponse\"\x00\x12k\n\x10GetGuildChannels\x12).protocol.chat.v1.GetGuildChannelsRequest\x1a*.protocol.chat.v1.GetGuildChannelsResponse\"\x00\x12q\n\x12GetChannelMessages\x12+.protocol.chat.v1.GetChannelMessagesRequest\x1a,.protocol.chat.v1.GetChannelMessagesResponse\"\x00\x12Y\n\nGetMessage\x12#.protocol.chat.v1.GetMessageRequest\x1a$.protocol.chat.v1.GetMessageResponse\"\x00\x12b\n\rGetEmotePacks\x12&.protocol.chat.v1.GetEmotePacksRequest\x1a'.protocol.chat.v1.GetEmotePacksResponse\"\x00\x12q\n\x12GetEmotePackEmotes\x12+.protocol.chat.v1.GetEmotePackEmotesRequest\x1a,.protocol.chat.v1.GetEmotePackEmotesResponse\"\x00\x12c\n\x16UpdateGuildInformation\x12/.protocol.chat.v1.UpdateGuildInformationRequest\x1a\x16.google.protobuf.Empty\"\x00\x12g\n\x18UpdateChannelInformation\x121.protocol.chat.v1.UpdateChannelInformationRequest\x1a\x16.google.protobuf.Empty\"\x00\x12[\n\x12UpdateChannelOrder\x12+.protocol.chat.v1.UpdateChannelOrderRequest\x1a\x16.google.protobuf.Empty\"\x00\x12Q\n\rUpdateMessage\x12&.protocol.chat.v1.UpdateMessageRequest\x1a\x16.google.protobuf.Empty\"\x00\x12S\n\x0eAddEmoteToPack\x12'.protocol.chat.v1.AddEmoteToPackRequest\x1a\x16.google.protobuf.Empty\"\x00\x12M\n\vDeleteGuild\x12$.protocol.chat.v1.DeleteGuildRequest\x1a\x16.google.protobuf.Empty\"\x00\x12O\n\fDeleteInvite\x12%.protocol.chat.v1.DeleteInviteRequest\x1a\x16.google.protobuf.Empty\"\x00\x12Q\n\rDeleteChannel\x12&.protocol.chat.v1.DeleteChannelRequest\x1a\x16.google.protobuf.Empty\"\x00\x12Q\n\rDeleteMessage\x12&.protocol.chat.v1.DeleteMessageRequest\x1a\x16.google.protobuf.Empty\"\x00\x12]\n\x13DeleteEmoteFromPack\x12,.protocol.chat.v1.DeleteEmoteFromPackRequest\x1a\x16.google.protobuf.Empty\"\x00\x12U\n\x0fDeleteEmotePack\x12(.protocol.chat.v1.DeleteEmotePackRequest\x1a\x16.google.protobuf.Empty\"\x00\x12U\n\x0fDequipEmotePack\x12(.protocol.chat.v1.DequipEmotePackRequest\x1a\x16.google.protobuf.Empty\"\x00\x12V\n\tJoinGuild\x12\".protocol.chat.v1.JoinGuildRequest\x1a#.protocol.chat.v1.JoinGuildResponse\"\x00\x12K\n\nLeaveGuild\x12#.protocol.chat.v1.LeaveGuildRequest\x1a\x16.google.protobuf.Empty\"\x00\x12Q\n\rTriggerAction\x12&.protocol.chat.v1.TriggerActionRequest\x1a\x16.google.protobuf.Empty\"\x00\x12\\\n\vSendMessage\x12$.protocol.chat.v1.SendMessageRequest\x1a%.protocol.chat.v1.SendMessageResponse\"\x00\x12m\n\x12QueryHasPermission\x12).protocol.chat.v1.QueryPermissionsRequest\x1a*.protocol.chat.v1.QueryPermissionsResponse\"\x00\x12S\n\x0eSetPermissions\x12'.protocol.chat.v1.SetPermissionsRequest\x1a\x16.google.protobuf.Empty\"\x00\x12e\n\x0eGetPermissions\x12'.protocol.chat.v1.GetPermissionsRequest\x1a(.protocol.chat.v1.GetPermissionsResponse\"\x00\x12S\n\bMoveRole\x12!.protocol.chat.v1.MoveRoleRequest\x1a\".protocol.chat.v1.MoveRoleResponse\"\x00\x12b\n\rGetGuildRoles\x12&.protocol.chat.v1.GetGuildRolesRequest\x1a'.protocol.chat.v1.GetGuildRolesResponse\"\x00\x12_\n\fAddGuildRole\x12%.protocol.chat.v1.AddGuildRoleRequest\x1a&.protocol.chat.v1.AddGuildRoleResponse\"\x00\x12U\n\x0fModifyGuildRole\x12(.protocol.chat.v1.ModifyGuildRoleRequest\x1a\x16.google.protobuf.Empty\"\x00\x12U\n\x0fDeleteGuildRole\x12(.protocol.chat.v1.DeleteGuildRoleRequest\x1a\x16.google.protobuf.Empty\"\x00\x12U\n\x0fManageUserRoles\x12(.protocol.chat.v1.ManageUserRolesRequest\x1a\x16.google.protobuf.Empty\"\x00\x12_\n\fGetUserRoles\x12%.protocol.chat.v1.GetUserRolesRequest\x1a&.protocol.chat.v1.GetUserRolesResponse\"\x00\x12T\n\fStreamEvents\x12%.protocol.chat.v1.StreamEventsRequest\x1a\x17.protocol.chat.v1.Event\"\x00(\x010\x01\x12P\n\aGetUser\x12 .protocol.chat.v1.GetUserRequest\x1a!.protocol.chat.v1.GetUserResponse\"\x00\x12h\n\x0fGetUserMetadata\x12(.protocol.chat.v1.GetUserMetadataRequest\x1a).protocol.chat.v1.GetUserMetadataResponse\"\x00\x12Q\n\rProfileUpdate\x12&.protocol.chat.v1.ProfileUpdateRequest\x1a\x16.google.protobuf.Empty\"\x00\x12C\n\x06Typing\x12\x1f.protocol.chat.v1.TypingRequest\x1a\x16.google.protobuf.Empty\"\x00\x12]\n\fPreviewGuild\x12%.protocol.chat.v1.PreviewGuildRequest\x1a&.protocol.chat.v1.PreviewGuildResponse")
+	data := []byte("\n\vChatService\x12f\n\vCreateGuild\x12$.protocol.chat.v1.CreateGuildRequest\x1a%.protocol.chat.v1.CreateGuildResponse\"\n\x9aD\x02\b\x01\x9aD\x02\x1a\x00\x12~\n\fCreateInvite\x12%.protocol.chat.v1.CreateInviteRequest\x1a&.protocol.chat.v1.CreateInviteResponse\"\x1f\x9aD\x02\b\x01\x9aD\x17\x1a\x15invites.manage.create\x12\x82\x01\n\rCreateChannel\x12&.protocol.chat.v1.CreateChannelRequest\x1a'.protocol.chat.v1.CreateChannelResponse\" \x9aD\x02\b\x01\x9aD\x18\x1a\x16channels.manage.create\x12m\n\x0fCreateEmotePack\x12(.protocol.chat.v1.CreateEmotePackRequest\x1a).protocol.chat.v1.CreateEmotePackResponse\"\x05\x9aD\x02\b\x01\x12d\n\fGetGuildList\x12%.protocol.chat.v1.GetGuildListRequest\x1a&.protocol.chat.v1.GetGuildListResponse\"\x05\x9aD\x02\b\x01\x12~\n\x13AddGuildToGuildList\x12,.protocol.chat.v1.AddGuildToGuildListRequest\x1a-.protocol.chat.v1.AddGuildToGuildListResponse\"\n\x9aD\x02\b\x01\x9aD\x02\x10\x01\x12\x8d\x01\n\x18RemoveGuildFromGuildList\x121.protocol.chat.v1.RemoveGuildFromGuildListRequest\x1a2.protocol.chat.v1.RemoveGuildFromGuildListResponse\"\n\x9aD\x02\b\x01\x9aD\x02\x10\x01\x12X\n\bGetGuild\x12!.protocol.chat.v1.GetGuildRequest\x1a\".protocol.chat.v1.GetGuildResponse\"\x05\x9aD\x02\b\x01\x12~\n\x0fGetGuildInvites\x12(.protocol.chat.v1.GetGuildInvitesRequest\x1a).protocol.chat.v1.GetGuildInvitesResponse\"\x16\x9aD\x02\b\x01\x9aD\x0e\x1a\finvites.view\x12m\n\x0fGetGuildMembers\x12(.protocol.chat.v1.GetGuildMembersRequest\x1a).protocol.chat.v1.GetGuildMembersResponse\"\x05\x9aD\x02\b\x01\x12k\n\x10GetGuildChannels\x12).protocol.chat.v1.GetGuildChannelsRequest\x1a*.protocol.chat.v1.GetGuildChannelsResponse\"\x00\x12\x88\x01\n\x12GetChannelMessages\x12+.protocol.chat.v1.GetChannelMessagesRequest\x1a,.protocol.chat.v1.GetChannelMessagesResponse\"\x17\x9aD\x02\b\x01\x9aD\x0f\x1a\rmessages.view\x12p\n\nGetMessage\x12#.protocol.chat.v1.GetMessageRequest\x1a$.protocol.chat.v1.GetMessageResponse\"\x17\x9aD\x02\b\x01\x9aD\x0f\x1a\rmessages.view\x12g\n\rGetEmotePacks\x12&.protocol.chat.v1.GetEmotePacksRequest\x1a'.protocol.chat.v1.GetEmotePacksResponse\"\x05\x9aD\x02\b\x01\x12v\n\x12GetEmotePackEmotes\x12+.protocol.chat.v1.GetEmotePackEmotesRequest\x1a,.protocol.chat.v1.GetEmotePackEmotesResponse\"\x05\x9aD\x02\b\x01\x12\x8c\x01\n\x16UpdateGuildInformation\x12/.protocol.chat.v1.UpdateGuildInformationRequest\x1a\x16.google.protobuf.Empty\")\x9aD\x02\b\x01\x9aD!\x1a\x1fguild.manage.change-information\x12\x93\x01\n\x18UpdateChannelInformation\x121.protocol.chat.v1.UpdateChannelInformationRequest\x1a\x16.google.protobuf.Empty\",\x9aD\x02\b\x01\x9aD$\x1a\"channels.manage.change-information\x12y\n\x12UpdateChannelOrder\x12+.protocol.chat.v1.UpdateChannelOrderRequest\x1a\x16.google.protobuf.Empty\"\x1e\x9aD\x02\b\x01\x9aD\x16\x1a\x14channels.manage.move\x12p\n\x11UpdateMessageText\x12*.protocol.chat.v1.UpdateMessageTextRequest\x1a\x16.google.protobuf.Empty\"\x17\x9aD\x02\b\x01\x9aD\x0f\x1a\rmessages.send\x12X\n\x0eAddEmoteToPack\x12'.protocol.chat.v1.AddEmoteToPackRequest\x1a\x16.google.protobuf.Empty\"\x05\x9aD\x02\b\x01\x12j\n\vDeleteGuild\x12$.protocol.chat.v1.DeleteGuildRequest\x1a\x16.google.protobuf.Empty\"\x1d\x9aD\x02\b\x01\x9aD\x15\x1a\x13guild.manage.delete\x12n\n\fDeleteInvite\x12%.protocol.chat.v1.DeleteInviteRequest\x1a\x16.google.protobuf.Empty\"\x1f\x9aD\x02\b\x01\x9aD\x17\x1a\x15invites.manage.delete\x12q\n\rDeleteChannel\x12&.protocol.chat.v1.DeleteChannelRequest\x1a\x16.google.protobuf.Empty\" \x9aD\x02\b\x01\x9aD\x18\x1a\x16channels.manage.delete\x12V\n\rDeleteMessage\x12&.protocol.chat.v1.DeleteMessageRequest\x1a\x16.google.protobuf.Empty\"\x05\x9aD\x02\b\x01\x12b\n\x13DeleteEmoteFromPack\x12,.protocol.chat.v1.DeleteEmoteFromPackRequest\x1a\x16.google.protobuf.Empty\"\x05\x9aD\x02\b\x01\x12Z\n\x0fDeleteEmotePack\x12(.protocol.chat.v1.DeleteEmotePackRequest\x1a\x16.google.protobuf.Empty\"\x05\x9aD\x02\b\x01\x12Z\n\x0fDequipEmotePack\x12(.protocol.chat.v1.DequipEmotePackRequest\x1a\x16.google.protobuf.Empty\"\x05\x9aD\x02\b\x01\x12[\n\tJoinGuild\x12\".protocol.chat.v1.JoinGuildRequest\x1a#.protocol.chat.v1.JoinGuildResponse\"\x05\x9aD\x02\b\x01\x12P\n\nLeaveGuild\x12#.protocol.chat.v1.LeaveGuildRequest\x1a\x16.google.protobuf.Empty\"\x05\x9aD\x02\b\x01\x12j\n\rTriggerAction\x12&.protocol.chat.v1.TriggerActionRequest\x1a\x16.google.protobuf.Empty\"\x19\x9aD\x02\b\x01\x9aD\x11\x1a\x0factions.trigger\x12s\n\vSendMessage\x12$.protocol.chat.v1.SendMessageRequest\x1a%.protocol.chat.v1.SendMessageResponse\"\x17\x9aD\x02\b\x01\x9aD\x0f\x1a\rmessages.send\x12r\n\x12QueryHasPermission\x12).protocol.chat.v1.QueryPermissionsRequest\x1a*.protocol.chat.v1.QueryPermissionsResponse\"\x05\x9aD\x02\b\x01\x12s\n\x0eSetPermissions\x12'.protocol.chat.v1.SetPermissionsRequest\x1a\x16.google.protobuf.Empty\" \x9aD\x02\b\x01\x9aD\x18\x1a\x16permissions.manage.set\x12\x85\x01\n\x0eGetPermissions\x12'.protocol.chat.v1.GetPermissionsRequest\x1a(.protocol.chat.v1.GetPermissionsResponse\" \x9aD\x02\b\x01\x9aD\x18\x1a\x16permissions.manage.get\x12i\n\bMoveRole\x12!.protocol.chat.v1.MoveRoleRequest\x1a\".protocol.chat.v1.MoveRoleResponse\"\x16\x9aD\x02\b\x01\x9aD\x0e\x1a\froles.manage\x12u\n\rGetGuildRoles\x12&.protocol.chat.v1.GetGuildRolesRequest\x1a'.protocol.chat.v1.GetGuildRolesResponse\"\x13\x9aD\x02\b\x01\x9aD\v\x1a\troles.get\x12u\n\fAddGuildRole\x12%.protocol.chat.v1.AddGuildRoleRequest\x1a&.protocol.chat.v1.AddGuildRoleResponse\"\x16\x9aD\x02\b\x01\x9aD\x0e\x1a\froles.manage\x12k\n\x0fModifyGuildRole\x12(.protocol.chat.v1.ModifyGuildRoleRequest\x1a\x16.google.protobuf.Empty\"\x16\x9aD\x02\b\x01\x9aD\x0e\x1a\froles.manage\x12k\n\x0fDeleteGuildRole\x12(.protocol.chat.v1.DeleteGuildRoleRequest\x1a\x16.google.protobuf.Empty\"\x16\x9aD\x02\b\x01\x9aD\x0e\x1a\froles.manage\x12p\n\x0fManageUserRoles\x12(.protocol.chat.v1.ManageUserRolesRequest\x1a\x16.google.protobuf.Empty\"\x1b\x9aD\x02\b\x01\x9aD\x13\x1a\x11roles.user.manage\x12d\n\fGetUserRoles\x12%.protocol.chat.v1.GetUserRolesRequest\x1a&.protocol.chat.v1.GetUserRolesResponse\"\x05\x9aD\x02\b\x01\x12Y\n\fStreamEvents\x12%.protocol.chat.v1.StreamEventsRequest\x1a\x17.protocol.chat.v1.Event\"\x05\x9aD\x02\b\x01(\x010\x01\x12U\n\aGetUser\x12 .protocol.chat.v1.GetUserRequest\x1a!.protocol.chat.v1.GetUserResponse\"\x05\x9aD\x02\b\x01\x12a\n\vGetUserBulk\x12$.protocol.chat.v1.GetUserBulkRequest\x1a%.protocol.chat.v1.GetUserBulkResponse\"\x05\x9aD\x02\b\x01\x12m\n\x0fGetUserMetadata\x12(.protocol.chat.v1.GetUserMetadataRequest\x1a).protocol.chat.v1.GetUserMetadataResponse\"\x05\x9aD\x02\b\x01\x12V\n\rProfileUpdate\x12&.protocol.chat.v1.ProfileUpdateRequest\x1a\x16.google.protobuf.Empty\"\x05\x9aD\x02\b\x01\x12Z\n\x06Typing\x12\x1f.protocol.chat.v1.TypingRequest\x1a\x16.google.protobuf.Empty\"\x17\x9aD\x02\b\x01\x9aD\x0f\x1a\rmessages.send\x12d\n\fPreviewGuild\x12%.protocol.chat.v1.PreviewGuildRequest\x1a&.protocol.chat.v1.PreviewGuildResponse\"\x05\x9aD\x02\b\x00\x12^\n\aBanUser\x12 .protocol.chat.v1.BanUserRequest\x1a\x16.google.protobuf.Empty\"\x19\x9aD\x02\b\x01\x9aD\x11\x1a\x0fuser.manage.ban\x12a\n\bKickUser\x12!.protocol.chat.v1.KickUserRequest\x1a\x16.google.protobuf.Empty\"\x1a\x9aD\x02\b\x01\x9aD\x12\x1a\x10user.manage.kick\x12d\n\tUnbanUser\x12\".protocol.chat.v1.UnbanUserRequest\x1a\x16.google.protobuf.Empty\"\x1b\x9aD\x02\b\x01\x9aD\x13\x1a\x11user.manage.unban")
 
 	err := proto.Unmarshal(data, ChatServiceData)
 	if err != nil {
@@ -93,7 +93,7 @@ type ChatServiceServer interface {
 
 	UpdateChannelOrder(ctx echo.Context, r *UpdateChannelOrderRequest) (resp *empty.Empty, err error)
 
-	UpdateMessage(ctx echo.Context, r *UpdateMessageRequest) (resp *empty.Empty, err error)
+	UpdateMessageText(ctx echo.Context, r *UpdateMessageTextRequest) (resp *empty.Empty, err error)
 
 	AddEmoteToPack(ctx echo.Context, r *AddEmoteToPackRequest) (resp *empty.Empty, err error)
 
@@ -143,6 +143,8 @@ type ChatServiceServer interface {
 
 	GetUser(ctx echo.Context, r *GetUserRequest) (resp *GetUserResponse, err error)
 
+	GetUserBulk(ctx echo.Context, r *GetUserBulkRequest) (resp *GetUserBulkResponse, err error)
+
 	GetUserMetadata(ctx echo.Context, r *GetUserMetadataRequest) (resp *GetUserMetadataResponse, err error)
 
 	ProfileUpdate(ctx echo.Context, r *ProfileUpdateRequest) (resp *empty.Empty, err error)
@@ -150,12 +152,18 @@ type ChatServiceServer interface {
 	Typing(ctx echo.Context, r *TypingRequest) (resp *empty.Empty, err error)
 
 	PreviewGuild(ctx echo.Context, r *PreviewGuildRequest) (resp *PreviewGuildResponse, err error)
+
+	BanUser(ctx echo.Context, r *BanUserRequest) (resp *empty.Empty, err error)
+
+	KickUser(ctx echo.Context, r *KickUserRequest) (resp *empty.Empty, err error)
+
+	UnbanUser(ctx echo.Context, r *UnbanUserRequest) (resp *empty.Empty, err error)
 }
 
 var ChatServiceServerCreateGuildData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\vCreateGuild\x12$.protocol.chat.v1.CreateGuildRequest\x1a%.protocol.chat.v1.CreateGuildResponse\"\x00")
+	data := []byte("\n\vCreateGuild\x12$.protocol.chat.v1.CreateGuildRequest\x1a%.protocol.chat.v1.CreateGuildResponse\"\n\x9aD\x02\b\x01\x9aD\x02\x1a\x00")
 
 	err := proto.Unmarshal(data, ChatServiceServerCreateGuildData)
 	if err != nil {
@@ -166,7 +174,7 @@ func init() {
 var ChatServiceServerCreateInviteData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\fCreateInvite\x12%.protocol.chat.v1.CreateInviteRequest\x1a&.protocol.chat.v1.CreateInviteResponse\"\x00")
+	data := []byte("\n\fCreateInvite\x12%.protocol.chat.v1.CreateInviteRequest\x1a&.protocol.chat.v1.CreateInviteResponse\"\x1f\x9aD\x02\b\x01\x9aD\x17\x1a\x15invites.manage.create")
 
 	err := proto.Unmarshal(data, ChatServiceServerCreateInviteData)
 	if err != nil {
@@ -177,7 +185,7 @@ func init() {
 var ChatServiceServerCreateChannelData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\rCreateChannel\x12&.protocol.chat.v1.CreateChannelRequest\x1a'.protocol.chat.v1.CreateChannelResponse\"\x00")
+	data := []byte("\n\rCreateChannel\x12&.protocol.chat.v1.CreateChannelRequest\x1a'.protocol.chat.v1.CreateChannelResponse\" \x9aD\x02\b\x01\x9aD\x18\x1a\x16channels.manage.create")
 
 	err := proto.Unmarshal(data, ChatServiceServerCreateChannelData)
 	if err != nil {
@@ -188,7 +196,7 @@ func init() {
 var ChatServiceServerCreateEmotePackData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\x0fCreateEmotePack\x12(.protocol.chat.v1.CreateEmotePackRequest\x1a).protocol.chat.v1.CreateEmotePackResponse\"\x00")
+	data := []byte("\n\x0fCreateEmotePack\x12(.protocol.chat.v1.CreateEmotePackRequest\x1a).protocol.chat.v1.CreateEmotePackResponse\"\x05\x9aD\x02\b\x01")
 
 	err := proto.Unmarshal(data, ChatServiceServerCreateEmotePackData)
 	if err != nil {
@@ -199,7 +207,7 @@ func init() {
 var ChatServiceServerGetGuildListData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\fGetGuildList\x12%.protocol.chat.v1.GetGuildListRequest\x1a&.protocol.chat.v1.GetGuildListResponse\"\x00")
+	data := []byte("\n\fGetGuildList\x12%.protocol.chat.v1.GetGuildListRequest\x1a&.protocol.chat.v1.GetGuildListResponse\"\x05\x9aD\x02\b\x01")
 
 	err := proto.Unmarshal(data, ChatServiceServerGetGuildListData)
 	if err != nil {
@@ -210,7 +218,7 @@ func init() {
 var ChatServiceServerAddGuildToGuildListData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\x13AddGuildToGuildList\x12,.protocol.chat.v1.AddGuildToGuildListRequest\x1a-.protocol.chat.v1.AddGuildToGuildListResponse\"\x00")
+	data := []byte("\n\x13AddGuildToGuildList\x12,.protocol.chat.v1.AddGuildToGuildListRequest\x1a-.protocol.chat.v1.AddGuildToGuildListResponse\"\n\x9aD\x02\b\x01\x9aD\x02\x10\x01")
 
 	err := proto.Unmarshal(data, ChatServiceServerAddGuildToGuildListData)
 	if err != nil {
@@ -221,7 +229,7 @@ func init() {
 var ChatServiceServerRemoveGuildFromGuildListData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\x18RemoveGuildFromGuildList\x121.protocol.chat.v1.RemoveGuildFromGuildListRequest\x1a2.protocol.chat.v1.RemoveGuildFromGuildListResponse\"\x00")
+	data := []byte("\n\x18RemoveGuildFromGuildList\x121.protocol.chat.v1.RemoveGuildFromGuildListRequest\x1a2.protocol.chat.v1.RemoveGuildFromGuildListResponse\"\n\x9aD\x02\b\x01\x9aD\x02\x10\x01")
 
 	err := proto.Unmarshal(data, ChatServiceServerRemoveGuildFromGuildListData)
 	if err != nil {
@@ -232,7 +240,7 @@ func init() {
 var ChatServiceServerGetGuildData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\bGetGuild\x12!.protocol.chat.v1.GetGuildRequest\x1a\".protocol.chat.v1.GetGuildResponse\"\x00")
+	data := []byte("\n\bGetGuild\x12!.protocol.chat.v1.GetGuildRequest\x1a\".protocol.chat.v1.GetGuildResponse\"\x05\x9aD\x02\b\x01")
 
 	err := proto.Unmarshal(data, ChatServiceServerGetGuildData)
 	if err != nil {
@@ -243,7 +251,7 @@ func init() {
 var ChatServiceServerGetGuildInvitesData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\x0fGetGuildInvites\x12(.protocol.chat.v1.GetGuildInvitesRequest\x1a).protocol.chat.v1.GetGuildInvitesResponse\"\x00")
+	data := []byte("\n\x0fGetGuildInvites\x12(.protocol.chat.v1.GetGuildInvitesRequest\x1a).protocol.chat.v1.GetGuildInvitesResponse\"\x16\x9aD\x02\b\x01\x9aD\x0e\x1a\finvites.view")
 
 	err := proto.Unmarshal(data, ChatServiceServerGetGuildInvitesData)
 	if err != nil {
@@ -254,7 +262,7 @@ func init() {
 var ChatServiceServerGetGuildMembersData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\x0fGetGuildMembers\x12(.protocol.chat.v1.GetGuildMembersRequest\x1a).protocol.chat.v1.GetGuildMembersResponse\"\x00")
+	data := []byte("\n\x0fGetGuildMembers\x12(.protocol.chat.v1.GetGuildMembersRequest\x1a).protocol.chat.v1.GetGuildMembersResponse\"\x05\x9aD\x02\b\x01")
 
 	err := proto.Unmarshal(data, ChatServiceServerGetGuildMembersData)
 	if err != nil {
@@ -276,7 +284,7 @@ func init() {
 var ChatServiceServerGetChannelMessagesData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\x12GetChannelMessages\x12+.protocol.chat.v1.GetChannelMessagesRequest\x1a,.protocol.chat.v1.GetChannelMessagesResponse\"\x00")
+	data := []byte("\n\x12GetChannelMessages\x12+.protocol.chat.v1.GetChannelMessagesRequest\x1a,.protocol.chat.v1.GetChannelMessagesResponse\"\x17\x9aD\x02\b\x01\x9aD\x0f\x1a\rmessages.view")
 
 	err := proto.Unmarshal(data, ChatServiceServerGetChannelMessagesData)
 	if err != nil {
@@ -287,7 +295,7 @@ func init() {
 var ChatServiceServerGetMessageData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\nGetMessage\x12#.protocol.chat.v1.GetMessageRequest\x1a$.protocol.chat.v1.GetMessageResponse\"\x00")
+	data := []byte("\n\nGetMessage\x12#.protocol.chat.v1.GetMessageRequest\x1a$.protocol.chat.v1.GetMessageResponse\"\x17\x9aD\x02\b\x01\x9aD\x0f\x1a\rmessages.view")
 
 	err := proto.Unmarshal(data, ChatServiceServerGetMessageData)
 	if err != nil {
@@ -298,7 +306,7 @@ func init() {
 var ChatServiceServerGetEmotePacksData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\rGetEmotePacks\x12&.protocol.chat.v1.GetEmotePacksRequest\x1a'.protocol.chat.v1.GetEmotePacksResponse\"\x00")
+	data := []byte("\n\rGetEmotePacks\x12&.protocol.chat.v1.GetEmotePacksRequest\x1a'.protocol.chat.v1.GetEmotePacksResponse\"\x05\x9aD\x02\b\x01")
 
 	err := proto.Unmarshal(data, ChatServiceServerGetEmotePacksData)
 	if err != nil {
@@ -309,7 +317,7 @@ func init() {
 var ChatServiceServerGetEmotePackEmotesData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\x12GetEmotePackEmotes\x12+.protocol.chat.v1.GetEmotePackEmotesRequest\x1a,.protocol.chat.v1.GetEmotePackEmotesResponse\"\x00")
+	data := []byte("\n\x12GetEmotePackEmotes\x12+.protocol.chat.v1.GetEmotePackEmotesRequest\x1a,.protocol.chat.v1.GetEmotePackEmotesResponse\"\x05\x9aD\x02\b\x01")
 
 	err := proto.Unmarshal(data, ChatServiceServerGetEmotePackEmotesData)
 	if err != nil {
@@ -320,7 +328,7 @@ func init() {
 var ChatServiceServerUpdateGuildInformationData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\x16UpdateGuildInformation\x12/.protocol.chat.v1.UpdateGuildInformationRequest\x1a\x16.google.protobuf.Empty\"\x00")
+	data := []byte("\n\x16UpdateGuildInformation\x12/.protocol.chat.v1.UpdateGuildInformationRequest\x1a\x16.google.protobuf.Empty\")\x9aD\x02\b\x01\x9aD!\x1a\x1fguild.manage.change-information")
 
 	err := proto.Unmarshal(data, ChatServiceServerUpdateGuildInformationData)
 	if err != nil {
@@ -331,7 +339,7 @@ func init() {
 var ChatServiceServerUpdateChannelInformationData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\x18UpdateChannelInformation\x121.protocol.chat.v1.UpdateChannelInformationRequest\x1a\x16.google.protobuf.Empty\"\x00")
+	data := []byte("\n\x18UpdateChannelInformation\x121.protocol.chat.v1.UpdateChannelInformationRequest\x1a\x16.google.protobuf.Empty\",\x9aD\x02\b\x01\x9aD$\x1a\"channels.manage.change-information")
 
 	err := proto.Unmarshal(data, ChatServiceServerUpdateChannelInformationData)
 	if err != nil {
@@ -342,7 +350,7 @@ func init() {
 var ChatServiceServerUpdateChannelOrderData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\x12UpdateChannelOrder\x12+.protocol.chat.v1.UpdateChannelOrderRequest\x1a\x16.google.protobuf.Empty\"\x00")
+	data := []byte("\n\x12UpdateChannelOrder\x12+.protocol.chat.v1.UpdateChannelOrderRequest\x1a\x16.google.protobuf.Empty\"\x1e\x9aD\x02\b\x01\x9aD\x16\x1a\x14channels.manage.move")
 
 	err := proto.Unmarshal(data, ChatServiceServerUpdateChannelOrderData)
 	if err != nil {
@@ -350,12 +358,12 @@ func init() {
 	}
 }
 
-var ChatServiceServerUpdateMessageData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
+var ChatServiceServerUpdateMessageTextData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\rUpdateMessage\x12&.protocol.chat.v1.UpdateMessageRequest\x1a\x16.google.protobuf.Empty\"\x00")
+	data := []byte("\n\x11UpdateMessageText\x12*.protocol.chat.v1.UpdateMessageTextRequest\x1a\x16.google.protobuf.Empty\"\x17\x9aD\x02\b\x01\x9aD\x0f\x1a\rmessages.send")
 
-	err := proto.Unmarshal(data, ChatServiceServerUpdateMessageData)
+	err := proto.Unmarshal(data, ChatServiceServerUpdateMessageTextData)
 	if err != nil {
 		panic(err)
 	}
@@ -364,7 +372,7 @@ func init() {
 var ChatServiceServerAddEmoteToPackData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\x0eAddEmoteToPack\x12'.protocol.chat.v1.AddEmoteToPackRequest\x1a\x16.google.protobuf.Empty\"\x00")
+	data := []byte("\n\x0eAddEmoteToPack\x12'.protocol.chat.v1.AddEmoteToPackRequest\x1a\x16.google.protobuf.Empty\"\x05\x9aD\x02\b\x01")
 
 	err := proto.Unmarshal(data, ChatServiceServerAddEmoteToPackData)
 	if err != nil {
@@ -375,7 +383,7 @@ func init() {
 var ChatServiceServerDeleteGuildData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\vDeleteGuild\x12$.protocol.chat.v1.DeleteGuildRequest\x1a\x16.google.protobuf.Empty\"\x00")
+	data := []byte("\n\vDeleteGuild\x12$.protocol.chat.v1.DeleteGuildRequest\x1a\x16.google.protobuf.Empty\"\x1d\x9aD\x02\b\x01\x9aD\x15\x1a\x13guild.manage.delete")
 
 	err := proto.Unmarshal(data, ChatServiceServerDeleteGuildData)
 	if err != nil {
@@ -386,7 +394,7 @@ func init() {
 var ChatServiceServerDeleteInviteData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\fDeleteInvite\x12%.protocol.chat.v1.DeleteInviteRequest\x1a\x16.google.protobuf.Empty\"\x00")
+	data := []byte("\n\fDeleteInvite\x12%.protocol.chat.v1.DeleteInviteRequest\x1a\x16.google.protobuf.Empty\"\x1f\x9aD\x02\b\x01\x9aD\x17\x1a\x15invites.manage.delete")
 
 	err := proto.Unmarshal(data, ChatServiceServerDeleteInviteData)
 	if err != nil {
@@ -397,7 +405,7 @@ func init() {
 var ChatServiceServerDeleteChannelData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\rDeleteChannel\x12&.protocol.chat.v1.DeleteChannelRequest\x1a\x16.google.protobuf.Empty\"\x00")
+	data := []byte("\n\rDeleteChannel\x12&.protocol.chat.v1.DeleteChannelRequest\x1a\x16.google.protobuf.Empty\" \x9aD\x02\b\x01\x9aD\x18\x1a\x16channels.manage.delete")
 
 	err := proto.Unmarshal(data, ChatServiceServerDeleteChannelData)
 	if err != nil {
@@ -408,7 +416,7 @@ func init() {
 var ChatServiceServerDeleteMessageData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\rDeleteMessage\x12&.protocol.chat.v1.DeleteMessageRequest\x1a\x16.google.protobuf.Empty\"\x00")
+	data := []byte("\n\rDeleteMessage\x12&.protocol.chat.v1.DeleteMessageRequest\x1a\x16.google.protobuf.Empty\"\x05\x9aD\x02\b\x01")
 
 	err := proto.Unmarshal(data, ChatServiceServerDeleteMessageData)
 	if err != nil {
@@ -419,7 +427,7 @@ func init() {
 var ChatServiceServerDeleteEmoteFromPackData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\x13DeleteEmoteFromPack\x12,.protocol.chat.v1.DeleteEmoteFromPackRequest\x1a\x16.google.protobuf.Empty\"\x00")
+	data := []byte("\n\x13DeleteEmoteFromPack\x12,.protocol.chat.v1.DeleteEmoteFromPackRequest\x1a\x16.google.protobuf.Empty\"\x05\x9aD\x02\b\x01")
 
 	err := proto.Unmarshal(data, ChatServiceServerDeleteEmoteFromPackData)
 	if err != nil {
@@ -430,7 +438,7 @@ func init() {
 var ChatServiceServerDeleteEmotePackData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\x0fDeleteEmotePack\x12(.protocol.chat.v1.DeleteEmotePackRequest\x1a\x16.google.protobuf.Empty\"\x00")
+	data := []byte("\n\x0fDeleteEmotePack\x12(.protocol.chat.v1.DeleteEmotePackRequest\x1a\x16.google.protobuf.Empty\"\x05\x9aD\x02\b\x01")
 
 	err := proto.Unmarshal(data, ChatServiceServerDeleteEmotePackData)
 	if err != nil {
@@ -441,7 +449,7 @@ func init() {
 var ChatServiceServerDequipEmotePackData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\x0fDequipEmotePack\x12(.protocol.chat.v1.DequipEmotePackRequest\x1a\x16.google.protobuf.Empty\"\x00")
+	data := []byte("\n\x0fDequipEmotePack\x12(.protocol.chat.v1.DequipEmotePackRequest\x1a\x16.google.protobuf.Empty\"\x05\x9aD\x02\b\x01")
 
 	err := proto.Unmarshal(data, ChatServiceServerDequipEmotePackData)
 	if err != nil {
@@ -452,7 +460,7 @@ func init() {
 var ChatServiceServerJoinGuildData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\tJoinGuild\x12\".protocol.chat.v1.JoinGuildRequest\x1a#.protocol.chat.v1.JoinGuildResponse\"\x00")
+	data := []byte("\n\tJoinGuild\x12\".protocol.chat.v1.JoinGuildRequest\x1a#.protocol.chat.v1.JoinGuildResponse\"\x05\x9aD\x02\b\x01")
 
 	err := proto.Unmarshal(data, ChatServiceServerJoinGuildData)
 	if err != nil {
@@ -463,7 +471,7 @@ func init() {
 var ChatServiceServerLeaveGuildData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\nLeaveGuild\x12#.protocol.chat.v1.LeaveGuildRequest\x1a\x16.google.protobuf.Empty\"\x00")
+	data := []byte("\n\nLeaveGuild\x12#.protocol.chat.v1.LeaveGuildRequest\x1a\x16.google.protobuf.Empty\"\x05\x9aD\x02\b\x01")
 
 	err := proto.Unmarshal(data, ChatServiceServerLeaveGuildData)
 	if err != nil {
@@ -474,7 +482,7 @@ func init() {
 var ChatServiceServerTriggerActionData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\rTriggerAction\x12&.protocol.chat.v1.TriggerActionRequest\x1a\x16.google.protobuf.Empty\"\x00")
+	data := []byte("\n\rTriggerAction\x12&.protocol.chat.v1.TriggerActionRequest\x1a\x16.google.protobuf.Empty\"\x19\x9aD\x02\b\x01\x9aD\x11\x1a\x0factions.trigger")
 
 	err := proto.Unmarshal(data, ChatServiceServerTriggerActionData)
 	if err != nil {
@@ -485,7 +493,7 @@ func init() {
 var ChatServiceServerSendMessageData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\vSendMessage\x12$.protocol.chat.v1.SendMessageRequest\x1a%.protocol.chat.v1.SendMessageResponse\"\x00")
+	data := []byte("\n\vSendMessage\x12$.protocol.chat.v1.SendMessageRequest\x1a%.protocol.chat.v1.SendMessageResponse\"\x17\x9aD\x02\b\x01\x9aD\x0f\x1a\rmessages.send")
 
 	err := proto.Unmarshal(data, ChatServiceServerSendMessageData)
 	if err != nil {
@@ -496,7 +504,7 @@ func init() {
 var ChatServiceServerQueryHasPermissionData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\x12QueryHasPermission\x12).protocol.chat.v1.QueryPermissionsRequest\x1a*.protocol.chat.v1.QueryPermissionsResponse\"\x00")
+	data := []byte("\n\x12QueryHasPermission\x12).protocol.chat.v1.QueryPermissionsRequest\x1a*.protocol.chat.v1.QueryPermissionsResponse\"\x05\x9aD\x02\b\x01")
 
 	err := proto.Unmarshal(data, ChatServiceServerQueryHasPermissionData)
 	if err != nil {
@@ -507,7 +515,7 @@ func init() {
 var ChatServiceServerSetPermissionsData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\x0eSetPermissions\x12'.protocol.chat.v1.SetPermissionsRequest\x1a\x16.google.protobuf.Empty\"\x00")
+	data := []byte("\n\x0eSetPermissions\x12'.protocol.chat.v1.SetPermissionsRequest\x1a\x16.google.protobuf.Empty\" \x9aD\x02\b\x01\x9aD\x18\x1a\x16permissions.manage.set")
 
 	err := proto.Unmarshal(data, ChatServiceServerSetPermissionsData)
 	if err != nil {
@@ -518,7 +526,7 @@ func init() {
 var ChatServiceServerGetPermissionsData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\x0eGetPermissions\x12'.protocol.chat.v1.GetPermissionsRequest\x1a(.protocol.chat.v1.GetPermissionsResponse\"\x00")
+	data := []byte("\n\x0eGetPermissions\x12'.protocol.chat.v1.GetPermissionsRequest\x1a(.protocol.chat.v1.GetPermissionsResponse\" \x9aD\x02\b\x01\x9aD\x18\x1a\x16permissions.manage.get")
 
 	err := proto.Unmarshal(data, ChatServiceServerGetPermissionsData)
 	if err != nil {
@@ -529,7 +537,7 @@ func init() {
 var ChatServiceServerMoveRoleData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\bMoveRole\x12!.protocol.chat.v1.MoveRoleRequest\x1a\".protocol.chat.v1.MoveRoleResponse\"\x00")
+	data := []byte("\n\bMoveRole\x12!.protocol.chat.v1.MoveRoleRequest\x1a\".protocol.chat.v1.MoveRoleResponse\"\x16\x9aD\x02\b\x01\x9aD\x0e\x1a\froles.manage")
 
 	err := proto.Unmarshal(data, ChatServiceServerMoveRoleData)
 	if err != nil {
@@ -540,7 +548,7 @@ func init() {
 var ChatServiceServerGetGuildRolesData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\rGetGuildRoles\x12&.protocol.chat.v1.GetGuildRolesRequest\x1a'.protocol.chat.v1.GetGuildRolesResponse\"\x00")
+	data := []byte("\n\rGetGuildRoles\x12&.protocol.chat.v1.GetGuildRolesRequest\x1a'.protocol.chat.v1.GetGuildRolesResponse\"\x13\x9aD\x02\b\x01\x9aD\v\x1a\troles.get")
 
 	err := proto.Unmarshal(data, ChatServiceServerGetGuildRolesData)
 	if err != nil {
@@ -551,7 +559,7 @@ func init() {
 var ChatServiceServerAddGuildRoleData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\fAddGuildRole\x12%.protocol.chat.v1.AddGuildRoleRequest\x1a&.protocol.chat.v1.AddGuildRoleResponse\"\x00")
+	data := []byte("\n\fAddGuildRole\x12%.protocol.chat.v1.AddGuildRoleRequest\x1a&.protocol.chat.v1.AddGuildRoleResponse\"\x16\x9aD\x02\b\x01\x9aD\x0e\x1a\froles.manage")
 
 	err := proto.Unmarshal(data, ChatServiceServerAddGuildRoleData)
 	if err != nil {
@@ -562,7 +570,7 @@ func init() {
 var ChatServiceServerModifyGuildRoleData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\x0fModifyGuildRole\x12(.protocol.chat.v1.ModifyGuildRoleRequest\x1a\x16.google.protobuf.Empty\"\x00")
+	data := []byte("\n\x0fModifyGuildRole\x12(.protocol.chat.v1.ModifyGuildRoleRequest\x1a\x16.google.protobuf.Empty\"\x16\x9aD\x02\b\x01\x9aD\x0e\x1a\froles.manage")
 
 	err := proto.Unmarshal(data, ChatServiceServerModifyGuildRoleData)
 	if err != nil {
@@ -573,7 +581,7 @@ func init() {
 var ChatServiceServerDeleteGuildRoleData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\x0fDeleteGuildRole\x12(.protocol.chat.v1.DeleteGuildRoleRequest\x1a\x16.google.protobuf.Empty\"\x00")
+	data := []byte("\n\x0fDeleteGuildRole\x12(.protocol.chat.v1.DeleteGuildRoleRequest\x1a\x16.google.protobuf.Empty\"\x16\x9aD\x02\b\x01\x9aD\x0e\x1a\froles.manage")
 
 	err := proto.Unmarshal(data, ChatServiceServerDeleteGuildRoleData)
 	if err != nil {
@@ -584,7 +592,7 @@ func init() {
 var ChatServiceServerManageUserRolesData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\x0fManageUserRoles\x12(.protocol.chat.v1.ManageUserRolesRequest\x1a\x16.google.protobuf.Empty\"\x00")
+	data := []byte("\n\x0fManageUserRoles\x12(.protocol.chat.v1.ManageUserRolesRequest\x1a\x16.google.protobuf.Empty\"\x1b\x9aD\x02\b\x01\x9aD\x13\x1a\x11roles.user.manage")
 
 	err := proto.Unmarshal(data, ChatServiceServerManageUserRolesData)
 	if err != nil {
@@ -595,7 +603,7 @@ func init() {
 var ChatServiceServerGetUserRolesData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\fGetUserRoles\x12%.protocol.chat.v1.GetUserRolesRequest\x1a&.protocol.chat.v1.GetUserRolesResponse\"\x00")
+	data := []byte("\n\fGetUserRoles\x12%.protocol.chat.v1.GetUserRolesRequest\x1a&.protocol.chat.v1.GetUserRolesResponse\"\x05\x9aD\x02\b\x01")
 
 	err := proto.Unmarshal(data, ChatServiceServerGetUserRolesData)
 	if err != nil {
@@ -606,7 +614,7 @@ func init() {
 var ChatServiceServerStreamEventsData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\fStreamEvents\x12%.protocol.chat.v1.StreamEventsRequest\x1a\x17.protocol.chat.v1.Event\"\x00(\x010\x01")
+	data := []byte("\n\fStreamEvents\x12%.protocol.chat.v1.StreamEventsRequest\x1a\x17.protocol.chat.v1.Event\"\x05\x9aD\x02\b\x01(\x010\x01")
 
 	err := proto.Unmarshal(data, ChatServiceServerStreamEventsData)
 	if err != nil {
@@ -617,9 +625,20 @@ func init() {
 var ChatServiceServerGetUserData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\aGetUser\x12 .protocol.chat.v1.GetUserRequest\x1a!.protocol.chat.v1.GetUserResponse\"\x00")
+	data := []byte("\n\aGetUser\x12 .protocol.chat.v1.GetUserRequest\x1a!.protocol.chat.v1.GetUserResponse\"\x05\x9aD\x02\b\x01")
 
 	err := proto.Unmarshal(data, ChatServiceServerGetUserData)
+	if err != nil {
+		panic(err)
+	}
+}
+
+var ChatServiceServerGetUserBulkData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
+
+func init() {
+	data := []byte("\n\vGetUserBulk\x12$.protocol.chat.v1.GetUserBulkRequest\x1a%.protocol.chat.v1.GetUserBulkResponse\"\x05\x9aD\x02\b\x01")
+
+	err := proto.Unmarshal(data, ChatServiceServerGetUserBulkData)
 	if err != nil {
 		panic(err)
 	}
@@ -628,7 +647,7 @@ func init() {
 var ChatServiceServerGetUserMetadataData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\x0fGetUserMetadata\x12(.protocol.chat.v1.GetUserMetadataRequest\x1a).protocol.chat.v1.GetUserMetadataResponse\"\x00")
+	data := []byte("\n\x0fGetUserMetadata\x12(.protocol.chat.v1.GetUserMetadataRequest\x1a).protocol.chat.v1.GetUserMetadataResponse\"\x05\x9aD\x02\b\x01")
 
 	err := proto.Unmarshal(data, ChatServiceServerGetUserMetadataData)
 	if err != nil {
@@ -639,7 +658,7 @@ func init() {
 var ChatServiceServerProfileUpdateData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\rProfileUpdate\x12&.protocol.chat.v1.ProfileUpdateRequest\x1a\x16.google.protobuf.Empty\"\x00")
+	data := []byte("\n\rProfileUpdate\x12&.protocol.chat.v1.ProfileUpdateRequest\x1a\x16.google.protobuf.Empty\"\x05\x9aD\x02\b\x01")
 
 	err := proto.Unmarshal(data, ChatServiceServerProfileUpdateData)
 	if err != nil {
@@ -650,7 +669,7 @@ func init() {
 var ChatServiceServerTypingData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\x06Typing\x12\x1f.protocol.chat.v1.TypingRequest\x1a\x16.google.protobuf.Empty\"\x00")
+	data := []byte("\n\x06Typing\x12\x1f.protocol.chat.v1.TypingRequest\x1a\x16.google.protobuf.Empty\"\x17\x9aD\x02\b\x01\x9aD\x0f\x1a\rmessages.send")
 
 	err := proto.Unmarshal(data, ChatServiceServerTypingData)
 	if err != nil {
@@ -661,9 +680,42 @@ func init() {
 var ChatServiceServerPreviewGuildData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
 
 func init() {
-	data := []byte("\n\fPreviewGuild\x12%.protocol.chat.v1.PreviewGuildRequest\x1a&.protocol.chat.v1.PreviewGuildResponse")
+	data := []byte("\n\fPreviewGuild\x12%.protocol.chat.v1.PreviewGuildRequest\x1a&.protocol.chat.v1.PreviewGuildResponse\"\x05\x9aD\x02\b\x00")
 
 	err := proto.Unmarshal(data, ChatServiceServerPreviewGuildData)
+	if err != nil {
+		panic(err)
+	}
+}
+
+var ChatServiceServerBanUserData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
+
+func init() {
+	data := []byte("\n\aBanUser\x12 .protocol.chat.v1.BanUserRequest\x1a\x16.google.protobuf.Empty\"\x19\x9aD\x02\b\x01\x9aD\x11\x1a\x0fuser.manage.ban")
+
+	err := proto.Unmarshal(data, ChatServiceServerBanUserData)
+	if err != nil {
+		panic(err)
+	}
+}
+
+var ChatServiceServerKickUserData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
+
+func init() {
+	data := []byte("\n\bKickUser\x12!.protocol.chat.v1.KickUserRequest\x1a\x16.google.protobuf.Empty\"\x1a\x9aD\x02\b\x01\x9aD\x12\x1a\x10user.manage.kick")
+
+	err := proto.Unmarshal(data, ChatServiceServerKickUserData)
+	if err != nil {
+		panic(err)
+	}
+}
+
+var ChatServiceServerUnbanUserData *descriptorpb.MethodDescriptorProto = new(descriptorpb.MethodDescriptorProto)
+
+func init() {
+	data := []byte("\n\tUnbanUser\x12\".protocol.chat.v1.UnbanUserRequest\x1a\x16.google.protobuf.Empty\"\x1b\x9aD\x02\b\x01\x9aD\x13\x1a\x11user.manage.unban")
+
+	err := proto.Unmarshal(data, ChatServiceServerUnbanUserData)
 	if err != nil {
 		panic(err)
 	}
@@ -732,7 +784,7 @@ func (h *ChatServiceHandler) Routes() map[string]echo.HandlerFunc {
 
 		"/protocol.chat.v1.ChatService/UpdateChannelOrder": h.UpdateChannelOrderHandler,
 
-		"/protocol.chat.v1.ChatService/UpdateMessage": h.UpdateMessageHandler,
+		"/protocol.chat.v1.ChatService/UpdateMessageText": h.UpdateMessageTextHandler,
 
 		"/protocol.chat.v1.ChatService/AddEmoteToPack": h.AddEmoteToPackHandler,
 
@@ -782,6 +834,8 @@ func (h *ChatServiceHandler) Routes() map[string]echo.HandlerFunc {
 
 		"/protocol.chat.v1.ChatService/GetUser": h.GetUserHandler,
 
+		"/protocol.chat.v1.ChatService/GetUserBulk": h.GetUserBulkHandler,
+
 		"/protocol.chat.v1.ChatService/GetUserMetadata": h.GetUserMetadataHandler,
 
 		"/protocol.chat.v1.ChatService/ProfileUpdate": h.ProfileUpdateHandler,
@@ -789,6 +843,12 @@ func (h *ChatServiceHandler) Routes() map[string]echo.HandlerFunc {
 		"/protocol.chat.v1.ChatService/Typing": h.TypingHandler,
 
 		"/protocol.chat.v1.ChatService/PreviewGuild": h.PreviewGuildHandler,
+
+		"/protocol.chat.v1.ChatService/BanUser": h.BanUserHandler,
+
+		"/protocol.chat.v1.ChatService/KickUser": h.KickUserHandler,
+
+		"/protocol.chat.v1.ChatService/UnbanUser": h.UnbanUserHandler,
 	}
 }
 
@@ -1530,19 +1590,19 @@ func (h *ChatServiceHandler) UpdateChannelOrderHandler(c echo.Context) error {
 
 }
 
-func (h *ChatServiceHandler) UpdateMessageHandler(c echo.Context) error {
+func (h *ChatServiceHandler) UpdateMessageTextHandler(c echo.Context) error {
 
-	requestProto := new(UpdateMessageRequest)
+	requestProto := new(UpdateMessageTextRequest)
 	if err := BindPB(requestProto, c); err != nil {
 		return err
 	}
 
 	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
-		return h.Server.UpdateMessage(c, req.(*UpdateMessageRequest))
+		return h.Server.UpdateMessageText(c, req.(*UpdateMessageTextRequest))
 	}
 
 	if h.UnaryPre != nil {
-		invoker = h.UnaryPre(ChatServiceServerUpdateMessageData, ChatServiceData, Chatᐳv1ᐳchat, invoker)
+		invoker = h.UnaryPre(ChatServiceServerUpdateMessageTextData, ChatServiceData, Chatᐳv1ᐳchat, invoker)
 	}
 
 	res, err := invoker(c, requestProto)
@@ -2629,6 +2689,47 @@ func (h *ChatServiceHandler) GetUserHandler(c echo.Context) error {
 
 }
 
+func (h *ChatServiceHandler) GetUserBulkHandler(c echo.Context) error {
+
+	requestProto := new(GetUserBulkRequest)
+	if err := BindPB(requestProto, c); err != nil {
+		return err
+	}
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.GetUserBulk(c, req.(*GetUserBulkRequest))
+	}
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerGetUserBulkData, ChatServiceData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
+	if err != nil {
+		return err
+	}
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
+
+}
+
 func (h *ChatServiceHandler) GetUserMetadataHandler(c echo.Context) error {
 
 	requestProto := new(GetUserMetadataRequest)
@@ -2765,6 +2866,129 @@ func (h *ChatServiceHandler) PreviewGuildHandler(c echo.Context) error {
 
 	if h.UnaryPre != nil {
 		invoker = h.UnaryPre(ChatServiceServerPreviewGuildData, ChatServiceData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
+	if err != nil {
+		return err
+	}
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
+
+}
+
+func (h *ChatServiceHandler) BanUserHandler(c echo.Context) error {
+
+	requestProto := new(BanUserRequest)
+	if err := BindPB(requestProto, c); err != nil {
+		return err
+	}
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.BanUser(c, req.(*BanUserRequest))
+	}
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerBanUserData, ChatServiceData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
+	if err != nil {
+		return err
+	}
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
+
+}
+
+func (h *ChatServiceHandler) KickUserHandler(c echo.Context) error {
+
+	requestProto := new(KickUserRequest)
+	if err := BindPB(requestProto, c); err != nil {
+		return err
+	}
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.KickUser(c, req.(*KickUserRequest))
+	}
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerKickUserData, ChatServiceData, Chatᐳv1ᐳchat, invoker)
+	}
+
+	res, err := invoker(c, requestProto)
+	if err != nil {
+		return err
+	}
+	var response []byte
+
+	ct := c.Request().Header.Get("Content-Type")
+
+	switch ct {
+	case "application/hrpc-json":
+		response, err = protojson.Marshal(res)
+	default:
+		response, err = proto.Marshal(res)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	if ct == "application/hrpc-json" {
+		return c.Blob(http.StatusOK, "application/hrpc-json", response)
+	}
+	return c.Blob(http.StatusOK, "application/hrpc", response)
+
+}
+
+func (h *ChatServiceHandler) UnbanUserHandler(c echo.Context) error {
+
+	requestProto := new(UnbanUserRequest)
+	if err := BindPB(requestProto, c); err != nil {
+		return err
+	}
+
+	invoker := func(c echo.Context, req proto.Message) (proto.Message, error) {
+		return h.Server.UnbanUser(c, req.(*UnbanUserRequest))
+	}
+
+	if h.UnaryPre != nil {
+		invoker = h.UnaryPre(ChatServiceServerUnbanUserData, ChatServiceData, Chatᐳv1ᐳchat, invoker)
 	}
 
 	res, err := invoker(c, requestProto)

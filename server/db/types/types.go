@@ -49,5 +49,6 @@ type UserData struct {
 	Username string
 	Avatar   sql.NullString
 	Status   int16
+	IsBot    bool
 	Password []byte
 }

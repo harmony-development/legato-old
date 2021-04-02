@@ -1,4 +1,5 @@
 //+build ignore
+
 package sqlite
 
 import (

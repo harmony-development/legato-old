@@ -5,7 +5,9 @@ import (
 	"github.com/harmony-development/legato/server/db/queries"
 )
 
-func (d *database) AddChannelToGuild(guildID uint64, channelID uint64, channelName string, previous, next uint64, category bool, md *harmonytypesv1.Metadata) (channel queries.Channel, err error) {
+func (d *database) AddChannelToGuild(guildID uint64, channelName string, previous, next uint64, category bool, md *harmonytypesv1.Metadata) (q queries.Channel, err error) {
+	panic("unimplemented")
+
 	defer doRecovery(&err)
 
 	// TODO uhh add the channel

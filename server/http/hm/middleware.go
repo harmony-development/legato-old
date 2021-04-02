@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"sync"
 
+	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/config"
-	"github.com/harmony-development/legato/server/db/queries"
 	"github.com/harmony-development/legato/server/db/types"
 	"github.com/harmony-development/legato/server/logger"
 
@@ -17,8 +17,8 @@ import (
 type LocationContext struct {
 	GuildID   *uint64
 	ChannelID *uint64
-	Message   *queries.Message
-	User      *queries.GetUserRow
+	Message   *harmonytypesv1.Message
+	User      *types.UserData
 }
 
 // A HarmonyContext adds rate limiting and a user ID to an echo.Context

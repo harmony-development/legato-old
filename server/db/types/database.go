@@ -23,8 +23,7 @@ type IHarmonyDB interface {
 	DeleteChannelFromGuild(guildID, channelID uint64) error
 
 	AddTextMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata, content string) (time.Time, error)
-	AddPhotoMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata, photos []*harmonytypesv1.Photo) (time.Time, error)
-	AddFilesMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata, files []string) (time.Time, error)
+	AddFilesMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata, files []*harmonytypesv1.Attachment) (time.Time, error)
 	AddEmbedMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata, embeds []*harmonytypesv1.Embed) (time.Time, error)
 
 	UpdateTextMessage(messageID uint64, content string) (time.Time, error)

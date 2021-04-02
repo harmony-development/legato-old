@@ -1,11 +1,12 @@
 //+build ignore
+
 package sqlite
 
 import (
 	"database/sql"
 
 	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
-	"github.com/harmony-development/legato/server/db/queries"
+	"github.com/harmony-development/legato/server/db/types"
 )
 
 func (d *database) EmailExists(email string) (bool, error) {
@@ -26,22 +27,21 @@ func (d *database) AddLocalUser(userID uint64, email, username string, passwordH
 		SetEmail(email).
 		SetPassword(passwordHash).
 		SetUser(user).
-		SetUsername(username).
 		SaveX(ctx)
 
 	return
 }
 
-func (d *database) GetUserByEmail(email string) (q queries.GetUserByEmailRow, err error) {
+func (d *database) GetUserByEmail(email string) (q types.UserData, err error) {
 	defer doRecovery(&err)
 
 	user := d.Client.LocalUser.Query().Where(localuser.Email(email)).OnlyX(ctx)
 	profile := user.QueryUser().QueryProfile().OnlyX(ctx)
 
-	return queries.GetUserByEmailRow{
-		UserID:   user.QueryUser().OnlyIDX(ctx),
-		Email:    email,
-		Username: user.Username,
+	return types.UserData{
+		UserID: user.QueryUser().OnlyIDX(ctx),
+		Email:  email,
+		// Username: user.Username,
 		Avatar: sql.NullString{
 			String: profile.Avatar,
 		},

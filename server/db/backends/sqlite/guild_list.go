@@ -1,2 +1,3 @@
 //+build ignore
+
 package sqlite
