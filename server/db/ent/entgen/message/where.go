@@ -454,34 +454,6 @@ func HasChannelWith(preds ...predicate.Channel) predicate.Message {
 	})
 }
 
-// HasOverride applies the HasEdge predicate on the "override" edge.
-func HasOverride() predicate.Message {
-	return predicate.Message(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(OverrideTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, OverrideTable, OverrideColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasOverrideWith applies the HasEdge predicate on the "override" edge with a given conditions (other predicates).
-func HasOverrideWith(preds ...predicate.Override) predicate.Message {
-	return predicate.Message(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(OverrideInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, OverrideTable, OverrideColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasParent applies the HasEdge predicate on the "parent" edge.
 func HasParent() predicate.Message {
 	return predicate.Message(func(s *sql.Selector) {

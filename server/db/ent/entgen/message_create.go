@@ -15,7 +15,6 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/embedmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/filemessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
-	"github.com/harmony-development/legato/server/db/ent/entgen/override"
 	"github.com/harmony-development/legato/server/db/ent/entgen/textmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
@@ -115,25 +114,6 @@ func (mc *MessageCreate) SetNillableChannelID(id *uint64) *MessageCreate {
 // SetChannel sets the "channel" edge to the Channel entity.
 func (mc *MessageCreate) SetChannel(c *Channel) *MessageCreate {
 	return mc.SetChannelID(c.ID)
-}
-
-// SetOverrideID sets the "override" edge to the Override entity by ID.
-func (mc *MessageCreate) SetOverrideID(id int) *MessageCreate {
-	mc.mutation.SetOverrideID(id)
-	return mc
-}
-
-// SetNillableOverrideID sets the "override" edge to the Override entity by ID if the given value is not nil.
-func (mc *MessageCreate) SetNillableOverrideID(id *int) *MessageCreate {
-	if id != nil {
-		mc = mc.SetOverrideID(*id)
-	}
-	return mc
-}
-
-// SetOverride sets the "override" edge to the Override entity.
-func (mc *MessageCreate) SetOverride(o *Override) *MessageCreate {
-	return mc.SetOverrideID(o.ID)
 }
 
 // SetParentID sets the "parent" edge to the Message entity by ID.
@@ -401,25 +381,6 @@ func (mc *MessageCreate) createSpec() (*Message, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.channel_message = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := mc.mutation.OverrideIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   message.OverrideTable,
-			Columns: []string{message.OverrideColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: override.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := mc.mutation.ParentIDs(); len(nodes) > 0 {

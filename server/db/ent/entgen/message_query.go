@@ -16,7 +16,6 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/embedmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/filemessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
-	"github.com/harmony-development/legato/server/db/ent/entgen/override"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 	"github.com/harmony-development/legato/server/db/ent/entgen/textmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
@@ -33,7 +32,6 @@ type MessageQuery struct {
 	// eager-loading edges.
 	withUser         *UserQuery
 	withChannel      *ChannelQuery
-	withOverride     *OverrideQuery
 	withParent       *MessageQuery
 	withReplies      *MessageQuery
 	withTextmessage  *TextMessageQuery
@@ -106,28 +104,6 @@ func (mq *MessageQuery) QueryChannel() *ChannelQuery {
 			sqlgraph.From(message.Table, message.FieldID, selector),
 			sqlgraph.To(channel.Table, channel.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, message.ChannelTable, message.ChannelColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(mq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryOverride chains the current query on the "override" edge.
-func (mq *MessageQuery) QueryOverride() *OverrideQuery {
-	query := &OverrideQuery{config: mq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := mq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := mq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(message.Table, message.FieldID, selector),
-			sqlgraph.To(override.Table, override.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, message.OverrideTable, message.OverrideColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(mq.driver.Dialect(), step)
 		return fromU, nil
@@ -428,7 +404,6 @@ func (mq *MessageQuery) Clone() *MessageQuery {
 		predicates:       append([]predicate.Message{}, mq.predicates...),
 		withUser:         mq.withUser.Clone(),
 		withChannel:      mq.withChannel.Clone(),
-		withOverride:     mq.withOverride.Clone(),
 		withParent:       mq.withParent.Clone(),
 		withReplies:      mq.withReplies.Clone(),
 		withTextmessage:  mq.withTextmessage.Clone(),
@@ -459,17 +434,6 @@ func (mq *MessageQuery) WithChannel(opts ...func(*ChannelQuery)) *MessageQuery {
 		opt(query)
 	}
 	mq.withChannel = query
-	return mq
-}
-
-// WithOverride tells the query-builder to eager-load the nodes that are connected to
-// the "override" edge. The optional arguments are used to configure the query builder of the edge.
-func (mq *MessageQuery) WithOverride(opts ...func(*OverrideQuery)) *MessageQuery {
-	query := &OverrideQuery{config: mq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	mq.withOverride = query
 	return mq
 }
 
@@ -594,10 +558,9 @@ func (mq *MessageQuery) sqlAll(ctx context.Context) ([]*Message, error) {
 		nodes       = []*Message{}
 		withFKs     = mq.withFKs
 		_spec       = mq.querySpec()
-		loadedTypes = [8]bool{
+		loadedTypes = [7]bool{
 			mq.withUser != nil,
 			mq.withChannel != nil,
-			mq.withOverride != nil,
 			mq.withParent != nil,
 			mq.withReplies != nil,
 			mq.withTextmessage != nil,
@@ -680,34 +643,6 @@ func (mq *MessageQuery) sqlAll(ctx context.Context) ([]*Message, error) {
 			for i := range nodes {
 				nodes[i].Edges.Channel = n
 			}
-		}
-	}
-
-	if query := mq.withOverride; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[uint64]*Message)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-		}
-		query.withFKs = true
-		query.Where(predicate.Override(func(s *sql.Selector) {
-			s.Where(sql.InValues(message.OverrideColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			fk := n.message_override
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "message_override" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "message_override" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Override = n
 		}
 	}
 

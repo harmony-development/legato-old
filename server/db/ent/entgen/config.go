@@ -36,7 +36,6 @@ type hooks struct {
 	Invite       []ent.Hook
 	LocalUser    []ent.Hook
 	Message      []ent.Hook
-	Override     []ent.Hook
 	Permission   []ent.Hook
 	Profile      []ent.Hook
 	Role         []ent.Hook

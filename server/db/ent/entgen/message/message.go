@@ -25,8 +25,6 @@ const (
 	EdgeUser = "user"
 	// EdgeChannel holds the string denoting the channel edge name in mutations.
 	EdgeChannel = "channel"
-	// EdgeOverride holds the string denoting the override edge name in mutations.
-	EdgeOverride = "override"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
 	// EdgeReplies holds the string denoting the replies edge name in mutations.
@@ -53,13 +51,6 @@ const (
 	ChannelInverseTable = "channels"
 	// ChannelColumn is the table column denoting the channel relation/edge.
 	ChannelColumn = "channel_message"
-	// OverrideTable is the table the holds the override relation/edge.
-	OverrideTable = "overrides"
-	// OverrideInverseTable is the table name for the Override entity.
-	// It exists in this package in order to avoid circular dependency with the "override" package.
-	OverrideInverseTable = "overrides"
-	// OverrideColumn is the table column denoting the override relation/edge.
-	OverrideColumn = "message_override"
 	// ParentTable is the table the holds the parent relation/edge.
 	ParentTable = "messages"
 	// ParentColumn is the table column denoting the parent relation/edge.

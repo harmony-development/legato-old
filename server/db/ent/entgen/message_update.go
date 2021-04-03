@@ -15,7 +15,6 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/embedmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/filemessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
-	"github.com/harmony-development/legato/server/db/ent/entgen/override"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 	"github.com/harmony-development/legato/server/db/ent/entgen/textmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
@@ -142,25 +141,6 @@ func (mu *MessageUpdate) SetChannel(c *Channel) *MessageUpdate {
 	return mu.SetChannelID(c.ID)
 }
 
-// SetOverrideID sets the "override" edge to the Override entity by ID.
-func (mu *MessageUpdate) SetOverrideID(id int) *MessageUpdate {
-	mu.mutation.SetOverrideID(id)
-	return mu
-}
-
-// SetNillableOverrideID sets the "override" edge to the Override entity by ID if the given value is not nil.
-func (mu *MessageUpdate) SetNillableOverrideID(id *int) *MessageUpdate {
-	if id != nil {
-		mu = mu.SetOverrideID(*id)
-	}
-	return mu
-}
-
-// SetOverride sets the "override" edge to the Override entity.
-func (mu *MessageUpdate) SetOverride(o *Override) *MessageUpdate {
-	return mu.SetOverrideID(o.ID)
-}
-
 // SetParentID sets the "parent" edge to the Message entity by ID.
 func (mu *MessageUpdate) SetParentID(id uint64) *MessageUpdate {
 	mu.mutation.SetParentID(id)
@@ -266,12 +246,6 @@ func (mu *MessageUpdate) ClearUser() *MessageUpdate {
 // ClearChannel clears the "channel" edge to the Channel entity.
 func (mu *MessageUpdate) ClearChannel() *MessageUpdate {
 	mu.mutation.ClearChannel()
-	return mu
-}
-
-// ClearOverride clears the "override" edge to the Override entity.
-func (mu *MessageUpdate) ClearOverride() *MessageUpdate {
-	mu.mutation.ClearOverride()
 	return mu
 }
 
@@ -510,41 +484,6 @@ func (mu *MessageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUint64,
 					Column: channel.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if mu.mutation.OverrideCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   message.OverrideTable,
-			Columns: []string{message.OverrideColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: override.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := mu.mutation.OverrideIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   message.OverrideTable,
-			Columns: []string{message.OverrideColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: override.FieldID,
 				},
 			},
 		}
@@ -873,25 +812,6 @@ func (muo *MessageUpdateOne) SetChannel(c *Channel) *MessageUpdateOne {
 	return muo.SetChannelID(c.ID)
 }
 
-// SetOverrideID sets the "override" edge to the Override entity by ID.
-func (muo *MessageUpdateOne) SetOverrideID(id int) *MessageUpdateOne {
-	muo.mutation.SetOverrideID(id)
-	return muo
-}
-
-// SetNillableOverrideID sets the "override" edge to the Override entity by ID if the given value is not nil.
-func (muo *MessageUpdateOne) SetNillableOverrideID(id *int) *MessageUpdateOne {
-	if id != nil {
-		muo = muo.SetOverrideID(*id)
-	}
-	return muo
-}
-
-// SetOverride sets the "override" edge to the Override entity.
-func (muo *MessageUpdateOne) SetOverride(o *Override) *MessageUpdateOne {
-	return muo.SetOverrideID(o.ID)
-}
-
 // SetParentID sets the "parent" edge to the Message entity by ID.
 func (muo *MessageUpdateOne) SetParentID(id uint64) *MessageUpdateOne {
 	muo.mutation.SetParentID(id)
@@ -997,12 +917,6 @@ func (muo *MessageUpdateOne) ClearUser() *MessageUpdateOne {
 // ClearChannel clears the "channel" edge to the Channel entity.
 func (muo *MessageUpdateOne) ClearChannel() *MessageUpdateOne {
 	muo.mutation.ClearChannel()
-	return muo
-}
-
-// ClearOverride clears the "override" edge to the Override entity.
-func (muo *MessageUpdateOne) ClearOverride() *MessageUpdateOne {
-	muo.mutation.ClearOverride()
 	return muo
 }
 
@@ -1246,41 +1160,6 @@ func (muo *MessageUpdateOne) sqlSave(ctx context.Context) (_node *Message, err e
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUint64,
 					Column: channel.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if muo.mutation.OverrideCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   message.OverrideTable,
-			Columns: []string{message.OverrideColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: override.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := muo.mutation.OverrideIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   message.OverrideTable,
-			Columns: []string{message.OverrideColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: override.FieldID,
 				},
 			},
 		}

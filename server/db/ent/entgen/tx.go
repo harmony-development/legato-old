@@ -36,8 +36,6 @@ type Tx struct {
 	LocalUser *LocalUserClient
 	// Message is the client for interacting with the Message builders.
 	Message *MessageClient
-	// Override is the client for interacting with the Override builders.
-	Override *OverrideClient
 	// Permission is the client for interacting with the Permission builders.
 	Permission *PermissionClient
 	// Profile is the client for interacting with the Profile builders.
@@ -197,7 +195,6 @@ func (tx *Tx) init() {
 	tx.Invite = NewInviteClient(tx.config)
 	tx.LocalUser = NewLocalUserClient(tx.config)
 	tx.Message = NewMessageClient(tx.config)
-	tx.Override = NewOverrideClient(tx.config)
 	tx.Permission = NewPermissionClient(tx.config)
 	tx.Profile = NewProfileClient(tx.config)
 	tx.Role = NewRoleClient(tx.config)

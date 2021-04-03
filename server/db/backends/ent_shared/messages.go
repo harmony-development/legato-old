@@ -4,9 +4,18 @@ import (
 	"database/sql"
 	"time"
 
+	proto "github.com/golang/protobuf/proto"
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen"
 )
+
+func mustBytes(m proto.Message) []byte {
+	data, err := proto.Marshal(m)
+	if err != nil {
+		panic(err)
+	}
+	return data
+}
 
 // TODO: overrides
 func (d *database) addMessageStem(channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata) *entgen.MessageCreate {
@@ -15,10 +24,8 @@ func (d *database) addMessageStem(channelID, messageID uint64, authorID uint64, 
 		SetChannelID(channelID).
 		SetUserID(authorID).
 		SetMetadata(metadata).
-		SetActions(actions)
-	// SetOverride(d.Override.Create().
-	// 	SetReason(int64(overrides.Reason)).
-	// 	SaveX(ctx))
+		SetActions(actions).
+		SetOverrides(mustBytes(overrides))
 
 	if replyTo.Valid {
 		foo = foo.AddReplyIDs(uint64(replyTo.Int64))

@@ -42,9 +42,6 @@ type LocalUser func(*sql.Selector)
 // Message is the predicate function for message builders.
 type Message func(*sql.Selector)
 
-// Override is the predicate function for override builders.
-type Override func(*sql.Selector)
-
 // Permission is the predicate function for permission builders.
 type Permission func(*sql.Selector)
 

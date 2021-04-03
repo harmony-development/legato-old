@@ -266,28 +266,6 @@ var (
 			},
 		},
 	}
-	// OverridesColumns holds the columns for the "overrides" table.
-	OverridesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "username", Type: field.TypeString},
-		{Name: "avatar", Type: field.TypeString},
-		{Name: "reason", Type: field.TypeInt64},
-		{Name: "message_override", Type: field.TypeUint64, Unique: true, Nullable: true},
-	}
-	// OverridesTable holds the schema information for the "overrides" table.
-	OverridesTable = &schema.Table{
-		Name:       "overrides",
-		Columns:    OverridesColumns,
-		PrimaryKey: []*schema.Column{OverridesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "overrides_messages_override",
-				Columns:    []*schema.Column{OverridesColumns[4]},
-				RefColumns: []*schema.Column{MessagesColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
 	// PermissionsColumns holds the columns for the "permissions" table.
 	PermissionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint64, Increment: true},
@@ -477,7 +455,6 @@ var (
 		InvitesTable,
 		LocalUsersTable,
 		MessagesTable,
-		OverridesTable,
 		PermissionsTable,
 		ProfilesTable,
 		RolesTable,
@@ -503,7 +480,6 @@ func init() {
 	MessagesTable.ForeignKeys[2].RefTable = FileMessagesTable
 	MessagesTable.ForeignKeys[3].RefTable = EmbedMessagesTable
 	MessagesTable.ForeignKeys[4].RefTable = UsersTable
-	OverridesTable.ForeignKeys[0].RefTable = MessagesTable
 	PermissionsTable.ForeignKeys[0].RefTable = RolesTable
 	ProfilesTable.ForeignKeys[0].RefTable = UsersTable
 	SessionsTable.ForeignKeys[0].RefTable = LocalUsersTable

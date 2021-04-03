@@ -21,7 +21,6 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/invite"
 	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
-	"github.com/harmony-development/legato/server/db/ent/entgen/override"
 	"github.com/harmony-development/legato/server/db/ent/entgen/permission"
 	"github.com/harmony-development/legato/server/db/ent/entgen/profile"
 	"github.com/harmony-development/legato/server/db/ent/entgen/role"
@@ -63,8 +62,6 @@ type Client struct {
 	LocalUser *LocalUserClient
 	// Message is the client for interacting with the Message builders.
 	Message *MessageClient
-	// Override is the client for interacting with the Override builders.
-	Override *OverrideClient
 	// Permission is the client for interacting with the Permission builders.
 	Permission *PermissionClient
 	// Profile is the client for interacting with the Profile builders.
@@ -102,7 +99,6 @@ func (c *Client) init() {
 	c.Invite = NewInviteClient(c.config)
 	c.LocalUser = NewLocalUserClient(c.config)
 	c.Message = NewMessageClient(c.config)
-	c.Override = NewOverrideClient(c.config)
 	c.Permission = NewPermissionClient(c.config)
 	c.Profile = NewProfileClient(c.config)
 	c.Role = NewRoleClient(c.config)
@@ -154,7 +150,6 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Invite:       NewInviteClient(cfg),
 		LocalUser:    NewLocalUserClient(cfg),
 		Message:      NewMessageClient(cfg),
-		Override:     NewOverrideClient(cfg),
 		Permission:   NewPermissionClient(cfg),
 		Profile:      NewProfileClient(cfg),
 		Role:         NewRoleClient(cfg),
@@ -191,7 +186,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Invite:       NewInviteClient(cfg),
 		LocalUser:    NewLocalUserClient(cfg),
 		Message:      NewMessageClient(cfg),
-		Override:     NewOverrideClient(cfg),
 		Permission:   NewPermissionClient(cfg),
 		Profile:      NewProfileClient(cfg),
 		Role:         NewRoleClient(cfg),
@@ -239,7 +233,6 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Invite.Use(hooks...)
 	c.LocalUser.Use(hooks...)
 	c.Message.Use(hooks...)
-	c.Override.Use(hooks...)
 	c.Permission.Use(hooks...)
 	c.Profile.Use(hooks...)
 	c.Role.Use(hooks...)
@@ -1587,22 +1580,6 @@ func (c *MessageClient) QueryChannel(m *Message) *ChannelQuery {
 	return query
 }
 
-// QueryOverride queries the override edge of a Message.
-func (c *MessageClient) QueryOverride(m *Message) *OverrideQuery {
-	query := &OverrideQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(message.Table, message.FieldID, id),
-			sqlgraph.To(override.Table, override.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, message.OverrideTable, message.OverrideColumn),
-		)
-		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QueryParent queries the parent edge of a Message.
 func (c *MessageClient) QueryParent(m *Message) *MessageQuery {
 	query := &MessageQuery{config: c.config}
@@ -1686,110 +1663,6 @@ func (c *MessageClient) QueryEmbedmessage(m *Message) *EmbedMessageQuery {
 // Hooks returns the client hooks.
 func (c *MessageClient) Hooks() []Hook {
 	return c.hooks.Message
-}
-
-// OverrideClient is a client for the Override schema.
-type OverrideClient struct {
-	config
-}
-
-// NewOverrideClient returns a client for the Override from the given config.
-func NewOverrideClient(c config) *OverrideClient {
-	return &OverrideClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `override.Hooks(f(g(h())))`.
-func (c *OverrideClient) Use(hooks ...Hook) {
-	c.hooks.Override = append(c.hooks.Override, hooks...)
-}
-
-// Create returns a create builder for Override.
-func (c *OverrideClient) Create() *OverrideCreate {
-	mutation := newOverrideMutation(c.config, OpCreate)
-	return &OverrideCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of Override entities.
-func (c *OverrideClient) CreateBulk(builders ...*OverrideCreate) *OverrideCreateBulk {
-	return &OverrideCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Override.
-func (c *OverrideClient) Update() *OverrideUpdate {
-	mutation := newOverrideMutation(c.config, OpUpdate)
-	return &OverrideUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *OverrideClient) UpdateOne(o *Override) *OverrideUpdateOne {
-	mutation := newOverrideMutation(c.config, OpUpdateOne, withOverride(o))
-	return &OverrideUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *OverrideClient) UpdateOneID(id int) *OverrideUpdateOne {
-	mutation := newOverrideMutation(c.config, OpUpdateOne, withOverrideID(id))
-	return &OverrideUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for Override.
-func (c *OverrideClient) Delete() *OverrideDelete {
-	mutation := newOverrideMutation(c.config, OpDelete)
-	return &OverrideDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a delete builder for the given entity.
-func (c *OverrideClient) DeleteOne(o *Override) *OverrideDeleteOne {
-	return c.DeleteOneID(o.ID)
-}
-
-// DeleteOneID returns a delete builder for the given id.
-func (c *OverrideClient) DeleteOneID(id int) *OverrideDeleteOne {
-	builder := c.Delete().Where(override.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &OverrideDeleteOne{builder}
-}
-
-// Query returns a query builder for Override.
-func (c *OverrideClient) Query() *OverrideQuery {
-	return &OverrideQuery{config: c.config}
-}
-
-// Get returns a Override entity by its id.
-func (c *OverrideClient) Get(ctx context.Context, id int) (*Override, error) {
-	return c.Query().Where(override.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *OverrideClient) GetX(ctx context.Context, id int) *Override {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryMessage queries the message edge of a Override.
-func (c *OverrideClient) QueryMessage(o *Override) *MessageQuery {
-	query := &MessageQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := o.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(override.Table, override.FieldID, id),
-			sqlgraph.To(message.Table, message.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, override.MessageTable, override.MessageColumn),
-		)
-		fromV = sqlgraph.Neighbors(o.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *OverrideClient) Hooks() []Hook {
-	return c.hooks.Override
 }
 
 // PermissionClient is a client for the Permission schema.

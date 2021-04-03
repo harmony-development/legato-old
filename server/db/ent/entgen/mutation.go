@@ -19,7 +19,6 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/invite"
 	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
-	"github.com/harmony-development/legato/server/db/ent/entgen/override"
 	"github.com/harmony-development/legato/server/db/ent/entgen/permission"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 	"github.com/harmony-development/legato/server/db/ent/entgen/profile"
@@ -52,7 +51,6 @@ const (
 	TypeInvite       = "Invite"
 	TypeLocalUser    = "LocalUser"
 	TypeMessage      = "Message"
-	TypeOverride     = "Override"
 	TypePermission   = "Permission"
 	TypeProfile      = "Profile"
 	TypeRole         = "Role"
@@ -5214,8 +5212,6 @@ type MessageMutation struct {
 	cleareduser         bool
 	channel             *uint64
 	clearedchannel      bool
-	override            *int
-	clearedoverride     bool
 	parent              *uint64
 	clearedparent       bool
 	replies             map[uint64]struct{}
@@ -5625,45 +5621,6 @@ func (m *MessageMutation) ChannelIDs() (ids []uint64) {
 func (m *MessageMutation) ResetChannel() {
 	m.channel = nil
 	m.clearedchannel = false
-}
-
-// SetOverrideID sets the "override" edge to the Override entity by id.
-func (m *MessageMutation) SetOverrideID(id int) {
-	m.override = &id
-}
-
-// ClearOverride clears the "override" edge to the Override entity.
-func (m *MessageMutation) ClearOverride() {
-	m.clearedoverride = true
-}
-
-// OverrideCleared returns if the "override" edge to the Override entity was cleared.
-func (m *MessageMutation) OverrideCleared() bool {
-	return m.clearedoverride
-}
-
-// OverrideID returns the "override" edge ID in the mutation.
-func (m *MessageMutation) OverrideID() (id int, exists bool) {
-	if m.override != nil {
-		return *m.override, true
-	}
-	return
-}
-
-// OverrideIDs returns the "override" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// OverrideID instead. It exists only for internal usage by the builders.
-func (m *MessageMutation) OverrideIDs() (ids []int) {
-	if id := m.override; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetOverride resets all changes to the "override" edge.
-func (m *MessageMutation) ResetOverride() {
-	m.override = nil
-	m.clearedoverride = false
 }
 
 // SetParentID sets the "parent" edge to the Message entity by id.
@@ -6083,15 +6040,12 @@ func (m *MessageMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *MessageMutation) AddedEdges() []string {
-	edges := make([]string, 0, 8)
+	edges := make([]string, 0, 7)
 	if m.user != nil {
 		edges = append(edges, message.EdgeUser)
 	}
 	if m.channel != nil {
 		edges = append(edges, message.EdgeChannel)
-	}
-	if m.override != nil {
-		edges = append(edges, message.EdgeOverride)
 	}
 	if m.parent != nil {
 		edges = append(edges, message.EdgeParent)
@@ -6123,10 +6077,6 @@ func (m *MessageMutation) AddedIDs(name string) []ent.Value {
 		if id := m.channel; id != nil {
 			return []ent.Value{*id}
 		}
-	case message.EdgeOverride:
-		if id := m.override; id != nil {
-			return []ent.Value{*id}
-		}
 	case message.EdgeParent:
 		if id := m.parent; id != nil {
 			return []ent.Value{*id}
@@ -6155,7 +6105,7 @@ func (m *MessageMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *MessageMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 8)
+	edges := make([]string, 0, 7)
 	if m.removedreplies != nil {
 		edges = append(edges, message.EdgeReplies)
 	}
@@ -6178,15 +6128,12 @@ func (m *MessageMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *MessageMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 8)
+	edges := make([]string, 0, 7)
 	if m.cleareduser {
 		edges = append(edges, message.EdgeUser)
 	}
 	if m.clearedchannel {
 		edges = append(edges, message.EdgeChannel)
-	}
-	if m.clearedoverride {
-		edges = append(edges, message.EdgeOverride)
 	}
 	if m.clearedparent {
 		edges = append(edges, message.EdgeParent)
@@ -6214,8 +6161,6 @@ func (m *MessageMutation) EdgeCleared(name string) bool {
 		return m.cleareduser
 	case message.EdgeChannel:
 		return m.clearedchannel
-	case message.EdgeOverride:
-		return m.clearedoverride
 	case message.EdgeParent:
 		return m.clearedparent
 	case message.EdgeReplies:
@@ -6239,9 +6184,6 @@ func (m *MessageMutation) ClearEdge(name string) error {
 		return nil
 	case message.EdgeChannel:
 		m.ClearChannel()
-		return nil
-	case message.EdgeOverride:
-		m.ClearOverride()
 		return nil
 	case message.EdgeParent:
 		m.ClearParent()
@@ -6269,9 +6211,6 @@ func (m *MessageMutation) ResetEdge(name string) error {
 	case message.EdgeChannel:
 		m.ResetChannel()
 		return nil
-	case message.EdgeOverride:
-		m.ResetOverride()
-		return nil
 	case message.EdgeParent:
 		m.ResetParent()
 		return nil
@@ -6289,506 +6228,6 @@ func (m *MessageMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Message edge %s", name)
-}
-
-// OverrideMutation represents an operation that mutates the Override nodes in the graph.
-type OverrideMutation struct {
-	config
-	op             Op
-	typ            string
-	id             *int
-	username       *string
-	avatar         *string
-	reason         *int64
-	addreason      *int64
-	clearedFields  map[string]struct{}
-	message        *uint64
-	clearedmessage bool
-	done           bool
-	oldValue       func(context.Context) (*Override, error)
-	predicates     []predicate.Override
-}
-
-var _ ent.Mutation = (*OverrideMutation)(nil)
-
-// overrideOption allows management of the mutation configuration using functional options.
-type overrideOption func(*OverrideMutation)
-
-// newOverrideMutation creates new mutation for the Override entity.
-func newOverrideMutation(c config, op Op, opts ...overrideOption) *OverrideMutation {
-	m := &OverrideMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeOverride,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withOverrideID sets the ID field of the mutation.
-func withOverrideID(id int) overrideOption {
-	return func(m *OverrideMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *Override
-		)
-		m.oldValue = func(ctx context.Context) (*Override, error) {
-			once.Do(func() {
-				if m.done {
-					err = fmt.Errorf("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().Override.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withOverride sets the old Override of the mutation.
-func withOverride(node *Override) overrideOption {
-	return func(m *OverrideMutation) {
-		m.oldValue = func(context.Context) (*Override, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m OverrideMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m OverrideMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, fmt.Errorf("entgen: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
-func (m *OverrideMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// SetUsername sets the "username" field.
-func (m *OverrideMutation) SetUsername(s string) {
-	m.username = &s
-}
-
-// Username returns the value of the "username" field in the mutation.
-func (m *OverrideMutation) Username() (r string, exists bool) {
-	v := m.username
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUsername returns the old "username" field's value of the Override entity.
-// If the Override object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *OverrideMutation) OldUsername(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUsername is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUsername requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUsername: %w", err)
-	}
-	return oldValue.Username, nil
-}
-
-// ResetUsername resets all changes to the "username" field.
-func (m *OverrideMutation) ResetUsername() {
-	m.username = nil
-}
-
-// SetAvatar sets the "avatar" field.
-func (m *OverrideMutation) SetAvatar(s string) {
-	m.avatar = &s
-}
-
-// Avatar returns the value of the "avatar" field in the mutation.
-func (m *OverrideMutation) Avatar() (r string, exists bool) {
-	v := m.avatar
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldAvatar returns the old "avatar" field's value of the Override entity.
-// If the Override object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *OverrideMutation) OldAvatar(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldAvatar is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldAvatar requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAvatar: %w", err)
-	}
-	return oldValue.Avatar, nil
-}
-
-// ResetAvatar resets all changes to the "avatar" field.
-func (m *OverrideMutation) ResetAvatar() {
-	m.avatar = nil
-}
-
-// SetReason sets the "reason" field.
-func (m *OverrideMutation) SetReason(i int64) {
-	m.reason = &i
-	m.addreason = nil
-}
-
-// Reason returns the value of the "reason" field in the mutation.
-func (m *OverrideMutation) Reason() (r int64, exists bool) {
-	v := m.reason
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldReason returns the old "reason" field's value of the Override entity.
-// If the Override object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *OverrideMutation) OldReason(ctx context.Context) (v int64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldReason is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldReason requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldReason: %w", err)
-	}
-	return oldValue.Reason, nil
-}
-
-// AddReason adds i to the "reason" field.
-func (m *OverrideMutation) AddReason(i int64) {
-	if m.addreason != nil {
-		*m.addreason += i
-	} else {
-		m.addreason = &i
-	}
-}
-
-// AddedReason returns the value that was added to the "reason" field in this mutation.
-func (m *OverrideMutation) AddedReason() (r int64, exists bool) {
-	v := m.addreason
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetReason resets all changes to the "reason" field.
-func (m *OverrideMutation) ResetReason() {
-	m.reason = nil
-	m.addreason = nil
-}
-
-// SetMessageID sets the "message" edge to the Message entity by id.
-func (m *OverrideMutation) SetMessageID(id uint64) {
-	m.message = &id
-}
-
-// ClearMessage clears the "message" edge to the Message entity.
-func (m *OverrideMutation) ClearMessage() {
-	m.clearedmessage = true
-}
-
-// MessageCleared returns if the "message" edge to the Message entity was cleared.
-func (m *OverrideMutation) MessageCleared() bool {
-	return m.clearedmessage
-}
-
-// MessageID returns the "message" edge ID in the mutation.
-func (m *OverrideMutation) MessageID() (id uint64, exists bool) {
-	if m.message != nil {
-		return *m.message, true
-	}
-	return
-}
-
-// MessageIDs returns the "message" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// MessageID instead. It exists only for internal usage by the builders.
-func (m *OverrideMutation) MessageIDs() (ids []uint64) {
-	if id := m.message; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetMessage resets all changes to the "message" edge.
-func (m *OverrideMutation) ResetMessage() {
-	m.message = nil
-	m.clearedmessage = false
-}
-
-// Op returns the operation name.
-func (m *OverrideMutation) Op() Op {
-	return m.op
-}
-
-// Type returns the node type of this mutation (Override).
-func (m *OverrideMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *OverrideMutation) Fields() []string {
-	fields := make([]string, 0, 3)
-	if m.username != nil {
-		fields = append(fields, override.FieldUsername)
-	}
-	if m.avatar != nil {
-		fields = append(fields, override.FieldAvatar)
-	}
-	if m.reason != nil {
-		fields = append(fields, override.FieldReason)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *OverrideMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case override.FieldUsername:
-		return m.Username()
-	case override.FieldAvatar:
-		return m.Avatar()
-	case override.FieldReason:
-		return m.Reason()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *OverrideMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case override.FieldUsername:
-		return m.OldUsername(ctx)
-	case override.FieldAvatar:
-		return m.OldAvatar(ctx)
-	case override.FieldReason:
-		return m.OldReason(ctx)
-	}
-	return nil, fmt.Errorf("unknown Override field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *OverrideMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case override.FieldUsername:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUsername(v)
-		return nil
-	case override.FieldAvatar:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAvatar(v)
-		return nil
-	case override.FieldReason:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetReason(v)
-		return nil
-	}
-	return fmt.Errorf("unknown Override field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *OverrideMutation) AddedFields() []string {
-	var fields []string
-	if m.addreason != nil {
-		fields = append(fields, override.FieldReason)
-	}
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *OverrideMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case override.FieldReason:
-		return m.AddedReason()
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *OverrideMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	case override.FieldReason:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddReason(v)
-		return nil
-	}
-	return fmt.Errorf("unknown Override numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *OverrideMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *OverrideMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *OverrideMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown Override nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *OverrideMutation) ResetField(name string) error {
-	switch name {
-	case override.FieldUsername:
-		m.ResetUsername()
-		return nil
-	case override.FieldAvatar:
-		m.ResetAvatar()
-		return nil
-	case override.FieldReason:
-		m.ResetReason()
-		return nil
-	}
-	return fmt.Errorf("unknown Override field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *OverrideMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.message != nil {
-		edges = append(edges, override.EdgeMessage)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *OverrideMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case override.EdgeMessage:
-		if id := m.message; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *OverrideMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *OverrideMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *OverrideMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedmessage {
-		edges = append(edges, override.EdgeMessage)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *OverrideMutation) EdgeCleared(name string) bool {
-	switch name {
-	case override.EdgeMessage:
-		return m.clearedmessage
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *OverrideMutation) ClearEdge(name string) error {
-	switch name {
-	case override.EdgeMessage:
-		m.ClearMessage()
-		return nil
-	}
-	return fmt.Errorf("unknown Override unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *OverrideMutation) ResetEdge(name string) error {
-	switch name {
-	case override.EdgeMessage:
-		m.ResetMessage()
-		return nil
-	}
-	return fmt.Errorf("unknown Override edge %s", name)
 }
 
 // PermissionMutation represents an operation that mutates the Permission nodes in the graph.

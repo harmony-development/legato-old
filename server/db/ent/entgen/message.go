@@ -14,7 +14,6 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/embedmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/filemessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
-	"github.com/harmony-development/legato/server/db/ent/entgen/override"
 	"github.com/harmony-development/legato/server/db/ent/entgen/textmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
@@ -50,8 +49,6 @@ type MessageEdges struct {
 	User *User `json:"user,omitempty"`
 	// Channel holds the value of the channel edge.
 	Channel *Channel `json:"channel,omitempty"`
-	// Override holds the value of the override edge.
-	Override *Override `json:"override,omitempty"`
 	// Parent holds the value of the parent edge.
 	Parent *Message `json:"parent,omitempty"`
 	// Replies holds the value of the replies edge.
@@ -64,7 +61,7 @@ type MessageEdges struct {
 	Embedmessage *EmbedMessage `json:"embedmessage,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [8]bool
+	loadedTypes [7]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -95,24 +92,10 @@ func (e MessageEdges) ChannelOrErr() (*Channel, error) {
 	return nil, &NotLoadedError{edge: "channel"}
 }
 
-// OverrideOrErr returns the Override value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e MessageEdges) OverrideOrErr() (*Override, error) {
-	if e.loadedTypes[2] {
-		if e.Override == nil {
-			// The edge override was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: override.Label}
-		}
-		return e.Override, nil
-	}
-	return nil, &NotLoadedError{edge: "override"}
-}
-
 // ParentOrErr returns the Parent value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e MessageEdges) ParentOrErr() (*Message, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[2] {
 		if e.Parent == nil {
 			// The edge parent was loaded in eager-loading,
 			// but was not found.
@@ -126,7 +109,7 @@ func (e MessageEdges) ParentOrErr() (*Message, error) {
 // RepliesOrErr returns the Replies value or an error if the edge
 // was not loaded in eager-loading.
 func (e MessageEdges) RepliesOrErr() ([]*Message, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[3] {
 		return e.Replies, nil
 	}
 	return nil, &NotLoadedError{edge: "replies"}
@@ -135,7 +118,7 @@ func (e MessageEdges) RepliesOrErr() ([]*Message, error) {
 // TextmessageOrErr returns the Textmessage value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e MessageEdges) TextmessageOrErr() (*TextMessage, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[4] {
 		if e.Textmessage == nil {
 			// The edge textmessage was loaded in eager-loading,
 			// but was not found.
@@ -149,7 +132,7 @@ func (e MessageEdges) TextmessageOrErr() (*TextMessage, error) {
 // FilemessageOrErr returns the Filemessage value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e MessageEdges) FilemessageOrErr() (*FileMessage, error) {
-	if e.loadedTypes[6] {
+	if e.loadedTypes[5] {
 		if e.Filemessage == nil {
 			// The edge filemessage was loaded in eager-loading,
 			// but was not found.
@@ -163,7 +146,7 @@ func (e MessageEdges) FilemessageOrErr() (*FileMessage, error) {
 // EmbedmessageOrErr returns the Embedmessage value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e MessageEdges) EmbedmessageOrErr() (*EmbedMessage, error) {
-	if e.loadedTypes[7] {
+	if e.loadedTypes[6] {
 		if e.Embedmessage == nil {
 			// The edge embedmessage was loaded in eager-loading,
 			// but was not found.
@@ -300,11 +283,6 @@ func (m *Message) QueryUser() *UserQuery {
 // QueryChannel queries the "channel" edge of the Message entity.
 func (m *Message) QueryChannel() *ChannelQuery {
 	return (&MessageClient{config: m.config}).QueryChannel(m)
-}
-
-// QueryOverride queries the "override" edge of the Message entity.
-func (m *Message) QueryOverride() *OverrideQuery {
-	return (&MessageClient{config: m.config}).QueryOverride(m)
 }
 
 // QueryParent queries the "parent" edge of the Message entity.

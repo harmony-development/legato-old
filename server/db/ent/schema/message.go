@@ -41,9 +41,6 @@ func (Message) Edges() []ent.Edge {
 			Ref("message").
 			Unique(),
 		edge.
-			To("override", Override.Type).
-			Unique(),
-		edge.
 			To("replies", Message.Type).
 			From("parent").
 			Unique(),
