@@ -2,8 +2,8 @@ package schema
 
 import (
 	"entgo.io/ent"
-	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // FileHash holds the schema definition for the FileHash entity.
@@ -14,13 +14,18 @@ type FileHash struct {
 // Fields of the FileHash.
 func (FileHash) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("hash").Unique(),
+		field.Bytes("hash"),
+		field.String("fileid"),
+	}
+}
+
+func (FileHash) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("hash").Unique(),
 	}
 }
 
 // Edges of the FileHash.
 func (FileHash) Edges() []ent.Edge {
-	return []ent.Edge{
-		edge.To("file", File.Type).Unique(),
-	}
+	return nil
 }

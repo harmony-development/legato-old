@@ -23,6 +23,8 @@ const (
 	EdgeEmotepack = "emotepack"
 	// EdgeCreatedpacks holds the string denoting the createdpacks edge name in mutations.
 	EdgeCreatedpacks = "createdpacks"
+	// EdgeListentry holds the string denoting the listentry edge name in mutations.
+	EdgeListentry = "listentry"
 	// EdgeRole holds the string denoting the role edge name in mutations.
 	EdgeRole = "role"
 	// Table holds the table name of the user in the database.
@@ -81,6 +83,13 @@ const (
 	CreatedpacksInverseTable = "emote_packs"
 	// CreatedpacksColumn is the table column denoting the createdpacks relation/edge.
 	CreatedpacksColumn = "user_createdpacks"
+	// ListentryTable is the table the holds the listentry relation/edge.
+	ListentryTable = "guild_list_entries"
+	// ListentryInverseTable is the table name for the GuildListEntry entity.
+	// It exists in this package in order to avoid circular dependency with the "guildlistentry" package.
+	ListentryInverseTable = "guild_list_entries"
+	// ListentryColumn is the table column denoting the listentry relation/edge.
+	ListentryColumn = "user_listentry"
 	// RoleTable is the table the holds the role relation/edge. The primary key declared below.
 	RoleTable = "role_members"
 	// RoleInverseTable is the table name for the Role entity.

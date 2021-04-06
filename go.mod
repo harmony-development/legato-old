@@ -31,6 +31,7 @@ require (
 	github.com/labstack/echo/v4 v4.2.0
 	github.com/lib/pq v1.10.0
 	github.com/magefile/mage v1.11.0 // indirect
+	github.com/matryer/moq v0.2.1 // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mattn/go-sqlite3 v1.14.6
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect

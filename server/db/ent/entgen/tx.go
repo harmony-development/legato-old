@@ -30,6 +30,8 @@ type Tx struct {
 	ForeignUser *ForeignUserClient
 	// Guild is the client for interacting with the Guild builders.
 	Guild *GuildClient
+	// GuildListEntry is the client for interacting with the GuildListEntry builders.
+	GuildListEntry *GuildListEntryClient
 	// Invite is the client for interacting with the Invite builders.
 	Invite *InviteClient
 	// LocalUser is the client for interacting with the LocalUser builders.
@@ -192,6 +194,7 @@ func (tx *Tx) init() {
 	tx.FileMessage = NewFileMessageClient(tx.config)
 	tx.ForeignUser = NewForeignUserClient(tx.config)
 	tx.Guild = NewGuildClient(tx.config)
+	tx.GuildListEntry = NewGuildListEntryClient(tx.config)
 	tx.Invite = NewInviteClient(tx.config)
 	tx.LocalUser = NewLocalUserClient(tx.config)
 	tx.Message = NewMessageClient(tx.config)

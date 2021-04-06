@@ -283,12 +283,12 @@ func (fuq *ForeignUserQuery) WithUser(opts ...func(*UserQuery)) *ForeignUserQuer
 // Example:
 //
 //	var v []struct {
-//		Username string `json:"username,omitempty"`
+//		Foreignid uint64 `json:"foreignid,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.ForeignUser.Query().
-//		GroupBy(foreignuser.FieldUsername).
+//		GroupBy(foreignuser.FieldForeignid).
 //		Aggregate(entgen.Count()).
 //		Scan(ctx, &v)
 //
@@ -310,11 +310,11 @@ func (fuq *ForeignUserQuery) GroupBy(field string, fields ...string) *ForeignUse
 // Example:
 //
 //	var v []struct {
-//		Username string `json:"username,omitempty"`
+//		Foreignid uint64 `json:"foreignid,omitempty"`
 //	}
 //
 //	client.ForeignUser.Query().
-//		Select(foreignuser.FieldUsername).
+//		Select(foreignuser.FieldForeignid).
 //		Scan(ctx, &v)
 //
 func (fuq *ForeignUserQuery) Select(field string, fields ...string) *ForeignUserSelect {

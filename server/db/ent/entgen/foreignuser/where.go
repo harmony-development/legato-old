@@ -91,17 +91,10 @@ func IDLTE(id int) predicate.ForeignUser {
 	})
 }
 
-// Username applies equality check predicate on the "username" field. It's identical to UsernameEQ.
-func Username(v string) predicate.ForeignUser {
+// Foreignid applies equality check predicate on the "foreignid" field. It's identical to ForeignidEQ.
+func Foreignid(v uint64) predicate.ForeignUser {
 	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUsername), v))
-	})
-}
-
-// Picture applies equality check predicate on the "picture" field. It's identical to PictureEQ.
-func Picture(v string) predicate.ForeignUser {
-	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPicture), v))
+		s.Where(sql.EQ(s.C(FieldForeignid), v))
 	})
 }
 
@@ -112,22 +105,22 @@ func Host(v string) predicate.ForeignUser {
 	})
 }
 
-// UsernameEQ applies the EQ predicate on the "username" field.
-func UsernameEQ(v string) predicate.ForeignUser {
+// ForeignidEQ applies the EQ predicate on the "foreignid" field.
+func ForeignidEQ(v uint64) predicate.ForeignUser {
 	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUsername), v))
+		s.Where(sql.EQ(s.C(FieldForeignid), v))
 	})
 }
 
-// UsernameNEQ applies the NEQ predicate on the "username" field.
-func UsernameNEQ(v string) predicate.ForeignUser {
+// ForeignidNEQ applies the NEQ predicate on the "foreignid" field.
+func ForeignidNEQ(v uint64) predicate.ForeignUser {
 	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUsername), v))
+		s.Where(sql.NEQ(s.C(FieldForeignid), v))
 	})
 }
 
-// UsernameIn applies the In predicate on the "username" field.
-func UsernameIn(vs ...string) predicate.ForeignUser {
+// ForeignidIn applies the In predicate on the "foreignid" field.
+func ForeignidIn(vs ...uint64) predicate.ForeignUser {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -139,12 +132,12 @@ func UsernameIn(vs ...string) predicate.ForeignUser {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldUsername), v...))
+		s.Where(sql.In(s.C(FieldForeignid), v...))
 	})
 }
 
-// UsernameNotIn applies the NotIn predicate on the "username" field.
-func UsernameNotIn(vs ...string) predicate.ForeignUser {
+// ForeignidNotIn applies the NotIn predicate on the "foreignid" field.
+func ForeignidNotIn(vs ...uint64) predicate.ForeignUser {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -156,181 +149,35 @@ func UsernameNotIn(vs ...string) predicate.ForeignUser {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldUsername), v...))
+		s.Where(sql.NotIn(s.C(FieldForeignid), v...))
 	})
 }
 
-// UsernameGT applies the GT predicate on the "username" field.
-func UsernameGT(v string) predicate.ForeignUser {
+// ForeignidGT applies the GT predicate on the "foreignid" field.
+func ForeignidGT(v uint64) predicate.ForeignUser {
 	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldUsername), v))
+		s.Where(sql.GT(s.C(FieldForeignid), v))
 	})
 }
 
-// UsernameGTE applies the GTE predicate on the "username" field.
-func UsernameGTE(v string) predicate.ForeignUser {
+// ForeignidGTE applies the GTE predicate on the "foreignid" field.
+func ForeignidGTE(v uint64) predicate.ForeignUser {
 	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldUsername), v))
+		s.Where(sql.GTE(s.C(FieldForeignid), v))
 	})
 }
 
-// UsernameLT applies the LT predicate on the "username" field.
-func UsernameLT(v string) predicate.ForeignUser {
+// ForeignidLT applies the LT predicate on the "foreignid" field.
+func ForeignidLT(v uint64) predicate.ForeignUser {
 	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldUsername), v))
+		s.Where(sql.LT(s.C(FieldForeignid), v))
 	})
 }
 
-// UsernameLTE applies the LTE predicate on the "username" field.
-func UsernameLTE(v string) predicate.ForeignUser {
+// ForeignidLTE applies the LTE predicate on the "foreignid" field.
+func ForeignidLTE(v uint64) predicate.ForeignUser {
 	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldUsername), v))
-	})
-}
-
-// UsernameContains applies the Contains predicate on the "username" field.
-func UsernameContains(v string) predicate.ForeignUser {
-	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldUsername), v))
-	})
-}
-
-// UsernameHasPrefix applies the HasPrefix predicate on the "username" field.
-func UsernameHasPrefix(v string) predicate.ForeignUser {
-	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldUsername), v))
-	})
-}
-
-// UsernameHasSuffix applies the HasSuffix predicate on the "username" field.
-func UsernameHasSuffix(v string) predicate.ForeignUser {
-	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldUsername), v))
-	})
-}
-
-// UsernameEqualFold applies the EqualFold predicate on the "username" field.
-func UsernameEqualFold(v string) predicate.ForeignUser {
-	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldUsername), v))
-	})
-}
-
-// UsernameContainsFold applies the ContainsFold predicate on the "username" field.
-func UsernameContainsFold(v string) predicate.ForeignUser {
-	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldUsername), v))
-	})
-}
-
-// PictureEQ applies the EQ predicate on the "picture" field.
-func PictureEQ(v string) predicate.ForeignUser {
-	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPicture), v))
-	})
-}
-
-// PictureNEQ applies the NEQ predicate on the "picture" field.
-func PictureNEQ(v string) predicate.ForeignUser {
-	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldPicture), v))
-	})
-}
-
-// PictureIn applies the In predicate on the "picture" field.
-func PictureIn(vs ...string) predicate.ForeignUser {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.ForeignUser(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldPicture), v...))
-	})
-}
-
-// PictureNotIn applies the NotIn predicate on the "picture" field.
-func PictureNotIn(vs ...string) predicate.ForeignUser {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.ForeignUser(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldPicture), v...))
-	})
-}
-
-// PictureGT applies the GT predicate on the "picture" field.
-func PictureGT(v string) predicate.ForeignUser {
-	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldPicture), v))
-	})
-}
-
-// PictureGTE applies the GTE predicate on the "picture" field.
-func PictureGTE(v string) predicate.ForeignUser {
-	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldPicture), v))
-	})
-}
-
-// PictureLT applies the LT predicate on the "picture" field.
-func PictureLT(v string) predicate.ForeignUser {
-	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldPicture), v))
-	})
-}
-
-// PictureLTE applies the LTE predicate on the "picture" field.
-func PictureLTE(v string) predicate.ForeignUser {
-	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldPicture), v))
-	})
-}
-
-// PictureContains applies the Contains predicate on the "picture" field.
-func PictureContains(v string) predicate.ForeignUser {
-	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldPicture), v))
-	})
-}
-
-// PictureHasPrefix applies the HasPrefix predicate on the "picture" field.
-func PictureHasPrefix(v string) predicate.ForeignUser {
-	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldPicture), v))
-	})
-}
-
-// PictureHasSuffix applies the HasSuffix predicate on the "picture" field.
-func PictureHasSuffix(v string) predicate.ForeignUser {
-	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldPicture), v))
-	})
-}
-
-// PictureEqualFold applies the EqualFold predicate on the "picture" field.
-func PictureEqualFold(v string) predicate.ForeignUser {
-	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldPicture), v))
-	})
-}
-
-// PictureContainsFold applies the ContainsFold predicate on the "picture" field.
-func PictureContainsFold(v string) predicate.ForeignUser {
-	return predicate.ForeignUser(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldPicture), v))
+		s.Where(sql.LTE(s.C(FieldForeignid), v))
 	})
 }
 

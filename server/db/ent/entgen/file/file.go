@@ -13,17 +13,8 @@ const (
 	FieldContenttype = "contenttype"
 	// FieldSize holds the string denoting the size field in the database.
 	FieldSize = "size"
-	// EdgeFilehash holds the string denoting the filehash edge name in mutations.
-	EdgeFilehash = "filehash"
 	// Table holds the table name of the file in the database.
 	Table = "files"
-	// FilehashTable is the table the holds the filehash relation/edge.
-	FilehashTable = "files"
-	// FilehashInverseTable is the table name for the FileHash entity.
-	// It exists in this package in order to avoid circular dependency with the "filehash" package.
-	FilehashInverseTable = "file_hashes"
-	// FilehashColumn is the table column denoting the filehash relation/edge.
-	FilehashColumn = "file_hash_file"
 )
 
 // Columns holds all SQL columns for file fields.
@@ -34,21 +25,10 @@ var Columns = []string{
 	FieldSize,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "files"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"file_hash_file",
-}
-
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}

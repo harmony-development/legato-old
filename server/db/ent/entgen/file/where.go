@@ -4,7 +4,6 @@ package file
 
 import (
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 )
 
@@ -407,34 +406,6 @@ func SizeLT(v int) predicate.File {
 func SizeLTE(v int) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldSize), v))
-	})
-}
-
-// HasFilehash applies the HasEdge predicate on the "filehash" edge.
-func HasFilehash() predicate.File {
-	return predicate.File(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(FilehashTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, FilehashTable, FilehashColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasFilehashWith applies the HasEdge predicate on the "filehash" edge with a given conditions (other predicates).
-func HasFilehashWith(preds ...predicate.FileHash) predicate.File {
-	return predicate.File(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(FilehashInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, FilehashTable, FilehashColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
 	})
 }
 

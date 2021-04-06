@@ -1,12 +1,13 @@
 package ent_shared
 
 import (
-	"database/sql"
 	"time"
 
 	proto "github.com/golang/protobuf/proto"
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen"
+	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
+	"github.com/harmony-development/legato/server/db/ent/entgen/message"
 )
 
 func mustBytes(m proto.Message) []byte {
@@ -17,9 +18,9 @@ func mustBytes(m proto.Message) []byte {
 	return data
 }
 
-// TODO: overrides
-func (d *database) addMessageStem(channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata) *entgen.MessageCreate {
-	foo := d.Message.Create().
+// TODO: overrides, actions
+func (d *database) addMessageStem(channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata) *entgen.MessageCreate {
+	msg := d.Message.Create().
 		SetID(messageID).
 		SetChannelID(channelID).
 		SetUserID(authorID).
@@ -27,14 +28,14 @@ func (d *database) addMessageStem(channelID, messageID uint64, authorID uint64, 
 		SetActions(actions).
 		SetOverrides(mustBytes(overrides))
 
-	if replyTo.Valid {
-		foo = foo.AddReplyIDs(uint64(replyTo.Int64))
+	if replyTo != nil {
+		msg.AddReplyIDs(*replyTo)
 	}
 
-	return foo
+	return msg
 }
 
-func (d *database) AddTextMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata, content string) (t time.Time, e error) {
+func (d *database) AddTextMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, content string) (t time.Time, e error) {
 	defer doRecovery(&e)
 
 	msg := d.addMessageStem(channelID, messageID, authorID, actions, overrides, replyTo, metadata).SaveX(ctx)
@@ -43,9 +44,50 @@ func (d *database) AddTextMessage(guildID, channelID, messageID uint64, authorID
 	return msg.Createdat, nil
 }
 
-func (d *database) AddFilesMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata, files []*harmonytypesv1.Attachment) (t time.Time, e error) {
+func (d *database) AddFilesMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, files []*harmonytypesv1.Attachment) (t time.Time, e error) {
 	panic("unimplemented")
 }
-func (d *database) AddEmbedMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata, embeds []*harmonytypesv1.Embed) (t time.Time, e error) {
+func (d *database) AddEmbedMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, embeds []*harmonytypesv1.Embed) (t time.Time, e error) {
 	panic("unimplemented")
+}
+
+func (d *database) DeleteMessage(messageID uint64) (err error) {
+	defer doRecovery(&err)
+
+	d.Message.DeleteOneID(messageID).ExecX(ctx)
+
+	return
+}
+
+func (d *database) GetMessage(messageID uint64) (msg *entgen.Message, err error) {
+	defer doRecovery(&err)
+	msg = d.Message.GetX(ctx, messageID)
+	return
+}
+
+func (d *database) GetMessages(channelID uint64) (msgs []*entgen.Message, err error) {
+	defer doRecovery(&err)
+	msgs = d.Channel.
+		GetX(ctx, channelID).
+		QueryMessage().
+		Limit(50).
+		AllX(ctx)
+	return
+}
+
+func (d *database) GetMessagesBefore(channelID uint64, date time.Time) (msgs []*entgen.Message, err error) {
+	defer doRecovery(&err)
+	msgs = d.Message.
+		Query().
+		Limit(50).
+		Where(
+			message.And(
+				message.CreatedatLT(date),
+				message.HasChannelWith(
+					channel.ID(channelID),
+				),
+			),
+		).
+		AllX(ctx)
+	return
 }

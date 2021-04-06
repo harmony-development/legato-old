@@ -27,7 +27,8 @@ type Role struct {
 	Position string `json:"position,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RoleQuery when eager-loading is set.
-	Edges RoleEdges `json:"edges"`
+	Edges      RoleEdges `json:"edges"`
+	guild_role *uint64
 }
 
 // RoleEdges holds the relations/edges for other nodes in the graph.
@@ -70,6 +71,8 @@ func (*Role) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = &sql.NullInt64{}
 		case role.FieldName, role.FieldPosition:
 			values[i] = &sql.NullString{}
+		case role.ForeignKeys[0]: // guild_role
+			values[i] = &sql.NullInt64{}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Role", columns[i])
 		}
@@ -120,6 +123,13 @@ func (r *Role) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field position", values[i])
 			} else if value.Valid {
 				r.Position = value.String
+			}
+		case role.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field guild_role", value)
+			} else if value.Valid {
+				r.guild_role = new(uint64)
+				*r.guild_role = uint64(value.Int64)
 			}
 		}
 	}

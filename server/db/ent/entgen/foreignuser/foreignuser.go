@@ -7,10 +7,8 @@ const (
 	Label = "foreign_user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldUsername holds the string denoting the username field in the database.
-	FieldUsername = "username"
-	// FieldPicture holds the string denoting the picture field in the database.
-	FieldPicture = "picture"
+	// FieldForeignid holds the string denoting the foreignid field in the database.
+	FieldForeignid = "foreignid"
 	// FieldHost holds the string denoting the host field in the database.
 	FieldHost = "host"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -29,8 +27,7 @@ const (
 // Columns holds all SQL columns for foreignuser fields.
 var Columns = []string{
 	FieldID,
-	FieldUsername,
-	FieldPicture,
+	FieldForeignid,
 	FieldHost,
 }
 

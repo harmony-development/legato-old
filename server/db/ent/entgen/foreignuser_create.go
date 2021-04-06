@@ -20,15 +20,9 @@ type ForeignUserCreate struct {
 	hooks    []Hook
 }
 
-// SetUsername sets the "username" field.
-func (fuc *ForeignUserCreate) SetUsername(s string) *ForeignUserCreate {
-	fuc.mutation.SetUsername(s)
-	return fuc
-}
-
-// SetPicture sets the "picture" field.
-func (fuc *ForeignUserCreate) SetPicture(s string) *ForeignUserCreate {
-	fuc.mutation.SetPicture(s)
+// SetForeignid sets the "foreignid" field.
+func (fuc *ForeignUserCreate) SetForeignid(u uint64) *ForeignUserCreate {
+	fuc.mutation.SetForeignid(u)
 	return fuc
 }
 
@@ -100,11 +94,8 @@ func (fuc *ForeignUserCreate) SaveX(ctx context.Context) *ForeignUser {
 
 // check runs all checks and user-defined validators on the builder.
 func (fuc *ForeignUserCreate) check() error {
-	if _, ok := fuc.mutation.Username(); !ok {
-		return &ValidationError{Name: "username", err: errors.New("entgen: missing required field \"username\"")}
-	}
-	if _, ok := fuc.mutation.Picture(); !ok {
-		return &ValidationError{Name: "picture", err: errors.New("entgen: missing required field \"picture\"")}
+	if _, ok := fuc.mutation.Foreignid(); !ok {
+		return &ValidationError{Name: "foreignid", err: errors.New("entgen: missing required field \"foreignid\"")}
 	}
 	if _, ok := fuc.mutation.Host(); !ok {
 		return &ValidationError{Name: "host", err: errors.New("entgen: missing required field \"host\"")}
@@ -139,21 +130,13 @@ func (fuc *ForeignUserCreate) createSpec() (*ForeignUser, *sqlgraph.CreateSpec) 
 			},
 		}
 	)
-	if value, ok := fuc.mutation.Username(); ok {
+	if value, ok := fuc.mutation.Foreignid(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeUint64,
 			Value:  value,
-			Column: foreignuser.FieldUsername,
+			Column: foreignuser.FieldForeignid,
 		})
-		_node.Username = value
-	}
-	if value, ok := fuc.mutation.Picture(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: foreignuser.FieldPicture,
-		})
-		_node.Picture = value
+		_node.Foreignid = value
 	}
 	if value, ok := fuc.mutation.Host(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

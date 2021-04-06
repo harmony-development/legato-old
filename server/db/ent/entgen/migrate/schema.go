@@ -95,26 +95,19 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "contenttype", Type: field.TypeString},
 		{Name: "size", Type: field.TypeInt},
-		{Name: "file_hash_file", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// FilesTable holds the schema information for the "files" table.
 	FilesTable = &schema.Table{
-		Name:       "files",
-		Columns:    FilesColumns,
-		PrimaryKey: []*schema.Column{FilesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "files_file_hashes_file",
-				Columns:    []*schema.Column{FilesColumns[4]},
-				RefColumns: []*schema.Column{FileHashesColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
+		Name:        "files",
+		Columns:     FilesColumns,
+		PrimaryKey:  []*schema.Column{FilesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
 	}
 	// FileHashesColumns holds the columns for the "file_hashes" table.
 	FileHashesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "hash", Type: field.TypeString, Unique: true},
+		{Name: "hash", Type: field.TypeBytes},
+		{Name: "fileid", Type: field.TypeString},
 	}
 	// FileHashesTable holds the schema information for the "file_hashes" table.
 	FileHashesTable = &schema.Table{
@@ -122,6 +115,13 @@ var (
 		Columns:     FileHashesColumns,
 		PrimaryKey:  []*schema.Column{FileHashesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
+		Indexes: []*schema.Index{
+			{
+				Name:    "filehash_hash",
+				Unique:  true,
+				Columns: []*schema.Column{FileHashesColumns[1]},
+			},
+		},
 	}
 	// FileMessagesColumns holds the columns for the "file_messages" table.
 	FileMessagesColumns = []*schema.Column{
@@ -137,8 +137,7 @@ var (
 	// ForeignUsersColumns holds the columns for the "foreign_users" table.
 	ForeignUsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "username", Type: field.TypeString},
-		{Name: "picture", Type: field.TypeString},
+		{Name: "foreignid", Type: field.TypeUint64},
 		{Name: "host", Type: field.TypeString},
 		{Name: "user_foreign_user", Type: field.TypeUint64, Unique: true, Nullable: true},
 	}
@@ -150,7 +149,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "foreign_users_users_foreign_user",
-				Columns:    []*schema.Column{ForeignUsersColumns[4]},
+				Columns:    []*schema.Column{ForeignUsersColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -170,6 +169,27 @@ var (
 		Columns:     GuildsColumns,
 		PrimaryKey:  []*schema.Column{GuildsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
+	}
+	// GuildListEntriesColumns holds the columns for the "guild_list_entries" table.
+	GuildListEntriesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint64, Increment: true},
+		{Name: "host", Type: field.TypeString},
+		{Name: "position", Type: field.TypeString},
+		{Name: "user_listentry", Type: field.TypeUint64, Nullable: true},
+	}
+	// GuildListEntriesTable holds the schema information for the "guild_list_entries" table.
+	GuildListEntriesTable = &schema.Table{
+		Name:       "guild_list_entries",
+		Columns:    GuildListEntriesColumns,
+		PrimaryKey: []*schema.Column{GuildListEntriesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "guild_list_entries_users_listentry",
+				Columns:    []*schema.Column{GuildListEntriesColumns[3]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// InvitesColumns holds the columns for the "invites" table.
 	InvitesColumns = []*schema.Column{
@@ -316,18 +336,25 @@ var (
 		{Name: "hoist", Type: field.TypeBool},
 		{Name: "pingable", Type: field.TypeBool},
 		{Name: "position", Type: field.TypeString},
+		{Name: "guild_role", Type: field.TypeUint64, Nullable: true},
 	}
 	// RolesTable holds the schema information for the "roles" table.
 	RolesTable = &schema.Table{
-		Name:        "roles",
-		Columns:     RolesColumns,
-		PrimaryKey:  []*schema.Column{RolesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "roles",
+		Columns:    RolesColumns,
+		PrimaryKey: []*schema.Column{RolesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "roles_guilds_role",
+				Columns:    []*schema.Column{RolesColumns[6]},
+				RefColumns: []*schema.Column{GuildsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// SessionsColumns holds the columns for the "sessions" table.
 	SessionsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "sessionid", Type: field.TypeString},
+		{Name: "id", Type: field.TypeString},
 		{Name: "expires", Type: field.TypeTime},
 		{Name: "local_user_sessions", Type: field.TypeInt, Nullable: true},
 		{Name: "user_sessions", Type: field.TypeUint64, Nullable: true},
@@ -340,13 +367,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "sessions_local_users_sessions",
-				Columns:    []*schema.Column{SessionsColumns[3]},
+				Columns:    []*schema.Column{SessionsColumns[2]},
 				RefColumns: []*schema.Column{LocalUsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "sessions_users_sessions",
-				Columns:    []*schema.Column{SessionsColumns[4]},
+				Columns:    []*schema.Column{SessionsColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -452,6 +479,7 @@ var (
 		FileMessagesTable,
 		ForeignUsersTable,
 		GuildsTable,
+		GuildListEntriesTable,
 		InvitesTable,
 		LocalUsersTable,
 		MessagesTable,
@@ -471,8 +499,8 @@ func init() {
 	EmotesTable.ForeignKeys[0].RefTable = EmotePacksTable
 	EmotePacksTable.ForeignKeys[0].RefTable = UsersTable
 	EmotePacksTable.ForeignKeys[1].RefTable = UsersTable
-	FilesTable.ForeignKeys[0].RefTable = FileHashesTable
 	ForeignUsersTable.ForeignKeys[0].RefTable = UsersTable
+	GuildListEntriesTable.ForeignKeys[0].RefTable = UsersTable
 	InvitesTable.ForeignKeys[0].RefTable = GuildsTable
 	LocalUsersTable.ForeignKeys[0].RefTable = UsersTable
 	MessagesTable.ForeignKeys[0].RefTable = ChannelsTable
@@ -482,6 +510,7 @@ func init() {
 	MessagesTable.ForeignKeys[4].RefTable = UsersTable
 	PermissionsTable.ForeignKeys[0].RefTable = RolesTable
 	ProfilesTable.ForeignKeys[0].RefTable = UsersTable
+	RolesTable.ForeignKeys[0].RefTable = GuildsTable
 	SessionsTable.ForeignKeys[0].RefTable = LocalUsersTable
 	SessionsTable.ForeignKeys[1].RefTable = UsersTable
 	TextMessagesTable.ForeignKeys[0].RefTable = MessagesTable

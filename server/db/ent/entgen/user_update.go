@@ -12,6 +12,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/emotepack"
 	"github.com/harmony-development/legato/server/db/ent/entgen/foreignuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
+	"github.com/harmony-development/legato/server/db/ent/entgen/guildlistentry"
 	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
@@ -92,14 +93,14 @@ func (uu *UserUpdate) SetProfile(p *Profile) *UserUpdate {
 }
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
-func (uu *UserUpdate) AddSessionIDs(ids ...int) *UserUpdate {
+func (uu *UserUpdate) AddSessionIDs(ids ...string) *UserUpdate {
 	uu.mutation.AddSessionIDs(ids...)
 	return uu
 }
 
 // AddSessions adds the "sessions" edges to the Session entity.
 func (uu *UserUpdate) AddSessions(s ...*Session) *UserUpdate {
-	ids := make([]int, len(s))
+	ids := make([]string, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -166,6 +167,21 @@ func (uu *UserUpdate) AddCreatedpacks(e ...*EmotePack) *UserUpdate {
 	return uu.AddCreatedpackIDs(ids...)
 }
 
+// AddListentryIDs adds the "listentry" edge to the GuildListEntry entity by IDs.
+func (uu *UserUpdate) AddListentryIDs(ids ...uint64) *UserUpdate {
+	uu.mutation.AddListentryIDs(ids...)
+	return uu
+}
+
+// AddListentry adds the "listentry" edges to the GuildListEntry entity.
+func (uu *UserUpdate) AddListentry(g ...*GuildListEntry) *UserUpdate {
+	ids := make([]uint64, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return uu.AddListentryIDs(ids...)
+}
+
 // AddRoleIDs adds the "role" edge to the Role entity by IDs.
 func (uu *UserUpdate) AddRoleIDs(ids ...uint64) *UserUpdate {
 	uu.mutation.AddRoleIDs(ids...)
@@ -211,14 +227,14 @@ func (uu *UserUpdate) ClearSessions() *UserUpdate {
 }
 
 // RemoveSessionIDs removes the "sessions" edge to Session entities by IDs.
-func (uu *UserUpdate) RemoveSessionIDs(ids ...int) *UserUpdate {
+func (uu *UserUpdate) RemoveSessionIDs(ids ...string) *UserUpdate {
 	uu.mutation.RemoveSessionIDs(ids...)
 	return uu
 }
 
 // RemoveSessions removes "sessions" edges to Session entities.
 func (uu *UserUpdate) RemoveSessions(s ...*Session) *UserUpdate {
-	ids := make([]int, len(s))
+	ids := make([]string, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -307,6 +323,27 @@ func (uu *UserUpdate) RemoveCreatedpacks(e ...*EmotePack) *UserUpdate {
 		ids[i] = e[i].ID
 	}
 	return uu.RemoveCreatedpackIDs(ids...)
+}
+
+// ClearListentry clears all "listentry" edges to the GuildListEntry entity.
+func (uu *UserUpdate) ClearListentry() *UserUpdate {
+	uu.mutation.ClearListentry()
+	return uu
+}
+
+// RemoveListentryIDs removes the "listentry" edge to GuildListEntry entities by IDs.
+func (uu *UserUpdate) RemoveListentryIDs(ids ...uint64) *UserUpdate {
+	uu.mutation.RemoveListentryIDs(ids...)
+	return uu
+}
+
+// RemoveListentry removes "listentry" edges to GuildListEntry entities.
+func (uu *UserUpdate) RemoveListentry(g ...*GuildListEntry) *UserUpdate {
+	ids := make([]uint64, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return uu.RemoveListentryIDs(ids...)
 }
 
 // ClearRole clears all "role" edges to the Role entity.
@@ -513,7 +550,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: session.FieldID,
 				},
 			},
@@ -529,7 +566,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: session.FieldID,
 				},
 			},
@@ -548,7 +585,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: session.FieldID,
 				},
 			},
@@ -774,6 +811,60 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.ListentryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ListentryTable,
+			Columns: []string{user.ListentryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: guildlistentry.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedListentryIDs(); len(nodes) > 0 && !uu.mutation.ListentryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ListentryTable,
+			Columns: []string{user.ListentryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: guildlistentry.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.ListentryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ListentryTable,
+			Columns: []string{user.ListentryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: guildlistentry.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if uu.mutation.RoleCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -904,14 +995,14 @@ func (uuo *UserUpdateOne) SetProfile(p *Profile) *UserUpdateOne {
 }
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
-func (uuo *UserUpdateOne) AddSessionIDs(ids ...int) *UserUpdateOne {
+func (uuo *UserUpdateOne) AddSessionIDs(ids ...string) *UserUpdateOne {
 	uuo.mutation.AddSessionIDs(ids...)
 	return uuo
 }
 
 // AddSessions adds the "sessions" edges to the Session entity.
 func (uuo *UserUpdateOne) AddSessions(s ...*Session) *UserUpdateOne {
-	ids := make([]int, len(s))
+	ids := make([]string, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -978,6 +1069,21 @@ func (uuo *UserUpdateOne) AddCreatedpacks(e ...*EmotePack) *UserUpdateOne {
 	return uuo.AddCreatedpackIDs(ids...)
 }
 
+// AddListentryIDs adds the "listentry" edge to the GuildListEntry entity by IDs.
+func (uuo *UserUpdateOne) AddListentryIDs(ids ...uint64) *UserUpdateOne {
+	uuo.mutation.AddListentryIDs(ids...)
+	return uuo
+}
+
+// AddListentry adds the "listentry" edges to the GuildListEntry entity.
+func (uuo *UserUpdateOne) AddListentry(g ...*GuildListEntry) *UserUpdateOne {
+	ids := make([]uint64, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return uuo.AddListentryIDs(ids...)
+}
+
 // AddRoleIDs adds the "role" edge to the Role entity by IDs.
 func (uuo *UserUpdateOne) AddRoleIDs(ids ...uint64) *UserUpdateOne {
 	uuo.mutation.AddRoleIDs(ids...)
@@ -1023,14 +1129,14 @@ func (uuo *UserUpdateOne) ClearSessions() *UserUpdateOne {
 }
 
 // RemoveSessionIDs removes the "sessions" edge to Session entities by IDs.
-func (uuo *UserUpdateOne) RemoveSessionIDs(ids ...int) *UserUpdateOne {
+func (uuo *UserUpdateOne) RemoveSessionIDs(ids ...string) *UserUpdateOne {
 	uuo.mutation.RemoveSessionIDs(ids...)
 	return uuo
 }
 
 // RemoveSessions removes "sessions" edges to Session entities.
 func (uuo *UserUpdateOne) RemoveSessions(s ...*Session) *UserUpdateOne {
-	ids := make([]int, len(s))
+	ids := make([]string, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -1119,6 +1225,27 @@ func (uuo *UserUpdateOne) RemoveCreatedpacks(e ...*EmotePack) *UserUpdateOne {
 		ids[i] = e[i].ID
 	}
 	return uuo.RemoveCreatedpackIDs(ids...)
+}
+
+// ClearListentry clears all "listentry" edges to the GuildListEntry entity.
+func (uuo *UserUpdateOne) ClearListentry() *UserUpdateOne {
+	uuo.mutation.ClearListentry()
+	return uuo
+}
+
+// RemoveListentryIDs removes the "listentry" edge to GuildListEntry entities by IDs.
+func (uuo *UserUpdateOne) RemoveListentryIDs(ids ...uint64) *UserUpdateOne {
+	uuo.mutation.RemoveListentryIDs(ids...)
+	return uuo
+}
+
+// RemoveListentry removes "listentry" edges to GuildListEntry entities.
+func (uuo *UserUpdateOne) RemoveListentry(g ...*GuildListEntry) *UserUpdateOne {
+	ids := make([]uint64, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return uuo.RemoveListentryIDs(ids...)
 }
 
 // ClearRole clears all "role" edges to the Role entity.
@@ -1330,7 +1457,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: session.FieldID,
 				},
 			},
@@ -1346,7 +1473,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: session.FieldID,
 				},
 			},
@@ -1365,7 +1492,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: session.FieldID,
 				},
 			},
@@ -1583,6 +1710,60 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUint64,
 					Column: emotepack.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.ListentryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ListentryTable,
+			Columns: []string{user.ListentryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: guildlistentry.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedListentryIDs(); len(nodes) > 0 && !uuo.mutation.ListentryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ListentryTable,
+			Columns: []string{user.ListentryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: guildlistentry.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.ListentryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ListentryTable,
+			Columns: []string{user.ListentryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: guildlistentry.FieldID,
 				},
 			},
 		}

@@ -45,14 +45,14 @@ func (luc *LocalUserCreate) SetUser(u *User) *LocalUserCreate {
 }
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
-func (luc *LocalUserCreate) AddSessionIDs(ids ...int) *LocalUserCreate {
+func (luc *LocalUserCreate) AddSessionIDs(ids ...string) *LocalUserCreate {
 	luc.mutation.AddSessionIDs(ids...)
 	return luc
 }
 
 // AddSessions adds the "sessions" edges to the Session entity.
 func (luc *LocalUserCreate) AddSessions(s ...*Session) *LocalUserCreate {
-	ids := make([]int, len(s))
+	ids := make([]string, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -196,7 +196,7 @@ func (luc *LocalUserCreate) createSpec() (*LocalUser, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: session.FieldID,
 				},
 			},

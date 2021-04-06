@@ -16,6 +16,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/invite"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
+	"github.com/harmony-development/legato/server/db/ent/entgen/role"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
 
@@ -31,6 +32,7 @@ type GuildQuery struct {
 	withInvite  *InviteQuery
 	withBans    *UserQuery
 	withChannel *ChannelQuery
+	withRole    *RoleQuery
 	withUser    *UserQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -120,6 +122,28 @@ func (gq *GuildQuery) QueryChannel() *ChannelQuery {
 			sqlgraph.From(guild.Table, guild.FieldID, selector),
 			sqlgraph.To(channel.Table, channel.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, guild.ChannelTable, guild.ChannelColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryRole chains the current query on the "role" edge.
+func (gq *GuildQuery) QueryRole() *RoleQuery {
+	query := &RoleQuery{config: gq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := gq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(guild.Table, guild.FieldID, selector),
+			sqlgraph.To(role.Table, role.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, guild.RoleTable, guild.RoleColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 		return fromU, nil
@@ -333,6 +357,7 @@ func (gq *GuildQuery) Clone() *GuildQuery {
 		withInvite:  gq.withInvite.Clone(),
 		withBans:    gq.withBans.Clone(),
 		withChannel: gq.withChannel.Clone(),
+		withRole:    gq.withRole.Clone(),
 		withUser:    gq.withUser.Clone(),
 		// clone intermediate query.
 		sql:  gq.sql.Clone(),
@@ -370,6 +395,17 @@ func (gq *GuildQuery) WithChannel(opts ...func(*ChannelQuery)) *GuildQuery {
 		opt(query)
 	}
 	gq.withChannel = query
+	return gq
+}
+
+// WithRole tells the query-builder to eager-load the nodes that are connected to
+// the "role" edge. The optional arguments are used to configure the query builder of the edge.
+func (gq *GuildQuery) WithRole(opts ...func(*RoleQuery)) *GuildQuery {
+	query := &RoleQuery{config: gq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	gq.withRole = query
 	return gq
 }
 
@@ -449,10 +485,11 @@ func (gq *GuildQuery) sqlAll(ctx context.Context) ([]*Guild, error) {
 	var (
 		nodes       = []*Guild{}
 		_spec       = gq.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [5]bool{
 			gq.withInvite != nil,
 			gq.withBans != nil,
 			gq.withChannel != nil,
+			gq.withRole != nil,
 			gq.withUser != nil,
 		}
 	)
@@ -560,6 +597,35 @@ func (gq *GuildQuery) sqlAll(ctx context.Context) ([]*Guild, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "guild_channel" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Channel = append(node.Edges.Channel, n)
+		}
+	}
+
+	if query := gq.withRole; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uint64]*Guild)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Role = []*Role{}
+		}
+		query.withFKs = true
+		query.Where(predicate.Role(func(s *sql.Selector) {
+			s.Where(sql.InValues(guild.RoleColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.guild_role
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "guild_role" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "guild_role" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Role = append(node.Edges.Role, n)
 		}
 	}
 

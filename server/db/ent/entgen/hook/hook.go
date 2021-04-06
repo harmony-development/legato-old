@@ -126,6 +126,19 @@ func (f GuildFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value,
 	return f(ctx, mv)
 }
 
+// The GuildListEntryFunc type is an adapter to allow the use of ordinary
+// function as GuildListEntry mutator.
+type GuildListEntryFunc func(context.Context, *entgen.GuildListEntryMutation) (entgen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f GuildListEntryFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	mv, ok := m.(*entgen.GuildListEntryMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.GuildListEntryMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The InviteFunc type is an adapter to allow the use of ordinary
 // function as Invite mutator.
 type InviteFunc func(context.Context, *entgen.InviteMutation) (entgen.Value, error)

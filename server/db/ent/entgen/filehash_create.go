@@ -9,7 +9,6 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/harmony-development/legato/server/db/ent/entgen/file"
 	"github.com/harmony-development/legato/server/db/ent/entgen/filehash"
 )
 
@@ -21,28 +20,15 @@ type FileHashCreate struct {
 }
 
 // SetHash sets the "hash" field.
-func (fhc *FileHashCreate) SetHash(s string) *FileHashCreate {
-	fhc.mutation.SetHash(s)
+func (fhc *FileHashCreate) SetHash(b []byte) *FileHashCreate {
+	fhc.mutation.SetHash(b)
 	return fhc
 }
 
-// SetFileID sets the "file" edge to the File entity by ID.
-func (fhc *FileHashCreate) SetFileID(id string) *FileHashCreate {
-	fhc.mutation.SetFileID(id)
+// SetFileid sets the "fileid" field.
+func (fhc *FileHashCreate) SetFileid(s string) *FileHashCreate {
+	fhc.mutation.SetFileid(s)
 	return fhc
-}
-
-// SetNillableFileID sets the "file" edge to the File entity by ID if the given value is not nil.
-func (fhc *FileHashCreate) SetNillableFileID(id *string) *FileHashCreate {
-	if id != nil {
-		fhc = fhc.SetFileID(*id)
-	}
-	return fhc
-}
-
-// SetFile sets the "file" edge to the File entity.
-func (fhc *FileHashCreate) SetFile(f *File) *FileHashCreate {
-	return fhc.SetFileID(f.ID)
 }
 
 // Mutation returns the FileHashMutation object of the builder.
@@ -99,6 +85,9 @@ func (fhc *FileHashCreate) check() error {
 	if _, ok := fhc.mutation.Hash(); !ok {
 		return &ValidationError{Name: "hash", err: errors.New("entgen: missing required field \"hash\"")}
 	}
+	if _, ok := fhc.mutation.Fileid(); !ok {
+		return &ValidationError{Name: "fileid", err: errors.New("entgen: missing required field \"fileid\"")}
+	}
 	return nil
 }
 
@@ -128,30 +117,19 @@ func (fhc *FileHashCreate) createSpec() (*FileHash, *sqlgraph.CreateSpec) {
 	)
 	if value, ok := fhc.mutation.Hash(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeBytes,
 			Value:  value,
 			Column: filehash.FieldHash,
 		})
 		_node.Hash = value
 	}
-	if nodes := fhc.mutation.FileIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   filehash.FileTable,
-			Columns: []string{filehash.FileColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: file.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
+	if value, ok := fhc.mutation.Fileid(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: filehash.FieldFileid,
+		})
+		_node.Fileid = value
 	}
 	return _node, _spec
 }

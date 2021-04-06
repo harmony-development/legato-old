@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/harmony-development/legato/server/db/ent/entgen/file"
-	"github.com/harmony-development/legato/server/db/ent/entgen/filehash"
 )
 
 // FileCreate is the builder for creating a File entity.
@@ -42,25 +41,6 @@ func (fc *FileCreate) SetSize(i int) *FileCreate {
 func (fc *FileCreate) SetID(s string) *FileCreate {
 	fc.mutation.SetID(s)
 	return fc
-}
-
-// SetFilehashID sets the "filehash" edge to the FileHash entity by ID.
-func (fc *FileCreate) SetFilehashID(id int) *FileCreate {
-	fc.mutation.SetFilehashID(id)
-	return fc
-}
-
-// SetNillableFilehashID sets the "filehash" edge to the FileHash entity by ID if the given value is not nil.
-func (fc *FileCreate) SetNillableFilehashID(id *int) *FileCreate {
-	if id != nil {
-		fc = fc.SetFilehashID(*id)
-	}
-	return fc
-}
-
-// SetFilehash sets the "filehash" edge to the FileHash entity.
-func (fc *FileCreate) SetFilehash(f *FileHash) *FileCreate {
-	return fc.SetFilehashID(f.ID)
 }
 
 // Mutation returns the FileMutation object of the builder.
@@ -175,26 +155,6 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 			Column: file.FieldSize,
 		})
 		_node.Size = value
-	}
-	if nodes := fc.mutation.FilehashIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   file.FilehashTable,
-			Columns: []string{file.FilehashColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: filehash.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.file_hash_file = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

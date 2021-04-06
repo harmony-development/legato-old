@@ -315,6 +315,34 @@ func HasCreatedpacksWith(preds ...predicate.EmotePack) predicate.User {
 	})
 }
 
+// HasListentry applies the HasEdge predicate on the "listentry" edge.
+func HasListentry() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ListentryTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ListentryTable, ListentryColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasListentryWith applies the HasEdge predicate on the "listentry" edge with a given conditions (other predicates).
+func HasListentryWith(preds ...predicate.GuildListEntry) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ListentryInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ListentryTable, ListentryColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasRole applies the HasEdge predicate on the "role" edge.
 func HasRole() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

@@ -16,10 +16,8 @@ type ForeignUser struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// Username holds the value of the "username" field.
-	Username string `json:"username,omitempty"`
-	// Picture holds the value of the "picture" field.
-	Picture string `json:"picture,omitempty"`
+	// Foreignid holds the value of the "foreignid" field.
+	Foreignid uint64 `json:"foreignid,omitempty"`
 	// Host holds the value of the "host" field.
 	Host string `json:"host,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -56,9 +54,9 @@ func (*ForeignUser) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case foreignuser.FieldID:
+		case foreignuser.FieldID, foreignuser.FieldForeignid:
 			values[i] = &sql.NullInt64{}
-		case foreignuser.FieldUsername, foreignuser.FieldPicture, foreignuser.FieldHost:
+		case foreignuser.FieldHost:
 			values[i] = &sql.NullString{}
 		case foreignuser.ForeignKeys[0]: // user_foreign_user
 			values[i] = &sql.NullInt64{}
@@ -83,17 +81,11 @@ func (fu *ForeignUser) assignValues(columns []string, values []interface{}) erro
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			fu.ID = int(value.Int64)
-		case foreignuser.FieldUsername:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field username", values[i])
+		case foreignuser.FieldForeignid:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field foreignid", values[i])
 			} else if value.Valid {
-				fu.Username = value.String
-			}
-		case foreignuser.FieldPicture:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field picture", values[i])
-			} else if value.Valid {
-				fu.Picture = value.String
+				fu.Foreignid = uint64(value.Int64)
 			}
 		case foreignuser.FieldHost:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -141,10 +133,8 @@ func (fu *ForeignUser) String() string {
 	var builder strings.Builder
 	builder.WriteString("ForeignUser(")
 	builder.WriteString(fmt.Sprintf("id=%v", fu.ID))
-	builder.WriteString(", username=")
-	builder.WriteString(fu.Username)
-	builder.WriteString(", picture=")
-	builder.WriteString(fu.Picture)
+	builder.WriteString(", foreignid=")
+	builder.WriteString(fmt.Sprintf("%v", fu.Foreignid))
 	builder.WriteString(", host=")
 	builder.WriteString(fu.Host)
 	builder.WriteByte(')')

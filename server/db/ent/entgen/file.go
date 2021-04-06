@@ -8,7 +8,6 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/harmony-development/legato/server/db/ent/entgen/file"
-	"github.com/harmony-development/legato/server/db/ent/entgen/filehash"
 )
 
 // File is the model entity for the File schema.
@@ -22,33 +21,6 @@ type File struct {
 	Contenttype string `json:"contenttype,omitempty"`
 	// Size holds the value of the "size" field.
 	Size int `json:"size,omitempty"`
-	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the FileQuery when eager-loading is set.
-	Edges          FileEdges `json:"edges"`
-	file_hash_file *int
-}
-
-// FileEdges holds the relations/edges for other nodes in the graph.
-type FileEdges struct {
-	// Filehash holds the value of the filehash edge.
-	Filehash *FileHash `json:"filehash,omitempty"`
-	// loadedTypes holds the information for reporting if a
-	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
-}
-
-// FilehashOrErr returns the Filehash value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e FileEdges) FilehashOrErr() (*FileHash, error) {
-	if e.loadedTypes[0] {
-		if e.Filehash == nil {
-			// The edge filehash was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: filehash.Label}
-		}
-		return e.Filehash, nil
-	}
-	return nil, &NotLoadedError{edge: "filehash"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -60,8 +32,6 @@ func (*File) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = &sql.NullInt64{}
 		case file.FieldID, file.FieldName, file.FieldContenttype:
 			values[i] = &sql.NullString{}
-		case file.ForeignKeys[0]: // file_hash_file
-			values[i] = &sql.NullInt64{}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type File", columns[i])
 		}
@@ -101,21 +71,9 @@ func (f *File) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				f.Size = int(value.Int64)
 			}
-		case file.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field file_hash_file", value)
-			} else if value.Valid {
-				f.file_hash_file = new(int)
-				*f.file_hash_file = int(value.Int64)
-			}
 		}
 	}
 	return nil
-}
-
-// QueryFilehash queries the "filehash" edge of the File entity.
-func (f *File) QueryFilehash() *FileHashQuery {
-	return (&FileClient{config: f.config}).QueryFilehash(f)
 }
 
 // Update returns a builder for updating this File.

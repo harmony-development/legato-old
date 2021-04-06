@@ -32,6 +32,8 @@ func (Guild) Edges() []ent.Edge {
 		edge.
 			To("channel", Channel.Type),
 		edge.
+			To("role", Role.Type),
+		edge.
 			From("user", User.Type).Ref("guild").Required(),
 	}
 }

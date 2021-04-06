@@ -18,6 +18,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/filemessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/foreignuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
+	"github.com/harmony-development/legato/server/db/ent/entgen/guildlistentry"
 	"github.com/harmony-development/legato/server/db/ent/entgen/invite"
 	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
@@ -56,6 +57,8 @@ type Client struct {
 	ForeignUser *ForeignUserClient
 	// Guild is the client for interacting with the Guild builders.
 	Guild *GuildClient
+	// GuildListEntry is the client for interacting with the GuildListEntry builders.
+	GuildListEntry *GuildListEntryClient
 	// Invite is the client for interacting with the Invite builders.
 	Invite *InviteClient
 	// LocalUser is the client for interacting with the LocalUser builders.
@@ -96,6 +99,7 @@ func (c *Client) init() {
 	c.FileMessage = NewFileMessageClient(c.config)
 	c.ForeignUser = NewForeignUserClient(c.config)
 	c.Guild = NewGuildClient(c.config)
+	c.GuildListEntry = NewGuildListEntryClient(c.config)
 	c.Invite = NewInviteClient(c.config)
 	c.LocalUser = NewLocalUserClient(c.config)
 	c.Message = NewMessageClient(c.config)
@@ -136,26 +140,27 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:          ctx,
-		config:       cfg,
-		Channel:      NewChannelClient(cfg),
-		EmbedMessage: NewEmbedMessageClient(cfg),
-		Emote:        NewEmoteClient(cfg),
-		EmotePack:    NewEmotePackClient(cfg),
-		File:         NewFileClient(cfg),
-		FileHash:     NewFileHashClient(cfg),
-		FileMessage:  NewFileMessageClient(cfg),
-		ForeignUser:  NewForeignUserClient(cfg),
-		Guild:        NewGuildClient(cfg),
-		Invite:       NewInviteClient(cfg),
-		LocalUser:    NewLocalUserClient(cfg),
-		Message:      NewMessageClient(cfg),
-		Permission:   NewPermissionClient(cfg),
-		Profile:      NewProfileClient(cfg),
-		Role:         NewRoleClient(cfg),
-		Session:      NewSessionClient(cfg),
-		TextMessage:  NewTextMessageClient(cfg),
-		User:         NewUserClient(cfg),
+		ctx:            ctx,
+		config:         cfg,
+		Channel:        NewChannelClient(cfg),
+		EmbedMessage:   NewEmbedMessageClient(cfg),
+		Emote:          NewEmoteClient(cfg),
+		EmotePack:      NewEmotePackClient(cfg),
+		File:           NewFileClient(cfg),
+		FileHash:       NewFileHashClient(cfg),
+		FileMessage:    NewFileMessageClient(cfg),
+		ForeignUser:    NewForeignUserClient(cfg),
+		Guild:          NewGuildClient(cfg),
+		GuildListEntry: NewGuildListEntryClient(cfg),
+		Invite:         NewInviteClient(cfg),
+		LocalUser:      NewLocalUserClient(cfg),
+		Message:        NewMessageClient(cfg),
+		Permission:     NewPermissionClient(cfg),
+		Profile:        NewProfileClient(cfg),
+		Role:           NewRoleClient(cfg),
+		Session:        NewSessionClient(cfg),
+		TextMessage:    NewTextMessageClient(cfg),
+		User:           NewUserClient(cfg),
 	}, nil
 }
 
@@ -173,25 +178,26 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		config:       cfg,
-		Channel:      NewChannelClient(cfg),
-		EmbedMessage: NewEmbedMessageClient(cfg),
-		Emote:        NewEmoteClient(cfg),
-		EmotePack:    NewEmotePackClient(cfg),
-		File:         NewFileClient(cfg),
-		FileHash:     NewFileHashClient(cfg),
-		FileMessage:  NewFileMessageClient(cfg),
-		ForeignUser:  NewForeignUserClient(cfg),
-		Guild:        NewGuildClient(cfg),
-		Invite:       NewInviteClient(cfg),
-		LocalUser:    NewLocalUserClient(cfg),
-		Message:      NewMessageClient(cfg),
-		Permission:   NewPermissionClient(cfg),
-		Profile:      NewProfileClient(cfg),
-		Role:         NewRoleClient(cfg),
-		Session:      NewSessionClient(cfg),
-		TextMessage:  NewTextMessageClient(cfg),
-		User:         NewUserClient(cfg),
+		config:         cfg,
+		Channel:        NewChannelClient(cfg),
+		EmbedMessage:   NewEmbedMessageClient(cfg),
+		Emote:          NewEmoteClient(cfg),
+		EmotePack:      NewEmotePackClient(cfg),
+		File:           NewFileClient(cfg),
+		FileHash:       NewFileHashClient(cfg),
+		FileMessage:    NewFileMessageClient(cfg),
+		ForeignUser:    NewForeignUserClient(cfg),
+		Guild:          NewGuildClient(cfg),
+		GuildListEntry: NewGuildListEntryClient(cfg),
+		Invite:         NewInviteClient(cfg),
+		LocalUser:      NewLocalUserClient(cfg),
+		Message:        NewMessageClient(cfg),
+		Permission:     NewPermissionClient(cfg),
+		Profile:        NewProfileClient(cfg),
+		Role:           NewRoleClient(cfg),
+		Session:        NewSessionClient(cfg),
+		TextMessage:    NewTextMessageClient(cfg),
+		User:           NewUserClient(cfg),
 	}, nil
 }
 
@@ -230,6 +236,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.FileMessage.Use(hooks...)
 	c.ForeignUser.Use(hooks...)
 	c.Guild.Use(hooks...)
+	c.GuildListEntry.Use(hooks...)
 	c.Invite.Use(hooks...)
 	c.LocalUser.Use(hooks...)
 	c.Message.Use(hooks...)
@@ -772,22 +779,6 @@ func (c *FileClient) GetX(ctx context.Context, id string) *File {
 	return obj
 }
 
-// QueryFilehash queries the filehash edge of a File.
-func (c *FileClient) QueryFilehash(f *File) *FileHashQuery {
-	query := &FileHashQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := f.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(file.Table, file.FieldID, id),
-			sqlgraph.To(filehash.Table, filehash.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, file.FilehashTable, file.FilehashColumn),
-		)
-		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
 func (c *FileClient) Hooks() []Hook {
 	return c.hooks.File
@@ -874,22 +865,6 @@ func (c *FileHashClient) GetX(ctx context.Context, id int) *FileHash {
 		panic(err)
 	}
 	return obj
-}
-
-// QueryFile queries the file edge of a FileHash.
-func (c *FileHashClient) QueryFile(fh *FileHash) *FileQuery {
-	query := &FileQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := fh.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(filehash.Table, filehash.FieldID, id),
-			sqlgraph.To(file.Table, file.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, filehash.FileTable, filehash.FileColumn),
-		)
-		fromV = sqlgraph.Neighbors(fh.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
 }
 
 // Hooks returns the client hooks.
@@ -1220,6 +1195,22 @@ func (c *GuildClient) QueryChannel(gu *Guild) *ChannelQuery {
 	return query
 }
 
+// QueryRole queries the role edge of a Guild.
+func (c *GuildClient) QueryRole(gu *Guild) *RoleQuery {
+	query := &RoleQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := gu.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(guild.Table, guild.FieldID, id),
+			sqlgraph.To(role.Table, role.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, guild.RoleTable, guild.RoleColumn),
+		)
+		fromV = sqlgraph.Neighbors(gu.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryUser queries the user edge of a Guild.
 func (c *GuildClient) QueryUser(gu *Guild) *UserQuery {
 	query := &UserQuery{config: c.config}
@@ -1239,6 +1230,110 @@ func (c *GuildClient) QueryUser(gu *Guild) *UserQuery {
 // Hooks returns the client hooks.
 func (c *GuildClient) Hooks() []Hook {
 	return c.hooks.Guild
+}
+
+// GuildListEntryClient is a client for the GuildListEntry schema.
+type GuildListEntryClient struct {
+	config
+}
+
+// NewGuildListEntryClient returns a client for the GuildListEntry from the given config.
+func NewGuildListEntryClient(c config) *GuildListEntryClient {
+	return &GuildListEntryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `guildlistentry.Hooks(f(g(h())))`.
+func (c *GuildListEntryClient) Use(hooks ...Hook) {
+	c.hooks.GuildListEntry = append(c.hooks.GuildListEntry, hooks...)
+}
+
+// Create returns a create builder for GuildListEntry.
+func (c *GuildListEntryClient) Create() *GuildListEntryCreate {
+	mutation := newGuildListEntryMutation(c.config, OpCreate)
+	return &GuildListEntryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of GuildListEntry entities.
+func (c *GuildListEntryClient) CreateBulk(builders ...*GuildListEntryCreate) *GuildListEntryCreateBulk {
+	return &GuildListEntryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for GuildListEntry.
+func (c *GuildListEntryClient) Update() *GuildListEntryUpdate {
+	mutation := newGuildListEntryMutation(c.config, OpUpdate)
+	return &GuildListEntryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *GuildListEntryClient) UpdateOne(gle *GuildListEntry) *GuildListEntryUpdateOne {
+	mutation := newGuildListEntryMutation(c.config, OpUpdateOne, withGuildListEntry(gle))
+	return &GuildListEntryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *GuildListEntryClient) UpdateOneID(id uint64) *GuildListEntryUpdateOne {
+	mutation := newGuildListEntryMutation(c.config, OpUpdateOne, withGuildListEntryID(id))
+	return &GuildListEntryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for GuildListEntry.
+func (c *GuildListEntryClient) Delete() *GuildListEntryDelete {
+	mutation := newGuildListEntryMutation(c.config, OpDelete)
+	return &GuildListEntryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *GuildListEntryClient) DeleteOne(gle *GuildListEntry) *GuildListEntryDeleteOne {
+	return c.DeleteOneID(gle.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *GuildListEntryClient) DeleteOneID(id uint64) *GuildListEntryDeleteOne {
+	builder := c.Delete().Where(guildlistentry.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &GuildListEntryDeleteOne{builder}
+}
+
+// Query returns a query builder for GuildListEntry.
+func (c *GuildListEntryClient) Query() *GuildListEntryQuery {
+	return &GuildListEntryQuery{config: c.config}
+}
+
+// Get returns a GuildListEntry entity by its id.
+func (c *GuildListEntryClient) Get(ctx context.Context, id uint64) (*GuildListEntry, error) {
+	return c.Query().Where(guildlistentry.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *GuildListEntryClient) GetX(ctx context.Context, id uint64) *GuildListEntry {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a GuildListEntry.
+func (c *GuildListEntryClient) QueryUser(gle *GuildListEntry) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := gle.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(guildlistentry.Table, guildlistentry.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, guildlistentry.UserTable, guildlistentry.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(gle.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *GuildListEntryClient) Hooks() []Hook {
+	return c.hooks.GuildListEntry
 }
 
 // InviteClient is a client for the Invite schema.
@@ -2033,7 +2128,7 @@ func (c *SessionClient) UpdateOne(s *Session) *SessionUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *SessionClient) UpdateOneID(id int) *SessionUpdateOne {
+func (c *SessionClient) UpdateOneID(id string) *SessionUpdateOne {
 	mutation := newSessionMutation(c.config, OpUpdateOne, withSessionID(id))
 	return &SessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -2050,7 +2145,7 @@ func (c *SessionClient) DeleteOne(s *Session) *SessionDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *SessionClient) DeleteOneID(id int) *SessionDeleteOne {
+func (c *SessionClient) DeleteOneID(id string) *SessionDeleteOne {
 	builder := c.Delete().Where(session.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -2063,12 +2158,12 @@ func (c *SessionClient) Query() *SessionQuery {
 }
 
 // Get returns a Session entity by its id.
-func (c *SessionClient) Get(ctx context.Context, id int) (*Session, error) {
+func (c *SessionClient) Get(ctx context.Context, id string) (*Session, error) {
 	return c.Query().Where(session.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *SessionClient) GetX(ctx context.Context, id int) *Session {
+func (c *SessionClient) GetX(ctx context.Context, id string) *Session {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -2405,6 +2500,22 @@ func (c *UserClient) QueryCreatedpacks(u *User) *EmotePackQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(emotepack.Table, emotepack.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.CreatedpacksTable, user.CreatedpacksColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryListentry queries the listentry edge of a User.
+func (c *UserClient) QueryListentry(u *User) *GuildListEntryQuery {
+	query := &GuildListEntryQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(guildlistentry.Table, guildlistentry.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ListentryTable, user.ListentryColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

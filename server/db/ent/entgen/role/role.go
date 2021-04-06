@@ -47,6 +47,12 @@ var Columns = []string{
 	FieldPosition,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "roles"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"guild_role",
+}
+
 var (
 	// MembersPrimaryKey and MembersColumn2 are the table columns denoting the
 	// primary key for the members relation (M2M).
@@ -57,6 +63,11 @@ var (
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}

@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/harmony-development/legato/server/db/ent/entgen/file"
-	"github.com/harmony-development/legato/server/db/ent/entgen/filehash"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 )
 
@@ -52,34 +51,9 @@ func (fu *FileUpdate) AddSize(i int) *FileUpdate {
 	return fu
 }
 
-// SetFilehashID sets the "filehash" edge to the FileHash entity by ID.
-func (fu *FileUpdate) SetFilehashID(id int) *FileUpdate {
-	fu.mutation.SetFilehashID(id)
-	return fu
-}
-
-// SetNillableFilehashID sets the "filehash" edge to the FileHash entity by ID if the given value is not nil.
-func (fu *FileUpdate) SetNillableFilehashID(id *int) *FileUpdate {
-	if id != nil {
-		fu = fu.SetFilehashID(*id)
-	}
-	return fu
-}
-
-// SetFilehash sets the "filehash" edge to the FileHash entity.
-func (fu *FileUpdate) SetFilehash(f *FileHash) *FileUpdate {
-	return fu.SetFilehashID(f.ID)
-}
-
 // Mutation returns the FileMutation object of the builder.
 func (fu *FileUpdate) Mutation() *FileMutation {
 	return fu.mutation
-}
-
-// ClearFilehash clears the "filehash" edge to the FileHash entity.
-func (fu *FileUpdate) ClearFilehash() *FileUpdate {
-	fu.mutation.ClearFilehash()
-	return fu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -179,41 +153,6 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: file.FieldSize,
 		})
 	}
-	if fu.mutation.FilehashCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   file.FilehashTable,
-			Columns: []string{file.FilehashColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: filehash.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := fu.mutation.FilehashIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   file.FilehashTable,
-			Columns: []string{file.FilehashColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: filehash.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if n, err = sqlgraph.UpdateNodes(ctx, fu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{file.Label}
@@ -257,34 +196,9 @@ func (fuo *FileUpdateOne) AddSize(i int) *FileUpdateOne {
 	return fuo
 }
 
-// SetFilehashID sets the "filehash" edge to the FileHash entity by ID.
-func (fuo *FileUpdateOne) SetFilehashID(id int) *FileUpdateOne {
-	fuo.mutation.SetFilehashID(id)
-	return fuo
-}
-
-// SetNillableFilehashID sets the "filehash" edge to the FileHash entity by ID if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableFilehashID(id *int) *FileUpdateOne {
-	if id != nil {
-		fuo = fuo.SetFilehashID(*id)
-	}
-	return fuo
-}
-
-// SetFilehash sets the "filehash" edge to the FileHash entity.
-func (fuo *FileUpdateOne) SetFilehash(f *FileHash) *FileUpdateOne {
-	return fuo.SetFilehashID(f.ID)
-}
-
 // Mutation returns the FileMutation object of the builder.
 func (fuo *FileUpdateOne) Mutation() *FileMutation {
 	return fuo.mutation
-}
-
-// ClearFilehash clears the "filehash" edge to the FileHash entity.
-func (fuo *FileUpdateOne) ClearFilehash() *FileUpdateOne {
-	fuo.mutation.ClearFilehash()
-	return fuo
 }
 
 // Save executes the query and returns the updated File entity.
@@ -388,41 +302,6 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 			Value:  value,
 			Column: file.FieldSize,
 		})
-	}
-	if fuo.mutation.FilehashCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   file.FilehashTable,
-			Columns: []string{file.FilehashColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: filehash.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := fuo.mutation.FilehashIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   file.FilehashTable,
-			Columns: []string{file.FilehashColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: filehash.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &File{config: fuo.config}
 	_spec.Assign = _node.assignValues

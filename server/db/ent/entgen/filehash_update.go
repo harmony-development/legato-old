@@ -9,7 +9,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/harmony-development/legato/server/db/ent/entgen/file"
 	"github.com/harmony-development/legato/server/db/ent/entgen/filehash"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 )
@@ -28,39 +27,20 @@ func (fhu *FileHashUpdate) Where(ps ...predicate.FileHash) *FileHashUpdate {
 }
 
 // SetHash sets the "hash" field.
-func (fhu *FileHashUpdate) SetHash(s string) *FileHashUpdate {
-	fhu.mutation.SetHash(s)
+func (fhu *FileHashUpdate) SetHash(b []byte) *FileHashUpdate {
+	fhu.mutation.SetHash(b)
 	return fhu
 }
 
-// SetFileID sets the "file" edge to the File entity by ID.
-func (fhu *FileHashUpdate) SetFileID(id string) *FileHashUpdate {
-	fhu.mutation.SetFileID(id)
+// SetFileid sets the "fileid" field.
+func (fhu *FileHashUpdate) SetFileid(s string) *FileHashUpdate {
+	fhu.mutation.SetFileid(s)
 	return fhu
-}
-
-// SetNillableFileID sets the "file" edge to the File entity by ID if the given value is not nil.
-func (fhu *FileHashUpdate) SetNillableFileID(id *string) *FileHashUpdate {
-	if id != nil {
-		fhu = fhu.SetFileID(*id)
-	}
-	return fhu
-}
-
-// SetFile sets the "file" edge to the File entity.
-func (fhu *FileHashUpdate) SetFile(f *File) *FileHashUpdate {
-	return fhu.SetFileID(f.ID)
 }
 
 // Mutation returns the FileHashMutation object of the builder.
 func (fhu *FileHashUpdate) Mutation() *FileHashMutation {
 	return fhu.mutation
-}
-
-// ClearFile clears the "file" edge to the File entity.
-func (fhu *FileHashUpdate) ClearFile() *FileHashUpdate {
-	fhu.mutation.ClearFile()
-	return fhu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -134,45 +114,17 @@ func (fhu *FileHashUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := fhu.mutation.Hash(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeBytes,
 			Value:  value,
 			Column: filehash.FieldHash,
 		})
 	}
-	if fhu.mutation.FileCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   filehash.FileTable,
-			Columns: []string{filehash.FileColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: file.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := fhu.mutation.FileIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   filehash.FileTable,
-			Columns: []string{filehash.FileColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: file.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if value, ok := fhu.mutation.Fileid(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: filehash.FieldFileid,
+		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, fhu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -193,39 +145,20 @@ type FileHashUpdateOne struct {
 }
 
 // SetHash sets the "hash" field.
-func (fhuo *FileHashUpdateOne) SetHash(s string) *FileHashUpdateOne {
-	fhuo.mutation.SetHash(s)
+func (fhuo *FileHashUpdateOne) SetHash(b []byte) *FileHashUpdateOne {
+	fhuo.mutation.SetHash(b)
 	return fhuo
 }
 
-// SetFileID sets the "file" edge to the File entity by ID.
-func (fhuo *FileHashUpdateOne) SetFileID(id string) *FileHashUpdateOne {
-	fhuo.mutation.SetFileID(id)
+// SetFileid sets the "fileid" field.
+func (fhuo *FileHashUpdateOne) SetFileid(s string) *FileHashUpdateOne {
+	fhuo.mutation.SetFileid(s)
 	return fhuo
-}
-
-// SetNillableFileID sets the "file" edge to the File entity by ID if the given value is not nil.
-func (fhuo *FileHashUpdateOne) SetNillableFileID(id *string) *FileHashUpdateOne {
-	if id != nil {
-		fhuo = fhuo.SetFileID(*id)
-	}
-	return fhuo
-}
-
-// SetFile sets the "file" edge to the File entity.
-func (fhuo *FileHashUpdateOne) SetFile(f *File) *FileHashUpdateOne {
-	return fhuo.SetFileID(f.ID)
 }
 
 // Mutation returns the FileHashMutation object of the builder.
 func (fhuo *FileHashUpdateOne) Mutation() *FileHashMutation {
 	return fhuo.mutation
-}
-
-// ClearFile clears the "file" edge to the File entity.
-func (fhuo *FileHashUpdateOne) ClearFile() *FileHashUpdateOne {
-	fhuo.mutation.ClearFile()
-	return fhuo
 }
 
 // Save executes the query and returns the updated FileHash entity.
@@ -304,45 +237,17 @@ func (fhuo *FileHashUpdateOne) sqlSave(ctx context.Context) (_node *FileHash, er
 	}
 	if value, ok := fhuo.mutation.Hash(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeBytes,
 			Value:  value,
 			Column: filehash.FieldHash,
 		})
 	}
-	if fhuo.mutation.FileCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   filehash.FileTable,
-			Columns: []string{filehash.FileColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: file.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := fhuo.mutation.FileIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   filehash.FileTable,
-			Columns: []string{filehash.FileColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: file.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if value, ok := fhuo.mutation.Fileid(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: filehash.FieldFileid,
+		})
 	}
 	_node = &FileHash{config: fhuo.config}
 	_spec.Assign = _node.assignValues

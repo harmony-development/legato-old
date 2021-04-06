@@ -41,6 +41,8 @@ func (User) Edges() []ent.Edge {
 		edge.To(
 			"createdpacks", EmotePack.Type),
 		edge.
+			To("listentry", GuildListEntry.Type),
+		edge.
 			From("role", Role.Type).
 			Ref("members"),
 	}

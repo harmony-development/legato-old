@@ -53,14 +53,14 @@ func (luu *LocalUserUpdate) SetUser(u *User) *LocalUserUpdate {
 }
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
-func (luu *LocalUserUpdate) AddSessionIDs(ids ...int) *LocalUserUpdate {
+func (luu *LocalUserUpdate) AddSessionIDs(ids ...string) *LocalUserUpdate {
 	luu.mutation.AddSessionIDs(ids...)
 	return luu
 }
 
 // AddSessions adds the "sessions" edges to the Session entity.
 func (luu *LocalUserUpdate) AddSessions(s ...*Session) *LocalUserUpdate {
-	ids := make([]int, len(s))
+	ids := make([]string, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -85,14 +85,14 @@ func (luu *LocalUserUpdate) ClearSessions() *LocalUserUpdate {
 }
 
 // RemoveSessionIDs removes the "sessions" edge to Session entities by IDs.
-func (luu *LocalUserUpdate) RemoveSessionIDs(ids ...int) *LocalUserUpdate {
+func (luu *LocalUserUpdate) RemoveSessionIDs(ids ...string) *LocalUserUpdate {
 	luu.mutation.RemoveSessionIDs(ids...)
 	return luu
 }
 
 // RemoveSessions removes "sessions" edges to Session entities.
 func (luu *LocalUserUpdate) RemoveSessions(s ...*Session) *LocalUserUpdate {
-	ids := make([]int, len(s))
+	ids := make([]string, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -245,7 +245,7 @@ func (luu *LocalUserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: session.FieldID,
 				},
 			},
@@ -261,7 +261,7 @@ func (luu *LocalUserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: session.FieldID,
 				},
 			},
@@ -280,7 +280,7 @@ func (luu *LocalUserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: session.FieldID,
 				},
 			},
@@ -332,14 +332,14 @@ func (luuo *LocalUserUpdateOne) SetUser(u *User) *LocalUserUpdateOne {
 }
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
-func (luuo *LocalUserUpdateOne) AddSessionIDs(ids ...int) *LocalUserUpdateOne {
+func (luuo *LocalUserUpdateOne) AddSessionIDs(ids ...string) *LocalUserUpdateOne {
 	luuo.mutation.AddSessionIDs(ids...)
 	return luuo
 }
 
 // AddSessions adds the "sessions" edges to the Session entity.
 func (luuo *LocalUserUpdateOne) AddSessions(s ...*Session) *LocalUserUpdateOne {
-	ids := make([]int, len(s))
+	ids := make([]string, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -364,14 +364,14 @@ func (luuo *LocalUserUpdateOne) ClearSessions() *LocalUserUpdateOne {
 }
 
 // RemoveSessionIDs removes the "sessions" edge to Session entities by IDs.
-func (luuo *LocalUserUpdateOne) RemoveSessionIDs(ids ...int) *LocalUserUpdateOne {
+func (luuo *LocalUserUpdateOne) RemoveSessionIDs(ids ...string) *LocalUserUpdateOne {
 	luuo.mutation.RemoveSessionIDs(ids...)
 	return luuo
 }
 
 // RemoveSessions removes "sessions" edges to Session entities.
 func (luuo *LocalUserUpdateOne) RemoveSessions(s ...*Session) *LocalUserUpdateOne {
-	ids := make([]int, len(s))
+	ids := make([]string, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -529,7 +529,7 @@ func (luuo *LocalUserUpdateOne) sqlSave(ctx context.Context) (_node *LocalUser, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: session.FieldID,
 				},
 			},
@@ -545,7 +545,7 @@ func (luuo *LocalUserUpdateOne) sqlSave(ctx context.Context) (_node *LocalUser, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: session.FieldID,
 				},
 			},
@@ -564,7 +564,7 @@ func (luuo *LocalUserUpdateOne) sqlSave(ctx context.Context) (_node *LocalUser, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: session.FieldID,
 				},
 			},

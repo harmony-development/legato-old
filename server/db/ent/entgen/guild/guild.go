@@ -21,6 +21,8 @@ const (
 	EdgeBans = "bans"
 	// EdgeChannel holds the string denoting the channel edge name in mutations.
 	EdgeChannel = "channel"
+	// EdgeRole holds the string denoting the role edge name in mutations.
+	EdgeRole = "role"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// Table holds the table name of the guild in the database.
@@ -46,6 +48,13 @@ const (
 	ChannelInverseTable = "channels"
 	// ChannelColumn is the table column denoting the channel relation/edge.
 	ChannelColumn = "guild_channel"
+	// RoleTable is the table the holds the role relation/edge.
+	RoleTable = "roles"
+	// RoleInverseTable is the table name for the Role entity.
+	// It exists in this package in order to avoid circular dependency with the "role" package.
+	RoleInverseTable = "roles"
+	// RoleColumn is the table column denoting the role relation/edge.
+	RoleColumn = "guild_role"
 	// UserTable is the table the holds the user relation/edge. The primary key declared below.
 	UserTable = "user_guild"
 	// UserInverseTable is the table name for the User entity.

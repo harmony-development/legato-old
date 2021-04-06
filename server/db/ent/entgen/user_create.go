@@ -11,6 +11,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/emotepack"
 	"github.com/harmony-development/legato/server/db/ent/entgen/foreignuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
+	"github.com/harmony-development/legato/server/db/ent/entgen/guildlistentry"
 	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
 	"github.com/harmony-development/legato/server/db/ent/entgen/profile"
@@ -90,14 +91,14 @@ func (uc *UserCreate) SetProfile(p *Profile) *UserCreate {
 }
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
-func (uc *UserCreate) AddSessionIDs(ids ...int) *UserCreate {
+func (uc *UserCreate) AddSessionIDs(ids ...string) *UserCreate {
 	uc.mutation.AddSessionIDs(ids...)
 	return uc
 }
 
 // AddSessions adds the "sessions" edges to the Session entity.
 func (uc *UserCreate) AddSessions(s ...*Session) *UserCreate {
-	ids := make([]int, len(s))
+	ids := make([]string, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -162,6 +163,21 @@ func (uc *UserCreate) AddCreatedpacks(e ...*EmotePack) *UserCreate {
 		ids[i] = e[i].ID
 	}
 	return uc.AddCreatedpackIDs(ids...)
+}
+
+// AddListentryIDs adds the "listentry" edge to the GuildListEntry entity by IDs.
+func (uc *UserCreate) AddListentryIDs(ids ...uint64) *UserCreate {
+	uc.mutation.AddListentryIDs(ids...)
+	return uc
+}
+
+// AddListentry adds the "listentry" edges to the GuildListEntry entity.
+func (uc *UserCreate) AddListentry(g ...*GuildListEntry) *UserCreate {
+	ids := make([]uint64, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return uc.AddListentryIDs(ids...)
 }
 
 // AddRoleIDs adds the "role" edge to the Role entity by IDs.
@@ -329,7 +345,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: session.FieldID,
 				},
 			},
@@ -407,6 +423,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUint64,
 					Column: emotepack.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.ListentryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ListentryTable,
+			Columns: []string{user.ListentryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: guildlistentry.FieldID,
 				},
 			},
 		}

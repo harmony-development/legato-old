@@ -1,9 +1,23 @@
 package ent_shared
 
 import (
+	"time"
+
 	"github.com/harmony-development/legato/server/db/ent/entgen/session"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
+
+func (d *database) ExpireSessions() (err error) {
+	doRecovery(&err)
+	d.Session.Delete().Where(session.ExpiresLT(time.Now())).ExecX(ctx)
+	return
+}
+
+func (d *database) ExtendSession(session string) (err error) {
+	doRecovery(&err)
+	d.Session.UpdateOneID(session).ExecX(ctx)
+	return
+}
 
 func (d *database) AddSession(userID uint64, session string) (err error) {
 	defer doRecovery(&err)
@@ -17,7 +31,7 @@ func (d *database) AddSession(userID uint64, session string) (err error) {
 				).
 				OnlyX(ctx),
 		).
-		SetSessionid(session).
+		SetID(session).
 		SaveX(ctx)
 
 	return
@@ -28,7 +42,7 @@ func (d *database) SessionToUserID(sid string) (userID uint64, err error) {
 
 	userID = d.Client.Session.
 		Query().
-		Where(session.Sessionid(sid)).
+		Where(session.ID(sid)).
 		QueryUser().
 		OnlyX(ctx).
 		ID

@@ -42,11 +42,13 @@ type UserEdges struct {
 	Emotepack []*EmotePack `json:"emotepack,omitempty"`
 	// Createdpacks holds the value of the createdpacks edge.
 	Createdpacks []*EmotePack `json:"createdpacks,omitempty"`
+	// Listentry holds the value of the listentry edge.
+	Listentry []*GuildListEntry `json:"listentry,omitempty"`
 	// Role holds the value of the role edge.
 	Role []*Role `json:"role,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [9]bool
+	loadedTypes [10]bool
 }
 
 // LocalUserOrErr returns the LocalUser value or an error if the edge
@@ -136,10 +138,19 @@ func (e UserEdges) CreatedpacksOrErr() ([]*EmotePack, error) {
 	return nil, &NotLoadedError{edge: "createdpacks"}
 }
 
+// ListentryOrErr returns the Listentry value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ListentryOrErr() ([]*GuildListEntry, error) {
+	if e.loadedTypes[8] {
+		return e.Listentry, nil
+	}
+	return nil, &NotLoadedError{edge: "listentry"}
+}
+
 // RoleOrErr returns the Role value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) RoleOrErr() ([]*Role, error) {
-	if e.loadedTypes[8] {
+	if e.loadedTypes[9] {
 		return e.Role, nil
 	}
 	return nil, &NotLoadedError{edge: "role"}
@@ -225,6 +236,11 @@ func (u *User) QueryEmotepack() *EmotePackQuery {
 // QueryCreatedpacks queries the "createdpacks" edge of the User entity.
 func (u *User) QueryCreatedpacks() *EmotePackQuery {
 	return (&UserClient{config: u.config}).QueryCreatedpacks(u)
+}
+
+// QueryListentry queries the "listentry" edge of the User entity.
+func (u *User) QueryListentry() *GuildListEntryQuery {
+	return (&UserClient{config: u.config}).QueryListentry(u)
 }
 
 // QueryRole queries the "role" edge of the User entity.

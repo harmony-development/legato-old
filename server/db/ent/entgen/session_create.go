@@ -21,12 +21,6 @@ type SessionCreate struct {
 	hooks    []Hook
 }
 
-// SetSessionid sets the "sessionid" field.
-func (sc *SessionCreate) SetSessionid(s string) *SessionCreate {
-	sc.mutation.SetSessionid(s)
-	return sc
-}
-
 // SetExpires sets the "expires" field.
 func (sc *SessionCreate) SetExpires(t time.Time) *SessionCreate {
 	sc.mutation.SetExpires(t)
@@ -38,6 +32,12 @@ func (sc *SessionCreate) SetNillableExpires(t *time.Time) *SessionCreate {
 	if t != nil {
 		sc.SetExpires(*t)
 	}
+	return sc
+}
+
+// SetID sets the "id" field.
+func (sc *SessionCreate) SetID(s string) *SessionCreate {
+	sc.mutation.SetID(s)
 	return sc
 }
 
@@ -120,9 +120,6 @@ func (sc *SessionCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (sc *SessionCreate) check() error {
-	if _, ok := sc.mutation.Sessionid(); !ok {
-		return &ValidationError{Name: "sessionid", err: errors.New("entgen: missing required field \"sessionid\"")}
-	}
 	if _, ok := sc.mutation.Expires(); !ok {
 		return &ValidationError{Name: "expires", err: errors.New("entgen: missing required field \"expires\"")}
 	}
@@ -137,8 +134,6 @@ func (sc *SessionCreate) sqlSave(ctx context.Context) (*Session, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -148,18 +143,14 @@ func (sc *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: session.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeString,
 				Column: session.FieldID,
 			},
 		}
 	)
-	if value, ok := sc.mutation.Sessionid(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: session.FieldSessionid,
-		})
-		_node.Sessionid = value
+	if id, ok := sc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
 	}
 	if value, ok := sc.mutation.Expires(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -232,8 +223,6 @@ func (scb *SessionCreateBulk) Save(ctx context.Context) ([]*Session, error) {
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

@@ -4,7 +4,6 @@ package filehash
 
 import (
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 )
 
@@ -92,28 +91,35 @@ func IDLTE(id int) predicate.FileHash {
 }
 
 // Hash applies equality check predicate on the "hash" field. It's identical to HashEQ.
-func Hash(v string) predicate.FileHash {
+func Hash(v []byte) predicate.FileHash {
 	return predicate.FileHash(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldHash), v))
 	})
 }
 
+// Fileid applies equality check predicate on the "fileid" field. It's identical to FileidEQ.
+func Fileid(v string) predicate.FileHash {
+	return predicate.FileHash(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldFileid), v))
+	})
+}
+
 // HashEQ applies the EQ predicate on the "hash" field.
-func HashEQ(v string) predicate.FileHash {
+func HashEQ(v []byte) predicate.FileHash {
 	return predicate.FileHash(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldHash), v))
 	})
 }
 
 // HashNEQ applies the NEQ predicate on the "hash" field.
-func HashNEQ(v string) predicate.FileHash {
+func HashNEQ(v []byte) predicate.FileHash {
 	return predicate.FileHash(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldHash), v))
 	})
 }
 
 // HashIn applies the In predicate on the "hash" field.
-func HashIn(vs ...string) predicate.FileHash {
+func HashIn(vs ...[]byte) predicate.FileHash {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -130,7 +136,7 @@ func HashIn(vs ...string) predicate.FileHash {
 }
 
 // HashNotIn applies the NotIn predicate on the "hash" field.
-func HashNotIn(vs ...string) predicate.FileHash {
+func HashNotIn(vs ...[]byte) predicate.FileHash {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -147,93 +153,141 @@ func HashNotIn(vs ...string) predicate.FileHash {
 }
 
 // HashGT applies the GT predicate on the "hash" field.
-func HashGT(v string) predicate.FileHash {
+func HashGT(v []byte) predicate.FileHash {
 	return predicate.FileHash(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldHash), v))
 	})
 }
 
 // HashGTE applies the GTE predicate on the "hash" field.
-func HashGTE(v string) predicate.FileHash {
+func HashGTE(v []byte) predicate.FileHash {
 	return predicate.FileHash(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldHash), v))
 	})
 }
 
 // HashLT applies the LT predicate on the "hash" field.
-func HashLT(v string) predicate.FileHash {
+func HashLT(v []byte) predicate.FileHash {
 	return predicate.FileHash(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldHash), v))
 	})
 }
 
 // HashLTE applies the LTE predicate on the "hash" field.
-func HashLTE(v string) predicate.FileHash {
+func HashLTE(v []byte) predicate.FileHash {
 	return predicate.FileHash(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldHash), v))
 	})
 }
 
-// HashContains applies the Contains predicate on the "hash" field.
-func HashContains(v string) predicate.FileHash {
+// FileidEQ applies the EQ predicate on the "fileid" field.
+func FileidEQ(v string) predicate.FileHash {
 	return predicate.FileHash(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldHash), v))
+		s.Where(sql.EQ(s.C(FieldFileid), v))
 	})
 }
 
-// HashHasPrefix applies the HasPrefix predicate on the "hash" field.
-func HashHasPrefix(v string) predicate.FileHash {
+// FileidNEQ applies the NEQ predicate on the "fileid" field.
+func FileidNEQ(v string) predicate.FileHash {
 	return predicate.FileHash(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldHash), v))
+		s.Where(sql.NEQ(s.C(FieldFileid), v))
 	})
 }
 
-// HashHasSuffix applies the HasSuffix predicate on the "hash" field.
-func HashHasSuffix(v string) predicate.FileHash {
+// FileidIn applies the In predicate on the "fileid" field.
+func FileidIn(vs ...string) predicate.FileHash {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
 	return predicate.FileHash(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldHash), v))
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldFileid), v...))
 	})
 }
 
-// HashEqualFold applies the EqualFold predicate on the "hash" field.
-func HashEqualFold(v string) predicate.FileHash {
+// FileidNotIn applies the NotIn predicate on the "fileid" field.
+func FileidNotIn(vs ...string) predicate.FileHash {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
 	return predicate.FileHash(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldHash), v))
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldFileid), v...))
 	})
 }
 
-// HashContainsFold applies the ContainsFold predicate on the "hash" field.
-func HashContainsFold(v string) predicate.FileHash {
+// FileidGT applies the GT predicate on the "fileid" field.
+func FileidGT(v string) predicate.FileHash {
 	return predicate.FileHash(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldHash), v))
+		s.Where(sql.GT(s.C(FieldFileid), v))
 	})
 }
 
-// HasFile applies the HasEdge predicate on the "file" edge.
-func HasFile() predicate.FileHash {
+// FileidGTE applies the GTE predicate on the "fileid" field.
+func FileidGTE(v string) predicate.FileHash {
 	return predicate.FileHash(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(FileTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, FileTable, FileColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
+		s.Where(sql.GTE(s.C(FieldFileid), v))
 	})
 }
 
-// HasFileWith applies the HasEdge predicate on the "file" edge with a given conditions (other predicates).
-func HasFileWith(preds ...predicate.File) predicate.FileHash {
+// FileidLT applies the LT predicate on the "fileid" field.
+func FileidLT(v string) predicate.FileHash {
 	return predicate.FileHash(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(FileInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, FileTable, FileColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
+		s.Where(sql.LT(s.C(FieldFileid), v))
+	})
+}
+
+// FileidLTE applies the LTE predicate on the "fileid" field.
+func FileidLTE(v string) predicate.FileHash {
+	return predicate.FileHash(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldFileid), v))
+	})
+}
+
+// FileidContains applies the Contains predicate on the "fileid" field.
+func FileidContains(v string) predicate.FileHash {
+	return predicate.FileHash(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldFileid), v))
+	})
+}
+
+// FileidHasPrefix applies the HasPrefix predicate on the "fileid" field.
+func FileidHasPrefix(v string) predicate.FileHash {
+	return predicate.FileHash(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldFileid), v))
+	})
+}
+
+// FileidHasSuffix applies the HasSuffix predicate on the "fileid" field.
+func FileidHasSuffix(v string) predicate.FileHash {
+	return predicate.FileHash(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldFileid), v))
+	})
+}
+
+// FileidEqualFold applies the EqualFold predicate on the "fileid" field.
+func FileidEqualFold(v string) predicate.FileHash {
+	return predicate.FileHash(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldFileid), v))
+	})
+}
+
+// FileidContainsFold applies the ContainsFold predicate on the "fileid" field.
+func FileidContainsFold(v string) predicate.FileHash {
+	return predicate.FileHash(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldFileid), v))
 	})
 }
 

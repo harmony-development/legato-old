@@ -28,12 +28,6 @@ func (su *SessionUpdate) Where(ps ...predicate.Session) *SessionUpdate {
 	return su
 }
 
-// SetSessionid sets the "sessionid" field.
-func (su *SessionUpdate) SetSessionid(s string) *SessionUpdate {
-	su.mutation.SetSessionid(s)
-	return su
-}
-
 // SetExpires sets the "expires" field.
 func (su *SessionUpdate) SetExpires(t time.Time) *SessionUpdate {
 	su.mutation.SetExpires(t)
@@ -135,7 +129,7 @@ func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   session.Table,
 			Columns: session.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeString,
 				Column: session.FieldID,
 			},
 		},
@@ -146,13 +140,6 @@ func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := su.mutation.Sessionid(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: session.FieldSessionid,
-		})
 	}
 	if value, ok := su.mutation.Expires(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -212,12 +199,6 @@ type SessionUpdateOne struct {
 	config
 	hooks    []Hook
 	mutation *SessionMutation
-}
-
-// SetSessionid sets the "sessionid" field.
-func (suo *SessionUpdateOne) SetSessionid(s string) *SessionUpdateOne {
-	suo.mutation.SetSessionid(s)
-	return suo
 }
 
 // SetExpires sets the "expires" field.
@@ -321,7 +302,7 @@ func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err e
 			Table:   session.Table,
 			Columns: session.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeString,
 				Column: session.FieldID,
 			},
 		},
@@ -337,13 +318,6 @@ func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err e
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := suo.mutation.Sessionid(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: session.FieldSessionid,
-		})
 	}
 	if value, ok := suo.mutation.Expires(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{

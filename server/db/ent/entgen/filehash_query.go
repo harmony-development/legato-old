@@ -4,7 +4,6 @@ package entgen
 
 import (
 	"context"
-	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -12,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/harmony-development/legato/server/db/ent/entgen/file"
 	"github.com/harmony-development/legato/server/db/ent/entgen/filehash"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 )
@@ -25,8 +23,6 @@ type FileHashQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.FileHash
-	// eager-loading edges.
-	withFile *FileQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -54,28 +50,6 @@ func (fhq *FileHashQuery) Offset(offset int) *FileHashQuery {
 func (fhq *FileHashQuery) Order(o ...OrderFunc) *FileHashQuery {
 	fhq.order = append(fhq.order, o...)
 	return fhq
-}
-
-// QueryFile chains the current query on the "file" edge.
-func (fhq *FileHashQuery) QueryFile() *FileQuery {
-	query := &FileQuery{config: fhq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := fhq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := fhq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(filehash.Table, filehash.FieldID, selector),
-			sqlgraph.To(file.Table, file.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, filehash.FileTable, filehash.FileColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(fhq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
 }
 
 // First returns the first FileHash entity from the query.
@@ -259,22 +233,10 @@ func (fhq *FileHashQuery) Clone() *FileHashQuery {
 		offset:     fhq.offset,
 		order:      append([]OrderFunc{}, fhq.order...),
 		predicates: append([]predicate.FileHash{}, fhq.predicates...),
-		withFile:   fhq.withFile.Clone(),
 		// clone intermediate query.
 		sql:  fhq.sql.Clone(),
 		path: fhq.path,
 	}
-}
-
-// WithFile tells the query-builder to eager-load the nodes that are connected to
-// the "file" edge. The optional arguments are used to configure the query builder of the edge.
-func (fhq *FileHashQuery) WithFile(opts ...func(*FileQuery)) *FileHashQuery {
-	query := &FileQuery{config: fhq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	fhq.withFile = query
-	return fhq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -283,7 +245,7 @@ func (fhq *FileHashQuery) WithFile(opts ...func(*FileQuery)) *FileHashQuery {
 // Example:
 //
 //	var v []struct {
-//		Hash string `json:"hash,omitempty"`
+//		Hash []byte `json:"hash,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -310,7 +272,7 @@ func (fhq *FileHashQuery) GroupBy(field string, fields ...string) *FileHashGroup
 // Example:
 //
 //	var v []struct {
-//		Hash string `json:"hash,omitempty"`
+//		Hash []byte `json:"hash,omitempty"`
 //	}
 //
 //	client.FileHash.Query().
@@ -340,11 +302,8 @@ func (fhq *FileHashQuery) prepareQuery(ctx context.Context) error {
 
 func (fhq *FileHashQuery) sqlAll(ctx context.Context) ([]*FileHash, error) {
 	var (
-		nodes       = []*FileHash{}
-		_spec       = fhq.querySpec()
-		loadedTypes = [1]bool{
-			fhq.withFile != nil,
-		}
+		nodes = []*FileHash{}
+		_spec = fhq.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &FileHash{config: fhq.config}
@@ -356,7 +315,6 @@ func (fhq *FileHashQuery) sqlAll(ctx context.Context) ([]*FileHash, error) {
 			return fmt.Errorf("entgen: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
-		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if err := sqlgraph.QueryNodes(ctx, fhq.driver, _spec); err != nil {
@@ -365,35 +323,6 @@ func (fhq *FileHashQuery) sqlAll(ctx context.Context) ([]*FileHash, error) {
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
-	if query := fhq.withFile; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*FileHash)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-		}
-		query.withFKs = true
-		query.Where(predicate.File(func(s *sql.Selector) {
-			s.Where(sql.InValues(filehash.FileColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			fk := n.file_hash_file
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "file_hash_file" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "file_hash_file" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.File = n
-		}
-	}
-
 	return nodes, nil
 }
 

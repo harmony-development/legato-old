@@ -16,9 +16,7 @@ import (
 type Session struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
-	// Sessionid holds the value of the "sessionid" field.
-	Sessionid string `json:"sessionid,omitempty"`
+	ID string `json:"id,omitempty"`
 	// Expires holds the value of the "expires" field.
 	Expires time.Time `json:"expires,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -57,8 +55,6 @@ func (*Session) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case session.FieldID:
-			values[i] = &sql.NullInt64{}
-		case session.FieldSessionid:
 			values[i] = &sql.NullString{}
 		case session.FieldExpires:
 			values[i] = &sql.NullTime{}
@@ -82,16 +78,10 @@ func (s *Session) assignValues(columns []string, values []interface{}) error {
 	for i := range columns {
 		switch columns[i] {
 		case session.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
-			}
-			s.ID = int(value.Int64)
-		case session.FieldSessionid:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field sessionid", values[i])
+				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value.Valid {
-				s.Sessionid = value.String
+				s.ID = value.String
 			}
 		case session.FieldExpires:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -146,8 +136,6 @@ func (s *Session) String() string {
 	var builder strings.Builder
 	builder.WriteString("Session(")
 	builder.WriteString(fmt.Sprintf("id=%v", s.ID))
-	builder.WriteString(", sessionid=")
-	builder.WriteString(s.Sessionid)
 	builder.WriteString(", expires=")
 	builder.WriteString(s.Expires.Format(time.ANSIC))
 	builder.WriteByte(')')

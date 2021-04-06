@@ -14,8 +14,7 @@ type ForeignUser struct {
 // Fields of the ForeignUser.
 func (ForeignUser) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("username"),
-		field.String("picture"),
+		field.Uint64("foreignid"),
 		field.String("host"),
 	}
 }

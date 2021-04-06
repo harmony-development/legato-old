@@ -9,23 +9,17 @@ const (
 	FieldID = "id"
 	// FieldHash holds the string denoting the hash field in the database.
 	FieldHash = "hash"
-	// EdgeFile holds the string denoting the file edge name in mutations.
-	EdgeFile = "file"
+	// FieldFileid holds the string denoting the fileid field in the database.
+	FieldFileid = "fileid"
 	// Table holds the table name of the filehash in the database.
 	Table = "file_hashes"
-	// FileTable is the table the holds the file relation/edge.
-	FileTable = "files"
-	// FileInverseTable is the table name for the File entity.
-	// It exists in this package in order to avoid circular dependency with the "file" package.
-	FileInverseTable = "files"
-	// FileColumn is the table column denoting the file relation/edge.
-	FileColumn = "file_hash_file"
 )
 
 // Columns holds all SQL columns for filehash fields.
 var Columns = []string{
 	FieldID,
 	FieldHash,
+	FieldFileid,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

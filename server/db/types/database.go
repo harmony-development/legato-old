@@ -1,50 +1,45 @@
 package types
 
 import (
-	"database/sql"
 	"time"
 
-	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen"
-	"github.com/harmony-development/legato/server/db/queries"
 )
 
 type IHarmonyDB interface {
 	Migrate() error
 	SessionExpireRoutine()
-	CreateGuild(owner, id, channelID uint64, guildName, picture string) (*queries.Guild, error)
+	CreateGuild(owner, id, channelID uint64, guildName, picture string) (*entgen.Guild, error)
 	DeleteGuild(guildID uint64) error
 	GetOwner(guildID uint64) (uint64, error)
 	IsOwner(guildID, userID uint64) (bool, error)
-	CreateInvite(guildID uint64, possibleUses int32, name string) (queries.Invite, error)
+	CreateInvite(guildID uint64, possibleUses int32, name string) (*entgen.Invite, error)
 	UpdateChannelInformation(guildID, channelID uint64, name *string, metadata []byte) error
 	AddMemberToGuild(userID, guildID uint64) error
 	AddChannelToGuild(guildID, channelID uint64, channelName string, previous, next *uint64, kind ChannelKind, md []byte) (c entgen.Channel, err error)
 	DeleteChannelFromGuild(guildID, channelID uint64) error
 
-	AddTextMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata, content string) (time.Time, error)
-	AddFilesMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata, files []*harmonytypesv1.Attachment) (time.Time, error)
-	AddEmbedMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo sql.NullInt64, metadata *harmonytypesv1.Metadata, embeds []*harmonytypesv1.Embed) (time.Time, error)
+	AddTextMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, content string) (time.Time, error)
+	AddFilesMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, files []*harmonytypesv1.Attachment) (time.Time, error)
+	AddEmbedMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, embeds []*harmonytypesv1.Embed) (time.Time, error)
 
 	UpdateTextMessage(messageID uint64, content string) (time.Time, error)
 
-	DeleteMessage(messageID, channelID, guildID uint64) error
+	DeleteMessage(messageID uint64) error
 
-	GetMessageOwner(messageID uint64) (uint64, error)
 	ResolveGuildID(inviteID string) (uint64, error)
 	IncrementInvite(inviteID string) error
 	DeleteInvite(inviteID string) error
 	SessionToUserID(session string) (uint64, error)
 	UserInGuild(userID, guildID uint64) (bool, error)
 
-	GetMessageDate(messageID uint64) (time.Time, error)
-	GetMessages(guildID, channelID uint64) ([]*harmonytypesv1.Message, error)
-	GetMessagesBefore(guildID, channelID uint64, date time.Time) ([]*harmonytypesv1.Message, error)
+	GetMessages(channelID uint64) ([]*entgen.Message, error)
+	GetMessagesBefore(channelID uint64, date time.Time) ([]*entgen.Message, error)
 
 	UpdateGuildInformation(guildID uint64, name, picture string, metadata *harmonytypesv1.Metadata, updateName, updatePicture, updateMetadata bool) error
 	GetGuildPicture(guildID uint64) (string, error)
-	GetInvites(guildID uint64) ([]queries.Invite, error)
+	GetInvites(guildID uint64) ([]*entgen.Invite, error)
 	DeleteMember(guildID, userID uint64) error
 	BanUser(guildID, userID uint64) error
 	IsBanned(guildID, userID uint64) (bool, error)
@@ -53,31 +48,29 @@ type IHarmonyDB interface {
 	ChannelsForGuild(guildID uint64) ([]*entgen.Channel, error)
 	MembersInGuild(guildID uint64) ([]uint64, error)
 	CountMembersInGuild(guildID uint64) (int64, error)
-	GetMessage(messageID uint64) (*harmonytypesv1.Message, error)
+	GetMessage(messageID uint64) (*entgen.Message, error)
 	GetUserByEmail(email string) (UserData, error)
 	GetUserByID(userID uint64) (UserData, error)
 	AddSession(userID uint64, session string) error
 	ExtendSession(session string) error
-	GetLocalUserForForeignUser(userID uint64, homeserver string) (uint64, error)
+	GetLocalUserForForeignUser(userID uint64, host string) (uint64, error)
 	AddLocalUser(userID uint64, email, username string, passwordHash []byte) error
-	AddForeignUser(homeServer string, userID, localUserID uint64, username, avatar string) (uint64, error)
+	AddForeignUser(host string, userID, localUserID uint64, username, avatar string) error
 	EmailExists(email string) (bool, error)
 	ExpireSessions() error
 	UpdateUsername(userID uint64, username string) error
-	GetAvatar(userID uint64) (sql.NullString, error)
+	GetAvatar(userID uint64) (*string, error)
 	UpdateAvatar(userID uint64, avatar string) error
 	HasGuildWithID(guildID uint64) (bool, error)
 	HasChannelWithID(guildID, channelID uint64) (bool, error)
 	HasMessageWithID(guildID, channelID, messageID uint64) (bool, error)
-	GetGuildByID(guildID uint64) (*chatv1.GetGuildResponse, error)
+	GetGuildByID(guildID uint64) (*entgen.Guild, error)
 	SetStatus(userID uint64, status harmonytypesv1.UserStatus) error
 	SetUsername(userID uint64, username string) error
 	SetAvatar(userID uint64, avatar string) error
 	SetIsBot(userID uint64, isBot bool) error
 	GetUserMetadata(userID uint64, appID string) (string, error)
-	GetNonceInfo(nonce string) (queries.GetNonceInfoRow, error)
-	AddNonce(nonce string, userID uint64, homeServer string) error
-	GetGuildList(userID uint64) ([]queries.GetGuildListRow, error)
+	GetGuildList(userID uint64) ([]*entgen.GuildListEntry, error)
 	GetGuildListPosition(userID, guildID uint64, homeServer string) (string, error)
 	AddGuildToList(userID, guildID uint64, homeServer string) error
 	MoveGuild(userID, guildID uint64, homeServer string, nextGuildID, prevGuildID uint64, nextHomeServer, prevHomeServer string) error
@@ -93,11 +86,11 @@ type IHarmonyDB interface {
 	GetEmotePacks(userID uint64) ([]*entgen.EmotePack, error)
 	GetEmotePackEmotes(packID uint64) ([]*entgen.Emote, error)
 	DequipEmotePack(userID, packID uint64) error
-	AddRoleToGuild(guildID uint64, role *chatv1.Role) error
+	AddRoleToGuild(guildID, roleID uint64, name string, color int, hoist, pingable bool) error
 	RemoveRoleFromGuild(guildID, roleID uint64) error
 	GetRolePositions(guildID, before, previous uint64) (pos string, retErr error)
 	MoveRole(guildID, roleID, beforeRole, previousRole uint64) error
-	GetGuildRoles(guildID uint64) ([]*chatv1.Role, error)
+	GetGuildRoles(guildID uint64) ([]*entgen.Role, error)
 	SetPermissions(guildID uint64, channelID uint64, roleID uint64, permissions []PermissionsNode) error
 	GetPermissions(guildID uint64, channelID uint64, roleID uint64) (permissions []PermissionsNode, err error)
 	GetPermissionsData(guildID uint64) (PermissionsData, error)
@@ -108,6 +101,6 @@ type IHarmonyDB interface {
 	GetFileIDByHash(hash []byte) (string, error)
 	AddFileHash(fileID string, hash []byte) error
 	SetFileMetadata(fileID string, contentType, name string, size int32) error
-	GetFileMetadata(fileID string) (queries.GetFileMetadataRow, error)
+	GetFileMetadata(fileID string) (*entgen.File, error)
 	GetFirstChannel(guildID uint64) (uint64, error)
 }

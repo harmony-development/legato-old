@@ -29,6 +29,7 @@ type RoleQuery struct {
 	// eager-loading edges.
 	withMembers    *UserQuery
 	withPermission *PermissionQuery
+	withFKs        bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -377,12 +378,16 @@ func (rq *RoleQuery) prepareQuery(ctx context.Context) error {
 func (rq *RoleQuery) sqlAll(ctx context.Context) ([]*Role, error) {
 	var (
 		nodes       = []*Role{}
+		withFKs     = rq.withFKs
 		_spec       = rq.querySpec()
 		loadedTypes = [2]bool{
 			rq.withMembers != nil,
 			rq.withPermission != nil,
 		}
 	)
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, role.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Role{config: rq.config}
 		nodes = append(nodes, node)

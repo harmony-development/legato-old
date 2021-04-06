@@ -28,15 +28,16 @@ func (fuu *ForeignUserUpdate) Where(ps ...predicate.ForeignUser) *ForeignUserUpd
 	return fuu
 }
 
-// SetUsername sets the "username" field.
-func (fuu *ForeignUserUpdate) SetUsername(s string) *ForeignUserUpdate {
-	fuu.mutation.SetUsername(s)
+// SetForeignid sets the "foreignid" field.
+func (fuu *ForeignUserUpdate) SetForeignid(u uint64) *ForeignUserUpdate {
+	fuu.mutation.ResetForeignid()
+	fuu.mutation.SetForeignid(u)
 	return fuu
 }
 
-// SetPicture sets the "picture" field.
-func (fuu *ForeignUserUpdate) SetPicture(s string) *ForeignUserUpdate {
-	fuu.mutation.SetPicture(s)
+// AddForeignid adds u to the "foreignid" field.
+func (fuu *ForeignUserUpdate) AddForeignid(u uint64) *ForeignUserUpdate {
+	fuu.mutation.AddForeignid(u)
 	return fuu
 }
 
@@ -151,18 +152,18 @@ func (fuu *ForeignUserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := fuu.mutation.Username(); ok {
+	if value, ok := fuu.mutation.Foreignid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeUint64,
 			Value:  value,
-			Column: foreignuser.FieldUsername,
+			Column: foreignuser.FieldForeignid,
 		})
 	}
-	if value, ok := fuu.mutation.Picture(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+	if value, ok := fuu.mutation.AddedForeignid(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint64,
 			Value:  value,
-			Column: foreignuser.FieldPicture,
+			Column: foreignuser.FieldForeignid,
 		})
 	}
 	if value, ok := fuu.mutation.Host(); ok {
@@ -225,15 +226,16 @@ type ForeignUserUpdateOne struct {
 	mutation *ForeignUserMutation
 }
 
-// SetUsername sets the "username" field.
-func (fuuo *ForeignUserUpdateOne) SetUsername(s string) *ForeignUserUpdateOne {
-	fuuo.mutation.SetUsername(s)
+// SetForeignid sets the "foreignid" field.
+func (fuuo *ForeignUserUpdateOne) SetForeignid(u uint64) *ForeignUserUpdateOne {
+	fuuo.mutation.ResetForeignid()
+	fuuo.mutation.SetForeignid(u)
 	return fuuo
 }
 
-// SetPicture sets the "picture" field.
-func (fuuo *ForeignUserUpdateOne) SetPicture(s string) *ForeignUserUpdateOne {
-	fuuo.mutation.SetPicture(s)
+// AddForeignid adds u to the "foreignid" field.
+func (fuuo *ForeignUserUpdateOne) AddForeignid(u uint64) *ForeignUserUpdateOne {
+	fuuo.mutation.AddForeignid(u)
 	return fuuo
 }
 
@@ -353,18 +355,18 @@ func (fuuo *ForeignUserUpdateOne) sqlSave(ctx context.Context) (_node *ForeignUs
 			}
 		}
 	}
-	if value, ok := fuuo.mutation.Username(); ok {
+	if value, ok := fuuo.mutation.Foreignid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeUint64,
 			Value:  value,
-			Column: foreignuser.FieldUsername,
+			Column: foreignuser.FieldForeignid,
 		})
 	}
-	if value, ok := fuuo.mutation.Picture(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+	if value, ok := fuuo.mutation.AddedForeignid(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint64,
 			Value:  value,
-			Column: foreignuser.FieldPicture,
+			Column: foreignuser.FieldForeignid,
 		})
 	}
 	if value, ok := fuuo.mutation.Host(); ok {

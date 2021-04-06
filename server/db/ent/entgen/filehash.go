@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/harmony-development/legato/server/db/ent/entgen/file"
 	"github.com/harmony-development/legato/server/db/ent/entgen/filehash"
 )
 
@@ -17,33 +16,9 @@ type FileHash struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Hash holds the value of the "hash" field.
-	Hash string `json:"hash,omitempty"`
-	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the FileHashQuery when eager-loading is set.
-	Edges FileHashEdges `json:"edges"`
-}
-
-// FileHashEdges holds the relations/edges for other nodes in the graph.
-type FileHashEdges struct {
-	// File holds the value of the file edge.
-	File *File `json:"file,omitempty"`
-	// loadedTypes holds the information for reporting if a
-	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
-}
-
-// FileOrErr returns the File value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e FileHashEdges) FileOrErr() (*File, error) {
-	if e.loadedTypes[0] {
-		if e.File == nil {
-			// The edge file was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: file.Label}
-		}
-		return e.File, nil
-	}
-	return nil, &NotLoadedError{edge: "file"}
+	Hash []byte `json:"hash,omitempty"`
+	// Fileid holds the value of the "fileid" field.
+	Fileid string `json:"fileid,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -51,9 +26,11 @@ func (*FileHash) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case filehash.FieldHash:
+			values[i] = &[]byte{}
 		case filehash.FieldID:
 			values[i] = &sql.NullInt64{}
-		case filehash.FieldHash:
+		case filehash.FieldFileid:
 			values[i] = &sql.NullString{}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type FileHash", columns[i])
@@ -77,19 +54,20 @@ func (fh *FileHash) assignValues(columns []string, values []interface{}) error {
 			}
 			fh.ID = int(value.Int64)
 		case filehash.FieldHash:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field hash", values[i])
+			} else if value != nil {
+				fh.Hash = *value
+			}
+		case filehash.FieldFileid:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field fileid", values[i])
 			} else if value.Valid {
-				fh.Hash = value.String
+				fh.Fileid = value.String
 			}
 		}
 	}
 	return nil
-}
-
-// QueryFile queries the "file" edge of the FileHash entity.
-func (fh *FileHash) QueryFile() *FileQuery {
-	return (&FileHashClient{config: fh.config}).QueryFile(fh)
 }
 
 // Update returns a builder for updating this FileHash.
@@ -116,7 +94,9 @@ func (fh *FileHash) String() string {
 	builder.WriteString("FileHash(")
 	builder.WriteString(fmt.Sprintf("id=%v", fh.ID))
 	builder.WriteString(", hash=")
-	builder.WriteString(fh.Hash)
+	builder.WriteString(fmt.Sprintf("%v", fh.Hash))
+	builder.WriteString(", fileid=")
+	builder.WriteString(fh.Fileid)
 	builder.WriteByte(')')
 	return builder.String()
 }

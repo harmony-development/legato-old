@@ -16,7 +16,7 @@ type Session struct {
 // Fields of the Session.
 func (Session) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("sessionid"),
+		field.String("id"),
 		field.Time("expires").Default(func() time.Time {
 			return time.Now().Add(2 * 24 * time.Hour)
 		}),

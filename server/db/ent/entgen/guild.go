@@ -36,11 +36,13 @@ type GuildEdges struct {
 	Bans []*User `json:"bans,omitempty"`
 	// Channel holds the value of the channel edge.
 	Channel []*Channel `json:"channel,omitempty"`
+	// Role holds the value of the role edge.
+	Role []*Role `json:"role,omitempty"`
 	// User holds the value of the user edge.
 	User []*User `json:"user,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [5]bool
 }
 
 // InviteOrErr returns the Invite value or an error if the edge
@@ -70,10 +72,19 @@ func (e GuildEdges) ChannelOrErr() ([]*Channel, error) {
 	return nil, &NotLoadedError{edge: "channel"}
 }
 
+// RoleOrErr returns the Role value or an error if the edge
+// was not loaded in eager-loading.
+func (e GuildEdges) RoleOrErr() ([]*Role, error) {
+	if e.loadedTypes[3] {
+		return e.Role, nil
+	}
+	return nil, &NotLoadedError{edge: "role"}
+}
+
 // UserOrErr returns the User value or an error if the edge
 // was not loaded in eager-loading.
 func (e GuildEdges) UserOrErr() ([]*User, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		return e.User, nil
 	}
 	return nil, &NotLoadedError{edge: "user"}
@@ -153,6 +164,11 @@ func (gu *Guild) QueryBans() *UserQuery {
 // QueryChannel queries the "channel" edge of the Guild entity.
 func (gu *Guild) QueryChannel() *ChannelQuery {
 	return (&GuildClient{config: gu.config}).QueryChannel(gu)
+}
+
+// QueryRole queries the "role" edge of the Guild entity.
+func (gu *Guild) QueryRole() *RoleQuery {
+	return (&GuildClient{config: gu.config}).QueryRole(gu)
 }
 
 // QueryUser queries the "user" edge of the Guild entity.

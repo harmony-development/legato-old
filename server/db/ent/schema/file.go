@@ -2,7 +2,6 @@ package schema
 
 import (
 	"entgo.io/ent"
-	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
@@ -23,7 +22,5 @@ func (File) Fields() []ent.Field {
 
 // Edges of the File.
 func (File) Edges() []ent.Edge {
-	return []ent.Edge{
-		edge.From("filehash", FileHash.Type).Ref("file").Unique(),
-	}
+	return nil
 }
