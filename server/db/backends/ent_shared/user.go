@@ -4,6 +4,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen"
 	"github.com/harmony-development/legato/server/db/ent/entgen/foreignuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
+	"github.com/harmony-development/legato/server/db/ent/entgen/profile"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 	"github.com/harmony-development/legato/server/db/ent/entgen/usermeta"
 	"github.com/harmony-development/legato/server/db/types"
@@ -127,5 +128,29 @@ func (d *database) GetUserMetadata(userID uint64, appID string) (meta string, er
 		).
 		OnlyX(ctx).
 		Meta
+	return
+}
+
+func (d *database) SetAvatar(userID uint64, avatar string) (err error) {
+	defer doRecovery(&err)
+	d.Profile.
+		Update().
+		Where(
+			profile.HasUserWith(
+				user.ID(userID)),
+		).
+		SetAvatar(avatar)
+	return
+}
+
+func (d *database) SetIsBot(userID uint64, isBot bool) (err error) {
+	defer doRecovery(&err)
+	d.Profile.
+		Update().
+		Where(
+			profile.HasUserWith(
+				user.ID(userID)),
+		).
+		SetIsBot(isBot)
 	return
 }

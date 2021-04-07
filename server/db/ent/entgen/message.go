@@ -9,12 +9,11 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/harmony-development/legato/server/db/ent/entgen/message"
-
 	v1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/ent/entgen/embedmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/filemessage"
+	"github.com/harmony-development/legato/server/db/ent/entgen/message"
 	"github.com/harmony-development/legato/server/db/ent/entgen/textmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )

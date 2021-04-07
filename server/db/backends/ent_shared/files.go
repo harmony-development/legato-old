@@ -32,3 +32,14 @@ func (d *database) GetFileMetadata(fileID string) (file *entgen.File, err error)
 	file = d.File.GetX(ctx, fileID)
 	return
 }
+
+func (d *database) SetFileMetadata(fileID string, contentType, name string, size int) (err error) {
+	defer doRecovery(&err)
+	d.File.
+		UpdateOneID(fileID).
+		SetContenttype(contentType).
+		SetName(name).
+		SetSize(size).
+		ExecX(ctx)
+	return
+}

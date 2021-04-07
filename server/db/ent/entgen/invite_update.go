@@ -27,12 +27,6 @@ func (iu *InviteUpdate) Where(ps ...predicate.Invite) *InviteUpdate {
 	return iu
 }
 
-// SetCode sets the "code" field.
-func (iu *InviteUpdate) SetCode(s string) *InviteUpdate {
-	iu.mutation.SetCode(s)
-	return iu
-}
-
 // SetUses sets the "uses" field.
 func (iu *InviteUpdate) SetUses(i int64) *InviteUpdate {
 	iu.mutation.ResetUses()
@@ -162,7 +156,7 @@ func (iu *InviteUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   invite.Table,
 			Columns: invite.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeString,
 				Column: invite.FieldID,
 			},
 		},
@@ -173,13 +167,6 @@ func (iu *InviteUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := iu.mutation.Code(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: invite.FieldCode,
-		})
 	}
 	if value, ok := iu.mutation.Uses(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -260,12 +247,6 @@ type InviteUpdateOne struct {
 	config
 	hooks    []Hook
 	mutation *InviteMutation
-}
-
-// SetCode sets the "code" field.
-func (iuo *InviteUpdateOne) SetCode(s string) *InviteUpdateOne {
-	iuo.mutation.SetCode(s)
-	return iuo
 }
 
 // SetUses sets the "uses" field.
@@ -397,7 +378,7 @@ func (iuo *InviteUpdateOne) sqlSave(ctx context.Context) (_node *Invite, err err
 			Table:   invite.Table,
 			Columns: invite.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeString,
 				Column: invite.FieldID,
 			},
 		},
@@ -413,13 +394,6 @@ func (iuo *InviteUpdateOne) sqlSave(ctx context.Context) (_node *Invite, err err
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := iuo.mutation.Code(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: invite.FieldCode,
-		})
 	}
 	if value, ok := iuo.mutation.Uses(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{

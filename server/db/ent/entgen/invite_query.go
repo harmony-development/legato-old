@@ -102,8 +102,8 @@ func (iq *InviteQuery) FirstX(ctx context.Context) *Invite {
 
 // FirstID returns the first Invite ID from the query.
 // Returns a *NotFoundError when no Invite ID was found.
-func (iq *InviteQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (iq *InviteQuery) FirstID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = iq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -115,7 +115,7 @@ func (iq *InviteQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (iq *InviteQuery) FirstIDX(ctx context.Context) int {
+func (iq *InviteQuery) FirstIDX(ctx context.Context) string {
 	id, err := iq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -153,8 +153,8 @@ func (iq *InviteQuery) OnlyX(ctx context.Context) *Invite {
 // OnlyID is like Only, but returns the only Invite ID in the query.
 // Returns a *NotSingularError when exactly one Invite ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (iq *InviteQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (iq *InviteQuery) OnlyID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = iq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -170,7 +170,7 @@ func (iq *InviteQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (iq *InviteQuery) OnlyIDX(ctx context.Context) int {
+func (iq *InviteQuery) OnlyIDX(ctx context.Context) string {
 	id, err := iq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -196,8 +196,8 @@ func (iq *InviteQuery) AllX(ctx context.Context) []*Invite {
 }
 
 // IDs executes the query and returns a list of Invite IDs.
-func (iq *InviteQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (iq *InviteQuery) IDs(ctx context.Context) ([]string, error) {
+	var ids []string
 	if err := iq.Select(invite.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -205,7 +205,7 @@ func (iq *InviteQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (iq *InviteQuery) IDsX(ctx context.Context) []int {
+func (iq *InviteQuery) IDsX(ctx context.Context) []string {
 	ids, err := iq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -283,12 +283,12 @@ func (iq *InviteQuery) WithGuild(opts ...func(*GuildQuery)) *InviteQuery {
 // Example:
 //
 //	var v []struct {
-//		Code string `json:"code,omitempty"`
+//		Uses int64 `json:"uses,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Invite.Query().
-//		GroupBy(invite.FieldCode).
+//		GroupBy(invite.FieldUses).
 //		Aggregate(entgen.Count()).
 //		Scan(ctx, &v)
 //
@@ -310,11 +310,11 @@ func (iq *InviteQuery) GroupBy(field string, fields ...string) *InviteGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Code string `json:"code,omitempty"`
+//		Uses int64 `json:"uses,omitempty"`
 //	}
 //
 //	client.Invite.Query().
-//		Select(invite.FieldCode).
+//		Select(invite.FieldUses).
 //		Scan(ctx, &v)
 //
 func (iq *InviteQuery) Select(field string, fields ...string) *InviteSelect {
@@ -421,7 +421,7 @@ func (iq *InviteQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   invite.Table,
 			Columns: invite.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeString,
 				Column: invite.FieldID,
 			},
 		},

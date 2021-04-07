@@ -14,7 +14,7 @@ type Invite struct {
 // Fields of the Invites.
 func (Invite) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("code").Unique(),
+		field.String("id").Unique(),
 		field.Int64("uses").Default(0),
 		field.Int64("possible_uses").Default(-1),
 	}

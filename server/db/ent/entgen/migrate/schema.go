@@ -193,8 +193,7 @@ var (
 	}
 	// InvitesColumns holds the columns for the "invites" table.
 	InvitesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "code", Type: field.TypeString, Unique: true},
+		{Name: "id", Type: field.TypeString, Unique: true},
 		{Name: "uses", Type: field.TypeInt64, Default: 0},
 		{Name: "possible_uses", Type: field.TypeInt64, Default: -1},
 		{Name: "guild_invite", Type: field.TypeUint64, Nullable: true},
@@ -207,7 +206,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "invites_guilds_invite",
-				Columns:    []*schema.Column{InvitesColumns[4]},
+				Columns:    []*schema.Column{InvitesColumns[3]},
 				RefColumns: []*schema.Column{GuildsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -339,7 +338,6 @@ var (
 		{Name: "pingable", Type: field.TypeBool},
 		{Name: "position", Type: field.TypeString},
 		{Name: "channel_role", Type: field.TypeUint64, Nullable: true},
-		{Name: "guild_role", Type: field.TypeUint64, Nullable: true},
 	}
 	// RolesTable holds the schema information for the "roles" table.
 	RolesTable = &schema.Table{
@@ -351,12 +349,6 @@ var (
 				Symbol:     "roles_channels_role",
 				Columns:    []*schema.Column{RolesColumns[6]},
 				RefColumns: []*schema.Column{ChannelsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "roles_guilds_role",
-				Columns:    []*schema.Column{RolesColumns[7]},
-				RefColumns: []*schema.Column{GuildsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -447,6 +439,31 @@ var (
 			},
 		},
 	}
+	// GuildRoleColumns holds the columns for the "guild_role" table.
+	GuildRoleColumns = []*schema.Column{
+		{Name: "guild_id", Type: field.TypeUint64},
+		{Name: "role_id", Type: field.TypeUint64},
+	}
+	// GuildRoleTable holds the schema information for the "guild_role" table.
+	GuildRoleTable = &schema.Table{
+		Name:       "guild_role",
+		Columns:    GuildRoleColumns,
+		PrimaryKey: []*schema.Column{GuildRoleColumns[0], GuildRoleColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "guild_role_guild_id",
+				Columns:    []*schema.Column{GuildRoleColumns[0]},
+				RefColumns: []*schema.Column{GuildsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "guild_role_role_id",
+				Columns:    []*schema.Column{GuildRoleColumns[1]},
+				RefColumns: []*schema.Column{RolesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// RoleMembersColumns holds the columns for the "role_members" table.
 	RoleMembersColumns = []*schema.Column{
 		{Name: "role_id", Type: field.TypeUint64},
@@ -519,6 +536,7 @@ var (
 		TextMessagesTable,
 		UsersTable,
 		UserMetaTable,
+		GuildRoleTable,
 		RoleMembersTable,
 		UserGuildTable,
 	}
@@ -541,12 +559,13 @@ func init() {
 	PermissionNodesTable.ForeignKeys[0].RefTable = RolesTable
 	ProfilesTable.ForeignKeys[0].RefTable = UsersTable
 	RolesTable.ForeignKeys[0].RefTable = ChannelsTable
-	RolesTable.ForeignKeys[1].RefTable = GuildsTable
 	SessionsTable.ForeignKeys[0].RefTable = LocalUsersTable
 	SessionsTable.ForeignKeys[1].RefTable = UsersTable
 	TextMessagesTable.ForeignKeys[0].RefTable = MessagesTable
 	UsersTable.ForeignKeys[0].RefTable = GuildsTable
 	UserMetaTable.ForeignKeys[0].RefTable = UsersTable
+	GuildRoleTable.ForeignKeys[0].RefTable = GuildsTable
+	GuildRoleTable.ForeignKeys[1].RefTable = RolesTable
 	RoleMembersTable.ForeignKeys[0].RefTable = RolesTable
 	RoleMembersTable.ForeignKeys[1].RefTable = UsersTable
 	UserGuildTable.ForeignKeys[0].RefTable = UsersTable

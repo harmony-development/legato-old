@@ -95,11 +95,11 @@ type IHarmonyDB interface {
 	GetPermissionsData(guildID uint64) (PermissionsData, error)
 	RolesForUser(guildID, userID uint64) ([]uint64, error)
 	ManageRoles(guildID, userID uint64, addRoles, removeRoles []uint64) error
-	ModifyRole(guildID, roleID uint64, name string, color int32, hoist, pingable, updateName, updateColor, updateHoist, updatePingable bool) error
+	ModifyRole(roleID uint64, name *string, color *int, hoist, pingable *bool) error
 	DeleteFileMeta(fileID string) error
 	GetFileIDByHash(hash []byte) (string, error)
 	AddFileHash(fileID string, hash []byte) error
-	SetFileMetadata(fileID string, contentType, name string, size int32) error
+	SetFileMetadata(fileID string, contentType, name string, size int) error
 	GetFileMetadata(fileID string) (*entgen.File, error)
 	GetFirstChannel(guildID uint64) (uint64, error)
 }

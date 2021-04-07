@@ -7,8 +7,6 @@ const (
 	Label = "invite"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldCode holds the string denoting the code field in the database.
-	FieldCode = "code"
 	// FieldUses holds the string denoting the uses field in the database.
 	FieldUses = "uses"
 	// FieldPossibleUses holds the string denoting the possible_uses field in the database.
@@ -29,7 +27,6 @@ const (
 // Columns holds all SQL columns for invite fields.
 var Columns = []string{
 	FieldID,
-	FieldCode,
 	FieldUses,
 	FieldPossibleUses,
 }

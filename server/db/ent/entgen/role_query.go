@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/permissionnode"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 	"github.com/harmony-development/legato/server/db/ent/entgen/role"
@@ -27,6 +28,7 @@ type RoleQuery struct {
 	fields     []string
 	predicates []predicate.Role
 	// eager-loading edges.
+	withGuild          *GuildQuery
 	withMembers        *UserQuery
 	withPermissionNode *PermissionNodeQuery
 	withFKs            bool
@@ -57,6 +59,28 @@ func (rq *RoleQuery) Offset(offset int) *RoleQuery {
 func (rq *RoleQuery) Order(o ...OrderFunc) *RoleQuery {
 	rq.order = append(rq.order, o...)
 	return rq
+}
+
+// QueryGuild chains the current query on the "guild" edge.
+func (rq *RoleQuery) QueryGuild() *GuildQuery {
+	query := &GuildQuery{config: rq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := rq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := rq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(role.Table, role.FieldID, selector),
+			sqlgraph.To(guild.Table, guild.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, role.GuildTable, role.GuildPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // QueryMembers chains the current query on the "members" edge.
@@ -284,12 +308,24 @@ func (rq *RoleQuery) Clone() *RoleQuery {
 		offset:             rq.offset,
 		order:              append([]OrderFunc{}, rq.order...),
 		predicates:         append([]predicate.Role{}, rq.predicates...),
+		withGuild:          rq.withGuild.Clone(),
 		withMembers:        rq.withMembers.Clone(),
 		withPermissionNode: rq.withPermissionNode.Clone(),
 		// clone intermediate query.
 		sql:  rq.sql.Clone(),
 		path: rq.path,
 	}
+}
+
+// WithGuild tells the query-builder to eager-load the nodes that are connected to
+// the "guild" edge. The optional arguments are used to configure the query builder of the edge.
+func (rq *RoleQuery) WithGuild(opts ...func(*GuildQuery)) *RoleQuery {
+	query := &GuildQuery{config: rq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	rq.withGuild = query
+	return rq
 }
 
 // WithMembers tells the query-builder to eager-load the nodes that are connected to
@@ -380,7 +416,8 @@ func (rq *RoleQuery) sqlAll(ctx context.Context) ([]*Role, error) {
 		nodes       = []*Role{}
 		withFKs     = rq.withFKs
 		_spec       = rq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
+			rq.withGuild != nil,
 			rq.withMembers != nil,
 			rq.withPermissionNode != nil,
 		}
@@ -406,6 +443,70 @@ func (rq *RoleQuery) sqlAll(ctx context.Context) ([]*Role, error) {
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
+	}
+
+	if query := rq.withGuild; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		ids := make(map[uint64]*Role, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+			node.Edges.Guild = []*Guild{}
+		}
+		var (
+			edgeids []uint64
+			edges   = make(map[uint64][]*Role)
+		)
+		_spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: true,
+				Table:   role.GuildTable,
+				Columns: role.GuildPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(role.GuildPrimaryKey[1], fks...))
+			},
+
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*sql.NullInt64)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*sql.NullInt64)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := uint64(eout.Int64)
+				inValue := uint64(ein.Int64)
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				edgeids = append(edgeids, inValue)
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, rq.driver, _spec); err != nil {
+			return nil, fmt.Errorf(`query edges "guild": %w`, err)
+		}
+		query.Where(guild.IDIn(edgeids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := edges[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "guild" node returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Guild = append(nodes[i].Edges.Guild, n)
+			}
+		}
 	}
 
 	if query := rq.withMembers; query != nil {

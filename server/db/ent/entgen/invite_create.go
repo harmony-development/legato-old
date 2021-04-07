@@ -20,12 +20,6 @@ type InviteCreate struct {
 	hooks    []Hook
 }
 
-// SetCode sets the "code" field.
-func (ic *InviteCreate) SetCode(s string) *InviteCreate {
-	ic.mutation.SetCode(s)
-	return ic
-}
-
 // SetUses sets the "uses" field.
 func (ic *InviteCreate) SetUses(i int64) *InviteCreate {
 	ic.mutation.SetUses(i)
@@ -51,6 +45,12 @@ func (ic *InviteCreate) SetNillablePossibleUses(i *int64) *InviteCreate {
 	if i != nil {
 		ic.SetPossibleUses(*i)
 	}
+	return ic
+}
+
+// SetID sets the "id" field.
+func (ic *InviteCreate) SetID(s string) *InviteCreate {
+	ic.mutation.SetID(s)
 	return ic
 }
 
@@ -137,9 +137,6 @@ func (ic *InviteCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (ic *InviteCreate) check() error {
-	if _, ok := ic.mutation.Code(); !ok {
-		return &ValidationError{Name: "code", err: errors.New("entgen: missing required field \"code\"")}
-	}
 	if _, ok := ic.mutation.Uses(); !ok {
 		return &ValidationError{Name: "uses", err: errors.New("entgen: missing required field \"uses\"")}
 	}
@@ -157,8 +154,6 @@ func (ic *InviteCreate) sqlSave(ctx context.Context) (*Invite, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -168,18 +163,14 @@ func (ic *InviteCreate) createSpec() (*Invite, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: invite.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeString,
 				Column: invite.FieldID,
 			},
 		}
 	)
-	if value, ok := ic.mutation.Code(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: invite.FieldCode,
-		})
-		_node.Code = value
+	if id, ok := ic.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
 	}
 	if value, ok := ic.mutation.Uses(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -260,8 +251,6 @@ func (icb *InviteCreateBulk) Save(ctx context.Context) ([]*Invite, error) {
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

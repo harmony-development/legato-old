@@ -15,9 +15,7 @@ import (
 type Invite struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
-	// Code holds the value of the "code" field.
-	Code string `json:"code,omitempty"`
+	ID string `json:"id,omitempty"`
 	// Uses holds the value of the "uses" field.
 	Uses int64 `json:"uses,omitempty"`
 	// PossibleUses holds the value of the "possible_uses" field.
@@ -56,9 +54,9 @@ func (*Invite) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case invite.FieldID, invite.FieldUses, invite.FieldPossibleUses:
+		case invite.FieldUses, invite.FieldPossibleUses:
 			values[i] = &sql.NullInt64{}
-		case invite.FieldCode:
+		case invite.FieldID:
 			values[i] = &sql.NullString{}
 		case invite.ForeignKeys[0]: // guild_invite
 			values[i] = &sql.NullInt64{}
@@ -78,16 +76,10 @@ func (i *Invite) assignValues(columns []string, values []interface{}) error {
 	for j := range columns {
 		switch columns[j] {
 		case invite.FieldID:
-			value, ok := values[j].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
-			}
-			i.ID = int(value.Int64)
-		case invite.FieldCode:
 			if value, ok := values[j].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field code", values[j])
+				return fmt.Errorf("unexpected type %T for field id", values[j])
 			} else if value.Valid {
-				i.Code = value.String
+				i.ID = value.String
 			}
 		case invite.FieldUses:
 			if value, ok := values[j].(*sql.NullInt64); !ok {
@@ -141,8 +133,6 @@ func (i *Invite) String() string {
 	var builder strings.Builder
 	builder.WriteString("Invite(")
 	builder.WriteString(fmt.Sprintf("id=%v", i.ID))
-	builder.WriteString(", code=")
-	builder.WriteString(i.Code)
 	builder.WriteString(", uses=")
 	builder.WriteString(fmt.Sprintf("%v", i.Uses))
 	builder.WriteString(", possible_uses=")

@@ -5,6 +5,7 @@ import (
 	"runtime"
 
 	"github.com/harmony-development/legato/server/db/ent/entgen"
+	"github.com/harmony-development/legato/server/logger"
 	"github.com/ztrue/tracerr"
 
 	// backend
@@ -13,6 +14,7 @@ import (
 
 type database struct {
 	*entgen.Client
+	Logger logger.Logger
 }
 
 var ctx = context.Background()
@@ -29,6 +31,10 @@ var ctx = context.Background()
 
 // 	return db, nil
 // }
+
+func (d *database) Migrate() error {
+	return d.Schema.Create(ctx)
+}
 
 func (db *database) TxX() *entgen.Tx {
 	tx, err := db.Tx(ctx)

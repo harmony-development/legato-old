@@ -62,14 +62,14 @@ func (gu *GuildUpdate) SetMetadata(b []byte) *GuildUpdate {
 }
 
 // AddInviteIDs adds the "invite" edge to the Invite entity by IDs.
-func (gu *GuildUpdate) AddInviteIDs(ids ...int) *GuildUpdate {
+func (gu *GuildUpdate) AddInviteIDs(ids ...string) *GuildUpdate {
 	gu.mutation.AddInviteIDs(ids...)
 	return gu
 }
 
 // AddInvite adds the "invite" edges to the Invite entity.
 func (gu *GuildUpdate) AddInvite(i ...*Invite) *GuildUpdate {
-	ids := make([]int, len(i))
+	ids := make([]string, len(i))
 	for j := range i {
 		ids[j] = i[j].ID
 	}
@@ -148,14 +148,14 @@ func (gu *GuildUpdate) ClearInvite() *GuildUpdate {
 }
 
 // RemoveInviteIDs removes the "invite" edge to Invite entities by IDs.
-func (gu *GuildUpdate) RemoveInviteIDs(ids ...int) *GuildUpdate {
+func (gu *GuildUpdate) RemoveInviteIDs(ids ...string) *GuildUpdate {
 	gu.mutation.RemoveInviteIDs(ids...)
 	return gu
 }
 
 // RemoveInvite removes "invite" edges to Invite entities.
 func (gu *GuildUpdate) RemoveInvite(i ...*Invite) *GuildUpdate {
-	ids := make([]int, len(i))
+	ids := make([]string, len(i))
 	for j := range i {
 		ids[j] = i[j].ID
 	}
@@ -359,7 +359,7 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: invite.FieldID,
 				},
 			},
@@ -375,7 +375,7 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: invite.FieldID,
 				},
 			},
@@ -394,7 +394,7 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: invite.FieldID,
 				},
 			},
@@ -514,10 +514,10 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if gu.mutation.RoleCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   guild.RoleTable,
-			Columns: []string{guild.RoleColumn},
+			Columns: guild.RolePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -530,10 +530,10 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := gu.mutation.RemovedRoleIDs(); len(nodes) > 0 && !gu.mutation.RoleCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   guild.RoleTable,
-			Columns: []string{guild.RoleColumn},
+			Columns: guild.RolePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -549,10 +549,10 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := gu.mutation.RoleIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   guild.RoleTable,
-			Columns: []string{guild.RoleColumn},
+			Columns: guild.RolePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -670,14 +670,14 @@ func (guo *GuildUpdateOne) SetMetadata(b []byte) *GuildUpdateOne {
 }
 
 // AddInviteIDs adds the "invite" edge to the Invite entity by IDs.
-func (guo *GuildUpdateOne) AddInviteIDs(ids ...int) *GuildUpdateOne {
+func (guo *GuildUpdateOne) AddInviteIDs(ids ...string) *GuildUpdateOne {
 	guo.mutation.AddInviteIDs(ids...)
 	return guo
 }
 
 // AddInvite adds the "invite" edges to the Invite entity.
 func (guo *GuildUpdateOne) AddInvite(i ...*Invite) *GuildUpdateOne {
-	ids := make([]int, len(i))
+	ids := make([]string, len(i))
 	for j := range i {
 		ids[j] = i[j].ID
 	}
@@ -756,14 +756,14 @@ func (guo *GuildUpdateOne) ClearInvite() *GuildUpdateOne {
 }
 
 // RemoveInviteIDs removes the "invite" edge to Invite entities by IDs.
-func (guo *GuildUpdateOne) RemoveInviteIDs(ids ...int) *GuildUpdateOne {
+func (guo *GuildUpdateOne) RemoveInviteIDs(ids ...string) *GuildUpdateOne {
 	guo.mutation.RemoveInviteIDs(ids...)
 	return guo
 }
 
 // RemoveInvite removes "invite" edges to Invite entities.
 func (guo *GuildUpdateOne) RemoveInvite(i ...*Invite) *GuildUpdateOne {
-	ids := make([]int, len(i))
+	ids := make([]string, len(i))
 	for j := range i {
 		ids[j] = i[j].ID
 	}
@@ -972,7 +972,7 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: invite.FieldID,
 				},
 			},
@@ -988,7 +988,7 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: invite.FieldID,
 				},
 			},
@@ -1007,7 +1007,7 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: invite.FieldID,
 				},
 			},
@@ -1127,10 +1127,10 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 	}
 	if guo.mutation.RoleCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   guild.RoleTable,
-			Columns: []string{guild.RoleColumn},
+			Columns: guild.RolePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -1143,10 +1143,10 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 	}
 	if nodes := guo.mutation.RemovedRoleIDs(); len(nodes) > 0 && !guo.mutation.RoleCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   guild.RoleTable,
-			Columns: []string{guild.RoleColumn},
+			Columns: guild.RolePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -1162,10 +1162,10 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 	}
 	if nodes := guo.mutation.RoleIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   guild.RoleTable,
-			Columns: []string{guild.RoleColumn},
+			Columns: guild.RolePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

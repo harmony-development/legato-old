@@ -4,6 +4,8 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen"
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
+	"github.com/harmony-development/legato/server/db/ent/entgen/role"
+	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 	"github.com/harmony-development/legato/server/db/lexorank"
 	"github.com/harmony-development/legato/server/db/types"
 )
@@ -85,5 +87,61 @@ func (d *database) MoveRole(guildID, roleID, previousRole, nextRole uint64) (err
 			lexorank.Rank(previousPos, nextPos),
 		).
 		ExecX(ctx)
+	return
+}
+
+func (d *database) ManageRoles(guildID, userID uint64, addRoles, removeRoles []uint64) (err error) {
+	defer doRecovery(&err)
+	d.User.
+		UpdateOneID(userID).
+		AddRoleIDs(addRoles...).
+		RemoveRoleIDs(removeRoles...).
+		ExecX(ctx)
+	return
+}
+
+func (d *database) ModifyRole(roleID uint64, name *string, color *int, hoist, pingable *bool) (err error) {
+	defer doRecovery(&err)
+	update := d.Role.UpdateOneID(roleID)
+	if name != nil {
+		update.SetName(*name)
+	}
+	if color != nil {
+		update.SetColor(*color)
+	}
+	if hoist != nil {
+		update.SetHoist(*hoist)
+	}
+	if pingable != nil {
+		update.SetPingable(*pingable)
+	}
+	update.ExecX(ctx)
+	return
+}
+
+func (d *database) RemoveRoleFromGuild(guildID, roleID uint64) (err error) {
+	defer doRecovery(&err)
+	d.Guild.
+		UpdateOneID(guildID).
+		RemoveRoleIDs(roleID).
+		ExecX(ctx)
+	return
+}
+
+func (d *database) RolesForUser(guildID, userID uint64) (roles []uint64, err error) {
+	defer doRecovery(&err)
+	roles = d.Role.
+		Query().
+		Where(
+			role.And(
+				role.HasMembersWith(
+					user.ID(userID),
+				),
+				role.HasGuildWith(
+					guild.ID(guildID),
+				),
+			),
+		).
+		IDsX(ctx)
 	return
 }

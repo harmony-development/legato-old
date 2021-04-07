@@ -48,13 +48,11 @@ const (
 	ChannelInverseTable = "channels"
 	// ChannelColumn is the table column denoting the channel relation/edge.
 	ChannelColumn = "guild_channel"
-	// RoleTable is the table the holds the role relation/edge.
-	RoleTable = "roles"
+	// RoleTable is the table the holds the role relation/edge. The primary key declared below.
+	RoleTable = "guild_role"
 	// RoleInverseTable is the table name for the Role entity.
 	// It exists in this package in order to avoid circular dependency with the "role" package.
 	RoleInverseTable = "roles"
-	// RoleColumn is the table column denoting the role relation/edge.
-	RoleColumn = "guild_role"
 	// UserTable is the table the holds the user relation/edge. The primary key declared below.
 	UserTable = "user_guild"
 	// UserInverseTable is the table name for the User entity.
@@ -72,6 +70,9 @@ var Columns = []string{
 }
 
 var (
+	// RolePrimaryKey and RoleColumn2 are the table columns denoting the
+	// primary key for the role relation (M2M).
+	RolePrimaryKey = []string{"guild_id", "role_id"}
 	// UserPrimaryKey and UserColumn2 are the table columns denoting the
 	// primary key for the user relation (M2M).
 	UserPrimaryKey = []string{"user_id", "guild_id"}

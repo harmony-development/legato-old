@@ -452,6 +452,34 @@ func PositionContainsFold(v string) predicate.Role {
 	})
 }
 
+// HasGuild applies the HasEdge predicate on the "guild" edge.
+func HasGuild() predicate.Role {
+	return predicate.Role(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(GuildTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, GuildTable, GuildPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasGuildWith applies the HasEdge predicate on the "guild" edge with a given conditions (other predicates).
+func HasGuildWith(preds ...predicate.Guild) predicate.Role {
+	return predicate.Role(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(GuildInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, GuildTable, GuildPrimaryKey...),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasMembers applies the HasEdge predicate on the "members" edge.
 func HasMembers() predicate.Role {
 	return predicate.Role(func(s *sql.Selector) {

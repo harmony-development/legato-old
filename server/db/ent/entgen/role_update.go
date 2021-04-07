@@ -9,6 +9,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/permissionnode"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 	"github.com/harmony-development/legato/server/db/ent/entgen/role"
@@ -65,6 +66,21 @@ func (ru *RoleUpdate) SetPosition(s string) *RoleUpdate {
 	return ru
 }
 
+// AddGuildIDs adds the "guild" edge to the Guild entity by IDs.
+func (ru *RoleUpdate) AddGuildIDs(ids ...uint64) *RoleUpdate {
+	ru.mutation.AddGuildIDs(ids...)
+	return ru
+}
+
+// AddGuild adds the "guild" edges to the Guild entity.
+func (ru *RoleUpdate) AddGuild(g ...*Guild) *RoleUpdate {
+	ids := make([]uint64, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return ru.AddGuildIDs(ids...)
+}
+
 // AddMemberIDs adds the "members" edge to the User entity by IDs.
 func (ru *RoleUpdate) AddMemberIDs(ids ...uint64) *RoleUpdate {
 	ru.mutation.AddMemberIDs(ids...)
@@ -98,6 +114,27 @@ func (ru *RoleUpdate) AddPermissionNode(p ...*PermissionNode) *RoleUpdate {
 // Mutation returns the RoleMutation object of the builder.
 func (ru *RoleUpdate) Mutation() *RoleMutation {
 	return ru.mutation
+}
+
+// ClearGuild clears all "guild" edges to the Guild entity.
+func (ru *RoleUpdate) ClearGuild() *RoleUpdate {
+	ru.mutation.ClearGuild()
+	return ru
+}
+
+// RemoveGuildIDs removes the "guild" edge to Guild entities by IDs.
+func (ru *RoleUpdate) RemoveGuildIDs(ids ...uint64) *RoleUpdate {
+	ru.mutation.RemoveGuildIDs(ids...)
+	return ru
+}
+
+// RemoveGuild removes "guild" edges to Guild entities.
+func (ru *RoleUpdate) RemoveGuild(g ...*Guild) *RoleUpdate {
+	ids := make([]uint64, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return ru.RemoveGuildIDs(ids...)
 }
 
 // ClearMembers clears all "members" edges to the User entity.
@@ -252,6 +289,60 @@ func (ru *RoleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Value:  value,
 			Column: role.FieldPosition,
 		})
+	}
+	if ru.mutation.GuildCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   role.GuildTable,
+			Columns: role.GuildPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: guild.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ru.mutation.RemovedGuildIDs(); len(nodes) > 0 && !ru.mutation.GuildCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   role.GuildTable,
+			Columns: role.GuildPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: guild.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ru.mutation.GuildIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   role.GuildTable,
+			Columns: role.GuildPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: guild.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if ru.mutation.MembersCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -416,6 +507,21 @@ func (ruo *RoleUpdateOne) SetPosition(s string) *RoleUpdateOne {
 	return ruo
 }
 
+// AddGuildIDs adds the "guild" edge to the Guild entity by IDs.
+func (ruo *RoleUpdateOne) AddGuildIDs(ids ...uint64) *RoleUpdateOne {
+	ruo.mutation.AddGuildIDs(ids...)
+	return ruo
+}
+
+// AddGuild adds the "guild" edges to the Guild entity.
+func (ruo *RoleUpdateOne) AddGuild(g ...*Guild) *RoleUpdateOne {
+	ids := make([]uint64, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return ruo.AddGuildIDs(ids...)
+}
+
 // AddMemberIDs adds the "members" edge to the User entity by IDs.
 func (ruo *RoleUpdateOne) AddMemberIDs(ids ...uint64) *RoleUpdateOne {
 	ruo.mutation.AddMemberIDs(ids...)
@@ -449,6 +555,27 @@ func (ruo *RoleUpdateOne) AddPermissionNode(p ...*PermissionNode) *RoleUpdateOne
 // Mutation returns the RoleMutation object of the builder.
 func (ruo *RoleUpdateOne) Mutation() *RoleMutation {
 	return ruo.mutation
+}
+
+// ClearGuild clears all "guild" edges to the Guild entity.
+func (ruo *RoleUpdateOne) ClearGuild() *RoleUpdateOne {
+	ruo.mutation.ClearGuild()
+	return ruo
+}
+
+// RemoveGuildIDs removes the "guild" edge to Guild entities by IDs.
+func (ruo *RoleUpdateOne) RemoveGuildIDs(ids ...uint64) *RoleUpdateOne {
+	ruo.mutation.RemoveGuildIDs(ids...)
+	return ruo
+}
+
+// RemoveGuild removes "guild" edges to Guild entities.
+func (ruo *RoleUpdateOne) RemoveGuild(g ...*Guild) *RoleUpdateOne {
+	ids := make([]uint64, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return ruo.RemoveGuildIDs(ids...)
 }
 
 // ClearMembers clears all "members" edges to the User entity.
@@ -608,6 +735,60 @@ func (ruo *RoleUpdateOne) sqlSave(ctx context.Context) (_node *Role, err error) 
 			Value:  value,
 			Column: role.FieldPosition,
 		})
+	}
+	if ruo.mutation.GuildCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   role.GuildTable,
+			Columns: role.GuildPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: guild.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ruo.mutation.RemovedGuildIDs(); len(nodes) > 0 && !ruo.mutation.GuildCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   role.GuildTable,
+			Columns: role.GuildPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: guild.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ruo.mutation.GuildIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   role.GuildTable,
+			Columns: role.GuildPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: guild.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if ruo.mutation.MembersCleared() {
 		edge := &sqlgraph.EdgeSpec{

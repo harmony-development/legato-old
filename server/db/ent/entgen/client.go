@@ -1226,7 +1226,7 @@ func (c *GuildClient) QueryRole(gu *Guild) *RoleQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(guild.Table, guild.FieldID, id),
 			sqlgraph.To(role.Table, role.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, guild.RoleTable, guild.RoleColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, guild.RoleTable, guild.RolePrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(gu.driver.Dialect(), step)
 		return fromV, nil
@@ -1399,7 +1399,7 @@ func (c *InviteClient) UpdateOne(i *Invite) *InviteUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *InviteClient) UpdateOneID(id int) *InviteUpdateOne {
+func (c *InviteClient) UpdateOneID(id string) *InviteUpdateOne {
 	mutation := newInviteMutation(c.config, OpUpdateOne, withInviteID(id))
 	return &InviteUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1416,7 +1416,7 @@ func (c *InviteClient) DeleteOne(i *Invite) *InviteDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *InviteClient) DeleteOneID(id int) *InviteDeleteOne {
+func (c *InviteClient) DeleteOneID(id string) *InviteDeleteOne {
 	builder := c.Delete().Where(invite.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1429,12 +1429,12 @@ func (c *InviteClient) Query() *InviteQuery {
 }
 
 // Get returns a Invite entity by its id.
-func (c *InviteClient) Get(ctx context.Context, id int) (*Invite, error) {
+func (c *InviteClient) Get(ctx context.Context, id string) (*Invite, error) {
 	return c.Query().Where(invite.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *InviteClient) GetX(ctx context.Context, id int) *Invite {
+func (c *InviteClient) GetX(ctx context.Context, id string) *Invite {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -2072,6 +2072,22 @@ func (c *RoleClient) GetX(ctx context.Context, id uint64) *Role {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryGuild queries the guild edge of a Role.
+func (c *RoleClient) QueryGuild(r *Role) *GuildQuery {
+	query := &GuildQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(role.Table, role.FieldID, id),
+			sqlgraph.To(guild.Table, guild.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, role.GuildTable, role.GuildPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // QueryMembers queries the members edge of a Role.

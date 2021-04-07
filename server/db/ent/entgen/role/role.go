@@ -17,12 +17,19 @@ const (
 	FieldPingable = "pingable"
 	// FieldPosition holds the string denoting the position field in the database.
 	FieldPosition = "position"
+	// EdgeGuild holds the string denoting the guild edge name in mutations.
+	EdgeGuild = "guild"
 	// EdgeMembers holds the string denoting the members edge name in mutations.
 	EdgeMembers = "members"
 	// EdgePermissionNode holds the string denoting the permission_node edge name in mutations.
 	EdgePermissionNode = "permission_node"
 	// Table holds the table name of the role in the database.
 	Table = "roles"
+	// GuildTable is the table the holds the guild relation/edge. The primary key declared below.
+	GuildTable = "guild_role"
+	// GuildInverseTable is the table name for the Guild entity.
+	// It exists in this package in order to avoid circular dependency with the "guild" package.
+	GuildInverseTable = "guilds"
 	// MembersTable is the table the holds the members relation/edge. The primary key declared below.
 	MembersTable = "role_members"
 	// MembersInverseTable is the table name for the User entity.
@@ -51,10 +58,12 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"channel_role",
-	"guild_role",
 }
 
 var (
+	// GuildPrimaryKey and GuildColumn2 are the table columns denoting the
+	// primary key for the guild relation (M2M).
+	GuildPrimaryKey = []string{"guild_id", "role_id"}
 	// MembersPrimaryKey and MembersColumn2 are the table columns denoting the
 	// primary key for the members relation (M2M).
 	MembersPrimaryKey = []string{"role_id", "user_id"}

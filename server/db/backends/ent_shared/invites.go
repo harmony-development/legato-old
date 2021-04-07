@@ -11,7 +11,7 @@ func (d *database) CreateInvite(guildID uint64, possibleUses int32, name string)
 
 	inv = d.Invite.
 		Create().
-		SetCode(name).
+		SetID(name).
 		SetGuildID(guildID).
 		SetPossibleUses(int64(possibleUses)).
 		SaveX(ctx)
@@ -21,13 +21,13 @@ func (d *database) CreateInvite(guildID uint64, possibleUses int32, name string)
 
 func (d *database) IncrementInvite(inviteID string) (err error) {
 	defer doRecovery(&err)
-	d.Invite.Update().Where(invite.Code(inviteID)).AddUses(1).ExecX(ctx)
+	d.Invite.Update().Where(invite.ID(inviteID)).AddUses(1).ExecX(ctx)
 	return
 }
 
 func (d *database) DeleteInvite(inviteID string) (err error) {
 	defer doRecovery(&err)
-	d.Invite.Delete().Where(invite.Code(inviteID)).ExecX(ctx)
+	d.Invite.Delete().Where(invite.ID(inviteID)).ExecX(ctx)
 	return
 }
 
@@ -37,5 +37,11 @@ func (d *database) GetInvites(guildID uint64) (invites []*entgen.Invite, err err
 	for _, inv := range queriedInvites {
 		invites = append(invites, inv)
 	}
+	return
+}
+
+func (d *database) ResolveGuildID(inviteID string) (guildID uint64, err error) {
+	defer doRecovery(&err)
+	guildID = d.Invite.GetX(ctx, inviteID).QueryGuild().OnlyX(ctx).ID
 	return
 }

@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/permissionnode"
 	"github.com/harmony-development/legato/server/db/ent/entgen/role"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
@@ -55,6 +56,21 @@ func (rc *RoleCreate) SetPosition(s string) *RoleCreate {
 func (rc *RoleCreate) SetID(u uint64) *RoleCreate {
 	rc.mutation.SetID(u)
 	return rc
+}
+
+// AddGuildIDs adds the "guild" edge to the Guild entity by IDs.
+func (rc *RoleCreate) AddGuildIDs(ids ...uint64) *RoleCreate {
+	rc.mutation.AddGuildIDs(ids...)
+	return rc
+}
+
+// AddGuild adds the "guild" edges to the Guild entity.
+func (rc *RoleCreate) AddGuild(g ...*Guild) *RoleCreate {
+	ids := make([]uint64, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return rc.AddGuildIDs(ids...)
 }
 
 // AddMemberIDs adds the "members" edge to the User entity by IDs.
@@ -225,6 +241,25 @@ func (rc *RoleCreate) createSpec() (*Role, *sqlgraph.CreateSpec) {
 			Column: role.FieldPosition,
 		})
 		_node.Position = value
+	}
+	if nodes := rc.mutation.GuildIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   role.GuildTable,
+			Columns: role.GuildPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: guild.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := rc.mutation.MembersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

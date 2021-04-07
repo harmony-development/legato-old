@@ -212,7 +212,7 @@ var _ IHarmonyDB = &IHarmonyDBMock{}
 // 			MigrateFunc: func() error {
 // 				panic("mock out the Migrate method")
 // 			},
-// 			ModifyRoleFunc: func(guildID uint64, roleID uint64, name string, color int32, hoist bool, pingable bool, updateName bool, updateColor bool, updateHoist bool, updatePingable bool) error {
+// 			ModifyRoleFunc: func(roleID uint64, name *string, color *int, hoist *bool, pingable *bool) error {
 // 				panic("mock out the ModifyRole method")
 // 			},
 // 			MoveChannelFunc: func(channelID uint64, previousID *uint64, nextID *uint64) error {
@@ -245,7 +245,7 @@ var _ IHarmonyDB = &IHarmonyDBMock{}
 // 			SetAvatarFunc: func(userID uint64, avatar string) error {
 // 				panic("mock out the SetAvatar method")
 // 			},
-// 			SetFileMetadataFunc: func(fileID string, contentType string, name string, size int32) error {
+// 			SetFileMetadataFunc: func(fileID string, contentType string, name string, size int) error {
 // 				panic("mock out the SetFileMetadata method")
 // 			},
 // 			SetIsBotFunc: func(userID uint64, isBot bool) error {
@@ -484,7 +484,7 @@ type IHarmonyDBMock struct {
 	MigrateFunc func() error
 
 	// ModifyRoleFunc mocks the ModifyRole method.
-	ModifyRoleFunc func(guildID uint64, roleID uint64, name string, color int32, hoist bool, pingable bool, updateName bool, updateColor bool, updateHoist bool, updatePingable bool) error
+	ModifyRoleFunc func(roleID uint64, name *string, color *int, hoist *bool, pingable *bool) error
 
 	// MoveChannelFunc mocks the MoveChannel method.
 	MoveChannelFunc func(channelID uint64, previousID *uint64, nextID *uint64) error
@@ -517,7 +517,7 @@ type IHarmonyDBMock struct {
 	SetAvatarFunc func(userID uint64, avatar string) error
 
 	// SetFileMetadataFunc mocks the SetFileMetadata method.
-	SetFileMetadataFunc func(fileID string, contentType string, name string, size int32) error
+	SetFileMetadataFunc func(fileID string, contentType string, name string, size int) error
 
 	// SetIsBotFunc mocks the SetIsBot method.
 	SetIsBotFunc func(userID uint64, isBot bool) error
@@ -1023,26 +1023,16 @@ type IHarmonyDBMock struct {
 		}
 		// ModifyRole holds details about calls to the ModifyRole method.
 		ModifyRole []struct {
-			// GuildID is the guildID argument value.
-			GuildID uint64
 			// RoleID is the roleID argument value.
 			RoleID uint64
 			// Name is the name argument value.
-			Name string
+			Name *string
 			// Color is the color argument value.
-			Color int32
+			Color *int
 			// Hoist is the hoist argument value.
-			Hoist bool
+			Hoist *bool
 			// Pingable is the pingable argument value.
-			Pingable bool
-			// UpdateName is the updateName argument value.
-			UpdateName bool
-			// UpdateColor is the updateColor argument value.
-			UpdateColor bool
-			// UpdateHoist is the updateHoist argument value.
-			UpdateHoist bool
-			// UpdatePingable is the updatePingable argument value.
-			UpdatePingable bool
+			Pingable *bool
 		}
 		// MoveChannel holds details about calls to the MoveChannel method.
 		MoveChannel []struct {
@@ -1133,7 +1123,7 @@ type IHarmonyDBMock struct {
 			// Name is the name argument value.
 			Name string
 			// Size is the size argument value.
-			Size int32
+			Size int
 		}
 		// SetIsBot holds details about calls to the SetIsBot method.
 		SetIsBot []struct {
@@ -3597,65 +3587,45 @@ func (mock *IHarmonyDBMock) MigrateCalls() []struct {
 }
 
 // ModifyRole calls ModifyRoleFunc.
-func (mock *IHarmonyDBMock) ModifyRole(guildID uint64, roleID uint64, name string, color int32, hoist bool, pingable bool, updateName bool, updateColor bool, updateHoist bool, updatePingable bool) error {
+func (mock *IHarmonyDBMock) ModifyRole(roleID uint64, name *string, color *int, hoist *bool, pingable *bool) error {
 	if mock.ModifyRoleFunc == nil {
 		panic("IHarmonyDBMock.ModifyRoleFunc: method is nil but IHarmonyDB.ModifyRole was just called")
 	}
 	callInfo := struct {
-		GuildID        uint64
-		RoleID         uint64
-		Name           string
-		Color          int32
-		Hoist          bool
-		Pingable       bool
-		UpdateName     bool
-		UpdateColor    bool
-		UpdateHoist    bool
-		UpdatePingable bool
+		RoleID   uint64
+		Name     *string
+		Color    *int
+		Hoist    *bool
+		Pingable *bool
 	}{
-		GuildID:        guildID,
-		RoleID:         roleID,
-		Name:           name,
-		Color:          color,
-		Hoist:          hoist,
-		Pingable:       pingable,
-		UpdateName:     updateName,
-		UpdateColor:    updateColor,
-		UpdateHoist:    updateHoist,
-		UpdatePingable: updatePingable,
+		RoleID:   roleID,
+		Name:     name,
+		Color:    color,
+		Hoist:    hoist,
+		Pingable: pingable,
 	}
 	mock.lockModifyRole.Lock()
 	mock.calls.ModifyRole = append(mock.calls.ModifyRole, callInfo)
 	mock.lockModifyRole.Unlock()
-	return mock.ModifyRoleFunc(guildID, roleID, name, color, hoist, pingable, updateName, updateColor, updateHoist, updatePingable)
+	return mock.ModifyRoleFunc(roleID, name, color, hoist, pingable)
 }
 
 // ModifyRoleCalls gets all the calls that were made to ModifyRole.
 // Check the length with:
 //     len(mockedIHarmonyDB.ModifyRoleCalls())
 func (mock *IHarmonyDBMock) ModifyRoleCalls() []struct {
-	GuildID        uint64
-	RoleID         uint64
-	Name           string
-	Color          int32
-	Hoist          bool
-	Pingable       bool
-	UpdateName     bool
-	UpdateColor    bool
-	UpdateHoist    bool
-	UpdatePingable bool
+	RoleID   uint64
+	Name     *string
+	Color    *int
+	Hoist    *bool
+	Pingable *bool
 } {
 	var calls []struct {
-		GuildID        uint64
-		RoleID         uint64
-		Name           string
-		Color          int32
-		Hoist          bool
-		Pingable       bool
-		UpdateName     bool
-		UpdateColor    bool
-		UpdateHoist    bool
-		UpdatePingable bool
+		RoleID   uint64
+		Name     *string
+		Color    *int
+		Hoist    *bool
+		Pingable *bool
 	}
 	mock.lockModifyRole.RLock()
 	calls = mock.calls.ModifyRole
@@ -4033,7 +4003,7 @@ func (mock *IHarmonyDBMock) SetAvatarCalls() []struct {
 }
 
 // SetFileMetadata calls SetFileMetadataFunc.
-func (mock *IHarmonyDBMock) SetFileMetadata(fileID string, contentType string, name string, size int32) error {
+func (mock *IHarmonyDBMock) SetFileMetadata(fileID string, contentType string, name string, size int) error {
 	if mock.SetFileMetadataFunc == nil {
 		panic("IHarmonyDBMock.SetFileMetadataFunc: method is nil but IHarmonyDB.SetFileMetadata was just called")
 	}
@@ -4041,7 +4011,7 @@ func (mock *IHarmonyDBMock) SetFileMetadata(fileID string, contentType string, n
 		FileID      string
 		ContentType string
 		Name        string
-		Size        int32
+		Size        int
 	}{
 		FileID:      fileID,
 		ContentType: contentType,
@@ -4061,13 +4031,13 @@ func (mock *IHarmonyDBMock) SetFileMetadataCalls() []struct {
 	FileID      string
 	ContentType string
 	Name        string
-	Size        int32
+	Size        int
 } {
 	var calls []struct {
 		FileID      string
 		ContentType string
 		Name        string
-		Size        int32
+		Size        int
 	}
 	mock.lockSetFileMetadata.RLock()
 	calls = mock.calls.SetFileMetadata

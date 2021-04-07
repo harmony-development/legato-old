@@ -143,7 +143,7 @@ func (gq *GuildQuery) QueryRole() *RoleQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(guild.Table, guild.FieldID, selector),
 			sqlgraph.To(role.Table, role.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, guild.RoleTable, guild.RoleColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, guild.RoleTable, guild.RolePrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 		return fromU, nil
@@ -602,30 +602,65 @@ func (gq *GuildQuery) sqlAll(ctx context.Context) ([]*Guild, error) {
 
 	if query := gq.withRole; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[uint64]*Guild)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Role = []*Role{}
+		ids := make(map[uint64]*Guild, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+			node.Edges.Role = []*Role{}
 		}
-		query.withFKs = true
-		query.Where(predicate.Role(func(s *sql.Selector) {
-			s.Where(sql.InValues(guild.RoleColumn, fks...))
-		}))
+		var (
+			edgeids []uint64
+			edges   = make(map[uint64][]*Guild)
+		)
+		_spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: false,
+				Table:   guild.RoleTable,
+				Columns: guild.RolePrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(guild.RolePrimaryKey[0], fks...))
+			},
+
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*sql.NullInt64)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*sql.NullInt64)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := uint64(eout.Int64)
+				inValue := uint64(ein.Int64)
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				edgeids = append(edgeids, inValue)
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, gq.driver, _spec); err != nil {
+			return nil, fmt.Errorf(`query edges "role": %w`, err)
+		}
+		query.Where(role.IDIn(edgeids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.guild_role
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "guild_role" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := edges[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "guild_role" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected "role" node returned %v`, n.ID)
 			}
-			node.Edges.Role = append(node.Edges.Role, n)
+			for i := range nodes {
+				nodes[i].Edges.Role = append(nodes[i].Edges.Role, n)
+			}
 		}
 	}
 

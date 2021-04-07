@@ -13,6 +13,16 @@ func (d *database) ExpireSessions() (err error) {
 	return
 }
 
+func (d *database) SessionExpireRoutine() {
+	for {
+		time.Sleep(15 * time.Minute)
+		err := d.ExpireSessions()
+		if err != nil {
+			d.Logger.Exception(err)
+		}
+	}
+}
+
 func (d *database) ExtendSession(session string) (err error) {
 	defer doRecovery(&err)
 	d.Session.UpdateOneID(session).ExecX(ctx)

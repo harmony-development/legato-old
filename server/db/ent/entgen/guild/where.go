@@ -583,7 +583,7 @@ func HasRole() predicate.Guild {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(RoleTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, RoleTable, RoleColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, RoleTable, RolePrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -595,7 +595,7 @@ func HasRoleWith(preds ...predicate.Role) predicate.Guild {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(RoleInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, RoleTable, RoleColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, RoleTable, RolePrimaryKey...),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

@@ -3,6 +3,7 @@ package ent_shared
 import (
 	"github.com/harmony-development/legato/server/db/ent/entgen"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
+	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
 
 func (d *database) CreateGuild(owner, id, channelID uint64, guildName, picture string) (guild *entgen.Guild, err error) {
@@ -42,6 +43,12 @@ func (d *database) BanUser(guildID, userID uint64) (err error) {
 func (d *database) UnbanUser(guildID, userID uint64) (err error) {
 	defer doRecovery(&err)
 	d.Guild.UpdateOneID(guildID).RemoveBanIDs(userID).ExecX(ctx)
+	return
+}
+
+func (d *database) IsBanned(guildID, userID uint64) (banned bool, err error) {
+	defer doRecovery(&err)
+	banned = d.Guild.Query().Where(guild.ID(guildID)).QueryBans().Where(user.ID(userID)).ExistX(ctx)
 	return
 }
 

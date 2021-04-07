@@ -26,6 +26,7 @@ func (Role) Fields() []ent.Field {
 // Edges of the Role.
 func (Role) Edges() []ent.Edge {
 	return []ent.Edge{
+		edge.From("guild", Guild.Type).Ref("role"),
 		edge.To("members", User.Type),
 		edge.To("permission_node", PermissionNode.Type),
 	}

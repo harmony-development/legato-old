@@ -54,14 +54,14 @@ func (gc *GuildCreate) SetID(u uint64) *GuildCreate {
 }
 
 // AddInviteIDs adds the "invite" edge to the Invite entity by IDs.
-func (gc *GuildCreate) AddInviteIDs(ids ...int) *GuildCreate {
+func (gc *GuildCreate) AddInviteIDs(ids ...string) *GuildCreate {
 	gc.mutation.AddInviteIDs(ids...)
 	return gc
 }
 
 // AddInvite adds the "invite" edges to the Invite entity.
 func (gc *GuildCreate) AddInvite(i ...*Invite) *GuildCreate {
-	ids := make([]int, len(i))
+	ids := make([]string, len(i))
 	for j := range i {
 		ids[j] = i[j].ID
 	}
@@ -268,7 +268,7 @@ func (gc *GuildCreate) createSpec() (*Guild, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeString,
 					Column: invite.FieldID,
 				},
 			},
@@ -318,10 +318,10 @@ func (gc *GuildCreate) createSpec() (*Guild, *sqlgraph.CreateSpec) {
 	}
 	if nodes := gc.mutation.RoleIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   guild.RoleTable,
-			Columns: []string{guild.RoleColumn},
+			Columns: guild.RolePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
