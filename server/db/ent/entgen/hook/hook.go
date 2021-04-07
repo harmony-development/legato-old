@@ -178,15 +178,15 @@ func (f MessageFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Valu
 	return f(ctx, mv)
 }
 
-// The PermissionFunc type is an adapter to allow the use of ordinary
-// function as Permission mutator.
-type PermissionFunc func(context.Context, *entgen.PermissionMutation) (entgen.Value, error)
+// The PermissionNodeFunc type is an adapter to allow the use of ordinary
+// function as PermissionNode mutator.
+type PermissionNodeFunc func(context.Context, *entgen.PermissionNodeMutation) (entgen.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f PermissionFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
-	mv, ok := m.(*entgen.PermissionMutation)
+func (f PermissionNodeFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	mv, ok := m.(*entgen.PermissionNodeMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.PermissionMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.PermissionNodeMutation", m)
 	}
 	return f(ctx, mv)
 }
@@ -252,6 +252,19 @@ func (f UserFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, 
 	mv, ok := m.(*entgen.UserMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.UserMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The UserMetaFunc type is an adapter to allow the use of ordinary
+// function as UserMeta mutator.
+type UserMetaFunc func(context.Context, *entgen.UserMetaMutation) (entgen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UserMetaFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	mv, ok := m.(*entgen.UserMetaMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.UserMetaMutation", m)
 	}
 	return f(ctx, mv)
 }

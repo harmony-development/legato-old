@@ -9,7 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/harmony-development/legato/server/db/ent/entgen/permission"
+	"github.com/harmony-development/legato/server/db/ent/entgen/permissionnode"
 	"github.com/harmony-development/legato/server/db/ent/entgen/role"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
@@ -72,19 +72,19 @@ func (rc *RoleCreate) AddMembers(u ...*User) *RoleCreate {
 	return rc.AddMemberIDs(ids...)
 }
 
-// AddPermissionIDs adds the "permission" edge to the Permission entity by IDs.
-func (rc *RoleCreate) AddPermissionIDs(ids ...uint64) *RoleCreate {
-	rc.mutation.AddPermissionIDs(ids...)
+// AddPermissionNodeIDs adds the "permission_node" edge to the PermissionNode entity by IDs.
+func (rc *RoleCreate) AddPermissionNodeIDs(ids ...int) *RoleCreate {
+	rc.mutation.AddPermissionNodeIDs(ids...)
 	return rc
 }
 
-// AddPermission adds the "permission" edges to the Permission entity.
-func (rc *RoleCreate) AddPermission(p ...*Permission) *RoleCreate {
-	ids := make([]uint64, len(p))
+// AddPermissionNode adds the "permission_node" edges to the PermissionNode entity.
+func (rc *RoleCreate) AddPermissionNode(p ...*PermissionNode) *RoleCreate {
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
-	return rc.AddPermissionIDs(ids...)
+	return rc.AddPermissionNodeIDs(ids...)
 }
 
 // Mutation returns the RoleMutation object of the builder.
@@ -245,17 +245,17 @@ func (rc *RoleCreate) createSpec() (*Role, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := rc.mutation.PermissionIDs(); len(nodes) > 0 {
+	if nodes := rc.mutation.PermissionNodeIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   role.PermissionTable,
-			Columns: []string{role.PermissionColumn},
+			Table:   role.PermissionNodeTable,
+			Columns: []string{role.PermissionNodeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint64,
-					Column: permission.FieldID,
+					Type:   field.TypeInt,
+					Column: permissionnode.FieldID,
 				},
 			},
 		}

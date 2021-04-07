@@ -63,7 +63,7 @@ type IHarmonyDB interface {
 	UpdateAvatar(userID uint64, avatar string) error
 	HasGuildWithID(guildID uint64) (bool, error)
 	HasChannelWithID(guildID, channelID uint64) (bool, error)
-	HasMessageWithID(guildID, channelID, messageID uint64) (bool, error)
+	HasMessageWithID(messageID uint64) (bool, error)
 	GetGuildByID(guildID uint64) (*entgen.Guild, error)
 	SetStatus(userID uint64, status harmonytypesv1.UserStatus) error
 	SetUsername(userID uint64, username string) error
@@ -88,11 +88,10 @@ type IHarmonyDB interface {
 	DequipEmotePack(userID, packID uint64) error
 	AddRoleToGuild(guildID, roleID uint64, name string, color int, hoist, pingable bool) error
 	RemoveRoleFromGuild(guildID, roleID uint64) error
-	GetRolePositions(guildID, before, previous uint64) (pos string, retErr error)
-	MoveRole(guildID, roleID, beforeRole, previousRole uint64) error
+	MoveRole(guildID, roleID, previousRole, nextRole uint64) error
 	GetGuildRoles(guildID uint64) ([]*entgen.Role, error)
 	SetPermissions(guildID uint64, channelID uint64, roleID uint64, permissions []PermissionsNode) error
-	GetPermissions(guildID uint64, channelID uint64, roleID uint64) (permissions []PermissionsNode, err error)
+	GetPermissions(roleID uint64) (permissions []PermissionsNode, err error)
 	GetPermissionsData(guildID uint64) (PermissionsData, error)
 	RolesForUser(guildID, userID uint64) ([]uint64, error)
 	ManageRoles(guildID, userID uint64, addRoles, removeRoles []uint64) error

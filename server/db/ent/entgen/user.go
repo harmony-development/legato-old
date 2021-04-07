@@ -32,6 +32,8 @@ type UserEdges struct {
 	ForeignUser *ForeignUser `json:"foreign_user,omitempty"`
 	// Profile holds the value of the profile edge.
 	Profile *Profile `json:"profile,omitempty"`
+	// Metadata holds the value of the metadata edge.
+	Metadata []*UserMeta `json:"metadata,omitempty"`
 	// Sessions holds the value of the sessions edge.
 	Sessions []*Session `json:"sessions,omitempty"`
 	// Message holds the value of the message edge.
@@ -48,7 +50,7 @@ type UserEdges struct {
 	Role []*Role `json:"role,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [10]bool
+	loadedTypes [11]bool
 }
 
 // LocalUserOrErr returns the LocalUser value or an error if the edge
@@ -93,10 +95,19 @@ func (e UserEdges) ProfileOrErr() (*Profile, error) {
 	return nil, &NotLoadedError{edge: "profile"}
 }
 
+// MetadataOrErr returns the Metadata value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) MetadataOrErr() ([]*UserMeta, error) {
+	if e.loadedTypes[3] {
+		return e.Metadata, nil
+	}
+	return nil, &NotLoadedError{edge: "metadata"}
+}
+
 // SessionsOrErr returns the Sessions value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) SessionsOrErr() ([]*Session, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		return e.Sessions, nil
 	}
 	return nil, &NotLoadedError{edge: "sessions"}
@@ -105,7 +116,7 @@ func (e UserEdges) SessionsOrErr() ([]*Session, error) {
 // MessageOrErr returns the Message value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) MessageOrErr() ([]*Message, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[5] {
 		return e.Message, nil
 	}
 	return nil, &NotLoadedError{edge: "message"}
@@ -114,7 +125,7 @@ func (e UserEdges) MessageOrErr() ([]*Message, error) {
 // GuildOrErr returns the Guild value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) GuildOrErr() ([]*Guild, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[6] {
 		return e.Guild, nil
 	}
 	return nil, &NotLoadedError{edge: "guild"}
@@ -123,7 +134,7 @@ func (e UserEdges) GuildOrErr() ([]*Guild, error) {
 // EmotepackOrErr returns the Emotepack value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) EmotepackOrErr() ([]*EmotePack, error) {
-	if e.loadedTypes[6] {
+	if e.loadedTypes[7] {
 		return e.Emotepack, nil
 	}
 	return nil, &NotLoadedError{edge: "emotepack"}
@@ -132,7 +143,7 @@ func (e UserEdges) EmotepackOrErr() ([]*EmotePack, error) {
 // CreatedpacksOrErr returns the Createdpacks value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) CreatedpacksOrErr() ([]*EmotePack, error) {
-	if e.loadedTypes[7] {
+	if e.loadedTypes[8] {
 		return e.Createdpacks, nil
 	}
 	return nil, &NotLoadedError{edge: "createdpacks"}
@@ -141,7 +152,7 @@ func (e UserEdges) CreatedpacksOrErr() ([]*EmotePack, error) {
 // ListentryOrErr returns the Listentry value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) ListentryOrErr() ([]*GuildListEntry, error) {
-	if e.loadedTypes[8] {
+	if e.loadedTypes[9] {
 		return e.Listentry, nil
 	}
 	return nil, &NotLoadedError{edge: "listentry"}
@@ -150,7 +161,7 @@ func (e UserEdges) ListentryOrErr() ([]*GuildListEntry, error) {
 // RoleOrErr returns the Role value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) RoleOrErr() ([]*Role, error) {
-	if e.loadedTypes[9] {
+	if e.loadedTypes[10] {
 		return e.Role, nil
 	}
 	return nil, &NotLoadedError{edge: "role"}
@@ -211,6 +222,11 @@ func (u *User) QueryForeignUser() *ForeignUserQuery {
 // QueryProfile queries the "profile" edge of the User entity.
 func (u *User) QueryProfile() *ProfileQuery {
 	return (&UserClient{config: u.config}).QueryProfile(u)
+}
+
+// QueryMetadata queries the "metadata" edge of the User entity.
+func (u *User) QueryMetadata() *UserMetaQuery {
+	return (&UserClient{config: u.config}).QueryMetadata(u)
 }
 
 // QuerySessions queries the "sessions" edge of the User entity.

@@ -36,9 +36,11 @@ type ChannelEdges struct {
 	Guild *Guild `json:"guild,omitempty"`
 	// Message holds the value of the message edge.
 	Message []*Message `json:"message,omitempty"`
+	// Role holds the value of the role edge.
+	Role []*Role `json:"role,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // GuildOrErr returns the Guild value or an error if the edge
@@ -62,6 +64,15 @@ func (e ChannelEdges) MessageOrErr() ([]*Message, error) {
 		return e.Message, nil
 	}
 	return nil, &NotLoadedError{edge: "message"}
+}
+
+// RoleOrErr returns the Role value or an error if the edge
+// was not loaded in eager-loading.
+func (e ChannelEdges) RoleOrErr() ([]*Role, error) {
+	if e.loadedTypes[2] {
+		return e.Role, nil
+	}
+	return nil, &NotLoadedError{edge: "role"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -142,6 +153,11 @@ func (c *Channel) QueryGuild() *GuildQuery {
 // QueryMessage queries the "message" edge of the Channel entity.
 func (c *Channel) QueryMessage() *MessageQuery {
 	return (&ChannelClient{config: c.config}).QueryMessage(c)
+}
+
+// QueryRole queries the "role" edge of the Channel entity.
+func (c *Channel) QueryRole() *RoleQuery {
+	return (&ChannelClient{config: c.config}).QueryRole(c)
 }
 
 // Update returns a builder for updating this Channel.

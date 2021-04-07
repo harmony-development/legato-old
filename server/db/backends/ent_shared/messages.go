@@ -91,3 +91,9 @@ func (d *database) GetMessagesBefore(channelID uint64, date time.Time) (msgs []*
 		AllX(ctx)
 	return
 }
+
+func (d *database) HasMessageWithID(messageID uint64) (exists bool, err error) {
+	defer doRecovery(&err)
+	exists = d.Message.Query().Where(message.ID(messageID)).ExistX(ctx)
+	return
+}

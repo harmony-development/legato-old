@@ -13,6 +13,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
+	"github.com/harmony-development/legato/server/db/ent/entgen/role"
 )
 
 // ChannelUpdate is the builder for updating Channel entities.
@@ -93,6 +94,21 @@ func (cu *ChannelUpdate) AddMessage(m ...*Message) *ChannelUpdate {
 	return cu.AddMessageIDs(ids...)
 }
 
+// AddRoleIDs adds the "role" edge to the Role entity by IDs.
+func (cu *ChannelUpdate) AddRoleIDs(ids ...uint64) *ChannelUpdate {
+	cu.mutation.AddRoleIDs(ids...)
+	return cu
+}
+
+// AddRole adds the "role" edges to the Role entity.
+func (cu *ChannelUpdate) AddRole(r ...*Role) *ChannelUpdate {
+	ids := make([]uint64, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return cu.AddRoleIDs(ids...)
+}
+
 // Mutation returns the ChannelMutation object of the builder.
 func (cu *ChannelUpdate) Mutation() *ChannelMutation {
 	return cu.mutation
@@ -123,6 +139,27 @@ func (cu *ChannelUpdate) RemoveMessage(m ...*Message) *ChannelUpdate {
 		ids[i] = m[i].ID
 	}
 	return cu.RemoveMessageIDs(ids...)
+}
+
+// ClearRole clears all "role" edges to the Role entity.
+func (cu *ChannelUpdate) ClearRole() *ChannelUpdate {
+	cu.mutation.ClearRole()
+	return cu
+}
+
+// RemoveRoleIDs removes the "role" edge to Role entities by IDs.
+func (cu *ChannelUpdate) RemoveRoleIDs(ids ...uint64) *ChannelUpdate {
+	cu.mutation.RemoveRoleIDs(ids...)
+	return cu
+}
+
+// RemoveRole removes "role" edges to Role entities.
+func (cu *ChannelUpdate) RemoveRole(r ...*Role) *ChannelUpdate {
+	ids := make([]uint64, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return cu.RemoveRoleIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -318,6 +355,60 @@ func (cu *ChannelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if cu.mutation.RoleCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.RoleTable,
+			Columns: []string{channel.RoleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: role.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RemovedRoleIDs(); len(nodes) > 0 && !cu.mutation.RoleCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.RoleTable,
+			Columns: []string{channel.RoleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: role.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RoleIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.RoleTable,
+			Columns: []string{channel.RoleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: role.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{channel.Label}
@@ -401,6 +492,21 @@ func (cuo *ChannelUpdateOne) AddMessage(m ...*Message) *ChannelUpdateOne {
 	return cuo.AddMessageIDs(ids...)
 }
 
+// AddRoleIDs adds the "role" edge to the Role entity by IDs.
+func (cuo *ChannelUpdateOne) AddRoleIDs(ids ...uint64) *ChannelUpdateOne {
+	cuo.mutation.AddRoleIDs(ids...)
+	return cuo
+}
+
+// AddRole adds the "role" edges to the Role entity.
+func (cuo *ChannelUpdateOne) AddRole(r ...*Role) *ChannelUpdateOne {
+	ids := make([]uint64, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return cuo.AddRoleIDs(ids...)
+}
+
 // Mutation returns the ChannelMutation object of the builder.
 func (cuo *ChannelUpdateOne) Mutation() *ChannelMutation {
 	return cuo.mutation
@@ -431,6 +537,27 @@ func (cuo *ChannelUpdateOne) RemoveMessage(m ...*Message) *ChannelUpdateOne {
 		ids[i] = m[i].ID
 	}
 	return cuo.RemoveMessageIDs(ids...)
+}
+
+// ClearRole clears all "role" edges to the Role entity.
+func (cuo *ChannelUpdateOne) ClearRole() *ChannelUpdateOne {
+	cuo.mutation.ClearRole()
+	return cuo
+}
+
+// RemoveRoleIDs removes the "role" edge to Role entities by IDs.
+func (cuo *ChannelUpdateOne) RemoveRoleIDs(ids ...uint64) *ChannelUpdateOne {
+	cuo.mutation.RemoveRoleIDs(ids...)
+	return cuo
+}
+
+// RemoveRole removes "role" edges to Role entities.
+func (cuo *ChannelUpdateOne) RemoveRole(r ...*Role) *ChannelUpdateOne {
+	ids := make([]uint64, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return cuo.RemoveRoleIDs(ids...)
 }
 
 // Save executes the query and returns the updated Channel entity.
@@ -623,6 +750,60 @@ func (cuo *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err e
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUint64,
 					Column: message.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cuo.mutation.RoleCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.RoleTable,
+			Columns: []string{channel.RoleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: role.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RemovedRoleIDs(); len(nodes) > 0 && !cuo.mutation.RoleCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.RoleTable,
+			Columns: []string{channel.RoleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: role.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RoleIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.RoleTable,
+			Columns: []string{channel.RoleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: role.FieldID,
 				},
 			},
 		}

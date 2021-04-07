@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/harmony-development/legato/server/db/ent/entgen/permission"
+	"github.com/harmony-development/legato/server/db/ent/entgen/permissionnode"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 	"github.com/harmony-development/legato/server/db/ent/entgen/role"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
@@ -27,9 +27,9 @@ type RoleQuery struct {
 	fields     []string
 	predicates []predicate.Role
 	// eager-loading edges.
-	withMembers    *UserQuery
-	withPermission *PermissionQuery
-	withFKs        bool
+	withMembers        *UserQuery
+	withPermissionNode *PermissionNodeQuery
+	withFKs            bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -81,9 +81,9 @@ func (rq *RoleQuery) QueryMembers() *UserQuery {
 	return query
 }
 
-// QueryPermission chains the current query on the "permission" edge.
-func (rq *RoleQuery) QueryPermission() *PermissionQuery {
-	query := &PermissionQuery{config: rq.config}
+// QueryPermissionNode chains the current query on the "permission_node" edge.
+func (rq *RoleQuery) QueryPermissionNode() *PermissionNodeQuery {
+	query := &PermissionNodeQuery{config: rq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := rq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -94,8 +94,8 @@ func (rq *RoleQuery) QueryPermission() *PermissionQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(role.Table, role.FieldID, selector),
-			sqlgraph.To(permission.Table, permission.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, role.PermissionTable, role.PermissionColumn),
+			sqlgraph.To(permissionnode.Table, permissionnode.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, role.PermissionNodeTable, role.PermissionNodeColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -279,13 +279,13 @@ func (rq *RoleQuery) Clone() *RoleQuery {
 		return nil
 	}
 	return &RoleQuery{
-		config:         rq.config,
-		limit:          rq.limit,
-		offset:         rq.offset,
-		order:          append([]OrderFunc{}, rq.order...),
-		predicates:     append([]predicate.Role{}, rq.predicates...),
-		withMembers:    rq.withMembers.Clone(),
-		withPermission: rq.withPermission.Clone(),
+		config:             rq.config,
+		limit:              rq.limit,
+		offset:             rq.offset,
+		order:              append([]OrderFunc{}, rq.order...),
+		predicates:         append([]predicate.Role{}, rq.predicates...),
+		withMembers:        rq.withMembers.Clone(),
+		withPermissionNode: rq.withPermissionNode.Clone(),
 		// clone intermediate query.
 		sql:  rq.sql.Clone(),
 		path: rq.path,
@@ -303,14 +303,14 @@ func (rq *RoleQuery) WithMembers(opts ...func(*UserQuery)) *RoleQuery {
 	return rq
 }
 
-// WithPermission tells the query-builder to eager-load the nodes that are connected to
-// the "permission" edge. The optional arguments are used to configure the query builder of the edge.
-func (rq *RoleQuery) WithPermission(opts ...func(*PermissionQuery)) *RoleQuery {
-	query := &PermissionQuery{config: rq.config}
+// WithPermissionNode tells the query-builder to eager-load the nodes that are connected to
+// the "permission_node" edge. The optional arguments are used to configure the query builder of the edge.
+func (rq *RoleQuery) WithPermissionNode(opts ...func(*PermissionNodeQuery)) *RoleQuery {
+	query := &PermissionNodeQuery{config: rq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	rq.withPermission = query
+	rq.withPermissionNode = query
 	return rq
 }
 
@@ -382,7 +382,7 @@ func (rq *RoleQuery) sqlAll(ctx context.Context) ([]*Role, error) {
 		_spec       = rq.querySpec()
 		loadedTypes = [2]bool{
 			rq.withMembers != nil,
-			rq.withPermission != nil,
+			rq.withPermissionNode != nil,
 		}
 	)
 	if withFKs {
@@ -472,32 +472,32 @@ func (rq *RoleQuery) sqlAll(ctx context.Context) ([]*Role, error) {
 		}
 	}
 
-	if query := rq.withPermission; query != nil {
+	if query := rq.withPermissionNode; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[uint64]*Role)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Permission = []*Permission{}
+			nodes[i].Edges.PermissionNode = []*PermissionNode{}
 		}
 		query.withFKs = true
-		query.Where(predicate.Permission(func(s *sql.Selector) {
-			s.Where(sql.InValues(role.PermissionColumn, fks...))
+		query.Where(predicate.PermissionNode(func(s *sql.Selector) {
+			s.Where(sql.InValues(role.PermissionNodeColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.role_permission
+			fk := n.role_permission_node
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "role_permission" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "role_permission_node" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "role_permission" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "role_permission_node" returned %v for node %v`, *fk, n.ID)
 			}
-			node.Edges.Permission = append(node.Edges.Permission, n)
+			node.Edges.PermissionNode = append(node.Edges.PermissionNode, n)
 		}
 	}
 

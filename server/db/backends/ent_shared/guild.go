@@ -62,3 +62,9 @@ func (d *database) GetLocalGuilds(userID uint64) (guilds []uint64, err error) {
 	guilds = d.User.GetX(ctx, userID).QueryGuild().IDsX(ctx)
 	return
 }
+
+func (d *database) HasGuildWithID(guildID uint64) (exists bool, err error) {
+	defer doRecovery(&err)
+	exists = d.Guild.Query().Where(guild.ID(guildID)).ExistX(ctx)
+	return
+}

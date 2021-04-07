@@ -12,14 +12,14 @@ import (
 
 // Ensure, that IHarmonyDBMock does implement IHarmonyDB.
 // If this is not the case, regenerate this file with moq.
-var _ IHarmonyDB = &DummyDB{}
+var _ IHarmonyDB = &IHarmonyDBMock{}
 
-// DummyDB is a mock implementation of IHarmonyDB.
+// IHarmonyDBMock is a mock implementation of IHarmonyDB.
 //
 // 	func TestSomethingThatUsesIHarmonyDB(t *testing.T) {
 //
 // 		// make and configure a mocked IHarmonyDB
-// 		mockedIHarmonyDB := &DummyDB{
+// 		mockedIHarmonyDB := &IHarmonyDBMock{
 // 			AddChannelToGuildFunc: func(guildID uint64, channelID uint64, channelName string, previous *uint64, next *uint64, kind ChannelKind, md []byte) (entgen.Channel, error) {
 // 				panic("mock out the AddChannelToGuild method")
 // 			},
@@ -167,14 +167,11 @@ var _ IHarmonyDB = &DummyDB{}
 // 			GetOwnerFunc: func(guildID uint64) (uint64, error) {
 // 				panic("mock out the GetOwner method")
 // 			},
-// 			GetPermissionsFunc: func(guildID uint64, channelID uint64, roleID uint64) ([]PermissionsNode, error) {
+// 			GetPermissionsFunc: func(roleID uint64) ([]PermissionsNode, error) {
 // 				panic("mock out the GetPermissions method")
 // 			},
 // 			GetPermissionsDataFunc: func(guildID uint64) (PermissionsData, error) {
 // 				panic("mock out the GetPermissionsData method")
-// 			},
-// 			GetRolePositionsFunc: func(guildID uint64, before uint64, previous uint64) (string, error) {
-// 				panic("mock out the GetRolePositions method")
 // 			},
 // 			GetUserByEmailFunc: func(email string) (UserData, error) {
 // 				panic("mock out the GetUserByEmail method")
@@ -191,7 +188,7 @@ var _ IHarmonyDB = &DummyDB{}
 // 			HasGuildWithIDFunc: func(guildID uint64) (bool, error) {
 // 				panic("mock out the HasGuildWithID method")
 // 			},
-// 			HasMessageWithIDFunc: func(guildID uint64, channelID uint64, messageID uint64) (bool, error) {
+// 			HasMessageWithIDFunc: func(messageID uint64) (bool, error) {
 // 				panic("mock out the HasMessageWithID method")
 // 			},
 // 			IncrementInviteFunc: func(inviteID string) error {
@@ -224,7 +221,7 @@ var _ IHarmonyDB = &DummyDB{}
 // 			MoveGuildFunc: func(userID uint64, guildID uint64, homeServer string, nextGuildID uint64, prevGuildID uint64, nextHomeServer string, prevHomeServer string) error {
 // 				panic("mock out the MoveGuild method")
 // 			},
-// 			MoveRoleFunc: func(guildID uint64, roleID uint64, beforeRole uint64, previousRole uint64) error {
+// 			MoveRoleFunc: func(guildID uint64, roleID uint64, previousRole uint64, nextRole uint64) error {
 // 				panic("mock out the MoveRole method")
 // 			},
 // 			RemoveGuildFromListFunc: func(userID uint64, guildID uint64, homeServer string) error {
@@ -293,7 +290,7 @@ var _ IHarmonyDB = &DummyDB{}
 // 		// and then make assertions.
 //
 // 	}
-type DummyDB struct {
+type IHarmonyDBMock struct {
 	// AddChannelToGuildFunc mocks the AddChannelToGuild method.
 	AddChannelToGuildFunc func(guildID uint64, channelID uint64, channelName string, previous *uint64, next *uint64, kind ChannelKind, md []byte) (entgen.Channel, error)
 
@@ -442,13 +439,10 @@ type DummyDB struct {
 	GetOwnerFunc func(guildID uint64) (uint64, error)
 
 	// GetPermissionsFunc mocks the GetPermissions method.
-	GetPermissionsFunc func(guildID uint64, channelID uint64, roleID uint64) ([]PermissionsNode, error)
+	GetPermissionsFunc func(roleID uint64) ([]PermissionsNode, error)
 
 	// GetPermissionsDataFunc mocks the GetPermissionsData method.
 	GetPermissionsDataFunc func(guildID uint64) (PermissionsData, error)
-
-	// GetRolePositionsFunc mocks the GetRolePositions method.
-	GetRolePositionsFunc func(guildID uint64, before uint64, previous uint64) (string, error)
 
 	// GetUserByEmailFunc mocks the GetUserByEmail method.
 	GetUserByEmailFunc func(email string) (UserData, error)
@@ -466,7 +460,7 @@ type DummyDB struct {
 	HasGuildWithIDFunc func(guildID uint64) (bool, error)
 
 	// HasMessageWithIDFunc mocks the HasMessageWithID method.
-	HasMessageWithIDFunc func(guildID uint64, channelID uint64, messageID uint64) (bool, error)
+	HasMessageWithIDFunc func(messageID uint64) (bool, error)
 
 	// IncrementInviteFunc mocks the IncrementInvite method.
 	IncrementInviteFunc func(inviteID string) error
@@ -499,7 +493,7 @@ type DummyDB struct {
 	MoveGuildFunc func(userID uint64, guildID uint64, homeServer string, nextGuildID uint64, prevGuildID uint64, nextHomeServer string, prevHomeServer string) error
 
 	// MoveRoleFunc mocks the MoveRole method.
-	MoveRoleFunc func(guildID uint64, roleID uint64, beforeRole uint64, previousRole uint64) error
+	MoveRoleFunc func(guildID uint64, roleID uint64, previousRole uint64, nextRole uint64) error
 
 	// RemoveGuildFromListFunc mocks the RemoveGuildFromList method.
 	RemoveGuildFromListFunc func(userID uint64, guildID uint64, homeServer string) error
@@ -940,10 +934,6 @@ type DummyDB struct {
 		}
 		// GetPermissions holds details about calls to the GetPermissions method.
 		GetPermissions []struct {
-			// GuildID is the guildID argument value.
-			GuildID uint64
-			// ChannelID is the channelID argument value.
-			ChannelID uint64
 			// RoleID is the roleID argument value.
 			RoleID uint64
 		}
@@ -951,15 +941,6 @@ type DummyDB struct {
 		GetPermissionsData []struct {
 			// GuildID is the guildID argument value.
 			GuildID uint64
-		}
-		// GetRolePositions holds details about calls to the GetRolePositions method.
-		GetRolePositions []struct {
-			// GuildID is the guildID argument value.
-			GuildID uint64
-			// Before is the before argument value.
-			Before uint64
-			// Previous is the previous argument value.
-			Previous uint64
 		}
 		// GetUserByEmail holds details about calls to the GetUserByEmail method.
 		GetUserByEmail []struct {
@@ -992,10 +973,6 @@ type DummyDB struct {
 		}
 		// HasMessageWithID holds details about calls to the HasMessageWithID method.
 		HasMessageWithID []struct {
-			// GuildID is the guildID argument value.
-			GuildID uint64
-			// ChannelID is the channelID argument value.
-			ChannelID uint64
 			// MessageID is the messageID argument value.
 			MessageID uint64
 		}
@@ -1099,10 +1076,10 @@ type DummyDB struct {
 			GuildID uint64
 			// RoleID is the roleID argument value.
 			RoleID uint64
-			// BeforeRole is the beforeRole argument value.
-			BeforeRole uint64
 			// PreviousRole is the previousRole argument value.
 			PreviousRole uint64
+			// NextRole is the nextRole argument value.
+			NextRole uint64
 		}
 		// RemoveGuildFromList holds details about calls to the RemoveGuildFromList method.
 		RemoveGuildFromList []struct {
@@ -1310,7 +1287,6 @@ type DummyDB struct {
 	lockGetOwner                   sync.RWMutex
 	lockGetPermissions             sync.RWMutex
 	lockGetPermissionsData         sync.RWMutex
-	lockGetRolePositions           sync.RWMutex
 	lockGetUserByEmail             sync.RWMutex
 	lockGetUserByID                sync.RWMutex
 	lockGetUserMetadata            sync.RWMutex
@@ -1351,7 +1327,7 @@ type DummyDB struct {
 }
 
 // AddChannelToGuild calls AddChannelToGuildFunc.
-func (mock *DummyDB) AddChannelToGuild(guildID uint64, channelID uint64, channelName string, previous *uint64, next *uint64, kind ChannelKind, md []byte) (entgen.Channel, error) {
+func (mock *IHarmonyDBMock) AddChannelToGuild(guildID uint64, channelID uint64, channelName string, previous *uint64, next *uint64, kind ChannelKind, md []byte) (entgen.Channel, error) {
 	if mock.AddChannelToGuildFunc == nil {
 		panic("IHarmonyDBMock.AddChannelToGuildFunc: method is nil but IHarmonyDB.AddChannelToGuild was just called")
 	}
@@ -1381,7 +1357,7 @@ func (mock *DummyDB) AddChannelToGuild(guildID uint64, channelID uint64, channel
 // AddChannelToGuildCalls gets all the calls that were made to AddChannelToGuild.
 // Check the length with:
 //     len(mockedIHarmonyDB.AddChannelToGuildCalls())
-func (mock *DummyDB) AddChannelToGuildCalls() []struct {
+func (mock *IHarmonyDBMock) AddChannelToGuildCalls() []struct {
 	GuildID     uint64
 	ChannelID   uint64
 	ChannelName string
@@ -1406,7 +1382,7 @@ func (mock *DummyDB) AddChannelToGuildCalls() []struct {
 }
 
 // AddEmbedMessage calls AddEmbedMessageFunc.
-func (mock *DummyDB) AddEmbedMessage(guildID uint64, channelID uint64, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, embeds []*harmonytypesv1.Embed) (time.Time, error) {
+func (mock *IHarmonyDBMock) AddEmbedMessage(guildID uint64, channelID uint64, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, embeds []*harmonytypesv1.Embed) (time.Time, error) {
 	if mock.AddEmbedMessageFunc == nil {
 		panic("IHarmonyDBMock.AddEmbedMessageFunc: method is nil but IHarmonyDB.AddEmbedMessage was just called")
 	}
@@ -1440,7 +1416,7 @@ func (mock *DummyDB) AddEmbedMessage(guildID uint64, channelID uint64, messageID
 // AddEmbedMessageCalls gets all the calls that were made to AddEmbedMessage.
 // Check the length with:
 //     len(mockedIHarmonyDB.AddEmbedMessageCalls())
-func (mock *DummyDB) AddEmbedMessageCalls() []struct {
+func (mock *IHarmonyDBMock) AddEmbedMessageCalls() []struct {
 	GuildID   uint64
 	ChannelID uint64
 	MessageID uint64
@@ -1469,7 +1445,7 @@ func (mock *DummyDB) AddEmbedMessageCalls() []struct {
 }
 
 // AddEmoteToPack calls AddEmoteToPackFunc.
-func (mock *DummyDB) AddEmoteToPack(packID uint64, imageID string, name string) error {
+func (mock *IHarmonyDBMock) AddEmoteToPack(packID uint64, imageID string, name string) error {
 	if mock.AddEmoteToPackFunc == nil {
 		panic("IHarmonyDBMock.AddEmoteToPackFunc: method is nil but IHarmonyDB.AddEmoteToPack was just called")
 	}
@@ -1491,7 +1467,7 @@ func (mock *DummyDB) AddEmoteToPack(packID uint64, imageID string, name string) 
 // AddEmoteToPackCalls gets all the calls that were made to AddEmoteToPack.
 // Check the length with:
 //     len(mockedIHarmonyDB.AddEmoteToPackCalls())
-func (mock *DummyDB) AddEmoteToPackCalls() []struct {
+func (mock *IHarmonyDBMock) AddEmoteToPackCalls() []struct {
 	PackID  uint64
 	ImageID string
 	Name    string
@@ -1508,7 +1484,7 @@ func (mock *DummyDB) AddEmoteToPackCalls() []struct {
 }
 
 // AddFileHash calls AddFileHashFunc.
-func (mock *DummyDB) AddFileHash(fileID string, hash []byte) error {
+func (mock *IHarmonyDBMock) AddFileHash(fileID string, hash []byte) error {
 	if mock.AddFileHashFunc == nil {
 		panic("IHarmonyDBMock.AddFileHashFunc: method is nil but IHarmonyDB.AddFileHash was just called")
 	}
@@ -1528,7 +1504,7 @@ func (mock *DummyDB) AddFileHash(fileID string, hash []byte) error {
 // AddFileHashCalls gets all the calls that were made to AddFileHash.
 // Check the length with:
 //     len(mockedIHarmonyDB.AddFileHashCalls())
-func (mock *DummyDB) AddFileHashCalls() []struct {
+func (mock *IHarmonyDBMock) AddFileHashCalls() []struct {
 	FileID string
 	Hash   []byte
 } {
@@ -1543,7 +1519,7 @@ func (mock *DummyDB) AddFileHashCalls() []struct {
 }
 
 // AddFilesMessage calls AddFilesMessageFunc.
-func (mock *DummyDB) AddFilesMessage(guildID uint64, channelID uint64, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, files []*harmonytypesv1.Attachment) (time.Time, error) {
+func (mock *IHarmonyDBMock) AddFilesMessage(guildID uint64, channelID uint64, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, files []*harmonytypesv1.Attachment) (time.Time, error) {
 	if mock.AddFilesMessageFunc == nil {
 		panic("IHarmonyDBMock.AddFilesMessageFunc: method is nil but IHarmonyDB.AddFilesMessage was just called")
 	}
@@ -1577,7 +1553,7 @@ func (mock *DummyDB) AddFilesMessage(guildID uint64, channelID uint64, messageID
 // AddFilesMessageCalls gets all the calls that were made to AddFilesMessage.
 // Check the length with:
 //     len(mockedIHarmonyDB.AddFilesMessageCalls())
-func (mock *DummyDB) AddFilesMessageCalls() []struct {
+func (mock *IHarmonyDBMock) AddFilesMessageCalls() []struct {
 	GuildID   uint64
 	ChannelID uint64
 	MessageID uint64
@@ -1606,7 +1582,7 @@ func (mock *DummyDB) AddFilesMessageCalls() []struct {
 }
 
 // AddForeignUser calls AddForeignUserFunc.
-func (mock *DummyDB) AddForeignUser(host string, userID uint64, localUserID uint64, username string, avatar string) error {
+func (mock *IHarmonyDBMock) AddForeignUser(host string, userID uint64, localUserID uint64, username string, avatar string) error {
 	if mock.AddForeignUserFunc == nil {
 		panic("IHarmonyDBMock.AddForeignUserFunc: method is nil but IHarmonyDB.AddForeignUser was just called")
 	}
@@ -1632,7 +1608,7 @@ func (mock *DummyDB) AddForeignUser(host string, userID uint64, localUserID uint
 // AddForeignUserCalls gets all the calls that were made to AddForeignUser.
 // Check the length with:
 //     len(mockedIHarmonyDB.AddForeignUserCalls())
-func (mock *DummyDB) AddForeignUserCalls() []struct {
+func (mock *IHarmonyDBMock) AddForeignUserCalls() []struct {
 	Host        string
 	UserID      uint64
 	LocalUserID uint64
@@ -1653,7 +1629,7 @@ func (mock *DummyDB) AddForeignUserCalls() []struct {
 }
 
 // AddGuildToList calls AddGuildToListFunc.
-func (mock *DummyDB) AddGuildToList(userID uint64, guildID uint64, homeServer string) error {
+func (mock *IHarmonyDBMock) AddGuildToList(userID uint64, guildID uint64, homeServer string) error {
 	if mock.AddGuildToListFunc == nil {
 		panic("IHarmonyDBMock.AddGuildToListFunc: method is nil but IHarmonyDB.AddGuildToList was just called")
 	}
@@ -1675,7 +1651,7 @@ func (mock *DummyDB) AddGuildToList(userID uint64, guildID uint64, homeServer st
 // AddGuildToListCalls gets all the calls that were made to AddGuildToList.
 // Check the length with:
 //     len(mockedIHarmonyDB.AddGuildToListCalls())
-func (mock *DummyDB) AddGuildToListCalls() []struct {
+func (mock *IHarmonyDBMock) AddGuildToListCalls() []struct {
 	UserID     uint64
 	GuildID    uint64
 	HomeServer string
@@ -1692,7 +1668,7 @@ func (mock *DummyDB) AddGuildToListCalls() []struct {
 }
 
 // AddLocalUser calls AddLocalUserFunc.
-func (mock *DummyDB) AddLocalUser(userID uint64, email string, username string, passwordHash []byte) error {
+func (mock *IHarmonyDBMock) AddLocalUser(userID uint64, email string, username string, passwordHash []byte) error {
 	if mock.AddLocalUserFunc == nil {
 		panic("IHarmonyDBMock.AddLocalUserFunc: method is nil but IHarmonyDB.AddLocalUser was just called")
 	}
@@ -1716,7 +1692,7 @@ func (mock *DummyDB) AddLocalUser(userID uint64, email string, username string, 
 // AddLocalUserCalls gets all the calls that were made to AddLocalUser.
 // Check the length with:
 //     len(mockedIHarmonyDB.AddLocalUserCalls())
-func (mock *DummyDB) AddLocalUserCalls() []struct {
+func (mock *IHarmonyDBMock) AddLocalUserCalls() []struct {
 	UserID       uint64
 	Email        string
 	Username     string
@@ -1735,7 +1711,7 @@ func (mock *DummyDB) AddLocalUserCalls() []struct {
 }
 
 // AddMemberToGuild calls AddMemberToGuildFunc.
-func (mock *DummyDB) AddMemberToGuild(userID uint64, guildID uint64) error {
+func (mock *IHarmonyDBMock) AddMemberToGuild(userID uint64, guildID uint64) error {
 	if mock.AddMemberToGuildFunc == nil {
 		panic("IHarmonyDBMock.AddMemberToGuildFunc: method is nil but IHarmonyDB.AddMemberToGuild was just called")
 	}
@@ -1755,7 +1731,7 @@ func (mock *DummyDB) AddMemberToGuild(userID uint64, guildID uint64) error {
 // AddMemberToGuildCalls gets all the calls that were made to AddMemberToGuild.
 // Check the length with:
 //     len(mockedIHarmonyDB.AddMemberToGuildCalls())
-func (mock *DummyDB) AddMemberToGuildCalls() []struct {
+func (mock *IHarmonyDBMock) AddMemberToGuildCalls() []struct {
 	UserID  uint64
 	GuildID uint64
 } {
@@ -1770,7 +1746,7 @@ func (mock *DummyDB) AddMemberToGuildCalls() []struct {
 }
 
 // AddRoleToGuild calls AddRoleToGuildFunc.
-func (mock *DummyDB) AddRoleToGuild(guildID uint64, roleID uint64, name string, color int, hoist bool, pingable bool) error {
+func (mock *IHarmonyDBMock) AddRoleToGuild(guildID uint64, roleID uint64, name string, color int, hoist bool, pingable bool) error {
 	if mock.AddRoleToGuildFunc == nil {
 		panic("IHarmonyDBMock.AddRoleToGuildFunc: method is nil but IHarmonyDB.AddRoleToGuild was just called")
 	}
@@ -1798,7 +1774,7 @@ func (mock *DummyDB) AddRoleToGuild(guildID uint64, roleID uint64, name string, 
 // AddRoleToGuildCalls gets all the calls that were made to AddRoleToGuild.
 // Check the length with:
 //     len(mockedIHarmonyDB.AddRoleToGuildCalls())
-func (mock *DummyDB) AddRoleToGuildCalls() []struct {
+func (mock *IHarmonyDBMock) AddRoleToGuildCalls() []struct {
 	GuildID  uint64
 	RoleID   uint64
 	Name     string
@@ -1821,7 +1797,7 @@ func (mock *DummyDB) AddRoleToGuildCalls() []struct {
 }
 
 // AddSession calls AddSessionFunc.
-func (mock *DummyDB) AddSession(userID uint64, session string) error {
+func (mock *IHarmonyDBMock) AddSession(userID uint64, session string) error {
 	if mock.AddSessionFunc == nil {
 		panic("IHarmonyDBMock.AddSessionFunc: method is nil but IHarmonyDB.AddSession was just called")
 	}
@@ -1841,7 +1817,7 @@ func (mock *DummyDB) AddSession(userID uint64, session string) error {
 // AddSessionCalls gets all the calls that were made to AddSession.
 // Check the length with:
 //     len(mockedIHarmonyDB.AddSessionCalls())
-func (mock *DummyDB) AddSessionCalls() []struct {
+func (mock *IHarmonyDBMock) AddSessionCalls() []struct {
 	UserID  uint64
 	Session string
 } {
@@ -1856,7 +1832,7 @@ func (mock *DummyDB) AddSessionCalls() []struct {
 }
 
 // AddTextMessage calls AddTextMessageFunc.
-func (mock *DummyDB) AddTextMessage(guildID uint64, channelID uint64, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, content string) (time.Time, error) {
+func (mock *IHarmonyDBMock) AddTextMessage(guildID uint64, channelID uint64, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, content string) (time.Time, error) {
 	if mock.AddTextMessageFunc == nil {
 		panic("IHarmonyDBMock.AddTextMessageFunc: method is nil but IHarmonyDB.AddTextMessage was just called")
 	}
@@ -1890,7 +1866,7 @@ func (mock *DummyDB) AddTextMessage(guildID uint64, channelID uint64, messageID 
 // AddTextMessageCalls gets all the calls that were made to AddTextMessage.
 // Check the length with:
 //     len(mockedIHarmonyDB.AddTextMessageCalls())
-func (mock *DummyDB) AddTextMessageCalls() []struct {
+func (mock *IHarmonyDBMock) AddTextMessageCalls() []struct {
 	GuildID   uint64
 	ChannelID uint64
 	MessageID uint64
@@ -1919,7 +1895,7 @@ func (mock *DummyDB) AddTextMessageCalls() []struct {
 }
 
 // BanUser calls BanUserFunc.
-func (mock *DummyDB) BanUser(guildID uint64, userID uint64) error {
+func (mock *IHarmonyDBMock) BanUser(guildID uint64, userID uint64) error {
 	if mock.BanUserFunc == nil {
 		panic("IHarmonyDBMock.BanUserFunc: method is nil but IHarmonyDB.BanUser was just called")
 	}
@@ -1939,7 +1915,7 @@ func (mock *DummyDB) BanUser(guildID uint64, userID uint64) error {
 // BanUserCalls gets all the calls that were made to BanUser.
 // Check the length with:
 //     len(mockedIHarmonyDB.BanUserCalls())
-func (mock *DummyDB) BanUserCalls() []struct {
+func (mock *IHarmonyDBMock) BanUserCalls() []struct {
 	GuildID uint64
 	UserID  uint64
 } {
@@ -1954,7 +1930,7 @@ func (mock *DummyDB) BanUserCalls() []struct {
 }
 
 // ChannelsForGuild calls ChannelsForGuildFunc.
-func (mock *DummyDB) ChannelsForGuild(guildID uint64) ([]*entgen.Channel, error) {
+func (mock *IHarmonyDBMock) ChannelsForGuild(guildID uint64) ([]*entgen.Channel, error) {
 	if mock.ChannelsForGuildFunc == nil {
 		panic("IHarmonyDBMock.ChannelsForGuildFunc: method is nil but IHarmonyDB.ChannelsForGuild was just called")
 	}
@@ -1972,7 +1948,7 @@ func (mock *DummyDB) ChannelsForGuild(guildID uint64) ([]*entgen.Channel, error)
 // ChannelsForGuildCalls gets all the calls that were made to ChannelsForGuild.
 // Check the length with:
 //     len(mockedIHarmonyDB.ChannelsForGuildCalls())
-func (mock *DummyDB) ChannelsForGuildCalls() []struct {
+func (mock *IHarmonyDBMock) ChannelsForGuildCalls() []struct {
 	GuildID uint64
 } {
 	var calls []struct {
@@ -1985,7 +1961,7 @@ func (mock *DummyDB) ChannelsForGuildCalls() []struct {
 }
 
 // CountMembersInGuild calls CountMembersInGuildFunc.
-func (mock *DummyDB) CountMembersInGuild(guildID uint64) (int64, error) {
+func (mock *IHarmonyDBMock) CountMembersInGuild(guildID uint64) (int64, error) {
 	if mock.CountMembersInGuildFunc == nil {
 		panic("IHarmonyDBMock.CountMembersInGuildFunc: method is nil but IHarmonyDB.CountMembersInGuild was just called")
 	}
@@ -2003,7 +1979,7 @@ func (mock *DummyDB) CountMembersInGuild(guildID uint64) (int64, error) {
 // CountMembersInGuildCalls gets all the calls that were made to CountMembersInGuild.
 // Check the length with:
 //     len(mockedIHarmonyDB.CountMembersInGuildCalls())
-func (mock *DummyDB) CountMembersInGuildCalls() []struct {
+func (mock *IHarmonyDBMock) CountMembersInGuildCalls() []struct {
 	GuildID uint64
 } {
 	var calls []struct {
@@ -2016,7 +1992,7 @@ func (mock *DummyDB) CountMembersInGuildCalls() []struct {
 }
 
 // CreateEmotePack calls CreateEmotePackFunc.
-func (mock *DummyDB) CreateEmotePack(userID uint64, packID uint64, packName string) error {
+func (mock *IHarmonyDBMock) CreateEmotePack(userID uint64, packID uint64, packName string) error {
 	if mock.CreateEmotePackFunc == nil {
 		panic("IHarmonyDBMock.CreateEmotePackFunc: method is nil but IHarmonyDB.CreateEmotePack was just called")
 	}
@@ -2038,7 +2014,7 @@ func (mock *DummyDB) CreateEmotePack(userID uint64, packID uint64, packName stri
 // CreateEmotePackCalls gets all the calls that were made to CreateEmotePack.
 // Check the length with:
 //     len(mockedIHarmonyDB.CreateEmotePackCalls())
-func (mock *DummyDB) CreateEmotePackCalls() []struct {
+func (mock *IHarmonyDBMock) CreateEmotePackCalls() []struct {
 	UserID   uint64
 	PackID   uint64
 	PackName string
@@ -2055,7 +2031,7 @@ func (mock *DummyDB) CreateEmotePackCalls() []struct {
 }
 
 // CreateGuild calls CreateGuildFunc.
-func (mock *DummyDB) CreateGuild(owner uint64, id uint64, channelID uint64, guildName string, picture string) (*entgen.Guild, error) {
+func (mock *IHarmonyDBMock) CreateGuild(owner uint64, id uint64, channelID uint64, guildName string, picture string) (*entgen.Guild, error) {
 	if mock.CreateGuildFunc == nil {
 		panic("IHarmonyDBMock.CreateGuildFunc: method is nil but IHarmonyDB.CreateGuild was just called")
 	}
@@ -2081,7 +2057,7 @@ func (mock *DummyDB) CreateGuild(owner uint64, id uint64, channelID uint64, guil
 // CreateGuildCalls gets all the calls that were made to CreateGuild.
 // Check the length with:
 //     len(mockedIHarmonyDB.CreateGuildCalls())
-func (mock *DummyDB) CreateGuildCalls() []struct {
+func (mock *IHarmonyDBMock) CreateGuildCalls() []struct {
 	Owner     uint64
 	ID        uint64
 	ChannelID uint64
@@ -2102,7 +2078,7 @@ func (mock *DummyDB) CreateGuildCalls() []struct {
 }
 
 // CreateInvite calls CreateInviteFunc.
-func (mock *DummyDB) CreateInvite(guildID uint64, possibleUses int32, name string) (*entgen.Invite, error) {
+func (mock *IHarmonyDBMock) CreateInvite(guildID uint64, possibleUses int32, name string) (*entgen.Invite, error) {
 	if mock.CreateInviteFunc == nil {
 		panic("IHarmonyDBMock.CreateInviteFunc: method is nil but IHarmonyDB.CreateInvite was just called")
 	}
@@ -2124,7 +2100,7 @@ func (mock *DummyDB) CreateInvite(guildID uint64, possibleUses int32, name strin
 // CreateInviteCalls gets all the calls that were made to CreateInvite.
 // Check the length with:
 //     len(mockedIHarmonyDB.CreateInviteCalls())
-func (mock *DummyDB) CreateInviteCalls() []struct {
+func (mock *IHarmonyDBMock) CreateInviteCalls() []struct {
 	GuildID      uint64
 	PossibleUses int32
 	Name         string
@@ -2141,7 +2117,7 @@ func (mock *DummyDB) CreateInviteCalls() []struct {
 }
 
 // DeleteChannelFromGuild calls DeleteChannelFromGuildFunc.
-func (mock *DummyDB) DeleteChannelFromGuild(guildID uint64, channelID uint64) error {
+func (mock *IHarmonyDBMock) DeleteChannelFromGuild(guildID uint64, channelID uint64) error {
 	if mock.DeleteChannelFromGuildFunc == nil {
 		panic("IHarmonyDBMock.DeleteChannelFromGuildFunc: method is nil but IHarmonyDB.DeleteChannelFromGuild was just called")
 	}
@@ -2161,7 +2137,7 @@ func (mock *DummyDB) DeleteChannelFromGuild(guildID uint64, channelID uint64) er
 // DeleteChannelFromGuildCalls gets all the calls that were made to DeleteChannelFromGuild.
 // Check the length with:
 //     len(mockedIHarmonyDB.DeleteChannelFromGuildCalls())
-func (mock *DummyDB) DeleteChannelFromGuildCalls() []struct {
+func (mock *IHarmonyDBMock) DeleteChannelFromGuildCalls() []struct {
 	GuildID   uint64
 	ChannelID uint64
 } {
@@ -2176,7 +2152,7 @@ func (mock *DummyDB) DeleteChannelFromGuildCalls() []struct {
 }
 
 // DeleteEmoteFromPack calls DeleteEmoteFromPackFunc.
-func (mock *DummyDB) DeleteEmoteFromPack(packID uint64, emoteID string) error {
+func (mock *IHarmonyDBMock) DeleteEmoteFromPack(packID uint64, emoteID string) error {
 	if mock.DeleteEmoteFromPackFunc == nil {
 		panic("IHarmonyDBMock.DeleteEmoteFromPackFunc: method is nil but IHarmonyDB.DeleteEmoteFromPack was just called")
 	}
@@ -2196,7 +2172,7 @@ func (mock *DummyDB) DeleteEmoteFromPack(packID uint64, emoteID string) error {
 // DeleteEmoteFromPackCalls gets all the calls that were made to DeleteEmoteFromPack.
 // Check the length with:
 //     len(mockedIHarmonyDB.DeleteEmoteFromPackCalls())
-func (mock *DummyDB) DeleteEmoteFromPackCalls() []struct {
+func (mock *IHarmonyDBMock) DeleteEmoteFromPackCalls() []struct {
 	PackID  uint64
 	EmoteID string
 } {
@@ -2211,7 +2187,7 @@ func (mock *DummyDB) DeleteEmoteFromPackCalls() []struct {
 }
 
 // DeleteEmotePack calls DeleteEmotePackFunc.
-func (mock *DummyDB) DeleteEmotePack(packID uint64) error {
+func (mock *IHarmonyDBMock) DeleteEmotePack(packID uint64) error {
 	if mock.DeleteEmotePackFunc == nil {
 		panic("IHarmonyDBMock.DeleteEmotePackFunc: method is nil but IHarmonyDB.DeleteEmotePack was just called")
 	}
@@ -2229,7 +2205,7 @@ func (mock *DummyDB) DeleteEmotePack(packID uint64) error {
 // DeleteEmotePackCalls gets all the calls that were made to DeleteEmotePack.
 // Check the length with:
 //     len(mockedIHarmonyDB.DeleteEmotePackCalls())
-func (mock *DummyDB) DeleteEmotePackCalls() []struct {
+func (mock *IHarmonyDBMock) DeleteEmotePackCalls() []struct {
 	PackID uint64
 } {
 	var calls []struct {
@@ -2242,7 +2218,7 @@ func (mock *DummyDB) DeleteEmotePackCalls() []struct {
 }
 
 // DeleteFileMeta calls DeleteFileMetaFunc.
-func (mock *DummyDB) DeleteFileMeta(fileID string) error {
+func (mock *IHarmonyDBMock) DeleteFileMeta(fileID string) error {
 	if mock.DeleteFileMetaFunc == nil {
 		panic("IHarmonyDBMock.DeleteFileMetaFunc: method is nil but IHarmonyDB.DeleteFileMeta was just called")
 	}
@@ -2260,7 +2236,7 @@ func (mock *DummyDB) DeleteFileMeta(fileID string) error {
 // DeleteFileMetaCalls gets all the calls that were made to DeleteFileMeta.
 // Check the length with:
 //     len(mockedIHarmonyDB.DeleteFileMetaCalls())
-func (mock *DummyDB) DeleteFileMetaCalls() []struct {
+func (mock *IHarmonyDBMock) DeleteFileMetaCalls() []struct {
 	FileID string
 } {
 	var calls []struct {
@@ -2273,7 +2249,7 @@ func (mock *DummyDB) DeleteFileMetaCalls() []struct {
 }
 
 // DeleteGuild calls DeleteGuildFunc.
-func (mock *DummyDB) DeleteGuild(guildID uint64) error {
+func (mock *IHarmonyDBMock) DeleteGuild(guildID uint64) error {
 	if mock.DeleteGuildFunc == nil {
 		panic("IHarmonyDBMock.DeleteGuildFunc: method is nil but IHarmonyDB.DeleteGuild was just called")
 	}
@@ -2291,7 +2267,7 @@ func (mock *DummyDB) DeleteGuild(guildID uint64) error {
 // DeleteGuildCalls gets all the calls that were made to DeleteGuild.
 // Check the length with:
 //     len(mockedIHarmonyDB.DeleteGuildCalls())
-func (mock *DummyDB) DeleteGuildCalls() []struct {
+func (mock *IHarmonyDBMock) DeleteGuildCalls() []struct {
 	GuildID uint64
 } {
 	var calls []struct {
@@ -2304,7 +2280,7 @@ func (mock *DummyDB) DeleteGuildCalls() []struct {
 }
 
 // DeleteInvite calls DeleteInviteFunc.
-func (mock *DummyDB) DeleteInvite(inviteID string) error {
+func (mock *IHarmonyDBMock) DeleteInvite(inviteID string) error {
 	if mock.DeleteInviteFunc == nil {
 		panic("IHarmonyDBMock.DeleteInviteFunc: method is nil but IHarmonyDB.DeleteInvite was just called")
 	}
@@ -2322,7 +2298,7 @@ func (mock *DummyDB) DeleteInvite(inviteID string) error {
 // DeleteInviteCalls gets all the calls that were made to DeleteInvite.
 // Check the length with:
 //     len(mockedIHarmonyDB.DeleteInviteCalls())
-func (mock *DummyDB) DeleteInviteCalls() []struct {
+func (mock *IHarmonyDBMock) DeleteInviteCalls() []struct {
 	InviteID string
 } {
 	var calls []struct {
@@ -2335,7 +2311,7 @@ func (mock *DummyDB) DeleteInviteCalls() []struct {
 }
 
 // DeleteMember calls DeleteMemberFunc.
-func (mock *DummyDB) DeleteMember(guildID uint64, userID uint64) error {
+func (mock *IHarmonyDBMock) DeleteMember(guildID uint64, userID uint64) error {
 	if mock.DeleteMemberFunc == nil {
 		panic("IHarmonyDBMock.DeleteMemberFunc: method is nil but IHarmonyDB.DeleteMember was just called")
 	}
@@ -2355,7 +2331,7 @@ func (mock *DummyDB) DeleteMember(guildID uint64, userID uint64) error {
 // DeleteMemberCalls gets all the calls that were made to DeleteMember.
 // Check the length with:
 //     len(mockedIHarmonyDB.DeleteMemberCalls())
-func (mock *DummyDB) DeleteMemberCalls() []struct {
+func (mock *IHarmonyDBMock) DeleteMemberCalls() []struct {
 	GuildID uint64
 	UserID  uint64
 } {
@@ -2370,7 +2346,7 @@ func (mock *DummyDB) DeleteMemberCalls() []struct {
 }
 
 // DeleteMessage calls DeleteMessageFunc.
-func (mock *DummyDB) DeleteMessage(messageID uint64) error {
+func (mock *IHarmonyDBMock) DeleteMessage(messageID uint64) error {
 	if mock.DeleteMessageFunc == nil {
 		panic("IHarmonyDBMock.DeleteMessageFunc: method is nil but IHarmonyDB.DeleteMessage was just called")
 	}
@@ -2388,7 +2364,7 @@ func (mock *DummyDB) DeleteMessage(messageID uint64) error {
 // DeleteMessageCalls gets all the calls that were made to DeleteMessage.
 // Check the length with:
 //     len(mockedIHarmonyDB.DeleteMessageCalls())
-func (mock *DummyDB) DeleteMessageCalls() []struct {
+func (mock *IHarmonyDBMock) DeleteMessageCalls() []struct {
 	MessageID uint64
 } {
 	var calls []struct {
@@ -2401,7 +2377,7 @@ func (mock *DummyDB) DeleteMessageCalls() []struct {
 }
 
 // DequipEmotePack calls DequipEmotePackFunc.
-func (mock *DummyDB) DequipEmotePack(userID uint64, packID uint64) error {
+func (mock *IHarmonyDBMock) DequipEmotePack(userID uint64, packID uint64) error {
 	if mock.DequipEmotePackFunc == nil {
 		panic("IHarmonyDBMock.DequipEmotePackFunc: method is nil but IHarmonyDB.DequipEmotePack was just called")
 	}
@@ -2421,7 +2397,7 @@ func (mock *DummyDB) DequipEmotePack(userID uint64, packID uint64) error {
 // DequipEmotePackCalls gets all the calls that were made to DequipEmotePack.
 // Check the length with:
 //     len(mockedIHarmonyDB.DequipEmotePackCalls())
-func (mock *DummyDB) DequipEmotePackCalls() []struct {
+func (mock *IHarmonyDBMock) DequipEmotePackCalls() []struct {
 	UserID uint64
 	PackID uint64
 } {
@@ -2436,7 +2412,7 @@ func (mock *DummyDB) DequipEmotePackCalls() []struct {
 }
 
 // EmailExists calls EmailExistsFunc.
-func (mock *DummyDB) EmailExists(email string) (bool, error) {
+func (mock *IHarmonyDBMock) EmailExists(email string) (bool, error) {
 	if mock.EmailExistsFunc == nil {
 		panic("IHarmonyDBMock.EmailExistsFunc: method is nil but IHarmonyDB.EmailExists was just called")
 	}
@@ -2454,7 +2430,7 @@ func (mock *DummyDB) EmailExists(email string) (bool, error) {
 // EmailExistsCalls gets all the calls that were made to EmailExists.
 // Check the length with:
 //     len(mockedIHarmonyDB.EmailExistsCalls())
-func (mock *DummyDB) EmailExistsCalls() []struct {
+func (mock *IHarmonyDBMock) EmailExistsCalls() []struct {
 	Email string
 } {
 	var calls []struct {
@@ -2467,7 +2443,7 @@ func (mock *DummyDB) EmailExistsCalls() []struct {
 }
 
 // ExpireSessions calls ExpireSessionsFunc.
-func (mock *DummyDB) ExpireSessions() error {
+func (mock *IHarmonyDBMock) ExpireSessions() error {
 	if mock.ExpireSessionsFunc == nil {
 		panic("IHarmonyDBMock.ExpireSessionsFunc: method is nil but IHarmonyDB.ExpireSessions was just called")
 	}
@@ -2482,7 +2458,7 @@ func (mock *DummyDB) ExpireSessions() error {
 // ExpireSessionsCalls gets all the calls that were made to ExpireSessions.
 // Check the length with:
 //     len(mockedIHarmonyDB.ExpireSessionsCalls())
-func (mock *DummyDB) ExpireSessionsCalls() []struct {
+func (mock *IHarmonyDBMock) ExpireSessionsCalls() []struct {
 } {
 	var calls []struct {
 	}
@@ -2493,7 +2469,7 @@ func (mock *DummyDB) ExpireSessionsCalls() []struct {
 }
 
 // ExtendSession calls ExtendSessionFunc.
-func (mock *DummyDB) ExtendSession(session string) error {
+func (mock *IHarmonyDBMock) ExtendSession(session string) error {
 	if mock.ExtendSessionFunc == nil {
 		panic("IHarmonyDBMock.ExtendSessionFunc: method is nil but IHarmonyDB.ExtendSession was just called")
 	}
@@ -2511,7 +2487,7 @@ func (mock *DummyDB) ExtendSession(session string) error {
 // ExtendSessionCalls gets all the calls that were made to ExtendSession.
 // Check the length with:
 //     len(mockedIHarmonyDB.ExtendSessionCalls())
-func (mock *DummyDB) ExtendSessionCalls() []struct {
+func (mock *IHarmonyDBMock) ExtendSessionCalls() []struct {
 	Session string
 } {
 	var calls []struct {
@@ -2524,7 +2500,7 @@ func (mock *DummyDB) ExtendSessionCalls() []struct {
 }
 
 // GetAvatar calls GetAvatarFunc.
-func (mock *DummyDB) GetAvatar(userID uint64) (*string, error) {
+func (mock *IHarmonyDBMock) GetAvatar(userID uint64) (*string, error) {
 	if mock.GetAvatarFunc == nil {
 		panic("IHarmonyDBMock.GetAvatarFunc: method is nil but IHarmonyDB.GetAvatar was just called")
 	}
@@ -2542,7 +2518,7 @@ func (mock *DummyDB) GetAvatar(userID uint64) (*string, error) {
 // GetAvatarCalls gets all the calls that were made to GetAvatar.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetAvatarCalls())
-func (mock *DummyDB) GetAvatarCalls() []struct {
+func (mock *IHarmonyDBMock) GetAvatarCalls() []struct {
 	UserID uint64
 } {
 	var calls []struct {
@@ -2555,7 +2531,7 @@ func (mock *DummyDB) GetAvatarCalls() []struct {
 }
 
 // GetChannelListPosition calls GetChannelListPositionFunc.
-func (mock *DummyDB) GetChannelListPosition(channelID uint64) (string, error) {
+func (mock *IHarmonyDBMock) GetChannelListPosition(channelID uint64) (string, error) {
 	if mock.GetChannelListPositionFunc == nil {
 		panic("IHarmonyDBMock.GetChannelListPositionFunc: method is nil but IHarmonyDB.GetChannelListPosition was just called")
 	}
@@ -2573,7 +2549,7 @@ func (mock *DummyDB) GetChannelListPosition(channelID uint64) (string, error) {
 // GetChannelListPositionCalls gets all the calls that were made to GetChannelListPosition.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetChannelListPositionCalls())
-func (mock *DummyDB) GetChannelListPositionCalls() []struct {
+func (mock *IHarmonyDBMock) GetChannelListPositionCalls() []struct {
 	ChannelID uint64
 } {
 	var calls []struct {
@@ -2586,7 +2562,7 @@ func (mock *DummyDB) GetChannelListPositionCalls() []struct {
 }
 
 // GetEmotePackEmotes calls GetEmotePackEmotesFunc.
-func (mock *DummyDB) GetEmotePackEmotes(packID uint64) ([]*entgen.Emote, error) {
+func (mock *IHarmonyDBMock) GetEmotePackEmotes(packID uint64) ([]*entgen.Emote, error) {
 	if mock.GetEmotePackEmotesFunc == nil {
 		panic("IHarmonyDBMock.GetEmotePackEmotesFunc: method is nil but IHarmonyDB.GetEmotePackEmotes was just called")
 	}
@@ -2604,7 +2580,7 @@ func (mock *DummyDB) GetEmotePackEmotes(packID uint64) ([]*entgen.Emote, error) 
 // GetEmotePackEmotesCalls gets all the calls that were made to GetEmotePackEmotes.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetEmotePackEmotesCalls())
-func (mock *DummyDB) GetEmotePackEmotesCalls() []struct {
+func (mock *IHarmonyDBMock) GetEmotePackEmotesCalls() []struct {
 	PackID uint64
 } {
 	var calls []struct {
@@ -2617,7 +2593,7 @@ func (mock *DummyDB) GetEmotePackEmotesCalls() []struct {
 }
 
 // GetEmotePacks calls GetEmotePacksFunc.
-func (mock *DummyDB) GetEmotePacks(userID uint64) ([]*entgen.EmotePack, error) {
+func (mock *IHarmonyDBMock) GetEmotePacks(userID uint64) ([]*entgen.EmotePack, error) {
 	if mock.GetEmotePacksFunc == nil {
 		panic("IHarmonyDBMock.GetEmotePacksFunc: method is nil but IHarmonyDB.GetEmotePacks was just called")
 	}
@@ -2635,7 +2611,7 @@ func (mock *DummyDB) GetEmotePacks(userID uint64) ([]*entgen.EmotePack, error) {
 // GetEmotePacksCalls gets all the calls that were made to GetEmotePacks.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetEmotePacksCalls())
-func (mock *DummyDB) GetEmotePacksCalls() []struct {
+func (mock *IHarmonyDBMock) GetEmotePacksCalls() []struct {
 	UserID uint64
 } {
 	var calls []struct {
@@ -2648,7 +2624,7 @@ func (mock *DummyDB) GetEmotePacksCalls() []struct {
 }
 
 // GetFileIDByHash calls GetFileIDByHashFunc.
-func (mock *DummyDB) GetFileIDByHash(hash []byte) (string, error) {
+func (mock *IHarmonyDBMock) GetFileIDByHash(hash []byte) (string, error) {
 	if mock.GetFileIDByHashFunc == nil {
 		panic("IHarmonyDBMock.GetFileIDByHashFunc: method is nil but IHarmonyDB.GetFileIDByHash was just called")
 	}
@@ -2666,7 +2642,7 @@ func (mock *DummyDB) GetFileIDByHash(hash []byte) (string, error) {
 // GetFileIDByHashCalls gets all the calls that were made to GetFileIDByHash.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetFileIDByHashCalls())
-func (mock *DummyDB) GetFileIDByHashCalls() []struct {
+func (mock *IHarmonyDBMock) GetFileIDByHashCalls() []struct {
 	Hash []byte
 } {
 	var calls []struct {
@@ -2679,7 +2655,7 @@ func (mock *DummyDB) GetFileIDByHashCalls() []struct {
 }
 
 // GetFileMetadata calls GetFileMetadataFunc.
-func (mock *DummyDB) GetFileMetadata(fileID string) (*entgen.File, error) {
+func (mock *IHarmonyDBMock) GetFileMetadata(fileID string) (*entgen.File, error) {
 	if mock.GetFileMetadataFunc == nil {
 		panic("IHarmonyDBMock.GetFileMetadataFunc: method is nil but IHarmonyDB.GetFileMetadata was just called")
 	}
@@ -2697,7 +2673,7 @@ func (mock *DummyDB) GetFileMetadata(fileID string) (*entgen.File, error) {
 // GetFileMetadataCalls gets all the calls that were made to GetFileMetadata.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetFileMetadataCalls())
-func (mock *DummyDB) GetFileMetadataCalls() []struct {
+func (mock *IHarmonyDBMock) GetFileMetadataCalls() []struct {
 	FileID string
 } {
 	var calls []struct {
@@ -2710,7 +2686,7 @@ func (mock *DummyDB) GetFileMetadataCalls() []struct {
 }
 
 // GetFirstChannel calls GetFirstChannelFunc.
-func (mock *DummyDB) GetFirstChannel(guildID uint64) (uint64, error) {
+func (mock *IHarmonyDBMock) GetFirstChannel(guildID uint64) (uint64, error) {
 	if mock.GetFirstChannelFunc == nil {
 		panic("IHarmonyDBMock.GetFirstChannelFunc: method is nil but IHarmonyDB.GetFirstChannel was just called")
 	}
@@ -2728,7 +2704,7 @@ func (mock *DummyDB) GetFirstChannel(guildID uint64) (uint64, error) {
 // GetFirstChannelCalls gets all the calls that were made to GetFirstChannel.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetFirstChannelCalls())
-func (mock *DummyDB) GetFirstChannelCalls() []struct {
+func (mock *IHarmonyDBMock) GetFirstChannelCalls() []struct {
 	GuildID uint64
 } {
 	var calls []struct {
@@ -2741,7 +2717,7 @@ func (mock *DummyDB) GetFirstChannelCalls() []struct {
 }
 
 // GetGuildByID calls GetGuildByIDFunc.
-func (mock *DummyDB) GetGuildByID(guildID uint64) (*entgen.Guild, error) {
+func (mock *IHarmonyDBMock) GetGuildByID(guildID uint64) (*entgen.Guild, error) {
 	if mock.GetGuildByIDFunc == nil {
 		panic("IHarmonyDBMock.GetGuildByIDFunc: method is nil but IHarmonyDB.GetGuildByID was just called")
 	}
@@ -2759,7 +2735,7 @@ func (mock *DummyDB) GetGuildByID(guildID uint64) (*entgen.Guild, error) {
 // GetGuildByIDCalls gets all the calls that were made to GetGuildByID.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetGuildByIDCalls())
-func (mock *DummyDB) GetGuildByIDCalls() []struct {
+func (mock *IHarmonyDBMock) GetGuildByIDCalls() []struct {
 	GuildID uint64
 } {
 	var calls []struct {
@@ -2772,7 +2748,7 @@ func (mock *DummyDB) GetGuildByIDCalls() []struct {
 }
 
 // GetGuildList calls GetGuildListFunc.
-func (mock *DummyDB) GetGuildList(userID uint64) ([]*entgen.GuildListEntry, error) {
+func (mock *IHarmonyDBMock) GetGuildList(userID uint64) ([]*entgen.GuildListEntry, error) {
 	if mock.GetGuildListFunc == nil {
 		panic("IHarmonyDBMock.GetGuildListFunc: method is nil but IHarmonyDB.GetGuildList was just called")
 	}
@@ -2790,7 +2766,7 @@ func (mock *DummyDB) GetGuildList(userID uint64) ([]*entgen.GuildListEntry, erro
 // GetGuildListCalls gets all the calls that were made to GetGuildList.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetGuildListCalls())
-func (mock *DummyDB) GetGuildListCalls() []struct {
+func (mock *IHarmonyDBMock) GetGuildListCalls() []struct {
 	UserID uint64
 } {
 	var calls []struct {
@@ -2803,7 +2779,7 @@ func (mock *DummyDB) GetGuildListCalls() []struct {
 }
 
 // GetGuildListPosition calls GetGuildListPositionFunc.
-func (mock *DummyDB) GetGuildListPosition(userID uint64, guildID uint64, homeServer string) (string, error) {
+func (mock *IHarmonyDBMock) GetGuildListPosition(userID uint64, guildID uint64, homeServer string) (string, error) {
 	if mock.GetGuildListPositionFunc == nil {
 		panic("IHarmonyDBMock.GetGuildListPositionFunc: method is nil but IHarmonyDB.GetGuildListPosition was just called")
 	}
@@ -2825,7 +2801,7 @@ func (mock *DummyDB) GetGuildListPosition(userID uint64, guildID uint64, homeSer
 // GetGuildListPositionCalls gets all the calls that were made to GetGuildListPosition.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetGuildListPositionCalls())
-func (mock *DummyDB) GetGuildListPositionCalls() []struct {
+func (mock *IHarmonyDBMock) GetGuildListPositionCalls() []struct {
 	UserID     uint64
 	GuildID    uint64
 	HomeServer string
@@ -2842,7 +2818,7 @@ func (mock *DummyDB) GetGuildListPositionCalls() []struct {
 }
 
 // GetGuildPicture calls GetGuildPictureFunc.
-func (mock *DummyDB) GetGuildPicture(guildID uint64) (string, error) {
+func (mock *IHarmonyDBMock) GetGuildPicture(guildID uint64) (string, error) {
 	if mock.GetGuildPictureFunc == nil {
 		panic("IHarmonyDBMock.GetGuildPictureFunc: method is nil but IHarmonyDB.GetGuildPicture was just called")
 	}
@@ -2860,7 +2836,7 @@ func (mock *DummyDB) GetGuildPicture(guildID uint64) (string, error) {
 // GetGuildPictureCalls gets all the calls that were made to GetGuildPicture.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetGuildPictureCalls())
-func (mock *DummyDB) GetGuildPictureCalls() []struct {
+func (mock *IHarmonyDBMock) GetGuildPictureCalls() []struct {
 	GuildID uint64
 } {
 	var calls []struct {
@@ -2873,7 +2849,7 @@ func (mock *DummyDB) GetGuildPictureCalls() []struct {
 }
 
 // GetGuildRoles calls GetGuildRolesFunc.
-func (mock *DummyDB) GetGuildRoles(guildID uint64) ([]*entgen.Role, error) {
+func (mock *IHarmonyDBMock) GetGuildRoles(guildID uint64) ([]*entgen.Role, error) {
 	if mock.GetGuildRolesFunc == nil {
 		panic("IHarmonyDBMock.GetGuildRolesFunc: method is nil but IHarmonyDB.GetGuildRoles was just called")
 	}
@@ -2891,7 +2867,7 @@ func (mock *DummyDB) GetGuildRoles(guildID uint64) ([]*entgen.Role, error) {
 // GetGuildRolesCalls gets all the calls that were made to GetGuildRoles.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetGuildRolesCalls())
-func (mock *DummyDB) GetGuildRolesCalls() []struct {
+func (mock *IHarmonyDBMock) GetGuildRolesCalls() []struct {
 	GuildID uint64
 } {
 	var calls []struct {
@@ -2904,7 +2880,7 @@ func (mock *DummyDB) GetGuildRolesCalls() []struct {
 }
 
 // GetInvites calls GetInvitesFunc.
-func (mock *DummyDB) GetInvites(guildID uint64) ([]*entgen.Invite, error) {
+func (mock *IHarmonyDBMock) GetInvites(guildID uint64) ([]*entgen.Invite, error) {
 	if mock.GetInvitesFunc == nil {
 		panic("IHarmonyDBMock.GetInvitesFunc: method is nil but IHarmonyDB.GetInvites was just called")
 	}
@@ -2922,7 +2898,7 @@ func (mock *DummyDB) GetInvites(guildID uint64) ([]*entgen.Invite, error) {
 // GetInvitesCalls gets all the calls that were made to GetInvites.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetInvitesCalls())
-func (mock *DummyDB) GetInvitesCalls() []struct {
+func (mock *IHarmonyDBMock) GetInvitesCalls() []struct {
 	GuildID uint64
 } {
 	var calls []struct {
@@ -2935,7 +2911,7 @@ func (mock *DummyDB) GetInvitesCalls() []struct {
 }
 
 // GetLocalGuilds calls GetLocalGuildsFunc.
-func (mock *DummyDB) GetLocalGuilds(userID uint64) ([]uint64, error) {
+func (mock *IHarmonyDBMock) GetLocalGuilds(userID uint64) ([]uint64, error) {
 	if mock.GetLocalGuildsFunc == nil {
 		panic("IHarmonyDBMock.GetLocalGuildsFunc: method is nil but IHarmonyDB.GetLocalGuilds was just called")
 	}
@@ -2953,7 +2929,7 @@ func (mock *DummyDB) GetLocalGuilds(userID uint64) ([]uint64, error) {
 // GetLocalGuildsCalls gets all the calls that were made to GetLocalGuilds.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetLocalGuildsCalls())
-func (mock *DummyDB) GetLocalGuildsCalls() []struct {
+func (mock *IHarmonyDBMock) GetLocalGuildsCalls() []struct {
 	UserID uint64
 } {
 	var calls []struct {
@@ -2966,7 +2942,7 @@ func (mock *DummyDB) GetLocalGuildsCalls() []struct {
 }
 
 // GetLocalUserForForeignUser calls GetLocalUserForForeignUserFunc.
-func (mock *DummyDB) GetLocalUserForForeignUser(userID uint64, host string) (uint64, error) {
+func (mock *IHarmonyDBMock) GetLocalUserForForeignUser(userID uint64, host string) (uint64, error) {
 	if mock.GetLocalUserForForeignUserFunc == nil {
 		panic("IHarmonyDBMock.GetLocalUserForForeignUserFunc: method is nil but IHarmonyDB.GetLocalUserForForeignUser was just called")
 	}
@@ -2986,7 +2962,7 @@ func (mock *DummyDB) GetLocalUserForForeignUser(userID uint64, host string) (uin
 // GetLocalUserForForeignUserCalls gets all the calls that were made to GetLocalUserForForeignUser.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetLocalUserForForeignUserCalls())
-func (mock *DummyDB) GetLocalUserForForeignUserCalls() []struct {
+func (mock *IHarmonyDBMock) GetLocalUserForForeignUserCalls() []struct {
 	UserID uint64
 	Host   string
 } {
@@ -3001,7 +2977,7 @@ func (mock *DummyDB) GetLocalUserForForeignUserCalls() []struct {
 }
 
 // GetMessage calls GetMessageFunc.
-func (mock *DummyDB) GetMessage(messageID uint64) (*entgen.Message, error) {
+func (mock *IHarmonyDBMock) GetMessage(messageID uint64) (*entgen.Message, error) {
 	if mock.GetMessageFunc == nil {
 		panic("IHarmonyDBMock.GetMessageFunc: method is nil but IHarmonyDB.GetMessage was just called")
 	}
@@ -3019,7 +2995,7 @@ func (mock *DummyDB) GetMessage(messageID uint64) (*entgen.Message, error) {
 // GetMessageCalls gets all the calls that were made to GetMessage.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetMessageCalls())
-func (mock *DummyDB) GetMessageCalls() []struct {
+func (mock *IHarmonyDBMock) GetMessageCalls() []struct {
 	MessageID uint64
 } {
 	var calls []struct {
@@ -3032,7 +3008,7 @@ func (mock *DummyDB) GetMessageCalls() []struct {
 }
 
 // GetMessages calls GetMessagesFunc.
-func (mock *DummyDB) GetMessages(channelID uint64) ([]*entgen.Message, error) {
+func (mock *IHarmonyDBMock) GetMessages(channelID uint64) ([]*entgen.Message, error) {
 	if mock.GetMessagesFunc == nil {
 		panic("IHarmonyDBMock.GetMessagesFunc: method is nil but IHarmonyDB.GetMessages was just called")
 	}
@@ -3050,7 +3026,7 @@ func (mock *DummyDB) GetMessages(channelID uint64) ([]*entgen.Message, error) {
 // GetMessagesCalls gets all the calls that were made to GetMessages.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetMessagesCalls())
-func (mock *DummyDB) GetMessagesCalls() []struct {
+func (mock *IHarmonyDBMock) GetMessagesCalls() []struct {
 	ChannelID uint64
 } {
 	var calls []struct {
@@ -3063,7 +3039,7 @@ func (mock *DummyDB) GetMessagesCalls() []struct {
 }
 
 // GetMessagesBefore calls GetMessagesBeforeFunc.
-func (mock *DummyDB) GetMessagesBefore(channelID uint64, date time.Time) ([]*entgen.Message, error) {
+func (mock *IHarmonyDBMock) GetMessagesBefore(channelID uint64, date time.Time) ([]*entgen.Message, error) {
 	if mock.GetMessagesBeforeFunc == nil {
 		panic("IHarmonyDBMock.GetMessagesBeforeFunc: method is nil but IHarmonyDB.GetMessagesBefore was just called")
 	}
@@ -3083,7 +3059,7 @@ func (mock *DummyDB) GetMessagesBefore(channelID uint64, date time.Time) ([]*ent
 // GetMessagesBeforeCalls gets all the calls that were made to GetMessagesBefore.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetMessagesBeforeCalls())
-func (mock *DummyDB) GetMessagesBeforeCalls() []struct {
+func (mock *IHarmonyDBMock) GetMessagesBeforeCalls() []struct {
 	ChannelID uint64
 	Date      time.Time
 } {
@@ -3098,7 +3074,7 @@ func (mock *DummyDB) GetMessagesBeforeCalls() []struct {
 }
 
 // GetOwner calls GetOwnerFunc.
-func (mock *DummyDB) GetOwner(guildID uint64) (uint64, error) {
+func (mock *IHarmonyDBMock) GetOwner(guildID uint64) (uint64, error) {
 	if mock.GetOwnerFunc == nil {
 		panic("IHarmonyDBMock.GetOwnerFunc: method is nil but IHarmonyDB.GetOwner was just called")
 	}
@@ -3116,7 +3092,7 @@ func (mock *DummyDB) GetOwner(guildID uint64) (uint64, error) {
 // GetOwnerCalls gets all the calls that were made to GetOwner.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetOwnerCalls())
-func (mock *DummyDB) GetOwnerCalls() []struct {
+func (mock *IHarmonyDBMock) GetOwnerCalls() []struct {
 	GuildID uint64
 } {
 	var calls []struct {
@@ -3129,37 +3105,29 @@ func (mock *DummyDB) GetOwnerCalls() []struct {
 }
 
 // GetPermissions calls GetPermissionsFunc.
-func (mock *DummyDB) GetPermissions(guildID uint64, channelID uint64, roleID uint64) ([]PermissionsNode, error) {
+func (mock *IHarmonyDBMock) GetPermissions(roleID uint64) ([]PermissionsNode, error) {
 	if mock.GetPermissionsFunc == nil {
 		panic("IHarmonyDBMock.GetPermissionsFunc: method is nil but IHarmonyDB.GetPermissions was just called")
 	}
 	callInfo := struct {
-		GuildID   uint64
-		ChannelID uint64
-		RoleID    uint64
+		RoleID uint64
 	}{
-		GuildID:   guildID,
-		ChannelID: channelID,
-		RoleID:    roleID,
+		RoleID: roleID,
 	}
 	mock.lockGetPermissions.Lock()
 	mock.calls.GetPermissions = append(mock.calls.GetPermissions, callInfo)
 	mock.lockGetPermissions.Unlock()
-	return mock.GetPermissionsFunc(guildID, channelID, roleID)
+	return mock.GetPermissionsFunc(roleID)
 }
 
 // GetPermissionsCalls gets all the calls that were made to GetPermissions.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetPermissionsCalls())
-func (mock *DummyDB) GetPermissionsCalls() []struct {
-	GuildID   uint64
-	ChannelID uint64
-	RoleID    uint64
+func (mock *IHarmonyDBMock) GetPermissionsCalls() []struct {
+	RoleID uint64
 } {
 	var calls []struct {
-		GuildID   uint64
-		ChannelID uint64
-		RoleID    uint64
+		RoleID uint64
 	}
 	mock.lockGetPermissions.RLock()
 	calls = mock.calls.GetPermissions
@@ -3168,7 +3136,7 @@ func (mock *DummyDB) GetPermissionsCalls() []struct {
 }
 
 // GetPermissionsData calls GetPermissionsDataFunc.
-func (mock *DummyDB) GetPermissionsData(guildID uint64) (PermissionsData, error) {
+func (mock *IHarmonyDBMock) GetPermissionsData(guildID uint64) (PermissionsData, error) {
 	if mock.GetPermissionsDataFunc == nil {
 		panic("IHarmonyDBMock.GetPermissionsDataFunc: method is nil but IHarmonyDB.GetPermissionsData was just called")
 	}
@@ -3186,7 +3154,7 @@ func (mock *DummyDB) GetPermissionsData(guildID uint64) (PermissionsData, error)
 // GetPermissionsDataCalls gets all the calls that were made to GetPermissionsData.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetPermissionsDataCalls())
-func (mock *DummyDB) GetPermissionsDataCalls() []struct {
+func (mock *IHarmonyDBMock) GetPermissionsDataCalls() []struct {
 	GuildID uint64
 } {
 	var calls []struct {
@@ -3198,47 +3166,8 @@ func (mock *DummyDB) GetPermissionsDataCalls() []struct {
 	return calls
 }
 
-// GetRolePositions calls GetRolePositionsFunc.
-func (mock *DummyDB) GetRolePositions(guildID uint64, before uint64, previous uint64) (string, error) {
-	if mock.GetRolePositionsFunc == nil {
-		panic("IHarmonyDBMock.GetRolePositionsFunc: method is nil but IHarmonyDB.GetRolePositions was just called")
-	}
-	callInfo := struct {
-		GuildID  uint64
-		Before   uint64
-		Previous uint64
-	}{
-		GuildID:  guildID,
-		Before:   before,
-		Previous: previous,
-	}
-	mock.lockGetRolePositions.Lock()
-	mock.calls.GetRolePositions = append(mock.calls.GetRolePositions, callInfo)
-	mock.lockGetRolePositions.Unlock()
-	return mock.GetRolePositionsFunc(guildID, before, previous)
-}
-
-// GetRolePositionsCalls gets all the calls that were made to GetRolePositions.
-// Check the length with:
-//     len(mockedIHarmonyDB.GetRolePositionsCalls())
-func (mock *DummyDB) GetRolePositionsCalls() []struct {
-	GuildID  uint64
-	Before   uint64
-	Previous uint64
-} {
-	var calls []struct {
-		GuildID  uint64
-		Before   uint64
-		Previous uint64
-	}
-	mock.lockGetRolePositions.RLock()
-	calls = mock.calls.GetRolePositions
-	mock.lockGetRolePositions.RUnlock()
-	return calls
-}
-
 // GetUserByEmail calls GetUserByEmailFunc.
-func (mock *DummyDB) GetUserByEmail(email string) (UserData, error) {
+func (mock *IHarmonyDBMock) GetUserByEmail(email string) (UserData, error) {
 	if mock.GetUserByEmailFunc == nil {
 		panic("IHarmonyDBMock.GetUserByEmailFunc: method is nil but IHarmonyDB.GetUserByEmail was just called")
 	}
@@ -3256,7 +3185,7 @@ func (mock *DummyDB) GetUserByEmail(email string) (UserData, error) {
 // GetUserByEmailCalls gets all the calls that were made to GetUserByEmail.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetUserByEmailCalls())
-func (mock *DummyDB) GetUserByEmailCalls() []struct {
+func (mock *IHarmonyDBMock) GetUserByEmailCalls() []struct {
 	Email string
 } {
 	var calls []struct {
@@ -3269,7 +3198,7 @@ func (mock *DummyDB) GetUserByEmailCalls() []struct {
 }
 
 // GetUserByID calls GetUserByIDFunc.
-func (mock *DummyDB) GetUserByID(userID uint64) (UserData, error) {
+func (mock *IHarmonyDBMock) GetUserByID(userID uint64) (UserData, error) {
 	if mock.GetUserByIDFunc == nil {
 		panic("IHarmonyDBMock.GetUserByIDFunc: method is nil but IHarmonyDB.GetUserByID was just called")
 	}
@@ -3287,7 +3216,7 @@ func (mock *DummyDB) GetUserByID(userID uint64) (UserData, error) {
 // GetUserByIDCalls gets all the calls that were made to GetUserByID.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetUserByIDCalls())
-func (mock *DummyDB) GetUserByIDCalls() []struct {
+func (mock *IHarmonyDBMock) GetUserByIDCalls() []struct {
 	UserID uint64
 } {
 	var calls []struct {
@@ -3300,7 +3229,7 @@ func (mock *DummyDB) GetUserByIDCalls() []struct {
 }
 
 // GetUserMetadata calls GetUserMetadataFunc.
-func (mock *DummyDB) GetUserMetadata(userID uint64, appID string) (string, error) {
+func (mock *IHarmonyDBMock) GetUserMetadata(userID uint64, appID string) (string, error) {
 	if mock.GetUserMetadataFunc == nil {
 		panic("IHarmonyDBMock.GetUserMetadataFunc: method is nil but IHarmonyDB.GetUserMetadata was just called")
 	}
@@ -3320,7 +3249,7 @@ func (mock *DummyDB) GetUserMetadata(userID uint64, appID string) (string, error
 // GetUserMetadataCalls gets all the calls that were made to GetUserMetadata.
 // Check the length with:
 //     len(mockedIHarmonyDB.GetUserMetadataCalls())
-func (mock *DummyDB) GetUserMetadataCalls() []struct {
+func (mock *IHarmonyDBMock) GetUserMetadataCalls() []struct {
 	UserID uint64
 	AppID  string
 } {
@@ -3335,7 +3264,7 @@ func (mock *DummyDB) GetUserMetadataCalls() []struct {
 }
 
 // HasChannelWithID calls HasChannelWithIDFunc.
-func (mock *DummyDB) HasChannelWithID(guildID uint64, channelID uint64) (bool, error) {
+func (mock *IHarmonyDBMock) HasChannelWithID(guildID uint64, channelID uint64) (bool, error) {
 	if mock.HasChannelWithIDFunc == nil {
 		panic("IHarmonyDBMock.HasChannelWithIDFunc: method is nil but IHarmonyDB.HasChannelWithID was just called")
 	}
@@ -3355,7 +3284,7 @@ func (mock *DummyDB) HasChannelWithID(guildID uint64, channelID uint64) (bool, e
 // HasChannelWithIDCalls gets all the calls that were made to HasChannelWithID.
 // Check the length with:
 //     len(mockedIHarmonyDB.HasChannelWithIDCalls())
-func (mock *DummyDB) HasChannelWithIDCalls() []struct {
+func (mock *IHarmonyDBMock) HasChannelWithIDCalls() []struct {
 	GuildID   uint64
 	ChannelID uint64
 } {
@@ -3370,7 +3299,7 @@ func (mock *DummyDB) HasChannelWithIDCalls() []struct {
 }
 
 // HasGuildWithID calls HasGuildWithIDFunc.
-func (mock *DummyDB) HasGuildWithID(guildID uint64) (bool, error) {
+func (mock *IHarmonyDBMock) HasGuildWithID(guildID uint64) (bool, error) {
 	if mock.HasGuildWithIDFunc == nil {
 		panic("IHarmonyDBMock.HasGuildWithIDFunc: method is nil but IHarmonyDB.HasGuildWithID was just called")
 	}
@@ -3388,7 +3317,7 @@ func (mock *DummyDB) HasGuildWithID(guildID uint64) (bool, error) {
 // HasGuildWithIDCalls gets all the calls that were made to HasGuildWithID.
 // Check the length with:
 //     len(mockedIHarmonyDB.HasGuildWithIDCalls())
-func (mock *DummyDB) HasGuildWithIDCalls() []struct {
+func (mock *IHarmonyDBMock) HasGuildWithIDCalls() []struct {
 	GuildID uint64
 } {
 	var calls []struct {
@@ -3401,36 +3330,28 @@ func (mock *DummyDB) HasGuildWithIDCalls() []struct {
 }
 
 // HasMessageWithID calls HasMessageWithIDFunc.
-func (mock *DummyDB) HasMessageWithID(guildID uint64, channelID uint64, messageID uint64) (bool, error) {
+func (mock *IHarmonyDBMock) HasMessageWithID(messageID uint64) (bool, error) {
 	if mock.HasMessageWithIDFunc == nil {
 		panic("IHarmonyDBMock.HasMessageWithIDFunc: method is nil but IHarmonyDB.HasMessageWithID was just called")
 	}
 	callInfo := struct {
-		GuildID   uint64
-		ChannelID uint64
 		MessageID uint64
 	}{
-		GuildID:   guildID,
-		ChannelID: channelID,
 		MessageID: messageID,
 	}
 	mock.lockHasMessageWithID.Lock()
 	mock.calls.HasMessageWithID = append(mock.calls.HasMessageWithID, callInfo)
 	mock.lockHasMessageWithID.Unlock()
-	return mock.HasMessageWithIDFunc(guildID, channelID, messageID)
+	return mock.HasMessageWithIDFunc(messageID)
 }
 
 // HasMessageWithIDCalls gets all the calls that were made to HasMessageWithID.
 // Check the length with:
 //     len(mockedIHarmonyDB.HasMessageWithIDCalls())
-func (mock *DummyDB) HasMessageWithIDCalls() []struct {
-	GuildID   uint64
-	ChannelID uint64
+func (mock *IHarmonyDBMock) HasMessageWithIDCalls() []struct {
 	MessageID uint64
 } {
 	var calls []struct {
-		GuildID   uint64
-		ChannelID uint64
 		MessageID uint64
 	}
 	mock.lockHasMessageWithID.RLock()
@@ -3440,7 +3361,7 @@ func (mock *DummyDB) HasMessageWithIDCalls() []struct {
 }
 
 // IncrementInvite calls IncrementInviteFunc.
-func (mock *DummyDB) IncrementInvite(inviteID string) error {
+func (mock *IHarmonyDBMock) IncrementInvite(inviteID string) error {
 	if mock.IncrementInviteFunc == nil {
 		panic("IHarmonyDBMock.IncrementInviteFunc: method is nil but IHarmonyDB.IncrementInvite was just called")
 	}
@@ -3458,7 +3379,7 @@ func (mock *DummyDB) IncrementInvite(inviteID string) error {
 // IncrementInviteCalls gets all the calls that were made to IncrementInvite.
 // Check the length with:
 //     len(mockedIHarmonyDB.IncrementInviteCalls())
-func (mock *DummyDB) IncrementInviteCalls() []struct {
+func (mock *IHarmonyDBMock) IncrementInviteCalls() []struct {
 	InviteID string
 } {
 	var calls []struct {
@@ -3471,7 +3392,7 @@ func (mock *DummyDB) IncrementInviteCalls() []struct {
 }
 
 // IsBanned calls IsBannedFunc.
-func (mock *DummyDB) IsBanned(guildID uint64, userID uint64) (bool, error) {
+func (mock *IHarmonyDBMock) IsBanned(guildID uint64, userID uint64) (bool, error) {
 	if mock.IsBannedFunc == nil {
 		panic("IHarmonyDBMock.IsBannedFunc: method is nil but IHarmonyDB.IsBanned was just called")
 	}
@@ -3491,7 +3412,7 @@ func (mock *DummyDB) IsBanned(guildID uint64, userID uint64) (bool, error) {
 // IsBannedCalls gets all the calls that were made to IsBanned.
 // Check the length with:
 //     len(mockedIHarmonyDB.IsBannedCalls())
-func (mock *DummyDB) IsBannedCalls() []struct {
+func (mock *IHarmonyDBMock) IsBannedCalls() []struct {
 	GuildID uint64
 	UserID  uint64
 } {
@@ -3506,7 +3427,7 @@ func (mock *DummyDB) IsBannedCalls() []struct {
 }
 
 // IsOwner calls IsOwnerFunc.
-func (mock *DummyDB) IsOwner(guildID uint64, userID uint64) (bool, error) {
+func (mock *IHarmonyDBMock) IsOwner(guildID uint64, userID uint64) (bool, error) {
 	if mock.IsOwnerFunc == nil {
 		panic("IHarmonyDBMock.IsOwnerFunc: method is nil but IHarmonyDB.IsOwner was just called")
 	}
@@ -3526,7 +3447,7 @@ func (mock *DummyDB) IsOwner(guildID uint64, userID uint64) (bool, error) {
 // IsOwnerCalls gets all the calls that were made to IsOwner.
 // Check the length with:
 //     len(mockedIHarmonyDB.IsOwnerCalls())
-func (mock *DummyDB) IsOwnerCalls() []struct {
+func (mock *IHarmonyDBMock) IsOwnerCalls() []struct {
 	GuildID uint64
 	UserID  uint64
 } {
@@ -3541,7 +3462,7 @@ func (mock *DummyDB) IsOwnerCalls() []struct {
 }
 
 // IsPackOwner calls IsPackOwnerFunc.
-func (mock *DummyDB) IsPackOwner(userID uint64, packID uint64) (bool, error) {
+func (mock *IHarmonyDBMock) IsPackOwner(userID uint64, packID uint64) (bool, error) {
 	if mock.IsPackOwnerFunc == nil {
 		panic("IHarmonyDBMock.IsPackOwnerFunc: method is nil but IHarmonyDB.IsPackOwner was just called")
 	}
@@ -3561,7 +3482,7 @@ func (mock *DummyDB) IsPackOwner(userID uint64, packID uint64) (bool, error) {
 // IsPackOwnerCalls gets all the calls that were made to IsPackOwner.
 // Check the length with:
 //     len(mockedIHarmonyDB.IsPackOwnerCalls())
-func (mock *DummyDB) IsPackOwnerCalls() []struct {
+func (mock *IHarmonyDBMock) IsPackOwnerCalls() []struct {
 	UserID uint64
 	PackID uint64
 } {
@@ -3576,7 +3497,7 @@ func (mock *DummyDB) IsPackOwnerCalls() []struct {
 }
 
 // ManageRoles calls ManageRolesFunc.
-func (mock *DummyDB) ManageRoles(guildID uint64, userID uint64, addRoles []uint64, removeRoles []uint64) error {
+func (mock *IHarmonyDBMock) ManageRoles(guildID uint64, userID uint64, addRoles []uint64, removeRoles []uint64) error {
 	if mock.ManageRolesFunc == nil {
 		panic("IHarmonyDBMock.ManageRolesFunc: method is nil but IHarmonyDB.ManageRoles was just called")
 	}
@@ -3600,7 +3521,7 @@ func (mock *DummyDB) ManageRoles(guildID uint64, userID uint64, addRoles []uint6
 // ManageRolesCalls gets all the calls that were made to ManageRoles.
 // Check the length with:
 //     len(mockedIHarmonyDB.ManageRolesCalls())
-func (mock *DummyDB) ManageRolesCalls() []struct {
+func (mock *IHarmonyDBMock) ManageRolesCalls() []struct {
 	GuildID     uint64
 	UserID      uint64
 	AddRoles    []uint64
@@ -3619,7 +3540,7 @@ func (mock *DummyDB) ManageRolesCalls() []struct {
 }
 
 // MembersInGuild calls MembersInGuildFunc.
-func (mock *DummyDB) MembersInGuild(guildID uint64) ([]uint64, error) {
+func (mock *IHarmonyDBMock) MembersInGuild(guildID uint64) ([]uint64, error) {
 	if mock.MembersInGuildFunc == nil {
 		panic("IHarmonyDBMock.MembersInGuildFunc: method is nil but IHarmonyDB.MembersInGuild was just called")
 	}
@@ -3637,7 +3558,7 @@ func (mock *DummyDB) MembersInGuild(guildID uint64) ([]uint64, error) {
 // MembersInGuildCalls gets all the calls that were made to MembersInGuild.
 // Check the length with:
 //     len(mockedIHarmonyDB.MembersInGuildCalls())
-func (mock *DummyDB) MembersInGuildCalls() []struct {
+func (mock *IHarmonyDBMock) MembersInGuildCalls() []struct {
 	GuildID uint64
 } {
 	var calls []struct {
@@ -3650,7 +3571,7 @@ func (mock *DummyDB) MembersInGuildCalls() []struct {
 }
 
 // Migrate calls MigrateFunc.
-func (mock *DummyDB) Migrate() error {
+func (mock *IHarmonyDBMock) Migrate() error {
 	if mock.MigrateFunc == nil {
 		panic("IHarmonyDBMock.MigrateFunc: method is nil but IHarmonyDB.Migrate was just called")
 	}
@@ -3665,7 +3586,7 @@ func (mock *DummyDB) Migrate() error {
 // MigrateCalls gets all the calls that were made to Migrate.
 // Check the length with:
 //     len(mockedIHarmonyDB.MigrateCalls())
-func (mock *DummyDB) MigrateCalls() []struct {
+func (mock *IHarmonyDBMock) MigrateCalls() []struct {
 } {
 	var calls []struct {
 	}
@@ -3676,7 +3597,7 @@ func (mock *DummyDB) MigrateCalls() []struct {
 }
 
 // ModifyRole calls ModifyRoleFunc.
-func (mock *DummyDB) ModifyRole(guildID uint64, roleID uint64, name string, color int32, hoist bool, pingable bool, updateName bool, updateColor bool, updateHoist bool, updatePingable bool) error {
+func (mock *IHarmonyDBMock) ModifyRole(guildID uint64, roleID uint64, name string, color int32, hoist bool, pingable bool, updateName bool, updateColor bool, updateHoist bool, updatePingable bool) error {
 	if mock.ModifyRoleFunc == nil {
 		panic("IHarmonyDBMock.ModifyRoleFunc: method is nil but IHarmonyDB.ModifyRole was just called")
 	}
@@ -3712,7 +3633,7 @@ func (mock *DummyDB) ModifyRole(guildID uint64, roleID uint64, name string, colo
 // ModifyRoleCalls gets all the calls that were made to ModifyRole.
 // Check the length with:
 //     len(mockedIHarmonyDB.ModifyRoleCalls())
-func (mock *DummyDB) ModifyRoleCalls() []struct {
+func (mock *IHarmonyDBMock) ModifyRoleCalls() []struct {
 	GuildID        uint64
 	RoleID         uint64
 	Name           string
@@ -3743,7 +3664,7 @@ func (mock *DummyDB) ModifyRoleCalls() []struct {
 }
 
 // MoveChannel calls MoveChannelFunc.
-func (mock *DummyDB) MoveChannel(channelID uint64, previousID *uint64, nextID *uint64) error {
+func (mock *IHarmonyDBMock) MoveChannel(channelID uint64, previousID *uint64, nextID *uint64) error {
 	if mock.MoveChannelFunc == nil {
 		panic("IHarmonyDBMock.MoveChannelFunc: method is nil but IHarmonyDB.MoveChannel was just called")
 	}
@@ -3765,7 +3686,7 @@ func (mock *DummyDB) MoveChannel(channelID uint64, previousID *uint64, nextID *u
 // MoveChannelCalls gets all the calls that were made to MoveChannel.
 // Check the length with:
 //     len(mockedIHarmonyDB.MoveChannelCalls())
-func (mock *DummyDB) MoveChannelCalls() []struct {
+func (mock *IHarmonyDBMock) MoveChannelCalls() []struct {
 	ChannelID  uint64
 	PreviousID *uint64
 	NextID     *uint64
@@ -3782,7 +3703,7 @@ func (mock *DummyDB) MoveChannelCalls() []struct {
 }
 
 // MoveGuild calls MoveGuildFunc.
-func (mock *DummyDB) MoveGuild(userID uint64, guildID uint64, homeServer string, nextGuildID uint64, prevGuildID uint64, nextHomeServer string, prevHomeServer string) error {
+func (mock *IHarmonyDBMock) MoveGuild(userID uint64, guildID uint64, homeServer string, nextGuildID uint64, prevGuildID uint64, nextHomeServer string, prevHomeServer string) error {
 	if mock.MoveGuildFunc == nil {
 		panic("IHarmonyDBMock.MoveGuildFunc: method is nil but IHarmonyDB.MoveGuild was just called")
 	}
@@ -3812,7 +3733,7 @@ func (mock *DummyDB) MoveGuild(userID uint64, guildID uint64, homeServer string,
 // MoveGuildCalls gets all the calls that were made to MoveGuild.
 // Check the length with:
 //     len(mockedIHarmonyDB.MoveGuildCalls())
-func (mock *DummyDB) MoveGuildCalls() []struct {
+func (mock *IHarmonyDBMock) MoveGuildCalls() []struct {
 	UserID         uint64
 	GuildID        uint64
 	HomeServer     string
@@ -3837,41 +3758,41 @@ func (mock *DummyDB) MoveGuildCalls() []struct {
 }
 
 // MoveRole calls MoveRoleFunc.
-func (mock *DummyDB) MoveRole(guildID uint64, roleID uint64, beforeRole uint64, previousRole uint64) error {
+func (mock *IHarmonyDBMock) MoveRole(guildID uint64, roleID uint64, previousRole uint64, nextRole uint64) error {
 	if mock.MoveRoleFunc == nil {
 		panic("IHarmonyDBMock.MoveRoleFunc: method is nil but IHarmonyDB.MoveRole was just called")
 	}
 	callInfo := struct {
 		GuildID      uint64
 		RoleID       uint64
-		BeforeRole   uint64
 		PreviousRole uint64
+		NextRole     uint64
 	}{
 		GuildID:      guildID,
 		RoleID:       roleID,
-		BeforeRole:   beforeRole,
 		PreviousRole: previousRole,
+		NextRole:     nextRole,
 	}
 	mock.lockMoveRole.Lock()
 	mock.calls.MoveRole = append(mock.calls.MoveRole, callInfo)
 	mock.lockMoveRole.Unlock()
-	return mock.MoveRoleFunc(guildID, roleID, beforeRole, previousRole)
+	return mock.MoveRoleFunc(guildID, roleID, previousRole, nextRole)
 }
 
 // MoveRoleCalls gets all the calls that were made to MoveRole.
 // Check the length with:
 //     len(mockedIHarmonyDB.MoveRoleCalls())
-func (mock *DummyDB) MoveRoleCalls() []struct {
+func (mock *IHarmonyDBMock) MoveRoleCalls() []struct {
 	GuildID      uint64
 	RoleID       uint64
-	BeforeRole   uint64
 	PreviousRole uint64
+	NextRole     uint64
 } {
 	var calls []struct {
 		GuildID      uint64
 		RoleID       uint64
-		BeforeRole   uint64
 		PreviousRole uint64
+		NextRole     uint64
 	}
 	mock.lockMoveRole.RLock()
 	calls = mock.calls.MoveRole
@@ -3880,7 +3801,7 @@ func (mock *DummyDB) MoveRoleCalls() []struct {
 }
 
 // RemoveGuildFromList calls RemoveGuildFromListFunc.
-func (mock *DummyDB) RemoveGuildFromList(userID uint64, guildID uint64, homeServer string) error {
+func (mock *IHarmonyDBMock) RemoveGuildFromList(userID uint64, guildID uint64, homeServer string) error {
 	if mock.RemoveGuildFromListFunc == nil {
 		panic("IHarmonyDBMock.RemoveGuildFromListFunc: method is nil but IHarmonyDB.RemoveGuildFromList was just called")
 	}
@@ -3902,7 +3823,7 @@ func (mock *DummyDB) RemoveGuildFromList(userID uint64, guildID uint64, homeServ
 // RemoveGuildFromListCalls gets all the calls that were made to RemoveGuildFromList.
 // Check the length with:
 //     len(mockedIHarmonyDB.RemoveGuildFromListCalls())
-func (mock *DummyDB) RemoveGuildFromListCalls() []struct {
+func (mock *IHarmonyDBMock) RemoveGuildFromListCalls() []struct {
 	UserID     uint64
 	GuildID    uint64
 	HomeServer string
@@ -3919,7 +3840,7 @@ func (mock *DummyDB) RemoveGuildFromListCalls() []struct {
 }
 
 // RemoveRoleFromGuild calls RemoveRoleFromGuildFunc.
-func (mock *DummyDB) RemoveRoleFromGuild(guildID uint64, roleID uint64) error {
+func (mock *IHarmonyDBMock) RemoveRoleFromGuild(guildID uint64, roleID uint64) error {
 	if mock.RemoveRoleFromGuildFunc == nil {
 		panic("IHarmonyDBMock.RemoveRoleFromGuildFunc: method is nil but IHarmonyDB.RemoveRoleFromGuild was just called")
 	}
@@ -3939,7 +3860,7 @@ func (mock *DummyDB) RemoveRoleFromGuild(guildID uint64, roleID uint64) error {
 // RemoveRoleFromGuildCalls gets all the calls that were made to RemoveRoleFromGuild.
 // Check the length with:
 //     len(mockedIHarmonyDB.RemoveRoleFromGuildCalls())
-func (mock *DummyDB) RemoveRoleFromGuildCalls() []struct {
+func (mock *IHarmonyDBMock) RemoveRoleFromGuildCalls() []struct {
 	GuildID uint64
 	RoleID  uint64
 } {
@@ -3954,7 +3875,7 @@ func (mock *DummyDB) RemoveRoleFromGuildCalls() []struct {
 }
 
 // ResolveGuildID calls ResolveGuildIDFunc.
-func (mock *DummyDB) ResolveGuildID(inviteID string) (uint64, error) {
+func (mock *IHarmonyDBMock) ResolveGuildID(inviteID string) (uint64, error) {
 	if mock.ResolveGuildIDFunc == nil {
 		panic("IHarmonyDBMock.ResolveGuildIDFunc: method is nil but IHarmonyDB.ResolveGuildID was just called")
 	}
@@ -3972,7 +3893,7 @@ func (mock *DummyDB) ResolveGuildID(inviteID string) (uint64, error) {
 // ResolveGuildIDCalls gets all the calls that were made to ResolveGuildID.
 // Check the length with:
 //     len(mockedIHarmonyDB.ResolveGuildIDCalls())
-func (mock *DummyDB) ResolveGuildIDCalls() []struct {
+func (mock *IHarmonyDBMock) ResolveGuildIDCalls() []struct {
 	InviteID string
 } {
 	var calls []struct {
@@ -3985,7 +3906,7 @@ func (mock *DummyDB) ResolveGuildIDCalls() []struct {
 }
 
 // RolesForUser calls RolesForUserFunc.
-func (mock *DummyDB) RolesForUser(guildID uint64, userID uint64) ([]uint64, error) {
+func (mock *IHarmonyDBMock) RolesForUser(guildID uint64, userID uint64) ([]uint64, error) {
 	if mock.RolesForUserFunc == nil {
 		panic("IHarmonyDBMock.RolesForUserFunc: method is nil but IHarmonyDB.RolesForUser was just called")
 	}
@@ -4005,7 +3926,7 @@ func (mock *DummyDB) RolesForUser(guildID uint64, userID uint64) ([]uint64, erro
 // RolesForUserCalls gets all the calls that were made to RolesForUser.
 // Check the length with:
 //     len(mockedIHarmonyDB.RolesForUserCalls())
-func (mock *DummyDB) RolesForUserCalls() []struct {
+func (mock *IHarmonyDBMock) RolesForUserCalls() []struct {
 	GuildID uint64
 	UserID  uint64
 } {
@@ -4020,7 +3941,7 @@ func (mock *DummyDB) RolesForUserCalls() []struct {
 }
 
 // SessionExpireRoutine calls SessionExpireRoutineFunc.
-func (mock *DummyDB) SessionExpireRoutine() {
+func (mock *IHarmonyDBMock) SessionExpireRoutine() {
 	if mock.SessionExpireRoutineFunc == nil {
 		panic("IHarmonyDBMock.SessionExpireRoutineFunc: method is nil but IHarmonyDB.SessionExpireRoutine was just called")
 	}
@@ -4035,7 +3956,7 @@ func (mock *DummyDB) SessionExpireRoutine() {
 // SessionExpireRoutineCalls gets all the calls that were made to SessionExpireRoutine.
 // Check the length with:
 //     len(mockedIHarmonyDB.SessionExpireRoutineCalls())
-func (mock *DummyDB) SessionExpireRoutineCalls() []struct {
+func (mock *IHarmonyDBMock) SessionExpireRoutineCalls() []struct {
 } {
 	var calls []struct {
 	}
@@ -4046,7 +3967,7 @@ func (mock *DummyDB) SessionExpireRoutineCalls() []struct {
 }
 
 // SessionToUserID calls SessionToUserIDFunc.
-func (mock *DummyDB) SessionToUserID(session string) (uint64, error) {
+func (mock *IHarmonyDBMock) SessionToUserID(session string) (uint64, error) {
 	if mock.SessionToUserIDFunc == nil {
 		panic("IHarmonyDBMock.SessionToUserIDFunc: method is nil but IHarmonyDB.SessionToUserID was just called")
 	}
@@ -4064,7 +3985,7 @@ func (mock *DummyDB) SessionToUserID(session string) (uint64, error) {
 // SessionToUserIDCalls gets all the calls that were made to SessionToUserID.
 // Check the length with:
 //     len(mockedIHarmonyDB.SessionToUserIDCalls())
-func (mock *DummyDB) SessionToUserIDCalls() []struct {
+func (mock *IHarmonyDBMock) SessionToUserIDCalls() []struct {
 	Session string
 } {
 	var calls []struct {
@@ -4077,7 +3998,7 @@ func (mock *DummyDB) SessionToUserIDCalls() []struct {
 }
 
 // SetAvatar calls SetAvatarFunc.
-func (mock *DummyDB) SetAvatar(userID uint64, avatar string) error {
+func (mock *IHarmonyDBMock) SetAvatar(userID uint64, avatar string) error {
 	if mock.SetAvatarFunc == nil {
 		panic("IHarmonyDBMock.SetAvatarFunc: method is nil but IHarmonyDB.SetAvatar was just called")
 	}
@@ -4097,7 +4018,7 @@ func (mock *DummyDB) SetAvatar(userID uint64, avatar string) error {
 // SetAvatarCalls gets all the calls that were made to SetAvatar.
 // Check the length with:
 //     len(mockedIHarmonyDB.SetAvatarCalls())
-func (mock *DummyDB) SetAvatarCalls() []struct {
+func (mock *IHarmonyDBMock) SetAvatarCalls() []struct {
 	UserID uint64
 	Avatar string
 } {
@@ -4112,7 +4033,7 @@ func (mock *DummyDB) SetAvatarCalls() []struct {
 }
 
 // SetFileMetadata calls SetFileMetadataFunc.
-func (mock *DummyDB) SetFileMetadata(fileID string, contentType string, name string, size int32) error {
+func (mock *IHarmonyDBMock) SetFileMetadata(fileID string, contentType string, name string, size int32) error {
 	if mock.SetFileMetadataFunc == nil {
 		panic("IHarmonyDBMock.SetFileMetadataFunc: method is nil but IHarmonyDB.SetFileMetadata was just called")
 	}
@@ -4136,7 +4057,7 @@ func (mock *DummyDB) SetFileMetadata(fileID string, contentType string, name str
 // SetFileMetadataCalls gets all the calls that were made to SetFileMetadata.
 // Check the length with:
 //     len(mockedIHarmonyDB.SetFileMetadataCalls())
-func (mock *DummyDB) SetFileMetadataCalls() []struct {
+func (mock *IHarmonyDBMock) SetFileMetadataCalls() []struct {
 	FileID      string
 	ContentType string
 	Name        string
@@ -4155,7 +4076,7 @@ func (mock *DummyDB) SetFileMetadataCalls() []struct {
 }
 
 // SetIsBot calls SetIsBotFunc.
-func (mock *DummyDB) SetIsBot(userID uint64, isBot bool) error {
+func (mock *IHarmonyDBMock) SetIsBot(userID uint64, isBot bool) error {
 	if mock.SetIsBotFunc == nil {
 		panic("IHarmonyDBMock.SetIsBotFunc: method is nil but IHarmonyDB.SetIsBot was just called")
 	}
@@ -4175,7 +4096,7 @@ func (mock *DummyDB) SetIsBot(userID uint64, isBot bool) error {
 // SetIsBotCalls gets all the calls that were made to SetIsBot.
 // Check the length with:
 //     len(mockedIHarmonyDB.SetIsBotCalls())
-func (mock *DummyDB) SetIsBotCalls() []struct {
+func (mock *IHarmonyDBMock) SetIsBotCalls() []struct {
 	UserID uint64
 	IsBot  bool
 } {
@@ -4190,7 +4111,7 @@ func (mock *DummyDB) SetIsBotCalls() []struct {
 }
 
 // SetPermissions calls SetPermissionsFunc.
-func (mock *DummyDB) SetPermissions(guildID uint64, channelID uint64, roleID uint64, permissions []PermissionsNode) error {
+func (mock *IHarmonyDBMock) SetPermissions(guildID uint64, channelID uint64, roleID uint64, permissions []PermissionsNode) error {
 	if mock.SetPermissionsFunc == nil {
 		panic("IHarmonyDBMock.SetPermissionsFunc: method is nil but IHarmonyDB.SetPermissions was just called")
 	}
@@ -4214,7 +4135,7 @@ func (mock *DummyDB) SetPermissions(guildID uint64, channelID uint64, roleID uin
 // SetPermissionsCalls gets all the calls that were made to SetPermissions.
 // Check the length with:
 //     len(mockedIHarmonyDB.SetPermissionsCalls())
-func (mock *DummyDB) SetPermissionsCalls() []struct {
+func (mock *IHarmonyDBMock) SetPermissionsCalls() []struct {
 	GuildID     uint64
 	ChannelID   uint64
 	RoleID      uint64
@@ -4233,7 +4154,7 @@ func (mock *DummyDB) SetPermissionsCalls() []struct {
 }
 
 // SetStatus calls SetStatusFunc.
-func (mock *DummyDB) SetStatus(userID uint64, status harmonytypesv1.UserStatus) error {
+func (mock *IHarmonyDBMock) SetStatus(userID uint64, status harmonytypesv1.UserStatus) error {
 	if mock.SetStatusFunc == nil {
 		panic("IHarmonyDBMock.SetStatusFunc: method is nil but IHarmonyDB.SetStatus was just called")
 	}
@@ -4253,7 +4174,7 @@ func (mock *DummyDB) SetStatus(userID uint64, status harmonytypesv1.UserStatus) 
 // SetStatusCalls gets all the calls that were made to SetStatus.
 // Check the length with:
 //     len(mockedIHarmonyDB.SetStatusCalls())
-func (mock *DummyDB) SetStatusCalls() []struct {
+func (mock *IHarmonyDBMock) SetStatusCalls() []struct {
 	UserID uint64
 	Status harmonytypesv1.UserStatus
 } {
@@ -4268,7 +4189,7 @@ func (mock *DummyDB) SetStatusCalls() []struct {
 }
 
 // SetUsername calls SetUsernameFunc.
-func (mock *DummyDB) SetUsername(userID uint64, username string) error {
+func (mock *IHarmonyDBMock) SetUsername(userID uint64, username string) error {
 	if mock.SetUsernameFunc == nil {
 		panic("IHarmonyDBMock.SetUsernameFunc: method is nil but IHarmonyDB.SetUsername was just called")
 	}
@@ -4288,7 +4209,7 @@ func (mock *DummyDB) SetUsername(userID uint64, username string) error {
 // SetUsernameCalls gets all the calls that were made to SetUsername.
 // Check the length with:
 //     len(mockedIHarmonyDB.SetUsernameCalls())
-func (mock *DummyDB) SetUsernameCalls() []struct {
+func (mock *IHarmonyDBMock) SetUsernameCalls() []struct {
 	UserID   uint64
 	Username string
 } {
@@ -4303,7 +4224,7 @@ func (mock *DummyDB) SetUsernameCalls() []struct {
 }
 
 // UnbanUser calls UnbanUserFunc.
-func (mock *DummyDB) UnbanUser(guildID uint64, userID uint64) error {
+func (mock *IHarmonyDBMock) UnbanUser(guildID uint64, userID uint64) error {
 	if mock.UnbanUserFunc == nil {
 		panic("IHarmonyDBMock.UnbanUserFunc: method is nil but IHarmonyDB.UnbanUser was just called")
 	}
@@ -4323,7 +4244,7 @@ func (mock *DummyDB) UnbanUser(guildID uint64, userID uint64) error {
 // UnbanUserCalls gets all the calls that were made to UnbanUser.
 // Check the length with:
 //     len(mockedIHarmonyDB.UnbanUserCalls())
-func (mock *DummyDB) UnbanUserCalls() []struct {
+func (mock *IHarmonyDBMock) UnbanUserCalls() []struct {
 	GuildID uint64
 	UserID  uint64
 } {
@@ -4338,7 +4259,7 @@ func (mock *DummyDB) UnbanUserCalls() []struct {
 }
 
 // UpdateAvatar calls UpdateAvatarFunc.
-func (mock *DummyDB) UpdateAvatar(userID uint64, avatar string) error {
+func (mock *IHarmonyDBMock) UpdateAvatar(userID uint64, avatar string) error {
 	if mock.UpdateAvatarFunc == nil {
 		panic("IHarmonyDBMock.UpdateAvatarFunc: method is nil but IHarmonyDB.UpdateAvatar was just called")
 	}
@@ -4358,7 +4279,7 @@ func (mock *DummyDB) UpdateAvatar(userID uint64, avatar string) error {
 // UpdateAvatarCalls gets all the calls that were made to UpdateAvatar.
 // Check the length with:
 //     len(mockedIHarmonyDB.UpdateAvatarCalls())
-func (mock *DummyDB) UpdateAvatarCalls() []struct {
+func (mock *IHarmonyDBMock) UpdateAvatarCalls() []struct {
 	UserID uint64
 	Avatar string
 } {
@@ -4373,7 +4294,7 @@ func (mock *DummyDB) UpdateAvatarCalls() []struct {
 }
 
 // UpdateChannelInformation calls UpdateChannelInformationFunc.
-func (mock *DummyDB) UpdateChannelInformation(guildID uint64, channelID uint64, name *string, metadata []byte) error {
+func (mock *IHarmonyDBMock) UpdateChannelInformation(guildID uint64, channelID uint64, name *string, metadata []byte) error {
 	if mock.UpdateChannelInformationFunc == nil {
 		panic("IHarmonyDBMock.UpdateChannelInformationFunc: method is nil but IHarmonyDB.UpdateChannelInformation was just called")
 	}
@@ -4397,7 +4318,7 @@ func (mock *DummyDB) UpdateChannelInformation(guildID uint64, channelID uint64, 
 // UpdateChannelInformationCalls gets all the calls that were made to UpdateChannelInformation.
 // Check the length with:
 //     len(mockedIHarmonyDB.UpdateChannelInformationCalls())
-func (mock *DummyDB) UpdateChannelInformationCalls() []struct {
+func (mock *IHarmonyDBMock) UpdateChannelInformationCalls() []struct {
 	GuildID   uint64
 	ChannelID uint64
 	Name      *string
@@ -4416,7 +4337,7 @@ func (mock *DummyDB) UpdateChannelInformationCalls() []struct {
 }
 
 // UpdateGuildInformation calls UpdateGuildInformationFunc.
-func (mock *DummyDB) UpdateGuildInformation(guildID uint64, name string, picture string, metadata *harmonytypesv1.Metadata, updateName bool, updatePicture bool, updateMetadata bool) error {
+func (mock *IHarmonyDBMock) UpdateGuildInformation(guildID uint64, name string, picture string, metadata *harmonytypesv1.Metadata, updateName bool, updatePicture bool, updateMetadata bool) error {
 	if mock.UpdateGuildInformationFunc == nil {
 		panic("IHarmonyDBMock.UpdateGuildInformationFunc: method is nil but IHarmonyDB.UpdateGuildInformation was just called")
 	}
@@ -4446,7 +4367,7 @@ func (mock *DummyDB) UpdateGuildInformation(guildID uint64, name string, picture
 // UpdateGuildInformationCalls gets all the calls that were made to UpdateGuildInformation.
 // Check the length with:
 //     len(mockedIHarmonyDB.UpdateGuildInformationCalls())
-func (mock *DummyDB) UpdateGuildInformationCalls() []struct {
+func (mock *IHarmonyDBMock) UpdateGuildInformationCalls() []struct {
 	GuildID        uint64
 	Name           string
 	Picture        string
@@ -4471,7 +4392,7 @@ func (mock *DummyDB) UpdateGuildInformationCalls() []struct {
 }
 
 // UpdateTextMessage calls UpdateTextMessageFunc.
-func (mock *DummyDB) UpdateTextMessage(messageID uint64, content string) (time.Time, error) {
+func (mock *IHarmonyDBMock) UpdateTextMessage(messageID uint64, content string) (time.Time, error) {
 	if mock.UpdateTextMessageFunc == nil {
 		panic("IHarmonyDBMock.UpdateTextMessageFunc: method is nil but IHarmonyDB.UpdateTextMessage was just called")
 	}
@@ -4491,7 +4412,7 @@ func (mock *DummyDB) UpdateTextMessage(messageID uint64, content string) (time.T
 // UpdateTextMessageCalls gets all the calls that were made to UpdateTextMessage.
 // Check the length with:
 //     len(mockedIHarmonyDB.UpdateTextMessageCalls())
-func (mock *DummyDB) UpdateTextMessageCalls() []struct {
+func (mock *IHarmonyDBMock) UpdateTextMessageCalls() []struct {
 	MessageID uint64
 	Content   string
 } {
@@ -4506,7 +4427,7 @@ func (mock *DummyDB) UpdateTextMessageCalls() []struct {
 }
 
 // UpdateUsername calls UpdateUsernameFunc.
-func (mock *DummyDB) UpdateUsername(userID uint64, username string) error {
+func (mock *IHarmonyDBMock) UpdateUsername(userID uint64, username string) error {
 	if mock.UpdateUsernameFunc == nil {
 		panic("IHarmonyDBMock.UpdateUsernameFunc: method is nil but IHarmonyDB.UpdateUsername was just called")
 	}
@@ -4526,7 +4447,7 @@ func (mock *DummyDB) UpdateUsername(userID uint64, username string) error {
 // UpdateUsernameCalls gets all the calls that were made to UpdateUsername.
 // Check the length with:
 //     len(mockedIHarmonyDB.UpdateUsernameCalls())
-func (mock *DummyDB) UpdateUsernameCalls() []struct {
+func (mock *IHarmonyDBMock) UpdateUsernameCalls() []struct {
 	UserID   uint64
 	Username string
 } {
@@ -4541,7 +4462,7 @@ func (mock *DummyDB) UpdateUsernameCalls() []struct {
 }
 
 // UserInGuild calls UserInGuildFunc.
-func (mock *DummyDB) UserInGuild(userID uint64, guildID uint64) (bool, error) {
+func (mock *IHarmonyDBMock) UserInGuild(userID uint64, guildID uint64) (bool, error) {
 	if mock.UserInGuildFunc == nil {
 		panic("IHarmonyDBMock.UserInGuildFunc: method is nil but IHarmonyDB.UserInGuild was just called")
 	}
@@ -4561,7 +4482,7 @@ func (mock *DummyDB) UserInGuild(userID uint64, guildID uint64) (bool, error) {
 // UserInGuildCalls gets all the calls that were made to UserInGuild.
 // Check the length with:
 //     len(mockedIHarmonyDB.UserInGuildCalls())
-func (mock *DummyDB) UserInGuildCalls() []struct {
+func (mock *IHarmonyDBMock) UserInGuildCalls() []struct {
 	UserID  uint64
 	GuildID uint64
 } {
@@ -4576,7 +4497,7 @@ func (mock *DummyDB) UserInGuildCalls() []struct {
 }
 
 // UserIsLocal calls UserIsLocalFunc.
-func (mock *DummyDB) UserIsLocal(userID uint64) error {
+func (mock *IHarmonyDBMock) UserIsLocal(userID uint64) error {
 	if mock.UserIsLocalFunc == nil {
 		panic("IHarmonyDBMock.UserIsLocalFunc: method is nil but IHarmonyDB.UserIsLocal was just called")
 	}
@@ -4594,7 +4515,7 @@ func (mock *DummyDB) UserIsLocal(userID uint64) error {
 // UserIsLocalCalls gets all the calls that were made to UserIsLocal.
 // Check the length with:
 //     len(mockedIHarmonyDB.UserIsLocalCalls())
-func (mock *DummyDB) UserIsLocalCalls() []struct {
+func (mock *IHarmonyDBMock) UserIsLocalCalls() []struct {
 	UserID uint64
 } {
 	var calls []struct {

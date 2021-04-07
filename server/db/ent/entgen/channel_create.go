@@ -12,6 +12,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
+	"github.com/harmony-development/legato/server/db/ent/entgen/role"
 )
 
 // ChannelCreate is the builder for creating a Channel entity.
@@ -83,6 +84,21 @@ func (cc *ChannelCreate) AddMessage(m ...*Message) *ChannelCreate {
 		ids[i] = m[i].ID
 	}
 	return cc.AddMessageIDs(ids...)
+}
+
+// AddRoleIDs adds the "role" edge to the Role entity by IDs.
+func (cc *ChannelCreate) AddRoleIDs(ids ...uint64) *ChannelCreate {
+	cc.mutation.AddRoleIDs(ids...)
+	return cc
+}
+
+// AddRole adds the "role" edges to the Role entity.
+func (cc *ChannelCreate) AddRole(r ...*Role) *ChannelCreate {
+	ids := make([]uint64, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return cc.AddRoleIDs(ids...)
 }
 
 // Mutation returns the ChannelMutation object of the builder.
@@ -244,6 +260,25 @@ func (cc *ChannelCreate) createSpec() (*Channel, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUint64,
 					Column: message.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.RoleIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.RoleTable,
+			Columns: []string{channel.RoleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: role.FieldID,
 				},
 			},
 		}

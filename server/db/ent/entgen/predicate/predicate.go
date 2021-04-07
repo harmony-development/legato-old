@@ -45,8 +45,8 @@ type LocalUser func(*sql.Selector)
 // Message is the predicate function for message builders.
 type Message func(*sql.Selector)
 
-// Permission is the predicate function for permission builders.
-type Permission func(*sql.Selector)
+// PermissionNode is the predicate function for permissionnode builders.
+type PermissionNode func(*sql.Selector)
 
 // Profile is the predicate function for profile builders.
 type Profile func(*sql.Selector)
@@ -62,3 +62,6 @@ type TextMessage func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
+
+// UserMeta is the predicate function for usermeta builders.
+type UserMeta func(*sql.Selector)

@@ -37,12 +37,13 @@ type hooks struct {
 	Invite         []ent.Hook
 	LocalUser      []ent.Hook
 	Message        []ent.Hook
-	Permission     []ent.Hook
+	PermissionNode []ent.Hook
 	Profile        []ent.Hook
 	Role           []ent.Hook
 	Session        []ent.Hook
 	TextMessage    []ent.Hook
 	User           []ent.Hook
+	UserMeta       []ent.Hook
 }
 
 // Options applies the options on the config object.

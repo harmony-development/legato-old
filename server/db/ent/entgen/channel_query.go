@@ -16,6 +16,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
+	"github.com/harmony-development/legato/server/db/ent/entgen/role"
 )
 
 // ChannelQuery is the builder for querying Channel entities.
@@ -29,6 +30,7 @@ type ChannelQuery struct {
 	// eager-loading edges.
 	withGuild   *GuildQuery
 	withMessage *MessageQuery
+	withRole    *RoleQuery
 	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -96,6 +98,28 @@ func (cq *ChannelQuery) QueryMessage() *MessageQuery {
 			sqlgraph.From(channel.Table, channel.FieldID, selector),
 			sqlgraph.To(message.Table, message.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, channel.MessageTable, channel.MessageColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryRole chains the current query on the "role" edge.
+func (cq *ChannelQuery) QueryRole() *RoleQuery {
+	query := &RoleQuery{config: cq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(channel.Table, channel.FieldID, selector),
+			sqlgraph.To(role.Table, role.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, channel.RoleTable, channel.RoleColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -286,6 +310,7 @@ func (cq *ChannelQuery) Clone() *ChannelQuery {
 		predicates:  append([]predicate.Channel{}, cq.predicates...),
 		withGuild:   cq.withGuild.Clone(),
 		withMessage: cq.withMessage.Clone(),
+		withRole:    cq.withRole.Clone(),
 		// clone intermediate query.
 		sql:  cq.sql.Clone(),
 		path: cq.path,
@@ -311,6 +336,17 @@ func (cq *ChannelQuery) WithMessage(opts ...func(*MessageQuery)) *ChannelQuery {
 		opt(query)
 	}
 	cq.withMessage = query
+	return cq
+}
+
+// WithRole tells the query-builder to eager-load the nodes that are connected to
+// the "role" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *ChannelQuery) WithRole(opts ...func(*RoleQuery)) *ChannelQuery {
+	query := &RoleQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withRole = query
 	return cq
 }
 
@@ -380,9 +416,10 @@ func (cq *ChannelQuery) sqlAll(ctx context.Context) ([]*Channel, error) {
 		nodes       = []*Channel{}
 		withFKs     = cq.withFKs
 		_spec       = cq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			cq.withGuild != nil,
 			cq.withMessage != nil,
+			cq.withRole != nil,
 		}
 	)
 	if cq.withGuild != nil {
@@ -463,6 +500,35 @@ func (cq *ChannelQuery) sqlAll(ctx context.Context) ([]*Channel, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "channel_message" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Message = append(node.Edges.Message, n)
+		}
+	}
+
+	if query := cq.withRole; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uint64]*Channel)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Role = []*Role{}
+		}
+		query.withFKs = true
+		query.Where(predicate.Role(func(s *sql.Selector) {
+			s.Where(sql.InValues(channel.RoleColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.channel_role
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "channel_role" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "channel_role" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Role = append(node.Edges.Role, n)
 		}
 	}
 

@@ -27,16 +27,17 @@ type Role struct {
 	Position string `json:"position,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RoleQuery when eager-loading is set.
-	Edges      RoleEdges `json:"edges"`
-	guild_role *uint64
+	Edges        RoleEdges `json:"edges"`
+	channel_role *uint64
+	guild_role   *uint64
 }
 
 // RoleEdges holds the relations/edges for other nodes in the graph.
 type RoleEdges struct {
 	// Members holds the value of the members edge.
 	Members []*User `json:"members,omitempty"`
-	// Permission holds the value of the permission edge.
-	Permission []*Permission `json:"permission,omitempty"`
+	// PermissionNode holds the value of the permission_node edge.
+	PermissionNode []*PermissionNode `json:"permission_node,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -51,13 +52,13 @@ func (e RoleEdges) MembersOrErr() ([]*User, error) {
 	return nil, &NotLoadedError{edge: "members"}
 }
 
-// PermissionOrErr returns the Permission value or an error if the edge
+// PermissionNodeOrErr returns the PermissionNode value or an error if the edge
 // was not loaded in eager-loading.
-func (e RoleEdges) PermissionOrErr() ([]*Permission, error) {
+func (e RoleEdges) PermissionNodeOrErr() ([]*PermissionNode, error) {
 	if e.loadedTypes[1] {
-		return e.Permission, nil
+		return e.PermissionNode, nil
 	}
-	return nil, &NotLoadedError{edge: "permission"}
+	return nil, &NotLoadedError{edge: "permission_node"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -71,7 +72,9 @@ func (*Role) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = &sql.NullInt64{}
 		case role.FieldName, role.FieldPosition:
 			values[i] = &sql.NullString{}
-		case role.ForeignKeys[0]: // guild_role
+		case role.ForeignKeys[0]: // channel_role
+			values[i] = &sql.NullInt64{}
+		case role.ForeignKeys[1]: // guild_role
 			values[i] = &sql.NullInt64{}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Role", columns[i])
@@ -126,6 +129,13 @@ func (r *Role) assignValues(columns []string, values []interface{}) error {
 			}
 		case role.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field channel_role", value)
+			} else if value.Valid {
+				r.channel_role = new(uint64)
+				*r.channel_role = uint64(value.Int64)
+			}
+		case role.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field guild_role", value)
 			} else if value.Valid {
 				r.guild_role = new(uint64)
@@ -141,9 +151,9 @@ func (r *Role) QueryMembers() *UserQuery {
 	return (&RoleClient{config: r.config}).QueryMembers(r)
 }
 
-// QueryPermission queries the "permission" edge of the Role entity.
-func (r *Role) QueryPermission() *PermissionQuery {
-	return (&RoleClient{config: r.config}).QueryPermission(r)
+// QueryPermissionNode queries the "permission_node" edge of the Role entity.
+func (r *Role) QueryPermissionNode() *PermissionNodeQuery {
+	return (&RoleClient{config: r.config}).QueryPermissionNode(r)
 }
 
 // Update returns a builder for updating this Role.

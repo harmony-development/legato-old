@@ -19,6 +19,8 @@ const (
 	EdgeGuild = "guild"
 	// EdgeMessage holds the string denoting the message edge name in mutations.
 	EdgeMessage = "message"
+	// EdgeRole holds the string denoting the role edge name in mutations.
+	EdgeRole = "role"
 	// Table holds the table name of the channel in the database.
 	Table = "channels"
 	// GuildTable is the table the holds the guild relation/edge.
@@ -35,6 +37,13 @@ const (
 	MessageInverseTable = "messages"
 	// MessageColumn is the table column denoting the message relation/edge.
 	MessageColumn = "channel_message"
+	// RoleTable is the table the holds the role relation/edge.
+	RoleTable = "roles"
+	// RoleInverseTable is the table name for the Role entity.
+	// It exists in this package in order to avoid circular dependency with the "role" package.
+	RoleInverseTable = "roles"
+	// RoleColumn is the table column denoting the role relation/edge.
+	RoleColumn = "channel_role"
 )
 
 // Columns holds all SQL columns for channel fields.

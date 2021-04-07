@@ -549,6 +549,34 @@ func HasMessageWith(preds ...predicate.Message) predicate.Channel {
 	})
 }
 
+// HasRole applies the HasEdge predicate on the "role" edge.
+func HasRole() predicate.Channel {
+	return predicate.Channel(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(RoleTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, RoleTable, RoleColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRoleWith applies the HasEdge predicate on the "role" edge with a given conditions (other predicates).
+func HasRoleWith(preds ...predicate.Role) predicate.Channel {
+	return predicate.Channel(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(RoleInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, RoleTable, RoleColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Channel) predicate.Channel {
 	return predicate.Channel(func(s *sql.Selector) {

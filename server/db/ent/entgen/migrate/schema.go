@@ -286,20 +286,22 @@ var (
 			},
 		},
 	}
-	// PermissionsColumns holds the columns for the "permissions" table.
-	PermissionsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUint64, Increment: true},
-		{Name: "role_permission", Type: field.TypeUint64, Nullable: true},
+	// PermissionNodesColumns holds the columns for the "permission_nodes" table.
+	PermissionNodesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "node", Type: field.TypeString},
+		{Name: "allow", Type: field.TypeBool},
+		{Name: "role_permission_node", Type: field.TypeUint64, Nullable: true},
 	}
-	// PermissionsTable holds the schema information for the "permissions" table.
-	PermissionsTable = &schema.Table{
-		Name:       "permissions",
-		Columns:    PermissionsColumns,
-		PrimaryKey: []*schema.Column{PermissionsColumns[0]},
+	// PermissionNodesTable holds the schema information for the "permission_nodes" table.
+	PermissionNodesTable = &schema.Table{
+		Name:       "permission_nodes",
+		Columns:    PermissionNodesColumns,
+		PrimaryKey: []*schema.Column{PermissionNodesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "permissions_roles_permission",
-				Columns:    []*schema.Column{PermissionsColumns[1]},
+				Symbol:     "permission_nodes_roles_permission_node",
+				Columns:    []*schema.Column{PermissionNodesColumns[3]},
 				RefColumns: []*schema.Column{RolesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -336,6 +338,7 @@ var (
 		{Name: "hoist", Type: field.TypeBool},
 		{Name: "pingable", Type: field.TypeBool},
 		{Name: "position", Type: field.TypeString},
+		{Name: "channel_role", Type: field.TypeUint64, Nullable: true},
 		{Name: "guild_role", Type: field.TypeUint64, Nullable: true},
 	}
 	// RolesTable holds the schema information for the "roles" table.
@@ -345,8 +348,14 @@ var (
 		PrimaryKey: []*schema.Column{RolesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "roles_guilds_role",
+				Symbol:     "roles_channels_role",
 				Columns:    []*schema.Column{RolesColumns[6]},
+				RefColumns: []*schema.Column{ChannelsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "roles_guilds_role",
+				Columns:    []*schema.Column{RolesColumns[7]},
 				RefColumns: []*schema.Column{GuildsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -418,6 +427,26 @@ var (
 			},
 		},
 	}
+	// UserMetaColumns holds the columns for the "user_meta" table.
+	UserMetaColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "meta", Type: field.TypeString},
+		{Name: "user_metadata", Type: field.TypeUint64, Nullable: true},
+	}
+	// UserMetaTable holds the schema information for the "user_meta" table.
+	UserMetaTable = &schema.Table{
+		Name:       "user_meta",
+		Columns:    UserMetaColumns,
+		PrimaryKey: []*schema.Column{UserMetaColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "user_meta_users_metadata",
+				Columns:    []*schema.Column{UserMetaColumns[2]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// RoleMembersColumns holds the columns for the "role_members" table.
 	RoleMembersColumns = []*schema.Column{
 		{Name: "role_id", Type: field.TypeUint64},
@@ -483,12 +512,13 @@ var (
 		InvitesTable,
 		LocalUsersTable,
 		MessagesTable,
-		PermissionsTable,
+		PermissionNodesTable,
 		ProfilesTable,
 		RolesTable,
 		SessionsTable,
 		TextMessagesTable,
 		UsersTable,
+		UserMetaTable,
 		RoleMembersTable,
 		UserGuildTable,
 	}
@@ -508,13 +538,15 @@ func init() {
 	MessagesTable.ForeignKeys[2].RefTable = FileMessagesTable
 	MessagesTable.ForeignKeys[3].RefTable = EmbedMessagesTable
 	MessagesTable.ForeignKeys[4].RefTable = UsersTable
-	PermissionsTable.ForeignKeys[0].RefTable = RolesTable
+	PermissionNodesTable.ForeignKeys[0].RefTable = RolesTable
 	ProfilesTable.ForeignKeys[0].RefTable = UsersTable
-	RolesTable.ForeignKeys[0].RefTable = GuildsTable
+	RolesTable.ForeignKeys[0].RefTable = ChannelsTable
+	RolesTable.ForeignKeys[1].RefTable = GuildsTable
 	SessionsTable.ForeignKeys[0].RefTable = LocalUsersTable
 	SessionsTable.ForeignKeys[1].RefTable = UsersTable
 	TextMessagesTable.ForeignKeys[0].RefTable = MessagesTable
 	UsersTable.ForeignKeys[0].RefTable = GuildsTable
+	UserMetaTable.ForeignKeys[0].RefTable = UsersTable
 	RoleMembersTable.ForeignKeys[0].RefTable = RolesTable
 	RoleMembersTable.ForeignKeys[1].RefTable = UsersTable
 	UserGuildTable.ForeignKeys[0].RefTable = UsersTable

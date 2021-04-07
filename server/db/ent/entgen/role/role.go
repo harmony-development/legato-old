@@ -19,8 +19,8 @@ const (
 	FieldPosition = "position"
 	// EdgeMembers holds the string denoting the members edge name in mutations.
 	EdgeMembers = "members"
-	// EdgePermission holds the string denoting the permission edge name in mutations.
-	EdgePermission = "permission"
+	// EdgePermissionNode holds the string denoting the permission_node edge name in mutations.
+	EdgePermissionNode = "permission_node"
 	// Table holds the table name of the role in the database.
 	Table = "roles"
 	// MembersTable is the table the holds the members relation/edge. The primary key declared below.
@@ -28,13 +28,13 @@ const (
 	// MembersInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	MembersInverseTable = "users"
-	// PermissionTable is the table the holds the permission relation/edge.
-	PermissionTable = "permissions"
-	// PermissionInverseTable is the table name for the Permission entity.
-	// It exists in this package in order to avoid circular dependency with the "permission" package.
-	PermissionInverseTable = "permissions"
-	// PermissionColumn is the table column denoting the permission relation/edge.
-	PermissionColumn = "role_permission"
+	// PermissionNodeTable is the table the holds the permission_node relation/edge.
+	PermissionNodeTable = "permission_nodes"
+	// PermissionNodeInverseTable is the table name for the PermissionNode entity.
+	// It exists in this package in order to avoid circular dependency with the "permissionnode" package.
+	PermissionNodeInverseTable = "permission_nodes"
+	// PermissionNodeColumn is the table column denoting the permission_node relation/edge.
+	PermissionNodeColumn = "role_permission_node"
 )
 
 // Columns holds all SQL columns for role fields.
@@ -50,6 +50,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "roles"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
+	"channel_role",
 	"guild_role",
 }
 

@@ -9,7 +9,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/harmony-development/legato/server/db/ent/entgen/permission"
+	"github.com/harmony-development/legato/server/db/ent/entgen/permissionnode"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 	"github.com/harmony-development/legato/server/db/ent/entgen/role"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
@@ -80,19 +80,19 @@ func (ru *RoleUpdate) AddMembers(u ...*User) *RoleUpdate {
 	return ru.AddMemberIDs(ids...)
 }
 
-// AddPermissionIDs adds the "permission" edge to the Permission entity by IDs.
-func (ru *RoleUpdate) AddPermissionIDs(ids ...uint64) *RoleUpdate {
-	ru.mutation.AddPermissionIDs(ids...)
+// AddPermissionNodeIDs adds the "permission_node" edge to the PermissionNode entity by IDs.
+func (ru *RoleUpdate) AddPermissionNodeIDs(ids ...int) *RoleUpdate {
+	ru.mutation.AddPermissionNodeIDs(ids...)
 	return ru
 }
 
-// AddPermission adds the "permission" edges to the Permission entity.
-func (ru *RoleUpdate) AddPermission(p ...*Permission) *RoleUpdate {
-	ids := make([]uint64, len(p))
+// AddPermissionNode adds the "permission_node" edges to the PermissionNode entity.
+func (ru *RoleUpdate) AddPermissionNode(p ...*PermissionNode) *RoleUpdate {
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
-	return ru.AddPermissionIDs(ids...)
+	return ru.AddPermissionNodeIDs(ids...)
 }
 
 // Mutation returns the RoleMutation object of the builder.
@@ -121,25 +121,25 @@ func (ru *RoleUpdate) RemoveMembers(u ...*User) *RoleUpdate {
 	return ru.RemoveMemberIDs(ids...)
 }
 
-// ClearPermission clears all "permission" edges to the Permission entity.
-func (ru *RoleUpdate) ClearPermission() *RoleUpdate {
-	ru.mutation.ClearPermission()
+// ClearPermissionNode clears all "permission_node" edges to the PermissionNode entity.
+func (ru *RoleUpdate) ClearPermissionNode() *RoleUpdate {
+	ru.mutation.ClearPermissionNode()
 	return ru
 }
 
-// RemovePermissionIDs removes the "permission" edge to Permission entities by IDs.
-func (ru *RoleUpdate) RemovePermissionIDs(ids ...uint64) *RoleUpdate {
-	ru.mutation.RemovePermissionIDs(ids...)
+// RemovePermissionNodeIDs removes the "permission_node" edge to PermissionNode entities by IDs.
+func (ru *RoleUpdate) RemovePermissionNodeIDs(ids ...int) *RoleUpdate {
+	ru.mutation.RemovePermissionNodeIDs(ids...)
 	return ru
 }
 
-// RemovePermission removes "permission" edges to Permission entities.
-func (ru *RoleUpdate) RemovePermission(p ...*Permission) *RoleUpdate {
-	ids := make([]uint64, len(p))
+// RemovePermissionNode removes "permission_node" edges to PermissionNode entities.
+func (ru *RoleUpdate) RemovePermissionNode(p ...*PermissionNode) *RoleUpdate {
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
-	return ru.RemovePermissionIDs(ids...)
+	return ru.RemovePermissionNodeIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -307,33 +307,33 @@ func (ru *RoleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ru.mutation.PermissionCleared() {
+	if ru.mutation.PermissionNodeCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   role.PermissionTable,
-			Columns: []string{role.PermissionColumn},
+			Table:   role.PermissionNodeTable,
+			Columns: []string{role.PermissionNodeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint64,
-					Column: permission.FieldID,
+					Type:   field.TypeInt,
+					Column: permissionnode.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ru.mutation.RemovedPermissionIDs(); len(nodes) > 0 && !ru.mutation.PermissionCleared() {
+	if nodes := ru.mutation.RemovedPermissionNodeIDs(); len(nodes) > 0 && !ru.mutation.PermissionNodeCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   role.PermissionTable,
-			Columns: []string{role.PermissionColumn},
+			Table:   role.PermissionNodeTable,
+			Columns: []string{role.PermissionNodeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint64,
-					Column: permission.FieldID,
+					Type:   field.TypeInt,
+					Column: permissionnode.FieldID,
 				},
 			},
 		}
@@ -342,17 +342,17 @@ func (ru *RoleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ru.mutation.PermissionIDs(); len(nodes) > 0 {
+	if nodes := ru.mutation.PermissionNodeIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   role.PermissionTable,
-			Columns: []string{role.PermissionColumn},
+			Table:   role.PermissionNodeTable,
+			Columns: []string{role.PermissionNodeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint64,
-					Column: permission.FieldID,
+					Type:   field.TypeInt,
+					Column: permissionnode.FieldID,
 				},
 			},
 		}
@@ -431,19 +431,19 @@ func (ruo *RoleUpdateOne) AddMembers(u ...*User) *RoleUpdateOne {
 	return ruo.AddMemberIDs(ids...)
 }
 
-// AddPermissionIDs adds the "permission" edge to the Permission entity by IDs.
-func (ruo *RoleUpdateOne) AddPermissionIDs(ids ...uint64) *RoleUpdateOne {
-	ruo.mutation.AddPermissionIDs(ids...)
+// AddPermissionNodeIDs adds the "permission_node" edge to the PermissionNode entity by IDs.
+func (ruo *RoleUpdateOne) AddPermissionNodeIDs(ids ...int) *RoleUpdateOne {
+	ruo.mutation.AddPermissionNodeIDs(ids...)
 	return ruo
 }
 
-// AddPermission adds the "permission" edges to the Permission entity.
-func (ruo *RoleUpdateOne) AddPermission(p ...*Permission) *RoleUpdateOne {
-	ids := make([]uint64, len(p))
+// AddPermissionNode adds the "permission_node" edges to the PermissionNode entity.
+func (ruo *RoleUpdateOne) AddPermissionNode(p ...*PermissionNode) *RoleUpdateOne {
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
-	return ruo.AddPermissionIDs(ids...)
+	return ruo.AddPermissionNodeIDs(ids...)
 }
 
 // Mutation returns the RoleMutation object of the builder.
@@ -472,25 +472,25 @@ func (ruo *RoleUpdateOne) RemoveMembers(u ...*User) *RoleUpdateOne {
 	return ruo.RemoveMemberIDs(ids...)
 }
 
-// ClearPermission clears all "permission" edges to the Permission entity.
-func (ruo *RoleUpdateOne) ClearPermission() *RoleUpdateOne {
-	ruo.mutation.ClearPermission()
+// ClearPermissionNode clears all "permission_node" edges to the PermissionNode entity.
+func (ruo *RoleUpdateOne) ClearPermissionNode() *RoleUpdateOne {
+	ruo.mutation.ClearPermissionNode()
 	return ruo
 }
 
-// RemovePermissionIDs removes the "permission" edge to Permission entities by IDs.
-func (ruo *RoleUpdateOne) RemovePermissionIDs(ids ...uint64) *RoleUpdateOne {
-	ruo.mutation.RemovePermissionIDs(ids...)
+// RemovePermissionNodeIDs removes the "permission_node" edge to PermissionNode entities by IDs.
+func (ruo *RoleUpdateOne) RemovePermissionNodeIDs(ids ...int) *RoleUpdateOne {
+	ruo.mutation.RemovePermissionNodeIDs(ids...)
 	return ruo
 }
 
-// RemovePermission removes "permission" edges to Permission entities.
-func (ruo *RoleUpdateOne) RemovePermission(p ...*Permission) *RoleUpdateOne {
-	ids := make([]uint64, len(p))
+// RemovePermissionNode removes "permission_node" edges to PermissionNode entities.
+func (ruo *RoleUpdateOne) RemovePermissionNode(p ...*PermissionNode) *RoleUpdateOne {
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
-	return ruo.RemovePermissionIDs(ids...)
+	return ruo.RemovePermissionNodeIDs(ids...)
 }
 
 // Save executes the query and returns the updated Role entity.
@@ -663,33 +663,33 @@ func (ruo *RoleUpdateOne) sqlSave(ctx context.Context) (_node *Role, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ruo.mutation.PermissionCleared() {
+	if ruo.mutation.PermissionNodeCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   role.PermissionTable,
-			Columns: []string{role.PermissionColumn},
+			Table:   role.PermissionNodeTable,
+			Columns: []string{role.PermissionNodeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint64,
-					Column: permission.FieldID,
+					Type:   field.TypeInt,
+					Column: permissionnode.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ruo.mutation.RemovedPermissionIDs(); len(nodes) > 0 && !ruo.mutation.PermissionCleared() {
+	if nodes := ruo.mutation.RemovedPermissionNodeIDs(); len(nodes) > 0 && !ruo.mutation.PermissionNodeCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   role.PermissionTable,
-			Columns: []string{role.PermissionColumn},
+			Table:   role.PermissionNodeTable,
+			Columns: []string{role.PermissionNodeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint64,
-					Column: permission.FieldID,
+					Type:   field.TypeInt,
+					Column: permissionnode.FieldID,
 				},
 			},
 		}
@@ -698,17 +698,17 @@ func (ruo *RoleUpdateOne) sqlSave(ctx context.Context) (_node *Role, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ruo.mutation.PermissionIDs(); len(nodes) > 0 {
+	if nodes := ruo.mutation.PermissionNodeIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   role.PermissionTable,
-			Columns: []string{role.PermissionColumn},
+			Table:   role.PermissionNodeTable,
+			Columns: []string{role.PermissionNodeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint64,
-					Column: permission.FieldID,
+					Type:   field.TypeInt,
+					Column: permissionnode.FieldID,
 				},
 			},
 		}

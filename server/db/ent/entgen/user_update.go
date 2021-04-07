@@ -20,6 +20,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/role"
 	"github.com/harmony-development/legato/server/db/ent/entgen/session"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
+	"github.com/harmony-development/legato/server/db/ent/entgen/usermeta"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -90,6 +91,21 @@ func (uu *UserUpdate) SetNillableProfileID(id *int) *UserUpdate {
 // SetProfile sets the "profile" edge to the Profile entity.
 func (uu *UserUpdate) SetProfile(p *Profile) *UserUpdate {
 	return uu.SetProfileID(p.ID)
+}
+
+// AddMetadatumIDs adds the "metadata" edge to the UserMeta entity by IDs.
+func (uu *UserUpdate) AddMetadatumIDs(ids ...string) *UserUpdate {
+	uu.mutation.AddMetadatumIDs(ids...)
+	return uu
+}
+
+// AddMetadata adds the "metadata" edges to the UserMeta entity.
+func (uu *UserUpdate) AddMetadata(u ...*UserMeta) *UserUpdate {
+	ids := make([]string, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uu.AddMetadatumIDs(ids...)
 }
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
@@ -218,6 +234,27 @@ func (uu *UserUpdate) ClearForeignUser() *UserUpdate {
 func (uu *UserUpdate) ClearProfile() *UserUpdate {
 	uu.mutation.ClearProfile()
 	return uu
+}
+
+// ClearMetadata clears all "metadata" edges to the UserMeta entity.
+func (uu *UserUpdate) ClearMetadata() *UserUpdate {
+	uu.mutation.ClearMetadata()
+	return uu
+}
+
+// RemoveMetadatumIDs removes the "metadata" edge to UserMeta entities by IDs.
+func (uu *UserUpdate) RemoveMetadatumIDs(ids ...string) *UserUpdate {
+	uu.mutation.RemoveMetadatumIDs(ids...)
+	return uu
+}
+
+// RemoveMetadata removes "metadata" edges to UserMeta entities.
+func (uu *UserUpdate) RemoveMetadata(u ...*UserMeta) *UserUpdate {
+	ids := make([]string, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uu.RemoveMetadatumIDs(ids...)
 }
 
 // ClearSessions clears all "sessions" edges to the Session entity.
@@ -533,6 +570,60 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: profile.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.MetadataCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.MetadataTable,
+			Columns: []string{user.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: usermeta.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedMetadataIDs(); len(nodes) > 0 && !uu.mutation.MetadataCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.MetadataTable,
+			Columns: []string{user.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: usermeta.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.MetadataIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.MetadataTable,
+			Columns: []string{user.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: usermeta.FieldID,
 				},
 			},
 		}
@@ -994,6 +1085,21 @@ func (uuo *UserUpdateOne) SetProfile(p *Profile) *UserUpdateOne {
 	return uuo.SetProfileID(p.ID)
 }
 
+// AddMetadatumIDs adds the "metadata" edge to the UserMeta entity by IDs.
+func (uuo *UserUpdateOne) AddMetadatumIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.AddMetadatumIDs(ids...)
+	return uuo
+}
+
+// AddMetadata adds the "metadata" edges to the UserMeta entity.
+func (uuo *UserUpdateOne) AddMetadata(u ...*UserMeta) *UserUpdateOne {
+	ids := make([]string, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uuo.AddMetadatumIDs(ids...)
+}
+
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
 func (uuo *UserUpdateOne) AddSessionIDs(ids ...string) *UserUpdateOne {
 	uuo.mutation.AddSessionIDs(ids...)
@@ -1120,6 +1226,27 @@ func (uuo *UserUpdateOne) ClearForeignUser() *UserUpdateOne {
 func (uuo *UserUpdateOne) ClearProfile() *UserUpdateOne {
 	uuo.mutation.ClearProfile()
 	return uuo
+}
+
+// ClearMetadata clears all "metadata" edges to the UserMeta entity.
+func (uuo *UserUpdateOne) ClearMetadata() *UserUpdateOne {
+	uuo.mutation.ClearMetadata()
+	return uuo
+}
+
+// RemoveMetadatumIDs removes the "metadata" edge to UserMeta entities by IDs.
+func (uuo *UserUpdateOne) RemoveMetadatumIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.RemoveMetadatumIDs(ids...)
+	return uuo
+}
+
+// RemoveMetadata removes "metadata" edges to UserMeta entities.
+func (uuo *UserUpdateOne) RemoveMetadata(u ...*UserMeta) *UserUpdateOne {
+	ids := make([]string, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uuo.RemoveMetadatumIDs(ids...)
 }
 
 // ClearSessions clears all "sessions" edges to the Session entity.
@@ -1440,6 +1567,60 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: profile.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.MetadataCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.MetadataTable,
+			Columns: []string{user.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: usermeta.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedMetadataIDs(); len(nodes) > 0 && !uuo.mutation.MetadataCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.MetadataTable,
+			Columns: []string{user.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: usermeta.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.MetadataIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.MetadataTable,
+			Columns: []string{user.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: usermeta.FieldID,
 				},
 			},
 		}

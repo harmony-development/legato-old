@@ -175,6 +175,34 @@ func HasProfileWith(preds ...predicate.Profile) predicate.User {
 	})
 }
 
+// HasMetadata applies the HasEdge predicate on the "metadata" edge.
+func HasMetadata() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(MetadataTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, MetadataTable, MetadataColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasMetadataWith applies the HasEdge predicate on the "metadata" edge with a given conditions (other predicates).
+func HasMetadataWith(preds ...predicate.UserMeta) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(MetadataInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, MetadataTable, MetadataColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasSessions applies the HasEdge predicate on the "sessions" edge.
 func HasSessions() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

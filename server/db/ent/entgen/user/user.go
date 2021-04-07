@@ -13,6 +13,8 @@ const (
 	EdgeForeignUser = "foreign_user"
 	// EdgeProfile holds the string denoting the profile edge name in mutations.
 	EdgeProfile = "profile"
+	// EdgeMetadata holds the string denoting the metadata edge name in mutations.
+	EdgeMetadata = "metadata"
 	// EdgeSessions holds the string denoting the sessions edge name in mutations.
 	EdgeSessions = "sessions"
 	// EdgeMessage holds the string denoting the message edge name in mutations.
@@ -50,6 +52,13 @@ const (
 	ProfileInverseTable = "profiles"
 	// ProfileColumn is the table column denoting the profile relation/edge.
 	ProfileColumn = "user_profile"
+	// MetadataTable is the table the holds the metadata relation/edge.
+	MetadataTable = "user_meta"
+	// MetadataInverseTable is the table name for the UserMeta entity.
+	// It exists in this package in order to avoid circular dependency with the "usermeta" package.
+	MetadataInverseTable = "user_meta"
+	// MetadataColumn is the table column denoting the metadata relation/edge.
+	MetadataColumn = "user_metadata"
 	// SessionsTable is the table the holds the sessions relation/edge.
 	SessionsTable = "sessions"
 	// SessionsInverseTable is the table name for the Session entity.

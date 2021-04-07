@@ -1,7 +1,6 @@
 package types
 
 import (
-	"database/sql"
 	"fmt"
 	"strings"
 )
@@ -47,7 +46,7 @@ type UserData struct {
 	UserID   uint64
 	Email    string
 	Username string
-	Avatar   sql.NullString
+	Avatar   *string
 	Status   int16
 	IsBot    bool
 	Password []byte

@@ -31,6 +31,8 @@ func (User) Edges() []ent.Edge {
 			To("profile", Profile.Type).
 			Unique(),
 		edge.
+			To("metadata", UserMeta.Type),
+		edge.
 			To("sessions", Session.Type),
 		edge.
 			To("message", Message.Type),

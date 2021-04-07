@@ -18,6 +18,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/role"
 	"github.com/harmony-development/legato/server/db/ent/entgen/session"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
+	"github.com/harmony-development/legato/server/db/ent/entgen/usermeta"
 )
 
 // UserCreate is the builder for creating a User entity.
@@ -88,6 +89,21 @@ func (uc *UserCreate) SetNillableProfileID(id *int) *UserCreate {
 // SetProfile sets the "profile" edge to the Profile entity.
 func (uc *UserCreate) SetProfile(p *Profile) *UserCreate {
 	return uc.SetProfileID(p.ID)
+}
+
+// AddMetadatumIDs adds the "metadata" edge to the UserMeta entity by IDs.
+func (uc *UserCreate) AddMetadatumIDs(ids ...string) *UserCreate {
+	uc.mutation.AddMetadatumIDs(ids...)
+	return uc
+}
+
+// AddMetadata adds the "metadata" edges to the UserMeta entity.
+func (uc *UserCreate) AddMetadata(u ...*UserMeta) *UserCreate {
+	ids := make([]string, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uc.AddMetadatumIDs(ids...)
 }
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
@@ -328,6 +344,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: profile.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.MetadataIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.MetadataTable,
+			Columns: []string{user.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: usermeta.FieldID,
 				},
 			},
 		}

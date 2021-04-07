@@ -8,13 +8,13 @@ import (
 )
 
 func (d *database) ExpireSessions() (err error) {
-	doRecovery(&err)
+	defer doRecovery(&err)
 	d.Session.Delete().Where(session.ExpiresLT(time.Now())).ExecX(ctx)
 	return
 }
 
 func (d *database) ExtendSession(session string) (err error) {
-	doRecovery(&err)
+	defer doRecovery(&err)
 	d.Session.UpdateOneID(session).ExecX(ctx)
 	return
 }

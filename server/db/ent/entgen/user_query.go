@@ -23,6 +23,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/role"
 	"github.com/harmony-development/legato/server/db/ent/entgen/session"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
+	"github.com/harmony-development/legato/server/db/ent/entgen/usermeta"
 )
 
 // UserQuery is the builder for querying User entities.
@@ -37,6 +38,7 @@ type UserQuery struct {
 	withLocalUser    *LocalUserQuery
 	withForeignUser  *ForeignUserQuery
 	withProfile      *ProfileQuery
+	withMetadata     *UserMetaQuery
 	withSessions     *SessionQuery
 	withMessage      *MessageQuery
 	withGuild        *GuildQuery
@@ -133,6 +135,28 @@ func (uq *UserQuery) QueryProfile() *ProfileQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(profile.Table, profile.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.ProfileTable, user.ProfileColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryMetadata chains the current query on the "metadata" edge.
+func (uq *UserQuery) QueryMetadata() *UserMetaQuery {
+	query := &UserMetaQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(usermeta.Table, usermeta.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.MetadataTable, user.MetadataColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -478,6 +502,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withLocalUser:    uq.withLocalUser.Clone(),
 		withForeignUser:  uq.withForeignUser.Clone(),
 		withProfile:      uq.withProfile.Clone(),
+		withMetadata:     uq.withMetadata.Clone(),
 		withSessions:     uq.withSessions.Clone(),
 		withMessage:      uq.withMessage.Clone(),
 		withGuild:        uq.withGuild.Clone(),
@@ -521,6 +546,17 @@ func (uq *UserQuery) WithProfile(opts ...func(*ProfileQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withProfile = query
+	return uq
+}
+
+// WithMetadata tells the query-builder to eager-load the nodes that are connected to
+// the "metadata" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithMetadata(opts ...func(*UserMetaQuery)) *UserQuery {
+	query := &UserMetaQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withMetadata = query
 	return uq
 }
 
@@ -643,10 +679,11 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		nodes       = []*User{}
 		withFKs     = uq.withFKs
 		_spec       = uq.querySpec()
-		loadedTypes = [10]bool{
+		loadedTypes = [11]bool{
 			uq.withLocalUser != nil,
 			uq.withForeignUser != nil,
 			uq.withProfile != nil,
+			uq.withMetadata != nil,
 			uq.withSessions != nil,
 			uq.withMessage != nil,
 			uq.withGuild != nil,
@@ -760,6 +797,35 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "user_profile" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Profile = n
+		}
+	}
+
+	if query := uq.withMetadata; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uint64]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Metadata = []*UserMeta{}
+		}
+		query.withFKs = true
+		query.Where(predicate.UserMeta(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.MetadataColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.user_metadata
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "user_metadata" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_metadata" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Metadata = append(node.Edges.Metadata, n)
 		}
 	}
 

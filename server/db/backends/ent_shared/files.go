@@ -6,7 +6,7 @@ import (
 )
 
 func (d *database) AddFileHash(fileID string, hash []byte) (err error) {
-	doRecovery(&err)
+	defer doRecovery(&err)
 	d.FileHash.
 		Create().
 		SetFileid(fileID).
@@ -16,19 +16,19 @@ func (d *database) AddFileHash(fileID string, hash []byte) (err error) {
 }
 
 func (d *database) DeleteFileMeta(fileID string) (err error) {
-	doRecovery(&err)
+	defer doRecovery(&err)
 	d.File.DeleteOneID(fileID).ExecX(ctx)
 	return
 }
 
 func (d *database) GetFileIDByHash(hash []byte) (fileID string, err error) {
-	doRecovery(&err)
+	defer doRecovery(&err)
 	fileID = d.FileHash.Query().Where(filehash.Hash(hash)).OnlyX(ctx).Fileid
 	return
 }
 
 func (d *database) GetFileMetadata(fileID string) (file *entgen.File, err error) {
-	doRecovery(&err)
+	defer doRecovery(&err)
 	file = d.File.GetX(ctx, fileID)
 	return
 }

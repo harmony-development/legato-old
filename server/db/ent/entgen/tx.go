@@ -38,8 +38,8 @@ type Tx struct {
 	LocalUser *LocalUserClient
 	// Message is the client for interacting with the Message builders.
 	Message *MessageClient
-	// Permission is the client for interacting with the Permission builders.
-	Permission *PermissionClient
+	// PermissionNode is the client for interacting with the PermissionNode builders.
+	PermissionNode *PermissionNodeClient
 	// Profile is the client for interacting with the Profile builders.
 	Profile *ProfileClient
 	// Role is the client for interacting with the Role builders.
@@ -50,6 +50,8 @@ type Tx struct {
 	TextMessage *TextMessageClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// UserMeta is the client for interacting with the UserMeta builders.
+	UserMeta *UserMetaClient
 
 	// lazily loaded.
 	client     *Client
@@ -198,12 +200,13 @@ func (tx *Tx) init() {
 	tx.Invite = NewInviteClient(tx.config)
 	tx.LocalUser = NewLocalUserClient(tx.config)
 	tx.Message = NewMessageClient(tx.config)
-	tx.Permission = NewPermissionClient(tx.config)
+	tx.PermissionNode = NewPermissionNodeClient(tx.config)
 	tx.Profile = NewProfileClient(tx.config)
 	tx.Role = NewRoleClient(tx.config)
 	tx.Session = NewSessionClient(tx.config)
 	tx.TextMessage = NewTextMessageClient(tx.config)
 	tx.User = NewUserClient(tx.config)
+	tx.UserMeta = NewUserMetaClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

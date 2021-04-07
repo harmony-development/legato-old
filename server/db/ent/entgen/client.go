@@ -22,12 +22,13 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/invite"
 	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
-	"github.com/harmony-development/legato/server/db/ent/entgen/permission"
+	"github.com/harmony-development/legato/server/db/ent/entgen/permissionnode"
 	"github.com/harmony-development/legato/server/db/ent/entgen/profile"
 	"github.com/harmony-development/legato/server/db/ent/entgen/role"
 	"github.com/harmony-development/legato/server/db/ent/entgen/session"
 	"github.com/harmony-development/legato/server/db/ent/entgen/textmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
+	"github.com/harmony-development/legato/server/db/ent/entgen/usermeta"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -65,8 +66,8 @@ type Client struct {
 	LocalUser *LocalUserClient
 	// Message is the client for interacting with the Message builders.
 	Message *MessageClient
-	// Permission is the client for interacting with the Permission builders.
-	Permission *PermissionClient
+	// PermissionNode is the client for interacting with the PermissionNode builders.
+	PermissionNode *PermissionNodeClient
 	// Profile is the client for interacting with the Profile builders.
 	Profile *ProfileClient
 	// Role is the client for interacting with the Role builders.
@@ -77,6 +78,8 @@ type Client struct {
 	TextMessage *TextMessageClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// UserMeta is the client for interacting with the UserMeta builders.
+	UserMeta *UserMetaClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -103,12 +106,13 @@ func (c *Client) init() {
 	c.Invite = NewInviteClient(c.config)
 	c.LocalUser = NewLocalUserClient(c.config)
 	c.Message = NewMessageClient(c.config)
-	c.Permission = NewPermissionClient(c.config)
+	c.PermissionNode = NewPermissionNodeClient(c.config)
 	c.Profile = NewProfileClient(c.config)
 	c.Role = NewRoleClient(c.config)
 	c.Session = NewSessionClient(c.config)
 	c.TextMessage = NewTextMessageClient(c.config)
 	c.User = NewUserClient(c.config)
+	c.UserMeta = NewUserMetaClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -155,12 +159,13 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Invite:         NewInviteClient(cfg),
 		LocalUser:      NewLocalUserClient(cfg),
 		Message:        NewMessageClient(cfg),
-		Permission:     NewPermissionClient(cfg),
+		PermissionNode: NewPermissionNodeClient(cfg),
 		Profile:        NewProfileClient(cfg),
 		Role:           NewRoleClient(cfg),
 		Session:        NewSessionClient(cfg),
 		TextMessage:    NewTextMessageClient(cfg),
 		User:           NewUserClient(cfg),
+		UserMeta:       NewUserMetaClient(cfg),
 	}, nil
 }
 
@@ -192,12 +197,13 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Invite:         NewInviteClient(cfg),
 		LocalUser:      NewLocalUserClient(cfg),
 		Message:        NewMessageClient(cfg),
-		Permission:     NewPermissionClient(cfg),
+		PermissionNode: NewPermissionNodeClient(cfg),
 		Profile:        NewProfileClient(cfg),
 		Role:           NewRoleClient(cfg),
 		Session:        NewSessionClient(cfg),
 		TextMessage:    NewTextMessageClient(cfg),
 		User:           NewUserClient(cfg),
+		UserMeta:       NewUserMetaClient(cfg),
 	}, nil
 }
 
@@ -240,12 +246,13 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Invite.Use(hooks...)
 	c.LocalUser.Use(hooks...)
 	c.Message.Use(hooks...)
-	c.Permission.Use(hooks...)
+	c.PermissionNode.Use(hooks...)
 	c.Profile.Use(hooks...)
 	c.Role.Use(hooks...)
 	c.Session.Use(hooks...)
 	c.TextMessage.Use(hooks...)
 	c.User.Use(hooks...)
+	c.UserMeta.Use(hooks...)
 }
 
 // ChannelClient is a client for the Channel schema.
@@ -356,6 +363,22 @@ func (c *ChannelClient) QueryMessage(ch *Channel) *MessageQuery {
 			sqlgraph.From(channel.Table, channel.FieldID, id),
 			sqlgraph.To(message.Table, message.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, channel.MessageTable, channel.MessageColumn),
+		)
+		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRole queries the role edge of a Channel.
+func (c *ChannelClient) QueryRole(ch *Channel) *RoleQuery {
+	query := &RoleQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ch.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(channel.Table, channel.FieldID, id),
+			sqlgraph.To(role.Table, role.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, channel.RoleTable, channel.RoleColumn),
 		)
 		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
 		return fromV, nil
@@ -1760,82 +1783,82 @@ func (c *MessageClient) Hooks() []Hook {
 	return c.hooks.Message
 }
 
-// PermissionClient is a client for the Permission schema.
-type PermissionClient struct {
+// PermissionNodeClient is a client for the PermissionNode schema.
+type PermissionNodeClient struct {
 	config
 }
 
-// NewPermissionClient returns a client for the Permission from the given config.
-func NewPermissionClient(c config) *PermissionClient {
-	return &PermissionClient{config: c}
+// NewPermissionNodeClient returns a client for the PermissionNode from the given config.
+func NewPermissionNodeClient(c config) *PermissionNodeClient {
+	return &PermissionNodeClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `permission.Hooks(f(g(h())))`.
-func (c *PermissionClient) Use(hooks ...Hook) {
-	c.hooks.Permission = append(c.hooks.Permission, hooks...)
+// A call to `Use(f, g, h)` equals to `permissionnode.Hooks(f(g(h())))`.
+func (c *PermissionNodeClient) Use(hooks ...Hook) {
+	c.hooks.PermissionNode = append(c.hooks.PermissionNode, hooks...)
 }
 
-// Create returns a create builder for Permission.
-func (c *PermissionClient) Create() *PermissionCreate {
-	mutation := newPermissionMutation(c.config, OpCreate)
-	return &PermissionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a create builder for PermissionNode.
+func (c *PermissionNodeClient) Create() *PermissionNodeCreate {
+	mutation := newPermissionNodeMutation(c.config, OpCreate)
+	return &PermissionNodeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of Permission entities.
-func (c *PermissionClient) CreateBulk(builders ...*PermissionCreate) *PermissionCreateBulk {
-	return &PermissionCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of PermissionNode entities.
+func (c *PermissionNodeClient) CreateBulk(builders ...*PermissionNodeCreate) *PermissionNodeCreateBulk {
+	return &PermissionNodeCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for Permission.
-func (c *PermissionClient) Update() *PermissionUpdate {
-	mutation := newPermissionMutation(c.config, OpUpdate)
-	return &PermissionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for PermissionNode.
+func (c *PermissionNodeClient) Update() *PermissionNodeUpdate {
+	mutation := newPermissionNodeMutation(c.config, OpUpdate)
+	return &PermissionNodeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *PermissionClient) UpdateOne(pe *Permission) *PermissionUpdateOne {
-	mutation := newPermissionMutation(c.config, OpUpdateOne, withPermission(pe))
-	return &PermissionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *PermissionNodeClient) UpdateOne(pn *PermissionNode) *PermissionNodeUpdateOne {
+	mutation := newPermissionNodeMutation(c.config, OpUpdateOne, withPermissionNode(pn))
+	return &PermissionNodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *PermissionClient) UpdateOneID(id uint64) *PermissionUpdateOne {
-	mutation := newPermissionMutation(c.config, OpUpdateOne, withPermissionID(id))
-	return &PermissionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *PermissionNodeClient) UpdateOneID(id int) *PermissionNodeUpdateOne {
+	mutation := newPermissionNodeMutation(c.config, OpUpdateOne, withPermissionNodeID(id))
+	return &PermissionNodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for Permission.
-func (c *PermissionClient) Delete() *PermissionDelete {
-	mutation := newPermissionMutation(c.config, OpDelete)
-	return &PermissionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for PermissionNode.
+func (c *PermissionNodeClient) Delete() *PermissionNodeDelete {
+	mutation := newPermissionNodeMutation(c.config, OpDelete)
+	return &PermissionNodeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
-func (c *PermissionClient) DeleteOne(pe *Permission) *PermissionDeleteOne {
-	return c.DeleteOneID(pe.ID)
+func (c *PermissionNodeClient) DeleteOne(pn *PermissionNode) *PermissionNodeDeleteOne {
+	return c.DeleteOneID(pn.ID)
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *PermissionClient) DeleteOneID(id uint64) *PermissionDeleteOne {
-	builder := c.Delete().Where(permission.ID(id))
+func (c *PermissionNodeClient) DeleteOneID(id int) *PermissionNodeDeleteOne {
+	builder := c.Delete().Where(permissionnode.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &PermissionDeleteOne{builder}
+	return &PermissionNodeDeleteOne{builder}
 }
 
-// Query returns a query builder for Permission.
-func (c *PermissionClient) Query() *PermissionQuery {
-	return &PermissionQuery{config: c.config}
+// Query returns a query builder for PermissionNode.
+func (c *PermissionNodeClient) Query() *PermissionNodeQuery {
+	return &PermissionNodeQuery{config: c.config}
 }
 
-// Get returns a Permission entity by its id.
-func (c *PermissionClient) Get(ctx context.Context, id uint64) (*Permission, error) {
-	return c.Query().Where(permission.ID(id)).Only(ctx)
+// Get returns a PermissionNode entity by its id.
+func (c *PermissionNodeClient) Get(ctx context.Context, id int) (*PermissionNode, error) {
+	return c.Query().Where(permissionnode.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *PermissionClient) GetX(ctx context.Context, id uint64) *Permission {
+func (c *PermissionNodeClient) GetX(ctx context.Context, id int) *PermissionNode {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1843,25 +1866,25 @@ func (c *PermissionClient) GetX(ctx context.Context, id uint64) *Permission {
 	return obj
 }
 
-// QueryRole queries the role edge of a Permission.
-func (c *PermissionClient) QueryRole(pe *Permission) *RoleQuery {
+// QueryRole queries the role edge of a PermissionNode.
+func (c *PermissionNodeClient) QueryRole(pn *PermissionNode) *RoleQuery {
 	query := &RoleQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := pe.ID
+		id := pn.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(permission.Table, permission.FieldID, id),
+			sqlgraph.From(permissionnode.Table, permissionnode.FieldID, id),
 			sqlgraph.To(role.Table, role.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, permission.RoleTable, permission.RoleColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, permissionnode.RoleTable, permissionnode.RoleColumn),
 		)
-		fromV = sqlgraph.Neighbors(pe.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *PermissionClient) Hooks() []Hook {
-	return c.hooks.Permission
+func (c *PermissionNodeClient) Hooks() []Hook {
+	return c.hooks.PermissionNode
 }
 
 // ProfileClient is a client for the Profile schema.
@@ -2067,15 +2090,15 @@ func (c *RoleClient) QueryMembers(r *Role) *UserQuery {
 	return query
 }
 
-// QueryPermission queries the permission edge of a Role.
-func (c *RoleClient) QueryPermission(r *Role) *PermissionQuery {
-	query := &PermissionQuery{config: c.config}
+// QueryPermissionNode queries the permission_node edge of a Role.
+func (c *RoleClient) QueryPermissionNode(r *Role) *PermissionNodeQuery {
+	query := &PermissionNodeQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := r.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(role.Table, role.FieldID, id),
-			sqlgraph.To(permission.Table, permission.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, role.PermissionTable, role.PermissionColumn),
+			sqlgraph.To(permissionnode.Table, permissionnode.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, role.PermissionNodeTable, role.PermissionNodeColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil
@@ -2427,6 +2450,22 @@ func (c *UserClient) QueryProfile(u *User) *ProfileQuery {
 	return query
 }
 
+// QueryMetadata queries the metadata edge of a User.
+func (c *UserClient) QueryMetadata(u *User) *UserMetaQuery {
+	query := &UserMetaQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(usermeta.Table, usermeta.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.MetadataTable, user.MetadataColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QuerySessions queries the sessions edge of a User.
 func (c *UserClient) QuerySessions(u *User) *SessionQuery {
 	query := &SessionQuery{config: c.config}
@@ -2542,4 +2581,108 @@ func (c *UserClient) QueryRole(u *User) *RoleQuery {
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
+}
+
+// UserMetaClient is a client for the UserMeta schema.
+type UserMetaClient struct {
+	config
+}
+
+// NewUserMetaClient returns a client for the UserMeta from the given config.
+func NewUserMetaClient(c config) *UserMetaClient {
+	return &UserMetaClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `usermeta.Hooks(f(g(h())))`.
+func (c *UserMetaClient) Use(hooks ...Hook) {
+	c.hooks.UserMeta = append(c.hooks.UserMeta, hooks...)
+}
+
+// Create returns a create builder for UserMeta.
+func (c *UserMetaClient) Create() *UserMetaCreate {
+	mutation := newUserMetaMutation(c.config, OpCreate)
+	return &UserMetaCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of UserMeta entities.
+func (c *UserMetaClient) CreateBulk(builders ...*UserMetaCreate) *UserMetaCreateBulk {
+	return &UserMetaCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for UserMeta.
+func (c *UserMetaClient) Update() *UserMetaUpdate {
+	mutation := newUserMetaMutation(c.config, OpUpdate)
+	return &UserMetaUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UserMetaClient) UpdateOne(um *UserMeta) *UserMetaUpdateOne {
+	mutation := newUserMetaMutation(c.config, OpUpdateOne, withUserMeta(um))
+	return &UserMetaUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UserMetaClient) UpdateOneID(id string) *UserMetaUpdateOne {
+	mutation := newUserMetaMutation(c.config, OpUpdateOne, withUserMetaID(id))
+	return &UserMetaUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for UserMeta.
+func (c *UserMetaClient) Delete() *UserMetaDelete {
+	mutation := newUserMetaMutation(c.config, OpDelete)
+	return &UserMetaDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *UserMetaClient) DeleteOne(um *UserMeta) *UserMetaDeleteOne {
+	return c.DeleteOneID(um.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *UserMetaClient) DeleteOneID(id string) *UserMetaDeleteOne {
+	builder := c.Delete().Where(usermeta.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserMetaDeleteOne{builder}
+}
+
+// Query returns a query builder for UserMeta.
+func (c *UserMetaClient) Query() *UserMetaQuery {
+	return &UserMetaQuery{config: c.config}
+}
+
+// Get returns a UserMeta entity by its id.
+func (c *UserMetaClient) Get(ctx context.Context, id string) (*UserMeta, error) {
+	return c.Query().Where(usermeta.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserMetaClient) GetX(ctx context.Context, id string) *UserMeta {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a UserMeta.
+func (c *UserMetaClient) QueryUser(um *UserMeta) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := um.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(usermeta.Table, usermeta.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, usermeta.UserTable, usermeta.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(um.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *UserMetaClient) Hooks() []Hook {
+	return c.hooks.UserMeta
 }
