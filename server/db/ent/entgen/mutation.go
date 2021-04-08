@@ -66,26 +66,29 @@ const (
 // ChannelMutation represents an operation that mutates the Channel nodes in the graph.
 type ChannelMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *uint64
-	name           *string
-	kind           *uint64
-	addkind        *uint64
-	position       *string
-	metadata       *[]byte
-	clearedFields  map[string]struct{}
-	guild          *uint64
-	clearedguild   bool
-	message        map[uint64]struct{}
-	removedmessage map[uint64]struct{}
-	clearedmessage bool
-	role           map[uint64]struct{}
-	removedrole    map[uint64]struct{}
-	clearedrole    bool
-	done           bool
-	oldValue       func(context.Context) (*Channel, error)
-	predicates     []predicate.Channel
+	op                     Op
+	typ                    string
+	id                     *uint64
+	name                   *string
+	kind                   *uint64
+	addkind                *uint64
+	position               *string
+	metadata               *[]byte
+	clearedFields          map[string]struct{}
+	guild                  *uint64
+	clearedguild           bool
+	message                map[uint64]struct{}
+	removedmessage         map[uint64]struct{}
+	clearedmessage         bool
+	role                   map[uint64]struct{}
+	removedrole            map[uint64]struct{}
+	clearedrole            bool
+	permission_node        map[int]struct{}
+	removedpermission_node map[int]struct{}
+	clearedpermission_node bool
+	done                   bool
+	oldValue               func(context.Context) (*Channel, error)
+	predicates             []predicate.Channel
 }
 
 var _ ent.Mutation = (*ChannelMutation)(nil)
@@ -482,6 +485,59 @@ func (m *ChannelMutation) ResetRole() {
 	m.removedrole = nil
 }
 
+// AddPermissionNodeIDs adds the "permission_node" edge to the PermissionNode entity by ids.
+func (m *ChannelMutation) AddPermissionNodeIDs(ids ...int) {
+	if m.permission_node == nil {
+		m.permission_node = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.permission_node[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPermissionNode clears the "permission_node" edge to the PermissionNode entity.
+func (m *ChannelMutation) ClearPermissionNode() {
+	m.clearedpermission_node = true
+}
+
+// PermissionNodeCleared returns if the "permission_node" edge to the PermissionNode entity was cleared.
+func (m *ChannelMutation) PermissionNodeCleared() bool {
+	return m.clearedpermission_node
+}
+
+// RemovePermissionNodeIDs removes the "permission_node" edge to the PermissionNode entity by IDs.
+func (m *ChannelMutation) RemovePermissionNodeIDs(ids ...int) {
+	if m.removedpermission_node == nil {
+		m.removedpermission_node = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.removedpermission_node[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPermissionNode returns the removed IDs of the "permission_node" edge to the PermissionNode entity.
+func (m *ChannelMutation) RemovedPermissionNodeIDs() (ids []int) {
+	for id := range m.removedpermission_node {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PermissionNodeIDs returns the "permission_node" edge IDs in the mutation.
+func (m *ChannelMutation) PermissionNodeIDs() (ids []int) {
+	for id := range m.permission_node {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPermissionNode resets all changes to the "permission_node" edge.
+func (m *ChannelMutation) ResetPermissionNode() {
+	m.permission_node = nil
+	m.clearedpermission_node = false
+	m.removedpermission_node = nil
+}
+
 // Op returns the operation name.
 func (m *ChannelMutation) Op() Op {
 	return m.op
@@ -661,7 +717,7 @@ func (m *ChannelMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ChannelMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.guild != nil {
 		edges = append(edges, channel.EdgeGuild)
 	}
@@ -670,6 +726,9 @@ func (m *ChannelMutation) AddedEdges() []string {
 	}
 	if m.role != nil {
 		edges = append(edges, channel.EdgeRole)
+	}
+	if m.permission_node != nil {
+		edges = append(edges, channel.EdgePermissionNode)
 	}
 	return edges
 }
@@ -694,18 +753,27 @@ func (m *ChannelMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case channel.EdgePermissionNode:
+		ids := make([]ent.Value, 0, len(m.permission_node))
+		for id := range m.permission_node {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ChannelMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.removedmessage != nil {
 		edges = append(edges, channel.EdgeMessage)
 	}
 	if m.removedrole != nil {
 		edges = append(edges, channel.EdgeRole)
+	}
+	if m.removedpermission_node != nil {
+		edges = append(edges, channel.EdgePermissionNode)
 	}
 	return edges
 }
@@ -726,13 +794,19 @@ func (m *ChannelMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case channel.EdgePermissionNode:
+		ids := make([]ent.Value, 0, len(m.removedpermission_node))
+		for id := range m.removedpermission_node {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ChannelMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.clearedguild {
 		edges = append(edges, channel.EdgeGuild)
 	}
@@ -741,6 +815,9 @@ func (m *ChannelMutation) ClearedEdges() []string {
 	}
 	if m.clearedrole {
 		edges = append(edges, channel.EdgeRole)
+	}
+	if m.clearedpermission_node {
+		edges = append(edges, channel.EdgePermissionNode)
 	}
 	return edges
 }
@@ -755,6 +832,8 @@ func (m *ChannelMutation) EdgeCleared(name string) bool {
 		return m.clearedmessage
 	case channel.EdgeRole:
 		return m.clearedrole
+	case channel.EdgePermissionNode:
+		return m.clearedpermission_node
 	}
 	return false
 }
@@ -782,6 +861,9 @@ func (m *ChannelMutation) ResetEdge(name string) error {
 		return nil
 	case channel.EdgeRole:
 		m.ResetRole()
+		return nil
+	case channel.EdgePermissionNode:
+		m.ResetPermissionNode()
 		return nil
 	}
 	return fmt.Errorf("unknown Channel edge %s", name)
@@ -3329,33 +3411,36 @@ func (m *ForeignUserMutation) ResetEdge(name string) error {
 // GuildMutation represents an operation that mutates the Guild nodes in the graph.
 type GuildMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *uint64
-	owner          *uint64
-	addowner       *uint64
-	name           *string
-	picture        *string
-	metadata       *[]byte
-	clearedFields  map[string]struct{}
-	invite         map[string]struct{}
-	removedinvite  map[string]struct{}
-	clearedinvite  bool
-	bans           map[uint64]struct{}
-	removedbans    map[uint64]struct{}
-	clearedbans    bool
-	channel        map[uint64]struct{}
-	removedchannel map[uint64]struct{}
-	clearedchannel bool
-	role           map[uint64]struct{}
-	removedrole    map[uint64]struct{}
-	clearedrole    bool
-	user           map[uint64]struct{}
-	removeduser    map[uint64]struct{}
-	cleareduser    bool
-	done           bool
-	oldValue       func(context.Context) (*Guild, error)
-	predicates     []predicate.Guild
+	op                     Op
+	typ                    string
+	id                     *uint64
+	owner                  *uint64
+	addowner               *uint64
+	name                   *string
+	picture                *string
+	metadata               *[]byte
+	clearedFields          map[string]struct{}
+	invite                 map[string]struct{}
+	removedinvite          map[string]struct{}
+	clearedinvite          bool
+	bans                   map[uint64]struct{}
+	removedbans            map[uint64]struct{}
+	clearedbans            bool
+	channel                map[uint64]struct{}
+	removedchannel         map[uint64]struct{}
+	clearedchannel         bool
+	role                   map[uint64]struct{}
+	removedrole            map[uint64]struct{}
+	clearedrole            bool
+	permission_node        map[int]struct{}
+	removedpermission_node map[int]struct{}
+	clearedpermission_node bool
+	user                   map[uint64]struct{}
+	removeduser            map[uint64]struct{}
+	cleareduser            bool
+	done                   bool
+	oldValue               func(context.Context) (*Guild, error)
+	predicates             []predicate.Guild
 }
 
 var _ ent.Mutation = (*GuildMutation)(nil)
@@ -3819,6 +3904,59 @@ func (m *GuildMutation) ResetRole() {
 	m.removedrole = nil
 }
 
+// AddPermissionNodeIDs adds the "permission_node" edge to the PermissionNode entity by ids.
+func (m *GuildMutation) AddPermissionNodeIDs(ids ...int) {
+	if m.permission_node == nil {
+		m.permission_node = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.permission_node[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPermissionNode clears the "permission_node" edge to the PermissionNode entity.
+func (m *GuildMutation) ClearPermissionNode() {
+	m.clearedpermission_node = true
+}
+
+// PermissionNodeCleared returns if the "permission_node" edge to the PermissionNode entity was cleared.
+func (m *GuildMutation) PermissionNodeCleared() bool {
+	return m.clearedpermission_node
+}
+
+// RemovePermissionNodeIDs removes the "permission_node" edge to the PermissionNode entity by IDs.
+func (m *GuildMutation) RemovePermissionNodeIDs(ids ...int) {
+	if m.removedpermission_node == nil {
+		m.removedpermission_node = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.removedpermission_node[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPermissionNode returns the removed IDs of the "permission_node" edge to the PermissionNode entity.
+func (m *GuildMutation) RemovedPermissionNodeIDs() (ids []int) {
+	for id := range m.removedpermission_node {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PermissionNodeIDs returns the "permission_node" edge IDs in the mutation.
+func (m *GuildMutation) PermissionNodeIDs() (ids []int) {
+	for id := range m.permission_node {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPermissionNode resets all changes to the "permission_node" edge.
+func (m *GuildMutation) ResetPermissionNode() {
+	m.permission_node = nil
+	m.clearedpermission_node = false
+	m.removedpermission_node = nil
+}
+
 // AddUserIDs adds the "user" edge to the User entity by ids.
 func (m *GuildMutation) AddUserIDs(ids ...uint64) {
 	if m.user == nil {
@@ -4051,7 +4189,7 @@ func (m *GuildMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *GuildMutation) AddedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.invite != nil {
 		edges = append(edges, guild.EdgeInvite)
 	}
@@ -4063,6 +4201,9 @@ func (m *GuildMutation) AddedEdges() []string {
 	}
 	if m.role != nil {
 		edges = append(edges, guild.EdgeRole)
+	}
+	if m.permission_node != nil {
+		edges = append(edges, guild.EdgePermissionNode)
 	}
 	if m.user != nil {
 		edges = append(edges, guild.EdgeUser)
@@ -4098,6 +4239,12 @@ func (m *GuildMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case guild.EdgePermissionNode:
+		ids := make([]ent.Value, 0, len(m.permission_node))
+		for id := range m.permission_node {
+			ids = append(ids, id)
+		}
+		return ids
 	case guild.EdgeUser:
 		ids := make([]ent.Value, 0, len(m.user))
 		for id := range m.user {
@@ -4110,7 +4257,7 @@ func (m *GuildMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *GuildMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.removedinvite != nil {
 		edges = append(edges, guild.EdgeInvite)
 	}
@@ -4122,6 +4269,9 @@ func (m *GuildMutation) RemovedEdges() []string {
 	}
 	if m.removedrole != nil {
 		edges = append(edges, guild.EdgeRole)
+	}
+	if m.removedpermission_node != nil {
+		edges = append(edges, guild.EdgePermissionNode)
 	}
 	if m.removeduser != nil {
 		edges = append(edges, guild.EdgeUser)
@@ -4157,6 +4307,12 @@ func (m *GuildMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case guild.EdgePermissionNode:
+		ids := make([]ent.Value, 0, len(m.removedpermission_node))
+		for id := range m.removedpermission_node {
+			ids = append(ids, id)
+		}
+		return ids
 	case guild.EdgeUser:
 		ids := make([]ent.Value, 0, len(m.removeduser))
 		for id := range m.removeduser {
@@ -4169,7 +4325,7 @@ func (m *GuildMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *GuildMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.clearedinvite {
 		edges = append(edges, guild.EdgeInvite)
 	}
@@ -4181,6 +4337,9 @@ func (m *GuildMutation) ClearedEdges() []string {
 	}
 	if m.clearedrole {
 		edges = append(edges, guild.EdgeRole)
+	}
+	if m.clearedpermission_node {
+		edges = append(edges, guild.EdgePermissionNode)
 	}
 	if m.cleareduser {
 		edges = append(edges, guild.EdgeUser)
@@ -4200,6 +4359,8 @@ func (m *GuildMutation) EdgeCleared(name string) bool {
 		return m.clearedchannel
 	case guild.EdgeRole:
 		return m.clearedrole
+	case guild.EdgePermissionNode:
+		return m.clearedpermission_node
 	case guild.EdgeUser:
 		return m.cleareduser
 	}
@@ -4229,6 +4390,9 @@ func (m *GuildMutation) ResetEdge(name string) error {
 		return nil
 	case guild.EdgeRole:
 		m.ResetRole()
+		return nil
+	case guild.EdgePermissionNode:
+		m.ResetPermissionNode()
 		return nil
 	case guild.EdgeUser:
 		m.ResetUser()
@@ -6667,17 +6831,21 @@ func (m *MessageMutation) ResetEdge(name string) error {
 // PermissionNodeMutation represents an operation that mutates the PermissionNode nodes in the graph.
 type PermissionNodeMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	node          *string
-	allow         *bool
-	clearedFields map[string]struct{}
-	role          *uint64
-	clearedrole   bool
-	done          bool
-	oldValue      func(context.Context) (*PermissionNode, error)
-	predicates    []predicate.PermissionNode
+	op             Op
+	typ            string
+	id             *int
+	node           *string
+	allow          *bool
+	clearedFields  map[string]struct{}
+	role           *uint64
+	clearedrole    bool
+	guild          *uint64
+	clearedguild   bool
+	channel        *uint64
+	clearedchannel bool
+	done           bool
+	oldValue       func(context.Context) (*PermissionNode, error)
+	predicates     []predicate.PermissionNode
 }
 
 var _ ent.Mutation = (*PermissionNodeMutation)(nil)
@@ -6870,6 +7038,84 @@ func (m *PermissionNodeMutation) ResetRole() {
 	m.clearedrole = false
 }
 
+// SetGuildID sets the "guild" edge to the Guild entity by id.
+func (m *PermissionNodeMutation) SetGuildID(id uint64) {
+	m.guild = &id
+}
+
+// ClearGuild clears the "guild" edge to the Guild entity.
+func (m *PermissionNodeMutation) ClearGuild() {
+	m.clearedguild = true
+}
+
+// GuildCleared returns if the "guild" edge to the Guild entity was cleared.
+func (m *PermissionNodeMutation) GuildCleared() bool {
+	return m.clearedguild
+}
+
+// GuildID returns the "guild" edge ID in the mutation.
+func (m *PermissionNodeMutation) GuildID() (id uint64, exists bool) {
+	if m.guild != nil {
+		return *m.guild, true
+	}
+	return
+}
+
+// GuildIDs returns the "guild" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// GuildID instead. It exists only for internal usage by the builders.
+func (m *PermissionNodeMutation) GuildIDs() (ids []uint64) {
+	if id := m.guild; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetGuild resets all changes to the "guild" edge.
+func (m *PermissionNodeMutation) ResetGuild() {
+	m.guild = nil
+	m.clearedguild = false
+}
+
+// SetChannelID sets the "channel" edge to the Channel entity by id.
+func (m *PermissionNodeMutation) SetChannelID(id uint64) {
+	m.channel = &id
+}
+
+// ClearChannel clears the "channel" edge to the Channel entity.
+func (m *PermissionNodeMutation) ClearChannel() {
+	m.clearedchannel = true
+}
+
+// ChannelCleared returns if the "channel" edge to the Channel entity was cleared.
+func (m *PermissionNodeMutation) ChannelCleared() bool {
+	return m.clearedchannel
+}
+
+// ChannelID returns the "channel" edge ID in the mutation.
+func (m *PermissionNodeMutation) ChannelID() (id uint64, exists bool) {
+	if m.channel != nil {
+		return *m.channel, true
+	}
+	return
+}
+
+// ChannelIDs returns the "channel" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ChannelID instead. It exists only for internal usage by the builders.
+func (m *PermissionNodeMutation) ChannelIDs() (ids []uint64) {
+	if id := m.channel; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetChannel resets all changes to the "channel" edge.
+func (m *PermissionNodeMutation) ResetChannel() {
+	m.channel = nil
+	m.clearedchannel = false
+}
+
 // Op returns the operation name.
 func (m *PermissionNodeMutation) Op() Op {
 	return m.op
@@ -7000,9 +7246,15 @@ func (m *PermissionNodeMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PermissionNodeMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	if m.role != nil {
 		edges = append(edges, permissionnode.EdgeRole)
+	}
+	if m.guild != nil {
+		edges = append(edges, permissionnode.EdgeGuild)
+	}
+	if m.channel != nil {
+		edges = append(edges, permissionnode.EdgeChannel)
 	}
 	return edges
 }
@@ -7015,13 +7267,21 @@ func (m *PermissionNodeMutation) AddedIDs(name string) []ent.Value {
 		if id := m.role; id != nil {
 			return []ent.Value{*id}
 		}
+	case permissionnode.EdgeGuild:
+		if id := m.guild; id != nil {
+			return []ent.Value{*id}
+		}
+	case permissionnode.EdgeChannel:
+		if id := m.channel; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PermissionNodeMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	return edges
 }
 
@@ -7035,9 +7295,15 @@ func (m *PermissionNodeMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PermissionNodeMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	if m.clearedrole {
 		edges = append(edges, permissionnode.EdgeRole)
+	}
+	if m.clearedguild {
+		edges = append(edges, permissionnode.EdgeGuild)
+	}
+	if m.clearedchannel {
+		edges = append(edges, permissionnode.EdgeChannel)
 	}
 	return edges
 }
@@ -7048,6 +7314,10 @@ func (m *PermissionNodeMutation) EdgeCleared(name string) bool {
 	switch name {
 	case permissionnode.EdgeRole:
 		return m.clearedrole
+	case permissionnode.EdgeGuild:
+		return m.clearedguild
+	case permissionnode.EdgeChannel:
+		return m.clearedchannel
 	}
 	return false
 }
@@ -7059,6 +7329,12 @@ func (m *PermissionNodeMutation) ClearEdge(name string) error {
 	case permissionnode.EdgeRole:
 		m.ClearRole()
 		return nil
+	case permissionnode.EdgeGuild:
+		m.ClearGuild()
+		return nil
+	case permissionnode.EdgeChannel:
+		m.ClearChannel()
+		return nil
 	}
 	return fmt.Errorf("unknown PermissionNode unique edge %s", name)
 }
@@ -7069,6 +7345,12 @@ func (m *PermissionNodeMutation) ResetEdge(name string) error {
 	switch name {
 	case permissionnode.EdgeRole:
 		m.ResetRole()
+		return nil
+	case permissionnode.EdgeGuild:
+		m.ResetGuild()
+		return nil
+	case permissionnode.EdgeChannel:
+		m.ResetChannel()
 		return nil
 	}
 	return fmt.Errorf("unknown PermissionNode edge %s", name)

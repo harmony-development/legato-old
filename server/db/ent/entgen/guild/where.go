@@ -605,6 +605,34 @@ func HasRoleWith(preds ...predicate.Role) predicate.Guild {
 	})
 }
 
+// HasPermissionNode applies the HasEdge predicate on the "permission_node" edge.
+func HasPermissionNode() predicate.Guild {
+	return predicate.Guild(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(PermissionNodeTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PermissionNodeTable, PermissionNodeColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPermissionNodeWith applies the HasEdge predicate on the "permission_node" edge with a given conditions (other predicates).
+func HasPermissionNodeWith(preds ...predicate.PermissionNode) predicate.Guild {
+	return predicate.Guild(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(PermissionNodeInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PermissionNodeTable, PermissionNodeColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasUser applies the HasEdge predicate on the "user" edge.
 func HasUser() predicate.Guild {
 	return predicate.Guild(func(s *sql.Selector) {

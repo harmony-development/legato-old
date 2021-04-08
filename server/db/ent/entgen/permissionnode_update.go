@@ -9,6 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
+	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/permissionnode"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 	"github.com/harmony-development/legato/server/db/ent/entgen/role"
@@ -58,6 +60,44 @@ func (pnu *PermissionNodeUpdate) SetRole(r *Role) *PermissionNodeUpdate {
 	return pnu.SetRoleID(r.ID)
 }
 
+// SetGuildID sets the "guild" edge to the Guild entity by ID.
+func (pnu *PermissionNodeUpdate) SetGuildID(id uint64) *PermissionNodeUpdate {
+	pnu.mutation.SetGuildID(id)
+	return pnu
+}
+
+// SetNillableGuildID sets the "guild" edge to the Guild entity by ID if the given value is not nil.
+func (pnu *PermissionNodeUpdate) SetNillableGuildID(id *uint64) *PermissionNodeUpdate {
+	if id != nil {
+		pnu = pnu.SetGuildID(*id)
+	}
+	return pnu
+}
+
+// SetGuild sets the "guild" edge to the Guild entity.
+func (pnu *PermissionNodeUpdate) SetGuild(g *Guild) *PermissionNodeUpdate {
+	return pnu.SetGuildID(g.ID)
+}
+
+// SetChannelID sets the "channel" edge to the Channel entity by ID.
+func (pnu *PermissionNodeUpdate) SetChannelID(id uint64) *PermissionNodeUpdate {
+	pnu.mutation.SetChannelID(id)
+	return pnu
+}
+
+// SetNillableChannelID sets the "channel" edge to the Channel entity by ID if the given value is not nil.
+func (pnu *PermissionNodeUpdate) SetNillableChannelID(id *uint64) *PermissionNodeUpdate {
+	if id != nil {
+		pnu = pnu.SetChannelID(*id)
+	}
+	return pnu
+}
+
+// SetChannel sets the "channel" edge to the Channel entity.
+func (pnu *PermissionNodeUpdate) SetChannel(c *Channel) *PermissionNodeUpdate {
+	return pnu.SetChannelID(c.ID)
+}
+
 // Mutation returns the PermissionNodeMutation object of the builder.
 func (pnu *PermissionNodeUpdate) Mutation() *PermissionNodeMutation {
 	return pnu.mutation
@@ -66,6 +106,18 @@ func (pnu *PermissionNodeUpdate) Mutation() *PermissionNodeMutation {
 // ClearRole clears the "role" edge to the Role entity.
 func (pnu *PermissionNodeUpdate) ClearRole() *PermissionNodeUpdate {
 	pnu.mutation.ClearRole()
+	return pnu
+}
+
+// ClearGuild clears the "guild" edge to the Guild entity.
+func (pnu *PermissionNodeUpdate) ClearGuild() *PermissionNodeUpdate {
+	pnu.mutation.ClearGuild()
+	return pnu
+}
+
+// ClearChannel clears the "channel" edge to the Channel entity.
+func (pnu *PermissionNodeUpdate) ClearChannel() *PermissionNodeUpdate {
+	pnu.mutation.ClearChannel()
 	return pnu
 }
 
@@ -187,6 +239,76 @@ func (pnu *PermissionNodeUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if pnu.mutation.GuildCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   permissionnode.GuildTable,
+			Columns: []string{permissionnode.GuildColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: guild.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnu.mutation.GuildIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   permissionnode.GuildTable,
+			Columns: []string{permissionnode.GuildColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: guild.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pnu.mutation.ChannelCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   permissionnode.ChannelTable,
+			Columns: []string{permissionnode.ChannelColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: channel.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnu.mutation.ChannelIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   permissionnode.ChannelTable,
+			Columns: []string{permissionnode.ChannelColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: channel.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, pnu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{permissionnode.Label}
@@ -236,6 +358,44 @@ func (pnuo *PermissionNodeUpdateOne) SetRole(r *Role) *PermissionNodeUpdateOne {
 	return pnuo.SetRoleID(r.ID)
 }
 
+// SetGuildID sets the "guild" edge to the Guild entity by ID.
+func (pnuo *PermissionNodeUpdateOne) SetGuildID(id uint64) *PermissionNodeUpdateOne {
+	pnuo.mutation.SetGuildID(id)
+	return pnuo
+}
+
+// SetNillableGuildID sets the "guild" edge to the Guild entity by ID if the given value is not nil.
+func (pnuo *PermissionNodeUpdateOne) SetNillableGuildID(id *uint64) *PermissionNodeUpdateOne {
+	if id != nil {
+		pnuo = pnuo.SetGuildID(*id)
+	}
+	return pnuo
+}
+
+// SetGuild sets the "guild" edge to the Guild entity.
+func (pnuo *PermissionNodeUpdateOne) SetGuild(g *Guild) *PermissionNodeUpdateOne {
+	return pnuo.SetGuildID(g.ID)
+}
+
+// SetChannelID sets the "channel" edge to the Channel entity by ID.
+func (pnuo *PermissionNodeUpdateOne) SetChannelID(id uint64) *PermissionNodeUpdateOne {
+	pnuo.mutation.SetChannelID(id)
+	return pnuo
+}
+
+// SetNillableChannelID sets the "channel" edge to the Channel entity by ID if the given value is not nil.
+func (pnuo *PermissionNodeUpdateOne) SetNillableChannelID(id *uint64) *PermissionNodeUpdateOne {
+	if id != nil {
+		pnuo = pnuo.SetChannelID(*id)
+	}
+	return pnuo
+}
+
+// SetChannel sets the "channel" edge to the Channel entity.
+func (pnuo *PermissionNodeUpdateOne) SetChannel(c *Channel) *PermissionNodeUpdateOne {
+	return pnuo.SetChannelID(c.ID)
+}
+
 // Mutation returns the PermissionNodeMutation object of the builder.
 func (pnuo *PermissionNodeUpdateOne) Mutation() *PermissionNodeMutation {
 	return pnuo.mutation
@@ -244,6 +404,18 @@ func (pnuo *PermissionNodeUpdateOne) Mutation() *PermissionNodeMutation {
 // ClearRole clears the "role" edge to the Role entity.
 func (pnuo *PermissionNodeUpdateOne) ClearRole() *PermissionNodeUpdateOne {
 	pnuo.mutation.ClearRole()
+	return pnuo
+}
+
+// ClearGuild clears the "guild" edge to the Guild entity.
+func (pnuo *PermissionNodeUpdateOne) ClearGuild() *PermissionNodeUpdateOne {
+	pnuo.mutation.ClearGuild()
+	return pnuo
+}
+
+// ClearChannel clears the "channel" edge to the Channel entity.
+func (pnuo *PermissionNodeUpdateOne) ClearChannel() *PermissionNodeUpdateOne {
+	pnuo.mutation.ClearChannel()
 	return pnuo
 }
 
@@ -362,6 +534,76 @@ func (pnuo *PermissionNodeUpdateOne) sqlSave(ctx context.Context) (_node *Permis
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUint64,
 					Column: role.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pnuo.mutation.GuildCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   permissionnode.GuildTable,
+			Columns: []string{permissionnode.GuildColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: guild.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnuo.mutation.GuildIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   permissionnode.GuildTable,
+			Columns: []string{permissionnode.GuildColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: guild.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pnuo.mutation.ChannelCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   permissionnode.ChannelTable,
+			Columns: []string{permissionnode.ChannelColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: channel.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnuo.mutation.ChannelIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   permissionnode.ChannelTable,
+			Columns: []string{permissionnode.ChannelColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: channel.FieldID,
 				},
 			},
 		}

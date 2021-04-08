@@ -45,6 +45,41 @@ func (d *database) GetPermissions(roleID uint64) (permissions []types.Permission
 	return
 }
 
+func (d *database) SetPermissions(guildID uint64, channelID uint64, roleID uint64, permissions []types.PermissionsNode) (err error) {
+	defer doRecovery(&err)
+	tx := d.TxX()
+	nodes := make([]*entgen.PermissionNodeCreate, len(permissions))
+	for i, node := range permissions {
+		nodes[i] = tx.PermissionNode.Create().SetNode(node.Node).SetAllow(node.Allow)
+	}
+	savedNodes := d.PermissionNode.
+		CreateBulk(nodes...).
+		SaveX(ctx)
+	if roleID != 0 {
+		d.Role.
+			UpdateOneID(roleID).
+			AddPermissionNode(
+				savedNodes...,
+			).
+			ExecX(ctx)
+	} else if channelID != 0 {
+		d.Channel.
+			UpdateOneID(channelID).
+			AddPermissionNode(
+				savedNodes...,
+			).
+			ExecX(ctx)
+	} else if guildID != 0 {
+		d.Guild.
+			UpdateOneID(guildID).
+			AddPermissionNode(
+				savedNodes...,
+			).
+			ExecX(ctx)
+	}
+	return
+}
+
 func (d *database) GetPermissionsData(guildID uint64) (data types.PermissionsData, err error) {
 	defer doRecovery(&err)
 	roles := d.Guild.GetX(ctx, guildID).QueryRole().WithPermissionNode().AllX(ctx)

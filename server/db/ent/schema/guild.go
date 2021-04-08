@@ -34,6 +34,8 @@ func (Guild) Edges() []ent.Edge {
 		edge.
 			To("role", Role.Type),
 		edge.
+			To("permission_node", PermissionNode.Type),
+		edge.
 			From("user", User.Type).Ref("guild").Required(),
 	}
 }

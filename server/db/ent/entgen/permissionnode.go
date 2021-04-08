@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
+	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/permissionnode"
 	"github.com/harmony-development/legato/server/db/ent/entgen/role"
 )
@@ -22,17 +24,23 @@ type PermissionNode struct {
 	Allow bool `json:"allow,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PermissionNodeQuery when eager-loading is set.
-	Edges                PermissionNodeEdges `json:"edges"`
-	role_permission_node *uint64
+	Edges                   PermissionNodeEdges `json:"edges"`
+	channel_permission_node *uint64
+	guild_permission_node   *uint64
+	role_permission_node    *uint64
 }
 
 // PermissionNodeEdges holds the relations/edges for other nodes in the graph.
 type PermissionNodeEdges struct {
 	// Role holds the value of the role edge.
 	Role *Role `json:"role,omitempty"`
+	// Guild holds the value of the guild edge.
+	Guild *Guild `json:"guild,omitempty"`
+	// Channel holds the value of the channel edge.
+	Channel *Channel `json:"channel,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [3]bool
 }
 
 // RoleOrErr returns the Role value or an error if the edge
@@ -49,6 +57,34 @@ func (e PermissionNodeEdges) RoleOrErr() (*Role, error) {
 	return nil, &NotLoadedError{edge: "role"}
 }
 
+// GuildOrErr returns the Guild value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PermissionNodeEdges) GuildOrErr() (*Guild, error) {
+	if e.loadedTypes[1] {
+		if e.Guild == nil {
+			// The edge guild was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: guild.Label}
+		}
+		return e.Guild, nil
+	}
+	return nil, &NotLoadedError{edge: "guild"}
+}
+
+// ChannelOrErr returns the Channel value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PermissionNodeEdges) ChannelOrErr() (*Channel, error) {
+	if e.loadedTypes[2] {
+		if e.Channel == nil {
+			// The edge channel was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: channel.Label}
+		}
+		return e.Channel, nil
+	}
+	return nil, &NotLoadedError{edge: "channel"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*PermissionNode) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
@@ -60,7 +96,11 @@ func (*PermissionNode) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = &sql.NullInt64{}
 		case permissionnode.FieldNode:
 			values[i] = &sql.NullString{}
-		case permissionnode.ForeignKeys[0]: // role_permission_node
+		case permissionnode.ForeignKeys[0]: // channel_permission_node
+			values[i] = &sql.NullInt64{}
+		case permissionnode.ForeignKeys[1]: // guild_permission_node
+			values[i] = &sql.NullInt64{}
+		case permissionnode.ForeignKeys[2]: // role_permission_node
 			values[i] = &sql.NullInt64{}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type PermissionNode", columns[i])
@@ -97,6 +137,20 @@ func (pn *PermissionNode) assignValues(columns []string, values []interface{}) e
 			}
 		case permissionnode.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field channel_permission_node", value)
+			} else if value.Valid {
+				pn.channel_permission_node = new(uint64)
+				*pn.channel_permission_node = uint64(value.Int64)
+			}
+		case permissionnode.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field guild_permission_node", value)
+			} else if value.Valid {
+				pn.guild_permission_node = new(uint64)
+				*pn.guild_permission_node = uint64(value.Int64)
+			}
+		case permissionnode.ForeignKeys[2]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field role_permission_node", value)
 			} else if value.Valid {
 				pn.role_permission_node = new(uint64)
@@ -110,6 +164,16 @@ func (pn *PermissionNode) assignValues(columns []string, values []interface{}) e
 // QueryRole queries the "role" edge of the PermissionNode entity.
 func (pn *PermissionNode) QueryRole() *RoleQuery {
 	return (&PermissionNodeClient{config: pn.config}).QueryRole(pn)
+}
+
+// QueryGuild queries the "guild" edge of the PermissionNode entity.
+func (pn *PermissionNode) QueryGuild() *GuildQuery {
+	return (&PermissionNodeClient{config: pn.config}).QueryGuild(pn)
+}
+
+// QueryChannel queries the "channel" edge of the PermissionNode entity.
+func (pn *PermissionNode) QueryChannel() *ChannelQuery {
+	return (&PermissionNodeClient{config: pn.config}).QueryChannel(pn)
 }
 
 // Update returns a builder for updating this PermissionNode.

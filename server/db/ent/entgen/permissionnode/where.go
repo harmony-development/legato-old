@@ -258,6 +258,62 @@ func HasRoleWith(preds ...predicate.Role) predicate.PermissionNode {
 	})
 }
 
+// HasGuild applies the HasEdge predicate on the "guild" edge.
+func HasGuild() predicate.PermissionNode {
+	return predicate.PermissionNode(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(GuildTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, GuildTable, GuildColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasGuildWith applies the HasEdge predicate on the "guild" edge with a given conditions (other predicates).
+func HasGuildWith(preds ...predicate.Guild) predicate.PermissionNode {
+	return predicate.PermissionNode(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(GuildInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, GuildTable, GuildColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasChannel applies the HasEdge predicate on the "channel" edge.
+func HasChannel() predicate.PermissionNode {
+	return predicate.PermissionNode(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ChannelTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ChannelTable, ChannelColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasChannelWith applies the HasEdge predicate on the "channel" edge with a given conditions (other predicates).
+func HasChannelWith(preds ...predicate.Channel) predicate.PermissionNode {
+	return predicate.PermissionNode(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ChannelInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ChannelTable, ChannelColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.PermissionNode) predicate.PermissionNode {
 	return predicate.PermissionNode(func(s *sql.Selector) {

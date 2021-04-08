@@ -9,6 +9,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
+	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/permissionnode"
 	"github.com/harmony-development/legato/server/db/ent/entgen/role"
 )
@@ -49,6 +51,44 @@ func (pnc *PermissionNodeCreate) SetNillableRoleID(id *uint64) *PermissionNodeCr
 // SetRole sets the "role" edge to the Role entity.
 func (pnc *PermissionNodeCreate) SetRole(r *Role) *PermissionNodeCreate {
 	return pnc.SetRoleID(r.ID)
+}
+
+// SetGuildID sets the "guild" edge to the Guild entity by ID.
+func (pnc *PermissionNodeCreate) SetGuildID(id uint64) *PermissionNodeCreate {
+	pnc.mutation.SetGuildID(id)
+	return pnc
+}
+
+// SetNillableGuildID sets the "guild" edge to the Guild entity by ID if the given value is not nil.
+func (pnc *PermissionNodeCreate) SetNillableGuildID(id *uint64) *PermissionNodeCreate {
+	if id != nil {
+		pnc = pnc.SetGuildID(*id)
+	}
+	return pnc
+}
+
+// SetGuild sets the "guild" edge to the Guild entity.
+func (pnc *PermissionNodeCreate) SetGuild(g *Guild) *PermissionNodeCreate {
+	return pnc.SetGuildID(g.ID)
+}
+
+// SetChannelID sets the "channel" edge to the Channel entity by ID.
+func (pnc *PermissionNodeCreate) SetChannelID(id uint64) *PermissionNodeCreate {
+	pnc.mutation.SetChannelID(id)
+	return pnc
+}
+
+// SetNillableChannelID sets the "channel" edge to the Channel entity by ID if the given value is not nil.
+func (pnc *PermissionNodeCreate) SetNillableChannelID(id *uint64) *PermissionNodeCreate {
+	if id != nil {
+		pnc = pnc.SetChannelID(*id)
+	}
+	return pnc
+}
+
+// SetChannel sets the "channel" edge to the Channel entity.
+func (pnc *PermissionNodeCreate) SetChannel(c *Channel) *PermissionNodeCreate {
+	return pnc.SetChannelID(c.ID)
 }
 
 // Mutation returns the PermissionNodeMutation object of the builder.
@@ -169,6 +209,46 @@ func (pnc *PermissionNodeCreate) createSpec() (*PermissionNode, *sqlgraph.Create
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.role_permission_node = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pnc.mutation.GuildIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   permissionnode.GuildTable,
+			Columns: []string{permissionnode.GuildColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: guild.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.guild_permission_node = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pnc.mutation.ChannelIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   permissionnode.ChannelTable,
+			Columns: []string{permissionnode.ChannelColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: channel.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.channel_permission_node = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

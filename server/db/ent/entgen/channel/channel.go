@@ -21,6 +21,8 @@ const (
 	EdgeMessage = "message"
 	// EdgeRole holds the string denoting the role edge name in mutations.
 	EdgeRole = "role"
+	// EdgePermissionNode holds the string denoting the permission_node edge name in mutations.
+	EdgePermissionNode = "permission_node"
 	// Table holds the table name of the channel in the database.
 	Table = "channels"
 	// GuildTable is the table the holds the guild relation/edge.
@@ -44,6 +46,13 @@ const (
 	RoleInverseTable = "roles"
 	// RoleColumn is the table column denoting the role relation/edge.
 	RoleColumn = "channel_role"
+	// PermissionNodeTable is the table the holds the permission_node relation/edge.
+	PermissionNodeTable = "permission_nodes"
+	// PermissionNodeInverseTable is the table name for the PermissionNode entity.
+	// It exists in this package in order to avoid circular dependency with the "permissionnode" package.
+	PermissionNodeInverseTable = "permission_nodes"
+	// PermissionNodeColumn is the table column denoting the permission_node relation/edge.
+	PermissionNodeColumn = "channel_permission_node"
 )
 
 // Columns holds all SQL columns for channel fields.

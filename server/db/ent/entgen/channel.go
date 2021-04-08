@@ -38,9 +38,11 @@ type ChannelEdges struct {
 	Message []*Message `json:"message,omitempty"`
 	// Role holds the value of the role edge.
 	Role []*Role `json:"role,omitempty"`
+	// PermissionNode holds the value of the permission_node edge.
+	PermissionNode []*PermissionNode `json:"permission_node,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // GuildOrErr returns the Guild value or an error if the edge
@@ -73,6 +75,15 @@ func (e ChannelEdges) RoleOrErr() ([]*Role, error) {
 		return e.Role, nil
 	}
 	return nil, &NotLoadedError{edge: "role"}
+}
+
+// PermissionNodeOrErr returns the PermissionNode value or an error if the edge
+// was not loaded in eager-loading.
+func (e ChannelEdges) PermissionNodeOrErr() ([]*PermissionNode, error) {
+	if e.loadedTypes[3] {
+		return e.PermissionNode, nil
+	}
+	return nil, &NotLoadedError{edge: "permission_node"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -158,6 +169,11 @@ func (c *Channel) QueryMessage() *MessageQuery {
 // QueryRole queries the "role" edge of the Channel entity.
 func (c *Channel) QueryRole() *RoleQuery {
 	return (&ChannelClient{config: c.config}).QueryRole(c)
+}
+
+// QueryPermissionNode queries the "permission_node" edge of the Channel entity.
+func (c *Channel) QueryPermissionNode() *PermissionNodeQuery {
+	return (&ChannelClient{config: c.config}).QueryPermissionNode(c)
 }
 
 // Update returns a builder for updating this Channel.

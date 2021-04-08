@@ -386,6 +386,22 @@ func (c *ChannelClient) QueryRole(ch *Channel) *RoleQuery {
 	return query
 }
 
+// QueryPermissionNode queries the permission_node edge of a Channel.
+func (c *ChannelClient) QueryPermissionNode(ch *Channel) *PermissionNodeQuery {
+	query := &PermissionNodeQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ch.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(channel.Table, channel.FieldID, id),
+			sqlgraph.To(permissionnode.Table, permissionnode.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, channel.PermissionNodeTable, channel.PermissionNodeColumn),
+		)
+		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ChannelClient) Hooks() []Hook {
 	return c.hooks.Channel
@@ -1234,6 +1250,22 @@ func (c *GuildClient) QueryRole(gu *Guild) *RoleQuery {
 	return query
 }
 
+// QueryPermissionNode queries the permission_node edge of a Guild.
+func (c *GuildClient) QueryPermissionNode(gu *Guild) *PermissionNodeQuery {
+	query := &PermissionNodeQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := gu.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(guild.Table, guild.FieldID, id),
+			sqlgraph.To(permissionnode.Table, permissionnode.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, guild.PermissionNodeTable, guild.PermissionNodeColumn),
+		)
+		fromV = sqlgraph.Neighbors(gu.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryUser queries the user edge of a Guild.
 func (c *GuildClient) QueryUser(gu *Guild) *UserQuery {
 	query := &UserQuery{config: c.config}
@@ -1875,6 +1907,38 @@ func (c *PermissionNodeClient) QueryRole(pn *PermissionNode) *RoleQuery {
 			sqlgraph.From(permissionnode.Table, permissionnode.FieldID, id),
 			sqlgraph.To(role.Table, role.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, permissionnode.RoleTable, permissionnode.RoleColumn),
+		)
+		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGuild queries the guild edge of a PermissionNode.
+func (c *PermissionNodeClient) QueryGuild(pn *PermissionNode) *GuildQuery {
+	query := &GuildQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := pn.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(permissionnode.Table, permissionnode.FieldID, id),
+			sqlgraph.To(guild.Table, guild.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, permissionnode.GuildTable, permissionnode.GuildColumn),
+		)
+		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryChannel queries the channel edge of a PermissionNode.
+func (c *PermissionNodeClient) QueryChannel(pn *PermissionNode) *ChannelQuery {
+	query := &ChannelQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := pn.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(permissionnode.Table, permissionnode.FieldID, id),
+			sqlgraph.To(channel.Table, channel.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, permissionnode.ChannelTable, permissionnode.ChannelColumn),
 		)
 		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
 		return fromV, nil

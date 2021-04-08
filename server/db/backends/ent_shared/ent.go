@@ -4,8 +4,11 @@ import (
 	"context"
 	"runtime"
 
+	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db/ent/entgen"
+	"github.com/harmony-development/legato/server/db/types"
 	"github.com/harmony-development/legato/server/logger"
+	"github.com/sony/sonyflake"
 	"github.com/ztrue/tracerr"
 
 	// backend
@@ -20,17 +23,17 @@ type database struct {
 var ctx = context.Background()
 
 // New creates a new DB connection
-// func New(c *entgen.Client, cfg *config.Config, logger logger.ILogger, idgen *sonyflake.Sonyflake) (types.IHarmonyDB, error) {
-// 	db := &database{}
-// 	db.Client = c
-// 	if err := db.Schema.Create(context.Background()); err != nil {
-// 		return nil, tracerr.Wrap(err)
-// 	}
+func New(c *entgen.Client, cfg *config.Config, logger logger.ILogger, idgen *sonyflake.Sonyflake) (types.IHarmonyDB, error) {
+	db := &database{}
+	db.Client = c
+	if err := db.Schema.Create(context.Background()); err != nil {
+		return nil, tracerr.Wrap(err)
+	}
 
-// 	//go db.SessionExpireRoutine()
+	//go db.SessionExpireRoutine()
 
-// 	return db, nil
-// }
+	return db, nil
+}
 
 func (d *database) Migrate() error {
 	return d.Schema.Create(ctx)

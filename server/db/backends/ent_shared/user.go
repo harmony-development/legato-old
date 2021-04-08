@@ -1,6 +1,7 @@
 package ent_shared
 
 import (
+	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen"
 	"github.com/harmony-development/legato/server/db/ent/entgen/foreignuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
@@ -131,26 +132,38 @@ func (d *database) GetUserMetadata(userID uint64, appID string) (meta string, er
 	return
 }
 
-func (d *database) SetAvatar(userID uint64, avatar string) (err error) {
-	defer doRecovery(&err)
-	d.Profile.
+func (d *database) updateProfileStem(userID uint64) *entgen.ProfileUpdate {
+	return d.Profile.
 		Update().
 		Where(
 			profile.HasUserWith(
 				user.ID(userID)),
-		).
-		SetAvatar(avatar)
+		)
+}
+
+func (d *database) SetAvatar(userID uint64, avatar string) (err error) {
+	defer doRecovery(&err)
+	d.updateProfileStem(userID).SetAvatar(avatar)
 	return
 }
 
 func (d *database) SetIsBot(userID uint64, isBot bool) (err error) {
 	defer doRecovery(&err)
-	d.Profile.
-		Update().
-		Where(
-			profile.HasUserWith(
-				user.ID(userID)),
-		).
+	d.updateProfileStem(userID).
 		SetIsBot(isBot)
+	return
+}
+
+func (d *database) SetStatus(userID uint64, status harmonytypesv1.UserStatus) (err error) {
+	defer doRecovery(&err)
+	d.updateProfileStem(userID).
+		SetStatus(int16(status))
+	return
+}
+
+func (d *database) SetUsername(userID uint64, username string) (err error) {
+	defer doRecovery(&err)
+	d.updateProfileStem(userID).
+		SetUsername(username)
 	return
 }

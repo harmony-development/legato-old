@@ -12,6 +12,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/invite"
+	"github.com/harmony-development/legato/server/db/ent/entgen/permissionnode"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 	"github.com/harmony-development/legato/server/db/ent/entgen/role"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
@@ -121,6 +122,21 @@ func (gu *GuildUpdate) AddRole(r ...*Role) *GuildUpdate {
 	return gu.AddRoleIDs(ids...)
 }
 
+// AddPermissionNodeIDs adds the "permission_node" edge to the PermissionNode entity by IDs.
+func (gu *GuildUpdate) AddPermissionNodeIDs(ids ...int) *GuildUpdate {
+	gu.mutation.AddPermissionNodeIDs(ids...)
+	return gu
+}
+
+// AddPermissionNode adds the "permission_node" edges to the PermissionNode entity.
+func (gu *GuildUpdate) AddPermissionNode(p ...*PermissionNode) *GuildUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return gu.AddPermissionNodeIDs(ids...)
+}
+
 // AddUserIDs adds the "user" edge to the User entity by IDs.
 func (gu *GuildUpdate) AddUserIDs(ids ...uint64) *GuildUpdate {
 	gu.mutation.AddUserIDs(ids...)
@@ -223,6 +239,27 @@ func (gu *GuildUpdate) RemoveRole(r ...*Role) *GuildUpdate {
 		ids[i] = r[i].ID
 	}
 	return gu.RemoveRoleIDs(ids...)
+}
+
+// ClearPermissionNode clears all "permission_node" edges to the PermissionNode entity.
+func (gu *GuildUpdate) ClearPermissionNode() *GuildUpdate {
+	gu.mutation.ClearPermissionNode()
+	return gu
+}
+
+// RemovePermissionNodeIDs removes the "permission_node" edge to PermissionNode entities by IDs.
+func (gu *GuildUpdate) RemovePermissionNodeIDs(ids ...int) *GuildUpdate {
+	gu.mutation.RemovePermissionNodeIDs(ids...)
+	return gu
+}
+
+// RemovePermissionNode removes "permission_node" edges to PermissionNode entities.
+func (gu *GuildUpdate) RemovePermissionNode(p ...*PermissionNode) *GuildUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return gu.RemovePermissionNodeIDs(ids...)
 }
 
 // ClearUser clears all "user" edges to the User entity.
@@ -566,6 +603,60 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if gu.mutation.PermissionNodeCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   guild.PermissionNodeTable,
+			Columns: []string{guild.PermissionNodeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: permissionnode.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := gu.mutation.RemovedPermissionNodeIDs(); len(nodes) > 0 && !gu.mutation.PermissionNodeCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   guild.PermissionNodeTable,
+			Columns: []string{guild.PermissionNodeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: permissionnode.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := gu.mutation.PermissionNodeIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   guild.PermissionNodeTable,
+			Columns: []string{guild.PermissionNodeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: permissionnode.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if gu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -729,6 +820,21 @@ func (guo *GuildUpdateOne) AddRole(r ...*Role) *GuildUpdateOne {
 	return guo.AddRoleIDs(ids...)
 }
 
+// AddPermissionNodeIDs adds the "permission_node" edge to the PermissionNode entity by IDs.
+func (guo *GuildUpdateOne) AddPermissionNodeIDs(ids ...int) *GuildUpdateOne {
+	guo.mutation.AddPermissionNodeIDs(ids...)
+	return guo
+}
+
+// AddPermissionNode adds the "permission_node" edges to the PermissionNode entity.
+func (guo *GuildUpdateOne) AddPermissionNode(p ...*PermissionNode) *GuildUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return guo.AddPermissionNodeIDs(ids...)
+}
+
 // AddUserIDs adds the "user" edge to the User entity by IDs.
 func (guo *GuildUpdateOne) AddUserIDs(ids ...uint64) *GuildUpdateOne {
 	guo.mutation.AddUserIDs(ids...)
@@ -831,6 +937,27 @@ func (guo *GuildUpdateOne) RemoveRole(r ...*Role) *GuildUpdateOne {
 		ids[i] = r[i].ID
 	}
 	return guo.RemoveRoleIDs(ids...)
+}
+
+// ClearPermissionNode clears all "permission_node" edges to the PermissionNode entity.
+func (guo *GuildUpdateOne) ClearPermissionNode() *GuildUpdateOne {
+	guo.mutation.ClearPermissionNode()
+	return guo
+}
+
+// RemovePermissionNodeIDs removes the "permission_node" edge to PermissionNode entities by IDs.
+func (guo *GuildUpdateOne) RemovePermissionNodeIDs(ids ...int) *GuildUpdateOne {
+	guo.mutation.RemovePermissionNodeIDs(ids...)
+	return guo
+}
+
+// RemovePermissionNode removes "permission_node" edges to PermissionNode entities.
+func (guo *GuildUpdateOne) RemovePermissionNode(p ...*PermissionNode) *GuildUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return guo.RemovePermissionNodeIDs(ids...)
 }
 
 // ClearUser clears all "user" edges to the User entity.
@@ -1171,6 +1298,60 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUint64,
 					Column: role.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if guo.mutation.PermissionNodeCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   guild.PermissionNodeTable,
+			Columns: []string{guild.PermissionNodeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: permissionnode.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := guo.mutation.RemovedPermissionNodeIDs(); len(nodes) > 0 && !guo.mutation.PermissionNodeCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   guild.PermissionNodeTable,
+			Columns: []string{guild.PermissionNodeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: permissionnode.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := guo.mutation.PermissionNodeIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   guild.PermissionNodeTable,
+			Columns: []string{guild.PermissionNodeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: permissionnode.FieldID,
 				},
 			},
 		}

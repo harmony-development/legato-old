@@ -23,5 +23,7 @@ func (PermissionNode) Fields() []ent.Field {
 func (PermissionNode) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("role", Role.Type).Ref("permission_node").Unique(),
+		edge.From("guild", Guild.Type).Ref("permission_node").Unique(),
+		edge.From("channel", Channel.Type).Ref("permission_node").Unique(),
 	}
 }

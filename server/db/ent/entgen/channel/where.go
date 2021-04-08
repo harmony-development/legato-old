@@ -577,6 +577,34 @@ func HasRoleWith(preds ...predicate.Role) predicate.Channel {
 	})
 }
 
+// HasPermissionNode applies the HasEdge predicate on the "permission_node" edge.
+func HasPermissionNode() predicate.Channel {
+	return predicate.Channel(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(PermissionNodeTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PermissionNodeTable, PermissionNodeColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPermissionNodeWith applies the HasEdge predicate on the "permission_node" edge with a given conditions (other predicates).
+func HasPermissionNodeWith(preds ...predicate.PermissionNode) predicate.Channel {
+	return predicate.Channel(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(PermissionNodeInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PermissionNodeTable, PermissionNodeColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Channel) predicate.Channel {
 	return predicate.Channel(func(s *sql.Selector) {

@@ -15,6 +15,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
+	"github.com/harmony-development/legato/server/db/ent/entgen/permissionnode"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 	"github.com/harmony-development/legato/server/db/ent/entgen/role"
 )
@@ -28,10 +29,11 @@ type ChannelQuery struct {
 	fields     []string
 	predicates []predicate.Channel
 	// eager-loading edges.
-	withGuild   *GuildQuery
-	withMessage *MessageQuery
-	withRole    *RoleQuery
-	withFKs     bool
+	withGuild          *GuildQuery
+	withMessage        *MessageQuery
+	withRole           *RoleQuery
+	withPermissionNode *PermissionNodeQuery
+	withFKs            bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -120,6 +122,28 @@ func (cq *ChannelQuery) QueryRole() *RoleQuery {
 			sqlgraph.From(channel.Table, channel.FieldID, selector),
 			sqlgraph.To(role.Table, role.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, channel.RoleTable, channel.RoleColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPermissionNode chains the current query on the "permission_node" edge.
+func (cq *ChannelQuery) QueryPermissionNode() *PermissionNodeQuery {
+	query := &PermissionNodeQuery{config: cq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(channel.Table, channel.FieldID, selector),
+			sqlgraph.To(permissionnode.Table, permissionnode.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, channel.PermissionNodeTable, channel.PermissionNodeColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -303,14 +327,15 @@ func (cq *ChannelQuery) Clone() *ChannelQuery {
 		return nil
 	}
 	return &ChannelQuery{
-		config:      cq.config,
-		limit:       cq.limit,
-		offset:      cq.offset,
-		order:       append([]OrderFunc{}, cq.order...),
-		predicates:  append([]predicate.Channel{}, cq.predicates...),
-		withGuild:   cq.withGuild.Clone(),
-		withMessage: cq.withMessage.Clone(),
-		withRole:    cq.withRole.Clone(),
+		config:             cq.config,
+		limit:              cq.limit,
+		offset:             cq.offset,
+		order:              append([]OrderFunc{}, cq.order...),
+		predicates:         append([]predicate.Channel{}, cq.predicates...),
+		withGuild:          cq.withGuild.Clone(),
+		withMessage:        cq.withMessage.Clone(),
+		withRole:           cq.withRole.Clone(),
+		withPermissionNode: cq.withPermissionNode.Clone(),
 		// clone intermediate query.
 		sql:  cq.sql.Clone(),
 		path: cq.path,
@@ -347,6 +372,17 @@ func (cq *ChannelQuery) WithRole(opts ...func(*RoleQuery)) *ChannelQuery {
 		opt(query)
 	}
 	cq.withRole = query
+	return cq
+}
+
+// WithPermissionNode tells the query-builder to eager-load the nodes that are connected to
+// the "permission_node" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *ChannelQuery) WithPermissionNode(opts ...func(*PermissionNodeQuery)) *ChannelQuery {
+	query := &PermissionNodeQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withPermissionNode = query
 	return cq
 }
 
@@ -416,10 +452,11 @@ func (cq *ChannelQuery) sqlAll(ctx context.Context) ([]*Channel, error) {
 		nodes       = []*Channel{}
 		withFKs     = cq.withFKs
 		_spec       = cq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			cq.withGuild != nil,
 			cq.withMessage != nil,
 			cq.withRole != nil,
+			cq.withPermissionNode != nil,
 		}
 	)
 	if cq.withGuild != nil {
@@ -529,6 +566,35 @@ func (cq *ChannelQuery) sqlAll(ctx context.Context) ([]*Channel, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "channel_role" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Role = append(node.Edges.Role, n)
+		}
+	}
+
+	if query := cq.withPermissionNode; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uint64]*Channel)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.PermissionNode = []*PermissionNode{}
+		}
+		query.withFKs = true
+		query.Where(predicate.PermissionNode(func(s *sql.Selector) {
+			s.Where(sql.InValues(channel.PermissionNodeColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.channel_permission_node
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "channel_permission_node" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "channel_permission_node" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.PermissionNode = append(node.Edges.PermissionNode, n)
 		}
 	}
 

@@ -15,6 +15,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/invite"
+	"github.com/harmony-development/legato/server/db/ent/entgen/permissionnode"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 	"github.com/harmony-development/legato/server/db/ent/entgen/role"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
@@ -29,11 +30,12 @@ type GuildQuery struct {
 	fields     []string
 	predicates []predicate.Guild
 	// eager-loading edges.
-	withInvite  *InviteQuery
-	withBans    *UserQuery
-	withChannel *ChannelQuery
-	withRole    *RoleQuery
-	withUser    *UserQuery
+	withInvite         *InviteQuery
+	withBans           *UserQuery
+	withChannel        *ChannelQuery
+	withRole           *RoleQuery
+	withPermissionNode *PermissionNodeQuery
+	withUser           *UserQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -144,6 +146,28 @@ func (gq *GuildQuery) QueryRole() *RoleQuery {
 			sqlgraph.From(guild.Table, guild.FieldID, selector),
 			sqlgraph.To(role.Table, role.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, guild.RoleTable, guild.RolePrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPermissionNode chains the current query on the "permission_node" edge.
+func (gq *GuildQuery) QueryPermissionNode() *PermissionNodeQuery {
+	query := &PermissionNodeQuery{config: gq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := gq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(guild.Table, guild.FieldID, selector),
+			sqlgraph.To(permissionnode.Table, permissionnode.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, guild.PermissionNodeTable, guild.PermissionNodeColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 		return fromU, nil
@@ -349,16 +373,17 @@ func (gq *GuildQuery) Clone() *GuildQuery {
 		return nil
 	}
 	return &GuildQuery{
-		config:      gq.config,
-		limit:       gq.limit,
-		offset:      gq.offset,
-		order:       append([]OrderFunc{}, gq.order...),
-		predicates:  append([]predicate.Guild{}, gq.predicates...),
-		withInvite:  gq.withInvite.Clone(),
-		withBans:    gq.withBans.Clone(),
-		withChannel: gq.withChannel.Clone(),
-		withRole:    gq.withRole.Clone(),
-		withUser:    gq.withUser.Clone(),
+		config:             gq.config,
+		limit:              gq.limit,
+		offset:             gq.offset,
+		order:              append([]OrderFunc{}, gq.order...),
+		predicates:         append([]predicate.Guild{}, gq.predicates...),
+		withInvite:         gq.withInvite.Clone(),
+		withBans:           gq.withBans.Clone(),
+		withChannel:        gq.withChannel.Clone(),
+		withRole:           gq.withRole.Clone(),
+		withPermissionNode: gq.withPermissionNode.Clone(),
+		withUser:           gq.withUser.Clone(),
 		// clone intermediate query.
 		sql:  gq.sql.Clone(),
 		path: gq.path,
@@ -406,6 +431,17 @@ func (gq *GuildQuery) WithRole(opts ...func(*RoleQuery)) *GuildQuery {
 		opt(query)
 	}
 	gq.withRole = query
+	return gq
+}
+
+// WithPermissionNode tells the query-builder to eager-load the nodes that are connected to
+// the "permission_node" edge. The optional arguments are used to configure the query builder of the edge.
+func (gq *GuildQuery) WithPermissionNode(opts ...func(*PermissionNodeQuery)) *GuildQuery {
+	query := &PermissionNodeQuery{config: gq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	gq.withPermissionNode = query
 	return gq
 }
 
@@ -485,11 +521,12 @@ func (gq *GuildQuery) sqlAll(ctx context.Context) ([]*Guild, error) {
 	var (
 		nodes       = []*Guild{}
 		_spec       = gq.querySpec()
-		loadedTypes = [5]bool{
+		loadedTypes = [6]bool{
 			gq.withInvite != nil,
 			gq.withBans != nil,
 			gq.withChannel != nil,
 			gq.withRole != nil,
+			gq.withPermissionNode != nil,
 			gq.withUser != nil,
 		}
 	)
@@ -661,6 +698,35 @@ func (gq *GuildQuery) sqlAll(ctx context.Context) ([]*Guild, error) {
 			for i := range nodes {
 				nodes[i].Edges.Role = append(nodes[i].Edges.Role, n)
 			}
+		}
+	}
+
+	if query := gq.withPermissionNode; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uint64]*Guild)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.PermissionNode = []*PermissionNode{}
+		}
+		query.withFKs = true
+		query.Where(predicate.PermissionNode(func(s *sql.Selector) {
+			s.Where(sql.InValues(guild.PermissionNodeColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.guild_permission_node
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "guild_permission_node" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "guild_permission_node" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.PermissionNode = append(node.Edges.PermissionNode, n)
 		}
 	}
 

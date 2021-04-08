@@ -12,6 +12,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/invite"
+	"github.com/harmony-development/legato/server/db/ent/entgen/permissionnode"
 	"github.com/harmony-development/legato/server/db/ent/entgen/role"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
@@ -111,6 +112,21 @@ func (gc *GuildCreate) AddRole(r ...*Role) *GuildCreate {
 		ids[i] = r[i].ID
 	}
 	return gc.AddRoleIDs(ids...)
+}
+
+// AddPermissionNodeIDs adds the "permission_node" edge to the PermissionNode entity by IDs.
+func (gc *GuildCreate) AddPermissionNodeIDs(ids ...int) *GuildCreate {
+	gc.mutation.AddPermissionNodeIDs(ids...)
+	return gc
+}
+
+// AddPermissionNode adds the "permission_node" edges to the PermissionNode entity.
+func (gc *GuildCreate) AddPermissionNode(p ...*PermissionNode) *GuildCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return gc.AddPermissionNodeIDs(ids...)
 }
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
@@ -327,6 +343,25 @@ func (gc *GuildCreate) createSpec() (*Guild, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUint64,
 					Column: role.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := gc.mutation.PermissionNodeIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   guild.PermissionNodeTable,
+			Columns: []string{guild.PermissionNodeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: permissionnode.FieldID,
 				},
 			},
 		}

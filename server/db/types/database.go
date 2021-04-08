@@ -60,7 +60,6 @@ type IHarmonyDB interface {
 	ExpireSessions() error
 	UpdateUsername(userID uint64, username string) error
 	GetAvatar(userID uint64) (*string, error)
-	UpdateAvatar(userID uint64, avatar string) error
 	HasGuildWithID(guildID uint64) (bool, error)
 	HasChannelWithID(guildID, channelID uint64) (bool, error)
 	HasMessageWithID(messageID uint64) (bool, error)

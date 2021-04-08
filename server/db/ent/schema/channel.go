@@ -28,5 +28,6 @@ func (Channel) Edges() []ent.Edge {
 		edge.From("guild", Guild.Type).Ref("channel").Unique(),
 		edge.To("message", Message.Type),
 		edge.To("role", Role.Type),
+		edge.To("permission_node", PermissionNode.Type),
 	}
 }

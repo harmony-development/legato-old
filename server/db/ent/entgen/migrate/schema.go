@@ -290,6 +290,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "node", Type: field.TypeString},
 		{Name: "allow", Type: field.TypeBool},
+		{Name: "channel_permission_node", Type: field.TypeUint64, Nullable: true},
+		{Name: "guild_permission_node", Type: field.TypeUint64, Nullable: true},
 		{Name: "role_permission_node", Type: field.TypeUint64, Nullable: true},
 	}
 	// PermissionNodesTable holds the schema information for the "permission_nodes" table.
@@ -299,8 +301,20 @@ var (
 		PrimaryKey: []*schema.Column{PermissionNodesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "permission_nodes_roles_permission_node",
+				Symbol:     "permission_nodes_channels_permission_node",
 				Columns:    []*schema.Column{PermissionNodesColumns[3]},
+				RefColumns: []*schema.Column{ChannelsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "permission_nodes_guilds_permission_node",
+				Columns:    []*schema.Column{PermissionNodesColumns[4]},
+				RefColumns: []*schema.Column{GuildsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "permission_nodes_roles_permission_node",
+				Columns:    []*schema.Column{PermissionNodesColumns[5]},
 				RefColumns: []*schema.Column{RolesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -556,7 +570,9 @@ func init() {
 	MessagesTable.ForeignKeys[2].RefTable = FileMessagesTable
 	MessagesTable.ForeignKeys[3].RefTable = EmbedMessagesTable
 	MessagesTable.ForeignKeys[4].RefTable = UsersTable
-	PermissionNodesTable.ForeignKeys[0].RefTable = RolesTable
+	PermissionNodesTable.ForeignKeys[0].RefTable = ChannelsTable
+	PermissionNodesTable.ForeignKeys[1].RefTable = GuildsTable
+	PermissionNodesTable.ForeignKeys[2].RefTable = RolesTable
 	ProfilesTable.ForeignKeys[0].RefTable = UsersTable
 	RolesTable.ForeignKeys[0].RefTable = ChannelsTable
 	SessionsTable.ForeignKeys[0].RefTable = LocalUsersTable

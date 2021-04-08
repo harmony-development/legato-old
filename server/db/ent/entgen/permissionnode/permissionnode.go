@@ -13,6 +13,10 @@ const (
 	FieldAllow = "allow"
 	// EdgeRole holds the string denoting the role edge name in mutations.
 	EdgeRole = "role"
+	// EdgeGuild holds the string denoting the guild edge name in mutations.
+	EdgeGuild = "guild"
+	// EdgeChannel holds the string denoting the channel edge name in mutations.
+	EdgeChannel = "channel"
 	// Table holds the table name of the permissionnode in the database.
 	Table = "permission_nodes"
 	// RoleTable is the table the holds the role relation/edge.
@@ -22,6 +26,20 @@ const (
 	RoleInverseTable = "roles"
 	// RoleColumn is the table column denoting the role relation/edge.
 	RoleColumn = "role_permission_node"
+	// GuildTable is the table the holds the guild relation/edge.
+	GuildTable = "permission_nodes"
+	// GuildInverseTable is the table name for the Guild entity.
+	// It exists in this package in order to avoid circular dependency with the "guild" package.
+	GuildInverseTable = "guilds"
+	// GuildColumn is the table column denoting the guild relation/edge.
+	GuildColumn = "guild_permission_node"
+	// ChannelTable is the table the holds the channel relation/edge.
+	ChannelTable = "permission_nodes"
+	// ChannelInverseTable is the table name for the Channel entity.
+	// It exists in this package in order to avoid circular dependency with the "channel" package.
+	ChannelInverseTable = "channels"
+	// ChannelColumn is the table column denoting the channel relation/edge.
+	ChannelColumn = "channel_permission_node"
 )
 
 // Columns holds all SQL columns for permissionnode fields.
@@ -34,6 +52,8 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "permission_nodes"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
+	"channel_permission_node",
+	"guild_permission_node",
 	"role_permission_node",
 }
 
