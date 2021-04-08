@@ -8,6 +8,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen"
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
+	"github.com/harmony-development/legato/server/db/ent/entgen/textmessage"
 )
 
 func mustBytes(m proto.Message) []byte {
@@ -95,5 +96,19 @@ func (d *database) GetMessagesBefore(channelID uint64, date time.Time) (msgs []*
 func (d *database) HasMessageWithID(messageID uint64) (exists bool, err error) {
 	defer doRecovery(&err)
 	exists = d.Message.Query().Where(message.ID(messageID)).ExistX(ctx)
+	return
+}
+
+func (d *database) UpdateTextMessage(messageID uint64, content string) (t time.Time, err error) {
+	defer doRecovery(&err)
+	d.TextMessage.
+		Update().
+		Where(
+			textmessage.HasMessageWith(
+				message.ID(messageID),
+			),
+		).
+		SetContent(content).
+		ExecX(ctx)
 	return
 }

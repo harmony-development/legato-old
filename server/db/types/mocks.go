@@ -263,9 +263,6 @@ var _ IHarmonyDB = &IHarmonyDBMock{}
 // 			UnbanUserFunc: func(guildID uint64, userID uint64) error {
 // 				panic("mock out the UnbanUser method")
 // 			},
-// 			UpdateAvatarFunc: func(userID uint64, avatar string) error {
-// 				panic("mock out the UpdateAvatar method")
-// 			},
 // 			UpdateChannelInformationFunc: func(guildID uint64, channelID uint64, name *string, metadata []byte) error {
 // 				panic("mock out the UpdateChannelInformation method")
 // 			},
@@ -275,13 +272,10 @@ var _ IHarmonyDB = &IHarmonyDBMock{}
 // 			UpdateTextMessageFunc: func(messageID uint64, content string) (time.Time, error) {
 // 				panic("mock out the UpdateTextMessage method")
 // 			},
-// 			UpdateUsernameFunc: func(userID uint64, username string) error {
-// 				panic("mock out the UpdateUsername method")
-// 			},
 // 			UserInGuildFunc: func(userID uint64, guildID uint64) (bool, error) {
 // 				panic("mock out the UserInGuild method")
 // 			},
-// 			UserIsLocalFunc: func(userID uint64) error {
+// 			UserIsLocalFunc: func(userID uint64) (bool, error) {
 // 				panic("mock out the UserIsLocal method")
 // 			},
 // 		}
@@ -534,9 +528,6 @@ type IHarmonyDBMock struct {
 	// UnbanUserFunc mocks the UnbanUser method.
 	UnbanUserFunc func(guildID uint64, userID uint64) error
 
-	// UpdateAvatarFunc mocks the UpdateAvatar method.
-	UpdateAvatarFunc func(userID uint64, avatar string) error
-
 	// UpdateChannelInformationFunc mocks the UpdateChannelInformation method.
 	UpdateChannelInformationFunc func(guildID uint64, channelID uint64, name *string, metadata []byte) error
 
@@ -546,14 +537,11 @@ type IHarmonyDBMock struct {
 	// UpdateTextMessageFunc mocks the UpdateTextMessage method.
 	UpdateTextMessageFunc func(messageID uint64, content string) (time.Time, error)
 
-	// UpdateUsernameFunc mocks the UpdateUsername method.
-	UpdateUsernameFunc func(userID uint64, username string) error
-
 	// UserInGuildFunc mocks the UserInGuild method.
 	UserInGuildFunc func(userID uint64, guildID uint64) (bool, error)
 
 	// UserIsLocalFunc mocks the UserIsLocal method.
-	UserIsLocalFunc func(userID uint64) error
+	UserIsLocalFunc func(userID uint64) (bool, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -1164,13 +1152,6 @@ type IHarmonyDBMock struct {
 			// UserID is the userID argument value.
 			UserID uint64
 		}
-		// UpdateAvatar holds details about calls to the UpdateAvatar method.
-		UpdateAvatar []struct {
-			// UserID is the userID argument value.
-			UserID uint64
-			// Avatar is the avatar argument value.
-			Avatar string
-		}
 		// UpdateChannelInformation holds details about calls to the UpdateChannelInformation method.
 		UpdateChannelInformation []struct {
 			// GuildID is the guildID argument value.
@@ -1205,13 +1186,6 @@ type IHarmonyDBMock struct {
 			MessageID uint64
 			// Content is the content argument value.
 			Content string
-		}
-		// UpdateUsername holds details about calls to the UpdateUsername method.
-		UpdateUsername []struct {
-			// UserID is the userID argument value.
-			UserID uint64
-			// Username is the username argument value.
-			Username string
 		}
 		// UserInGuild holds details about calls to the UserInGuild method.
 		UserInGuild []struct {
@@ -1307,11 +1281,9 @@ type IHarmonyDBMock struct {
 	lockSetStatus                  sync.RWMutex
 	lockSetUsername                sync.RWMutex
 	lockUnbanUser                  sync.RWMutex
-	lockUpdateAvatar               sync.RWMutex
 	lockUpdateChannelInformation   sync.RWMutex
 	lockUpdateGuildInformation     sync.RWMutex
 	lockUpdateTextMessage          sync.RWMutex
-	lockUpdateUsername             sync.RWMutex
 	lockUserInGuild                sync.RWMutex
 	lockUserIsLocal                sync.RWMutex
 }
@@ -4228,41 +4200,6 @@ func (mock *IHarmonyDBMock) UnbanUserCalls() []struct {
 	return calls
 }
 
-// UpdateAvatar calls UpdateAvatarFunc.
-func (mock *IHarmonyDBMock) UpdateAvatar(userID uint64, avatar string) error {
-	if mock.UpdateAvatarFunc == nil {
-		panic("IHarmonyDBMock.UpdateAvatarFunc: method is nil but IHarmonyDB.UpdateAvatar was just called")
-	}
-	callInfo := struct {
-		UserID uint64
-		Avatar string
-	}{
-		UserID: userID,
-		Avatar: avatar,
-	}
-	mock.lockUpdateAvatar.Lock()
-	mock.calls.UpdateAvatar = append(mock.calls.UpdateAvatar, callInfo)
-	mock.lockUpdateAvatar.Unlock()
-	return mock.UpdateAvatarFunc(userID, avatar)
-}
-
-// UpdateAvatarCalls gets all the calls that were made to UpdateAvatar.
-// Check the length with:
-//     len(mockedIHarmonyDB.UpdateAvatarCalls())
-func (mock *IHarmonyDBMock) UpdateAvatarCalls() []struct {
-	UserID uint64
-	Avatar string
-} {
-	var calls []struct {
-		UserID uint64
-		Avatar string
-	}
-	mock.lockUpdateAvatar.RLock()
-	calls = mock.calls.UpdateAvatar
-	mock.lockUpdateAvatar.RUnlock()
-	return calls
-}
-
 // UpdateChannelInformation calls UpdateChannelInformationFunc.
 func (mock *IHarmonyDBMock) UpdateChannelInformation(guildID uint64, channelID uint64, name *string, metadata []byte) error {
 	if mock.UpdateChannelInformationFunc == nil {
@@ -4396,41 +4333,6 @@ func (mock *IHarmonyDBMock) UpdateTextMessageCalls() []struct {
 	return calls
 }
 
-// UpdateUsername calls UpdateUsernameFunc.
-func (mock *IHarmonyDBMock) UpdateUsername(userID uint64, username string) error {
-	if mock.UpdateUsernameFunc == nil {
-		panic("IHarmonyDBMock.UpdateUsernameFunc: method is nil but IHarmonyDB.UpdateUsername was just called")
-	}
-	callInfo := struct {
-		UserID   uint64
-		Username string
-	}{
-		UserID:   userID,
-		Username: username,
-	}
-	mock.lockUpdateUsername.Lock()
-	mock.calls.UpdateUsername = append(mock.calls.UpdateUsername, callInfo)
-	mock.lockUpdateUsername.Unlock()
-	return mock.UpdateUsernameFunc(userID, username)
-}
-
-// UpdateUsernameCalls gets all the calls that were made to UpdateUsername.
-// Check the length with:
-//     len(mockedIHarmonyDB.UpdateUsernameCalls())
-func (mock *IHarmonyDBMock) UpdateUsernameCalls() []struct {
-	UserID   uint64
-	Username string
-} {
-	var calls []struct {
-		UserID   uint64
-		Username string
-	}
-	mock.lockUpdateUsername.RLock()
-	calls = mock.calls.UpdateUsername
-	mock.lockUpdateUsername.RUnlock()
-	return calls
-}
-
 // UserInGuild calls UserInGuildFunc.
 func (mock *IHarmonyDBMock) UserInGuild(userID uint64, guildID uint64) (bool, error) {
 	if mock.UserInGuildFunc == nil {
@@ -4467,7 +4369,7 @@ func (mock *IHarmonyDBMock) UserInGuildCalls() []struct {
 }
 
 // UserIsLocal calls UserIsLocalFunc.
-func (mock *IHarmonyDBMock) UserIsLocal(userID uint64) error {
+func (mock *IHarmonyDBMock) UserIsLocal(userID uint64) (bool, error) {
 	if mock.UserIsLocalFunc == nil {
 		panic("IHarmonyDBMock.UserIsLocalFunc: method is nil but IHarmonyDB.UserIsLocal was just called")
 	}

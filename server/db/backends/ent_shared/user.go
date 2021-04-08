@@ -167,3 +167,9 @@ func (d *database) SetUsername(userID uint64, username string) (err error) {
 		SetUsername(username)
 	return
 }
+
+func (d *database) UserIsLocal(userID uint64) (isLocal bool, err error) {
+	defer doRecovery(&err)
+	isLocal = d.User.Query().Where(user.ID(userID)).QueryLocalUser().ExistX(ctx)
+	return
+}

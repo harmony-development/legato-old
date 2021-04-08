@@ -58,7 +58,6 @@ type IHarmonyDB interface {
 	AddForeignUser(host string, userID, localUserID uint64, username, avatar string) error
 	EmailExists(email string) (bool, error)
 	ExpireSessions() error
-	UpdateUsername(userID uint64, username string) error
 	GetAvatar(userID uint64) (*string, error)
 	HasGuildWithID(guildID uint64) (bool, error)
 	HasChannelWithID(guildID, channelID uint64) (bool, error)
@@ -76,7 +75,7 @@ type IHarmonyDB interface {
 	GetChannelListPosition(channelID uint64) (string, error)
 	MoveChannel(channelID uint64, previousID, nextID *uint64) error
 	RemoveGuildFromList(userID, guildID uint64, homeServer string) error
-	UserIsLocal(userID uint64) error
+	UserIsLocal(userID uint64) (isLocal bool, err error)
 	CreateEmotePack(userID, packID uint64, packName string) error
 	IsPackOwner(userID, packID uint64) (bool, error)
 	AddEmoteToPack(packID uint64, imageID string, name string) error

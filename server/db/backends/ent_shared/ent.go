@@ -30,7 +30,7 @@ func New(c *entgen.Client, cfg *config.Config, logger logger.ILogger, idgen *son
 		return nil, tracerr.Wrap(err)
 	}
 
-	//go db.SessionExpireRoutine()
+	go db.SessionExpireRoutine()
 
 	return db, nil
 }

@@ -77,6 +77,12 @@ func (d *database) SetPermissions(guildID uint64, channelID uint64, roleID uint6
 			).
 			ExecX(ctx)
 	}
+	if err := tx.Commit(); err != nil {
+		if err := tx.Rollback(); err != nil {
+			panic(err)
+		}
+		panic(err)
+	}
 	return
 }
 

@@ -28,7 +28,7 @@ func (d *database) GetGuildListPosition(userID, guildID uint64, host string) (po
 func (d *database) AddGuildToList(userID, guildID uint64, homeServer string) (err error) {
 	defer doRecovery(&err)
 	tx := d.TxX()
-	tx.User.GetX(ctx, userID).Update().AddListentry(
+	tx.User.UpdateOneID(userID).AddListentry(
 		tx.GuildListEntry.Create().SaveX(ctx),
 	).ExecX(ctx)
 	if err := tx.Commit(); err != nil {
