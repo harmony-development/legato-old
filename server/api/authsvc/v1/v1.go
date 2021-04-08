@@ -177,18 +177,14 @@ func (v1 *V1) Federate(c echo.Context, r *authv1.FederateRequest) (*authv1.Feder
 		return nil, err
 	}
 
-	token, err := v1.AuthManager.MakeAuthToken(ctx.UserID, r.Target, user.Username, user.Avatar.String)
+	token, err := v1.AuthManager.MakeAuthToken(ctx.UserID, r.Target, user.Username, user.Avatar)
 	if err != nil {
 		return nil, err
 	}
-
-	nonce := randstr.Base64(v1.Config.Server.Policies.Federation.NonceLength)
-	err = v1.DB.AddNonce(nonce, user.UserID, r.Target)
 	err = tracerr.Wrap(err)
 
 	return &authv1.FederateReply{
 		Token: token,
-		Nonce: nonce,
 	}, err
 }
 
@@ -247,8 +243,7 @@ func (v1 *V1) LoginFederated(c echo.Context, r *authv1.LoginFederatedRequest) (*
 		if err != nil {
 			return nil, err
 		}
-		localUserID, err = v1.DB.AddForeignUser(r.Domain, token.UserID, id, token.Username, token.Avatar)
-		if err != nil {
+		if err = v1.DB.AddForeignUser(r.Domain, token.UserID, id, token.Username, token.Avatar); err != nil {
 			return nil, err
 		}
 	}

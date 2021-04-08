@@ -9,6 +9,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
 	"github.com/harmony-development/legato/server/db/ent/entgen/textmessage"
+	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
 
 func mustBytes(m proto.Message) []byte {
@@ -110,5 +111,20 @@ func (d *DB) UpdateTextMessage(messageID uint64, content string) (t time.Time, e
 		).
 		SetContent(content).
 		ExecX(ctx)
+	return
+}
+
+func (d *DB) GetMessageOwner(messageID uint64) (userID uint64, err error) {
+	defer doRecovery(&err)
+	userID = d.Message.
+		Query().
+		Where(
+			message.ID(messageID),
+			message.HasUserWith(
+				user.ID(userID),
+			),
+		).
+		OnlyX(ctx).
+		ID
 	return
 }

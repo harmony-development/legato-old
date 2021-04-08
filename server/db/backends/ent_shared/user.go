@@ -91,7 +91,7 @@ func (d *DB) getUserStem(user *entgen.User, profile *entgen.Profile) types.UserD
 	return types.UserData{
 		UserID:   user.ID,
 		Username: profile.Username,
-		Avatar:   &profile.Avatar,
+		Avatar:   profile.Avatar,
 		Status:   profile.Status,
 		IsBot:    profile.IsBot,
 	}

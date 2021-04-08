@@ -46,10 +46,51 @@ type UserData struct {
 	UserID   uint64
 	Email    string
 	Username string
-	Avatar   *string
+	Avatar   string
 	Status   int16
 	IsBot    bool
 	Password []byte
+}
+
+type GuildData struct {
+	ID      uint64
+	Owner   uint64
+	Name    string
+	Picture string
+}
+
+type RoleData struct{}
+
+type GuildListEntryData struct {
+	ID   uint64
+	Host string
+}
+
+type MessageData struct {
+	GuildID   uint64
+	ChannelID uint64
+	Actions   []byte
+}
+
+type EmotePackData struct {
+}
+
+type EmoteData struct {
+}
+
+type FileData struct {
+}
+
+type InviteData struct {
+	ID           string
+	PossibleUses int32
+	Uses         int32
+}
+
+type ChannelData struct {
+	ID       uint64
+	Name     string
+	Metadata []byte
 }
 
 type ChannelKind uint64

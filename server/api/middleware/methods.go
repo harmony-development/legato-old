@@ -40,8 +40,8 @@ func (m Middlewares) MethodMetadataInterceptor(meth *descriptorpb.MethodDescript
 				goto afterLocal
 			}
 
-			err := m.DB.UserIsLocal(ctx.UserID)
-			if err != nil {
+			isLocal, err := m.DB.UserIsLocal(ctx.UserID)
+			if !isLocal || err != nil {
 				return nil, err
 			}
 		}

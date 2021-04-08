@@ -113,7 +113,7 @@ func (v1 *V1) CreateGuild(c echo.Context, r *chatv1.CreateGuildRequest) (*chatv1
 		return nil, err
 	}
 	return &chatv1.CreateGuildResponse{
-		GuildId: guild.GuildID,
+		GuildId: guild.ID,
 	}, nil
 }
 
@@ -139,7 +139,7 @@ func (v1 *V1) CreateInvite(c echo.Context, r *chatv1.CreateInviteRequest) (*chat
 		return nil, err
 	}
 	return &chatv1.CreateInviteResponse{
-		Name: invite.InviteID,
+		Name: invite.ID,
 	}, nil
 }
 
@@ -205,9 +205,9 @@ func (v1 *V1) GetGuild(c echo.Context, r *chatv1.GetGuildRequest) (*chatv1.GetGu
 		return nil, err
 	}
 	return &chatv1.GetGuildResponse{
-		GuildName:    guild.GuildName,
-		GuildOwner:   guild.GuildOwner,
-		GuildPicture: guild.GuildPicture,
+		GuildName:    guild.Name,
+		GuildOwner:   guild.Owner,
+		GuildPicture: guild.Picture,
 	}, nil
 }
 
@@ -232,14 +232,9 @@ func (v1 *V1) GetGuildInvites(c echo.Context, r *chatv1.GetGuildInvitesRequest) 
 		Invites: func() (ret []*chatv1.GetGuildInvitesResponse_Invite) {
 			for _, inv := range invites {
 				ret = append(ret, &chatv1.GetGuildInvitesResponse_Invite{
-					InviteId: inv.InviteID,
-					PossibleUses: func() int32 {
-						if inv.PossibleUses.Valid {
-							return inv.PossibleUses.Int32
-						}
-						return -1
-					}(),
-					UseCount: inv.Uses,
+					InviteId:     inv.ID,
+					PossibleUses: int32(inv.PossibleUses),
+					UseCount:     int32(inv.Uses),
 				})
 			}
 			return
@@ -354,8 +349,8 @@ func (v1 *V1) PreviewGuild(c echo.Context, r *chatv1.PreviewGuildRequest) (*chat
 		return nil, err
 	}
 
-	ret.Avatar = guildData.GuildPicture
-	ret.Name = guildData.GuildName
+	ret.Avatar = guildData.Picture
+	ret.Name = guildData.Name
 	count := int64(0)
 	count, err = v1.DB.CountMembersInGuild(data)
 	if err != nil {
@@ -382,11 +377,11 @@ func (v1 *V1) GetChannelMessages(c echo.Context, r *chatv1.GetChannelMessagesReq
 	var err error
 	var messages []*harmonytypesv1.Message
 	if r.BeforeMessage != 0 {
-		time, err := v1.DB.GetMessageDate(r.BeforeMessage)
+		beforeMsg, err := v1.DB.GetMessage(r.BeforeMessage)
 		if err != nil {
 			return nil, err
 		}
-		messages, err = v1.DB.GetMessagesBefore(r.GuildId, r.ChannelId, time)
+		messages, err = v1.DB.GetMessagesBefore(r.GuildId, r.ChannelId, beforeMsg.CreatedAt.AsTime())
 		if err != nil && err != sql.ErrNoRows {
 			return nil, err
 		}
@@ -646,7 +641,7 @@ func (v1 *V1) DeleteMessage(c echo.Context, r *chatv1.DeleteMessageRequest) (*em
 	if ctx.UserID != owner && !(ctx.IsOwner || v1.Perms.Check("messages.manage.delete", ctx.UserRoles, r.GuildId, r.ChannelId)) {
 		return nil, responses.NewError(responses.NotEnoughPermissions)
 	}
-	if err := v1.DB.DeleteMessage(r.MessageId, r.ChannelId, r.GuildId); err != nil {
+	if err := v1.DB.DeleteMessage(r.MessageId); err != nil {
 		return nil, err
 	}
 	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
@@ -818,8 +813,8 @@ func (v1 *V1) StreamEvents(c echo.Context, in chan *chatv1.StreamEventsRequest, 
 			case *chatv1.StreamEventsRequest_SubscribeToActions_:
 				v1.Streams.AddActionSubscription(out)
 			case *chatv1.StreamEventsRequest_SubscribeToHomeserverEvents_:
-				err = v1.DB.UserIsLocal(userID)
-				if err != nil {
+				isLocal, err := v1.DB.UserIsLocal(userID)
+				if !isLocal || err != nil {
 					continue
 				}
 				v1.Streams.AddHomeserverSubscription(out)
@@ -845,10 +840,14 @@ func (v1 *V1) TriggerAction(c echo.Context, r *chatv1.TriggerActionRequest) (*em
 	if err != nil {
 		return nil, err
 	}
-	if msg.ChannelId != r.ChannelId || msg.GuildId != r.GuildId {
+	if msg.ChannelID != r.ChannelId || msg.GuildID != r.GuildId {
 		return nil, responses.NewError(responses.BadAction)
 	}
-	for _, action := range msg.Content.Actions {
+	actions := harmonytypesv1.Action{}
+	if err := proto.Unmarshal(msg.Actions, actions); err != nil {
+		return nil, err
+	}
+	for _, action := range actions {
 		if action.Id == r.ActionId {
 			v1.Streams.BroadcastAction(ctx.UserID, &chatv1.Event{
 				Event: &chatv1.Event_ActionPerformed_{
@@ -886,9 +885,11 @@ func (v1 *V1) SendMessage(c echo.Context, r *chatv1.SendMessageRequest) (*chatv1
 		return nil, err
 	}
 
-	replyTo := sql.NullInt64{
-		Int64: int64(r.InReplyTo),
-		Valid: r.InReplyTo != 0,
+	var replyTo *uint64
+	if r.InReplyTo == 0 {
+		replyTo = nil
+	} else {
+		replyTo = &r.InReplyTo
 	}
 
 	var (
@@ -954,8 +955,8 @@ func (v1 *V1) GetGuildList(c echo.Context, r *chatv1.GetGuildListRequest) (*chat
 	var out []*chatv1.GetGuildListResponse_GuildListEntry
 	for _, guildEntry := range data {
 		out = append(out, &chatv1.GetGuildListResponse_GuildListEntry{
-			GuildId: guildEntry.GuildID,
-			Host:    guildEntry.HomeServer,
+			GuildId: guildEntry.ID,
+			Host:    guildEntry.Host,
 		})
 	}
 	return &chatv1.GetGuildListResponse{
@@ -1151,7 +1152,7 @@ func (v1 *V1) AddGuildRole(c echo.Context, r *chatv1.AddGuildRoleRequest) (*chat
 	}
 
 	r.Role.RoleId = roleID
-	err = v1.DB.AddRoleToGuild(r.GuildId, r.Role)
+	err = v1.DB.AddRoleToGuild(r.GuildId, r.Role.RoleId, r.Role.Name, int(r.Role.Color), r.Role.Hoist, r.Role.Pingable)
 	if err != nil {
 		return nil, err
 	}
@@ -1308,7 +1309,7 @@ func init() {
 }
 
 func (v1 *V1) ModifyGuildRole(c echo.Context, r *chatv1.ModifyGuildRoleRequest) (*empty.Empty, error) {
-	return &empty.Empty{}, v1.DB.ModifyRole(r.GuildId, r.Role.RoleId, r.Role.Name, r.Role.Color, r.Role.Hoist, r.Role.Pingable, r.ModifyName, r.ModifyColor, r.ModifyHoist, r.ModifyPingable)
+	return &empty.Empty{}, v1.DB.ModifyRole(r.Role.RoleId, r.Role.Name, int(r.Role.Color), r.Role.Hoist, r.Role.Pingable, r.ModifyName, r.ModifyColor, r.ModifyHoist, r.ModifyPingable)
 }
 
 func init() {
@@ -1370,7 +1371,7 @@ func (v1 *V1) GetUser(c echo.Context, r *chatv1.GetUserRequest) (*chatv1.GetUser
 	}
 	return &chatv1.GetUserResponse{
 		UserName:   res.Username,
-		UserAvatar: res.Avatar.String,
+		UserAvatar: res.Avatar,
 		UserStatus: harmonytypesv1.UserStatus(res.Status),
 		IsBot:      res.IsBot,
 	}, nil
