@@ -5,7 +5,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/filehash"
 )
 
-func (d *database) AddFileHash(fileID string, hash []byte) (err error) {
+func (d *DB) AddFileHash(fileID string, hash []byte) (err error) {
 	defer doRecovery(&err)
 	d.FileHash.
 		Create().
@@ -15,25 +15,25 @@ func (d *database) AddFileHash(fileID string, hash []byte) (err error) {
 	return
 }
 
-func (d *database) DeleteFileMeta(fileID string) (err error) {
+func (d *DB) DeleteFileMeta(fileID string) (err error) {
 	defer doRecovery(&err)
 	d.File.DeleteOneID(fileID).ExecX(ctx)
 	return
 }
 
-func (d *database) GetFileIDByHash(hash []byte) (fileID string, err error) {
+func (d *DB) GetFileIDByHash(hash []byte) (fileID string, err error) {
 	defer doRecovery(&err)
 	fileID = d.FileHash.Query().Where(filehash.Hash(hash)).OnlyX(ctx).Fileid
 	return
 }
 
-func (d *database) GetFileMetadata(fileID string) (file *entgen.File, err error) {
+func (d *DB) GetFileMetadata(fileID string) (file *entgen.File, err error) {
 	defer doRecovery(&err)
 	file = d.File.GetX(ctx, fileID)
 	return
 }
 
-func (d *database) SetFileMetadata(fileID string, contentType, name string, size int) (err error) {
+func (d *DB) SetFileMetadata(fileID string, contentType, name string, size int) (err error) {
 	defer doRecovery(&err)
 	d.File.
 		UpdateOneID(fileID).

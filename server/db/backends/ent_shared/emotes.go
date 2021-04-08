@@ -6,7 +6,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
 
-func (d *database) CreateEmotePack(userID, packID uint64, packName string) (err error) {
+func (d *DB) CreateEmotePack(userID, packID uint64, packName string) (err error) {
 	defer doRecovery(&err)
 
 	d.EmotePack.
@@ -19,7 +19,7 @@ func (d *database) CreateEmotePack(userID, packID uint64, packName string) (err 
 	return
 }
 
-func (d *database) IsPackOwner(userID, packID uint64) (isOwner bool, err error) {
+func (d *DB) IsPackOwner(userID, packID uint64) (isOwner bool, err error) {
 	defer doRecovery(&err)
 	isOwner = d.EmotePack.
 		Query().
@@ -31,7 +31,7 @@ func (d *database) IsPackOwner(userID, packID uint64) (isOwner bool, err error) 
 	return
 }
 
-func (d *database) AddEmoteToPack(packID uint64, imageID string, name string) (err error) {
+func (d *DB) AddEmoteToPack(packID uint64, imageID string, name string) (err error) {
 	defer doRecovery(&err)
 	d.EmotePack.UpdateOneID(packID).AddEmote(
 		d.Emote.
@@ -43,31 +43,31 @@ func (d *database) AddEmoteToPack(packID uint64, imageID string, name string) (e
 	return
 }
 
-func (d *database) DeleteEmoteFromPack(packID uint64, emoteID string) (err error) {
+func (d *DB) DeleteEmoteFromPack(packID uint64, emoteID string) (err error) {
 	defer doRecovery(&err)
 	d.EmotePack.UpdateOneID(packID).RemoveEmoteIDs(emoteID).ExecX(ctx)
 	return
 }
 
-func (d *database) DeleteEmotePack(packID uint64) (err error) {
+func (d *DB) DeleteEmotePack(packID uint64) (err error) {
 	defer doRecovery(&err)
 	d.EmotePack.DeleteOneID(packID).ExecX(ctx)
 	return
 }
 
-func (d *database) GetEmotePacks(userID uint64) (packs []*entgen.EmotePack, err error) {
+func (d *DB) GetEmotePacks(userID uint64) (packs []*entgen.EmotePack, err error) {
 	defer doRecovery(&err)
 	packs = d.User.GetX(ctx, userID).QueryEmotepack().WithOwner().WithEmote().AllX(ctx)
 	return
 }
 
-func (d *database) GetEmotePackEmotes(packID uint64) (emotes []*entgen.Emote, err error) {
+func (d *DB) GetEmotePackEmotes(packID uint64) (emotes []*entgen.Emote, err error) {
 	defer doRecovery(&err)
 	emotes = d.EmotePack.GetX(ctx, packID).QueryEmote().AllX(ctx)
 	return
 }
 
-func (d *database) DequipEmotePack(userID, packID uint64) (err error) {
+func (d *DB) DequipEmotePack(userID, packID uint64) (err error) {
 	defer doRecovery(&err)
 	d.User.GetX(ctx, userID).Update().RemoveEmotepackIDs(packID)
 	return

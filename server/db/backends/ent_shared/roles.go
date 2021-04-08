@@ -10,7 +10,7 @@ import (
 	"github.com/harmony-development/legato/server/db/types"
 )
 
-func (d *database) AddRoleToGuild(guildID, roleID uint64, name string, color int, hoist, pingable bool) (err error) {
+func (d *DB) AddRoleToGuild(guildID, roleID uint64, name string, color int, hoist, pingable bool) (err error) {
 	defer doRecovery(&err)
 	d.Guild.
 		UpdateOneID(guildID).
@@ -27,13 +27,13 @@ func (d *database) AddRoleToGuild(guildID, roleID uint64, name string, color int
 	return
 }
 
-func (d *database) GetGuildRoles(guildID uint64) (roles []*entgen.Role, err error) {
+func (d *DB) GetGuildRoles(guildID uint64) (roles []*entgen.Role, err error) {
 	defer doRecovery(&err)
 	roles = d.Guild.GetX(ctx, guildID).QueryRole().AllX(ctx)
 	return
 }
 
-func (d *database) GetPermissions(roleID uint64) (permissions []types.PermissionsNode, err error) {
+func (d *DB) GetPermissions(roleID uint64) (permissions []types.PermissionsNode, err error) {
 	defer doRecovery(&err)
 	nodes := d.Role.GetX(ctx, roleID).QueryPermissionNode().AllX(ctx)
 	for _, node := range nodes {
@@ -45,7 +45,7 @@ func (d *database) GetPermissions(roleID uint64) (permissions []types.Permission
 	return
 }
 
-func (d *database) SetPermissions(guildID uint64, channelID uint64, roleID uint64, permissions []types.PermissionsNode) (err error) {
+func (d *DB) SetPermissions(guildID uint64, channelID uint64, roleID uint64, permissions []types.PermissionsNode) (err error) {
 	defer doRecovery(&err)
 	tx := d.TxX()
 	nodes := make([]*entgen.PermissionNodeCreate, len(permissions))
@@ -86,7 +86,7 @@ func (d *database) SetPermissions(guildID uint64, channelID uint64, roleID uint6
 	return
 }
 
-func (d *database) GetPermissionsData(guildID uint64) (data types.PermissionsData, err error) {
+func (d *DB) GetPermissionsData(guildID uint64) (data types.PermissionsData, err error) {
 	defer doRecovery(&err)
 	roles := d.Guild.GetX(ctx, guildID).QueryRole().WithPermissionNode().AllX(ctx)
 	for _, role := range roles {
@@ -118,7 +118,7 @@ func (d *database) GetPermissionsData(guildID uint64) (data types.PermissionsDat
 	return
 }
 
-func (d *database) MoveRole(guildID, roleID, previousRole, nextRole uint64) (err error) {
+func (d *DB) MoveRole(guildID, roleID, previousRole, nextRole uint64) (err error) {
 	defer doRecovery(&err)
 	previousPos := d.Role.GetX(ctx, previousRole).Position
 	nextPos := d.Role.GetX(ctx, nextRole).Position
@@ -131,7 +131,7 @@ func (d *database) MoveRole(guildID, roleID, previousRole, nextRole uint64) (err
 	return
 }
 
-func (d *database) ManageRoles(guildID, userID uint64, addRoles, removeRoles []uint64) (err error) {
+func (d *DB) ManageRoles(guildID, userID uint64, addRoles, removeRoles []uint64) (err error) {
 	defer doRecovery(&err)
 	d.User.
 		UpdateOneID(userID).
@@ -141,7 +141,7 @@ func (d *database) ManageRoles(guildID, userID uint64, addRoles, removeRoles []u
 	return
 }
 
-func (d *database) ModifyRole(roleID uint64, name *string, color *int, hoist, pingable *bool) (err error) {
+func (d *DB) ModifyRole(roleID uint64, name *string, color *int, hoist, pingable *bool) (err error) {
 	defer doRecovery(&err)
 	update := d.Role.UpdateOneID(roleID)
 	if name != nil {
@@ -160,7 +160,7 @@ func (d *database) ModifyRole(roleID uint64, name *string, color *int, hoist, pi
 	return
 }
 
-func (d *database) RemoveRoleFromGuild(guildID, roleID uint64) (err error) {
+func (d *DB) RemoveRoleFromGuild(guildID, roleID uint64) (err error) {
 	defer doRecovery(&err)
 	d.Guild.
 		UpdateOneID(guildID).
@@ -169,7 +169,7 @@ func (d *database) RemoveRoleFromGuild(guildID, roleID uint64) (err error) {
 	return
 }
 
-func (d *database) RolesForUser(guildID, userID uint64) (roles []uint64, err error) {
+func (d *DB) RolesForUser(guildID, userID uint64) (roles []uint64, err error) {
 	defer doRecovery(&err)
 	roles = d.Role.
 		Query().

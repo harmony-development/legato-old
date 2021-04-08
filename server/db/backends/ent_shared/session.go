@@ -7,13 +7,13 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
 
-func (d *database) ExpireSessions() (err error) {
+func (d *DB) ExpireSessions() (err error) {
 	defer doRecovery(&err)
 	d.Session.Delete().Where(session.ExpiresLT(time.Now())).ExecX(ctx)
 	return
 }
 
-func (d *database) SessionExpireRoutine() {
+func (d *DB) SessionExpireRoutine() {
 	for {
 		time.Sleep(15 * time.Minute)
 		err := d.ExpireSessions()
@@ -23,13 +23,13 @@ func (d *database) SessionExpireRoutine() {
 	}
 }
 
-func (d *database) ExtendSession(session string) (err error) {
+func (d *DB) ExtendSession(session string) (err error) {
 	defer doRecovery(&err)
 	d.Session.UpdateOneID(session).ExecX(ctx)
 	return
 }
 
-func (d *database) AddSession(userID uint64, session string) (err error) {
+func (d *DB) AddSession(userID uint64, session string) (err error) {
 	defer doRecovery(&err)
 
 	d.Session.Create().
@@ -47,7 +47,7 @@ func (d *database) AddSession(userID uint64, session string) (err error) {
 	return
 }
 
-func (d *database) SessionToUserID(sid string) (userID uint64, err error) {
+func (d *DB) SessionToUserID(sid string) (userID uint64, err error) {
 	defer doRecovery(&err)
 
 	userID = d.Client.Session.

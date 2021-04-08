@@ -2,7 +2,7 @@ package ent_shared
 
 import "github.com/harmony-development/legato/server/db/ent/entgen/guild"
 
-func (d *database) GetOwner(guildID uint64) (userID uint64, err error) {
+func (d *DB) GetOwner(guildID uint64) (userID uint64, err error) {
 	defer doRecovery(&err)
 	userID = d.Guild.
 		Query().
@@ -11,7 +11,7 @@ func (d *database) GetOwner(guildID uint64) (userID uint64, err error) {
 	return
 }
 
-func (d *database) IsOwner(guildID, userID uint64) (isOwner bool, err error) {
+func (d *DB) IsOwner(guildID, userID uint64) (isOwner bool, err error) {
 	defer doRecovery(&err)
 
 	if owner, err := d.GetOwner(guildID); err != nil {
@@ -22,7 +22,7 @@ func (d *database) IsOwner(guildID, userID uint64) (isOwner bool, err error) {
 	return
 }
 
-func (d *database) AddMemberToGuild(userID, guildID uint64) (err error) {
+func (d *DB) AddMemberToGuild(userID, guildID uint64) (err error) {
 	defer doRecovery(&err)
 
 	d.Guild.UpdateOneID(guildID).AddUserIDs(userID).ExecX(ctx)
@@ -30,7 +30,7 @@ func (d *database) AddMemberToGuild(userID, guildID uint64) (err error) {
 	return
 }
 
-func (d *database) DeleteMember(guildID, userID uint64) (err error) {
+func (d *DB) DeleteMember(guildID, userID uint64) (err error) {
 	defer doRecovery(&err)
 
 	d.Guild.
@@ -41,7 +41,7 @@ func (d *database) DeleteMember(guildID, userID uint64) (err error) {
 	return
 }
 
-func (d *database) MembersInGuild(guildID uint64) (users []uint64, err error) {
+func (d *DB) MembersInGuild(guildID uint64) (users []uint64, err error) {
 	defer doRecovery(&err)
 
 	users = d.Guild.
@@ -53,7 +53,7 @@ func (d *database) MembersInGuild(guildID uint64) (users []uint64, err error) {
 	return
 }
 
-func (d *database) CountMembersInGuild(guildID uint64) (memberCount int64, err error) {
+func (d *DB) CountMembersInGuild(guildID uint64) (memberCount int64, err error) {
 	defer doRecovery(&err)
 
 	memberCount = int64(d.Guild.

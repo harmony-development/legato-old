@@ -8,7 +8,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
 
-func (d *database) CreateGuild(owner, id, channelID uint64, guildName, picture string) (guild *entgen.Guild, err error) {
+func (d *DB) CreateGuild(owner, id, channelID uint64, guildName, picture string) (guild *entgen.Guild, err error) {
 	defer doRecovery(&err)
 	guild = d.Guild.Create().
 		SetID(id).
@@ -27,7 +27,7 @@ func (d *database) CreateGuild(owner, id, channelID uint64, guildName, picture s
 	return
 }
 
-func (d *database) DeleteGuild(guildID uint64) (err error) {
+func (d *DB) DeleteGuild(guildID uint64) (err error) {
 	defer doRecovery(&err)
 	d.Guild.
 		Delete().
@@ -36,49 +36,49 @@ func (d *database) DeleteGuild(guildID uint64) (err error) {
 	return
 }
 
-func (d *database) BanUser(guildID, userID uint64) (err error) {
+func (d *DB) BanUser(guildID, userID uint64) (err error) {
 	defer doRecovery(&err)
 	d.Guild.UpdateOneID(guildID).AddBanIDs(userID).ExecX(ctx)
 	return
 }
 
-func (d *database) UnbanUser(guildID, userID uint64) (err error) {
+func (d *DB) UnbanUser(guildID, userID uint64) (err error) {
 	defer doRecovery(&err)
 	d.Guild.UpdateOneID(guildID).RemoveBanIDs(userID).ExecX(ctx)
 	return
 }
 
-func (d *database) IsBanned(guildID, userID uint64) (banned bool, err error) {
+func (d *DB) IsBanned(guildID, userID uint64) (banned bool, err error) {
 	defer doRecovery(&err)
 	banned = d.Guild.Query().Where(guild.ID(guildID)).QueryBans().Where(user.ID(userID)).ExistX(ctx)
 	return
 }
 
-func (d *database) GetGuildByID(guildID uint64) (guild *entgen.Guild, err error) {
+func (d *DB) GetGuildByID(guildID uint64) (guild *entgen.Guild, err error) {
 	defer doRecovery(&err)
 	guild = d.Guild.GetX(ctx, guildID)
 	return
 }
 
-func (d *database) GetGuildPicture(guildID uint64) (picture string, err error) {
+func (d *DB) GetGuildPicture(guildID uint64) (picture string, err error) {
 	defer doRecovery(&err)
 	picture = d.Guild.GetX(ctx, guildID).Picture
 	return
 }
 
-func (d *database) GetLocalGuilds(userID uint64) (guilds []uint64, err error) {
+func (d *DB) GetLocalGuilds(userID uint64) (guilds []uint64, err error) {
 	defer doRecovery(&err)
 	guilds = d.User.GetX(ctx, userID).QueryGuild().IDsX(ctx)
 	return
 }
 
-func (d *database) HasGuildWithID(guildID uint64) (exists bool, err error) {
+func (d *DB) HasGuildWithID(guildID uint64) (exists bool, err error) {
 	defer doRecovery(&err)
 	exists = d.Guild.Query().Where(guild.ID(guildID)).ExistX(ctx)
 	return
 }
 
-func (d *database) UserInGuild(userID, guildID uint64) (exists bool, err error) {
+func (d *DB) UserInGuild(userID, guildID uint64) (exists bool, err error) {
 	defer doRecovery(&err)
 	exists = d.Guild.
 		Query().
@@ -91,7 +91,7 @@ func (d *database) UserInGuild(userID, guildID uint64) (exists bool, err error) 
 	return
 }
 
-func (d *database) UpdateGuildInformation(guildID uint64, name, picture string, metadata *harmonytypesv1.Metadata, updateName, updatePicture, updateMetadata bool) (err error) {
+func (d *DB) UpdateGuildInformation(guildID uint64, name, picture string, metadata *harmonytypesv1.Metadata, updateName, updatePicture, updateMetadata bool) (err error) {
 	defer doRecovery(&err)
 	update := d.Guild.
 		UpdateOneID(guildID)

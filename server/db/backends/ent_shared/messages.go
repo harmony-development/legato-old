@@ -20,7 +20,7 @@ func mustBytes(m proto.Message) []byte {
 }
 
 // TODO: overrides, actions
-func (d *database) addMessageStem(channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata) *entgen.MessageCreate {
+func (d *DB) addMessageStem(channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata) *entgen.MessageCreate {
 	msg := d.Message.Create().
 		SetID(messageID).
 		SetChannelID(channelID).
@@ -36,7 +36,7 @@ func (d *database) addMessageStem(channelID, messageID uint64, authorID uint64, 
 	return msg
 }
 
-func (d *database) AddTextMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, content string) (t time.Time, e error) {
+func (d *DB) AddTextMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, content string) (t time.Time, e error) {
 	defer doRecovery(&e)
 
 	msg := d.addMessageStem(channelID, messageID, authorID, actions, overrides, replyTo, metadata).SaveX(ctx)
@@ -45,14 +45,14 @@ func (d *database) AddTextMessage(guildID, channelID, messageID uint64, authorID
 	return msg.Createdat, nil
 }
 
-func (d *database) AddFilesMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, files []*harmonytypesv1.Attachment) (t time.Time, e error) {
+func (d *DB) AddFilesMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, files []*harmonytypesv1.Attachment) (t time.Time, e error) {
 	panic("unimplemented")
 }
-func (d *database) AddEmbedMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, embeds []*harmonytypesv1.Embed) (t time.Time, e error) {
+func (d *DB) AddEmbedMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, embeds []*harmonytypesv1.Embed) (t time.Time, e error) {
 	panic("unimplemented")
 }
 
-func (d *database) DeleteMessage(messageID uint64) (err error) {
+func (d *DB) DeleteMessage(messageID uint64) (err error) {
 	defer doRecovery(&err)
 
 	d.Message.DeleteOneID(messageID).ExecX(ctx)
@@ -60,13 +60,13 @@ func (d *database) DeleteMessage(messageID uint64) (err error) {
 	return
 }
 
-func (d *database) GetMessage(messageID uint64) (msg *entgen.Message, err error) {
+func (d *DB) GetMessage(messageID uint64) (msg *entgen.Message, err error) {
 	defer doRecovery(&err)
 	msg = d.Message.GetX(ctx, messageID)
 	return
 }
 
-func (d *database) GetMessages(channelID uint64) (msgs []*entgen.Message, err error) {
+func (d *DB) GetMessages(channelID uint64) (msgs []*entgen.Message, err error) {
 	defer doRecovery(&err)
 	msgs = d.Channel.
 		GetX(ctx, channelID).
@@ -76,7 +76,7 @@ func (d *database) GetMessages(channelID uint64) (msgs []*entgen.Message, err er
 	return
 }
 
-func (d *database) GetMessagesBefore(channelID uint64, date time.Time) (msgs []*entgen.Message, err error) {
+func (d *DB) GetMessagesBefore(channelID uint64, date time.Time) (msgs []*entgen.Message, err error) {
 	defer doRecovery(&err)
 	msgs = d.Message.
 		Query().
@@ -93,13 +93,13 @@ func (d *database) GetMessagesBefore(channelID uint64, date time.Time) (msgs []*
 	return
 }
 
-func (d *database) HasMessageWithID(messageID uint64) (exists bool, err error) {
+func (d *DB) HasMessageWithID(messageID uint64) (exists bool, err error) {
 	defer doRecovery(&err)
 	exists = d.Message.Query().Where(message.ID(messageID)).ExistX(ctx)
 	return
 }
 
-func (d *database) UpdateTextMessage(messageID uint64, content string) (t time.Time, err error) {
+func (d *DB) UpdateTextMessage(messageID uint64, content string) (t time.Time, err error) {
 	defer doRecovery(&err)
 	d.TextMessage.
 		Update().

@@ -4,18 +4,15 @@ import (
 	"context"
 	"runtime"
 
-	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db/ent/entgen"
-	"github.com/harmony-development/legato/server/db/types"
 	"github.com/harmony-development/legato/server/logger"
-	"github.com/sony/sonyflake"
 	"github.com/ztrue/tracerr"
 
 	// backend
 	_ "github.com/lib/pq"
 )
 
-type database struct {
+type DB struct {
 	*entgen.Client
 	Logger logger.Logger
 }
@@ -23,8 +20,8 @@ type database struct {
 var ctx = context.Background()
 
 // New creates a new DB connection
-func New(c *entgen.Client, cfg *config.Config, logger logger.ILogger, idgen *sonyflake.Sonyflake) (types.IHarmonyDB, error) {
-	db := &database{}
+func New(c *entgen.Client, logger logger.ILogger) (*DB, error) {
+	db := &DB{}
 	db.Client = c
 	if err := db.Schema.Create(context.Background()); err != nil {
 		return nil, tracerr.Wrap(err)
@@ -35,11 +32,11 @@ func New(c *entgen.Client, cfg *config.Config, logger logger.ILogger, idgen *son
 	return db, nil
 }
 
-func (d *database) Migrate() error {
+func (d *DB) Migrate() error {
 	return d.Schema.Create(ctx)
 }
 
-func (db *database) TxX() *entgen.Tx {
+func (db *DB) TxX() *entgen.Tx {
 	tx, err := db.Tx(ctx)
 	if err != nil {
 		panic(err)

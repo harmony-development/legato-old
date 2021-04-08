@@ -11,7 +11,7 @@ import (
 	"github.com/harmony-development/legato/server/db/types"
 )
 
-func (d *database) AddForeignUser(host string, userID, localUserID uint64, username, avatar string) (err error) {
+func (d *DB) AddForeignUser(host string, userID, localUserID uint64, username, avatar string) (err error) {
 	defer doRecovery(&err)
 	tx := d.TxX()
 	tx.ForeignUser.Create().
@@ -34,7 +34,7 @@ func (d *database) AddForeignUser(host string, userID, localUserID uint64, usern
 	return
 }
 
-func (d *database) AddLocalUser(userID uint64, email, username string, passwordHash []byte) (err error) {
+func (d *DB) AddLocalUser(userID uint64, email, username string, passwordHash []byte) (err error) {
 	defer doRecovery(&err)
 	tx := d.TxX()
 	tx.LocalUser.
@@ -60,19 +60,19 @@ func (d *database) AddLocalUser(userID uint64, email, username string, passwordH
 	return
 }
 
-func (d *database) EmailExists(email string) (exists bool, err error) {
+func (d *DB) EmailExists(email string) (exists bool, err error) {
 	defer doRecovery(&err)
 	exists = d.LocalUser.Query().Where(localuser.Email(email)).ExistX(ctx)
 	return
 }
 
-func (d *database) GetAvatar(userID uint64) (avatar *string, err error) {
+func (d *DB) GetAvatar(userID uint64) (avatar *string, err error) {
 	defer doRecovery(&err)
 	avatar = &d.User.GetX(ctx, userID).QueryProfile().OnlyX(ctx).Avatar
 	return
 }
 
-func (d *database) GetLocalUserForForeignUser(userID uint64, host string) (localUserID uint64, err error) {
+func (d *DB) GetLocalUserForForeignUser(userID uint64, host string) (localUserID uint64, err error) {
 	defer doRecovery(&err)
 	localUserID = d.ForeignUser.
 		Query().
@@ -87,7 +87,7 @@ func (d *database) GetLocalUserForForeignUser(userID uint64, host string) (local
 	return
 }
 
-func (d *database) getUserStem(user *entgen.User, profile *entgen.Profile) types.UserData {
+func (d *DB) getUserStem(user *entgen.User, profile *entgen.Profile) types.UserData {
 	return types.UserData{
 		UserID:   user.ID,
 		Username: profile.Username,
@@ -97,7 +97,7 @@ func (d *database) getUserStem(user *entgen.User, profile *entgen.Profile) types
 	}
 }
 
-func (d *database) GetUserByEmail(email string) (userData types.UserData, err error) {
+func (d *DB) GetUserByEmail(email string) (userData types.UserData, err error) {
 	defer doRecovery(&err)
 	localUser := d.LocalUser.Query().Where(localuser.Email(email)).WithUser().OnlyX(ctx)
 	user := localUser.QueryUser().OnlyX(ctx)
@@ -108,7 +108,7 @@ func (d *database) GetUserByEmail(email string) (userData types.UserData, err er
 	return
 }
 
-func (d *database) GetUserByID(userID uint64) (userData types.UserData, err error) {
+func (d *DB) GetUserByID(userID uint64) (userData types.UserData, err error) {
 	defer doRecovery(&err)
 	user := d.User.GetX(ctx, userID)
 	profile := user.QueryProfile().OnlyX(ctx)
@@ -116,7 +116,7 @@ func (d *database) GetUserByID(userID uint64) (userData types.UserData, err erro
 	return
 }
 
-func (d *database) GetUserMetadata(userID uint64, appID string) (meta string, err error) {
+func (d *DB) GetUserMetadata(userID uint64, appID string) (meta string, err error) {
 	defer doRecovery(&err)
 	meta = d.User.
 		Query().
@@ -132,7 +132,7 @@ func (d *database) GetUserMetadata(userID uint64, appID string) (meta string, er
 	return
 }
 
-func (d *database) updateProfileStem(userID uint64) *entgen.ProfileUpdate {
+func (d *DB) updateProfileStem(userID uint64) *entgen.ProfileUpdate {
 	return d.Profile.
 		Update().
 		Where(
@@ -141,34 +141,34 @@ func (d *database) updateProfileStem(userID uint64) *entgen.ProfileUpdate {
 		)
 }
 
-func (d *database) SetAvatar(userID uint64, avatar string) (err error) {
+func (d *DB) SetAvatar(userID uint64, avatar string) (err error) {
 	defer doRecovery(&err)
 	d.updateProfileStem(userID).SetAvatar(avatar)
 	return
 }
 
-func (d *database) SetIsBot(userID uint64, isBot bool) (err error) {
+func (d *DB) SetIsBot(userID uint64, isBot bool) (err error) {
 	defer doRecovery(&err)
 	d.updateProfileStem(userID).
 		SetIsBot(isBot)
 	return
 }
 
-func (d *database) SetStatus(userID uint64, status harmonytypesv1.UserStatus) (err error) {
+func (d *DB) SetStatus(userID uint64, status harmonytypesv1.UserStatus) (err error) {
 	defer doRecovery(&err)
 	d.updateProfileStem(userID).
 		SetStatus(int16(status))
 	return
 }
 
-func (d *database) SetUsername(userID uint64, username string) (err error) {
+func (d *DB) SetUsername(userID uint64, username string) (err error) {
 	defer doRecovery(&err)
 	d.updateProfileStem(userID).
 		SetUsername(username)
 	return
 }
 
-func (d *database) UserIsLocal(userID uint64) (isLocal bool, err error) {
+func (d *DB) UserIsLocal(userID uint64) (isLocal bool, err error) {
 	defer doRecovery(&err)
 	isLocal = d.User.Query().Where(user.ID(userID)).QueryLocalUser().ExistX(ctx)
 	return

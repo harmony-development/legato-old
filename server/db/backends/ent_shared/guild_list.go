@@ -7,13 +7,13 @@ import (
 	"github.com/harmony-development/legato/server/db/lexorank"
 )
 
-func (d *database) GetGuildList(userID uint64) (guilds []*entgen.GuildListEntry, err error) {
+func (d *DB) GetGuildList(userID uint64) (guilds []*entgen.GuildListEntry, err error) {
 	defer doRecovery(&err)
 	guilds = d.User.GetX(ctx, userID).QueryListentry().AllX(ctx)
 	return
 }
 
-func (d *database) GetGuildListPosition(userID, guildID uint64, host string) (pos string, err error) {
+func (d *DB) GetGuildListPosition(userID, guildID uint64, host string) (pos string, err error) {
 	defer doRecovery(&err)
 	d.GuildListEntry.Query().Where(
 		guildlistentry.And(
@@ -25,7 +25,7 @@ func (d *database) GetGuildListPosition(userID, guildID uint64, host string) (po
 	return
 }
 
-func (d *database) AddGuildToList(userID, guildID uint64, homeServer string) (err error) {
+func (d *DB) AddGuildToList(userID, guildID uint64, homeServer string) (err error) {
 	defer doRecovery(&err)
 	tx := d.TxX()
 	tx.User.UpdateOneID(userID).AddListentry(
@@ -37,7 +37,7 @@ func (d *database) AddGuildToList(userID, guildID uint64, homeServer string) (er
 	return
 }
 
-func (d *database) MoveGuild(userID, guildID uint64, host string, nextGuildID, prevGuildID uint64, nextHost, prevHost string) (err error) {
+func (d *DB) MoveGuild(userID, guildID uint64, host string, nextGuildID, prevGuildID uint64, nextHost, prevHost string) (err error) {
 	defer doRecovery(&err)
 	prevPos, err := d.GetGuildListPosition(userID, prevGuildID, prevHost)
 	chk(err)
@@ -57,7 +57,7 @@ func (d *database) MoveGuild(userID, guildID uint64, host string, nextGuildID, p
 	return
 }
 
-func (d *database) RemoveGuildFromList(userID, guildID uint64, host string) (err error) {
+func (d *DB) RemoveGuildFromList(userID, guildID uint64, host string) (err error) {
 	defer doRecovery(&err)
 	d.GuildListEntry.Delete().Where(guildlistentry.And(
 		guildlistentry.HasUserWith(

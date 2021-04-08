@@ -7,7 +7,7 @@ import (
 	"github.com/harmony-development/legato/server/db/types"
 )
 
-func (d *database) AddChannelToGuild(guildID, channelID uint64, channelName string, previous, next *uint64, kind types.ChannelKind, md []byte) (c entgen.Channel, err error) {
+func (d *DB) AddChannelToGuild(guildID, channelID uint64, channelName string, previous, next *uint64, kind types.ChannelKind, md []byte) (c entgen.Channel, err error) {
 	defer doRecovery(&err)
 
 	previousChannelPos := ""
@@ -34,7 +34,7 @@ func (d *database) AddChannelToGuild(guildID, channelID uint64, channelName stri
 	return
 }
 
-func (d *database) DeleteChannelFromGuild(guildID, channelID uint64) (err error) {
+func (d *DB) DeleteChannelFromGuild(guildID, channelID uint64) (err error) {
 	defer doRecovery(&err)
 
 	d.Guild.UpdateOneID(guildID).RemoveChannelIDs(channelID).ExecX(ctx)
@@ -42,7 +42,7 @@ func (d *database) DeleteChannelFromGuild(guildID, channelID uint64) (err error)
 	return
 }
 
-func (d *database) ChannelsForGuild(guildID uint64) (chans []*entgen.Channel, err error) {
+func (d *DB) ChannelsForGuild(guildID uint64) (chans []*entgen.Channel, err error) {
 	defer doRecovery(&err)
 
 	chans = d.Guild.GetX(ctx, guildID).QueryChannel().AllX(ctx)
@@ -50,19 +50,19 @@ func (d *database) ChannelsForGuild(guildID uint64) (chans []*entgen.Channel, er
 	return
 }
 
-func (d *database) HasChannelWithID(guildID, channelID uint64) (hasChannel bool, err error) {
+func (d *DB) HasChannelWithID(guildID, channelID uint64) (hasChannel bool, err error) {
 	defer doRecovery(&err)
 	hasChannel = d.Channel.Query().Where(channel.ID(channelID)).ExistX(ctx)
 	return
 }
 
-func (d *database) GetChannelListPosition(channelID uint64) (pos string, err error) {
+func (d *DB) GetChannelListPosition(channelID uint64) (pos string, err error) {
 	defer doRecovery(&err)
 	d.Channel.GetX(ctx, channelID)
 	return
 }
 
-func (d *database) MoveChannel(channelID uint64, previousID, nextID *uint64) (err error) {
+func (d *DB) MoveChannel(channelID uint64, previousID, nextID *uint64) (err error) {
 	defer doRecovery(&err)
 	previousChannelPos := ""
 	nextChannelPos := ""
@@ -76,13 +76,13 @@ func (d *database) MoveChannel(channelID uint64, previousID, nextID *uint64) (er
 	return
 }
 
-func (d *database) GetFirstChannel(guildID uint64) (channelID uint64, err error) {
+func (d *DB) GetFirstChannel(guildID uint64) (channelID uint64, err error) {
 	defer doRecovery(&err)
 	channelID = d.Guild.GetX(ctx, guildID).QueryChannel().FirstIDX(ctx)
 	return
 }
 
-func (d *database) UpdateChannelInformation(guildID, channelID uint64, name *string, metadata []byte) (err error) {
+func (d *DB) UpdateChannelInformation(guildID, channelID uint64, name *string, metadata []byte) (err error) {
 	defer doRecovery(&err)
 	update := d.Channel.UpdateOneID(channelID)
 	if name != nil {

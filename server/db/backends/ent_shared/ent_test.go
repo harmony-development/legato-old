@@ -9,7 +9,7 @@ import (
 )
 
 func TestGetPercentImplemented(t *testing.T) {
-	db := &database{}
+	db := &DB{}
 	dbType := reflect.TypeOf(db)
 	ifaceType := reflect.TypeOf((*types.IHarmonyDB)(nil)).Elem()
 	meths := map[string]struct{}{}
