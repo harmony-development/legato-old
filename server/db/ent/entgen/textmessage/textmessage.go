@@ -19,7 +19,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "message" package.
 	MessageInverseTable = "messages"
 	// MessageColumn is the table column denoting the message relation/edge.
-	MessageColumn = "message_textmessage"
+	MessageColumn = "message_text_message"
 )
 
 // Columns holds all SQL columns for textmessage fields.
@@ -31,7 +31,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "text_messages"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"message_textmessage",
+	"message_text_message",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

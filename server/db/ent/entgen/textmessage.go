@@ -20,8 +20,8 @@ type TextMessage struct {
 	Content string `json:"content,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TextMessageQuery when eager-loading is set.
-	Edges               TextMessageEdges `json:"edges"`
-	message_textmessage *uint64
+	Edges                TextMessageEdges `json:"edges"`
+	message_text_message *uint64
 }
 
 // TextMessageEdges holds the relations/edges for other nodes in the graph.
@@ -56,7 +56,7 @@ func (*TextMessage) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = &sql.NullInt64{}
 		case textmessage.FieldContent:
 			values[i] = &sql.NullString{}
-		case textmessage.ForeignKeys[0]: // message_textmessage
+		case textmessage.ForeignKeys[0]: // message_text_message
 			values[i] = &sql.NullInt64{}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type TextMessage", columns[i])
@@ -87,10 +87,10 @@ func (tm *TextMessage) assignValues(columns []string, values []interface{}) erro
 			}
 		case textmessage.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field message_textmessage", value)
+				return fmt.Errorf("unexpected type %T for edge-field message_text_message", value)
 			} else if value.Valid {
-				tm.message_textmessage = new(uint64)
-				*tm.message_textmessage = uint64(value.Int64)
+				tm.message_text_message = new(uint64)
+				*tm.message_text_message = uint64(value.Int64)
 			}
 		}
 	}

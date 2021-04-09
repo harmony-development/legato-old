@@ -7,19 +7,81 @@ const (
 	Label = "embed_message"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldTitle holds the string denoting the title field in the database.
+	FieldTitle = "title"
+	// FieldBody holds the string denoting the body field in the database.
+	FieldBody = "body"
+	// FieldColor holds the string denoting the color field in the database.
+	FieldColor = "color"
+	// FieldHeaderText holds the string denoting the header_text field in the database.
+	FieldHeaderText = "header_text"
+	// FieldHeaderSubtext holds the string denoting the header_subtext field in the database.
+	FieldHeaderSubtext = "header_subtext"
+	// FieldHeaderURL holds the string denoting the header_url field in the database.
+	FieldHeaderURL = "header_url"
+	// FieldHeaderIcon holds the string denoting the header_icon field in the database.
+	FieldHeaderIcon = "header_icon"
+	// FieldFooterText holds the string denoting the footer_text field in the database.
+	FieldFooterText = "footer_text"
+	// FieldFooterSubtext holds the string denoting the footer_subtext field in the database.
+	FieldFooterSubtext = "footer_subtext"
+	// FieldFooterURL holds the string denoting the footer_url field in the database.
+	FieldFooterURL = "footer_url"
+	// FieldFooterIcon holds the string denoting the footer_icon field in the database.
+	FieldFooterIcon = "footer_icon"
+	// EdgeEmbedField holds the string denoting the embed_field edge name in mutations.
+	EdgeEmbedField = "embed_field"
+	// EdgeMessage holds the string denoting the message edge name in mutations.
+	EdgeMessage = "message"
 	// Table holds the table name of the embedmessage in the database.
 	Table = "embed_messages"
+	// EmbedFieldTable is the table the holds the embed_field relation/edge.
+	EmbedFieldTable = "embed_fields"
+	// EmbedFieldInverseTable is the table name for the EmbedField entity.
+	// It exists in this package in order to avoid circular dependency with the "embedfield" package.
+	EmbedFieldInverseTable = "embed_fields"
+	// EmbedFieldColumn is the table column denoting the embed_field relation/edge.
+	EmbedFieldColumn = "embed_message_embed_field"
+	// MessageTable is the table the holds the message relation/edge.
+	MessageTable = "embed_messages"
+	// MessageInverseTable is the table name for the Message entity.
+	// It exists in this package in order to avoid circular dependency with the "message" package.
+	MessageInverseTable = "messages"
+	// MessageColumn is the table column denoting the message relation/edge.
+	MessageColumn = "message_embed_message"
 )
 
 // Columns holds all SQL columns for embedmessage fields.
 var Columns = []string{
 	FieldID,
+	FieldTitle,
+	FieldBody,
+	FieldColor,
+	FieldHeaderText,
+	FieldHeaderSubtext,
+	FieldHeaderURL,
+	FieldHeaderIcon,
+	FieldFooterText,
+	FieldFooterSubtext,
+	FieldFooterURL,
+	FieldFooterIcon,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the "embed_messages"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"message_embed_message",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}

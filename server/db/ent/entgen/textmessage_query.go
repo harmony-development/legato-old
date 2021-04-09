@@ -377,7 +377,7 @@ func (tmq *TextMessageQuery) sqlAll(ctx context.Context) ([]*TextMessage, error)
 		ids := make([]uint64, 0, len(nodes))
 		nodeids := make(map[uint64][]*TextMessage)
 		for i := range nodes {
-			fk := nodes[i].message_textmessage
+			fk := nodes[i].message_text_message
 			if fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
@@ -391,7 +391,7 @@ func (tmq *TextMessageQuery) sqlAll(ctx context.Context) ([]*TextMessage, error)
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "message_textmessage" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "message_text_message" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Message = n

@@ -38,8 +38,7 @@ type Message struct {
 	Edges                MessageEdges `json:"edges"`
 	channel_message      *uint64
 	message_replies      *uint64
-	message_filemessage  *int
-	message_embedmessage *int
+	message_file_message *int
 	user_message         *uint64
 }
 
@@ -53,12 +52,12 @@ type MessageEdges struct {
 	Parent *Message `json:"parent,omitempty"`
 	// Replies holds the value of the replies edge.
 	Replies []*Message `json:"replies,omitempty"`
-	// Textmessage holds the value of the textmessage edge.
-	Textmessage *TextMessage `json:"textmessage,omitempty"`
-	// Filemessage holds the value of the filemessage edge.
-	Filemessage *FileMessage `json:"filemessage,omitempty"`
-	// Embedmessage holds the value of the embedmessage edge.
-	Embedmessage *EmbedMessage `json:"embedmessage,omitempty"`
+	// TextMessage holds the value of the text_message edge.
+	TextMessage *TextMessage `json:"text_message,omitempty"`
+	// FileMessage holds the value of the file_message edge.
+	FileMessage *FileMessage `json:"file_message,omitempty"`
+	// EmbedMessage holds the value of the embed_message edge.
+	EmbedMessage *EmbedMessage `json:"embed_message,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [7]bool
@@ -115,46 +114,46 @@ func (e MessageEdges) RepliesOrErr() ([]*Message, error) {
 	return nil, &NotLoadedError{edge: "replies"}
 }
 
-// TextmessageOrErr returns the Textmessage value or an error if the edge
+// TextMessageOrErr returns the TextMessage value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e MessageEdges) TextmessageOrErr() (*TextMessage, error) {
+func (e MessageEdges) TextMessageOrErr() (*TextMessage, error) {
 	if e.loadedTypes[4] {
-		if e.Textmessage == nil {
-			// The edge textmessage was loaded in eager-loading,
+		if e.TextMessage == nil {
+			// The edge text_message was loaded in eager-loading,
 			// but was not found.
 			return nil, &NotFoundError{label: textmessage.Label}
 		}
-		return e.Textmessage, nil
+		return e.TextMessage, nil
 	}
-	return nil, &NotLoadedError{edge: "textmessage"}
+	return nil, &NotLoadedError{edge: "text_message"}
 }
 
-// FilemessageOrErr returns the Filemessage value or an error if the edge
+// FileMessageOrErr returns the FileMessage value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e MessageEdges) FilemessageOrErr() (*FileMessage, error) {
+func (e MessageEdges) FileMessageOrErr() (*FileMessage, error) {
 	if e.loadedTypes[5] {
-		if e.Filemessage == nil {
-			// The edge filemessage was loaded in eager-loading,
+		if e.FileMessage == nil {
+			// The edge file_message was loaded in eager-loading,
 			// but was not found.
 			return nil, &NotFoundError{label: filemessage.Label}
 		}
-		return e.Filemessage, nil
+		return e.FileMessage, nil
 	}
-	return nil, &NotLoadedError{edge: "filemessage"}
+	return nil, &NotLoadedError{edge: "file_message"}
 }
 
-// EmbedmessageOrErr returns the Embedmessage value or an error if the edge
+// EmbedMessageOrErr returns the EmbedMessage value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e MessageEdges) EmbedmessageOrErr() (*EmbedMessage, error) {
+func (e MessageEdges) EmbedMessageOrErr() (*EmbedMessage, error) {
 	if e.loadedTypes[6] {
-		if e.Embedmessage == nil {
-			// The edge embedmessage was loaded in eager-loading,
+		if e.EmbedMessage == nil {
+			// The edge embed_message was loaded in eager-loading,
 			// but was not found.
 			return nil, &NotFoundError{label: embedmessage.Label}
 		}
-		return e.Embedmessage, nil
+		return e.EmbedMessage, nil
 	}
-	return nil, &NotLoadedError{edge: "embedmessage"}
+	return nil, &NotLoadedError{edge: "embed_message"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -172,11 +171,9 @@ func (*Message) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = &sql.NullInt64{}
 		case message.ForeignKeys[1]: // message_replies
 			values[i] = &sql.NullInt64{}
-		case message.ForeignKeys[2]: // message_filemessage
+		case message.ForeignKeys[2]: // message_file_message
 			values[i] = &sql.NullInt64{}
-		case message.ForeignKeys[3]: // message_embedmessage
-			values[i] = &sql.NullInt64{}
-		case message.ForeignKeys[4]: // user_message
+		case message.ForeignKeys[3]: // user_message
 			values[i] = &sql.NullInt64{}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Message", columns[i])
@@ -251,19 +248,12 @@ func (m *Message) assignValues(columns []string, values []interface{}) error {
 			}
 		case message.ForeignKeys[2]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field message_filemessage", value)
+				return fmt.Errorf("unexpected type %T for edge-field message_file_message", value)
 			} else if value.Valid {
-				m.message_filemessage = new(int)
-				*m.message_filemessage = int(value.Int64)
+				m.message_file_message = new(int)
+				*m.message_file_message = int(value.Int64)
 			}
 		case message.ForeignKeys[3]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field message_embedmessage", value)
-			} else if value.Valid {
-				m.message_embedmessage = new(int)
-				*m.message_embedmessage = int(value.Int64)
-			}
-		case message.ForeignKeys[4]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field user_message", value)
 			} else if value.Valid {
@@ -295,19 +285,19 @@ func (m *Message) QueryReplies() *MessageQuery {
 	return (&MessageClient{config: m.config}).QueryReplies(m)
 }
 
-// QueryTextmessage queries the "textmessage" edge of the Message entity.
-func (m *Message) QueryTextmessage() *TextMessageQuery {
-	return (&MessageClient{config: m.config}).QueryTextmessage(m)
+// QueryTextMessage queries the "text_message" edge of the Message entity.
+func (m *Message) QueryTextMessage() *TextMessageQuery {
+	return (&MessageClient{config: m.config}).QueryTextMessage(m)
 }
 
-// QueryFilemessage queries the "filemessage" edge of the Message entity.
-func (m *Message) QueryFilemessage() *FileMessageQuery {
-	return (&MessageClient{config: m.config}).QueryFilemessage(m)
+// QueryFileMessage queries the "file_message" edge of the Message entity.
+func (m *Message) QueryFileMessage() *FileMessageQuery {
+	return (&MessageClient{config: m.config}).QueryFileMessage(m)
 }
 
-// QueryEmbedmessage queries the "embedmessage" edge of the Message entity.
-func (m *Message) QueryEmbedmessage() *EmbedMessageQuery {
-	return (&MessageClient{config: m.config}).QueryEmbedmessage(m)
+// QueryEmbedMessage queries the "embed_message" edge of the Message entity.
+func (m *Message) QueryEmbedMessage() *EmbedMessageQuery {
+	return (&MessageClient{config: m.config}).QueryEmbedMessage(m)
 }
 
 // Update returns a builder for updating this Message.

@@ -4,6 +4,7 @@ package entgen
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -11,7 +12,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/harmony-development/legato/server/db/ent/entgen/embedfield"
 	"github.com/harmony-development/legato/server/db/ent/entgen/embedmessage"
+	"github.com/harmony-development/legato/server/db/ent/entgen/message"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 )
 
@@ -23,6 +26,10 @@ type EmbedMessageQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.EmbedMessage
+	// eager-loading edges.
+	withEmbedField *EmbedFieldQuery
+	withMessage    *MessageQuery
+	withFKs        bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -50,6 +57,50 @@ func (emq *EmbedMessageQuery) Offset(offset int) *EmbedMessageQuery {
 func (emq *EmbedMessageQuery) Order(o ...OrderFunc) *EmbedMessageQuery {
 	emq.order = append(emq.order, o...)
 	return emq
+}
+
+// QueryEmbedField chains the current query on the "embed_field" edge.
+func (emq *EmbedMessageQuery) QueryEmbedField() *EmbedFieldQuery {
+	query := &EmbedFieldQuery{config: emq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := emq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := emq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(embedmessage.Table, embedmessage.FieldID, selector),
+			sqlgraph.To(embedfield.Table, embedfield.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, embedmessage.EmbedFieldTable, embedmessage.EmbedFieldColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(emq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryMessage chains the current query on the "message" edge.
+func (emq *EmbedMessageQuery) QueryMessage() *MessageQuery {
+	query := &MessageQuery{config: emq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := emq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := emq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(embedmessage.Table, embedmessage.FieldID, selector),
+			sqlgraph.To(message.Table, message.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, embedmessage.MessageTable, embedmessage.MessageColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(emq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first EmbedMessage entity from the query.
@@ -228,19 +279,56 @@ func (emq *EmbedMessageQuery) Clone() *EmbedMessageQuery {
 		return nil
 	}
 	return &EmbedMessageQuery{
-		config:     emq.config,
-		limit:      emq.limit,
-		offset:     emq.offset,
-		order:      append([]OrderFunc{}, emq.order...),
-		predicates: append([]predicate.EmbedMessage{}, emq.predicates...),
+		config:         emq.config,
+		limit:          emq.limit,
+		offset:         emq.offset,
+		order:          append([]OrderFunc{}, emq.order...),
+		predicates:     append([]predicate.EmbedMessage{}, emq.predicates...),
+		withEmbedField: emq.withEmbedField.Clone(),
+		withMessage:    emq.withMessage.Clone(),
 		// clone intermediate query.
 		sql:  emq.sql.Clone(),
 		path: emq.path,
 	}
 }
 
+// WithEmbedField tells the query-builder to eager-load the nodes that are connected to
+// the "embed_field" edge. The optional arguments are used to configure the query builder of the edge.
+func (emq *EmbedMessageQuery) WithEmbedField(opts ...func(*EmbedFieldQuery)) *EmbedMessageQuery {
+	query := &EmbedFieldQuery{config: emq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	emq.withEmbedField = query
+	return emq
+}
+
+// WithMessage tells the query-builder to eager-load the nodes that are connected to
+// the "message" edge. The optional arguments are used to configure the query builder of the edge.
+func (emq *EmbedMessageQuery) WithMessage(opts ...func(*MessageQuery)) *EmbedMessageQuery {
+	query := &MessageQuery{config: emq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	emq.withMessage = query
+	return emq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		Title string `json:"title,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.EmbedMessage.Query().
+//		GroupBy(embedmessage.FieldTitle).
+//		Aggregate(entgen.Count()).
+//		Scan(ctx, &v)
+//
 func (emq *EmbedMessageQuery) GroupBy(field string, fields ...string) *EmbedMessageGroupBy {
 	group := &EmbedMessageGroupBy{config: emq.config}
 	group.fields = append([]string{field}, fields...)
@@ -255,6 +343,17 @@ func (emq *EmbedMessageQuery) GroupBy(field string, fields ...string) *EmbedMess
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		Title string `json:"title,omitempty"`
+//	}
+//
+//	client.EmbedMessage.Query().
+//		Select(embedmessage.FieldTitle).
+//		Scan(ctx, &v)
+//
 func (emq *EmbedMessageQuery) Select(field string, fields ...string) *EmbedMessageSelect {
 	emq.fields = append([]string{field}, fields...)
 	return &EmbedMessageSelect{EmbedMessageQuery: emq}
@@ -278,9 +377,20 @@ func (emq *EmbedMessageQuery) prepareQuery(ctx context.Context) error {
 
 func (emq *EmbedMessageQuery) sqlAll(ctx context.Context) ([]*EmbedMessage, error) {
 	var (
-		nodes = []*EmbedMessage{}
-		_spec = emq.querySpec()
+		nodes       = []*EmbedMessage{}
+		withFKs     = emq.withFKs
+		_spec       = emq.querySpec()
+		loadedTypes = [2]bool{
+			emq.withEmbedField != nil,
+			emq.withMessage != nil,
+		}
 	)
+	if emq.withMessage != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, embedmessage.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &EmbedMessage{config: emq.config}
 		nodes = append(nodes, node)
@@ -291,6 +401,7 @@ func (emq *EmbedMessageQuery) sqlAll(ctx context.Context) ([]*EmbedMessage, erro
 			return fmt.Errorf("entgen: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if err := sqlgraph.QueryNodes(ctx, emq.driver, _spec); err != nil {
@@ -299,6 +410,62 @@ func (emq *EmbedMessageQuery) sqlAll(ctx context.Context) ([]*EmbedMessage, erro
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := emq.withEmbedField; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*EmbedMessage)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.EmbedField = []*EmbedField{}
+		}
+		query.withFKs = true
+		query.Where(predicate.EmbedField(func(s *sql.Selector) {
+			s.Where(sql.InValues(embedmessage.EmbedFieldColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.embed_message_embed_field
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "embed_message_embed_field" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "embed_message_embed_field" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.EmbedField = append(node.Edges.EmbedField, n)
+		}
+	}
+
+	if query := emq.withMessage; query != nil {
+		ids := make([]uint64, 0, len(nodes))
+		nodeids := make(map[uint64][]*EmbedMessage)
+		for i := range nodes {
+			fk := nodes[i].message_embed_message
+			if fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
+		}
+		query.Where(message.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "message_embed_message" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Message = n
+			}
+		}
+	}
+
 	return nodes, nil
 }
 

@@ -23,7 +23,7 @@ func (TextMessage) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.
 			From("message", Message.Type).
-			Ref("textmessage").
+			Ref("text_message").
 			Unique(),
 	}
 }

@@ -6,8 +6,23 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// ActionButton is the predicate function for actionbutton builders.
+type ActionButton func(*sql.Selector)
+
+// ActionDropdown is the predicate function for actiondropdown builders.
+type ActionDropdown func(*sql.Selector)
+
+// ActionInput is the predicate function for actioninput builders.
+type ActionInput func(*sql.Selector)
+
 // Channel is the predicate function for channel builders.
 type Channel func(*sql.Selector)
+
+// EmbedAction is the predicate function for embedaction builders.
+type EmbedAction func(*sql.Selector)
+
+// EmbedField is the predicate function for embedfield builders.
+type EmbedField func(*sql.Selector)
 
 // EmbedMessage is the predicate function for embedmessage builders.
 type EmbedMessage func(*sql.Selector)

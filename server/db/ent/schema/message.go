@@ -45,13 +45,13 @@ func (Message) Edges() []ent.Edge {
 			From("parent").
 			Unique(),
 		edge.
-			To("textmessage", TextMessage.Type).
+			To("text_message", TextMessage.Type).
 			Unique(),
 		edge.
-			To("filemessage", FileMessage.Type).
+			To("file_message", FileMessage.Type).
 			Unique(),
 		edge.
-			To("embedmessage", EmbedMessage.Type).
+			To("embed_message", EmbedMessage.Type).
 			Unique(),
 	}
 }

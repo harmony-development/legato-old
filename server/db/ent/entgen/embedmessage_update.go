@@ -9,7 +9,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/harmony-development/legato/server/db/ent/entgen/embedfield"
 	"github.com/harmony-development/legato/server/db/ent/entgen/embedmessage"
+	"github.com/harmony-development/legato/server/db/ent/entgen/message"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 )
 
@@ -26,9 +28,143 @@ func (emu *EmbedMessageUpdate) Where(ps ...predicate.EmbedMessage) *EmbedMessage
 	return emu
 }
 
+// SetTitle sets the "title" field.
+func (emu *EmbedMessageUpdate) SetTitle(s string) *EmbedMessageUpdate {
+	emu.mutation.SetTitle(s)
+	return emu
+}
+
+// SetBody sets the "body" field.
+func (emu *EmbedMessageUpdate) SetBody(s string) *EmbedMessageUpdate {
+	emu.mutation.SetBody(s)
+	return emu
+}
+
+// SetColor sets the "color" field.
+func (emu *EmbedMessageUpdate) SetColor(i int64) *EmbedMessageUpdate {
+	emu.mutation.ResetColor()
+	emu.mutation.SetColor(i)
+	return emu
+}
+
+// AddColor adds i to the "color" field.
+func (emu *EmbedMessageUpdate) AddColor(i int64) *EmbedMessageUpdate {
+	emu.mutation.AddColor(i)
+	return emu
+}
+
+// SetHeaderText sets the "header_text" field.
+func (emu *EmbedMessageUpdate) SetHeaderText(s string) *EmbedMessageUpdate {
+	emu.mutation.SetHeaderText(s)
+	return emu
+}
+
+// SetHeaderSubtext sets the "header_subtext" field.
+func (emu *EmbedMessageUpdate) SetHeaderSubtext(s string) *EmbedMessageUpdate {
+	emu.mutation.SetHeaderSubtext(s)
+	return emu
+}
+
+// SetHeaderURL sets the "header_url" field.
+func (emu *EmbedMessageUpdate) SetHeaderURL(s string) *EmbedMessageUpdate {
+	emu.mutation.SetHeaderURL(s)
+	return emu
+}
+
+// SetHeaderIcon sets the "header_icon" field.
+func (emu *EmbedMessageUpdate) SetHeaderIcon(s string) *EmbedMessageUpdate {
+	emu.mutation.SetHeaderIcon(s)
+	return emu
+}
+
+// SetFooterText sets the "footer_text" field.
+func (emu *EmbedMessageUpdate) SetFooterText(s string) *EmbedMessageUpdate {
+	emu.mutation.SetFooterText(s)
+	return emu
+}
+
+// SetFooterSubtext sets the "footer_subtext" field.
+func (emu *EmbedMessageUpdate) SetFooterSubtext(s string) *EmbedMessageUpdate {
+	emu.mutation.SetFooterSubtext(s)
+	return emu
+}
+
+// SetFooterURL sets the "footer_url" field.
+func (emu *EmbedMessageUpdate) SetFooterURL(s string) *EmbedMessageUpdate {
+	emu.mutation.SetFooterURL(s)
+	return emu
+}
+
+// SetFooterIcon sets the "footer_icon" field.
+func (emu *EmbedMessageUpdate) SetFooterIcon(s string) *EmbedMessageUpdate {
+	emu.mutation.SetFooterIcon(s)
+	return emu
+}
+
+// AddEmbedFieldIDs adds the "embed_field" edge to the EmbedField entity by IDs.
+func (emu *EmbedMessageUpdate) AddEmbedFieldIDs(ids ...int) *EmbedMessageUpdate {
+	emu.mutation.AddEmbedFieldIDs(ids...)
+	return emu
+}
+
+// AddEmbedField adds the "embed_field" edges to the EmbedField entity.
+func (emu *EmbedMessageUpdate) AddEmbedField(e ...*EmbedField) *EmbedMessageUpdate {
+	ids := make([]int, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return emu.AddEmbedFieldIDs(ids...)
+}
+
+// SetMessageID sets the "message" edge to the Message entity by ID.
+func (emu *EmbedMessageUpdate) SetMessageID(id uint64) *EmbedMessageUpdate {
+	emu.mutation.SetMessageID(id)
+	return emu
+}
+
+// SetNillableMessageID sets the "message" edge to the Message entity by ID if the given value is not nil.
+func (emu *EmbedMessageUpdate) SetNillableMessageID(id *uint64) *EmbedMessageUpdate {
+	if id != nil {
+		emu = emu.SetMessageID(*id)
+	}
+	return emu
+}
+
+// SetMessage sets the "message" edge to the Message entity.
+func (emu *EmbedMessageUpdate) SetMessage(m *Message) *EmbedMessageUpdate {
+	return emu.SetMessageID(m.ID)
+}
+
 // Mutation returns the EmbedMessageMutation object of the builder.
 func (emu *EmbedMessageUpdate) Mutation() *EmbedMessageMutation {
 	return emu.mutation
+}
+
+// ClearEmbedField clears all "embed_field" edges to the EmbedField entity.
+func (emu *EmbedMessageUpdate) ClearEmbedField() *EmbedMessageUpdate {
+	emu.mutation.ClearEmbedField()
+	return emu
+}
+
+// RemoveEmbedFieldIDs removes the "embed_field" edge to EmbedField entities by IDs.
+func (emu *EmbedMessageUpdate) RemoveEmbedFieldIDs(ids ...int) *EmbedMessageUpdate {
+	emu.mutation.RemoveEmbedFieldIDs(ids...)
+	return emu
+}
+
+// RemoveEmbedField removes "embed_field" edges to EmbedField entities.
+func (emu *EmbedMessageUpdate) RemoveEmbedField(e ...*EmbedField) *EmbedMessageUpdate {
+	ids := make([]int, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return emu.RemoveEmbedFieldIDs(ids...)
+}
+
+// ClearMessage clears the "message" edge to the Message entity.
+func (emu *EmbedMessageUpdate) ClearMessage() *EmbedMessageUpdate {
+	emu.mutation.ClearMessage()
+	return emu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -100,6 +236,179 @@ func (emu *EmbedMessageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := emu.mutation.Title(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: embedmessage.FieldTitle,
+		})
+	}
+	if value, ok := emu.mutation.Body(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: embedmessage.FieldBody,
+		})
+	}
+	if value, ok := emu.mutation.Color(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: embedmessage.FieldColor,
+		})
+	}
+	if value, ok := emu.mutation.AddedColor(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: embedmessage.FieldColor,
+		})
+	}
+	if value, ok := emu.mutation.HeaderText(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: embedmessage.FieldHeaderText,
+		})
+	}
+	if value, ok := emu.mutation.HeaderSubtext(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: embedmessage.FieldHeaderSubtext,
+		})
+	}
+	if value, ok := emu.mutation.HeaderURL(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: embedmessage.FieldHeaderURL,
+		})
+	}
+	if value, ok := emu.mutation.HeaderIcon(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: embedmessage.FieldHeaderIcon,
+		})
+	}
+	if value, ok := emu.mutation.FooterText(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: embedmessage.FieldFooterText,
+		})
+	}
+	if value, ok := emu.mutation.FooterSubtext(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: embedmessage.FieldFooterSubtext,
+		})
+	}
+	if value, ok := emu.mutation.FooterURL(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: embedmessage.FieldFooterURL,
+		})
+	}
+	if value, ok := emu.mutation.FooterIcon(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: embedmessage.FieldFooterIcon,
+		})
+	}
+	if emu.mutation.EmbedFieldCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   embedmessage.EmbedFieldTable,
+			Columns: []string{embedmessage.EmbedFieldColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: embedfield.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := emu.mutation.RemovedEmbedFieldIDs(); len(nodes) > 0 && !emu.mutation.EmbedFieldCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   embedmessage.EmbedFieldTable,
+			Columns: []string{embedmessage.EmbedFieldColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: embedfield.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := emu.mutation.EmbedFieldIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   embedmessage.EmbedFieldTable,
+			Columns: []string{embedmessage.EmbedFieldColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: embedfield.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if emu.mutation.MessageCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   embedmessage.MessageTable,
+			Columns: []string{embedmessage.MessageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: message.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := emu.mutation.MessageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   embedmessage.MessageTable,
+			Columns: []string{embedmessage.MessageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: message.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, emu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{embedmessage.Label}
@@ -118,9 +427,143 @@ type EmbedMessageUpdateOne struct {
 	mutation *EmbedMessageMutation
 }
 
+// SetTitle sets the "title" field.
+func (emuo *EmbedMessageUpdateOne) SetTitle(s string) *EmbedMessageUpdateOne {
+	emuo.mutation.SetTitle(s)
+	return emuo
+}
+
+// SetBody sets the "body" field.
+func (emuo *EmbedMessageUpdateOne) SetBody(s string) *EmbedMessageUpdateOne {
+	emuo.mutation.SetBody(s)
+	return emuo
+}
+
+// SetColor sets the "color" field.
+func (emuo *EmbedMessageUpdateOne) SetColor(i int64) *EmbedMessageUpdateOne {
+	emuo.mutation.ResetColor()
+	emuo.mutation.SetColor(i)
+	return emuo
+}
+
+// AddColor adds i to the "color" field.
+func (emuo *EmbedMessageUpdateOne) AddColor(i int64) *EmbedMessageUpdateOne {
+	emuo.mutation.AddColor(i)
+	return emuo
+}
+
+// SetHeaderText sets the "header_text" field.
+func (emuo *EmbedMessageUpdateOne) SetHeaderText(s string) *EmbedMessageUpdateOne {
+	emuo.mutation.SetHeaderText(s)
+	return emuo
+}
+
+// SetHeaderSubtext sets the "header_subtext" field.
+func (emuo *EmbedMessageUpdateOne) SetHeaderSubtext(s string) *EmbedMessageUpdateOne {
+	emuo.mutation.SetHeaderSubtext(s)
+	return emuo
+}
+
+// SetHeaderURL sets the "header_url" field.
+func (emuo *EmbedMessageUpdateOne) SetHeaderURL(s string) *EmbedMessageUpdateOne {
+	emuo.mutation.SetHeaderURL(s)
+	return emuo
+}
+
+// SetHeaderIcon sets the "header_icon" field.
+func (emuo *EmbedMessageUpdateOne) SetHeaderIcon(s string) *EmbedMessageUpdateOne {
+	emuo.mutation.SetHeaderIcon(s)
+	return emuo
+}
+
+// SetFooterText sets the "footer_text" field.
+func (emuo *EmbedMessageUpdateOne) SetFooterText(s string) *EmbedMessageUpdateOne {
+	emuo.mutation.SetFooterText(s)
+	return emuo
+}
+
+// SetFooterSubtext sets the "footer_subtext" field.
+func (emuo *EmbedMessageUpdateOne) SetFooterSubtext(s string) *EmbedMessageUpdateOne {
+	emuo.mutation.SetFooterSubtext(s)
+	return emuo
+}
+
+// SetFooterURL sets the "footer_url" field.
+func (emuo *EmbedMessageUpdateOne) SetFooterURL(s string) *EmbedMessageUpdateOne {
+	emuo.mutation.SetFooterURL(s)
+	return emuo
+}
+
+// SetFooterIcon sets the "footer_icon" field.
+func (emuo *EmbedMessageUpdateOne) SetFooterIcon(s string) *EmbedMessageUpdateOne {
+	emuo.mutation.SetFooterIcon(s)
+	return emuo
+}
+
+// AddEmbedFieldIDs adds the "embed_field" edge to the EmbedField entity by IDs.
+func (emuo *EmbedMessageUpdateOne) AddEmbedFieldIDs(ids ...int) *EmbedMessageUpdateOne {
+	emuo.mutation.AddEmbedFieldIDs(ids...)
+	return emuo
+}
+
+// AddEmbedField adds the "embed_field" edges to the EmbedField entity.
+func (emuo *EmbedMessageUpdateOne) AddEmbedField(e ...*EmbedField) *EmbedMessageUpdateOne {
+	ids := make([]int, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return emuo.AddEmbedFieldIDs(ids...)
+}
+
+// SetMessageID sets the "message" edge to the Message entity by ID.
+func (emuo *EmbedMessageUpdateOne) SetMessageID(id uint64) *EmbedMessageUpdateOne {
+	emuo.mutation.SetMessageID(id)
+	return emuo
+}
+
+// SetNillableMessageID sets the "message" edge to the Message entity by ID if the given value is not nil.
+func (emuo *EmbedMessageUpdateOne) SetNillableMessageID(id *uint64) *EmbedMessageUpdateOne {
+	if id != nil {
+		emuo = emuo.SetMessageID(*id)
+	}
+	return emuo
+}
+
+// SetMessage sets the "message" edge to the Message entity.
+func (emuo *EmbedMessageUpdateOne) SetMessage(m *Message) *EmbedMessageUpdateOne {
+	return emuo.SetMessageID(m.ID)
+}
+
 // Mutation returns the EmbedMessageMutation object of the builder.
 func (emuo *EmbedMessageUpdateOne) Mutation() *EmbedMessageMutation {
 	return emuo.mutation
+}
+
+// ClearEmbedField clears all "embed_field" edges to the EmbedField entity.
+func (emuo *EmbedMessageUpdateOne) ClearEmbedField() *EmbedMessageUpdateOne {
+	emuo.mutation.ClearEmbedField()
+	return emuo
+}
+
+// RemoveEmbedFieldIDs removes the "embed_field" edge to EmbedField entities by IDs.
+func (emuo *EmbedMessageUpdateOne) RemoveEmbedFieldIDs(ids ...int) *EmbedMessageUpdateOne {
+	emuo.mutation.RemoveEmbedFieldIDs(ids...)
+	return emuo
+}
+
+// RemoveEmbedField removes "embed_field" edges to EmbedField entities.
+func (emuo *EmbedMessageUpdateOne) RemoveEmbedField(e ...*EmbedField) *EmbedMessageUpdateOne {
+	ids := make([]int, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return emuo.RemoveEmbedFieldIDs(ids...)
+}
+
+// ClearMessage clears the "message" edge to the Message entity.
+func (emuo *EmbedMessageUpdateOne) ClearMessage() *EmbedMessageUpdateOne {
+	emuo.mutation.ClearMessage()
+	return emuo
 }
 
 // Save executes the query and returns the updated EmbedMessage entity.
@@ -196,6 +639,179 @@ func (emuo *EmbedMessageUpdateOne) sqlSave(ctx context.Context) (_node *EmbedMes
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := emuo.mutation.Title(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: embedmessage.FieldTitle,
+		})
+	}
+	if value, ok := emuo.mutation.Body(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: embedmessage.FieldBody,
+		})
+	}
+	if value, ok := emuo.mutation.Color(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: embedmessage.FieldColor,
+		})
+	}
+	if value, ok := emuo.mutation.AddedColor(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: embedmessage.FieldColor,
+		})
+	}
+	if value, ok := emuo.mutation.HeaderText(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: embedmessage.FieldHeaderText,
+		})
+	}
+	if value, ok := emuo.mutation.HeaderSubtext(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: embedmessage.FieldHeaderSubtext,
+		})
+	}
+	if value, ok := emuo.mutation.HeaderURL(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: embedmessage.FieldHeaderURL,
+		})
+	}
+	if value, ok := emuo.mutation.HeaderIcon(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: embedmessage.FieldHeaderIcon,
+		})
+	}
+	if value, ok := emuo.mutation.FooterText(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: embedmessage.FieldFooterText,
+		})
+	}
+	if value, ok := emuo.mutation.FooterSubtext(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: embedmessage.FieldFooterSubtext,
+		})
+	}
+	if value, ok := emuo.mutation.FooterURL(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: embedmessage.FieldFooterURL,
+		})
+	}
+	if value, ok := emuo.mutation.FooterIcon(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: embedmessage.FieldFooterIcon,
+		})
+	}
+	if emuo.mutation.EmbedFieldCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   embedmessage.EmbedFieldTable,
+			Columns: []string{embedmessage.EmbedFieldColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: embedfield.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := emuo.mutation.RemovedEmbedFieldIDs(); len(nodes) > 0 && !emuo.mutation.EmbedFieldCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   embedmessage.EmbedFieldTable,
+			Columns: []string{embedmessage.EmbedFieldColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: embedfield.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := emuo.mutation.EmbedFieldIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   embedmessage.EmbedFieldTable,
+			Columns: []string{embedmessage.EmbedFieldColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: embedfield.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if emuo.mutation.MessageCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   embedmessage.MessageTable,
+			Columns: []string{embedmessage.MessageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: message.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := emuo.mutation.MessageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   embedmessage.MessageTable,
+			Columns: []string{embedmessage.MessageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: message.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &EmbedMessage{config: emuo.config}
 	_spec.Assign = _node.assignValues

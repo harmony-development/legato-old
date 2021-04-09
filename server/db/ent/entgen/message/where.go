@@ -510,25 +510,25 @@ func HasRepliesWith(preds ...predicate.Message) predicate.Message {
 	})
 }
 
-// HasTextmessage applies the HasEdge predicate on the "textmessage" edge.
-func HasTextmessage() predicate.Message {
+// HasTextMessage applies the HasEdge predicate on the "text_message" edge.
+func HasTextMessage() predicate.Message {
 	return predicate.Message(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TextmessageTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, TextmessageTable, TextmessageColumn),
+			sqlgraph.To(TextMessageTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, TextMessageTable, TextMessageColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasTextmessageWith applies the HasEdge predicate on the "textmessage" edge with a given conditions (other predicates).
-func HasTextmessageWith(preds ...predicate.TextMessage) predicate.Message {
+// HasTextMessageWith applies the HasEdge predicate on the "text_message" edge with a given conditions (other predicates).
+func HasTextMessageWith(preds ...predicate.TextMessage) predicate.Message {
 	return predicate.Message(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TextmessageInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, TextmessageTable, TextmessageColumn),
+			sqlgraph.To(TextMessageInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, TextMessageTable, TextMessageColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -538,25 +538,25 @@ func HasTextmessageWith(preds ...predicate.TextMessage) predicate.Message {
 	})
 }
 
-// HasFilemessage applies the HasEdge predicate on the "filemessage" edge.
-func HasFilemessage() predicate.Message {
+// HasFileMessage applies the HasEdge predicate on the "file_message" edge.
+func HasFileMessage() predicate.Message {
 	return predicate.Message(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(FilemessageTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, FilemessageTable, FilemessageColumn),
+			sqlgraph.To(FileMessageTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, FileMessageTable, FileMessageColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasFilemessageWith applies the HasEdge predicate on the "filemessage" edge with a given conditions (other predicates).
-func HasFilemessageWith(preds ...predicate.FileMessage) predicate.Message {
+// HasFileMessageWith applies the HasEdge predicate on the "file_message" edge with a given conditions (other predicates).
+func HasFileMessageWith(preds ...predicate.FileMessage) predicate.Message {
 	return predicate.Message(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(FilemessageInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, FilemessageTable, FilemessageColumn),
+			sqlgraph.To(FileMessageInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, FileMessageTable, FileMessageColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -566,25 +566,25 @@ func HasFilemessageWith(preds ...predicate.FileMessage) predicate.Message {
 	})
 }
 
-// HasEmbedmessage applies the HasEdge predicate on the "embedmessage" edge.
-func HasEmbedmessage() predicate.Message {
+// HasEmbedMessage applies the HasEdge predicate on the "embed_message" edge.
+func HasEmbedMessage() predicate.Message {
 	return predicate.Message(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(EmbedmessageTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, EmbedmessageTable, EmbedmessageColumn),
+			sqlgraph.To(EmbedMessageTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, EmbedMessageTable, EmbedMessageColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasEmbedmessageWith applies the HasEdge predicate on the "embedmessage" edge with a given conditions (other predicates).
-func HasEmbedmessageWith(preds ...predicate.EmbedMessage) predicate.Message {
+// HasEmbedMessageWith applies the HasEdge predicate on the "embed_message" edge with a given conditions (other predicates).
+func HasEmbedMessageWith(preds ...predicate.EmbedMessage) predicate.Message {
 	return predicate.Message(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(EmbedmessageInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, EmbedmessageTable, EmbedmessageColumn),
+			sqlgraph.To(EmbedMessageInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, EmbedMessageTable, EmbedMessageColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

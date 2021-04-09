@@ -24,7 +24,12 @@ type config struct {
 
 // hooks per client, for fast access.
 type hooks struct {
+	ActionButton   []ent.Hook
+	ActionDropdown []ent.Hook
+	ActionInput    []ent.Hook
 	Channel        []ent.Hook
+	EmbedAction    []ent.Hook
+	EmbedField     []ent.Hook
 	EmbedMessage   []ent.Hook
 	Emote          []ent.Hook
 	EmotePack      []ent.Hook

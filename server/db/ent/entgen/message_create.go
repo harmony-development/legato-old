@@ -150,61 +150,61 @@ func (mc *MessageCreate) AddReplies(m ...*Message) *MessageCreate {
 	return mc.AddReplyIDs(ids...)
 }
 
-// SetTextmessageID sets the "textmessage" edge to the TextMessage entity by ID.
-func (mc *MessageCreate) SetTextmessageID(id int) *MessageCreate {
-	mc.mutation.SetTextmessageID(id)
+// SetTextMessageID sets the "text_message" edge to the TextMessage entity by ID.
+func (mc *MessageCreate) SetTextMessageID(id int) *MessageCreate {
+	mc.mutation.SetTextMessageID(id)
 	return mc
 }
 
-// SetNillableTextmessageID sets the "textmessage" edge to the TextMessage entity by ID if the given value is not nil.
-func (mc *MessageCreate) SetNillableTextmessageID(id *int) *MessageCreate {
+// SetNillableTextMessageID sets the "text_message" edge to the TextMessage entity by ID if the given value is not nil.
+func (mc *MessageCreate) SetNillableTextMessageID(id *int) *MessageCreate {
 	if id != nil {
-		mc = mc.SetTextmessageID(*id)
+		mc = mc.SetTextMessageID(*id)
 	}
 	return mc
 }
 
-// SetTextmessage sets the "textmessage" edge to the TextMessage entity.
-func (mc *MessageCreate) SetTextmessage(t *TextMessage) *MessageCreate {
-	return mc.SetTextmessageID(t.ID)
+// SetTextMessage sets the "text_message" edge to the TextMessage entity.
+func (mc *MessageCreate) SetTextMessage(t *TextMessage) *MessageCreate {
+	return mc.SetTextMessageID(t.ID)
 }
 
-// SetFilemessageID sets the "filemessage" edge to the FileMessage entity by ID.
-func (mc *MessageCreate) SetFilemessageID(id int) *MessageCreate {
-	mc.mutation.SetFilemessageID(id)
+// SetFileMessageID sets the "file_message" edge to the FileMessage entity by ID.
+func (mc *MessageCreate) SetFileMessageID(id int) *MessageCreate {
+	mc.mutation.SetFileMessageID(id)
 	return mc
 }
 
-// SetNillableFilemessageID sets the "filemessage" edge to the FileMessage entity by ID if the given value is not nil.
-func (mc *MessageCreate) SetNillableFilemessageID(id *int) *MessageCreate {
+// SetNillableFileMessageID sets the "file_message" edge to the FileMessage entity by ID if the given value is not nil.
+func (mc *MessageCreate) SetNillableFileMessageID(id *int) *MessageCreate {
 	if id != nil {
-		mc = mc.SetFilemessageID(*id)
+		mc = mc.SetFileMessageID(*id)
 	}
 	return mc
 }
 
-// SetFilemessage sets the "filemessage" edge to the FileMessage entity.
-func (mc *MessageCreate) SetFilemessage(f *FileMessage) *MessageCreate {
-	return mc.SetFilemessageID(f.ID)
+// SetFileMessage sets the "file_message" edge to the FileMessage entity.
+func (mc *MessageCreate) SetFileMessage(f *FileMessage) *MessageCreate {
+	return mc.SetFileMessageID(f.ID)
 }
 
-// SetEmbedmessageID sets the "embedmessage" edge to the EmbedMessage entity by ID.
-func (mc *MessageCreate) SetEmbedmessageID(id int) *MessageCreate {
-	mc.mutation.SetEmbedmessageID(id)
+// SetEmbedMessageID sets the "embed_message" edge to the EmbedMessage entity by ID.
+func (mc *MessageCreate) SetEmbedMessageID(id int) *MessageCreate {
+	mc.mutation.SetEmbedMessageID(id)
 	return mc
 }
 
-// SetNillableEmbedmessageID sets the "embedmessage" edge to the EmbedMessage entity by ID if the given value is not nil.
-func (mc *MessageCreate) SetNillableEmbedmessageID(id *int) *MessageCreate {
+// SetNillableEmbedMessageID sets the "embed_message" edge to the EmbedMessage entity by ID if the given value is not nil.
+func (mc *MessageCreate) SetNillableEmbedMessageID(id *int) *MessageCreate {
 	if id != nil {
-		mc = mc.SetEmbedmessageID(*id)
+		mc = mc.SetEmbedMessageID(*id)
 	}
 	return mc
 }
 
-// SetEmbedmessage sets the "embedmessage" edge to the EmbedMessage entity.
-func (mc *MessageCreate) SetEmbedmessage(e *EmbedMessage) *MessageCreate {
-	return mc.SetEmbedmessageID(e.ID)
+// SetEmbedMessage sets the "embed_message" edge to the EmbedMessage entity.
+func (mc *MessageCreate) SetEmbedMessage(e *EmbedMessage) *MessageCreate {
+	return mc.SetEmbedMessageID(e.ID)
 }
 
 // Mutation returns the MessageMutation object of the builder.
@@ -422,12 +422,12 @@ func (mc *MessageCreate) createSpec() (*Message, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := mc.mutation.TextmessageIDs(); len(nodes) > 0 {
+	if nodes := mc.mutation.TextMessageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   message.TextmessageTable,
-			Columns: []string{message.TextmessageColumn},
+			Table:   message.TextMessageTable,
+			Columns: []string{message.TextMessageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -441,12 +441,12 @@ func (mc *MessageCreate) createSpec() (*Message, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := mc.mutation.FilemessageIDs(); len(nodes) > 0 {
+	if nodes := mc.mutation.FileMessageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   message.FilemessageTable,
-			Columns: []string{message.FilemessageColumn},
+			Table:   message.FileMessageTable,
+			Columns: []string{message.FileMessageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -458,15 +458,15 @@ func (mc *MessageCreate) createSpec() (*Message, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.message_filemessage = &nodes[0]
+		_node.message_file_message = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := mc.mutation.EmbedmessageIDs(); len(nodes) > 0 {
+	if nodes := mc.mutation.EmbedMessageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   message.EmbedmessageTable,
-			Columns: []string{message.EmbedmessageColumn},
+			Table:   message.EmbedMessageTable,
+			Columns: []string{message.EmbedMessageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -478,7 +478,6 @@ func (mc *MessageCreate) createSpec() (*Message, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.message_embedmessage = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

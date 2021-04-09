@@ -34,9 +34,9 @@ type MessageQuery struct {
 	withChannel      *ChannelQuery
 	withParent       *MessageQuery
 	withReplies      *MessageQuery
-	withTextmessage  *TextMessageQuery
-	withFilemessage  *FileMessageQuery
-	withEmbedmessage *EmbedMessageQuery
+	withTextMessage  *TextMessageQuery
+	withFileMessage  *FileMessageQuery
+	withEmbedMessage *EmbedMessageQuery
 	withFKs          bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -155,8 +155,8 @@ func (mq *MessageQuery) QueryReplies() *MessageQuery {
 	return query
 }
 
-// QueryTextmessage chains the current query on the "textmessage" edge.
-func (mq *MessageQuery) QueryTextmessage() *TextMessageQuery {
+// QueryTextMessage chains the current query on the "text_message" edge.
+func (mq *MessageQuery) QueryTextMessage() *TextMessageQuery {
 	query := &TextMessageQuery{config: mq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := mq.prepareQuery(ctx); err != nil {
@@ -169,7 +169,7 @@ func (mq *MessageQuery) QueryTextmessage() *TextMessageQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(message.Table, message.FieldID, selector),
 			sqlgraph.To(textmessage.Table, textmessage.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, message.TextmessageTable, message.TextmessageColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, message.TextMessageTable, message.TextMessageColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(mq.driver.Dialect(), step)
 		return fromU, nil
@@ -177,8 +177,8 @@ func (mq *MessageQuery) QueryTextmessage() *TextMessageQuery {
 	return query
 }
 
-// QueryFilemessage chains the current query on the "filemessage" edge.
-func (mq *MessageQuery) QueryFilemessage() *FileMessageQuery {
+// QueryFileMessage chains the current query on the "file_message" edge.
+func (mq *MessageQuery) QueryFileMessage() *FileMessageQuery {
 	query := &FileMessageQuery{config: mq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := mq.prepareQuery(ctx); err != nil {
@@ -191,7 +191,7 @@ func (mq *MessageQuery) QueryFilemessage() *FileMessageQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(message.Table, message.FieldID, selector),
 			sqlgraph.To(filemessage.Table, filemessage.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, message.FilemessageTable, message.FilemessageColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, message.FileMessageTable, message.FileMessageColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(mq.driver.Dialect(), step)
 		return fromU, nil
@@ -199,8 +199,8 @@ func (mq *MessageQuery) QueryFilemessage() *FileMessageQuery {
 	return query
 }
 
-// QueryEmbedmessage chains the current query on the "embedmessage" edge.
-func (mq *MessageQuery) QueryEmbedmessage() *EmbedMessageQuery {
+// QueryEmbedMessage chains the current query on the "embed_message" edge.
+func (mq *MessageQuery) QueryEmbedMessage() *EmbedMessageQuery {
 	query := &EmbedMessageQuery{config: mq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := mq.prepareQuery(ctx); err != nil {
@@ -213,7 +213,7 @@ func (mq *MessageQuery) QueryEmbedmessage() *EmbedMessageQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(message.Table, message.FieldID, selector),
 			sqlgraph.To(embedmessage.Table, embedmessage.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, message.EmbedmessageTable, message.EmbedmessageColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, message.EmbedMessageTable, message.EmbedMessageColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(mq.driver.Dialect(), step)
 		return fromU, nil
@@ -406,9 +406,9 @@ func (mq *MessageQuery) Clone() *MessageQuery {
 		withChannel:      mq.withChannel.Clone(),
 		withParent:       mq.withParent.Clone(),
 		withReplies:      mq.withReplies.Clone(),
-		withTextmessage:  mq.withTextmessage.Clone(),
-		withFilemessage:  mq.withFilemessage.Clone(),
-		withEmbedmessage: mq.withEmbedmessage.Clone(),
+		withTextMessage:  mq.withTextMessage.Clone(),
+		withFileMessage:  mq.withFileMessage.Clone(),
+		withEmbedMessage: mq.withEmbedMessage.Clone(),
 		// clone intermediate query.
 		sql:  mq.sql.Clone(),
 		path: mq.path,
@@ -459,36 +459,36 @@ func (mq *MessageQuery) WithReplies(opts ...func(*MessageQuery)) *MessageQuery {
 	return mq
 }
 
-// WithTextmessage tells the query-builder to eager-load the nodes that are connected to
-// the "textmessage" edge. The optional arguments are used to configure the query builder of the edge.
-func (mq *MessageQuery) WithTextmessage(opts ...func(*TextMessageQuery)) *MessageQuery {
+// WithTextMessage tells the query-builder to eager-load the nodes that are connected to
+// the "text_message" edge. The optional arguments are used to configure the query builder of the edge.
+func (mq *MessageQuery) WithTextMessage(opts ...func(*TextMessageQuery)) *MessageQuery {
 	query := &TextMessageQuery{config: mq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	mq.withTextmessage = query
+	mq.withTextMessage = query
 	return mq
 }
 
-// WithFilemessage tells the query-builder to eager-load the nodes that are connected to
-// the "filemessage" edge. The optional arguments are used to configure the query builder of the edge.
-func (mq *MessageQuery) WithFilemessage(opts ...func(*FileMessageQuery)) *MessageQuery {
+// WithFileMessage tells the query-builder to eager-load the nodes that are connected to
+// the "file_message" edge. The optional arguments are used to configure the query builder of the edge.
+func (mq *MessageQuery) WithFileMessage(opts ...func(*FileMessageQuery)) *MessageQuery {
 	query := &FileMessageQuery{config: mq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	mq.withFilemessage = query
+	mq.withFileMessage = query
 	return mq
 }
 
-// WithEmbedmessage tells the query-builder to eager-load the nodes that are connected to
-// the "embedmessage" edge. The optional arguments are used to configure the query builder of the edge.
-func (mq *MessageQuery) WithEmbedmessage(opts ...func(*EmbedMessageQuery)) *MessageQuery {
+// WithEmbedMessage tells the query-builder to eager-load the nodes that are connected to
+// the "embed_message" edge. The optional arguments are used to configure the query builder of the edge.
+func (mq *MessageQuery) WithEmbedMessage(opts ...func(*EmbedMessageQuery)) *MessageQuery {
 	query := &EmbedMessageQuery{config: mq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	mq.withEmbedmessage = query
+	mq.withEmbedMessage = query
 	return mq
 }
 
@@ -563,12 +563,12 @@ func (mq *MessageQuery) sqlAll(ctx context.Context) ([]*Message, error) {
 			mq.withChannel != nil,
 			mq.withParent != nil,
 			mq.withReplies != nil,
-			mq.withTextmessage != nil,
-			mq.withFilemessage != nil,
-			mq.withEmbedmessage != nil,
+			mq.withTextMessage != nil,
+			mq.withFileMessage != nil,
+			mq.withEmbedMessage != nil,
 		}
 	)
-	if mq.withUser != nil || mq.withChannel != nil || mq.withParent != nil || mq.withFilemessage != nil || mq.withEmbedmessage != nil {
+	if mq.withUser != nil || mq.withChannel != nil || mq.withParent != nil || mq.withFileMessage != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -701,7 +701,7 @@ func (mq *MessageQuery) sqlAll(ctx context.Context) ([]*Message, error) {
 		}
 	}
 
-	if query := mq.withTextmessage; query != nil {
+	if query := mq.withTextMessage; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[uint64]*Message)
 		for i := range nodes {
@@ -710,30 +710,30 @@ func (mq *MessageQuery) sqlAll(ctx context.Context) ([]*Message, error) {
 		}
 		query.withFKs = true
 		query.Where(predicate.TextMessage(func(s *sql.Selector) {
-			s.Where(sql.InValues(message.TextmessageColumn, fks...))
+			s.Where(sql.InValues(message.TextMessageColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.message_textmessage
+			fk := n.message_text_message
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "message_textmessage" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "message_text_message" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "message_textmessage" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "message_text_message" returned %v for node %v`, *fk, n.ID)
 			}
-			node.Edges.Textmessage = n
+			node.Edges.TextMessage = n
 		}
 	}
 
-	if query := mq.withFilemessage; query != nil {
+	if query := mq.withFileMessage; query != nil {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Message)
 		for i := range nodes {
-			fk := nodes[i].message_filemessage
+			fk := nodes[i].message_file_message
 			if fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
@@ -747,37 +747,39 @@ func (mq *MessageQuery) sqlAll(ctx context.Context) ([]*Message, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "message_filemessage" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "message_file_message" returned %v`, n.ID)
 			}
 			for i := range nodes {
-				nodes[i].Edges.Filemessage = n
+				nodes[i].Edges.FileMessage = n
 			}
 		}
 	}
 
-	if query := mq.withEmbedmessage; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Message)
+	if query := mq.withEmbedMessage; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uint64]*Message)
 		for i := range nodes {
-			fk := nodes[i].message_embedmessage
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
-			}
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
 		}
-		query.Where(embedmessage.IDIn(ids...))
+		query.withFKs = true
+		query.Where(predicate.EmbedMessage(func(s *sql.Selector) {
+			s.Where(sql.InValues(message.EmbedMessageColumn, fks...))
+		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
+			fk := n.message_embed_message
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "message_embed_message" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "message_embedmessage" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "message_embed_message" returned %v for node %v`, *fk, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.Embedmessage = n
-			}
+			node.Edges.EmbedMessage = n
 		}
 	}
 

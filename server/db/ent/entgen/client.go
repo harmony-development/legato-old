@@ -9,7 +9,12 @@ import (
 
 	"github.com/harmony-development/legato/server/db/ent/entgen/migrate"
 
+	"github.com/harmony-development/legato/server/db/ent/entgen/actionbutton"
+	"github.com/harmony-development/legato/server/db/ent/entgen/actiondropdown"
+	"github.com/harmony-development/legato/server/db/ent/entgen/actioninput"
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
+	"github.com/harmony-development/legato/server/db/ent/entgen/embedaction"
+	"github.com/harmony-development/legato/server/db/ent/entgen/embedfield"
 	"github.com/harmony-development/legato/server/db/ent/entgen/embedmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/emote"
 	"github.com/harmony-development/legato/server/db/ent/entgen/emotepack"
@@ -40,8 +45,18 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// ActionButton is the client for interacting with the ActionButton builders.
+	ActionButton *ActionButtonClient
+	// ActionDropdown is the client for interacting with the ActionDropdown builders.
+	ActionDropdown *ActionDropdownClient
+	// ActionInput is the client for interacting with the ActionInput builders.
+	ActionInput *ActionInputClient
 	// Channel is the client for interacting with the Channel builders.
 	Channel *ChannelClient
+	// EmbedAction is the client for interacting with the EmbedAction builders.
+	EmbedAction *EmbedActionClient
+	// EmbedField is the client for interacting with the EmbedField builders.
+	EmbedField *EmbedFieldClient
 	// EmbedMessage is the client for interacting with the EmbedMessage builders.
 	EmbedMessage *EmbedMessageClient
 	// Emote is the client for interacting with the Emote builders.
@@ -93,7 +108,12 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.ActionButton = NewActionButtonClient(c.config)
+	c.ActionDropdown = NewActionDropdownClient(c.config)
+	c.ActionInput = NewActionInputClient(c.config)
 	c.Channel = NewChannelClient(c.config)
+	c.EmbedAction = NewEmbedActionClient(c.config)
+	c.EmbedField = NewEmbedFieldClient(c.config)
 	c.EmbedMessage = NewEmbedMessageClient(c.config)
 	c.Emote = NewEmoteClient(c.config)
 	c.EmotePack = NewEmotePackClient(c.config)
@@ -146,7 +166,12 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:            ctx,
 		config:         cfg,
+		ActionButton:   NewActionButtonClient(cfg),
+		ActionDropdown: NewActionDropdownClient(cfg),
+		ActionInput:    NewActionInputClient(cfg),
 		Channel:        NewChannelClient(cfg),
+		EmbedAction:    NewEmbedActionClient(cfg),
+		EmbedField:     NewEmbedFieldClient(cfg),
 		EmbedMessage:   NewEmbedMessageClient(cfg),
 		Emote:          NewEmoteClient(cfg),
 		EmotePack:      NewEmotePackClient(cfg),
@@ -184,7 +209,12 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
 		config:         cfg,
+		ActionButton:   NewActionButtonClient(cfg),
+		ActionDropdown: NewActionDropdownClient(cfg),
+		ActionInput:    NewActionInputClient(cfg),
 		Channel:        NewChannelClient(cfg),
+		EmbedAction:    NewEmbedActionClient(cfg),
+		EmbedField:     NewEmbedFieldClient(cfg),
 		EmbedMessage:   NewEmbedMessageClient(cfg),
 		Emote:          NewEmoteClient(cfg),
 		EmotePack:      NewEmotePackClient(cfg),
@@ -210,7 +240,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Channel.
+//		ActionButton.
 //		Query().
 //		Count(ctx)
 //
@@ -233,7 +263,12 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.ActionButton.Use(hooks...)
+	c.ActionDropdown.Use(hooks...)
+	c.ActionInput.Use(hooks...)
 	c.Channel.Use(hooks...)
+	c.EmbedAction.Use(hooks...)
+	c.EmbedField.Use(hooks...)
 	c.EmbedMessage.Use(hooks...)
 	c.Emote.Use(hooks...)
 	c.EmotePack.Use(hooks...)
@@ -253,6 +288,270 @@ func (c *Client) Use(hooks ...Hook) {
 	c.TextMessage.Use(hooks...)
 	c.User.Use(hooks...)
 	c.UserMeta.Use(hooks...)
+}
+
+// ActionButtonClient is a client for the ActionButton schema.
+type ActionButtonClient struct {
+	config
+}
+
+// NewActionButtonClient returns a client for the ActionButton from the given config.
+func NewActionButtonClient(c config) *ActionButtonClient {
+	return &ActionButtonClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `actionbutton.Hooks(f(g(h())))`.
+func (c *ActionButtonClient) Use(hooks ...Hook) {
+	c.hooks.ActionButton = append(c.hooks.ActionButton, hooks...)
+}
+
+// Create returns a create builder for ActionButton.
+func (c *ActionButtonClient) Create() *ActionButtonCreate {
+	mutation := newActionButtonMutation(c.config, OpCreate)
+	return &ActionButtonCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ActionButton entities.
+func (c *ActionButtonClient) CreateBulk(builders ...*ActionButtonCreate) *ActionButtonCreateBulk {
+	return &ActionButtonCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ActionButton.
+func (c *ActionButtonClient) Update() *ActionButtonUpdate {
+	mutation := newActionButtonMutation(c.config, OpUpdate)
+	return &ActionButtonUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ActionButtonClient) UpdateOne(ab *ActionButton) *ActionButtonUpdateOne {
+	mutation := newActionButtonMutation(c.config, OpUpdateOne, withActionButton(ab))
+	return &ActionButtonUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ActionButtonClient) UpdateOneID(id int) *ActionButtonUpdateOne {
+	mutation := newActionButtonMutation(c.config, OpUpdateOne, withActionButtonID(id))
+	return &ActionButtonUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ActionButton.
+func (c *ActionButtonClient) Delete() *ActionButtonDelete {
+	mutation := newActionButtonMutation(c.config, OpDelete)
+	return &ActionButtonDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ActionButtonClient) DeleteOne(ab *ActionButton) *ActionButtonDeleteOne {
+	return c.DeleteOneID(ab.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ActionButtonClient) DeleteOneID(id int) *ActionButtonDeleteOne {
+	builder := c.Delete().Where(actionbutton.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ActionButtonDeleteOne{builder}
+}
+
+// Query returns a query builder for ActionButton.
+func (c *ActionButtonClient) Query() *ActionButtonQuery {
+	return &ActionButtonQuery{config: c.config}
+}
+
+// Get returns a ActionButton entity by its id.
+func (c *ActionButtonClient) Get(ctx context.Context, id int) (*ActionButton, error) {
+	return c.Query().Where(actionbutton.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ActionButtonClient) GetX(ctx context.Context, id int) *ActionButton {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ActionButtonClient) Hooks() []Hook {
+	return c.hooks.ActionButton
+}
+
+// ActionDropdownClient is a client for the ActionDropdown schema.
+type ActionDropdownClient struct {
+	config
+}
+
+// NewActionDropdownClient returns a client for the ActionDropdown from the given config.
+func NewActionDropdownClient(c config) *ActionDropdownClient {
+	return &ActionDropdownClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `actiondropdown.Hooks(f(g(h())))`.
+func (c *ActionDropdownClient) Use(hooks ...Hook) {
+	c.hooks.ActionDropdown = append(c.hooks.ActionDropdown, hooks...)
+}
+
+// Create returns a create builder for ActionDropdown.
+func (c *ActionDropdownClient) Create() *ActionDropdownCreate {
+	mutation := newActionDropdownMutation(c.config, OpCreate)
+	return &ActionDropdownCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ActionDropdown entities.
+func (c *ActionDropdownClient) CreateBulk(builders ...*ActionDropdownCreate) *ActionDropdownCreateBulk {
+	return &ActionDropdownCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ActionDropdown.
+func (c *ActionDropdownClient) Update() *ActionDropdownUpdate {
+	mutation := newActionDropdownMutation(c.config, OpUpdate)
+	return &ActionDropdownUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ActionDropdownClient) UpdateOne(ad *ActionDropdown) *ActionDropdownUpdateOne {
+	mutation := newActionDropdownMutation(c.config, OpUpdateOne, withActionDropdown(ad))
+	return &ActionDropdownUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ActionDropdownClient) UpdateOneID(id int) *ActionDropdownUpdateOne {
+	mutation := newActionDropdownMutation(c.config, OpUpdateOne, withActionDropdownID(id))
+	return &ActionDropdownUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ActionDropdown.
+func (c *ActionDropdownClient) Delete() *ActionDropdownDelete {
+	mutation := newActionDropdownMutation(c.config, OpDelete)
+	return &ActionDropdownDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ActionDropdownClient) DeleteOne(ad *ActionDropdown) *ActionDropdownDeleteOne {
+	return c.DeleteOneID(ad.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ActionDropdownClient) DeleteOneID(id int) *ActionDropdownDeleteOne {
+	builder := c.Delete().Where(actiondropdown.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ActionDropdownDeleteOne{builder}
+}
+
+// Query returns a query builder for ActionDropdown.
+func (c *ActionDropdownClient) Query() *ActionDropdownQuery {
+	return &ActionDropdownQuery{config: c.config}
+}
+
+// Get returns a ActionDropdown entity by its id.
+func (c *ActionDropdownClient) Get(ctx context.Context, id int) (*ActionDropdown, error) {
+	return c.Query().Where(actiondropdown.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ActionDropdownClient) GetX(ctx context.Context, id int) *ActionDropdown {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ActionDropdownClient) Hooks() []Hook {
+	return c.hooks.ActionDropdown
+}
+
+// ActionInputClient is a client for the ActionInput schema.
+type ActionInputClient struct {
+	config
+}
+
+// NewActionInputClient returns a client for the ActionInput from the given config.
+func NewActionInputClient(c config) *ActionInputClient {
+	return &ActionInputClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `actioninput.Hooks(f(g(h())))`.
+func (c *ActionInputClient) Use(hooks ...Hook) {
+	c.hooks.ActionInput = append(c.hooks.ActionInput, hooks...)
+}
+
+// Create returns a create builder for ActionInput.
+func (c *ActionInputClient) Create() *ActionInputCreate {
+	mutation := newActionInputMutation(c.config, OpCreate)
+	return &ActionInputCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ActionInput entities.
+func (c *ActionInputClient) CreateBulk(builders ...*ActionInputCreate) *ActionInputCreateBulk {
+	return &ActionInputCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ActionInput.
+func (c *ActionInputClient) Update() *ActionInputUpdate {
+	mutation := newActionInputMutation(c.config, OpUpdate)
+	return &ActionInputUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ActionInputClient) UpdateOne(ai *ActionInput) *ActionInputUpdateOne {
+	mutation := newActionInputMutation(c.config, OpUpdateOne, withActionInput(ai))
+	return &ActionInputUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ActionInputClient) UpdateOneID(id int) *ActionInputUpdateOne {
+	mutation := newActionInputMutation(c.config, OpUpdateOne, withActionInputID(id))
+	return &ActionInputUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ActionInput.
+func (c *ActionInputClient) Delete() *ActionInputDelete {
+	mutation := newActionInputMutation(c.config, OpDelete)
+	return &ActionInputDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ActionInputClient) DeleteOne(ai *ActionInput) *ActionInputDeleteOne {
+	return c.DeleteOneID(ai.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ActionInputClient) DeleteOneID(id int) *ActionInputDeleteOne {
+	builder := c.Delete().Where(actioninput.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ActionInputDeleteOne{builder}
+}
+
+// Query returns a query builder for ActionInput.
+func (c *ActionInputClient) Query() *ActionInputQuery {
+	return &ActionInputQuery{config: c.config}
+}
+
+// Get returns a ActionInput entity by its id.
+func (c *ActionInputClient) Get(ctx context.Context, id int) (*ActionInput, error) {
+	return c.Query().Where(actioninput.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ActionInputClient) GetX(ctx context.Context, id int) *ActionInput {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ActionInputClient) Hooks() []Hook {
+	return c.hooks.ActionInput
 }
 
 // ChannelClient is a client for the Channel schema.
@@ -407,6 +706,262 @@ func (c *ChannelClient) Hooks() []Hook {
 	return c.hooks.Channel
 }
 
+// EmbedActionClient is a client for the EmbedAction schema.
+type EmbedActionClient struct {
+	config
+}
+
+// NewEmbedActionClient returns a client for the EmbedAction from the given config.
+func NewEmbedActionClient(c config) *EmbedActionClient {
+	return &EmbedActionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `embedaction.Hooks(f(g(h())))`.
+func (c *EmbedActionClient) Use(hooks ...Hook) {
+	c.hooks.EmbedAction = append(c.hooks.EmbedAction, hooks...)
+}
+
+// Create returns a create builder for EmbedAction.
+func (c *EmbedActionClient) Create() *EmbedActionCreate {
+	mutation := newEmbedActionMutation(c.config, OpCreate)
+	return &EmbedActionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of EmbedAction entities.
+func (c *EmbedActionClient) CreateBulk(builders ...*EmbedActionCreate) *EmbedActionCreateBulk {
+	return &EmbedActionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for EmbedAction.
+func (c *EmbedActionClient) Update() *EmbedActionUpdate {
+	mutation := newEmbedActionMutation(c.config, OpUpdate)
+	return &EmbedActionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EmbedActionClient) UpdateOne(ea *EmbedAction) *EmbedActionUpdateOne {
+	mutation := newEmbedActionMutation(c.config, OpUpdateOne, withEmbedAction(ea))
+	return &EmbedActionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EmbedActionClient) UpdateOneID(id int) *EmbedActionUpdateOne {
+	mutation := newEmbedActionMutation(c.config, OpUpdateOne, withEmbedActionID(id))
+	return &EmbedActionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for EmbedAction.
+func (c *EmbedActionClient) Delete() *EmbedActionDelete {
+	mutation := newEmbedActionMutation(c.config, OpDelete)
+	return &EmbedActionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *EmbedActionClient) DeleteOne(ea *EmbedAction) *EmbedActionDeleteOne {
+	return c.DeleteOneID(ea.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *EmbedActionClient) DeleteOneID(id int) *EmbedActionDeleteOne {
+	builder := c.Delete().Where(embedaction.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EmbedActionDeleteOne{builder}
+}
+
+// Query returns a query builder for EmbedAction.
+func (c *EmbedActionClient) Query() *EmbedActionQuery {
+	return &EmbedActionQuery{config: c.config}
+}
+
+// Get returns a EmbedAction entity by its id.
+func (c *EmbedActionClient) Get(ctx context.Context, id int) (*EmbedAction, error) {
+	return c.Query().Where(embedaction.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EmbedActionClient) GetX(ctx context.Context, id int) *EmbedAction {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryButton queries the button edge of a EmbedAction.
+func (c *EmbedActionClient) QueryButton(ea *EmbedAction) *ActionButtonQuery {
+	query := &ActionButtonQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ea.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(embedaction.Table, embedaction.FieldID, id),
+			sqlgraph.To(actionbutton.Table, actionbutton.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, embedaction.ButtonTable, embedaction.ButtonColumn),
+		)
+		fromV = sqlgraph.Neighbors(ea.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDropdown queries the dropdown edge of a EmbedAction.
+func (c *EmbedActionClient) QueryDropdown(ea *EmbedAction) *ActionDropdownQuery {
+	query := &ActionDropdownQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ea.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(embedaction.Table, embedaction.FieldID, id),
+			sqlgraph.To(actiondropdown.Table, actiondropdown.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, embedaction.DropdownTable, embedaction.DropdownColumn),
+		)
+		fromV = sqlgraph.Neighbors(ea.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryInput queries the input edge of a EmbedAction.
+func (c *EmbedActionClient) QueryInput(ea *EmbedAction) *ActionInputQuery {
+	query := &ActionInputQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ea.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(embedaction.Table, embedaction.FieldID, id),
+			sqlgraph.To(actioninput.Table, actioninput.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, embedaction.InputTable, embedaction.InputColumn),
+		)
+		fromV = sqlgraph.Neighbors(ea.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *EmbedActionClient) Hooks() []Hook {
+	return c.hooks.EmbedAction
+}
+
+// EmbedFieldClient is a client for the EmbedField schema.
+type EmbedFieldClient struct {
+	config
+}
+
+// NewEmbedFieldClient returns a client for the EmbedField from the given config.
+func NewEmbedFieldClient(c config) *EmbedFieldClient {
+	return &EmbedFieldClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `embedfield.Hooks(f(g(h())))`.
+func (c *EmbedFieldClient) Use(hooks ...Hook) {
+	c.hooks.EmbedField = append(c.hooks.EmbedField, hooks...)
+}
+
+// Create returns a create builder for EmbedField.
+func (c *EmbedFieldClient) Create() *EmbedFieldCreate {
+	mutation := newEmbedFieldMutation(c.config, OpCreate)
+	return &EmbedFieldCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of EmbedField entities.
+func (c *EmbedFieldClient) CreateBulk(builders ...*EmbedFieldCreate) *EmbedFieldCreateBulk {
+	return &EmbedFieldCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for EmbedField.
+func (c *EmbedFieldClient) Update() *EmbedFieldUpdate {
+	mutation := newEmbedFieldMutation(c.config, OpUpdate)
+	return &EmbedFieldUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EmbedFieldClient) UpdateOne(ef *EmbedField) *EmbedFieldUpdateOne {
+	mutation := newEmbedFieldMutation(c.config, OpUpdateOne, withEmbedField(ef))
+	return &EmbedFieldUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EmbedFieldClient) UpdateOneID(id int) *EmbedFieldUpdateOne {
+	mutation := newEmbedFieldMutation(c.config, OpUpdateOne, withEmbedFieldID(id))
+	return &EmbedFieldUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for EmbedField.
+func (c *EmbedFieldClient) Delete() *EmbedFieldDelete {
+	mutation := newEmbedFieldMutation(c.config, OpDelete)
+	return &EmbedFieldDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *EmbedFieldClient) DeleteOne(ef *EmbedField) *EmbedFieldDeleteOne {
+	return c.DeleteOneID(ef.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *EmbedFieldClient) DeleteOneID(id int) *EmbedFieldDeleteOne {
+	builder := c.Delete().Where(embedfield.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EmbedFieldDeleteOne{builder}
+}
+
+// Query returns a query builder for EmbedField.
+func (c *EmbedFieldClient) Query() *EmbedFieldQuery {
+	return &EmbedFieldQuery{config: c.config}
+}
+
+// Get returns a EmbedField entity by its id.
+func (c *EmbedFieldClient) Get(ctx context.Context, id int) (*EmbedField, error) {
+	return c.Query().Where(embedfield.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EmbedFieldClient) GetX(ctx context.Context, id int) *EmbedField {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryEmbedAction queries the embed_action edge of a EmbedField.
+func (c *EmbedFieldClient) QueryEmbedAction(ef *EmbedField) *EmbedActionQuery {
+	query := &EmbedActionQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ef.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(embedfield.Table, embedfield.FieldID, id),
+			sqlgraph.To(embedaction.Table, embedaction.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, embedfield.EmbedActionTable, embedfield.EmbedActionColumn),
+		)
+		fromV = sqlgraph.Neighbors(ef.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryEmbedMessage queries the embed_message edge of a EmbedField.
+func (c *EmbedFieldClient) QueryEmbedMessage(ef *EmbedField) *EmbedMessageQuery {
+	query := &EmbedMessageQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ef.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(embedfield.Table, embedfield.FieldID, id),
+			sqlgraph.To(embedmessage.Table, embedmessage.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, embedfield.EmbedMessageTable, embedfield.EmbedMessageColumn),
+		)
+		fromV = sqlgraph.Neighbors(ef.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *EmbedFieldClient) Hooks() []Hook {
+	return c.hooks.EmbedField
+}
+
 // EmbedMessageClient is a client for the EmbedMessage schema.
 type EmbedMessageClient struct {
 	config
@@ -488,6 +1043,38 @@ func (c *EmbedMessageClient) GetX(ctx context.Context, id int) *EmbedMessage {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryEmbedField queries the embed_field edge of a EmbedMessage.
+func (c *EmbedMessageClient) QueryEmbedField(em *EmbedMessage) *EmbedFieldQuery {
+	query := &EmbedFieldQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := em.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(embedmessage.Table, embedmessage.FieldID, id),
+			sqlgraph.To(embedfield.Table, embedfield.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, embedmessage.EmbedFieldTable, embedmessage.EmbedFieldColumn),
+		)
+		fromV = sqlgraph.Neighbors(em.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMessage queries the message edge of a EmbedMessage.
+func (c *EmbedMessageClient) QueryMessage(em *EmbedMessage) *MessageQuery {
+	query := &MessageQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := em.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(embedmessage.Table, embedmessage.FieldID, id),
+			sqlgraph.To(message.Table, message.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, embedmessage.MessageTable, embedmessage.MessageColumn),
+		)
+		fromV = sqlgraph.Neighbors(em.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.
@@ -1762,15 +2349,15 @@ func (c *MessageClient) QueryReplies(m *Message) *MessageQuery {
 	return query
 }
 
-// QueryTextmessage queries the textmessage edge of a Message.
-func (c *MessageClient) QueryTextmessage(m *Message) *TextMessageQuery {
+// QueryTextMessage queries the text_message edge of a Message.
+func (c *MessageClient) QueryTextMessage(m *Message) *TextMessageQuery {
 	query := &TextMessageQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(message.Table, message.FieldID, id),
 			sqlgraph.To(textmessage.Table, textmessage.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, message.TextmessageTable, message.TextmessageColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, message.TextMessageTable, message.TextMessageColumn),
 		)
 		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
 		return fromV, nil
@@ -1778,15 +2365,15 @@ func (c *MessageClient) QueryTextmessage(m *Message) *TextMessageQuery {
 	return query
 }
 
-// QueryFilemessage queries the filemessage edge of a Message.
-func (c *MessageClient) QueryFilemessage(m *Message) *FileMessageQuery {
+// QueryFileMessage queries the file_message edge of a Message.
+func (c *MessageClient) QueryFileMessage(m *Message) *FileMessageQuery {
 	query := &FileMessageQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(message.Table, message.FieldID, id),
 			sqlgraph.To(filemessage.Table, filemessage.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, message.FilemessageTable, message.FilemessageColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, message.FileMessageTable, message.FileMessageColumn),
 		)
 		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
 		return fromV, nil
@@ -1794,15 +2381,15 @@ func (c *MessageClient) QueryFilemessage(m *Message) *FileMessageQuery {
 	return query
 }
 
-// QueryEmbedmessage queries the embedmessage edge of a Message.
-func (c *MessageClient) QueryEmbedmessage(m *Message) *EmbedMessageQuery {
+// QueryEmbedMessage queries the embed_message edge of a Message.
+func (c *MessageClient) QueryEmbedMessage(m *Message) *EmbedMessageQuery {
 	query := &EmbedMessageQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(message.Table, message.FieldID, id),
 			sqlgraph.To(embedmessage.Table, embedmessage.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, message.EmbedmessageTable, message.EmbedmessageColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, message.EmbedMessageTable, message.EmbedMessageColumn),
 		)
 		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
 		return fromV, nil

@@ -4,6 +4,7 @@ package embedmessage
 
 import (
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 )
 
@@ -87,6 +88,1325 @@ func IDLT(id int) predicate.EmbedMessage {
 func IDLTE(id int) predicate.EmbedMessage {
 	return predicate.EmbedMessage(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
+	})
+}
+
+// Title applies equality check predicate on the "title" field. It's identical to TitleEQ.
+func Title(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTitle), v))
+	})
+}
+
+// Body applies equality check predicate on the "body" field. It's identical to BodyEQ.
+func Body(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldBody), v))
+	})
+}
+
+// Color applies equality check predicate on the "color" field. It's identical to ColorEQ.
+func Color(v int64) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldColor), v))
+	})
+}
+
+// HeaderText applies equality check predicate on the "header_text" field. It's identical to HeaderTextEQ.
+func HeaderText(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldHeaderText), v))
+	})
+}
+
+// HeaderSubtext applies equality check predicate on the "header_subtext" field. It's identical to HeaderSubtextEQ.
+func HeaderSubtext(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldHeaderSubtext), v))
+	})
+}
+
+// HeaderURL applies equality check predicate on the "header_url" field. It's identical to HeaderURLEQ.
+func HeaderURL(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldHeaderURL), v))
+	})
+}
+
+// HeaderIcon applies equality check predicate on the "header_icon" field. It's identical to HeaderIconEQ.
+func HeaderIcon(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldHeaderIcon), v))
+	})
+}
+
+// FooterText applies equality check predicate on the "footer_text" field. It's identical to FooterTextEQ.
+func FooterText(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldFooterText), v))
+	})
+}
+
+// FooterSubtext applies equality check predicate on the "footer_subtext" field. It's identical to FooterSubtextEQ.
+func FooterSubtext(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldFooterSubtext), v))
+	})
+}
+
+// FooterURL applies equality check predicate on the "footer_url" field. It's identical to FooterURLEQ.
+func FooterURL(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldFooterURL), v))
+	})
+}
+
+// FooterIcon applies equality check predicate on the "footer_icon" field. It's identical to FooterIconEQ.
+func FooterIcon(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldFooterIcon), v))
+	})
+}
+
+// TitleEQ applies the EQ predicate on the "title" field.
+func TitleEQ(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTitle), v))
+	})
+}
+
+// TitleNEQ applies the NEQ predicate on the "title" field.
+func TitleNEQ(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldTitle), v))
+	})
+}
+
+// TitleIn applies the In predicate on the "title" field.
+func TitleIn(vs ...string) predicate.EmbedMessage {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldTitle), v...))
+	})
+}
+
+// TitleNotIn applies the NotIn predicate on the "title" field.
+func TitleNotIn(vs ...string) predicate.EmbedMessage {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldTitle), v...))
+	})
+}
+
+// TitleGT applies the GT predicate on the "title" field.
+func TitleGT(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldTitle), v))
+	})
+}
+
+// TitleGTE applies the GTE predicate on the "title" field.
+func TitleGTE(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldTitle), v))
+	})
+}
+
+// TitleLT applies the LT predicate on the "title" field.
+func TitleLT(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldTitle), v))
+	})
+}
+
+// TitleLTE applies the LTE predicate on the "title" field.
+func TitleLTE(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldTitle), v))
+	})
+}
+
+// TitleContains applies the Contains predicate on the "title" field.
+func TitleContains(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldTitle), v))
+	})
+}
+
+// TitleHasPrefix applies the HasPrefix predicate on the "title" field.
+func TitleHasPrefix(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldTitle), v))
+	})
+}
+
+// TitleHasSuffix applies the HasSuffix predicate on the "title" field.
+func TitleHasSuffix(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldTitle), v))
+	})
+}
+
+// TitleEqualFold applies the EqualFold predicate on the "title" field.
+func TitleEqualFold(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldTitle), v))
+	})
+}
+
+// TitleContainsFold applies the ContainsFold predicate on the "title" field.
+func TitleContainsFold(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldTitle), v))
+	})
+}
+
+// BodyEQ applies the EQ predicate on the "body" field.
+func BodyEQ(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldBody), v))
+	})
+}
+
+// BodyNEQ applies the NEQ predicate on the "body" field.
+func BodyNEQ(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldBody), v))
+	})
+}
+
+// BodyIn applies the In predicate on the "body" field.
+func BodyIn(vs ...string) predicate.EmbedMessage {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldBody), v...))
+	})
+}
+
+// BodyNotIn applies the NotIn predicate on the "body" field.
+func BodyNotIn(vs ...string) predicate.EmbedMessage {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldBody), v...))
+	})
+}
+
+// BodyGT applies the GT predicate on the "body" field.
+func BodyGT(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldBody), v))
+	})
+}
+
+// BodyGTE applies the GTE predicate on the "body" field.
+func BodyGTE(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldBody), v))
+	})
+}
+
+// BodyLT applies the LT predicate on the "body" field.
+func BodyLT(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldBody), v))
+	})
+}
+
+// BodyLTE applies the LTE predicate on the "body" field.
+func BodyLTE(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldBody), v))
+	})
+}
+
+// BodyContains applies the Contains predicate on the "body" field.
+func BodyContains(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldBody), v))
+	})
+}
+
+// BodyHasPrefix applies the HasPrefix predicate on the "body" field.
+func BodyHasPrefix(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldBody), v))
+	})
+}
+
+// BodyHasSuffix applies the HasSuffix predicate on the "body" field.
+func BodyHasSuffix(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldBody), v))
+	})
+}
+
+// BodyEqualFold applies the EqualFold predicate on the "body" field.
+func BodyEqualFold(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldBody), v))
+	})
+}
+
+// BodyContainsFold applies the ContainsFold predicate on the "body" field.
+func BodyContainsFold(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldBody), v))
+	})
+}
+
+// ColorEQ applies the EQ predicate on the "color" field.
+func ColorEQ(v int64) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldColor), v))
+	})
+}
+
+// ColorNEQ applies the NEQ predicate on the "color" field.
+func ColorNEQ(v int64) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldColor), v))
+	})
+}
+
+// ColorIn applies the In predicate on the "color" field.
+func ColorIn(vs ...int64) predicate.EmbedMessage {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldColor), v...))
+	})
+}
+
+// ColorNotIn applies the NotIn predicate on the "color" field.
+func ColorNotIn(vs ...int64) predicate.EmbedMessage {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldColor), v...))
+	})
+}
+
+// ColorGT applies the GT predicate on the "color" field.
+func ColorGT(v int64) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldColor), v))
+	})
+}
+
+// ColorGTE applies the GTE predicate on the "color" field.
+func ColorGTE(v int64) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldColor), v))
+	})
+}
+
+// ColorLT applies the LT predicate on the "color" field.
+func ColorLT(v int64) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldColor), v))
+	})
+}
+
+// ColorLTE applies the LTE predicate on the "color" field.
+func ColorLTE(v int64) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldColor), v))
+	})
+}
+
+// HeaderTextEQ applies the EQ predicate on the "header_text" field.
+func HeaderTextEQ(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldHeaderText), v))
+	})
+}
+
+// HeaderTextNEQ applies the NEQ predicate on the "header_text" field.
+func HeaderTextNEQ(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldHeaderText), v))
+	})
+}
+
+// HeaderTextIn applies the In predicate on the "header_text" field.
+func HeaderTextIn(vs ...string) predicate.EmbedMessage {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldHeaderText), v...))
+	})
+}
+
+// HeaderTextNotIn applies the NotIn predicate on the "header_text" field.
+func HeaderTextNotIn(vs ...string) predicate.EmbedMessage {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldHeaderText), v...))
+	})
+}
+
+// HeaderTextGT applies the GT predicate on the "header_text" field.
+func HeaderTextGT(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldHeaderText), v))
+	})
+}
+
+// HeaderTextGTE applies the GTE predicate on the "header_text" field.
+func HeaderTextGTE(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldHeaderText), v))
+	})
+}
+
+// HeaderTextLT applies the LT predicate on the "header_text" field.
+func HeaderTextLT(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldHeaderText), v))
+	})
+}
+
+// HeaderTextLTE applies the LTE predicate on the "header_text" field.
+func HeaderTextLTE(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldHeaderText), v))
+	})
+}
+
+// HeaderTextContains applies the Contains predicate on the "header_text" field.
+func HeaderTextContains(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldHeaderText), v))
+	})
+}
+
+// HeaderTextHasPrefix applies the HasPrefix predicate on the "header_text" field.
+func HeaderTextHasPrefix(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldHeaderText), v))
+	})
+}
+
+// HeaderTextHasSuffix applies the HasSuffix predicate on the "header_text" field.
+func HeaderTextHasSuffix(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldHeaderText), v))
+	})
+}
+
+// HeaderTextEqualFold applies the EqualFold predicate on the "header_text" field.
+func HeaderTextEqualFold(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldHeaderText), v))
+	})
+}
+
+// HeaderTextContainsFold applies the ContainsFold predicate on the "header_text" field.
+func HeaderTextContainsFold(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldHeaderText), v))
+	})
+}
+
+// HeaderSubtextEQ applies the EQ predicate on the "header_subtext" field.
+func HeaderSubtextEQ(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldHeaderSubtext), v))
+	})
+}
+
+// HeaderSubtextNEQ applies the NEQ predicate on the "header_subtext" field.
+func HeaderSubtextNEQ(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldHeaderSubtext), v))
+	})
+}
+
+// HeaderSubtextIn applies the In predicate on the "header_subtext" field.
+func HeaderSubtextIn(vs ...string) predicate.EmbedMessage {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldHeaderSubtext), v...))
+	})
+}
+
+// HeaderSubtextNotIn applies the NotIn predicate on the "header_subtext" field.
+func HeaderSubtextNotIn(vs ...string) predicate.EmbedMessage {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldHeaderSubtext), v...))
+	})
+}
+
+// HeaderSubtextGT applies the GT predicate on the "header_subtext" field.
+func HeaderSubtextGT(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldHeaderSubtext), v))
+	})
+}
+
+// HeaderSubtextGTE applies the GTE predicate on the "header_subtext" field.
+func HeaderSubtextGTE(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldHeaderSubtext), v))
+	})
+}
+
+// HeaderSubtextLT applies the LT predicate on the "header_subtext" field.
+func HeaderSubtextLT(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldHeaderSubtext), v))
+	})
+}
+
+// HeaderSubtextLTE applies the LTE predicate on the "header_subtext" field.
+func HeaderSubtextLTE(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldHeaderSubtext), v))
+	})
+}
+
+// HeaderSubtextContains applies the Contains predicate on the "header_subtext" field.
+func HeaderSubtextContains(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldHeaderSubtext), v))
+	})
+}
+
+// HeaderSubtextHasPrefix applies the HasPrefix predicate on the "header_subtext" field.
+func HeaderSubtextHasPrefix(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldHeaderSubtext), v))
+	})
+}
+
+// HeaderSubtextHasSuffix applies the HasSuffix predicate on the "header_subtext" field.
+func HeaderSubtextHasSuffix(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldHeaderSubtext), v))
+	})
+}
+
+// HeaderSubtextEqualFold applies the EqualFold predicate on the "header_subtext" field.
+func HeaderSubtextEqualFold(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldHeaderSubtext), v))
+	})
+}
+
+// HeaderSubtextContainsFold applies the ContainsFold predicate on the "header_subtext" field.
+func HeaderSubtextContainsFold(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldHeaderSubtext), v))
+	})
+}
+
+// HeaderURLEQ applies the EQ predicate on the "header_url" field.
+func HeaderURLEQ(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldHeaderURL), v))
+	})
+}
+
+// HeaderURLNEQ applies the NEQ predicate on the "header_url" field.
+func HeaderURLNEQ(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldHeaderURL), v))
+	})
+}
+
+// HeaderURLIn applies the In predicate on the "header_url" field.
+func HeaderURLIn(vs ...string) predicate.EmbedMessage {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldHeaderURL), v...))
+	})
+}
+
+// HeaderURLNotIn applies the NotIn predicate on the "header_url" field.
+func HeaderURLNotIn(vs ...string) predicate.EmbedMessage {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldHeaderURL), v...))
+	})
+}
+
+// HeaderURLGT applies the GT predicate on the "header_url" field.
+func HeaderURLGT(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldHeaderURL), v))
+	})
+}
+
+// HeaderURLGTE applies the GTE predicate on the "header_url" field.
+func HeaderURLGTE(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldHeaderURL), v))
+	})
+}
+
+// HeaderURLLT applies the LT predicate on the "header_url" field.
+func HeaderURLLT(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldHeaderURL), v))
+	})
+}
+
+// HeaderURLLTE applies the LTE predicate on the "header_url" field.
+func HeaderURLLTE(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldHeaderURL), v))
+	})
+}
+
+// HeaderURLContains applies the Contains predicate on the "header_url" field.
+func HeaderURLContains(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldHeaderURL), v))
+	})
+}
+
+// HeaderURLHasPrefix applies the HasPrefix predicate on the "header_url" field.
+func HeaderURLHasPrefix(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldHeaderURL), v))
+	})
+}
+
+// HeaderURLHasSuffix applies the HasSuffix predicate on the "header_url" field.
+func HeaderURLHasSuffix(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldHeaderURL), v))
+	})
+}
+
+// HeaderURLEqualFold applies the EqualFold predicate on the "header_url" field.
+func HeaderURLEqualFold(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldHeaderURL), v))
+	})
+}
+
+// HeaderURLContainsFold applies the ContainsFold predicate on the "header_url" field.
+func HeaderURLContainsFold(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldHeaderURL), v))
+	})
+}
+
+// HeaderIconEQ applies the EQ predicate on the "header_icon" field.
+func HeaderIconEQ(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldHeaderIcon), v))
+	})
+}
+
+// HeaderIconNEQ applies the NEQ predicate on the "header_icon" field.
+func HeaderIconNEQ(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldHeaderIcon), v))
+	})
+}
+
+// HeaderIconIn applies the In predicate on the "header_icon" field.
+func HeaderIconIn(vs ...string) predicate.EmbedMessage {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldHeaderIcon), v...))
+	})
+}
+
+// HeaderIconNotIn applies the NotIn predicate on the "header_icon" field.
+func HeaderIconNotIn(vs ...string) predicate.EmbedMessage {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldHeaderIcon), v...))
+	})
+}
+
+// HeaderIconGT applies the GT predicate on the "header_icon" field.
+func HeaderIconGT(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldHeaderIcon), v))
+	})
+}
+
+// HeaderIconGTE applies the GTE predicate on the "header_icon" field.
+func HeaderIconGTE(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldHeaderIcon), v))
+	})
+}
+
+// HeaderIconLT applies the LT predicate on the "header_icon" field.
+func HeaderIconLT(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldHeaderIcon), v))
+	})
+}
+
+// HeaderIconLTE applies the LTE predicate on the "header_icon" field.
+func HeaderIconLTE(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldHeaderIcon), v))
+	})
+}
+
+// HeaderIconContains applies the Contains predicate on the "header_icon" field.
+func HeaderIconContains(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldHeaderIcon), v))
+	})
+}
+
+// HeaderIconHasPrefix applies the HasPrefix predicate on the "header_icon" field.
+func HeaderIconHasPrefix(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldHeaderIcon), v))
+	})
+}
+
+// HeaderIconHasSuffix applies the HasSuffix predicate on the "header_icon" field.
+func HeaderIconHasSuffix(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldHeaderIcon), v))
+	})
+}
+
+// HeaderIconEqualFold applies the EqualFold predicate on the "header_icon" field.
+func HeaderIconEqualFold(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldHeaderIcon), v))
+	})
+}
+
+// HeaderIconContainsFold applies the ContainsFold predicate on the "header_icon" field.
+func HeaderIconContainsFold(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldHeaderIcon), v))
+	})
+}
+
+// FooterTextEQ applies the EQ predicate on the "footer_text" field.
+func FooterTextEQ(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldFooterText), v))
+	})
+}
+
+// FooterTextNEQ applies the NEQ predicate on the "footer_text" field.
+func FooterTextNEQ(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldFooterText), v))
+	})
+}
+
+// FooterTextIn applies the In predicate on the "footer_text" field.
+func FooterTextIn(vs ...string) predicate.EmbedMessage {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldFooterText), v...))
+	})
+}
+
+// FooterTextNotIn applies the NotIn predicate on the "footer_text" field.
+func FooterTextNotIn(vs ...string) predicate.EmbedMessage {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldFooterText), v...))
+	})
+}
+
+// FooterTextGT applies the GT predicate on the "footer_text" field.
+func FooterTextGT(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldFooterText), v))
+	})
+}
+
+// FooterTextGTE applies the GTE predicate on the "footer_text" field.
+func FooterTextGTE(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldFooterText), v))
+	})
+}
+
+// FooterTextLT applies the LT predicate on the "footer_text" field.
+func FooterTextLT(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldFooterText), v))
+	})
+}
+
+// FooterTextLTE applies the LTE predicate on the "footer_text" field.
+func FooterTextLTE(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldFooterText), v))
+	})
+}
+
+// FooterTextContains applies the Contains predicate on the "footer_text" field.
+func FooterTextContains(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldFooterText), v))
+	})
+}
+
+// FooterTextHasPrefix applies the HasPrefix predicate on the "footer_text" field.
+func FooterTextHasPrefix(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldFooterText), v))
+	})
+}
+
+// FooterTextHasSuffix applies the HasSuffix predicate on the "footer_text" field.
+func FooterTextHasSuffix(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldFooterText), v))
+	})
+}
+
+// FooterTextEqualFold applies the EqualFold predicate on the "footer_text" field.
+func FooterTextEqualFold(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldFooterText), v))
+	})
+}
+
+// FooterTextContainsFold applies the ContainsFold predicate on the "footer_text" field.
+func FooterTextContainsFold(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldFooterText), v))
+	})
+}
+
+// FooterSubtextEQ applies the EQ predicate on the "footer_subtext" field.
+func FooterSubtextEQ(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldFooterSubtext), v))
+	})
+}
+
+// FooterSubtextNEQ applies the NEQ predicate on the "footer_subtext" field.
+func FooterSubtextNEQ(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldFooterSubtext), v))
+	})
+}
+
+// FooterSubtextIn applies the In predicate on the "footer_subtext" field.
+func FooterSubtextIn(vs ...string) predicate.EmbedMessage {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldFooterSubtext), v...))
+	})
+}
+
+// FooterSubtextNotIn applies the NotIn predicate on the "footer_subtext" field.
+func FooterSubtextNotIn(vs ...string) predicate.EmbedMessage {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldFooterSubtext), v...))
+	})
+}
+
+// FooterSubtextGT applies the GT predicate on the "footer_subtext" field.
+func FooterSubtextGT(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldFooterSubtext), v))
+	})
+}
+
+// FooterSubtextGTE applies the GTE predicate on the "footer_subtext" field.
+func FooterSubtextGTE(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldFooterSubtext), v))
+	})
+}
+
+// FooterSubtextLT applies the LT predicate on the "footer_subtext" field.
+func FooterSubtextLT(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldFooterSubtext), v))
+	})
+}
+
+// FooterSubtextLTE applies the LTE predicate on the "footer_subtext" field.
+func FooterSubtextLTE(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldFooterSubtext), v))
+	})
+}
+
+// FooterSubtextContains applies the Contains predicate on the "footer_subtext" field.
+func FooterSubtextContains(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldFooterSubtext), v))
+	})
+}
+
+// FooterSubtextHasPrefix applies the HasPrefix predicate on the "footer_subtext" field.
+func FooterSubtextHasPrefix(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldFooterSubtext), v))
+	})
+}
+
+// FooterSubtextHasSuffix applies the HasSuffix predicate on the "footer_subtext" field.
+func FooterSubtextHasSuffix(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldFooterSubtext), v))
+	})
+}
+
+// FooterSubtextEqualFold applies the EqualFold predicate on the "footer_subtext" field.
+func FooterSubtextEqualFold(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldFooterSubtext), v))
+	})
+}
+
+// FooterSubtextContainsFold applies the ContainsFold predicate on the "footer_subtext" field.
+func FooterSubtextContainsFold(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldFooterSubtext), v))
+	})
+}
+
+// FooterURLEQ applies the EQ predicate on the "footer_url" field.
+func FooterURLEQ(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldFooterURL), v))
+	})
+}
+
+// FooterURLNEQ applies the NEQ predicate on the "footer_url" field.
+func FooterURLNEQ(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldFooterURL), v))
+	})
+}
+
+// FooterURLIn applies the In predicate on the "footer_url" field.
+func FooterURLIn(vs ...string) predicate.EmbedMessage {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldFooterURL), v...))
+	})
+}
+
+// FooterURLNotIn applies the NotIn predicate on the "footer_url" field.
+func FooterURLNotIn(vs ...string) predicate.EmbedMessage {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldFooterURL), v...))
+	})
+}
+
+// FooterURLGT applies the GT predicate on the "footer_url" field.
+func FooterURLGT(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldFooterURL), v))
+	})
+}
+
+// FooterURLGTE applies the GTE predicate on the "footer_url" field.
+func FooterURLGTE(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldFooterURL), v))
+	})
+}
+
+// FooterURLLT applies the LT predicate on the "footer_url" field.
+func FooterURLLT(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldFooterURL), v))
+	})
+}
+
+// FooterURLLTE applies the LTE predicate on the "footer_url" field.
+func FooterURLLTE(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldFooterURL), v))
+	})
+}
+
+// FooterURLContains applies the Contains predicate on the "footer_url" field.
+func FooterURLContains(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldFooterURL), v))
+	})
+}
+
+// FooterURLHasPrefix applies the HasPrefix predicate on the "footer_url" field.
+func FooterURLHasPrefix(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldFooterURL), v))
+	})
+}
+
+// FooterURLHasSuffix applies the HasSuffix predicate on the "footer_url" field.
+func FooterURLHasSuffix(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldFooterURL), v))
+	})
+}
+
+// FooterURLEqualFold applies the EqualFold predicate on the "footer_url" field.
+func FooterURLEqualFold(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldFooterURL), v))
+	})
+}
+
+// FooterURLContainsFold applies the ContainsFold predicate on the "footer_url" field.
+func FooterURLContainsFold(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldFooterURL), v))
+	})
+}
+
+// FooterIconEQ applies the EQ predicate on the "footer_icon" field.
+func FooterIconEQ(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldFooterIcon), v))
+	})
+}
+
+// FooterIconNEQ applies the NEQ predicate on the "footer_icon" field.
+func FooterIconNEQ(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldFooterIcon), v))
+	})
+}
+
+// FooterIconIn applies the In predicate on the "footer_icon" field.
+func FooterIconIn(vs ...string) predicate.EmbedMessage {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldFooterIcon), v...))
+	})
+}
+
+// FooterIconNotIn applies the NotIn predicate on the "footer_icon" field.
+func FooterIconNotIn(vs ...string) predicate.EmbedMessage {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldFooterIcon), v...))
+	})
+}
+
+// FooterIconGT applies the GT predicate on the "footer_icon" field.
+func FooterIconGT(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldFooterIcon), v))
+	})
+}
+
+// FooterIconGTE applies the GTE predicate on the "footer_icon" field.
+func FooterIconGTE(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldFooterIcon), v))
+	})
+}
+
+// FooterIconLT applies the LT predicate on the "footer_icon" field.
+func FooterIconLT(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldFooterIcon), v))
+	})
+}
+
+// FooterIconLTE applies the LTE predicate on the "footer_icon" field.
+func FooterIconLTE(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldFooterIcon), v))
+	})
+}
+
+// FooterIconContains applies the Contains predicate on the "footer_icon" field.
+func FooterIconContains(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldFooterIcon), v))
+	})
+}
+
+// FooterIconHasPrefix applies the HasPrefix predicate on the "footer_icon" field.
+func FooterIconHasPrefix(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldFooterIcon), v))
+	})
+}
+
+// FooterIconHasSuffix applies the HasSuffix predicate on the "footer_icon" field.
+func FooterIconHasSuffix(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldFooterIcon), v))
+	})
+}
+
+// FooterIconEqualFold applies the EqualFold predicate on the "footer_icon" field.
+func FooterIconEqualFold(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldFooterIcon), v))
+	})
+}
+
+// FooterIconContainsFold applies the ContainsFold predicate on the "footer_icon" field.
+func FooterIconContainsFold(v string) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldFooterIcon), v))
+	})
+}
+
+// HasEmbedField applies the HasEdge predicate on the "embed_field" edge.
+func HasEmbedField() predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(EmbedFieldTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, EmbedFieldTable, EmbedFieldColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasEmbedFieldWith applies the HasEdge predicate on the "embed_field" edge with a given conditions (other predicates).
+func HasEmbedFieldWith(preds ...predicate.EmbedField) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(EmbedFieldInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, EmbedFieldTable, EmbedFieldColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasMessage applies the HasEdge predicate on the "message" edge.
+func HasMessage() predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(MessageTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, MessageTable, MessageColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasMessageWith applies the HasEdge predicate on the "message" edge with a given conditions (other predicates).
+func HasMessageWith(preds ...predicate.Message) predicate.EmbedMessage {
+	return predicate.EmbedMessage(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(MessageInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, MessageTable, MessageColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
 	})
 }
 

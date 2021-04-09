@@ -9,6 +9,45 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen"
 )
 
+// The ActionButtonFunc type is an adapter to allow the use of ordinary
+// function as ActionButton mutator.
+type ActionButtonFunc func(context.Context, *entgen.ActionButtonMutation) (entgen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ActionButtonFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	mv, ok := m.(*entgen.ActionButtonMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.ActionButtonMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The ActionDropdownFunc type is an adapter to allow the use of ordinary
+// function as ActionDropdown mutator.
+type ActionDropdownFunc func(context.Context, *entgen.ActionDropdownMutation) (entgen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ActionDropdownFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	mv, ok := m.(*entgen.ActionDropdownMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.ActionDropdownMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The ActionInputFunc type is an adapter to allow the use of ordinary
+// function as ActionInput mutator.
+type ActionInputFunc func(context.Context, *entgen.ActionInputMutation) (entgen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ActionInputFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	mv, ok := m.(*entgen.ActionInputMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.ActionInputMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The ChannelFunc type is an adapter to allow the use of ordinary
 // function as Channel mutator.
 type ChannelFunc func(context.Context, *entgen.ChannelMutation) (entgen.Value, error)
@@ -18,6 +57,32 @@ func (f ChannelFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Valu
 	mv, ok := m.(*entgen.ChannelMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.ChannelMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The EmbedActionFunc type is an adapter to allow the use of ordinary
+// function as EmbedAction mutator.
+type EmbedActionFunc func(context.Context, *entgen.EmbedActionMutation) (entgen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f EmbedActionFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	mv, ok := m.(*entgen.EmbedActionMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.EmbedActionMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The EmbedFieldFunc type is an adapter to allow the use of ordinary
+// function as EmbedField mutator.
+type EmbedFieldFunc func(context.Context, *entgen.EmbedFieldMutation) (entgen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f EmbedFieldFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	mv, ok := m.(*entgen.EmbedFieldMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.EmbedFieldMutation", m)
 	}
 	return f(ctx, mv)
 }
