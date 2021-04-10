@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"io"
+	"io/ioutil"
 
 	"github.com/google/uuid"
 )
@@ -28,7 +29,7 @@ func NewMockAttachmentsBackend() *MockAttachments {
 func (m *MockAttachments) SaveFile(name, contentType string, r io.Reader) (id string, err error) {
 	fileID := uuid.New().String()
 
-	data, err := io.ReadAll(r)
+	data, err := ioutil.ReadAll(r)
 
 	if err != nil {
 		return "", err
@@ -56,6 +57,6 @@ func (m *MockAttachments) ReadFile(id string) (contentType, filename string, siz
 	if f, ok := m.files[id]; !ok {
 		return "", "", 0, nil, errors.New("attachment not found")
 	} else {
-		return f.contentType, f.fileName, f.size, io.NopCloser(bytes.NewReader(f.data)), nil
+		return f.contentType, f.fileName, f.size, ioutil.NopCloser(bytes.NewReader(f.data)), nil
 	}
 }
