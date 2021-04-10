@@ -16,11 +16,9 @@ require (
 	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/dyatlov/go-opengraph v0.0.0-20210112100619-dae8665a5b09
 	github.com/go-errors/errors v1.1.1 // indirect
-	github.com/go-playground/validator/v10 v10.4.1
 	github.com/go-test/deep v1.0.7 // indirect
 	github.com/gobwas/glob v0.2.3
 	github.com/golang/protobuf v1.4.3
-	github.com/google/go-cmp v0.5.4 // indirect
 	github.com/google/uuid v1.2.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79
@@ -31,13 +29,13 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/labstack/echo/v4 v4.2.0
-	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lib/pq v1.9.0
 	github.com/magefile/mage v1.11.0 // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mattn/go-sqlite3 v1.14.6
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/muesli/smartcrop v0.3.0 // indirect
+	github.com/nats-io/nats.go v1.9.1
 	github.com/peterbourgon/diskv v0.0.0-20171120014656-2973218375c3
 	github.com/pion/interceptor v0.0.10 // indirect
 	github.com/pion/rtcp v1.2.6
