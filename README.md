@@ -3,7 +3,7 @@
 </h1>
 A free and open source communications platform.
 <br>Designed as an open source Discord replacement; with messaging, guilds, roles and permissions. 
-<br>Join our <a href="https://discord.gg/jypXPA4">project chat</a> for announcements, support and contribution.
+<br>Join our <a href="https://discord.gg/Abr3upBjHy">project chat</a> for announcements, support and contribution.
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/harmony-development/legato/Harmony%20Build?style=for-the-badge)
 ![Codecov](https://img.shields.io/codecov/c/gh/harmony-development/legato?style=for-the-badge)
