@@ -20,6 +20,7 @@ type FileHashQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.FileHash
@@ -43,6 +44,13 @@ func (fhq *FileHashQuery) Limit(limit int) *FileHashQuery {
 // Offset adds an offset step to the query.
 func (fhq *FileHashQuery) Offset(offset int) *FileHashQuery {
 	fhq.offset = &offset
+	return fhq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (fhq *FileHashQuery) Unique(unique bool) *FileHashQuery {
+	fhq.unique = &unique
 	return fhq
 }
 
@@ -352,6 +360,9 @@ func (fhq *FileHashQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   fhq.sql,
 		Unique: true,
 	}
+	if unique := fhq.unique; unique != nil {
+		_spec.Unique = *unique
+	}
 	if fields := fhq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, filehash.FieldID)
@@ -377,7 +388,7 @@ func (fhq *FileHashQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := fhq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, filehash.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -396,7 +407,7 @@ func (fhq *FileHashQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range fhq.order {
-		p(selector, filehash.ValidColumn)
+		p(selector)
 	}
 	if offset := fhq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -662,7 +673,7 @@ func (fhgb *FileHashGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(fhgb.fields)+len(fhgb.fns))
 	columns = append(columns, fhgb.fields...)
 	for _, fn := range fhgb.fns {
-		columns = append(columns, fn(selector, filehash.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(fhgb.fields...)
 }

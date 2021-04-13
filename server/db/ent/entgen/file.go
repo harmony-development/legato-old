@@ -20,8 +20,7 @@ type File struct {
 	// Contenttype holds the value of the "contenttype" field.
 	Contenttype string `json:"contenttype,omitempty"`
 	// Size holds the value of the "size" field.
-	Size              int `json:"size,omitempty"`
-	file_message_file *int
+	Size int `json:"size,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -30,11 +29,9 @@ func (*File) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case file.FieldSize:
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		case file.FieldID, file.FieldName, file.FieldContenttype:
-			values[i] = &sql.NullString{}
-		case file.ForeignKeys[0]: // file_message_file
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullString)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type File", columns[i])
 		}
@@ -73,13 +70,6 @@ func (f *File) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field size", values[i])
 			} else if value.Valid {
 				f.Size = int(value.Int64)
-			}
-		case file.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field file_message_file", value)
-			} else if value.Valid {
-				f.file_message_file = new(int)
-				*f.file_message_file = int(value.Int64)
 			}
 		}
 	}

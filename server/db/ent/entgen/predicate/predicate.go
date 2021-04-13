@@ -6,26 +6,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// ActionButton is the predicate function for actionbutton builders.
-type ActionButton func(*sql.Selector)
-
-// ActionDropdown is the predicate function for actiondropdown builders.
-type ActionDropdown func(*sql.Selector)
-
-// ActionInput is the predicate function for actioninput builders.
-type ActionInput func(*sql.Selector)
-
 // Channel is the predicate function for channel builders.
 type Channel func(*sql.Selector)
-
-// EmbedAction is the predicate function for embedaction builders.
-type EmbedAction func(*sql.Selector)
-
-// EmbedField is the predicate function for embedfield builders.
-type EmbedField func(*sql.Selector)
-
-// EmbedMessage is the predicate function for embedmessage builders.
-type EmbedMessage func(*sql.Selector)
 
 // Emote is the predicate function for emote builders.
 type Emote func(*sql.Selector)
@@ -38,9 +20,6 @@ type File func(*sql.Selector)
 
 // FileHash is the predicate function for filehash builders.
 type FileHash func(*sql.Selector)
-
-// FileMessage is the predicate function for filemessage builders.
-type FileMessage func(*sql.Selector)
 
 // ForeignUser is the predicate function for foreignuser builders.
 type ForeignUser func(*sql.Selector)
@@ -71,9 +50,6 @@ type Role func(*sql.Selector)
 
 // Session is the predicate function for session builders.
 type Session func(*sql.Selector)
-
-// TextMessage is the predicate function for textmessage builders.
-type TextMessage func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

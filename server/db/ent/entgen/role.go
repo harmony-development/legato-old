@@ -77,13 +77,13 @@ func (*Role) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case role.FieldHoist, role.FieldPingable:
-			values[i] = &sql.NullBool{}
+			values[i] = new(sql.NullBool)
 		case role.FieldID, role.FieldColor:
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		case role.FieldName, role.FieldPosition:
-			values[i] = &sql.NullString{}
+			values[i] = new(sql.NullString)
 		case role.ForeignKeys[0]: // channel_role
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Role", columns[i])
 		}

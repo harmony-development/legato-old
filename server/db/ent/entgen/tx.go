@@ -12,20 +12,8 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// ActionButton is the client for interacting with the ActionButton builders.
-	ActionButton *ActionButtonClient
-	// ActionDropdown is the client for interacting with the ActionDropdown builders.
-	ActionDropdown *ActionDropdownClient
-	// ActionInput is the client for interacting with the ActionInput builders.
-	ActionInput *ActionInputClient
 	// Channel is the client for interacting with the Channel builders.
 	Channel *ChannelClient
-	// EmbedAction is the client for interacting with the EmbedAction builders.
-	EmbedAction *EmbedActionClient
-	// EmbedField is the client for interacting with the EmbedField builders.
-	EmbedField *EmbedFieldClient
-	// EmbedMessage is the client for interacting with the EmbedMessage builders.
-	EmbedMessage *EmbedMessageClient
 	// Emote is the client for interacting with the Emote builders.
 	Emote *EmoteClient
 	// EmotePack is the client for interacting with the EmotePack builders.
@@ -34,8 +22,6 @@ type Tx struct {
 	File *FileClient
 	// FileHash is the client for interacting with the FileHash builders.
 	FileHash *FileHashClient
-	// FileMessage is the client for interacting with the FileMessage builders.
-	FileMessage *FileMessageClient
 	// ForeignUser is the client for interacting with the ForeignUser builders.
 	ForeignUser *ForeignUserClient
 	// Guild is the client for interacting with the Guild builders.
@@ -56,8 +42,6 @@ type Tx struct {
 	Role *RoleClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
-	// TextMessage is the client for interacting with the TextMessage builders.
-	TextMessage *TextMessageClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// UserMeta is the client for interacting with the UserMeta builders.
@@ -197,18 +181,11 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	tx.ActionButton = NewActionButtonClient(tx.config)
-	tx.ActionDropdown = NewActionDropdownClient(tx.config)
-	tx.ActionInput = NewActionInputClient(tx.config)
 	tx.Channel = NewChannelClient(tx.config)
-	tx.EmbedAction = NewEmbedActionClient(tx.config)
-	tx.EmbedField = NewEmbedFieldClient(tx.config)
-	tx.EmbedMessage = NewEmbedMessageClient(tx.config)
 	tx.Emote = NewEmoteClient(tx.config)
 	tx.EmotePack = NewEmotePackClient(tx.config)
 	tx.File = NewFileClient(tx.config)
 	tx.FileHash = NewFileHashClient(tx.config)
-	tx.FileMessage = NewFileMessageClient(tx.config)
 	tx.ForeignUser = NewForeignUserClient(tx.config)
 	tx.Guild = NewGuildClient(tx.config)
 	tx.GuildListEntry = NewGuildListEntryClient(tx.config)
@@ -219,7 +196,6 @@ func (tx *Tx) init() {
 	tx.Profile = NewProfileClient(tx.config)
 	tx.Role = NewRoleClient(tx.config)
 	tx.Session = NewSessionClient(tx.config)
-	tx.TextMessage = NewTextMessageClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserMeta = NewUserMetaClient(tx.config)
 }
@@ -231,7 +207,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: ActionButton.QueryXXX(), the query will be executed
+// applies a query, for example: Channel.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

@@ -19,6 +19,8 @@ const (
 	FieldMetadata = "metadata"
 	// FieldOverride holds the string denoting the override field in the database.
 	FieldOverride = "override"
+	// FieldContent holds the string denoting the content field in the database.
+	FieldContent = "content"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// EdgeChannel holds the string denoting the channel edge name in mutations.
@@ -27,12 +29,6 @@ const (
 	EdgeParent = "parent"
 	// EdgeReplies holds the string denoting the replies edge name in mutations.
 	EdgeReplies = "replies"
-	// EdgeTextMessage holds the string denoting the text_message edge name in mutations.
-	EdgeTextMessage = "text_message"
-	// EdgeFileMessage holds the string denoting the file_message edge name in mutations.
-	EdgeFileMessage = "file_message"
-	// EdgeEmbedMessage holds the string denoting the embed_message edge name in mutations.
-	EdgeEmbedMessage = "embed_message"
 	// Table holds the table name of the message in the database.
 	Table = "messages"
 	// UserTable is the table the holds the user relation/edge.
@@ -57,27 +53,6 @@ const (
 	RepliesTable = "messages"
 	// RepliesColumn is the table column denoting the replies relation/edge.
 	RepliesColumn = "message_replies"
-	// TextMessageTable is the table the holds the text_message relation/edge.
-	TextMessageTable = "text_messages"
-	// TextMessageInverseTable is the table name for the TextMessage entity.
-	// It exists in this package in order to avoid circular dependency with the "textmessage" package.
-	TextMessageInverseTable = "text_messages"
-	// TextMessageColumn is the table column denoting the text_message relation/edge.
-	TextMessageColumn = "message_text_message"
-	// FileMessageTable is the table the holds the file_message relation/edge.
-	FileMessageTable = "messages"
-	// FileMessageInverseTable is the table name for the FileMessage entity.
-	// It exists in this package in order to avoid circular dependency with the "filemessage" package.
-	FileMessageInverseTable = "file_messages"
-	// FileMessageColumn is the table column denoting the file_message relation/edge.
-	FileMessageColumn = "message_file_message"
-	// EmbedMessageTable is the table the holds the embed_message relation/edge.
-	EmbedMessageTable = "embed_messages"
-	// EmbedMessageInverseTable is the table name for the EmbedMessage entity.
-	// It exists in this package in order to avoid circular dependency with the "embedmessage" package.
-	EmbedMessageInverseTable = "embed_messages"
-	// EmbedMessageColumn is the table column denoting the embed_message relation/edge.
-	EmbedMessageColumn = "message_embed_message"
 )
 
 // Columns holds all SQL columns for message fields.
@@ -87,6 +62,7 @@ var Columns = []string{
 	FieldEditedat,
 	FieldMetadata,
 	FieldOverride,
+	FieldContent,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "messages"
@@ -94,7 +70,6 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"channel_message",
 	"message_replies",
-	"message_file_message",
 	"user_message",
 }
 

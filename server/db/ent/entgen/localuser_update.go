@@ -304,6 +304,7 @@ func (luu *LocalUserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // LocalUserUpdateOne is the builder for updating a single LocalUser entity.
 type LocalUserUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *LocalUserMutation
 }
@@ -376,6 +377,13 @@ func (luuo *LocalUserUpdateOne) RemoveSessions(s ...*Session) *LocalUserUpdateOn
 		ids[i] = s[i].ID
 	}
 	return luuo.RemoveSessionIDs(ids...)
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (luuo *LocalUserUpdateOne) Select(field string, fields ...string) *LocalUserUpdateOne {
+	luuo.fields = append([]string{field}, fields...)
+	return luuo
 }
 
 // Save executes the query and returns the updated LocalUser entity.
@@ -464,6 +472,18 @@ func (luuo *LocalUserUpdateOne) sqlSave(ctx context.Context) (_node *LocalUser, 
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing LocalUser.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := luuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, localuser.FieldID)
+		for _, f := range fields {
+			if !localuser.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("entgen: invalid field %q for query", f)}
+			}
+			if f != localuser.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := luuo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

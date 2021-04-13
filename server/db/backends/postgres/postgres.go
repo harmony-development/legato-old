@@ -18,7 +18,6 @@ import (
 )
 
 type postgresBackend struct {
-	*ent_shared.DB
 }
 
 func (p postgresBackend) New(cfg *config.Config, logger logger.ILogger, idgen *sonyflake.Sonyflake) (types.IHarmonyDB, error) {

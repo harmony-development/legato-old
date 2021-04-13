@@ -188,6 +188,7 @@ func (umu *UserMetaUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // UserMetaUpdateOne is the builder for updating a single UserMeta entity.
 type UserMetaUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *UserMetaMutation
 }
@@ -225,6 +226,13 @@ func (umuo *UserMetaUpdateOne) Mutation() *UserMetaMutation {
 // ClearUser clears the "user" edge to the User entity.
 func (umuo *UserMetaUpdateOne) ClearUser() *UserMetaUpdateOne {
 	umuo.mutation.ClearUser()
+	return umuo
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (umuo *UserMetaUpdateOne) Select(field string, fields ...string) *UserMetaUpdateOne {
+	umuo.fields = append([]string{field}, fields...)
 	return umuo
 }
 
@@ -295,6 +303,18 @@ func (umuo *UserMetaUpdateOne) sqlSave(ctx context.Context) (_node *UserMeta, er
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing UserMeta.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := umuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, usermeta.FieldID)
+		for _, f := range fields {
+			if !usermeta.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("entgen: invalid field %q for query", f)}
+			}
+			if f != usermeta.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := umuo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

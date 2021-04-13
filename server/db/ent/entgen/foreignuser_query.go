@@ -21,6 +21,7 @@ type ForeignUserQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.ForeignUser
@@ -47,6 +48,13 @@ func (fuq *ForeignUserQuery) Limit(limit int) *ForeignUserQuery {
 // Offset adds an offset step to the query.
 func (fuq *ForeignUserQuery) Offset(offset int) *ForeignUserQuery {
 	fuq.offset = &offset
+	return fuq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (fuq *ForeignUserQuery) Unique(unique bool) *ForeignUserQuery {
+	fuq.unique = &unique
 	return fuq
 }
 
@@ -377,11 +385,14 @@ func (fuq *ForeignUserQuery) sqlAll(ctx context.Context) ([]*ForeignUser, error)
 		ids := make([]uint64, 0, len(nodes))
 		nodeids := make(map[uint64][]*ForeignUser)
 		for i := range nodes {
-			fk := nodes[i].user_foreign_user
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			if nodes[i].user_foreign_user == nil {
+				continue
 			}
+			fk := *nodes[i].user_foreign_user
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
 		query.Where(user.IDIn(ids...))
 		neighbors, err := query.All(ctx)
@@ -428,6 +439,9 @@ func (fuq *ForeignUserQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   fuq.sql,
 		Unique: true,
 	}
+	if unique := fuq.unique; unique != nil {
+		_spec.Unique = *unique
+	}
 	if fields := fuq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, foreignuser.FieldID)
@@ -453,7 +467,7 @@ func (fuq *ForeignUserQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := fuq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, foreignuser.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -472,7 +486,7 @@ func (fuq *ForeignUserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range fuq.order {
-		p(selector, foreignuser.ValidColumn)
+		p(selector)
 	}
 	if offset := fuq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -738,7 +752,7 @@ func (fugb *ForeignUserGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(fugb.fields)+len(fugb.fns))
 	columns = append(columns, fugb.fields...)
 	for _, fn := range fugb.fns {
-		columns = append(columns, fn(selector, foreignuser.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(fugb.fields...)
 }

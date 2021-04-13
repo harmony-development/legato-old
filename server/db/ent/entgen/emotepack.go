@@ -81,13 +81,13 @@ func (*EmotePack) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case emotepack.FieldID:
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		case emotepack.FieldName:
-			values[i] = &sql.NullString{}
+			values[i] = new(sql.NullString)
 		case emotepack.ForeignKeys[0]: // user_emotepack
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		case emotepack.ForeignKeys[1]: // user_createdpacks
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type EmotePack", columns[i])
 		}

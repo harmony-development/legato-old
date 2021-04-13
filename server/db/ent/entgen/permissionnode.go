@@ -91,17 +91,17 @@ func (*PermissionNode) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case permissionnode.FieldAllow:
-			values[i] = &sql.NullBool{}
+			values[i] = new(sql.NullBool)
 		case permissionnode.FieldID:
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		case permissionnode.FieldNode:
-			values[i] = &sql.NullString{}
+			values[i] = new(sql.NullString)
 		case permissionnode.ForeignKeys[0]: // channel_permission_node
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		case permissionnode.ForeignKeys[1]: // guild_permission_node
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		case permissionnode.ForeignKeys[2]: // role_permission_node
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type PermissionNode", columns[i])
 		}

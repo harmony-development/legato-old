@@ -152,20 +152,20 @@ func (d *DB) ManageRoles(guildID, userID uint64, addRoles, removeRoles []uint64)
 	return
 }
 
-func (d *DB) ModifyRole(roleID uint64, name *string, color *int, hoist, pingable *bool) (err error) {
+func (d *DB) ModifyRole(roleID uint64, name string, color int, hoist, pingable, updateName, updateColor, updateHoist, updatePingable bool) (err error) {
 	defer doRecovery(&err)
 	update := d.Role.UpdateOneID(roleID)
-	if name != nil {
-		update.SetName(*name)
+	if updateName {
+		update.SetName(name)
 	}
-	if color != nil {
-		update.SetColor(*color)
+	if updateColor {
+		update.SetColor(color)
 	}
-	if hoist != nil {
-		update.SetHoist(*hoist)
+	if updateHoist {
+		update.SetHoist(hoist)
 	}
-	if pingable != nil {
-		update.SetPingable(*pingable)
+	if updatePingable {
+		update.SetPingable(pingable)
 	}
 	update.ExecX(ctx)
 	return

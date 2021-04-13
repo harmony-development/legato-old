@@ -25,6 +25,7 @@ type ChannelQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Channel
@@ -54,6 +55,13 @@ func (cq *ChannelQuery) Limit(limit int) *ChannelQuery {
 // Offset adds an offset step to the query.
 func (cq *ChannelQuery) Offset(offset int) *ChannelQuery {
 	cq.offset = &offset
+	return cq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (cq *ChannelQuery) Unique(unique bool) *ChannelQuery {
+	cq.unique = &unique
 	return cq
 }
 
@@ -489,11 +497,14 @@ func (cq *ChannelQuery) sqlAll(ctx context.Context) ([]*Channel, error) {
 		ids := make([]uint64, 0, len(nodes))
 		nodeids := make(map[uint64][]*Channel)
 		for i := range nodes {
-			fk := nodes[i].guild_channel
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			if nodes[i].guild_channel == nil {
+				continue
 			}
+			fk := *nodes[i].guild_channel
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
 		query.Where(guild.IDIn(ids...))
 		neighbors, err := query.All(ctx)
@@ -627,6 +638,9 @@ func (cq *ChannelQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   cq.sql,
 		Unique: true,
 	}
+	if unique := cq.unique; unique != nil {
+		_spec.Unique = *unique
+	}
 	if fields := cq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, channel.FieldID)
@@ -652,7 +666,7 @@ func (cq *ChannelQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := cq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, channel.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -671,7 +685,7 @@ func (cq *ChannelQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range cq.order {
-		p(selector, channel.ValidColumn)
+		p(selector)
 	}
 	if offset := cq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -937,7 +951,7 @@ func (cgb *ChannelGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(cgb.fields)+len(cgb.fns))
 	columns = append(columns, cgb.fields...)
 	for _, fn := range cgb.fns {
-		columns = append(columns, fn(selector, channel.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(cgb.fields...)
 }

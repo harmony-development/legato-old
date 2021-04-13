@@ -61,7 +61,9 @@ func (d *DB) GetEmotePacks(userID uint64) (packs []*types.EmotePackData, err err
 	packs = make([]*types.EmotePackData, len(data))
 	for i, pack := range data {
 		packs[i] = &types.EmotePackData{
-			Name: pack.Name,
+			Name:    pack.Name,
+			PackID:  pack.ID,
+			OwnerID: pack.QueryUser().OnlyIDX(ctx),
 		}
 	}
 	return
@@ -73,7 +75,8 @@ func (d *DB) GetEmotePackEmotes(packID uint64) (emotes []*types.EmoteData, err e
 	emotes = make([]*types.EmoteData, len(data))
 	for i, pack := range data {
 		emotes[i] = &types.EmoteData{
-			Name: pack.Name,
+			Name:    pack.Name,
+			ImageID: pack.ID,
 		}
 	}
 	return

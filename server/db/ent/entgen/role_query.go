@@ -24,6 +24,7 @@ type RoleQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Role
@@ -52,6 +53,13 @@ func (rq *RoleQuery) Limit(limit int) *RoleQuery {
 // Offset adds an offset step to the query.
 func (rq *RoleQuery) Offset(offset int) *RoleQuery {
 	rq.offset = &offset
+	return rq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (rq *RoleQuery) Unique(unique bool) *RoleQuery {
+	rq.unique = &unique
 	return rq
 }
 
@@ -466,7 +474,6 @@ func (rq *RoleQuery) sqlAll(ctx context.Context) ([]*Role, error) {
 			Predicate: func(s *sql.Selector) {
 				s.Where(sql.InValues(role.GuildPrimaryKey[1], fks...))
 			},
-
 			ScanValues: func() [2]interface{} {
 				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
 			},
@@ -485,7 +492,9 @@ func (rq *RoleQuery) sqlAll(ctx context.Context) ([]*Role, error) {
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
 				}
-				edgeids = append(edgeids, inValue)
+				if _, ok := edges[inValue]; !ok {
+					edgeids = append(edgeids, inValue)
+				}
 				edges[inValue] = append(edges[inValue], node)
 				return nil
 			},
@@ -530,7 +539,6 @@ func (rq *RoleQuery) sqlAll(ctx context.Context) ([]*Role, error) {
 			Predicate: func(s *sql.Selector) {
 				s.Where(sql.InValues(role.MembersPrimaryKey[0], fks...))
 			},
-
 			ScanValues: func() [2]interface{} {
 				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
 			},
@@ -549,7 +557,9 @@ func (rq *RoleQuery) sqlAll(ctx context.Context) ([]*Role, error) {
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
 				}
-				edgeids = append(edgeids, inValue)
+				if _, ok := edges[inValue]; !ok {
+					edgeids = append(edgeids, inValue)
+				}
 				edges[inValue] = append(edges[inValue], node)
 				return nil
 			},
@@ -631,6 +641,9 @@ func (rq *RoleQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   rq.sql,
 		Unique: true,
 	}
+	if unique := rq.unique; unique != nil {
+		_spec.Unique = *unique
+	}
 	if fields := rq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, role.FieldID)
@@ -656,7 +669,7 @@ func (rq *RoleQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := rq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, role.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -675,7 +688,7 @@ func (rq *RoleQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range rq.order {
-		p(selector, role.ValidColumn)
+		p(selector)
 	}
 	if offset := rq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -941,7 +954,7 @@ func (rgb *RoleGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(rgb.fields)+len(rgb.fns))
 	columns = append(columns, rgb.fields...)
 	for _, fn := range rgb.fns {
-		columns = append(columns, fn(selector, role.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(rgb.fields...)
 }

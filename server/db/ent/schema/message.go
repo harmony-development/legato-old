@@ -31,12 +31,9 @@ func (Message) Fields() []ent.Field {
 		field.
 			Time("editedat").
 			Optional(),
-		field.
-			JSON("metadata", &harmonytypesv1.Metadata{}).
-			Optional(),
-		field.
-			JSON("override", &harmonytypesv1.Override{}).
-			Optional(),
+		field.Bytes("metadata").GoType(&harmonytypesv1.Metadata{}).Optional(),
+		field.Bytes("override").GoType(&harmonytypesv1.Override{}).Optional(),
+		field.Bytes("content").GoType(&harmonytypesv1.Content{}),
 	}
 }
 
@@ -54,15 +51,6 @@ func (Message) Edges() []ent.Edge {
 		edge.
 			To("replies", Message.Type).
 			From("parent").
-			Unique(),
-		edge.
-			To("text_message", TextMessage.Type).
-			Unique(),
-		edge.
-			To("file_message", FileMessage.Type).
-			Unique(),
-		edge.
-			To("embed_message", EmbedMessage.Type).
 			Unique(),
 	}
 }

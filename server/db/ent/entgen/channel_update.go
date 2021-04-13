@@ -515,6 +515,7 @@ func (cu *ChannelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // ChannelUpdateOne is the builder for updating a single Channel entity.
 type ChannelUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *ChannelMutation
 }
@@ -688,6 +689,13 @@ func (cuo *ChannelUpdateOne) RemovePermissionNode(p ...*PermissionNode) *Channel
 	return cuo.RemovePermissionNodeIDs(ids...)
 }
 
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (cuo *ChannelUpdateOne) Select(field string, fields ...string) *ChannelUpdateOne {
+	cuo.fields = append([]string{field}, fields...)
+	return cuo
+}
+
 // Save executes the query and returns the updated Channel entity.
 func (cuo *ChannelUpdateOne) Save(ctx context.Context) (*Channel, error) {
 	var (
@@ -755,6 +763,18 @@ func (cuo *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err e
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Channel.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := cuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, channel.FieldID)
+		for _, f := range fields {
+			if !channel.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("entgen: invalid field %q for query", f)}
+			}
+			if f != channel.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := cuo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

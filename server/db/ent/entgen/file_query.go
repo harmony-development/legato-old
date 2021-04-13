@@ -20,10 +20,10 @@ type FileQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.File
-	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -44,6 +44,13 @@ func (fq *FileQuery) Limit(limit int) *FileQuery {
 // Offset adds an offset step to the query.
 func (fq *FileQuery) Offset(offset int) *FileQuery {
 	fq.offset = &offset
+	return fq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (fq *FileQuery) Unique(unique bool) *FileQuery {
+	fq.unique = &unique
 	return fq
 }
 
@@ -303,13 +310,9 @@ func (fq *FileQuery) prepareQuery(ctx context.Context) error {
 
 func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 	var (
-		nodes   = []*File{}
-		withFKs = fq.withFKs
-		_spec   = fq.querySpec()
+		nodes = []*File{}
+		_spec = fq.querySpec()
 	)
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, file.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &File{config: fq.config}
 		nodes = append(nodes, node)
@@ -357,6 +360,9 @@ func (fq *FileQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   fq.sql,
 		Unique: true,
 	}
+	if unique := fq.unique; unique != nil {
+		_spec.Unique = *unique
+	}
 	if fields := fq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, file.FieldID)
@@ -382,7 +388,7 @@ func (fq *FileQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := fq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, file.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -401,7 +407,7 @@ func (fq *FileQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range fq.order {
-		p(selector, file.ValidColumn)
+		p(selector)
 	}
 	if offset := fq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -667,7 +673,7 @@ func (fgb *FileGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(fgb.fields)+len(fgb.fns))
 	columns = append(columns, fgb.fields...)
 	for _, fn := range fgb.fns {
-		columns = append(columns, fn(selector, file.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(fgb.fields...)
 }

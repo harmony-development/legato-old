@@ -3,7 +3,7 @@ module github.com/harmony-development/legato
 go 1.14
 
 require (
-	entgo.io/ent v0.7.0
+	entgo.io/ent v0.7.1-0.20210411114748-f59e25d22865
 	github.com/JohannesKaufmann/html-to-markdown v1.2.0
 	github.com/PuerkitoBio/goquery v1.6.1 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
@@ -55,7 +55,6 @@ require (
 	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83
 	golang.org/x/image v0.0.0-20210220032944-ac19c3e999fb // indirect
 	golang.org/x/net v0.0.0-20210222171744-9060382bd457 // indirect
-	golang.org/x/sys v0.0.0-20210223095934-7937bea0104d // indirect
 	golang.org/x/text v0.3.5 // indirect
 	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba
 	google.golang.org/protobuf v1.25.1-0.20200805231151-a709e31e5d12

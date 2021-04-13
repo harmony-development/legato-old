@@ -466,6 +466,7 @@ func (ru *RoleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // RoleUpdateOne is the builder for updating a single Role entity.
 type RoleUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *RoleMutation
 }
@@ -620,6 +621,13 @@ func (ruo *RoleUpdateOne) RemovePermissionNode(p ...*PermissionNode) *RoleUpdate
 	return ruo.RemovePermissionNodeIDs(ids...)
 }
 
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (ruo *RoleUpdateOne) Select(field string, fields ...string) *RoleUpdateOne {
+	ruo.fields = append([]string{field}, fields...)
+	return ruo
+}
+
 // Save executes the query and returns the updated Role entity.
 func (ruo *RoleUpdateOne) Save(ctx context.Context) (*Role, error) {
 	var (
@@ -687,6 +695,18 @@ func (ruo *RoleUpdateOne) sqlSave(ctx context.Context) (_node *Role, err error) 
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Role.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := ruo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, role.FieldID)
+		for _, f := range fields {
+			if !role.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("entgen: invalid field %q for query", f)}
+			}
+			if f != role.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := ruo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

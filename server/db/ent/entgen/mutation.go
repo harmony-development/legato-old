@@ -9,18 +9,11 @@ import (
 	"time"
 
 	v1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
-	"github.com/harmony-development/legato/server/db/ent/entgen/actionbutton"
-	"github.com/harmony-development/legato/server/db/ent/entgen/actiondropdown"
-	"github.com/harmony-development/legato/server/db/ent/entgen/actioninput"
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
-	"github.com/harmony-development/legato/server/db/ent/entgen/embedaction"
-	"github.com/harmony-development/legato/server/db/ent/entgen/embedfield"
-	"github.com/harmony-development/legato/server/db/ent/entgen/embedmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/emote"
 	"github.com/harmony-development/legato/server/db/ent/entgen/emotepack"
 	"github.com/harmony-development/legato/server/db/ent/entgen/file"
 	"github.com/harmony-development/legato/server/db/ent/entgen/filehash"
-	"github.com/harmony-development/legato/server/db/ent/entgen/filemessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/foreignuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guildlistentry"
@@ -32,7 +25,6 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/profile"
 	"github.com/harmony-development/legato/server/db/ent/entgen/role"
 	"github.com/harmony-development/legato/server/db/ent/entgen/session"
-	"github.com/harmony-development/legato/server/db/ent/entgen/textmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 	"github.com/harmony-development/legato/server/db/ent/entgen/usermeta"
 
@@ -48,18 +40,11 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeActionButton   = "ActionButton"
-	TypeActionDropdown = "ActionDropdown"
-	TypeActionInput    = "ActionInput"
 	TypeChannel        = "Channel"
-	TypeEmbedAction    = "EmbedAction"
-	TypeEmbedField     = "EmbedField"
-	TypeEmbedMessage   = "EmbedMessage"
 	TypeEmote          = "Emote"
 	TypeEmotePack      = "EmotePack"
 	TypeFile           = "File"
 	TypeFileHash       = "FileHash"
-	TypeFileMessage    = "FileMessage"
 	TypeForeignUser    = "ForeignUser"
 	TypeGuild          = "Guild"
 	TypeGuildListEntry = "GuildListEntry"
@@ -70,1033 +55,9 @@ const (
 	TypeProfile        = "Profile"
 	TypeRole           = "Role"
 	TypeSession        = "Session"
-	TypeTextMessage    = "TextMessage"
 	TypeUser           = "User"
 	TypeUserMeta       = "UserMeta"
 )
-
-// ActionButtonMutation represents an operation that mutates the ActionButton nodes in the graph.
-type ActionButtonMutation struct {
-	config
-	op            Op
-	typ           string
-	id            *int
-	text          *string
-	url           *string
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*ActionButton, error)
-	predicates    []predicate.ActionButton
-}
-
-var _ ent.Mutation = (*ActionButtonMutation)(nil)
-
-// actionbuttonOption allows management of the mutation configuration using functional options.
-type actionbuttonOption func(*ActionButtonMutation)
-
-// newActionButtonMutation creates new mutation for the ActionButton entity.
-func newActionButtonMutation(c config, op Op, opts ...actionbuttonOption) *ActionButtonMutation {
-	m := &ActionButtonMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeActionButton,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withActionButtonID sets the ID field of the mutation.
-func withActionButtonID(id int) actionbuttonOption {
-	return func(m *ActionButtonMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *ActionButton
-		)
-		m.oldValue = func(ctx context.Context) (*ActionButton, error) {
-			once.Do(func() {
-				if m.done {
-					err = fmt.Errorf("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().ActionButton.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withActionButton sets the old ActionButton of the mutation.
-func withActionButton(node *ActionButton) actionbuttonOption {
-	return func(m *ActionButtonMutation) {
-		m.oldValue = func(context.Context) (*ActionButton, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m ActionButtonMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m ActionButtonMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, fmt.Errorf("entgen: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
-func (m *ActionButtonMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// SetText sets the "text" field.
-func (m *ActionButtonMutation) SetText(s string) {
-	m.text = &s
-}
-
-// Text returns the value of the "text" field in the mutation.
-func (m *ActionButtonMutation) Text() (r string, exists bool) {
-	v := m.text
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldText returns the old "text" field's value of the ActionButton entity.
-// If the ActionButton object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ActionButtonMutation) OldText(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldText is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldText requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldText: %w", err)
-	}
-	return oldValue.Text, nil
-}
-
-// ResetText resets all changes to the "text" field.
-func (m *ActionButtonMutation) ResetText() {
-	m.text = nil
-}
-
-// SetURL sets the "url" field.
-func (m *ActionButtonMutation) SetURL(s string) {
-	m.url = &s
-}
-
-// URL returns the value of the "url" field in the mutation.
-func (m *ActionButtonMutation) URL() (r string, exists bool) {
-	v := m.url
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldURL returns the old "url" field's value of the ActionButton entity.
-// If the ActionButton object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ActionButtonMutation) OldURL(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldURL is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldURL requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldURL: %w", err)
-	}
-	return oldValue.URL, nil
-}
-
-// ResetURL resets all changes to the "url" field.
-func (m *ActionButtonMutation) ResetURL() {
-	m.url = nil
-}
-
-// Op returns the operation name.
-func (m *ActionButtonMutation) Op() Op {
-	return m.op
-}
-
-// Type returns the node type of this mutation (ActionButton).
-func (m *ActionButtonMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *ActionButtonMutation) Fields() []string {
-	fields := make([]string, 0, 2)
-	if m.text != nil {
-		fields = append(fields, actionbutton.FieldText)
-	}
-	if m.url != nil {
-		fields = append(fields, actionbutton.FieldURL)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *ActionButtonMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case actionbutton.FieldText:
-		return m.Text()
-	case actionbutton.FieldURL:
-		return m.URL()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *ActionButtonMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case actionbutton.FieldText:
-		return m.OldText(ctx)
-	case actionbutton.FieldURL:
-		return m.OldURL(ctx)
-	}
-	return nil, fmt.Errorf("unknown ActionButton field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *ActionButtonMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case actionbutton.FieldText:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetText(v)
-		return nil
-	case actionbutton.FieldURL:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetURL(v)
-		return nil
-	}
-	return fmt.Errorf("unknown ActionButton field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *ActionButtonMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *ActionButtonMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *ActionButtonMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown ActionButton numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *ActionButtonMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *ActionButtonMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *ActionButtonMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown ActionButton nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *ActionButtonMutation) ResetField(name string) error {
-	switch name {
-	case actionbutton.FieldText:
-		m.ResetText()
-		return nil
-	case actionbutton.FieldURL:
-		m.ResetURL()
-		return nil
-	}
-	return fmt.Errorf("unknown ActionButton field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *ActionButtonMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *ActionButtonMutation) AddedIDs(name string) []ent.Value {
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *ActionButtonMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *ActionButtonMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *ActionButtonMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *ActionButtonMutation) EdgeCleared(name string) bool {
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *ActionButtonMutation) ClearEdge(name string) error {
-	return fmt.Errorf("unknown ActionButton unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *ActionButtonMutation) ResetEdge(name string) error {
-	return fmt.Errorf("unknown ActionButton edge %s", name)
-}
-
-// ActionDropdownMutation represents an operation that mutates the ActionDropdown nodes in the graph.
-type ActionDropdownMutation struct {
-	config
-	op            Op
-	typ           string
-	id            *int
-	text          *string
-	options       *[]string
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*ActionDropdown, error)
-	predicates    []predicate.ActionDropdown
-}
-
-var _ ent.Mutation = (*ActionDropdownMutation)(nil)
-
-// actiondropdownOption allows management of the mutation configuration using functional options.
-type actiondropdownOption func(*ActionDropdownMutation)
-
-// newActionDropdownMutation creates new mutation for the ActionDropdown entity.
-func newActionDropdownMutation(c config, op Op, opts ...actiondropdownOption) *ActionDropdownMutation {
-	m := &ActionDropdownMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeActionDropdown,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withActionDropdownID sets the ID field of the mutation.
-func withActionDropdownID(id int) actiondropdownOption {
-	return func(m *ActionDropdownMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *ActionDropdown
-		)
-		m.oldValue = func(ctx context.Context) (*ActionDropdown, error) {
-			once.Do(func() {
-				if m.done {
-					err = fmt.Errorf("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().ActionDropdown.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withActionDropdown sets the old ActionDropdown of the mutation.
-func withActionDropdown(node *ActionDropdown) actiondropdownOption {
-	return func(m *ActionDropdownMutation) {
-		m.oldValue = func(context.Context) (*ActionDropdown, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m ActionDropdownMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m ActionDropdownMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, fmt.Errorf("entgen: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
-func (m *ActionDropdownMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// SetText sets the "text" field.
-func (m *ActionDropdownMutation) SetText(s string) {
-	m.text = &s
-}
-
-// Text returns the value of the "text" field in the mutation.
-func (m *ActionDropdownMutation) Text() (r string, exists bool) {
-	v := m.text
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldText returns the old "text" field's value of the ActionDropdown entity.
-// If the ActionDropdown object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ActionDropdownMutation) OldText(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldText is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldText requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldText: %w", err)
-	}
-	return oldValue.Text, nil
-}
-
-// ResetText resets all changes to the "text" field.
-func (m *ActionDropdownMutation) ResetText() {
-	m.text = nil
-}
-
-// SetOptions sets the "options" field.
-func (m *ActionDropdownMutation) SetOptions(s []string) {
-	m.options = &s
-}
-
-// Options returns the value of the "options" field in the mutation.
-func (m *ActionDropdownMutation) Options() (r []string, exists bool) {
-	v := m.options
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldOptions returns the old "options" field's value of the ActionDropdown entity.
-// If the ActionDropdown object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ActionDropdownMutation) OldOptions(ctx context.Context) (v []string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldOptions is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldOptions requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldOptions: %w", err)
-	}
-	return oldValue.Options, nil
-}
-
-// ResetOptions resets all changes to the "options" field.
-func (m *ActionDropdownMutation) ResetOptions() {
-	m.options = nil
-}
-
-// Op returns the operation name.
-func (m *ActionDropdownMutation) Op() Op {
-	return m.op
-}
-
-// Type returns the node type of this mutation (ActionDropdown).
-func (m *ActionDropdownMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *ActionDropdownMutation) Fields() []string {
-	fields := make([]string, 0, 2)
-	if m.text != nil {
-		fields = append(fields, actiondropdown.FieldText)
-	}
-	if m.options != nil {
-		fields = append(fields, actiondropdown.FieldOptions)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *ActionDropdownMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case actiondropdown.FieldText:
-		return m.Text()
-	case actiondropdown.FieldOptions:
-		return m.Options()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *ActionDropdownMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case actiondropdown.FieldText:
-		return m.OldText(ctx)
-	case actiondropdown.FieldOptions:
-		return m.OldOptions(ctx)
-	}
-	return nil, fmt.Errorf("unknown ActionDropdown field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *ActionDropdownMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case actiondropdown.FieldText:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetText(v)
-		return nil
-	case actiondropdown.FieldOptions:
-		v, ok := value.([]string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetOptions(v)
-		return nil
-	}
-	return fmt.Errorf("unknown ActionDropdown field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *ActionDropdownMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *ActionDropdownMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *ActionDropdownMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown ActionDropdown numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *ActionDropdownMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *ActionDropdownMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *ActionDropdownMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown ActionDropdown nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *ActionDropdownMutation) ResetField(name string) error {
-	switch name {
-	case actiondropdown.FieldText:
-		m.ResetText()
-		return nil
-	case actiondropdown.FieldOptions:
-		m.ResetOptions()
-		return nil
-	}
-	return fmt.Errorf("unknown ActionDropdown field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *ActionDropdownMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *ActionDropdownMutation) AddedIDs(name string) []ent.Value {
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *ActionDropdownMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *ActionDropdownMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *ActionDropdownMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *ActionDropdownMutation) EdgeCleared(name string) bool {
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *ActionDropdownMutation) ClearEdge(name string) error {
-	return fmt.Errorf("unknown ActionDropdown unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *ActionDropdownMutation) ResetEdge(name string) error {
-	return fmt.Errorf("unknown ActionDropdown edge %s", name)
-}
-
-// ActionInputMutation represents an operation that mutates the ActionInput nodes in the graph.
-type ActionInputMutation struct {
-	config
-	op            Op
-	typ           string
-	id            *int
-	label         *string
-	wide          *bool
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*ActionInput, error)
-	predicates    []predicate.ActionInput
-}
-
-var _ ent.Mutation = (*ActionInputMutation)(nil)
-
-// actioninputOption allows management of the mutation configuration using functional options.
-type actioninputOption func(*ActionInputMutation)
-
-// newActionInputMutation creates new mutation for the ActionInput entity.
-func newActionInputMutation(c config, op Op, opts ...actioninputOption) *ActionInputMutation {
-	m := &ActionInputMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeActionInput,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withActionInputID sets the ID field of the mutation.
-func withActionInputID(id int) actioninputOption {
-	return func(m *ActionInputMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *ActionInput
-		)
-		m.oldValue = func(ctx context.Context) (*ActionInput, error) {
-			once.Do(func() {
-				if m.done {
-					err = fmt.Errorf("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().ActionInput.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withActionInput sets the old ActionInput of the mutation.
-func withActionInput(node *ActionInput) actioninputOption {
-	return func(m *ActionInputMutation) {
-		m.oldValue = func(context.Context) (*ActionInput, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m ActionInputMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m ActionInputMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, fmt.Errorf("entgen: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
-func (m *ActionInputMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// SetLabel sets the "label" field.
-func (m *ActionInputMutation) SetLabel(s string) {
-	m.label = &s
-}
-
-// Label returns the value of the "label" field in the mutation.
-func (m *ActionInputMutation) Label() (r string, exists bool) {
-	v := m.label
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldLabel returns the old "label" field's value of the ActionInput entity.
-// If the ActionInput object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ActionInputMutation) OldLabel(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldLabel is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldLabel requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLabel: %w", err)
-	}
-	return oldValue.Label, nil
-}
-
-// ResetLabel resets all changes to the "label" field.
-func (m *ActionInputMutation) ResetLabel() {
-	m.label = nil
-}
-
-// SetWide sets the "wide" field.
-func (m *ActionInputMutation) SetWide(b bool) {
-	m.wide = &b
-}
-
-// Wide returns the value of the "wide" field in the mutation.
-func (m *ActionInputMutation) Wide() (r bool, exists bool) {
-	v := m.wide
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldWide returns the old "wide" field's value of the ActionInput entity.
-// If the ActionInput object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ActionInputMutation) OldWide(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldWide is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldWide requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldWide: %w", err)
-	}
-	return oldValue.Wide, nil
-}
-
-// ResetWide resets all changes to the "wide" field.
-func (m *ActionInputMutation) ResetWide() {
-	m.wide = nil
-}
-
-// Op returns the operation name.
-func (m *ActionInputMutation) Op() Op {
-	return m.op
-}
-
-// Type returns the node type of this mutation (ActionInput).
-func (m *ActionInputMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *ActionInputMutation) Fields() []string {
-	fields := make([]string, 0, 2)
-	if m.label != nil {
-		fields = append(fields, actioninput.FieldLabel)
-	}
-	if m.wide != nil {
-		fields = append(fields, actioninput.FieldWide)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *ActionInputMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case actioninput.FieldLabel:
-		return m.Label()
-	case actioninput.FieldWide:
-		return m.Wide()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *ActionInputMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case actioninput.FieldLabel:
-		return m.OldLabel(ctx)
-	case actioninput.FieldWide:
-		return m.OldWide(ctx)
-	}
-	return nil, fmt.Errorf("unknown ActionInput field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *ActionInputMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case actioninput.FieldLabel:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetLabel(v)
-		return nil
-	case actioninput.FieldWide:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetWide(v)
-		return nil
-	}
-	return fmt.Errorf("unknown ActionInput field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *ActionInputMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *ActionInputMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *ActionInputMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown ActionInput numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *ActionInputMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *ActionInputMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *ActionInputMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown ActionInput nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *ActionInputMutation) ResetField(name string) error {
-	switch name {
-	case actioninput.FieldLabel:
-		m.ResetLabel()
-		return nil
-	case actioninput.FieldWide:
-		m.ResetWide()
-		return nil
-	}
-	return fmt.Errorf("unknown ActionInput field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *ActionInputMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *ActionInputMutation) AddedIDs(name string) []ent.Value {
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *ActionInputMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *ActionInputMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *ActionInputMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *ActionInputMutation) EdgeCleared(name string) bool {
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *ActionInputMutation) ClearEdge(name string) error {
-	return fmt.Errorf("unknown ActionInput unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *ActionInputMutation) ResetEdge(name string) error {
-	return fmt.Errorf("unknown ActionInput edge %s", name)
-}
 
 // ChannelMutation represents an operation that mutates the Channel nodes in the graph.
 type ChannelMutation struct {
@@ -1385,7 +346,7 @@ func (m *ChannelMutation) ClearGuild() {
 	m.clearedguild = true
 }
 
-// GuildCleared returns if the "guild" edge to the Guild entity was cleared.
+// GuildCleared reports if the "guild" edge to the Guild entity was cleared.
 func (m *ChannelMutation) GuildCleared() bool {
 	return m.clearedguild
 }
@@ -1429,7 +390,7 @@ func (m *ChannelMutation) ClearMessage() {
 	m.clearedmessage = true
 }
 
-// MessageCleared returns if the "message" edge to the Message entity was cleared.
+// MessageCleared reports if the "message" edge to the Message entity was cleared.
 func (m *ChannelMutation) MessageCleared() bool {
 	return m.clearedmessage
 }
@@ -1482,7 +443,7 @@ func (m *ChannelMutation) ClearRole() {
 	m.clearedrole = true
 }
 
-// RoleCleared returns if the "role" edge to the Role entity was cleared.
+// RoleCleared reports if the "role" edge to the Role entity was cleared.
 func (m *ChannelMutation) RoleCleared() bool {
 	return m.clearedrole
 }
@@ -1535,7 +496,7 @@ func (m *ChannelMutation) ClearPermissionNode() {
 	m.clearedpermission_node = true
 }
 
-// PermissionNodeCleared returns if the "permission_node" edge to the PermissionNode entity was cleared.
+// PermissionNodeCleared reports if the "permission_node" edge to the PermissionNode entity was cleared.
 func (m *ChannelMutation) PermissionNodeCleared() bool {
 	return m.clearedpermission_node
 }
@@ -1904,1698 +865,6 @@ func (m *ChannelMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Channel edge %s", name)
 }
 
-// EmbedActionMutation represents an operation that mutates the EmbedAction nodes in the graph.
-type EmbedActionMutation struct {
-	config
-	op              Op
-	typ             string
-	id              *int
-	action_id       *string
-	action_type     *int8
-	addaction_type  *int8
-	clearedFields   map[string]struct{}
-	button          *int
-	clearedbutton   bool
-	dropdown        *int
-	cleareddropdown bool
-	input           *int
-	clearedinput    bool
-	done            bool
-	oldValue        func(context.Context) (*EmbedAction, error)
-	predicates      []predicate.EmbedAction
-}
-
-var _ ent.Mutation = (*EmbedActionMutation)(nil)
-
-// embedactionOption allows management of the mutation configuration using functional options.
-type embedactionOption func(*EmbedActionMutation)
-
-// newEmbedActionMutation creates new mutation for the EmbedAction entity.
-func newEmbedActionMutation(c config, op Op, opts ...embedactionOption) *EmbedActionMutation {
-	m := &EmbedActionMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeEmbedAction,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withEmbedActionID sets the ID field of the mutation.
-func withEmbedActionID(id int) embedactionOption {
-	return func(m *EmbedActionMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *EmbedAction
-		)
-		m.oldValue = func(ctx context.Context) (*EmbedAction, error) {
-			once.Do(func() {
-				if m.done {
-					err = fmt.Errorf("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().EmbedAction.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withEmbedAction sets the old EmbedAction of the mutation.
-func withEmbedAction(node *EmbedAction) embedactionOption {
-	return func(m *EmbedActionMutation) {
-		m.oldValue = func(context.Context) (*EmbedAction, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m EmbedActionMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m EmbedActionMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, fmt.Errorf("entgen: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
-func (m *EmbedActionMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// SetActionID sets the "action_id" field.
-func (m *EmbedActionMutation) SetActionID(s string) {
-	m.action_id = &s
-}
-
-// ActionID returns the value of the "action_id" field in the mutation.
-func (m *EmbedActionMutation) ActionID() (r string, exists bool) {
-	v := m.action_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldActionID returns the old "action_id" field's value of the EmbedAction entity.
-// If the EmbedAction object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EmbedActionMutation) OldActionID(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldActionID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldActionID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldActionID: %w", err)
-	}
-	return oldValue.ActionID, nil
-}
-
-// ResetActionID resets all changes to the "action_id" field.
-func (m *EmbedActionMutation) ResetActionID() {
-	m.action_id = nil
-}
-
-// SetActionType sets the "action_type" field.
-func (m *EmbedActionMutation) SetActionType(i int8) {
-	m.action_type = &i
-	m.addaction_type = nil
-}
-
-// ActionType returns the value of the "action_type" field in the mutation.
-func (m *EmbedActionMutation) ActionType() (r int8, exists bool) {
-	v := m.action_type
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldActionType returns the old "action_type" field's value of the EmbedAction entity.
-// If the EmbedAction object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EmbedActionMutation) OldActionType(ctx context.Context) (v int8, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldActionType is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldActionType requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldActionType: %w", err)
-	}
-	return oldValue.ActionType, nil
-}
-
-// AddActionType adds i to the "action_type" field.
-func (m *EmbedActionMutation) AddActionType(i int8) {
-	if m.addaction_type != nil {
-		*m.addaction_type += i
-	} else {
-		m.addaction_type = &i
-	}
-}
-
-// AddedActionType returns the value that was added to the "action_type" field in this mutation.
-func (m *EmbedActionMutation) AddedActionType() (r int8, exists bool) {
-	v := m.addaction_type
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetActionType resets all changes to the "action_type" field.
-func (m *EmbedActionMutation) ResetActionType() {
-	m.action_type = nil
-	m.addaction_type = nil
-}
-
-// SetButtonID sets the "button" edge to the ActionButton entity by id.
-func (m *EmbedActionMutation) SetButtonID(id int) {
-	m.button = &id
-}
-
-// ClearButton clears the "button" edge to the ActionButton entity.
-func (m *EmbedActionMutation) ClearButton() {
-	m.clearedbutton = true
-}
-
-// ButtonCleared returns if the "button" edge to the ActionButton entity was cleared.
-func (m *EmbedActionMutation) ButtonCleared() bool {
-	return m.clearedbutton
-}
-
-// ButtonID returns the "button" edge ID in the mutation.
-func (m *EmbedActionMutation) ButtonID() (id int, exists bool) {
-	if m.button != nil {
-		return *m.button, true
-	}
-	return
-}
-
-// ButtonIDs returns the "button" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// ButtonID instead. It exists only for internal usage by the builders.
-func (m *EmbedActionMutation) ButtonIDs() (ids []int) {
-	if id := m.button; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetButton resets all changes to the "button" edge.
-func (m *EmbedActionMutation) ResetButton() {
-	m.button = nil
-	m.clearedbutton = false
-}
-
-// SetDropdownID sets the "dropdown" edge to the ActionDropdown entity by id.
-func (m *EmbedActionMutation) SetDropdownID(id int) {
-	m.dropdown = &id
-}
-
-// ClearDropdown clears the "dropdown" edge to the ActionDropdown entity.
-func (m *EmbedActionMutation) ClearDropdown() {
-	m.cleareddropdown = true
-}
-
-// DropdownCleared returns if the "dropdown" edge to the ActionDropdown entity was cleared.
-func (m *EmbedActionMutation) DropdownCleared() bool {
-	return m.cleareddropdown
-}
-
-// DropdownID returns the "dropdown" edge ID in the mutation.
-func (m *EmbedActionMutation) DropdownID() (id int, exists bool) {
-	if m.dropdown != nil {
-		return *m.dropdown, true
-	}
-	return
-}
-
-// DropdownIDs returns the "dropdown" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// DropdownID instead. It exists only for internal usage by the builders.
-func (m *EmbedActionMutation) DropdownIDs() (ids []int) {
-	if id := m.dropdown; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetDropdown resets all changes to the "dropdown" edge.
-func (m *EmbedActionMutation) ResetDropdown() {
-	m.dropdown = nil
-	m.cleareddropdown = false
-}
-
-// SetInputID sets the "input" edge to the ActionInput entity by id.
-func (m *EmbedActionMutation) SetInputID(id int) {
-	m.input = &id
-}
-
-// ClearInput clears the "input" edge to the ActionInput entity.
-func (m *EmbedActionMutation) ClearInput() {
-	m.clearedinput = true
-}
-
-// InputCleared returns if the "input" edge to the ActionInput entity was cleared.
-func (m *EmbedActionMutation) InputCleared() bool {
-	return m.clearedinput
-}
-
-// InputID returns the "input" edge ID in the mutation.
-func (m *EmbedActionMutation) InputID() (id int, exists bool) {
-	if m.input != nil {
-		return *m.input, true
-	}
-	return
-}
-
-// InputIDs returns the "input" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// InputID instead. It exists only for internal usage by the builders.
-func (m *EmbedActionMutation) InputIDs() (ids []int) {
-	if id := m.input; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetInput resets all changes to the "input" edge.
-func (m *EmbedActionMutation) ResetInput() {
-	m.input = nil
-	m.clearedinput = false
-}
-
-// Op returns the operation name.
-func (m *EmbedActionMutation) Op() Op {
-	return m.op
-}
-
-// Type returns the node type of this mutation (EmbedAction).
-func (m *EmbedActionMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *EmbedActionMutation) Fields() []string {
-	fields := make([]string, 0, 2)
-	if m.action_id != nil {
-		fields = append(fields, embedaction.FieldActionID)
-	}
-	if m.action_type != nil {
-		fields = append(fields, embedaction.FieldActionType)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *EmbedActionMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case embedaction.FieldActionID:
-		return m.ActionID()
-	case embedaction.FieldActionType:
-		return m.ActionType()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *EmbedActionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case embedaction.FieldActionID:
-		return m.OldActionID(ctx)
-	case embedaction.FieldActionType:
-		return m.OldActionType(ctx)
-	}
-	return nil, fmt.Errorf("unknown EmbedAction field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *EmbedActionMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case embedaction.FieldActionID:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetActionID(v)
-		return nil
-	case embedaction.FieldActionType:
-		v, ok := value.(int8)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetActionType(v)
-		return nil
-	}
-	return fmt.Errorf("unknown EmbedAction field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *EmbedActionMutation) AddedFields() []string {
-	var fields []string
-	if m.addaction_type != nil {
-		fields = append(fields, embedaction.FieldActionType)
-	}
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *EmbedActionMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case embedaction.FieldActionType:
-		return m.AddedActionType()
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *EmbedActionMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	case embedaction.FieldActionType:
-		v, ok := value.(int8)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddActionType(v)
-		return nil
-	}
-	return fmt.Errorf("unknown EmbedAction numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *EmbedActionMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *EmbedActionMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *EmbedActionMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown EmbedAction nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *EmbedActionMutation) ResetField(name string) error {
-	switch name {
-	case embedaction.FieldActionID:
-		m.ResetActionID()
-		return nil
-	case embedaction.FieldActionType:
-		m.ResetActionType()
-		return nil
-	}
-	return fmt.Errorf("unknown EmbedAction field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *EmbedActionMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
-	if m.button != nil {
-		edges = append(edges, embedaction.EdgeButton)
-	}
-	if m.dropdown != nil {
-		edges = append(edges, embedaction.EdgeDropdown)
-	}
-	if m.input != nil {
-		edges = append(edges, embedaction.EdgeInput)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *EmbedActionMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case embedaction.EdgeButton:
-		if id := m.button; id != nil {
-			return []ent.Value{*id}
-		}
-	case embedaction.EdgeDropdown:
-		if id := m.dropdown; id != nil {
-			return []ent.Value{*id}
-		}
-	case embedaction.EdgeInput:
-		if id := m.input; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *EmbedActionMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *EmbedActionMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *EmbedActionMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
-	if m.clearedbutton {
-		edges = append(edges, embedaction.EdgeButton)
-	}
-	if m.cleareddropdown {
-		edges = append(edges, embedaction.EdgeDropdown)
-	}
-	if m.clearedinput {
-		edges = append(edges, embedaction.EdgeInput)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *EmbedActionMutation) EdgeCleared(name string) bool {
-	switch name {
-	case embedaction.EdgeButton:
-		return m.clearedbutton
-	case embedaction.EdgeDropdown:
-		return m.cleareddropdown
-	case embedaction.EdgeInput:
-		return m.clearedinput
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *EmbedActionMutation) ClearEdge(name string) error {
-	switch name {
-	case embedaction.EdgeButton:
-		m.ClearButton()
-		return nil
-	case embedaction.EdgeDropdown:
-		m.ClearDropdown()
-		return nil
-	case embedaction.EdgeInput:
-		m.ClearInput()
-		return nil
-	}
-	return fmt.Errorf("unknown EmbedAction unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *EmbedActionMutation) ResetEdge(name string) error {
-	switch name {
-	case embedaction.EdgeButton:
-		m.ResetButton()
-		return nil
-	case embedaction.EdgeDropdown:
-		m.ResetDropdown()
-		return nil
-	case embedaction.EdgeInput:
-		m.ResetInput()
-		return nil
-	}
-	return fmt.Errorf("unknown EmbedAction edge %s", name)
-}
-
-// EmbedFieldMutation represents an operation that mutates the EmbedField nodes in the graph.
-type EmbedFieldMutation struct {
-	config
-	op                   Op
-	typ                  string
-	id                   *int
-	title                *string
-	subtitle             *string
-	body                 *string
-	image_url            *string
-	presentation         *int8
-	addpresentation      *int8
-	clearedFields        map[string]struct{}
-	embed_action         map[int]struct{}
-	removedembed_action  map[int]struct{}
-	clearedembed_action  bool
-	embed_message        *int
-	clearedembed_message bool
-	done                 bool
-	oldValue             func(context.Context) (*EmbedField, error)
-	predicates           []predicate.EmbedField
-}
-
-var _ ent.Mutation = (*EmbedFieldMutation)(nil)
-
-// embedfieldOption allows management of the mutation configuration using functional options.
-type embedfieldOption func(*EmbedFieldMutation)
-
-// newEmbedFieldMutation creates new mutation for the EmbedField entity.
-func newEmbedFieldMutation(c config, op Op, opts ...embedfieldOption) *EmbedFieldMutation {
-	m := &EmbedFieldMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeEmbedField,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withEmbedFieldID sets the ID field of the mutation.
-func withEmbedFieldID(id int) embedfieldOption {
-	return func(m *EmbedFieldMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *EmbedField
-		)
-		m.oldValue = func(ctx context.Context) (*EmbedField, error) {
-			once.Do(func() {
-				if m.done {
-					err = fmt.Errorf("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().EmbedField.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withEmbedField sets the old EmbedField of the mutation.
-func withEmbedField(node *EmbedField) embedfieldOption {
-	return func(m *EmbedFieldMutation) {
-		m.oldValue = func(context.Context) (*EmbedField, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m EmbedFieldMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m EmbedFieldMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, fmt.Errorf("entgen: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
-func (m *EmbedFieldMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// SetTitle sets the "title" field.
-func (m *EmbedFieldMutation) SetTitle(s string) {
-	m.title = &s
-}
-
-// Title returns the value of the "title" field in the mutation.
-func (m *EmbedFieldMutation) Title() (r string, exists bool) {
-	v := m.title
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldTitle returns the old "title" field's value of the EmbedField entity.
-// If the EmbedField object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EmbedFieldMutation) OldTitle(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldTitle is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldTitle requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
-	}
-	return oldValue.Title, nil
-}
-
-// ResetTitle resets all changes to the "title" field.
-func (m *EmbedFieldMutation) ResetTitle() {
-	m.title = nil
-}
-
-// SetSubtitle sets the "subtitle" field.
-func (m *EmbedFieldMutation) SetSubtitle(s string) {
-	m.subtitle = &s
-}
-
-// Subtitle returns the value of the "subtitle" field in the mutation.
-func (m *EmbedFieldMutation) Subtitle() (r string, exists bool) {
-	v := m.subtitle
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSubtitle returns the old "subtitle" field's value of the EmbedField entity.
-// If the EmbedField object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EmbedFieldMutation) OldSubtitle(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldSubtitle is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldSubtitle requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSubtitle: %w", err)
-	}
-	return oldValue.Subtitle, nil
-}
-
-// ResetSubtitle resets all changes to the "subtitle" field.
-func (m *EmbedFieldMutation) ResetSubtitle() {
-	m.subtitle = nil
-}
-
-// SetBody sets the "body" field.
-func (m *EmbedFieldMutation) SetBody(s string) {
-	m.body = &s
-}
-
-// Body returns the value of the "body" field in the mutation.
-func (m *EmbedFieldMutation) Body() (r string, exists bool) {
-	v := m.body
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldBody returns the old "body" field's value of the EmbedField entity.
-// If the EmbedField object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EmbedFieldMutation) OldBody(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldBody is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldBody requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldBody: %w", err)
-	}
-	return oldValue.Body, nil
-}
-
-// ResetBody resets all changes to the "body" field.
-func (m *EmbedFieldMutation) ResetBody() {
-	m.body = nil
-}
-
-// SetImageURL sets the "image_url" field.
-func (m *EmbedFieldMutation) SetImageURL(s string) {
-	m.image_url = &s
-}
-
-// ImageURL returns the value of the "image_url" field in the mutation.
-func (m *EmbedFieldMutation) ImageURL() (r string, exists bool) {
-	v := m.image_url
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldImageURL returns the old "image_url" field's value of the EmbedField entity.
-// If the EmbedField object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EmbedFieldMutation) OldImageURL(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldImageURL is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldImageURL requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldImageURL: %w", err)
-	}
-	return oldValue.ImageURL, nil
-}
-
-// ResetImageURL resets all changes to the "image_url" field.
-func (m *EmbedFieldMutation) ResetImageURL() {
-	m.image_url = nil
-}
-
-// SetPresentation sets the "presentation" field.
-func (m *EmbedFieldMutation) SetPresentation(i int8) {
-	m.presentation = &i
-	m.addpresentation = nil
-}
-
-// Presentation returns the value of the "presentation" field in the mutation.
-func (m *EmbedFieldMutation) Presentation() (r int8, exists bool) {
-	v := m.presentation
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPresentation returns the old "presentation" field's value of the EmbedField entity.
-// If the EmbedField object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EmbedFieldMutation) OldPresentation(ctx context.Context) (v int8, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldPresentation is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldPresentation requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPresentation: %w", err)
-	}
-	return oldValue.Presentation, nil
-}
-
-// AddPresentation adds i to the "presentation" field.
-func (m *EmbedFieldMutation) AddPresentation(i int8) {
-	if m.addpresentation != nil {
-		*m.addpresentation += i
-	} else {
-		m.addpresentation = &i
-	}
-}
-
-// AddedPresentation returns the value that was added to the "presentation" field in this mutation.
-func (m *EmbedFieldMutation) AddedPresentation() (r int8, exists bool) {
-	v := m.addpresentation
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetPresentation resets all changes to the "presentation" field.
-func (m *EmbedFieldMutation) ResetPresentation() {
-	m.presentation = nil
-	m.addpresentation = nil
-}
-
-// AddEmbedActionIDs adds the "embed_action" edge to the EmbedAction entity by ids.
-func (m *EmbedFieldMutation) AddEmbedActionIDs(ids ...int) {
-	if m.embed_action == nil {
-		m.embed_action = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.embed_action[ids[i]] = struct{}{}
-	}
-}
-
-// ClearEmbedAction clears the "embed_action" edge to the EmbedAction entity.
-func (m *EmbedFieldMutation) ClearEmbedAction() {
-	m.clearedembed_action = true
-}
-
-// EmbedActionCleared returns if the "embed_action" edge to the EmbedAction entity was cleared.
-func (m *EmbedFieldMutation) EmbedActionCleared() bool {
-	return m.clearedembed_action
-}
-
-// RemoveEmbedActionIDs removes the "embed_action" edge to the EmbedAction entity by IDs.
-func (m *EmbedFieldMutation) RemoveEmbedActionIDs(ids ...int) {
-	if m.removedembed_action == nil {
-		m.removedembed_action = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.removedembed_action[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedEmbedAction returns the removed IDs of the "embed_action" edge to the EmbedAction entity.
-func (m *EmbedFieldMutation) RemovedEmbedActionIDs() (ids []int) {
-	for id := range m.removedembed_action {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// EmbedActionIDs returns the "embed_action" edge IDs in the mutation.
-func (m *EmbedFieldMutation) EmbedActionIDs() (ids []int) {
-	for id := range m.embed_action {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetEmbedAction resets all changes to the "embed_action" edge.
-func (m *EmbedFieldMutation) ResetEmbedAction() {
-	m.embed_action = nil
-	m.clearedembed_action = false
-	m.removedembed_action = nil
-}
-
-// SetEmbedMessageID sets the "embed_message" edge to the EmbedMessage entity by id.
-func (m *EmbedFieldMutation) SetEmbedMessageID(id int) {
-	m.embed_message = &id
-}
-
-// ClearEmbedMessage clears the "embed_message" edge to the EmbedMessage entity.
-func (m *EmbedFieldMutation) ClearEmbedMessage() {
-	m.clearedembed_message = true
-}
-
-// EmbedMessageCleared returns if the "embed_message" edge to the EmbedMessage entity was cleared.
-func (m *EmbedFieldMutation) EmbedMessageCleared() bool {
-	return m.clearedembed_message
-}
-
-// EmbedMessageID returns the "embed_message" edge ID in the mutation.
-func (m *EmbedFieldMutation) EmbedMessageID() (id int, exists bool) {
-	if m.embed_message != nil {
-		return *m.embed_message, true
-	}
-	return
-}
-
-// EmbedMessageIDs returns the "embed_message" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// EmbedMessageID instead. It exists only for internal usage by the builders.
-func (m *EmbedFieldMutation) EmbedMessageIDs() (ids []int) {
-	if id := m.embed_message; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetEmbedMessage resets all changes to the "embed_message" edge.
-func (m *EmbedFieldMutation) ResetEmbedMessage() {
-	m.embed_message = nil
-	m.clearedembed_message = false
-}
-
-// Op returns the operation name.
-func (m *EmbedFieldMutation) Op() Op {
-	return m.op
-}
-
-// Type returns the node type of this mutation (EmbedField).
-func (m *EmbedFieldMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *EmbedFieldMutation) Fields() []string {
-	fields := make([]string, 0, 5)
-	if m.title != nil {
-		fields = append(fields, embedfield.FieldTitle)
-	}
-	if m.subtitle != nil {
-		fields = append(fields, embedfield.FieldSubtitle)
-	}
-	if m.body != nil {
-		fields = append(fields, embedfield.FieldBody)
-	}
-	if m.image_url != nil {
-		fields = append(fields, embedfield.FieldImageURL)
-	}
-	if m.presentation != nil {
-		fields = append(fields, embedfield.FieldPresentation)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *EmbedFieldMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case embedfield.FieldTitle:
-		return m.Title()
-	case embedfield.FieldSubtitle:
-		return m.Subtitle()
-	case embedfield.FieldBody:
-		return m.Body()
-	case embedfield.FieldImageURL:
-		return m.ImageURL()
-	case embedfield.FieldPresentation:
-		return m.Presentation()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *EmbedFieldMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case embedfield.FieldTitle:
-		return m.OldTitle(ctx)
-	case embedfield.FieldSubtitle:
-		return m.OldSubtitle(ctx)
-	case embedfield.FieldBody:
-		return m.OldBody(ctx)
-	case embedfield.FieldImageURL:
-		return m.OldImageURL(ctx)
-	case embedfield.FieldPresentation:
-		return m.OldPresentation(ctx)
-	}
-	return nil, fmt.Errorf("unknown EmbedField field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *EmbedFieldMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case embedfield.FieldTitle:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetTitle(v)
-		return nil
-	case embedfield.FieldSubtitle:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSubtitle(v)
-		return nil
-	case embedfield.FieldBody:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetBody(v)
-		return nil
-	case embedfield.FieldImageURL:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetImageURL(v)
-		return nil
-	case embedfield.FieldPresentation:
-		v, ok := value.(int8)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPresentation(v)
-		return nil
-	}
-	return fmt.Errorf("unknown EmbedField field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *EmbedFieldMutation) AddedFields() []string {
-	var fields []string
-	if m.addpresentation != nil {
-		fields = append(fields, embedfield.FieldPresentation)
-	}
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *EmbedFieldMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case embedfield.FieldPresentation:
-		return m.AddedPresentation()
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *EmbedFieldMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	case embedfield.FieldPresentation:
-		v, ok := value.(int8)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddPresentation(v)
-		return nil
-	}
-	return fmt.Errorf("unknown EmbedField numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *EmbedFieldMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *EmbedFieldMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *EmbedFieldMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown EmbedField nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *EmbedFieldMutation) ResetField(name string) error {
-	switch name {
-	case embedfield.FieldTitle:
-		m.ResetTitle()
-		return nil
-	case embedfield.FieldSubtitle:
-		m.ResetSubtitle()
-		return nil
-	case embedfield.FieldBody:
-		m.ResetBody()
-		return nil
-	case embedfield.FieldImageURL:
-		m.ResetImageURL()
-		return nil
-	case embedfield.FieldPresentation:
-		m.ResetPresentation()
-		return nil
-	}
-	return fmt.Errorf("unknown EmbedField field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *EmbedFieldMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.embed_action != nil {
-		edges = append(edges, embedfield.EdgeEmbedAction)
-	}
-	if m.embed_message != nil {
-		edges = append(edges, embedfield.EdgeEmbedMessage)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *EmbedFieldMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case embedfield.EdgeEmbedAction:
-		ids := make([]ent.Value, 0, len(m.embed_action))
-		for id := range m.embed_action {
-			ids = append(ids, id)
-		}
-		return ids
-	case embedfield.EdgeEmbedMessage:
-		if id := m.embed_message; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *EmbedFieldMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.removedembed_action != nil {
-		edges = append(edges, embedfield.EdgeEmbedAction)
-	}
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *EmbedFieldMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case embedfield.EdgeEmbedAction:
-		ids := make([]ent.Value, 0, len(m.removedembed_action))
-		for id := range m.removedembed_action {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *EmbedFieldMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedembed_action {
-		edges = append(edges, embedfield.EdgeEmbedAction)
-	}
-	if m.clearedembed_message {
-		edges = append(edges, embedfield.EdgeEmbedMessage)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *EmbedFieldMutation) EdgeCleared(name string) bool {
-	switch name {
-	case embedfield.EdgeEmbedAction:
-		return m.clearedembed_action
-	case embedfield.EdgeEmbedMessage:
-		return m.clearedembed_message
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *EmbedFieldMutation) ClearEdge(name string) error {
-	switch name {
-	case embedfield.EdgeEmbedMessage:
-		m.ClearEmbedMessage()
-		return nil
-	}
-	return fmt.Errorf("unknown EmbedField unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *EmbedFieldMutation) ResetEdge(name string) error {
-	switch name {
-	case embedfield.EdgeEmbedAction:
-		m.ResetEmbedAction()
-		return nil
-	case embedfield.EdgeEmbedMessage:
-		m.ResetEmbedMessage()
-		return nil
-	}
-	return fmt.Errorf("unknown EmbedField edge %s", name)
-}
-
-// EmbedMessageMutation represents an operation that mutates the EmbedMessage nodes in the graph.
-type EmbedMessageMutation struct {
-	config
-	op                 Op
-	typ                string
-	id                 *int
-	data               **v1.Embed
-	clearedFields      map[string]struct{}
-	embed_field        map[int]struct{}
-	removedembed_field map[int]struct{}
-	clearedembed_field bool
-	message            *uint64
-	clearedmessage     bool
-	done               bool
-	oldValue           func(context.Context) (*EmbedMessage, error)
-	predicates         []predicate.EmbedMessage
-}
-
-var _ ent.Mutation = (*EmbedMessageMutation)(nil)
-
-// embedmessageOption allows management of the mutation configuration using functional options.
-type embedmessageOption func(*EmbedMessageMutation)
-
-// newEmbedMessageMutation creates new mutation for the EmbedMessage entity.
-func newEmbedMessageMutation(c config, op Op, opts ...embedmessageOption) *EmbedMessageMutation {
-	m := &EmbedMessageMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeEmbedMessage,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withEmbedMessageID sets the ID field of the mutation.
-func withEmbedMessageID(id int) embedmessageOption {
-	return func(m *EmbedMessageMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *EmbedMessage
-		)
-		m.oldValue = func(ctx context.Context) (*EmbedMessage, error) {
-			once.Do(func() {
-				if m.done {
-					err = fmt.Errorf("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().EmbedMessage.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withEmbedMessage sets the old EmbedMessage of the mutation.
-func withEmbedMessage(node *EmbedMessage) embedmessageOption {
-	return func(m *EmbedMessageMutation) {
-		m.oldValue = func(context.Context) (*EmbedMessage, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m EmbedMessageMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m EmbedMessageMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, fmt.Errorf("entgen: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
-func (m *EmbedMessageMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// SetData sets the "data" field.
-func (m *EmbedMessageMutation) SetData(v *v1.Embed) {
-	m.data = &v
-}
-
-// Data returns the value of the "data" field in the mutation.
-func (m *EmbedMessageMutation) Data() (r *v1.Embed, exists bool) {
-	v := m.data
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldData returns the old "data" field's value of the EmbedMessage entity.
-// If the EmbedMessage object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EmbedMessageMutation) OldData(ctx context.Context) (v *v1.Embed, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldData is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldData requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldData: %w", err)
-	}
-	return oldValue.Data, nil
-}
-
-// ResetData resets all changes to the "data" field.
-func (m *EmbedMessageMutation) ResetData() {
-	m.data = nil
-}
-
-// AddEmbedFieldIDs adds the "embed_field" edge to the EmbedField entity by ids.
-func (m *EmbedMessageMutation) AddEmbedFieldIDs(ids ...int) {
-	if m.embed_field == nil {
-		m.embed_field = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.embed_field[ids[i]] = struct{}{}
-	}
-}
-
-// ClearEmbedField clears the "embed_field" edge to the EmbedField entity.
-func (m *EmbedMessageMutation) ClearEmbedField() {
-	m.clearedembed_field = true
-}
-
-// EmbedFieldCleared returns if the "embed_field" edge to the EmbedField entity was cleared.
-func (m *EmbedMessageMutation) EmbedFieldCleared() bool {
-	return m.clearedembed_field
-}
-
-// RemoveEmbedFieldIDs removes the "embed_field" edge to the EmbedField entity by IDs.
-func (m *EmbedMessageMutation) RemoveEmbedFieldIDs(ids ...int) {
-	if m.removedembed_field == nil {
-		m.removedembed_field = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.removedembed_field[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedEmbedField returns the removed IDs of the "embed_field" edge to the EmbedField entity.
-func (m *EmbedMessageMutation) RemovedEmbedFieldIDs() (ids []int) {
-	for id := range m.removedembed_field {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// EmbedFieldIDs returns the "embed_field" edge IDs in the mutation.
-func (m *EmbedMessageMutation) EmbedFieldIDs() (ids []int) {
-	for id := range m.embed_field {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetEmbedField resets all changes to the "embed_field" edge.
-func (m *EmbedMessageMutation) ResetEmbedField() {
-	m.embed_field = nil
-	m.clearedembed_field = false
-	m.removedembed_field = nil
-}
-
-// SetMessageID sets the "message" edge to the Message entity by id.
-func (m *EmbedMessageMutation) SetMessageID(id uint64) {
-	m.message = &id
-}
-
-// ClearMessage clears the "message" edge to the Message entity.
-func (m *EmbedMessageMutation) ClearMessage() {
-	m.clearedmessage = true
-}
-
-// MessageCleared returns if the "message" edge to the Message entity was cleared.
-func (m *EmbedMessageMutation) MessageCleared() bool {
-	return m.clearedmessage
-}
-
-// MessageID returns the "message" edge ID in the mutation.
-func (m *EmbedMessageMutation) MessageID() (id uint64, exists bool) {
-	if m.message != nil {
-		return *m.message, true
-	}
-	return
-}
-
-// MessageIDs returns the "message" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// MessageID instead. It exists only for internal usage by the builders.
-func (m *EmbedMessageMutation) MessageIDs() (ids []uint64) {
-	if id := m.message; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetMessage resets all changes to the "message" edge.
-func (m *EmbedMessageMutation) ResetMessage() {
-	m.message = nil
-	m.clearedmessage = false
-}
-
-// Op returns the operation name.
-func (m *EmbedMessageMutation) Op() Op {
-	return m.op
-}
-
-// Type returns the node type of this mutation (EmbedMessage).
-func (m *EmbedMessageMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *EmbedMessageMutation) Fields() []string {
-	fields := make([]string, 0, 1)
-	if m.data != nil {
-		fields = append(fields, embedmessage.FieldData)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *EmbedMessageMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case embedmessage.FieldData:
-		return m.Data()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *EmbedMessageMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case embedmessage.FieldData:
-		return m.OldData(ctx)
-	}
-	return nil, fmt.Errorf("unknown EmbedMessage field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *EmbedMessageMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case embedmessage.FieldData:
-		v, ok := value.(*v1.Embed)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetData(v)
-		return nil
-	}
-	return fmt.Errorf("unknown EmbedMessage field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *EmbedMessageMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *EmbedMessageMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *EmbedMessageMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown EmbedMessage numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *EmbedMessageMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *EmbedMessageMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *EmbedMessageMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown EmbedMessage nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *EmbedMessageMutation) ResetField(name string) error {
-	switch name {
-	case embedmessage.FieldData:
-		m.ResetData()
-		return nil
-	}
-	return fmt.Errorf("unknown EmbedMessage field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *EmbedMessageMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.embed_field != nil {
-		edges = append(edges, embedmessage.EdgeEmbedField)
-	}
-	if m.message != nil {
-		edges = append(edges, embedmessage.EdgeMessage)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *EmbedMessageMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case embedmessage.EdgeEmbedField:
-		ids := make([]ent.Value, 0, len(m.embed_field))
-		for id := range m.embed_field {
-			ids = append(ids, id)
-		}
-		return ids
-	case embedmessage.EdgeMessage:
-		if id := m.message; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *EmbedMessageMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.removedembed_field != nil {
-		edges = append(edges, embedmessage.EdgeEmbedField)
-	}
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *EmbedMessageMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case embedmessage.EdgeEmbedField:
-		ids := make([]ent.Value, 0, len(m.removedembed_field))
-		for id := range m.removedembed_field {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *EmbedMessageMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedembed_field {
-		edges = append(edges, embedmessage.EdgeEmbedField)
-	}
-	if m.clearedmessage {
-		edges = append(edges, embedmessage.EdgeMessage)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *EmbedMessageMutation) EdgeCleared(name string) bool {
-	switch name {
-	case embedmessage.EdgeEmbedField:
-		return m.clearedembed_field
-	case embedmessage.EdgeMessage:
-		return m.clearedmessage
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *EmbedMessageMutation) ClearEdge(name string) error {
-	switch name {
-	case embedmessage.EdgeMessage:
-		m.ClearMessage()
-		return nil
-	}
-	return fmt.Errorf("unknown EmbedMessage unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *EmbedMessageMutation) ResetEdge(name string) error {
-	switch name {
-	case embedmessage.EdgeEmbedField:
-		m.ResetEmbedField()
-		return nil
-	case embedmessage.EdgeMessage:
-		m.ResetMessage()
-		return nil
-	}
-	return fmt.Errorf("unknown EmbedMessage edge %s", name)
-}
-
 // EmoteMutation represents an operation that mutates the Emote nodes in the graph.
 type EmoteMutation struct {
 	config
@@ -3742,7 +1011,7 @@ func (m *EmoteMutation) ClearEmotepack() {
 	m.clearedemotepack = true
 }
 
-// EmotepackCleared returns if the "emotepack" edge to the EmotePack entity was cleared.
+// EmotepackCleared reports if the "emotepack" edge to the EmotePack entity was cleared.
 func (m *EmoteMutation) EmotepackCleared() bool {
 	return m.clearedemotepack
 }
@@ -4109,7 +1378,7 @@ func (m *EmotePackMutation) ClearUser() {
 	m.cleareduser = true
 }
 
-// UserCleared returns if the "user" edge to the User entity was cleared.
+// UserCleared reports if the "user" edge to the User entity was cleared.
 func (m *EmotePackMutation) UserCleared() bool {
 	return m.cleareduser
 }
@@ -4148,7 +1417,7 @@ func (m *EmotePackMutation) ClearOwner() {
 	m.clearedowner = true
 }
 
-// OwnerCleared returns if the "owner" edge to the User entity was cleared.
+// OwnerCleared reports if the "owner" edge to the User entity was cleared.
 func (m *EmotePackMutation) OwnerCleared() bool {
 	return m.clearedowner
 }
@@ -4192,7 +1461,7 @@ func (m *EmotePackMutation) ClearEmote() {
 	m.clearedemote = true
 }
 
-// EmoteCleared returns if the "emote" edge to the Emote entity was cleared.
+// EmoteCleared reports if the "emote" edge to the Emote entity was cleared.
 func (m *EmotePackMutation) EmoteCleared() bool {
 	return m.clearedemote
 }
@@ -5239,323 +2508,6 @@ func (m *FileHashMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown FileHash edge %s", name)
 }
 
-// FileMessageMutation represents an operation that mutates the FileMessage nodes in the graph.
-type FileMessageMutation struct {
-	config
-	op            Op
-	typ           string
-	id            *int
-	clearedFields map[string]struct{}
-	file          map[string]struct{}
-	removedfile   map[string]struct{}
-	clearedfile   bool
-	done          bool
-	oldValue      func(context.Context) (*FileMessage, error)
-	predicates    []predicate.FileMessage
-}
-
-var _ ent.Mutation = (*FileMessageMutation)(nil)
-
-// filemessageOption allows management of the mutation configuration using functional options.
-type filemessageOption func(*FileMessageMutation)
-
-// newFileMessageMutation creates new mutation for the FileMessage entity.
-func newFileMessageMutation(c config, op Op, opts ...filemessageOption) *FileMessageMutation {
-	m := &FileMessageMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeFileMessage,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withFileMessageID sets the ID field of the mutation.
-func withFileMessageID(id int) filemessageOption {
-	return func(m *FileMessageMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *FileMessage
-		)
-		m.oldValue = func(ctx context.Context) (*FileMessage, error) {
-			once.Do(func() {
-				if m.done {
-					err = fmt.Errorf("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().FileMessage.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withFileMessage sets the old FileMessage of the mutation.
-func withFileMessage(node *FileMessage) filemessageOption {
-	return func(m *FileMessageMutation) {
-		m.oldValue = func(context.Context) (*FileMessage, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m FileMessageMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m FileMessageMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, fmt.Errorf("entgen: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
-func (m *FileMessageMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// AddFileIDs adds the "file" edge to the File entity by ids.
-func (m *FileMessageMutation) AddFileIDs(ids ...string) {
-	if m.file == nil {
-		m.file = make(map[string]struct{})
-	}
-	for i := range ids {
-		m.file[ids[i]] = struct{}{}
-	}
-}
-
-// ClearFile clears the "file" edge to the File entity.
-func (m *FileMessageMutation) ClearFile() {
-	m.clearedfile = true
-}
-
-// FileCleared returns if the "file" edge to the File entity was cleared.
-func (m *FileMessageMutation) FileCleared() bool {
-	return m.clearedfile
-}
-
-// RemoveFileIDs removes the "file" edge to the File entity by IDs.
-func (m *FileMessageMutation) RemoveFileIDs(ids ...string) {
-	if m.removedfile == nil {
-		m.removedfile = make(map[string]struct{})
-	}
-	for i := range ids {
-		m.removedfile[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedFile returns the removed IDs of the "file" edge to the File entity.
-func (m *FileMessageMutation) RemovedFileIDs() (ids []string) {
-	for id := range m.removedfile {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// FileIDs returns the "file" edge IDs in the mutation.
-func (m *FileMessageMutation) FileIDs() (ids []string) {
-	for id := range m.file {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetFile resets all changes to the "file" edge.
-func (m *FileMessageMutation) ResetFile() {
-	m.file = nil
-	m.clearedfile = false
-	m.removedfile = nil
-}
-
-// Op returns the operation name.
-func (m *FileMessageMutation) Op() Op {
-	return m.op
-}
-
-// Type returns the node type of this mutation (FileMessage).
-func (m *FileMessageMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *FileMessageMutation) Fields() []string {
-	fields := make([]string, 0, 0)
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *FileMessageMutation) Field(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *FileMessageMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	return nil, fmt.Errorf("unknown FileMessage field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *FileMessageMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown FileMessage field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *FileMessageMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *FileMessageMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *FileMessageMutation) AddField(name string, value ent.Value) error {
-	return fmt.Errorf("unknown FileMessage numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *FileMessageMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *FileMessageMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *FileMessageMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown FileMessage nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *FileMessageMutation) ResetField(name string) error {
-	return fmt.Errorf("unknown FileMessage field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *FileMessageMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.file != nil {
-		edges = append(edges, filemessage.EdgeFile)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *FileMessageMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case filemessage.EdgeFile:
-		ids := make([]ent.Value, 0, len(m.file))
-		for id := range m.file {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *FileMessageMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.removedfile != nil {
-		edges = append(edges, filemessage.EdgeFile)
-	}
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *FileMessageMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case filemessage.EdgeFile:
-		ids := make([]ent.Value, 0, len(m.removedfile))
-		for id := range m.removedfile {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *FileMessageMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedfile {
-		edges = append(edges, filemessage.EdgeFile)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *FileMessageMutation) EdgeCleared(name string) bool {
-	switch name {
-	case filemessage.EdgeFile:
-		return m.clearedfile
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *FileMessageMutation) ClearEdge(name string) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown FileMessage unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *FileMessageMutation) ResetEdge(name string) error {
-	switch name {
-	case filemessage.EdgeFile:
-		m.ResetFile()
-		return nil
-	}
-	return fmt.Errorf("unknown FileMessage edge %s", name)
-}
-
 // ForeignUserMutation represents an operation that mutates the ForeignUser nodes in the graph.
 type ForeignUserMutation struct {
 	config
@@ -5754,7 +2706,7 @@ func (m *ForeignUserMutation) ClearUser() {
 	m.cleareduser = true
 }
 
-// UserCleared returns if the "user" edge to the User entity was cleared.
+// UserCleared reports if the "user" edge to the User entity was cleared.
 func (m *ForeignUserMutation) UserCleared() bool {
 	return m.cleareduser
 }
@@ -6301,7 +3253,7 @@ func (m *GuildMutation) ClearInvite() {
 	m.clearedinvite = true
 }
 
-// InviteCleared returns if the "invite" edge to the Invite entity was cleared.
+// InviteCleared reports if the "invite" edge to the Invite entity was cleared.
 func (m *GuildMutation) InviteCleared() bool {
 	return m.clearedinvite
 }
@@ -6354,7 +3306,7 @@ func (m *GuildMutation) ClearBans() {
 	m.clearedbans = true
 }
 
-// BansCleared returns if the "bans" edge to the User entity was cleared.
+// BansCleared reports if the "bans" edge to the User entity was cleared.
 func (m *GuildMutation) BansCleared() bool {
 	return m.clearedbans
 }
@@ -6407,7 +3359,7 @@ func (m *GuildMutation) ClearChannel() {
 	m.clearedchannel = true
 }
 
-// ChannelCleared returns if the "channel" edge to the Channel entity was cleared.
+// ChannelCleared reports if the "channel" edge to the Channel entity was cleared.
 func (m *GuildMutation) ChannelCleared() bool {
 	return m.clearedchannel
 }
@@ -6460,7 +3412,7 @@ func (m *GuildMutation) ClearRole() {
 	m.clearedrole = true
 }
 
-// RoleCleared returns if the "role" edge to the Role entity was cleared.
+// RoleCleared reports if the "role" edge to the Role entity was cleared.
 func (m *GuildMutation) RoleCleared() bool {
 	return m.clearedrole
 }
@@ -6513,7 +3465,7 @@ func (m *GuildMutation) ClearPermissionNode() {
 	m.clearedpermission_node = true
 }
 
-// PermissionNodeCleared returns if the "permission_node" edge to the PermissionNode entity was cleared.
+// PermissionNodeCleared reports if the "permission_node" edge to the PermissionNode entity was cleared.
 func (m *GuildMutation) PermissionNodeCleared() bool {
 	return m.clearedpermission_node
 }
@@ -6566,7 +3518,7 @@ func (m *GuildMutation) ClearUser() {
 	m.cleareduser = true
 }
 
-// UserCleared returns if the "user" edge to the User entity was cleared.
+// UserCleared reports if the "user" edge to the User entity was cleared.
 func (m *GuildMutation) UserCleared() bool {
 	return m.cleareduser
 }
@@ -7178,7 +4130,7 @@ func (m *GuildListEntryMutation) ClearUser() {
 	m.cleareduser = true
 }
 
-// UserCleared returns if the "user" edge to the User entity was cleared.
+// UserCleared reports if the "user" edge to the User entity was cleared.
 func (m *GuildListEntryMutation) UserCleared() bool {
 	return m.cleareduser
 }
@@ -7636,7 +4588,7 @@ func (m *InviteMutation) ClearGuild() {
 	m.clearedguild = true
 }
 
-// GuildCleared returns if the "guild" edge to the Guild entity was cleared.
+// GuildCleared reports if the "guild" edge to the Guild entity was cleared.
 func (m *InviteMutation) GuildCleared() bool {
 	return m.clearedguild
 }
@@ -8076,7 +5028,7 @@ func (m *LocalUserMutation) ClearUser() {
 	m.cleareduser = true
 }
 
-// UserCleared returns if the "user" edge to the User entity was cleared.
+// UserCleared reports if the "user" edge to the User entity was cleared.
 func (m *LocalUserMutation) UserCleared() bool {
 	return m.cleareduser
 }
@@ -8120,7 +5072,7 @@ func (m *LocalUserMutation) ClearSessions() {
 	m.clearedsessions = true
 }
 
-// SessionsCleared returns if the "sessions" edge to the Session entity was cleared.
+// SessionsCleared reports if the "sessions" edge to the Session entity was cleared.
 func (m *LocalUserMutation) SessionsCleared() bool {
 	return m.clearedsessions
 }
@@ -8391,32 +5343,27 @@ func (m *LocalUserMutation) ResetEdge(name string) error {
 // MessageMutation represents an operation that mutates the Message nodes in the graph.
 type MessageMutation struct {
 	config
-	op                   Op
-	typ                  string
-	id                   *uint64
-	createdat            *time.Time
-	editedat             *time.Time
-	metadata             **v1.Metadata
-	override             **v1.Override
-	clearedFields        map[string]struct{}
-	user                 *uint64
-	cleareduser          bool
-	channel              *uint64
-	clearedchannel       bool
-	parent               *uint64
-	clearedparent        bool
-	replies              map[uint64]struct{}
-	removedreplies       map[uint64]struct{}
-	clearedreplies       bool
-	text_message         *int
-	clearedtext_message  bool
-	file_message         *int
-	clearedfile_message  bool
-	embed_message        *int
-	clearedembed_message bool
-	done                 bool
-	oldValue             func(context.Context) (*Message, error)
-	predicates           []predicate.Message
+	op             Op
+	typ            string
+	id             *uint64
+	createdat      *time.Time
+	editedat       *time.Time
+	metadata       **v1.Metadata
+	override       **v1.Override
+	_Content       **v1.Content
+	clearedFields  map[string]struct{}
+	user           *uint64
+	cleareduser    bool
+	channel        *uint64
+	clearedchannel bool
+	parent         *uint64
+	clearedparent  bool
+	replies        map[uint64]struct{}
+	removedreplies map[uint64]struct{}
+	clearedreplies bool
+	done           bool
+	oldValue       func(context.Context) (*Message, error)
+	predicates     []predicate.Message
 }
 
 var _ ent.Mutation = (*MessageMutation)(nil)
@@ -8687,6 +5634,42 @@ func (m *MessageMutation) ResetOverride() {
 	delete(m.clearedFields, message.FieldOverride)
 }
 
+// SetContent sets the "Content" field.
+func (m *MessageMutation) SetContent(v *v1.Content) {
+	m._Content = &v
+}
+
+// Content returns the value of the "Content" field in the mutation.
+func (m *MessageMutation) Content() (r *v1.Content, exists bool) {
+	v := m._Content
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContent returns the old "Content" field's value of the Message entity.
+// If the Message object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessageMutation) OldContent(ctx context.Context) (v *v1.Content, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldContent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldContent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContent: %w", err)
+	}
+	return oldValue.Content, nil
+}
+
+// ResetContent resets all changes to the "Content" field.
+func (m *MessageMutation) ResetContent() {
+	m._Content = nil
+}
+
 // SetUserID sets the "user" edge to the User entity by id.
 func (m *MessageMutation) SetUserID(id uint64) {
 	m.user = &id
@@ -8697,7 +5680,7 @@ func (m *MessageMutation) ClearUser() {
 	m.cleareduser = true
 }
 
-// UserCleared returns if the "user" edge to the User entity was cleared.
+// UserCleared reports if the "user" edge to the User entity was cleared.
 func (m *MessageMutation) UserCleared() bool {
 	return m.cleareduser
 }
@@ -8736,7 +5719,7 @@ func (m *MessageMutation) ClearChannel() {
 	m.clearedchannel = true
 }
 
-// ChannelCleared returns if the "channel" edge to the Channel entity was cleared.
+// ChannelCleared reports if the "channel" edge to the Channel entity was cleared.
 func (m *MessageMutation) ChannelCleared() bool {
 	return m.clearedchannel
 }
@@ -8775,7 +5758,7 @@ func (m *MessageMutation) ClearParent() {
 	m.clearedparent = true
 }
 
-// ParentCleared returns if the "parent" edge to the Message entity was cleared.
+// ParentCleared reports if the "parent" edge to the Message entity was cleared.
 func (m *MessageMutation) ParentCleared() bool {
 	return m.clearedparent
 }
@@ -8819,7 +5802,7 @@ func (m *MessageMutation) ClearReplies() {
 	m.clearedreplies = true
 }
 
-// RepliesCleared returns if the "replies" edge to the Message entity was cleared.
+// RepliesCleared reports if the "replies" edge to the Message entity was cleared.
 func (m *MessageMutation) RepliesCleared() bool {
 	return m.clearedreplies
 }
@@ -8857,123 +5840,6 @@ func (m *MessageMutation) ResetReplies() {
 	m.removedreplies = nil
 }
 
-// SetTextMessageID sets the "text_message" edge to the TextMessage entity by id.
-func (m *MessageMutation) SetTextMessageID(id int) {
-	m.text_message = &id
-}
-
-// ClearTextMessage clears the "text_message" edge to the TextMessage entity.
-func (m *MessageMutation) ClearTextMessage() {
-	m.clearedtext_message = true
-}
-
-// TextMessageCleared returns if the "text_message" edge to the TextMessage entity was cleared.
-func (m *MessageMutation) TextMessageCleared() bool {
-	return m.clearedtext_message
-}
-
-// TextMessageID returns the "text_message" edge ID in the mutation.
-func (m *MessageMutation) TextMessageID() (id int, exists bool) {
-	if m.text_message != nil {
-		return *m.text_message, true
-	}
-	return
-}
-
-// TextMessageIDs returns the "text_message" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// TextMessageID instead. It exists only for internal usage by the builders.
-func (m *MessageMutation) TextMessageIDs() (ids []int) {
-	if id := m.text_message; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetTextMessage resets all changes to the "text_message" edge.
-func (m *MessageMutation) ResetTextMessage() {
-	m.text_message = nil
-	m.clearedtext_message = false
-}
-
-// SetFileMessageID sets the "file_message" edge to the FileMessage entity by id.
-func (m *MessageMutation) SetFileMessageID(id int) {
-	m.file_message = &id
-}
-
-// ClearFileMessage clears the "file_message" edge to the FileMessage entity.
-func (m *MessageMutation) ClearFileMessage() {
-	m.clearedfile_message = true
-}
-
-// FileMessageCleared returns if the "file_message" edge to the FileMessage entity was cleared.
-func (m *MessageMutation) FileMessageCleared() bool {
-	return m.clearedfile_message
-}
-
-// FileMessageID returns the "file_message" edge ID in the mutation.
-func (m *MessageMutation) FileMessageID() (id int, exists bool) {
-	if m.file_message != nil {
-		return *m.file_message, true
-	}
-	return
-}
-
-// FileMessageIDs returns the "file_message" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// FileMessageID instead. It exists only for internal usage by the builders.
-func (m *MessageMutation) FileMessageIDs() (ids []int) {
-	if id := m.file_message; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetFileMessage resets all changes to the "file_message" edge.
-func (m *MessageMutation) ResetFileMessage() {
-	m.file_message = nil
-	m.clearedfile_message = false
-}
-
-// SetEmbedMessageID sets the "embed_message" edge to the EmbedMessage entity by id.
-func (m *MessageMutation) SetEmbedMessageID(id int) {
-	m.embed_message = &id
-}
-
-// ClearEmbedMessage clears the "embed_message" edge to the EmbedMessage entity.
-func (m *MessageMutation) ClearEmbedMessage() {
-	m.clearedembed_message = true
-}
-
-// EmbedMessageCleared returns if the "embed_message" edge to the EmbedMessage entity was cleared.
-func (m *MessageMutation) EmbedMessageCleared() bool {
-	return m.clearedembed_message
-}
-
-// EmbedMessageID returns the "embed_message" edge ID in the mutation.
-func (m *MessageMutation) EmbedMessageID() (id int, exists bool) {
-	if m.embed_message != nil {
-		return *m.embed_message, true
-	}
-	return
-}
-
-// EmbedMessageIDs returns the "embed_message" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// EmbedMessageID instead. It exists only for internal usage by the builders.
-func (m *MessageMutation) EmbedMessageIDs() (ids []int) {
-	if id := m.embed_message; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetEmbedMessage resets all changes to the "embed_message" edge.
-func (m *MessageMutation) ResetEmbedMessage() {
-	m.embed_message = nil
-	m.clearedembed_message = false
-}
-
 // Op returns the operation name.
 func (m *MessageMutation) Op() Op {
 	return m.op
@@ -8988,7 +5854,7 @@ func (m *MessageMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MessageMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.createdat != nil {
 		fields = append(fields, message.FieldCreatedat)
 	}
@@ -9000,6 +5866,9 @@ func (m *MessageMutation) Fields() []string {
 	}
 	if m.override != nil {
 		fields = append(fields, message.FieldOverride)
+	}
+	if m._Content != nil {
+		fields = append(fields, message.FieldContent)
 	}
 	return fields
 }
@@ -9017,6 +5886,8 @@ func (m *MessageMutation) Field(name string) (ent.Value, bool) {
 		return m.Metadata()
 	case message.FieldOverride:
 		return m.Override()
+	case message.FieldContent:
+		return m.Content()
 	}
 	return nil, false
 }
@@ -9034,6 +5905,8 @@ func (m *MessageMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldMetadata(ctx)
 	case message.FieldOverride:
 		return m.OldOverride(ctx)
+	case message.FieldContent:
+		return m.OldContent(ctx)
 	}
 	return nil, fmt.Errorf("unknown Message field %s", name)
 }
@@ -9070,6 +5943,13 @@ func (m *MessageMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetOverride(v)
+		return nil
+	case message.FieldContent:
+		v, ok := value.(*v1.Content)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContent(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Message field %s", name)
@@ -9153,13 +6033,16 @@ func (m *MessageMutation) ResetField(name string) error {
 	case message.FieldOverride:
 		m.ResetOverride()
 		return nil
+	case message.FieldContent:
+		m.ResetContent()
+		return nil
 	}
 	return fmt.Errorf("unknown Message field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *MessageMutation) AddedEdges() []string {
-	edges := make([]string, 0, 7)
+	edges := make([]string, 0, 4)
 	if m.user != nil {
 		edges = append(edges, message.EdgeUser)
 	}
@@ -9171,15 +6054,6 @@ func (m *MessageMutation) AddedEdges() []string {
 	}
 	if m.replies != nil {
 		edges = append(edges, message.EdgeReplies)
-	}
-	if m.text_message != nil {
-		edges = append(edges, message.EdgeTextMessage)
-	}
-	if m.file_message != nil {
-		edges = append(edges, message.EdgeFileMessage)
-	}
-	if m.embed_message != nil {
-		edges = append(edges, message.EdgeEmbedMessage)
 	}
 	return edges
 }
@@ -9206,25 +6080,13 @@ func (m *MessageMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case message.EdgeTextMessage:
-		if id := m.text_message; id != nil {
-			return []ent.Value{*id}
-		}
-	case message.EdgeFileMessage:
-		if id := m.file_message; id != nil {
-			return []ent.Value{*id}
-		}
-	case message.EdgeEmbedMessage:
-		if id := m.embed_message; id != nil {
-			return []ent.Value{*id}
-		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *MessageMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 7)
+	edges := make([]string, 0, 4)
 	if m.removedreplies != nil {
 		edges = append(edges, message.EdgeReplies)
 	}
@@ -9247,7 +6109,7 @@ func (m *MessageMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *MessageMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 7)
+	edges := make([]string, 0, 4)
 	if m.cleareduser {
 		edges = append(edges, message.EdgeUser)
 	}
@@ -9259,15 +6121,6 @@ func (m *MessageMutation) ClearedEdges() []string {
 	}
 	if m.clearedreplies {
 		edges = append(edges, message.EdgeReplies)
-	}
-	if m.clearedtext_message {
-		edges = append(edges, message.EdgeTextMessage)
-	}
-	if m.clearedfile_message {
-		edges = append(edges, message.EdgeFileMessage)
-	}
-	if m.clearedembed_message {
-		edges = append(edges, message.EdgeEmbedMessage)
 	}
 	return edges
 }
@@ -9284,12 +6137,6 @@ func (m *MessageMutation) EdgeCleared(name string) bool {
 		return m.clearedparent
 	case message.EdgeReplies:
 		return m.clearedreplies
-	case message.EdgeTextMessage:
-		return m.clearedtext_message
-	case message.EdgeFileMessage:
-		return m.clearedfile_message
-	case message.EdgeEmbedMessage:
-		return m.clearedembed_message
 	}
 	return false
 }
@@ -9306,15 +6153,6 @@ func (m *MessageMutation) ClearEdge(name string) error {
 		return nil
 	case message.EdgeParent:
 		m.ClearParent()
-		return nil
-	case message.EdgeTextMessage:
-		m.ClearTextMessage()
-		return nil
-	case message.EdgeFileMessage:
-		m.ClearFileMessage()
-		return nil
-	case message.EdgeEmbedMessage:
-		m.ClearEmbedMessage()
 		return nil
 	}
 	return fmt.Errorf("unknown Message unique edge %s", name)
@@ -9335,15 +6173,6 @@ func (m *MessageMutation) ResetEdge(name string) error {
 		return nil
 	case message.EdgeReplies:
 		m.ResetReplies()
-		return nil
-	case message.EdgeTextMessage:
-		m.ResetTextMessage()
-		return nil
-	case message.EdgeFileMessage:
-		m.ResetFileMessage()
-		return nil
-	case message.EdgeEmbedMessage:
-		m.ResetEmbedMessage()
 		return nil
 	}
 	return fmt.Errorf("unknown Message edge %s", name)
@@ -9530,7 +6359,7 @@ func (m *PermissionNodeMutation) ClearRole() {
 	m.clearedrole = true
 }
 
-// RoleCleared returns if the "role" edge to the Role entity was cleared.
+// RoleCleared reports if the "role" edge to the Role entity was cleared.
 func (m *PermissionNodeMutation) RoleCleared() bool {
 	return m.clearedrole
 }
@@ -9569,7 +6398,7 @@ func (m *PermissionNodeMutation) ClearGuild() {
 	m.clearedguild = true
 }
 
-// GuildCleared returns if the "guild" edge to the Guild entity was cleared.
+// GuildCleared reports if the "guild" edge to the Guild entity was cleared.
 func (m *PermissionNodeMutation) GuildCleared() bool {
 	return m.clearedguild
 }
@@ -9608,7 +6437,7 @@ func (m *PermissionNodeMutation) ClearChannel() {
 	m.clearedchannel = true
 }
 
-// ChannelCleared returns if the "channel" edge to the Channel entity was cleared.
+// ChannelCleared reports if the "channel" edge to the Channel entity was cleared.
 func (m *PermissionNodeMutation) ChannelCleared() bool {
 	return m.clearedchannel
 }
@@ -10189,7 +7018,7 @@ func (m *ProfileMutation) ClearUser() {
 	m.cleareduser = true
 }
 
-// UserCleared returns if the "user" edge to the User entity was cleared.
+// UserCleared reports if the "user" edge to the User entity was cleared.
 func (m *ProfileMutation) UserCleared() bool {
 	return m.cleareduser
 }
@@ -10819,7 +7648,7 @@ func (m *RoleMutation) ClearGuild() {
 	m.clearedguild = true
 }
 
-// GuildCleared returns if the "guild" edge to the Guild entity was cleared.
+// GuildCleared reports if the "guild" edge to the Guild entity was cleared.
 func (m *RoleMutation) GuildCleared() bool {
 	return m.clearedguild
 }
@@ -10872,7 +7701,7 @@ func (m *RoleMutation) ClearMembers() {
 	m.clearedmembers = true
 }
 
-// MembersCleared returns if the "members" edge to the User entity was cleared.
+// MembersCleared reports if the "members" edge to the User entity was cleared.
 func (m *RoleMutation) MembersCleared() bool {
 	return m.clearedmembers
 }
@@ -10925,7 +7754,7 @@ func (m *RoleMutation) ClearPermissionNode() {
 	m.clearedpermission_node = true
 }
 
-// PermissionNodeCleared returns if the "permission_node" edge to the PermissionNode entity was cleared.
+// PermissionNodeCleared reports if the "permission_node" edge to the PermissionNode entity was cleared.
 func (m *RoleMutation) PermissionNodeCleared() bool {
 	return m.clearedpermission_node
 }
@@ -11439,7 +8268,7 @@ func (m *SessionMutation) ClearUser() {
 	m.cleareduser = true
 }
 
-// UserCleared returns if the "user" edge to the User entity was cleared.
+// UserCleared reports if the "user" edge to the User entity was cleared.
 func (m *SessionMutation) UserCleared() bool {
 	return m.cleareduser
 }
@@ -11655,362 +8484,6 @@ func (m *SessionMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Session edge %s", name)
 }
 
-// TextMessageMutation represents an operation that mutates the TextMessage nodes in the graph.
-type TextMessageMutation struct {
-	config
-	op             Op
-	typ            string
-	id             *int
-	content        *string
-	clearedFields  map[string]struct{}
-	message        *uint64
-	clearedmessage bool
-	done           bool
-	oldValue       func(context.Context) (*TextMessage, error)
-	predicates     []predicate.TextMessage
-}
-
-var _ ent.Mutation = (*TextMessageMutation)(nil)
-
-// textmessageOption allows management of the mutation configuration using functional options.
-type textmessageOption func(*TextMessageMutation)
-
-// newTextMessageMutation creates new mutation for the TextMessage entity.
-func newTextMessageMutation(c config, op Op, opts ...textmessageOption) *TextMessageMutation {
-	m := &TextMessageMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeTextMessage,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withTextMessageID sets the ID field of the mutation.
-func withTextMessageID(id int) textmessageOption {
-	return func(m *TextMessageMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *TextMessage
-		)
-		m.oldValue = func(ctx context.Context) (*TextMessage, error) {
-			once.Do(func() {
-				if m.done {
-					err = fmt.Errorf("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().TextMessage.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withTextMessage sets the old TextMessage of the mutation.
-func withTextMessage(node *TextMessage) textmessageOption {
-	return func(m *TextMessageMutation) {
-		m.oldValue = func(context.Context) (*TextMessage, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m TextMessageMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m TextMessageMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, fmt.Errorf("entgen: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
-func (m *TextMessageMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// SetContent sets the "content" field.
-func (m *TextMessageMutation) SetContent(s string) {
-	m.content = &s
-}
-
-// Content returns the value of the "content" field in the mutation.
-func (m *TextMessageMutation) Content() (r string, exists bool) {
-	v := m.content
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldContent returns the old "content" field's value of the TextMessage entity.
-// If the TextMessage object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TextMessageMutation) OldContent(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldContent is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldContent requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldContent: %w", err)
-	}
-	return oldValue.Content, nil
-}
-
-// ResetContent resets all changes to the "content" field.
-func (m *TextMessageMutation) ResetContent() {
-	m.content = nil
-}
-
-// SetMessageID sets the "message" edge to the Message entity by id.
-func (m *TextMessageMutation) SetMessageID(id uint64) {
-	m.message = &id
-}
-
-// ClearMessage clears the "message" edge to the Message entity.
-func (m *TextMessageMutation) ClearMessage() {
-	m.clearedmessage = true
-}
-
-// MessageCleared returns if the "message" edge to the Message entity was cleared.
-func (m *TextMessageMutation) MessageCleared() bool {
-	return m.clearedmessage
-}
-
-// MessageID returns the "message" edge ID in the mutation.
-func (m *TextMessageMutation) MessageID() (id uint64, exists bool) {
-	if m.message != nil {
-		return *m.message, true
-	}
-	return
-}
-
-// MessageIDs returns the "message" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// MessageID instead. It exists only for internal usage by the builders.
-func (m *TextMessageMutation) MessageIDs() (ids []uint64) {
-	if id := m.message; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetMessage resets all changes to the "message" edge.
-func (m *TextMessageMutation) ResetMessage() {
-	m.message = nil
-	m.clearedmessage = false
-}
-
-// Op returns the operation name.
-func (m *TextMessageMutation) Op() Op {
-	return m.op
-}
-
-// Type returns the node type of this mutation (TextMessage).
-func (m *TextMessageMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *TextMessageMutation) Fields() []string {
-	fields := make([]string, 0, 1)
-	if m.content != nil {
-		fields = append(fields, textmessage.FieldContent)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *TextMessageMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case textmessage.FieldContent:
-		return m.Content()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *TextMessageMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case textmessage.FieldContent:
-		return m.OldContent(ctx)
-	}
-	return nil, fmt.Errorf("unknown TextMessage field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *TextMessageMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case textmessage.FieldContent:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetContent(v)
-		return nil
-	}
-	return fmt.Errorf("unknown TextMessage field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *TextMessageMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *TextMessageMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *TextMessageMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown TextMessage numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *TextMessageMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *TextMessageMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *TextMessageMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown TextMessage nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *TextMessageMutation) ResetField(name string) error {
-	switch name {
-	case textmessage.FieldContent:
-		m.ResetContent()
-		return nil
-	}
-	return fmt.Errorf("unknown TextMessage field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *TextMessageMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.message != nil {
-		edges = append(edges, textmessage.EdgeMessage)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *TextMessageMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case textmessage.EdgeMessage:
-		if id := m.message; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *TextMessageMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *TextMessageMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *TextMessageMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedmessage {
-		edges = append(edges, textmessage.EdgeMessage)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *TextMessageMutation) EdgeCleared(name string) bool {
-	switch name {
-	case textmessage.EdgeMessage:
-		return m.clearedmessage
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *TextMessageMutation) ClearEdge(name string) error {
-	switch name {
-	case textmessage.EdgeMessage:
-		m.ClearMessage()
-		return nil
-	}
-	return fmt.Errorf("unknown TextMessage unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *TextMessageMutation) ResetEdge(name string) error {
-	switch name {
-	case textmessage.EdgeMessage:
-		m.ResetMessage()
-		return nil
-	}
-	return fmt.Errorf("unknown TextMessage edge %s", name)
-}
-
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
@@ -12148,7 +8621,7 @@ func (m *UserMutation) ClearLocalUser() {
 	m.clearedlocal_user = true
 }
 
-// LocalUserCleared returns if the "local_user" edge to the LocalUser entity was cleared.
+// LocalUserCleared reports if the "local_user" edge to the LocalUser entity was cleared.
 func (m *UserMutation) LocalUserCleared() bool {
 	return m.clearedlocal_user
 }
@@ -12187,7 +8660,7 @@ func (m *UserMutation) ClearForeignUser() {
 	m.clearedforeign_user = true
 }
 
-// ForeignUserCleared returns if the "foreign_user" edge to the ForeignUser entity was cleared.
+// ForeignUserCleared reports if the "foreign_user" edge to the ForeignUser entity was cleared.
 func (m *UserMutation) ForeignUserCleared() bool {
 	return m.clearedforeign_user
 }
@@ -12226,7 +8699,7 @@ func (m *UserMutation) ClearProfile() {
 	m.clearedprofile = true
 }
 
-// ProfileCleared returns if the "profile" edge to the Profile entity was cleared.
+// ProfileCleared reports if the "profile" edge to the Profile entity was cleared.
 func (m *UserMutation) ProfileCleared() bool {
 	return m.clearedprofile
 }
@@ -12270,7 +8743,7 @@ func (m *UserMutation) ClearMetadata() {
 	m.clearedmetadata = true
 }
 
-// MetadataCleared returns if the "metadata" edge to the UserMeta entity was cleared.
+// MetadataCleared reports if the "metadata" edge to the UserMeta entity was cleared.
 func (m *UserMutation) MetadataCleared() bool {
 	return m.clearedmetadata
 }
@@ -12323,7 +8796,7 @@ func (m *UserMutation) ClearSessions() {
 	m.clearedsessions = true
 }
 
-// SessionsCleared returns if the "sessions" edge to the Session entity was cleared.
+// SessionsCleared reports if the "sessions" edge to the Session entity was cleared.
 func (m *UserMutation) SessionsCleared() bool {
 	return m.clearedsessions
 }
@@ -12376,7 +8849,7 @@ func (m *UserMutation) ClearMessage() {
 	m.clearedmessage = true
 }
 
-// MessageCleared returns if the "message" edge to the Message entity was cleared.
+// MessageCleared reports if the "message" edge to the Message entity was cleared.
 func (m *UserMutation) MessageCleared() bool {
 	return m.clearedmessage
 }
@@ -12429,7 +8902,7 @@ func (m *UserMutation) ClearGuild() {
 	m.clearedguild = true
 }
 
-// GuildCleared returns if the "guild" edge to the Guild entity was cleared.
+// GuildCleared reports if the "guild" edge to the Guild entity was cleared.
 func (m *UserMutation) GuildCleared() bool {
 	return m.clearedguild
 }
@@ -12482,7 +8955,7 @@ func (m *UserMutation) ClearEmotepack() {
 	m.clearedemotepack = true
 }
 
-// EmotepackCleared returns if the "emotepack" edge to the EmotePack entity was cleared.
+// EmotepackCleared reports if the "emotepack" edge to the EmotePack entity was cleared.
 func (m *UserMutation) EmotepackCleared() bool {
 	return m.clearedemotepack
 }
@@ -12535,7 +9008,7 @@ func (m *UserMutation) ClearCreatedpacks() {
 	m.clearedcreatedpacks = true
 }
 
-// CreatedpacksCleared returns if the "createdpacks" edge to the EmotePack entity was cleared.
+// CreatedpacksCleared reports if the "createdpacks" edge to the EmotePack entity was cleared.
 func (m *UserMutation) CreatedpacksCleared() bool {
 	return m.clearedcreatedpacks
 }
@@ -12588,7 +9061,7 @@ func (m *UserMutation) ClearListentry() {
 	m.clearedlistentry = true
 }
 
-// ListentryCleared returns if the "listentry" edge to the GuildListEntry entity was cleared.
+// ListentryCleared reports if the "listentry" edge to the GuildListEntry entity was cleared.
 func (m *UserMutation) ListentryCleared() bool {
 	return m.clearedlistentry
 }
@@ -12641,7 +9114,7 @@ func (m *UserMutation) ClearRole() {
 	m.clearedrole = true
 }
 
-// RoleCleared returns if the "role" edge to the Role entity was cleared.
+// RoleCleared reports if the "role" edge to the Role entity was cleared.
 func (m *UserMutation) RoleCleared() bool {
 	return m.clearedrole
 }
@@ -13231,7 +9704,7 @@ func (m *UserMetaMutation) ClearUser() {
 	m.cleareduser = true
 }
 
-// UserCleared returns if the "user" edge to the User entity was cleared.
+// UserCleared reports if the "user" edge to the User entity was cleared.
 func (m *UserMetaMutation) UserCleared() bool {
 	return m.cleareduser
 }

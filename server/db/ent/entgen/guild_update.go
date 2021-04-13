@@ -725,6 +725,7 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // GuildUpdateOne is the builder for updating a single Guild entity.
 type GuildUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *GuildMutation
 }
@@ -981,6 +982,13 @@ func (guo *GuildUpdateOne) RemoveUser(u ...*User) *GuildUpdateOne {
 	return guo.RemoveUserIDs(ids...)
 }
 
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (guo *GuildUpdateOne) Select(field string, fields ...string) *GuildUpdateOne {
+	guo.fields = append([]string{field}, fields...)
+	return guo
+}
+
 // Save executes the query and returns the updated Guild entity.
 func (guo *GuildUpdateOne) Save(ctx context.Context) (*Guild, error) {
 	var (
@@ -1048,6 +1056,18 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Guild.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := guo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, guild.FieldID)
+		for _, f := range fields {
+			if !guild.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("entgen: invalid field %q for query", f)}
+			}
+			if f != guild.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := guo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

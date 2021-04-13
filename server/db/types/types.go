@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
+	"github.com/harmony-development/legato/server/db/ent/entgen"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -78,11 +79,14 @@ type GuildListEntryData struct {
 }
 
 type EmotePackData struct {
-	Name string
+	OwnerID uint64
+	PackID  uint64
+	Name    string
 }
 
 type EmoteData struct {
-	Name string
+	Name    string
+	ImageID string
 }
 
 type FileData struct {
@@ -122,14 +126,48 @@ type MessageData struct {
 	CreatedAt *timestamppb.Timestamp
 	EditedAt  *timestamppb.Timestamp
 	InReplyTo uint64
-	Content   *Content
+	Content   *harmonytypesv1.Content
 }
 
-type MessageText struct {
-	Content string
+func (v *MessageData) ToV1() *harmonytypesv1.Message {
+	return &harmonytypesv1.Message{
+		Metadata:  v.Metadata,
+		Overrides: v.Overrides,
+		GuildId:   v.GuildId,
+		MessageId: v.MessageId,
+		AuthorId:  v.AuthorId,
+		CreatedAt: v.CreatedAt,
+		EditedAt:  v.EditedAt,
+		InReplyTo: v.InReplyTo,
+		Content:   v.Content,
+	}
 }
 
-type MessageFiles struct {
+func ManyMessageDataInto(msgs []*MessageData) (r []*harmonytypesv1.Message) {
+	for _, it := range msgs {
+		r = append(r, it.ToV1())
+	}
+	return
+}
+
+func Into(msg *entgen.Message) *MessageData {
+	return &MessageData{
+		GuildId:   msg.Edges.Channel.Edges.Guild.ID,
+		ChannelId: msg.Edges.Channel.ID,
+		MessageId: msg.ID,
+		AuthorId:  msg.Edges.User.ID,
+		CreatedAt: timestamppb.New(msg.Createdat),
+		EditedAt:  timestamppb.New(msg.Editedat),
+		InReplyTo: msg.Edges.Parent.ID,
+		Content:   msg.Content,
+	}
+}
+
+func IntoMany(msgs []*entgen.Message) (out []*MessageData) {
+	for _, it := range msgs {
+		out = append(out, Into(it))
+	}
+	return
 }
 
 type ChannelKind uint64

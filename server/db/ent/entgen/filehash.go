@@ -27,11 +27,11 @@ func (*FileHash) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case filehash.FieldHash:
-			values[i] = &[]byte{}
+			values[i] = new([]byte)
 		case filehash.FieldID:
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		case filehash.FieldFileid:
-			values[i] = &sql.NullString{}
+			values[i] = new(sql.NullString)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type FileHash", columns[i])
 		}

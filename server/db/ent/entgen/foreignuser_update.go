@@ -222,6 +222,7 @@ func (fuu *ForeignUserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // ForeignUserUpdateOne is the builder for updating a single ForeignUser entity.
 type ForeignUserUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *ForeignUserMutation
 }
@@ -264,6 +265,13 @@ func (fuuo *ForeignUserUpdateOne) Mutation() *ForeignUserMutation {
 // ClearUser clears the "user" edge to the User entity.
 func (fuuo *ForeignUserUpdateOne) ClearUser() *ForeignUserUpdateOne {
 	fuuo.mutation.ClearUser()
+	return fuuo
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (fuuo *ForeignUserUpdateOne) Select(field string, fields ...string) *ForeignUserUpdateOne {
+	fuuo.fields = append([]string{field}, fields...)
 	return fuuo
 }
 
@@ -348,6 +356,18 @@ func (fuuo *ForeignUserUpdateOne) sqlSave(ctx context.Context) (_node *ForeignUs
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing ForeignUser.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := fuuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, foreignuser.FieldID)
+		for _, f := range fields {
+			if !foreignuser.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("entgen: invalid field %q for query", f)}
+			}
+			if f != foreignuser.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := fuuo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

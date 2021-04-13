@@ -21,6 +21,7 @@ type SessionQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Session
@@ -47,6 +48,13 @@ func (sq *SessionQuery) Limit(limit int) *SessionQuery {
 // Offset adds an offset step to the query.
 func (sq *SessionQuery) Offset(offset int) *SessionQuery {
 	sq.offset = &offset
+	return sq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (sq *SessionQuery) Unique(unique bool) *SessionQuery {
+	sq.unique = &unique
 	return sq
 }
 
@@ -377,11 +385,14 @@ func (sq *SessionQuery) sqlAll(ctx context.Context) ([]*Session, error) {
 		ids := make([]uint64, 0, len(nodes))
 		nodeids := make(map[uint64][]*Session)
 		for i := range nodes {
-			fk := nodes[i].user_sessions
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			if nodes[i].user_sessions == nil {
+				continue
 			}
+			fk := *nodes[i].user_sessions
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
 		query.Where(user.IDIn(ids...))
 		neighbors, err := query.All(ctx)
@@ -428,6 +439,9 @@ func (sq *SessionQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   sq.sql,
 		Unique: true,
 	}
+	if unique := sq.unique; unique != nil {
+		_spec.Unique = *unique
+	}
 	if fields := sq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, session.FieldID)
@@ -453,7 +467,7 @@ func (sq *SessionQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := sq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, session.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -472,7 +486,7 @@ func (sq *SessionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range sq.order {
-		p(selector, session.ValidColumn)
+		p(selector)
 	}
 	if offset := sq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -738,7 +752,7 @@ func (sgb *SessionGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(sgb.fields)+len(sgb.fns))
 	columns = append(columns, sgb.fields...)
 	for _, fn := range sgb.fns {
-		columns = append(columns, fn(selector, session.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(sgb.fields...)
 }

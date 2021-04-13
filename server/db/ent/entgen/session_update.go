@@ -197,6 +197,7 @@ func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // SessionUpdateOne is the builder for updating a single Session entity.
 type SessionUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *SessionMutation
 }
@@ -242,6 +243,13 @@ func (suo *SessionUpdateOne) Mutation() *SessionMutation {
 // ClearUser clears the "user" edge to the User entity.
 func (suo *SessionUpdateOne) ClearUser() *SessionUpdateOne {
 	suo.mutation.ClearUser()
+	return suo
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (suo *SessionUpdateOne) Select(field string, fields ...string) *SessionUpdateOne {
+	suo.fields = append([]string{field}, fields...)
 	return suo
 }
 
@@ -312,6 +320,18 @@ func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err e
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Session.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := suo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, session.FieldID)
+		for _, f := range fields {
+			if !session.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("entgen: invalid field %q for query", f)}
+			}
+			if f != session.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := suo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

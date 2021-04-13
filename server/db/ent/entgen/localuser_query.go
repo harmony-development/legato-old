@@ -23,6 +23,7 @@ type LocalUserQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.LocalUser
@@ -50,6 +51,13 @@ func (luq *LocalUserQuery) Limit(limit int) *LocalUserQuery {
 // Offset adds an offset step to the query.
 func (luq *LocalUserQuery) Offset(offset int) *LocalUserQuery {
 	luq.offset = &offset
+	return luq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (luq *LocalUserQuery) Unique(unique bool) *LocalUserQuery {
+	luq.unique = &unique
 	return luq
 }
 
@@ -415,11 +423,14 @@ func (luq *LocalUserQuery) sqlAll(ctx context.Context) ([]*LocalUser, error) {
 		ids := make([]uint64, 0, len(nodes))
 		nodeids := make(map[uint64][]*LocalUser)
 		for i := range nodes {
-			fk := nodes[i].user_local_user
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			if nodes[i].user_local_user == nil {
+				continue
 			}
+			fk := *nodes[i].user_local_user
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
 		query.Where(user.IDIn(ids...))
 		neighbors, err := query.All(ctx)
@@ -495,6 +506,9 @@ func (luq *LocalUserQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   luq.sql,
 		Unique: true,
 	}
+	if unique := luq.unique; unique != nil {
+		_spec.Unique = *unique
+	}
 	if fields := luq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, localuser.FieldID)
@@ -520,7 +534,7 @@ func (luq *LocalUserQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := luq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, localuser.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -539,7 +553,7 @@ func (luq *LocalUserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range luq.order {
-		p(selector, localuser.ValidColumn)
+		p(selector)
 	}
 	if offset := luq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -805,7 +819,7 @@ func (lugb *LocalUserGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(lugb.fields)+len(lugb.fns))
 	columns = append(columns, lugb.fields...)
 	for _, fn := range lugb.fns {
-		columns = append(columns, fn(selector, localuser.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(lugb.fields...)
 }

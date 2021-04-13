@@ -53,9 +53,9 @@ func (*UserMeta) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case usermeta.FieldID, usermeta.FieldMeta:
-			values[i] = &sql.NullString{}
+			values[i] = new(sql.NullString)
 		case usermeta.ForeignKeys[0]: // user_metadata
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type UserMeta", columns[i])
 		}

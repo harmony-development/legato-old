@@ -23,6 +23,7 @@ type PermissionNodeQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.PermissionNode
@@ -51,6 +52,13 @@ func (pnq *PermissionNodeQuery) Limit(limit int) *PermissionNodeQuery {
 // Offset adds an offset step to the query.
 func (pnq *PermissionNodeQuery) Offset(offset int) *PermissionNodeQuery {
 	pnq.offset = &offset
+	return pnq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (pnq *PermissionNodeQuery) Unique(unique bool) *PermissionNodeQuery {
+	pnq.unique = &unique
 	return pnq
 }
 
@@ -451,11 +459,14 @@ func (pnq *PermissionNodeQuery) sqlAll(ctx context.Context) ([]*PermissionNode, 
 		ids := make([]uint64, 0, len(nodes))
 		nodeids := make(map[uint64][]*PermissionNode)
 		for i := range nodes {
-			fk := nodes[i].role_permission_node
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			if nodes[i].role_permission_node == nil {
+				continue
 			}
+			fk := *nodes[i].role_permission_node
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
 		query.Where(role.IDIn(ids...))
 		neighbors, err := query.All(ctx)
@@ -477,11 +488,14 @@ func (pnq *PermissionNodeQuery) sqlAll(ctx context.Context) ([]*PermissionNode, 
 		ids := make([]uint64, 0, len(nodes))
 		nodeids := make(map[uint64][]*PermissionNode)
 		for i := range nodes {
-			fk := nodes[i].guild_permission_node
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			if nodes[i].guild_permission_node == nil {
+				continue
 			}
+			fk := *nodes[i].guild_permission_node
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
 		query.Where(guild.IDIn(ids...))
 		neighbors, err := query.All(ctx)
@@ -503,11 +517,14 @@ func (pnq *PermissionNodeQuery) sqlAll(ctx context.Context) ([]*PermissionNode, 
 		ids := make([]uint64, 0, len(nodes))
 		nodeids := make(map[uint64][]*PermissionNode)
 		for i := range nodes {
-			fk := nodes[i].channel_permission_node
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			if nodes[i].channel_permission_node == nil {
+				continue
 			}
+			fk := *nodes[i].channel_permission_node
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
 		query.Where(channel.IDIn(ids...))
 		neighbors, err := query.All(ctx)
@@ -554,6 +571,9 @@ func (pnq *PermissionNodeQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   pnq.sql,
 		Unique: true,
 	}
+	if unique := pnq.unique; unique != nil {
+		_spec.Unique = *unique
+	}
 	if fields := pnq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, permissionnode.FieldID)
@@ -579,7 +599,7 @@ func (pnq *PermissionNodeQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := pnq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, permissionnode.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -598,7 +618,7 @@ func (pnq *PermissionNodeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range pnq.order {
-		p(selector, permissionnode.ValidColumn)
+		p(selector)
 	}
 	if offset := pnq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -864,7 +884,7 @@ func (pngb *PermissionNodeGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(pngb.fields)+len(pngb.fns))
 	columns = append(columns, pngb.fields...)
 	for _, fn := range pngb.fns {
-		columns = append(columns, fn(selector, permissionnode.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(pngb.fields...)
 }

@@ -339,6 +339,7 @@ func (epu *EmotePackUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // EmotePackUpdateOne is the builder for updating a single EmotePack entity.
 type EmotePackUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *EmotePackMutation
 }
@@ -440,6 +441,13 @@ func (epuo *EmotePackUpdateOne) RemoveEmote(e ...*Emote) *EmotePackUpdateOne {
 	return epuo.RemoveEmoteIDs(ids...)
 }
 
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (epuo *EmotePackUpdateOne) Select(field string, fields ...string) *EmotePackUpdateOne {
+	epuo.fields = append([]string{field}, fields...)
+	return epuo
+}
+
 // Save executes the query and returns the updated EmotePack entity.
 func (epuo *EmotePackUpdateOne) Save(ctx context.Context) (*EmotePack, error) {
 	var (
@@ -507,6 +515,18 @@ func (epuo *EmotePackUpdateOne) sqlSave(ctx context.Context) (_node *EmotePack, 
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing EmotePack.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := epuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, emotepack.FieldID)
+		for _, f := range fields {
+			if !emotepack.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("entgen: invalid field %q for query", f)}
+			}
+			if f != emotepack.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := epuo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

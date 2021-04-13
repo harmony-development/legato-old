@@ -21,6 +21,7 @@ type InviteQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Invite
@@ -47,6 +48,13 @@ func (iq *InviteQuery) Limit(limit int) *InviteQuery {
 // Offset adds an offset step to the query.
 func (iq *InviteQuery) Offset(offset int) *InviteQuery {
 	iq.offset = &offset
+	return iq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (iq *InviteQuery) Unique(unique bool) *InviteQuery {
+	iq.unique = &unique
 	return iq
 }
 
@@ -377,11 +385,14 @@ func (iq *InviteQuery) sqlAll(ctx context.Context) ([]*Invite, error) {
 		ids := make([]uint64, 0, len(nodes))
 		nodeids := make(map[uint64][]*Invite)
 		for i := range nodes {
-			fk := nodes[i].guild_invite
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			if nodes[i].guild_invite == nil {
+				continue
 			}
+			fk := *nodes[i].guild_invite
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
 		query.Where(guild.IDIn(ids...))
 		neighbors, err := query.All(ctx)
@@ -428,6 +439,9 @@ func (iq *InviteQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   iq.sql,
 		Unique: true,
 	}
+	if unique := iq.unique; unique != nil {
+		_spec.Unique = *unique
+	}
 	if fields := iq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, invite.FieldID)
@@ -453,7 +467,7 @@ func (iq *InviteQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := iq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, invite.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -472,7 +486,7 @@ func (iq *InviteQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range iq.order {
-		p(selector, invite.ValidColumn)
+		p(selector)
 	}
 	if offset := iq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -738,7 +752,7 @@ func (igb *InviteGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(igb.fields)+len(igb.fns))
 	columns = append(columns, igb.fields...)
 	for _, fn := range igb.fns {
-		columns = append(columns, fn(selector, invite.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(igb.fields...)
 }

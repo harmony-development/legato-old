@@ -140,6 +140,7 @@ func (fhu *FileHashUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // FileHashUpdateOne is the builder for updating a single FileHash entity.
 type FileHashUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *FileHashMutation
 }
@@ -159,6 +160,13 @@ func (fhuo *FileHashUpdateOne) SetFileid(s string) *FileHashUpdateOne {
 // Mutation returns the FileHashMutation object of the builder.
 func (fhuo *FileHashUpdateOne) Mutation() *FileHashMutation {
 	return fhuo.mutation
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (fhuo *FileHashUpdateOne) Select(field string, fields ...string) *FileHashUpdateOne {
+	fhuo.fields = append([]string{field}, fields...)
+	return fhuo
 }
 
 // Save executes the query and returns the updated FileHash entity.
@@ -228,6 +236,18 @@ func (fhuo *FileHashUpdateOne) sqlSave(ctx context.Context) (_node *FileHash, er
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing FileHash.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := fhuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, filehash.FieldID)
+		for _, f := range fields {
+			if !filehash.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("entgen: invalid field %q for query", f)}
+			}
+			if f != filehash.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := fhuo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

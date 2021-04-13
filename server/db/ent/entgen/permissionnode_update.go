@@ -323,6 +323,7 @@ func (pnu *PermissionNodeUpdate) sqlSave(ctx context.Context) (n int, err error)
 // PermissionNodeUpdateOne is the builder for updating a single PermissionNode entity.
 type PermissionNodeUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *PermissionNodeMutation
 }
@@ -419,6 +420,13 @@ func (pnuo *PermissionNodeUpdateOne) ClearChannel() *PermissionNodeUpdateOne {
 	return pnuo
 }
 
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (pnuo *PermissionNodeUpdateOne) Select(field string, fields ...string) *PermissionNodeUpdateOne {
+	pnuo.fields = append([]string{field}, fields...)
+	return pnuo
+}
+
 // Save executes the query and returns the updated PermissionNode entity.
 func (pnuo *PermissionNodeUpdateOne) Save(ctx context.Context) (*PermissionNode, error) {
 	var (
@@ -486,6 +494,18 @@ func (pnuo *PermissionNodeUpdateOne) sqlSave(ctx context.Context) (_node *Permis
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing PermissionNode.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := pnuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, permissionnode.FieldID)
+		for _, f := range fields {
+			if !permissionnode.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("entgen: invalid field %q for query", f)}
+			}
+			if f != permissionnode.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := pnuo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

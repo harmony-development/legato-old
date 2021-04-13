@@ -38,7 +38,7 @@ func (b *Backend) SaveFile(name, contentType string, r io.Reader) (id string, er
 		return "", err
 	}
 
-	err = b.DB.SetFileMetadata(fileID, contentType, name, int32(len(filedata)))
+	err = b.DB.SetFileMetadata(fileID, contentType, name, int(len(filedata)))
 	if err != nil {
 		return "", err
 	}
@@ -58,10 +58,10 @@ func (b *Backend) ReadFile(id string) (contentType, fileName string, size int32,
 
 	r, err = os.Open(path.Join(b.Config.Flatfile.MediaPath, baseFileName))
 
-	return res.ContentType, res.Name, res.Size, r, err
+	return res.ContentType, res.Name, int32(res.Size), r, err
 }
 
 func (b *Backend) GetMetadata(id string) (contentType, fileName string, size int32, err error) {
 	res, err := b.DB.GetFileMetadata(id)
-	return res.ContentType, res.Name, res.Size, err
+	return res.ContentType, res.Name, int32(res.Size), err
 }

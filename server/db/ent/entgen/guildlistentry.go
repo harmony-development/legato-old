@@ -55,11 +55,11 @@ func (*GuildListEntry) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case guildlistentry.FieldID:
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		case guildlistentry.FieldHost, guildlistentry.FieldPosition:
-			values[i] = &sql.NullString{}
+			values[i] = new(sql.NullString)
 		case guildlistentry.ForeignKeys[0]: // user_listentry
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type GuildListEntry", columns[i])
 		}

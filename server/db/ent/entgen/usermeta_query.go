@@ -21,6 +21,7 @@ type UserMetaQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.UserMeta
@@ -47,6 +48,13 @@ func (umq *UserMetaQuery) Limit(limit int) *UserMetaQuery {
 // Offset adds an offset step to the query.
 func (umq *UserMetaQuery) Offset(offset int) *UserMetaQuery {
 	umq.offset = &offset
+	return umq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (umq *UserMetaQuery) Unique(unique bool) *UserMetaQuery {
+	umq.unique = &unique
 	return umq
 }
 
@@ -377,11 +385,14 @@ func (umq *UserMetaQuery) sqlAll(ctx context.Context) ([]*UserMeta, error) {
 		ids := make([]uint64, 0, len(nodes))
 		nodeids := make(map[uint64][]*UserMeta)
 		for i := range nodes {
-			fk := nodes[i].user_metadata
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			if nodes[i].user_metadata == nil {
+				continue
 			}
+			fk := *nodes[i].user_metadata
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
 		query.Where(user.IDIn(ids...))
 		neighbors, err := query.All(ctx)
@@ -428,6 +439,9 @@ func (umq *UserMetaQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   umq.sql,
 		Unique: true,
 	}
+	if unique := umq.unique; unique != nil {
+		_spec.Unique = *unique
+	}
 	if fields := umq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, usermeta.FieldID)
@@ -453,7 +467,7 @@ func (umq *UserMetaQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := umq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, usermeta.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -472,7 +486,7 @@ func (umq *UserMetaQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range umq.order {
-		p(selector, usermeta.ValidColumn)
+		p(selector)
 	}
 	if offset := umq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -738,7 +752,7 @@ func (umgb *UserMetaGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(umgb.fields)+len(umgb.fns))
 	columns = append(columns, umgb.fields...)
 	for _, fn := range umgb.fns {
-		columns = append(columns, fn(selector, usermeta.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(umgb.fields...)
 }

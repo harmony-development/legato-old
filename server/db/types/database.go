@@ -14,14 +14,10 @@ type IHarmonyDB interface {
 	GetOwner(guildID uint64) (uint64, error)
 	IsOwner(guildID, userID uint64) (bool, error)
 	CreateInvite(guildID uint64, possibleUses int32, name string) (*InviteData, error)
-	UpdateChannelInformation(guildID, channelID uint64, name *string, metadata []byte) error
+	UpdateChannelInformation(guildID, channelID uint64, name *string, metadata *harmonytypesv1.Metadata) error
 	AddMemberToGuild(userID, guildID uint64) error
 	AddChannelToGuild(guildID, channelID uint64, channelName string, previous, next *uint64, kind ChannelKind, md *harmonytypesv1.Metadata) (c ChannelData, err error)
 	DeleteChannelFromGuild(guildID, channelID uint64) error
-
-	AddTextMessage(guildID, channelID, messageID uint64, authorID uint64, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, content string) (time.Time, error)
-	AddFilesMessage(guildID, channelID, messageID uint64, authorID uint64, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, files []string) (time.Time, error)
-	AddEmbedMessage(guildID, channelID, messageID uint64, authorID uint64, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, embed *harmonytypesv1.Embed) (time.Time, error)
 
 	UpdateTextMessage(messageID uint64, content string) (time.Time, error)
 
@@ -33,6 +29,8 @@ type IHarmonyDB interface {
 	SessionToUserID(session string) (uint64, error)
 	UserInGuild(userID, guildID uint64) (bool, error)
 
+	AddMessage(guildID, channelID, messageID uint64, authorID uint64, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, content *harmonytypesv1.Content) (time.Time, error)
+	GetMessage(messageID uint64) (*MessageData, error)
 	GetMessages(channelID uint64) ([]*MessageData, error)
 	GetMessagesBefore(channelID uint64, date time.Time) ([]*MessageData, error)
 
@@ -47,7 +45,6 @@ type IHarmonyDB interface {
 	ChannelsForGuild(guildID uint64) ([]*ChannelData, error)
 	MembersInGuild(guildID uint64) ([]uint64, error)
 	CountMembersInGuild(guildID uint64) (int64, error)
-	GetMessage(messageID uint64) (*MessageData, error)
 	GetUserByEmail(email string) (UserData, error)
 	GetUserByID(userID uint64) (UserData, error)
 	AddSession(userID uint64, session string) error
@@ -93,7 +90,9 @@ type IHarmonyDB interface {
 	GetPermissionsData(guildID uint64) (PermissionsData, error)
 	RolesForUser(guildID, userID uint64) ([]uint64, error)
 	ManageRoles(guildID, userID uint64, addRoles, removeRoles []uint64) error
+
 	ModifyRole(roleID uint64, name string, color int, hoist, pingable, updateName, updateColor, updateHoist, updatePingable bool) error
+
 	DeleteFileMeta(fileID string) error
 	GetFileIDByHash(hash []byte) (string, error)
 	AddFileHash(fileID string, hash []byte) error

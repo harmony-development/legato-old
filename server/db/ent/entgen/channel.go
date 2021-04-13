@@ -8,9 +8,8 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
-
 	v1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
+	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 )
 
@@ -95,13 +94,13 @@ func (*Channel) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case channel.FieldMetadata:
-			values[i] = &[]byte{}
+			values[i] = new([]byte)
 		case channel.FieldID, channel.FieldKind:
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		case channel.FieldName, channel.FieldPosition:
-			values[i] = &sql.NullString{}
+			values[i] = new(sql.NullString)
 		case channel.ForeignKeys[0]: // guild_channel
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Channel", columns[i])
 		}

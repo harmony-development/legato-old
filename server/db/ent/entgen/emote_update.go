@@ -188,6 +188,7 @@ func (eu *EmoteUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // EmoteUpdateOne is the builder for updating a single Emote entity.
 type EmoteUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *EmoteMutation
 }
@@ -225,6 +226,13 @@ func (euo *EmoteUpdateOne) Mutation() *EmoteMutation {
 // ClearEmotepack clears the "emotepack" edge to the EmotePack entity.
 func (euo *EmoteUpdateOne) ClearEmotepack() *EmoteUpdateOne {
 	euo.mutation.ClearEmotepack()
+	return euo
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (euo *EmoteUpdateOne) Select(field string, fields ...string) *EmoteUpdateOne {
+	euo.fields = append([]string{field}, fields...)
 	return euo
 }
 
@@ -295,6 +303,18 @@ func (euo *EmoteUpdateOne) sqlSave(ctx context.Context) (_node *Emote, err error
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Emote.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := euo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, emote.FieldID)
+		for _, f := range fields {
+			if !emote.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("entgen: invalid field %q for query", f)}
+			}
+			if f != emote.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := euo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

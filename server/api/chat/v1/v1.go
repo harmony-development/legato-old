@@ -160,11 +160,7 @@ func (v1 *V1) CreateChannel(c echo.Context, r *chatv1.CreateChannelRequest) (*ch
 	if err != nil {
 		return nil, err
 	}
-	md, err := proto.Marshal(r.Metadata)
-	if err != nil {
-		return nil, err
-	}
-	if _, err := v1.DB.AddChannelToGuild(r.GuildId, channelID, r.ChannelName, &r.PreviousId, &r.NextId, types.ChannelKindText, md); err != nil {
+	if _, err := v1.DB.AddChannelToGuild(r.GuildId, channelID, r.ChannelName, &r.PreviousId, &r.NextId, types.ChannelKindText, r.Metadata); err != nil {
 		return nil, err
 	}
 	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
@@ -320,7 +316,7 @@ func (v1 *V1) GetMessage(c echo.Context, r *chatv1.GetMessageRequest) (*chatv1.G
 		return nil, err
 	}
 	return &chatv1.GetMessageResponse{
-		Message: data,
+		Message: data.ToV1(),
 	}, nil
 }
 
@@ -370,22 +366,23 @@ func init() {
 
 // GetChannelMessages implements the GetChannelMessages RPC
 func (v1 *V1) GetChannelMessages(c echo.Context, r *chatv1.GetChannelMessagesRequest) (*chatv1.GetChannelMessagesResponse, error) {
-	var err error
 	var messages []*harmonytypesv1.Message
 	if r.BeforeMessage != 0 {
 		beforeMsg, err := v1.DB.GetMessage(r.BeforeMessage)
 		if err != nil {
 			return nil, err
 		}
-		messages, err = v1.DB.GetMessagesBefore(r.ChannelId, beforeMsg.CreatedAt.AsTime())
+		it, err := v1.DB.GetMessagesBefore(r.ChannelId, beforeMsg.CreatedAt.AsTime())
 		if err != nil && err != sql.ErrNoRows {
 			return nil, err
 		}
+		messages = types.ManyMessageDataInto(it)
 	} else {
-		messages, err = v1.DB.GetMessages(r.ChannelId)
+		it, err := v1.DB.GetMessages(r.ChannelId)
 		if err != nil && err != sql.ErrNoRows {
 			return nil, err
 		}
+		messages = types.ManyMessageDataInto(it)
 	}
 	return &chatv1.GetChannelMessagesResponse{
 		ReachedTop: len(messages) < v1.Config.Server.Policies.APIs.Messages.MaximumGetAmount,
@@ -440,18 +437,10 @@ func init() {
 // UpdateChannelInformation implements the UpdateChannelInformation RPC
 func (v1 *V1) UpdateChannelInformation(c echo.Context, r *chatv1.UpdateChannelInformationRequest) (*empty.Empty, error) {
 	var name *string
-	var metadata []byte
 	if r.UpdateName {
 		name = &r.Name
 	}
-	if r.UpdateMetadata {
-		if md, err := proto.Marshal(r.Metadata); err != nil {
-			return nil, err
-		} else {
-			metadata = md
-		}
-	}
-	if err := v1.DB.UpdateChannelInformation(r.GuildId, r.ChannelId, name, metadata); err != nil {
+	if err := v1.DB.UpdateChannelInformation(r.GuildId, r.ChannelId, name, r.Metadata); err != nil {
 		return nil, err
 	}
 	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
@@ -891,14 +880,7 @@ func (v1 *V1) SendMessage(c echo.Context, r *chatv1.SendMessageRequest) (*chatv1
 		t time.Time
 	)
 
-	switch e := r.Content.Content.(type) {
-	case *harmonytypesv1.Content_EmbedMessage:
-		t, err = v1.DB.AddEmbedMessage(r.GuildId, r.ChannelId, messageID, ctx.UserID, r.Overrides, replyTo, r.Metadata, e.EmbedMessage.Embeds)
-	case *harmonytypesv1.Content_FilesMessage:
-		t, err = v1.DB.AddFilesMessage(r.GuildId, r.ChannelId, messageID, ctx.UserID, r.Overrides, replyTo, r.Metadata, e.FilesMessage.Attachments)
-	case *harmonytypesv1.Content_TextMessage:
-		t, err = v1.DB.AddTextMessage(r.GuildId, r.ChannelId, messageID, ctx.UserID, r.Overrides, replyTo, r.Metadata, e.TextMessage.Content)
-	}
+	t, err = v1.DB.AddMessage(r.GuildId, r.ChannelId, messageID, ctx.UserID, r.Overrides, replyTo, r.Metadata, r.Content)
 
 	if err != nil {
 		return nil, err
@@ -1098,7 +1080,16 @@ func (v1 *V1) GetEmotePacks(c echo.Context, r *chatv1.GetEmotePacksRequest) (*ch
 		return nil, err
 	}
 	return &chatv1.GetEmotePacksResponse{
-		Packs: packs,
+		Packs: func() (f []*chatv1.GetEmotePacksResponse_EmotePack) {
+			for _, pack := range packs {
+				f = append(f, &chatv1.GetEmotePacksResponse_EmotePack{
+					PackName:  pack.Name,
+					PackId:    pack.PackID,
+					PackOwner: pack.OwnerID,
+				})
+			}
+			return
+		}(),
 	}, nil
 }
 
@@ -1109,7 +1100,15 @@ func (v1 *V1) GetEmotePackEmotes(c echo.Context, r *chatv1.GetEmotePackEmotesReq
 		return nil, err
 	}
 	return &chatv1.GetEmotePackEmotesResponse{
-		Emotes: emotes,
+		Emotes: func() (f []*chatv1.GetEmotePackEmotesResponse_Emote) {
+			for _, emote := range emotes {
+				f = append(f, &chatv1.GetEmotePackEmotesResponse_Emote{
+					ImageId: emote.ImageID,
+					Name:    emote.Name,
+				})
+			}
+			return
+		}(),
 	}, nil
 }
 
@@ -1190,7 +1189,18 @@ func init() {
 func (v1 *V1) GetGuildRoles(c echo.Context, r *chatv1.GetGuildRolesRequest) (*chatv1.GetGuildRolesResponse, error) {
 	roles, err := v1.DB.GetGuildRoles(r.GuildId)
 	return &chatv1.GetGuildRolesResponse{
-		Roles: roles,
+		Roles: func() (f []*chatv1.Role) {
+			for _, role := range roles {
+				f = append(f, &chatv1.Role{
+					RoleId:   role.ID,
+					Name:     role.Name,
+					Color:    int32(role.Color),
+					Hoist:    role.Hoist,
+					Pingable: role.Pingable,
+				})
+			}
+			return
+		}(),
 	}, err
 }
 

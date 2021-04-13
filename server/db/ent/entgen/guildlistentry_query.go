@@ -21,6 +21,7 @@ type GuildListEntryQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.GuildListEntry
@@ -47,6 +48,13 @@ func (gleq *GuildListEntryQuery) Limit(limit int) *GuildListEntryQuery {
 // Offset adds an offset step to the query.
 func (gleq *GuildListEntryQuery) Offset(offset int) *GuildListEntryQuery {
 	gleq.offset = &offset
+	return gleq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (gleq *GuildListEntryQuery) Unique(unique bool) *GuildListEntryQuery {
+	gleq.unique = &unique
 	return gleq
 }
 
@@ -377,11 +385,14 @@ func (gleq *GuildListEntryQuery) sqlAll(ctx context.Context) ([]*GuildListEntry,
 		ids := make([]uint64, 0, len(nodes))
 		nodeids := make(map[uint64][]*GuildListEntry)
 		for i := range nodes {
-			fk := nodes[i].user_listentry
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			if nodes[i].user_listentry == nil {
+				continue
 			}
+			fk := *nodes[i].user_listentry
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
 		query.Where(user.IDIn(ids...))
 		neighbors, err := query.All(ctx)
@@ -428,6 +439,9 @@ func (gleq *GuildListEntryQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   gleq.sql,
 		Unique: true,
 	}
+	if unique := gleq.unique; unique != nil {
+		_spec.Unique = *unique
+	}
 	if fields := gleq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, guildlistentry.FieldID)
@@ -453,7 +467,7 @@ func (gleq *GuildListEntryQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := gleq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, guildlistentry.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -472,7 +486,7 @@ func (gleq *GuildListEntryQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range gleq.order {
-		p(selector, guildlistentry.ValidColumn)
+		p(selector)
 	}
 	if offset := gleq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -738,7 +752,7 @@ func (glegb *GuildListEntryGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(glegb.fields)+len(glegb.fns))
 	columns = append(columns, glegb.fields...)
 	for _, fn := range glegb.fns {
-		columns = append(columns, fn(selector, guildlistentry.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(glegb.fields...)
 }

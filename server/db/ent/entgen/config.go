@@ -24,18 +24,11 @@ type config struct {
 
 // hooks per client, for fast access.
 type hooks struct {
-	ActionButton   []ent.Hook
-	ActionDropdown []ent.Hook
-	ActionInput    []ent.Hook
 	Channel        []ent.Hook
-	EmbedAction    []ent.Hook
-	EmbedField     []ent.Hook
-	EmbedMessage   []ent.Hook
 	Emote          []ent.Hook
 	EmotePack      []ent.Hook
 	File           []ent.Hook
 	FileHash       []ent.Hook
-	FileMessage    []ent.Hook
 	ForeignUser    []ent.Hook
 	Guild          []ent.Hook
 	GuildListEntry []ent.Hook
@@ -46,7 +39,6 @@ type hooks struct {
 	Profile        []ent.Hook
 	Role           []ent.Hook
 	Session        []ent.Hook
-	TextMessage    []ent.Hook
 	User           []ent.Hook
 	UserMeta       []ent.Hook
 }

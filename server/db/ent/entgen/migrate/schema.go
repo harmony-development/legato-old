@@ -8,45 +8,6 @@ import (
 )
 
 var (
-	// ActionButtonsColumns holds the columns for the "action_buttons" table.
-	ActionButtonsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "text", Type: field.TypeString},
-		{Name: "url", Type: field.TypeString},
-	}
-	// ActionButtonsTable holds the schema information for the "action_buttons" table.
-	ActionButtonsTable = &schema.Table{
-		Name:        "action_buttons",
-		Columns:     ActionButtonsColumns,
-		PrimaryKey:  []*schema.Column{ActionButtonsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
-	}
-	// ActionDropdownsColumns holds the columns for the "action_dropdowns" table.
-	ActionDropdownsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "text", Type: field.TypeString},
-		{Name: "options", Type: field.TypeJSON},
-	}
-	// ActionDropdownsTable holds the schema information for the "action_dropdowns" table.
-	ActionDropdownsTable = &schema.Table{
-		Name:        "action_dropdowns",
-		Columns:     ActionDropdownsColumns,
-		PrimaryKey:  []*schema.Column{ActionDropdownsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
-	}
-	// ActionInputsColumns holds the columns for the "action_inputs" table.
-	ActionInputsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "label", Type: field.TypeString},
-		{Name: "wide", Type: field.TypeBool},
-	}
-	// ActionInputsTable holds the schema information for the "action_inputs" table.
-	ActionInputsTable = &schema.Table{
-		Name:        "action_inputs",
-		Columns:     ActionInputsColumns,
-		PrimaryKey:  []*schema.Column{ActionInputsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
-	}
 	// ChannelsColumns holds the columns for the "channels" table.
 	ChannelsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint64, Increment: true},
@@ -66,92 +27,6 @@ var (
 				Symbol:     "channels_guilds_channel",
 				Columns:    []*schema.Column{ChannelsColumns[5]},
 				RefColumns: []*schema.Column{GuildsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
-	// EmbedActionsColumns holds the columns for the "embed_actions" table.
-	EmbedActionsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "action_id", Type: field.TypeString},
-		{Name: "action_type", Type: field.TypeInt8},
-		{Name: "embed_action_button", Type: field.TypeInt, Nullable: true},
-		{Name: "embed_action_dropdown", Type: field.TypeInt, Nullable: true},
-		{Name: "embed_action_input", Type: field.TypeInt, Nullable: true},
-		{Name: "embed_field_embed_action", Type: field.TypeInt, Nullable: true},
-	}
-	// EmbedActionsTable holds the schema information for the "embed_actions" table.
-	EmbedActionsTable = &schema.Table{
-		Name:       "embed_actions",
-		Columns:    EmbedActionsColumns,
-		PrimaryKey: []*schema.Column{EmbedActionsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "embed_actions_action_buttons_button",
-				Columns:    []*schema.Column{EmbedActionsColumns[3]},
-				RefColumns: []*schema.Column{ActionButtonsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "embed_actions_action_dropdowns_dropdown",
-				Columns:    []*schema.Column{EmbedActionsColumns[4]},
-				RefColumns: []*schema.Column{ActionDropdownsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "embed_actions_action_inputs_input",
-				Columns:    []*schema.Column{EmbedActionsColumns[5]},
-				RefColumns: []*schema.Column{ActionInputsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "embed_actions_embed_fields_embed_action",
-				Columns:    []*schema.Column{EmbedActionsColumns[6]},
-				RefColumns: []*schema.Column{EmbedFieldsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
-	// EmbedFieldsColumns holds the columns for the "embed_fields" table.
-	EmbedFieldsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "title", Type: field.TypeString},
-		{Name: "subtitle", Type: field.TypeString},
-		{Name: "body", Type: field.TypeString},
-		{Name: "image_url", Type: field.TypeString},
-		{Name: "presentation", Type: field.TypeInt8},
-		{Name: "embed_message_embed_field", Type: field.TypeInt, Nullable: true},
-	}
-	// EmbedFieldsTable holds the schema information for the "embed_fields" table.
-	EmbedFieldsTable = &schema.Table{
-		Name:       "embed_fields",
-		Columns:    EmbedFieldsColumns,
-		PrimaryKey: []*schema.Column{EmbedFieldsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "embed_fields_embed_messages_embed_field",
-				Columns:    []*schema.Column{EmbedFieldsColumns[6]},
-				RefColumns: []*schema.Column{EmbedMessagesColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
-	// EmbedMessagesColumns holds the columns for the "embed_messages" table.
-	EmbedMessagesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "data", Type: field.TypeJSON},
-		{Name: "message_embed_message", Type: field.TypeUint64, Unique: true, Nullable: true},
-	}
-	// EmbedMessagesTable holds the schema information for the "embed_messages" table.
-	EmbedMessagesTable = &schema.Table{
-		Name:       "embed_messages",
-		Columns:    EmbedMessagesColumns,
-		PrimaryKey: []*schema.Column{EmbedMessagesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "embed_messages_messages_embed_message",
-				Columns:    []*schema.Column{EmbedMessagesColumns[2]},
-				RefColumns: []*schema.Column{MessagesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -209,21 +84,13 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "contenttype", Type: field.TypeString},
 		{Name: "size", Type: field.TypeInt},
-		{Name: "file_message_file", Type: field.TypeInt, Nullable: true},
 	}
 	// FilesTable holds the schema information for the "files" table.
 	FilesTable = &schema.Table{
-		Name:       "files",
-		Columns:    FilesColumns,
-		PrimaryKey: []*schema.Column{FilesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "files_file_messages_file",
-				Columns:    []*schema.Column{FilesColumns[4]},
-				RefColumns: []*schema.Column{FileMessagesColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
+		Name:        "files",
+		Columns:     FilesColumns,
+		PrimaryKey:  []*schema.Column{FilesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
 	}
 	// FileHashesColumns holds the columns for the "file_hashes" table.
 	FileHashesColumns = []*schema.Column{
@@ -244,17 +111,6 @@ var (
 				Columns: []*schema.Column{FileHashesColumns[1]},
 			},
 		},
-	}
-	// FileMessagesColumns holds the columns for the "file_messages" table.
-	FileMessagesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-	}
-	// FileMessagesTable holds the schema information for the "file_messages" table.
-	FileMessagesTable = &schema.Table{
-		Name:        "file_messages",
-		Columns:     FileMessagesColumns,
-		PrimaryKey:  []*schema.Column{FileMessagesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
 	}
 	// ForeignUsersColumns holds the columns for the "foreign_users" table.
 	ForeignUsersColumns = []*schema.Column{
@@ -362,9 +218,9 @@ var (
 		{Name: "editedat", Type: field.TypeTime, Nullable: true},
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
 		{Name: "override", Type: field.TypeJSON, Nullable: true},
+		{Name: "content", Type: field.TypeBytes},
 		{Name: "channel_message", Type: field.TypeUint64, Nullable: true},
 		{Name: "message_replies", Type: field.TypeUint64, Nullable: true},
-		{Name: "message_file_message", Type: field.TypeInt, Nullable: true},
 		{Name: "user_message", Type: field.TypeUint64, Nullable: true},
 	}
 	// MessagesTable holds the schema information for the "messages" table.
@@ -375,20 +231,14 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "messages_channels_message",
-				Columns:    []*schema.Column{MessagesColumns[5]},
+				Columns:    []*schema.Column{MessagesColumns[6]},
 				RefColumns: []*schema.Column{ChannelsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "messages_messages_replies",
-				Columns:    []*schema.Column{MessagesColumns[6]},
-				RefColumns: []*schema.Column{MessagesColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "messages_file_messages_file_message",
 				Columns:    []*schema.Column{MessagesColumns[7]},
-				RefColumns: []*schema.Column{FileMessagesColumns[0]},
+				RefColumns: []*schema.Column{MessagesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
@@ -504,26 +354,6 @@ var (
 				Symbol:     "sessions_users_sessions",
 				Columns:    []*schema.Column{SessionsColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
-	// TextMessagesColumns holds the columns for the "text_messages" table.
-	TextMessagesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "content", Type: field.TypeString},
-		{Name: "message_text_message", Type: field.TypeUint64, Unique: true, Nullable: true},
-	}
-	// TextMessagesTable holds the schema information for the "text_messages" table.
-	TextMessagesTable = &schema.Table{
-		Name:       "text_messages",
-		Columns:    TextMessagesColumns,
-		PrimaryKey: []*schema.Column{TextMessagesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "text_messages_messages_text_message",
-				Columns:    []*schema.Column{TextMessagesColumns[2]},
-				RefColumns: []*schema.Column{MessagesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -644,18 +474,11 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		ActionButtonsTable,
-		ActionDropdownsTable,
-		ActionInputsTable,
 		ChannelsTable,
-		EmbedActionsTable,
-		EmbedFieldsTable,
-		EmbedMessagesTable,
 		EmotesTable,
 		EmotePacksTable,
 		FilesTable,
 		FileHashesTable,
-		FileMessagesTable,
 		ForeignUsersTable,
 		GuildsTable,
 		GuildListEntriesTable,
@@ -666,7 +489,6 @@ var (
 		ProfilesTable,
 		RolesTable,
 		SessionsTable,
-		TextMessagesTable,
 		UsersTable,
 		UserMetaTable,
 		GuildRoleTable,
@@ -677,24 +499,16 @@ var (
 
 func init() {
 	ChannelsTable.ForeignKeys[0].RefTable = GuildsTable
-	EmbedActionsTable.ForeignKeys[0].RefTable = ActionButtonsTable
-	EmbedActionsTable.ForeignKeys[1].RefTable = ActionDropdownsTable
-	EmbedActionsTable.ForeignKeys[2].RefTable = ActionInputsTable
-	EmbedActionsTable.ForeignKeys[3].RefTable = EmbedFieldsTable
-	EmbedFieldsTable.ForeignKeys[0].RefTable = EmbedMessagesTable
-	EmbedMessagesTable.ForeignKeys[0].RefTable = MessagesTable
 	EmotesTable.ForeignKeys[0].RefTable = EmotePacksTable
 	EmotePacksTable.ForeignKeys[0].RefTable = UsersTable
 	EmotePacksTable.ForeignKeys[1].RefTable = UsersTable
-	FilesTable.ForeignKeys[0].RefTable = FileMessagesTable
 	ForeignUsersTable.ForeignKeys[0].RefTable = UsersTable
 	GuildListEntriesTable.ForeignKeys[0].RefTable = UsersTable
 	InvitesTable.ForeignKeys[0].RefTable = GuildsTable
 	LocalUsersTable.ForeignKeys[0].RefTable = UsersTable
 	MessagesTable.ForeignKeys[0].RefTable = ChannelsTable
 	MessagesTable.ForeignKeys[1].RefTable = MessagesTable
-	MessagesTable.ForeignKeys[2].RefTable = FileMessagesTable
-	MessagesTable.ForeignKeys[3].RefTable = UsersTable
+	MessagesTable.ForeignKeys[2].RefTable = UsersTable
 	PermissionNodesTable.ForeignKeys[0].RefTable = ChannelsTable
 	PermissionNodesTable.ForeignKeys[1].RefTable = GuildsTable
 	PermissionNodesTable.ForeignKeys[2].RefTable = RolesTable
@@ -702,7 +516,6 @@ func init() {
 	RolesTable.ForeignKeys[0].RefTable = ChannelsTable
 	SessionsTable.ForeignKeys[0].RefTable = LocalUsersTable
 	SessionsTable.ForeignKeys[1].RefTable = UsersTable
-	TextMessagesTable.ForeignKeys[0].RefTable = MessagesTable
 	UsersTable.ForeignKeys[0].RefTable = GuildsTable
 	UserMetaTable.ForeignKeys[0].RefTable = UsersTable
 	GuildRoleTable.ForeignKeys[0].RefTable = GuildsTable

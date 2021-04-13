@@ -55,13 +55,13 @@ func (*Session) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case session.FieldID:
-			values[i] = &sql.NullString{}
+			values[i] = new(sql.NullString)
 		case session.FieldExpires:
-			values[i] = &sql.NullTime{}
+			values[i] = new(sql.NullTime)
 		case session.ForeignKeys[0]: // local_user_sessions
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		case session.ForeignKeys[1]: // user_sessions
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Session", columns[i])
 		}

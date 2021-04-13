@@ -23,6 +23,7 @@ type EmotePackQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.EmotePack
@@ -51,6 +52,13 @@ func (epq *EmotePackQuery) Limit(limit int) *EmotePackQuery {
 // Offset adds an offset step to the query.
 func (epq *EmotePackQuery) Offset(offset int) *EmotePackQuery {
 	epq.offset = &offset
+	return epq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (epq *EmotePackQuery) Unique(unique bool) *EmotePackQuery {
+	epq.unique = &unique
 	return epq
 }
 
@@ -451,11 +459,14 @@ func (epq *EmotePackQuery) sqlAll(ctx context.Context) ([]*EmotePack, error) {
 		ids := make([]uint64, 0, len(nodes))
 		nodeids := make(map[uint64][]*EmotePack)
 		for i := range nodes {
-			fk := nodes[i].user_emotepack
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			if nodes[i].user_emotepack == nil {
+				continue
 			}
+			fk := *nodes[i].user_emotepack
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
 		query.Where(user.IDIn(ids...))
 		neighbors, err := query.All(ctx)
@@ -477,11 +488,14 @@ func (epq *EmotePackQuery) sqlAll(ctx context.Context) ([]*EmotePack, error) {
 		ids := make([]uint64, 0, len(nodes))
 		nodeids := make(map[uint64][]*EmotePack)
 		for i := range nodes {
-			fk := nodes[i].user_createdpacks
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			if nodes[i].user_createdpacks == nil {
+				continue
 			}
+			fk := *nodes[i].user_createdpacks
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
 		query.Where(user.IDIn(ids...))
 		neighbors, err := query.All(ctx)
@@ -557,6 +571,9 @@ func (epq *EmotePackQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   epq.sql,
 		Unique: true,
 	}
+	if unique := epq.unique; unique != nil {
+		_spec.Unique = *unique
+	}
 	if fields := epq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, emotepack.FieldID)
@@ -582,7 +599,7 @@ func (epq *EmotePackQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := epq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, emotepack.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -601,7 +618,7 @@ func (epq *EmotePackQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range epq.order {
-		p(selector, emotepack.ValidColumn)
+		p(selector)
 	}
 	if offset := epq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -867,7 +884,7 @@ func (epgb *EmotePackGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(epgb.fields)+len(epgb.fns))
 	columns = append(columns, epgb.fields...)
 	for _, fn := range epgb.fns {
-		columns = append(columns, fn(selector, emotepack.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(epgb.fields...)
 }

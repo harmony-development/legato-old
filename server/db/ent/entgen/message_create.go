@@ -12,10 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	v1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
-	"github.com/harmony-development/legato/server/db/ent/entgen/embedmessage"
-	"github.com/harmony-development/legato/server/db/ent/entgen/filemessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
-	"github.com/harmony-development/legato/server/db/ent/entgen/textmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
 
@@ -63,6 +60,12 @@ func (mc *MessageCreate) SetMetadata(v *v1.Metadata) *MessageCreate {
 // SetOverride sets the "override" field.
 func (mc *MessageCreate) SetOverride(v *v1.Override) *MessageCreate {
 	mc.mutation.SetOverride(v)
+	return mc
+}
+
+// SetContent sets the "Content" field.
+func (mc *MessageCreate) SetContent(v *v1.Content) *MessageCreate {
+	mc.mutation.SetContent(v)
 	return mc
 }
 
@@ -144,63 +147,6 @@ func (mc *MessageCreate) AddReplies(m ...*Message) *MessageCreate {
 	return mc.AddReplyIDs(ids...)
 }
 
-// SetTextMessageID sets the "text_message" edge to the TextMessage entity by ID.
-func (mc *MessageCreate) SetTextMessageID(id int) *MessageCreate {
-	mc.mutation.SetTextMessageID(id)
-	return mc
-}
-
-// SetNillableTextMessageID sets the "text_message" edge to the TextMessage entity by ID if the given value is not nil.
-func (mc *MessageCreate) SetNillableTextMessageID(id *int) *MessageCreate {
-	if id != nil {
-		mc = mc.SetTextMessageID(*id)
-	}
-	return mc
-}
-
-// SetTextMessage sets the "text_message" edge to the TextMessage entity.
-func (mc *MessageCreate) SetTextMessage(t *TextMessage) *MessageCreate {
-	return mc.SetTextMessageID(t.ID)
-}
-
-// SetFileMessageID sets the "file_message" edge to the FileMessage entity by ID.
-func (mc *MessageCreate) SetFileMessageID(id int) *MessageCreate {
-	mc.mutation.SetFileMessageID(id)
-	return mc
-}
-
-// SetNillableFileMessageID sets the "file_message" edge to the FileMessage entity by ID if the given value is not nil.
-func (mc *MessageCreate) SetNillableFileMessageID(id *int) *MessageCreate {
-	if id != nil {
-		mc = mc.SetFileMessageID(*id)
-	}
-	return mc
-}
-
-// SetFileMessage sets the "file_message" edge to the FileMessage entity.
-func (mc *MessageCreate) SetFileMessage(f *FileMessage) *MessageCreate {
-	return mc.SetFileMessageID(f.ID)
-}
-
-// SetEmbedMessageID sets the "embed_message" edge to the EmbedMessage entity by ID.
-func (mc *MessageCreate) SetEmbedMessageID(id int) *MessageCreate {
-	mc.mutation.SetEmbedMessageID(id)
-	return mc
-}
-
-// SetNillableEmbedMessageID sets the "embed_message" edge to the EmbedMessage entity by ID if the given value is not nil.
-func (mc *MessageCreate) SetNillableEmbedMessageID(id *int) *MessageCreate {
-	if id != nil {
-		mc = mc.SetEmbedMessageID(*id)
-	}
-	return mc
-}
-
-// SetEmbedMessage sets the "embed_message" edge to the EmbedMessage entity.
-func (mc *MessageCreate) SetEmbedMessage(e *EmbedMessage) *MessageCreate {
-	return mc.SetEmbedMessageID(e.ID)
-}
-
 // Mutation returns the MessageMutation object of the builder.
 func (mc *MessageCreate) Mutation() *MessageMutation {
 	return mc.mutation
@@ -263,6 +209,9 @@ func (mc *MessageCreate) defaults() {
 func (mc *MessageCreate) check() error {
 	if _, ok := mc.mutation.Createdat(); !ok {
 		return &ValidationError{Name: "createdat", err: errors.New("entgen: missing required field \"createdat\"")}
+	}
+	if _, ok := mc.mutation.Content(); !ok {
+		return &ValidationError{Name: "Content", err: errors.New("entgen: missing required field \"Content\"")}
 	}
 	return nil
 }
@@ -328,6 +277,14 @@ func (mc *MessageCreate) createSpec() (*Message, *sqlgraph.CreateSpec) {
 			Column: message.FieldOverride,
 		})
 		_node.Override = value
+	}
+	if value, ok := mc.mutation.Content(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: message.FieldContent,
+		})
+		_node.Content = value
 	}
 	if nodes := mc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -400,64 +357,6 @@ func (mc *MessageCreate) createSpec() (*Message, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUint64,
 					Column: message.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := mc.mutation.TextMessageIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   message.TextMessageTable,
-			Columns: []string{message.TextMessageColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: textmessage.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := mc.mutation.FileMessageIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   message.FileMessageTable,
-			Columns: []string{message.FileMessageColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: filemessage.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.message_file_message = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := mc.mutation.EmbedMessageIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   message.EmbedMessageTable,
-			Columns: []string{message.EmbedMessageColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: embedmessage.FieldID,
 				},
 			},
 		}

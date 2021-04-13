@@ -55,11 +55,11 @@ func (*Invite) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case invite.FieldUses, invite.FieldPossibleUses:
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		case invite.FieldID:
-			values[i] = &sql.NullString{}
+			values[i] = new(sql.NullString)
 		case invite.ForeignKeys[0]: // guild_invite
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Invite", columns[i])
 		}
