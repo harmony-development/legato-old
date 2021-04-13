@@ -1,6 +1,9 @@
 package schema
 
-import "entgo.io/ent"
+import (
+	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
+)
 
 // FileMessage holds the schema definition for the FileMessage entity.
 type FileMessage struct {
@@ -14,5 +17,8 @@ func (FileMessage) Fields() []ent.Field {
 
 // Edges of the FileMessage.
 func (FileMessage) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.
+			To("file", File.Type),
+	}
 }

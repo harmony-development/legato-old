@@ -53,7 +53,7 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "kind", Type: field.TypeUint64},
 		{Name: "position", Type: field.TypeString},
-		{Name: "metadata", Type: field.TypeBytes},
+		{Name: "metadata", Type: field.TypeJSON},
 		{Name: "guild_channel", Type: field.TypeUint64, Nullable: true},
 	}
 	// ChannelsTable holds the schema information for the "channels" table.
@@ -139,17 +139,7 @@ var (
 	// EmbedMessagesColumns holds the columns for the "embed_messages" table.
 	EmbedMessagesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "title", Type: field.TypeString},
-		{Name: "body", Type: field.TypeString},
-		{Name: "color", Type: field.TypeInt64},
-		{Name: "header_text", Type: field.TypeString},
-		{Name: "header_subtext", Type: field.TypeString},
-		{Name: "header_url", Type: field.TypeString},
-		{Name: "header_icon", Type: field.TypeString},
-		{Name: "footer_text", Type: field.TypeString},
-		{Name: "footer_subtext", Type: field.TypeString},
-		{Name: "footer_url", Type: field.TypeString},
-		{Name: "footer_icon", Type: field.TypeString},
+		{Name: "data", Type: field.TypeJSON},
 		{Name: "message_embed_message", Type: field.TypeUint64, Unique: true, Nullable: true},
 	}
 	// EmbedMessagesTable holds the schema information for the "embed_messages" table.
@@ -160,7 +150,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "embed_messages_messages_embed_message",
-				Columns:    []*schema.Column{EmbedMessagesColumns[12]},
+				Columns:    []*schema.Column{EmbedMessagesColumns[2]},
 				RefColumns: []*schema.Column{MessagesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -219,13 +209,21 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "contenttype", Type: field.TypeString},
 		{Name: "size", Type: field.TypeInt},
+		{Name: "file_message_file", Type: field.TypeInt, Nullable: true},
 	}
 	// FilesTable holds the schema information for the "files" table.
 	FilesTable = &schema.Table{
-		Name:        "files",
-		Columns:     FilesColumns,
-		PrimaryKey:  []*schema.Column{FilesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "files",
+		Columns:    FilesColumns,
+		PrimaryKey: []*schema.Column{FilesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "files_file_messages_file",
+				Columns:    []*schema.Column{FilesColumns[4]},
+				RefColumns: []*schema.Column{FileMessagesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// FileHashesColumns holds the columns for the "file_hashes" table.
 	FileHashesColumns = []*schema.Column{
@@ -362,9 +360,8 @@ var (
 		{Name: "id", Type: field.TypeUint64, Increment: true},
 		{Name: "createdat", Type: field.TypeTime},
 		{Name: "editedat", Type: field.TypeTime, Nullable: true},
-		{Name: "actions", Type: field.TypeJSON, Nullable: true},
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
-		{Name: "overrides", Type: field.TypeBytes, Nullable: true},
+		{Name: "override", Type: field.TypeJSON, Nullable: true},
 		{Name: "channel_message", Type: field.TypeUint64, Nullable: true},
 		{Name: "message_replies", Type: field.TypeUint64, Nullable: true},
 		{Name: "message_file_message", Type: field.TypeInt, Nullable: true},
@@ -378,25 +375,25 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "messages_channels_message",
-				Columns:    []*schema.Column{MessagesColumns[6]},
+				Columns:    []*schema.Column{MessagesColumns[5]},
 				RefColumns: []*schema.Column{ChannelsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "messages_messages_replies",
-				Columns:    []*schema.Column{MessagesColumns[7]},
+				Columns:    []*schema.Column{MessagesColumns[6]},
 				RefColumns: []*schema.Column{MessagesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "messages_file_messages_file_message",
-				Columns:    []*schema.Column{MessagesColumns[8]},
+				Columns:    []*schema.Column{MessagesColumns[7]},
 				RefColumns: []*schema.Column{FileMessagesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "messages_users_message",
-				Columns:    []*schema.Column{MessagesColumns[9]},
+				Columns:    []*schema.Column{MessagesColumns[8]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -689,6 +686,7 @@ func init() {
 	EmotesTable.ForeignKeys[0].RefTable = EmotePacksTable
 	EmotePacksTable.ForeignKeys[0].RefTable = UsersTable
 	EmotePacksTable.ForeignKeys[1].RefTable = UsersTable
+	FilesTable.ForeignKeys[0].RefTable = FileMessagesTable
 	ForeignUsersTable.ForeignKeys[0].RefTable = UsersTable
 	GuildListEntriesTable.ForeignKeys[0].RefTable = UsersTable
 	InvitesTable.ForeignKeys[0].RefTable = GuildsTable

@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/harmony-development/legato/server/db/ent/entgen/file"
 	"github.com/harmony-development/legato/server/db/ent/entgen/filemessage"
 )
 
@@ -16,6 +17,21 @@ type FileMessageCreate struct {
 	config
 	mutation *FileMessageMutation
 	hooks    []Hook
+}
+
+// AddFileIDs adds the "file" edge to the File entity by IDs.
+func (fmc *FileMessageCreate) AddFileIDs(ids ...string) *FileMessageCreate {
+	fmc.mutation.AddFileIDs(ids...)
+	return fmc
+}
+
+// AddFile adds the "file" edges to the File entity.
+func (fmc *FileMessageCreate) AddFile(f ...*File) *FileMessageCreate {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fmc.AddFileIDs(ids...)
 }
 
 // Mutation returns the FileMessageMutation object of the builder.
@@ -96,6 +112,25 @@ func (fmc *FileMessageCreate) createSpec() (*FileMessage, *sqlgraph.CreateSpec) 
 			},
 		}
 	)
+	if nodes := fmc.mutation.FileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   filemessage.FileTable,
+			Columns: []string{filemessage.FileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: file.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	return _node, _spec
 }
 

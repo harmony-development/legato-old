@@ -3,6 +3,9 @@ package types
 import (
 	"fmt"
 	"strings"
+
+	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type PermissionsNode struct {
@@ -59,26 +62,34 @@ type GuildData struct {
 	Picture string
 }
 
-type RoleData struct{}
-
-type GuildListEntryData struct {
-	ID   uint64
-	Host string
+type RoleData struct {
+	ID       uint64
+	Name     string
+	Position string
+	Color    int
+	Hoist    bool
+	Pingable bool
 }
 
-type MessageData struct {
-	GuildID   uint64
-	ChannelID uint64
-	Actions   []byte
+type GuildListEntryData struct {
+	ID       uint64
+	Host     string
+	Position string
 }
 
 type EmotePackData struct {
+	Name string
 }
 
 type EmoteData struct {
+	Name string
 }
 
 type FileData struct {
+	FileID      string
+	ContentType string
+	Name        string
+	Size        int
 }
 
 type InviteData struct {
@@ -90,7 +101,35 @@ type InviteData struct {
 type ChannelData struct {
 	ID       uint64
 	Name     string
-	Metadata []byte
+	Position string
+	Kind     uint64
+	Metadata *harmonytypesv1.Metadata
+}
+
+type MessageOverride struct {
+	Username string
+	Avatar   string
+	Reason   string
+}
+
+type MessageData struct {
+	Metadata  *harmonytypesv1.Metadata
+	Overrides *harmonytypesv1.Override
+	GuildId   uint64
+	ChannelId uint64
+	MessageId uint64
+	AuthorId  uint64
+	CreatedAt *timestamppb.Timestamp
+	EditedAt  *timestamppb.Timestamp
+	InReplyTo uint64
+	Content   *Content
+}
+
+type MessageText struct {
+	Content string
+}
+
+type MessageFiles struct {
 }
 
 type ChannelKind uint64

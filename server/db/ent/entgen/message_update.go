@@ -67,18 +67,6 @@ func (mu *MessageUpdate) ClearEditedat() *MessageUpdate {
 	return mu
 }
 
-// SetActions sets the "actions" field.
-func (mu *MessageUpdate) SetActions(v []*v1.Action) *MessageUpdate {
-	mu.mutation.SetActions(v)
-	return mu
-}
-
-// ClearActions clears the value of the "actions" field.
-func (mu *MessageUpdate) ClearActions() *MessageUpdate {
-	mu.mutation.ClearActions()
-	return mu
-}
-
 // SetMetadata sets the "metadata" field.
 func (mu *MessageUpdate) SetMetadata(v *v1.Metadata) *MessageUpdate {
 	mu.mutation.SetMetadata(v)
@@ -91,15 +79,15 @@ func (mu *MessageUpdate) ClearMetadata() *MessageUpdate {
 	return mu
 }
 
-// SetOverrides sets the "overrides" field.
-func (mu *MessageUpdate) SetOverrides(b []byte) *MessageUpdate {
-	mu.mutation.SetOverrides(b)
+// SetOverride sets the "override" field.
+func (mu *MessageUpdate) SetOverride(v *v1.Override) *MessageUpdate {
+	mu.mutation.SetOverride(v)
 	return mu
 }
 
-// ClearOverrides clears the value of the "overrides" field.
-func (mu *MessageUpdate) ClearOverrides() *MessageUpdate {
-	mu.mutation.ClearOverrides()
+// ClearOverride clears the value of the "override" field.
+func (mu *MessageUpdate) ClearOverride() *MessageUpdate {
+	mu.mutation.ClearOverride()
 	return mu
 }
 
@@ -383,19 +371,6 @@ func (mu *MessageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: message.FieldEditedat,
 		})
 	}
-	if value, ok := mu.mutation.Actions(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: message.FieldActions,
-		})
-	}
-	if mu.mutation.ActionsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: message.FieldActions,
-		})
-	}
 	if value, ok := mu.mutation.Metadata(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
@@ -409,17 +384,17 @@ func (mu *MessageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: message.FieldMetadata,
 		})
 	}
-	if value, ok := mu.mutation.Overrides(); ok {
+	if value, ok := mu.mutation.Override(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBytes,
+			Type:   field.TypeJSON,
 			Value:  value,
-			Column: message.FieldOverrides,
+			Column: message.FieldOverride,
 		})
 	}
-	if mu.mutation.OverridesCleared() {
+	if mu.mutation.OverrideCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBytes,
-			Column: message.FieldOverrides,
+			Type:   field.TypeJSON,
+			Column: message.FieldOverride,
 		})
 	}
 	if mu.mutation.UserCleared() {
@@ -738,18 +713,6 @@ func (muo *MessageUpdateOne) ClearEditedat() *MessageUpdateOne {
 	return muo
 }
 
-// SetActions sets the "actions" field.
-func (muo *MessageUpdateOne) SetActions(v []*v1.Action) *MessageUpdateOne {
-	muo.mutation.SetActions(v)
-	return muo
-}
-
-// ClearActions clears the value of the "actions" field.
-func (muo *MessageUpdateOne) ClearActions() *MessageUpdateOne {
-	muo.mutation.ClearActions()
-	return muo
-}
-
 // SetMetadata sets the "metadata" field.
 func (muo *MessageUpdateOne) SetMetadata(v *v1.Metadata) *MessageUpdateOne {
 	muo.mutation.SetMetadata(v)
@@ -762,15 +725,15 @@ func (muo *MessageUpdateOne) ClearMetadata() *MessageUpdateOne {
 	return muo
 }
 
-// SetOverrides sets the "overrides" field.
-func (muo *MessageUpdateOne) SetOverrides(b []byte) *MessageUpdateOne {
-	muo.mutation.SetOverrides(b)
+// SetOverride sets the "override" field.
+func (muo *MessageUpdateOne) SetOverride(v *v1.Override) *MessageUpdateOne {
+	muo.mutation.SetOverride(v)
 	return muo
 }
 
-// ClearOverrides clears the value of the "overrides" field.
-func (muo *MessageUpdateOne) ClearOverrides() *MessageUpdateOne {
-	muo.mutation.ClearOverrides()
+// ClearOverride clears the value of the "override" field.
+func (muo *MessageUpdateOne) ClearOverride() *MessageUpdateOne {
+	muo.mutation.ClearOverride()
 	return muo
 }
 
@@ -1059,19 +1022,6 @@ func (muo *MessageUpdateOne) sqlSave(ctx context.Context) (_node *Message, err e
 			Column: message.FieldEditedat,
 		})
 	}
-	if value, ok := muo.mutation.Actions(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: message.FieldActions,
-		})
-	}
-	if muo.mutation.ActionsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: message.FieldActions,
-		})
-	}
 	if value, ok := muo.mutation.Metadata(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
@@ -1085,17 +1035,17 @@ func (muo *MessageUpdateOne) sqlSave(ctx context.Context) (_node *Message, err e
 			Column: message.FieldMetadata,
 		})
 	}
-	if value, ok := muo.mutation.Overrides(); ok {
+	if value, ok := muo.mutation.Override(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBytes,
+			Type:   field.TypeJSON,
 			Value:  value,
-			Column: message.FieldOverrides,
+			Column: message.FieldOverride,
 		})
 	}
-	if muo.mutation.OverridesCleared() {
+	if muo.mutation.OverrideCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBytes,
-			Column: message.FieldOverrides,
+			Type:   field.TypeJSON,
+			Column: message.FieldOverride,
 		})
 	}
 	if muo.mutation.UserCleared() {

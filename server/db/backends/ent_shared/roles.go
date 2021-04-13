@@ -27,9 +27,20 @@ func (d *DB) AddRoleToGuild(guildID, roleID uint64, name string, color int, hois
 	return
 }
 
-func (d *DB) GetGuildRoles(guildID uint64) (roles []*entgen.Role, err error) {
+func (d *DB) GetGuildRoles(guildID uint64) (roles []*types.RoleData, err error) {
 	defer doRecovery(&err)
-	roles = d.Guild.GetX(ctx, guildID).QueryRole().AllX(ctx)
+	data := d.Guild.GetX(ctx, guildID).QueryRole().AllX(ctx)
+	roles = make([]*types.RoleData, len(data))
+	for i, entry := range data {
+		roles[i] = &types.RoleData{
+			ID:       entry.ID,
+			Name:     entry.Name,
+			Position: entry.Position,
+			Color:    entry.Color,
+			Hoist:    entry.Hoist,
+			Pingable: entry.Pingable,
+		}
+	}
 	return
 }
 

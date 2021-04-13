@@ -10,8 +10,12 @@ rule sqlc
 rule gobuild
     command = GO111MODULE=on go build
 
+rule buildent
+    command = ent generate ./server/db/ent/entgen/schema/
+
 build legato-sqlc: sqlc
-build legato-protobuf: genprotos
+build protobuf: genprotos
+build ent: buildent
 build submodules: updatesubmodules
 build legato-binary: gobuild legato-sqlc legato-protobuf
 default legato-binary

@@ -1581,6 +1581,22 @@ func (c *FileMessageClient) GetX(ctx context.Context, id int) *FileMessage {
 	return obj
 }
 
+// QueryFile queries the file edge of a FileMessage.
+func (c *FileMessageClient) QueryFile(fm *FileMessage) *FileQuery {
+	query := &FileQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := fm.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(filemessage.Table, filemessage.FieldID, id),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, filemessage.FileTable, filemessage.FileColumn),
+		)
+		fromV = sqlgraph.Neighbors(fm.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *FileMessageClient) Hooks() []Hook {
 	return c.hooks.FileMessage

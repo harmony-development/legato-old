@@ -320,12 +320,12 @@ func (emq *EmbedMessageQuery) WithMessage(opts ...func(*MessageQuery)) *EmbedMes
 // Example:
 //
 //	var v []struct {
-//		Title string `json:"title,omitempty"`
+//		Data *v1.Embed `json:"data,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.EmbedMessage.Query().
-//		GroupBy(embedmessage.FieldTitle).
+//		GroupBy(embedmessage.FieldData).
 //		Aggregate(entgen.Count()).
 //		Scan(ctx, &v)
 //
@@ -347,11 +347,11 @@ func (emq *EmbedMessageQuery) GroupBy(field string, fields ...string) *EmbedMess
 // Example:
 //
 //	var v []struct {
-//		Title string `json:"title,omitempty"`
+//		Data *v1.Embed `json:"data,omitempty"`
 //	}
 //
 //	client.EmbedMessage.Query().
-//		Select(embedmessage.FieldTitle).
+//		Select(embedmessage.FieldData).
 //		Scan(ctx, &v)
 //
 func (emq *EmbedMessageQuery) Select(field string, fields ...string) *EmbedMessageSelect {

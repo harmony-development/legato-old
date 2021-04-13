@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	v1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen/embedfield"
 	"github.com/harmony-development/legato/server/db/ent/entgen/embedmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
@@ -21,69 +22,9 @@ type EmbedMessageCreate struct {
 	hooks    []Hook
 }
 
-// SetTitle sets the "title" field.
-func (emc *EmbedMessageCreate) SetTitle(s string) *EmbedMessageCreate {
-	emc.mutation.SetTitle(s)
-	return emc
-}
-
-// SetBody sets the "body" field.
-func (emc *EmbedMessageCreate) SetBody(s string) *EmbedMessageCreate {
-	emc.mutation.SetBody(s)
-	return emc
-}
-
-// SetColor sets the "color" field.
-func (emc *EmbedMessageCreate) SetColor(i int64) *EmbedMessageCreate {
-	emc.mutation.SetColor(i)
-	return emc
-}
-
-// SetHeaderText sets the "header_text" field.
-func (emc *EmbedMessageCreate) SetHeaderText(s string) *EmbedMessageCreate {
-	emc.mutation.SetHeaderText(s)
-	return emc
-}
-
-// SetHeaderSubtext sets the "header_subtext" field.
-func (emc *EmbedMessageCreate) SetHeaderSubtext(s string) *EmbedMessageCreate {
-	emc.mutation.SetHeaderSubtext(s)
-	return emc
-}
-
-// SetHeaderURL sets the "header_url" field.
-func (emc *EmbedMessageCreate) SetHeaderURL(s string) *EmbedMessageCreate {
-	emc.mutation.SetHeaderURL(s)
-	return emc
-}
-
-// SetHeaderIcon sets the "header_icon" field.
-func (emc *EmbedMessageCreate) SetHeaderIcon(s string) *EmbedMessageCreate {
-	emc.mutation.SetHeaderIcon(s)
-	return emc
-}
-
-// SetFooterText sets the "footer_text" field.
-func (emc *EmbedMessageCreate) SetFooterText(s string) *EmbedMessageCreate {
-	emc.mutation.SetFooterText(s)
-	return emc
-}
-
-// SetFooterSubtext sets the "footer_subtext" field.
-func (emc *EmbedMessageCreate) SetFooterSubtext(s string) *EmbedMessageCreate {
-	emc.mutation.SetFooterSubtext(s)
-	return emc
-}
-
-// SetFooterURL sets the "footer_url" field.
-func (emc *EmbedMessageCreate) SetFooterURL(s string) *EmbedMessageCreate {
-	emc.mutation.SetFooterURL(s)
-	return emc
-}
-
-// SetFooterIcon sets the "footer_icon" field.
-func (emc *EmbedMessageCreate) SetFooterIcon(s string) *EmbedMessageCreate {
-	emc.mutation.SetFooterIcon(s)
+// SetData sets the "data" field.
+func (emc *EmbedMessageCreate) SetData(v *v1.Embed) *EmbedMessageCreate {
+	emc.mutation.SetData(v)
 	return emc
 }
 
@@ -172,38 +113,8 @@ func (emc *EmbedMessageCreate) SaveX(ctx context.Context) *EmbedMessage {
 
 // check runs all checks and user-defined validators on the builder.
 func (emc *EmbedMessageCreate) check() error {
-	if _, ok := emc.mutation.Title(); !ok {
-		return &ValidationError{Name: "title", err: errors.New("entgen: missing required field \"title\"")}
-	}
-	if _, ok := emc.mutation.Body(); !ok {
-		return &ValidationError{Name: "body", err: errors.New("entgen: missing required field \"body\"")}
-	}
-	if _, ok := emc.mutation.Color(); !ok {
-		return &ValidationError{Name: "color", err: errors.New("entgen: missing required field \"color\"")}
-	}
-	if _, ok := emc.mutation.HeaderText(); !ok {
-		return &ValidationError{Name: "header_text", err: errors.New("entgen: missing required field \"header_text\"")}
-	}
-	if _, ok := emc.mutation.HeaderSubtext(); !ok {
-		return &ValidationError{Name: "header_subtext", err: errors.New("entgen: missing required field \"header_subtext\"")}
-	}
-	if _, ok := emc.mutation.HeaderURL(); !ok {
-		return &ValidationError{Name: "header_url", err: errors.New("entgen: missing required field \"header_url\"")}
-	}
-	if _, ok := emc.mutation.HeaderIcon(); !ok {
-		return &ValidationError{Name: "header_icon", err: errors.New("entgen: missing required field \"header_icon\"")}
-	}
-	if _, ok := emc.mutation.FooterText(); !ok {
-		return &ValidationError{Name: "footer_text", err: errors.New("entgen: missing required field \"footer_text\"")}
-	}
-	if _, ok := emc.mutation.FooterSubtext(); !ok {
-		return &ValidationError{Name: "footer_subtext", err: errors.New("entgen: missing required field \"footer_subtext\"")}
-	}
-	if _, ok := emc.mutation.FooterURL(); !ok {
-		return &ValidationError{Name: "footer_url", err: errors.New("entgen: missing required field \"footer_url\"")}
-	}
-	if _, ok := emc.mutation.FooterIcon(); !ok {
-		return &ValidationError{Name: "footer_icon", err: errors.New("entgen: missing required field \"footer_icon\"")}
+	if _, ok := emc.mutation.Data(); !ok {
+		return &ValidationError{Name: "data", err: errors.New("entgen: missing required field \"data\"")}
 	}
 	return nil
 }
@@ -232,93 +143,13 @@ func (emc *EmbedMessageCreate) createSpec() (*EmbedMessage, *sqlgraph.CreateSpec
 			},
 		}
 	)
-	if value, ok := emc.mutation.Title(); ok {
+	if value, ok := emc.mutation.Data(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeJSON,
 			Value:  value,
-			Column: embedmessage.FieldTitle,
+			Column: embedmessage.FieldData,
 		})
-		_node.Title = value
-	}
-	if value, ok := emc.mutation.Body(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldBody,
-		})
-		_node.Body = value
-	}
-	if value, ok := emc.mutation.Color(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: embedmessage.FieldColor,
-		})
-		_node.Color = value
-	}
-	if value, ok := emc.mutation.HeaderText(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldHeaderText,
-		})
-		_node.HeaderText = value
-	}
-	if value, ok := emc.mutation.HeaderSubtext(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldHeaderSubtext,
-		})
-		_node.HeaderSubtext = value
-	}
-	if value, ok := emc.mutation.HeaderURL(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldHeaderURL,
-		})
-		_node.HeaderURL = value
-	}
-	if value, ok := emc.mutation.HeaderIcon(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldHeaderIcon,
-		})
-		_node.HeaderIcon = value
-	}
-	if value, ok := emc.mutation.FooterText(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldFooterText,
-		})
-		_node.FooterText = value
-	}
-	if value, ok := emc.mutation.FooterSubtext(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldFooterSubtext,
-		})
-		_node.FooterSubtext = value
-	}
-	if value, ok := emc.mutation.FooterURL(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldFooterURL,
-		})
-		_node.FooterURL = value
-	}
-	if value, ok := emc.mutation.FooterIcon(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldFooterIcon,
-		})
-		_node.FooterIcon = value
+		_node.Data = value
 	}
 	if nodes := emc.mutation.EmbedFieldIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

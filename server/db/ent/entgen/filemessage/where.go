@@ -4,6 +4,7 @@ package filemessage
 
 import (
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 )
 
@@ -87,6 +88,34 @@ func IDLT(id int) predicate.FileMessage {
 func IDLTE(id int) predicate.FileMessage {
 	return predicate.FileMessage(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
+	})
+}
+
+// HasFile applies the HasEdge predicate on the "file" edge.
+func HasFile() predicate.FileMessage {
+	return predicate.FileMessage(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(FileTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, FileTable, FileColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasFileWith applies the HasEdge predicate on the "file" edge with a given conditions (other predicates).
+func HasFileWith(preds ...predicate.File) predicate.FileMessage {
+	return predicate.FileMessage(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(FileInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, FileTable, FileColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
 	})
 }
 

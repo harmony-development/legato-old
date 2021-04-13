@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 )
 
 // Channel holds the schema definition for the Channel entity.
@@ -18,7 +19,7 @@ func (Channel) Fields() []ent.Field {
 		field.String("name"),
 		field.Uint64("kind"),
 		field.String("position"),
-		field.Bytes("metadata"),
+		field.JSON("metadata", &harmonytypesv1.Metadata{}),
 	}
 }
 

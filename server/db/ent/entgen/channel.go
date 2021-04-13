@@ -3,11 +3,14 @@
 package entgen
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
+
+	v1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 )
 
@@ -23,7 +26,7 @@ type Channel struct {
 	// Position holds the value of the "position" field.
 	Position string `json:"position,omitempty"`
 	// Metadata holds the value of the "metadata" field.
-	Metadata []byte `json:"metadata,omitempty"`
+	Metadata *v1.Metadata `json:"metadata,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ChannelQuery when eager-loading is set.
 	Edges         ChannelEdges `json:"edges"`
@@ -139,10 +142,13 @@ func (c *Channel) assignValues(columns []string, values []interface{}) error {
 				c.Position = value.String
 			}
 		case channel.FieldMetadata:
+
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field metadata", values[i])
-			} else if value != nil {
-				c.Metadata = *value
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &c.Metadata); err != nil {
+					return fmt.Errorf("unmarshal field metadata: %w", err)
+				}
 			}
 		case channel.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {

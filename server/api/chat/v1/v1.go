@@ -289,15 +289,11 @@ func (v1 *V1) GetGuildChannels(c echo.Context, r *chatv1.GetGuildChannelsRequest
 
 	for _, channel := range chans {
 		if ctx.IsOwner || v1.Perms.Check("messages.view", roles, r.GuildId, channel.ID) {
-			var md *harmonytypesv1.Metadata
-			if err := proto.Unmarshal(channel.Metadata, &harmonytypesv1.Metadata{}); err != nil {
-				return nil, err
-			}
 			ret = append(ret, &chatv1.GetGuildChannelsResponse_Channel{
 				ChannelId:   channel.ID,
 				ChannelName: channel.Name,
-				IsCategory:  false,
-				Metadata:    md,
+				Metadata:    channel.Metadata,
+				IsCategory:  channel.Kind == uint64(types.ChannelKindCategory),
 			})
 		}
 	}
@@ -381,12 +377,12 @@ func (v1 *V1) GetChannelMessages(c echo.Context, r *chatv1.GetChannelMessagesReq
 		if err != nil {
 			return nil, err
 		}
-		messages, err = v1.DB.GetMessagesBefore(r.GuildId, r.ChannelId, beforeMsg.CreatedAt.AsTime())
+		messages, err = v1.DB.GetMessagesBefore(r.ChannelId, beforeMsg.CreatedAt.AsTime())
 		if err != nil && err != sql.ErrNoRows {
 			return nil, err
 		}
 	} else {
-		messages, err = v1.DB.GetMessages(r.GuildId, r.ChannelId)
+		messages, err = v1.DB.GetMessages(r.ChannelId)
 		if err != nil && err != sql.ErrNoRows {
 			return nil, err
 		}
@@ -840,27 +836,26 @@ func (v1 *V1) TriggerAction(c echo.Context, r *chatv1.TriggerActionRequest) (*em
 	if err != nil {
 		return nil, err
 	}
-	if msg.ChannelID != r.ChannelId || msg.GuildID != r.GuildId {
+	embedMsg := msg.Content.GetEmbedMessage()
+	if msg.ChannelId != r.ChannelId || msg.GuildId != r.GuildId || embedMsg == nil {
 		return nil, responses.NewError(responses.BadAction)
 	}
-	actions := harmonytypesv1.Action{}
-	if err := proto.Unmarshal(msg.Actions, actions); err != nil {
-		return nil, err
-	}
-	for _, action := range actions {
-		if action.Id == r.ActionId {
-			v1.Streams.BroadcastAction(ctx.UserID, &chatv1.Event{
-				Event: &chatv1.Event_ActionPerformed_{
-					ActionPerformed: &chatv1.Event_ActionPerformed{
-						GuildId:    r.GuildId,
-						ChannelId:  r.ChannelId,
-						MessageId:  r.MessageId,
-						ActionData: r.ActionData,
-						ActionId:   r.ActionId,
+	for _, field := range embedMsg.Embeds.Fields {
+		for _, action := range field.Actions {
+			if action.Id == r.ActionId {
+				v1.Streams.BroadcastAction(ctx.UserID, &chatv1.Event{
+					Event: &chatv1.Event_ActionPerformed_{
+						ActionPerformed: &chatv1.Event_ActionPerformed{
+							GuildId:    r.GuildId,
+							ChannelId:  r.ChannelId,
+							MessageId:  r.MessageId,
+							ActionData: r.ActionData,
+							ActionId:   r.ActionId,
+						},
 					},
-				},
-			})
-			return &emptypb.Empty{}, nil
+				})
+				return &emptypb.Empty{}, nil
+			}
 		}
 	}
 	return nil, responses.NewError(responses.BadAction)
@@ -898,11 +893,11 @@ func (v1 *V1) SendMessage(c echo.Context, r *chatv1.SendMessageRequest) (*chatv1
 
 	switch e := r.Content.Content.(type) {
 	case *harmonytypesv1.Content_EmbedMessage:
-		t, err = v1.DB.AddEmbedMessage(r.GuildId, r.ChannelId, messageID, ctx.UserID, r.Content.Actions, r.Overrides, replyTo, r.Metadata, e.EmbedMessage.Embeds)
+		t, err = v1.DB.AddEmbedMessage(r.GuildId, r.ChannelId, messageID, ctx.UserID, r.Overrides, replyTo, r.Metadata, e.EmbedMessage.Embeds)
 	case *harmonytypesv1.Content_FilesMessage:
-		t, err = v1.DB.AddFilesMessage(r.GuildId, r.ChannelId, messageID, ctx.UserID, r.Content.Actions, r.Overrides, replyTo, r.Metadata, e.FilesMessage.Attachments)
+		t, err = v1.DB.AddFilesMessage(r.GuildId, r.ChannelId, messageID, ctx.UserID, r.Overrides, replyTo, r.Metadata, e.FilesMessage.Attachments)
 	case *harmonytypesv1.Content_TextMessage:
-		t, err = v1.DB.AddTextMessage(r.GuildId, r.ChannelId, messageID, ctx.UserID, r.Content.Actions, r.Overrides, replyTo, r.Metadata, e.TextMessage.Content)
+		t, err = v1.DB.AddTextMessage(r.GuildId, r.ChannelId, messageID, ctx.UserID, r.Overrides, replyTo, r.Metadata, e.TextMessage.Content)
 	}
 
 	if err != nil {
@@ -1102,16 +1097,8 @@ func (v1 *V1) GetEmotePacks(c echo.Context, r *chatv1.GetEmotePacksRequest) (*ch
 	if err != nil {
 		return nil, err
 	}
-	outPacks := []*chatv1.GetEmotePacksResponse_EmotePack{}
-	for _, pack := range packs {
-		outPacks = append(outPacks, &chatv1.GetEmotePacksResponse_EmotePack{
-			PackId:    pack.ID,
-			PackOwner: pack.Edges.Owner.ID,
-			PackName:  pack.Name,
-		})
-	}
 	return &chatv1.GetEmotePacksResponse{
-		Packs: outPacks,
+		Packs: packs,
 	}, nil
 }
 
@@ -1121,15 +1108,8 @@ func (v1 *V1) GetEmotePackEmotes(c echo.Context, r *chatv1.GetEmotePackEmotesReq
 	if err != nil {
 		return nil, err
 	}
-	outEmotes := []*chatv1.GetEmotePackEmotesResponse_Emote{}
-	for _, emote := range emotes {
-		outEmotes = append(outEmotes, &chatv1.GetEmotePackEmotesResponse_Emote{
-			ImageId: emote.ID,
-			Name:    emote.Name,
-		})
-	}
 	return &chatv1.GetEmotePackEmotesResponse{
-		Emotes: outEmotes,
+		Emotes: emotes,
 	}, nil
 }
 

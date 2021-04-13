@@ -1,13 +1,13 @@
 package ent_shared
 
 import (
-	"github.com/harmony-development/legato/server/db/ent/entgen"
+	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/lexorank"
 	"github.com/harmony-development/legato/server/db/types"
 )
 
-func (d *DB) AddChannelToGuild(guildID, channelID uint64, channelName string, previous, next *uint64, kind types.ChannelKind, md []byte) (c entgen.Channel, err error) {
+func (d *DB) AddChannelToGuild(guildID, channelID uint64, channelName string, previous, next *uint64, kind types.ChannelKind, md *harmonytypesv1.Metadata) (c types.ChannelData, err error) {
 	defer doRecovery(&err)
 
 	previousChannelPos := ""
@@ -31,6 +31,10 @@ func (d *DB) AddChannelToGuild(guildID, channelID uint64, channelName string, pr
 			SaveX(ctx),
 	).ExecX(ctx)
 
+	c.ID = channelID
+	c.Metadata = md
+	c.Name = channelName
+
 	return
 }
 
@@ -42,10 +46,23 @@ func (d *DB) DeleteChannelFromGuild(guildID, channelID uint64) (err error) {
 	return
 }
 
-func (d *DB) ChannelsForGuild(guildID uint64) (chans []*entgen.Channel, err error) {
+func (d *DB) ChannelsForGuild(guildID uint64) (chans []*types.ChannelData, err error) {
 	defer doRecovery(&err)
 
-	chans = d.Guild.GetX(ctx, guildID).QueryChannel().AllX(ctx)
+	channels := d.Guild.
+		GetX(ctx, guildID).
+		QueryChannel().
+		AllX(ctx)
+
+	for _, c := range channels {
+		chans[c.ID] = &types.ChannelData{
+			ID:       c.ID,
+			Name:     c.Name,
+			Metadata: c.Metadata,
+			Position: c.Position,
+			Kind:     c.Kind,
+		}
+	}
 
 	return
 }
@@ -82,7 +99,7 @@ func (d *DB) GetFirstChannel(guildID uint64) (channelID uint64, err error) {
 	return
 }
 
-func (d *DB) UpdateChannelInformation(guildID, channelID uint64, name *string, metadata []byte) (err error) {
+func (d *DB) UpdateChannelInformation(guildID, channelID uint64, name *string, metadata *harmonytypesv1.Metadata) (err error) {
 	defer doRecovery(&err)
 	update := d.Channel.UpdateOneID(channelID)
 	if name != nil {

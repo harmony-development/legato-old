@@ -1,15 +1,23 @@
 package ent_shared
 
 import (
-	"github.com/harmony-development/legato/server/db/ent/entgen"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guildlistentry"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 	"github.com/harmony-development/legato/server/db/lexorank"
+	"github.com/harmony-development/legato/server/db/types"
 )
 
-func (d *DB) GetGuildList(userID uint64) (guilds []*entgen.GuildListEntry, err error) {
+func (d *DB) GetGuildList(userID uint64) (guilds []*types.GuildListEntryData, err error) {
 	defer doRecovery(&err)
-	guilds = d.User.GetX(ctx, userID).QueryListentry().AllX(ctx)
+	data := d.User.GetX(ctx, userID).QueryListentry().AllX(ctx)
+	guilds = make([]*types.GuildListEntryData, len(data))
+	for i, entry := range data {
+		guilds[i] = &types.GuildListEntryData{
+			ID:       entry.ID,
+			Host:     entry.Host,
+			Position: entry.Position,
+		}
+	}
 	return
 }
 

@@ -9,6 +9,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	v1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
@@ -56,8 +57,8 @@ func (cu *ChannelUpdate) SetPosition(s string) *ChannelUpdate {
 }
 
 // SetMetadata sets the "metadata" field.
-func (cu *ChannelUpdate) SetMetadata(b []byte) *ChannelUpdate {
-	cu.mutation.SetMetadata(b)
+func (cu *ChannelUpdate) SetMetadata(v *v1.Metadata) *ChannelUpdate {
+	cu.mutation.SetMetadata(v)
 	return cu
 }
 
@@ -298,7 +299,7 @@ func (cu *ChannelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := cu.mutation.Metadata(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBytes,
+			Type:   field.TypeJSON,
 			Value:  value,
 			Column: channel.FieldMetadata,
 		})
@@ -544,8 +545,8 @@ func (cuo *ChannelUpdateOne) SetPosition(s string) *ChannelUpdateOne {
 }
 
 // SetMetadata sets the "metadata" field.
-func (cuo *ChannelUpdateOne) SetMetadata(b []byte) *ChannelUpdateOne {
-	cuo.mutation.SetMetadata(b)
+func (cuo *ChannelUpdateOne) SetMetadata(v *v1.Metadata) *ChannelUpdateOne {
+	cuo.mutation.SetMetadata(v)
 	return cuo
 }
 
@@ -791,7 +792,7 @@ func (cuo *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err e
 	}
 	if value, ok := cuo.mutation.Metadata(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBytes,
+			Type:   field.TypeJSON,
 			Value:  value,
 			Column: channel.FieldMetadata,
 		})

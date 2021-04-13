@@ -9,6 +9,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	v1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen/embedfield"
 	"github.com/harmony-development/legato/server/db/ent/entgen/embedmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
@@ -28,76 +29,9 @@ func (emu *EmbedMessageUpdate) Where(ps ...predicate.EmbedMessage) *EmbedMessage
 	return emu
 }
 
-// SetTitle sets the "title" field.
-func (emu *EmbedMessageUpdate) SetTitle(s string) *EmbedMessageUpdate {
-	emu.mutation.SetTitle(s)
-	return emu
-}
-
-// SetBody sets the "body" field.
-func (emu *EmbedMessageUpdate) SetBody(s string) *EmbedMessageUpdate {
-	emu.mutation.SetBody(s)
-	return emu
-}
-
-// SetColor sets the "color" field.
-func (emu *EmbedMessageUpdate) SetColor(i int64) *EmbedMessageUpdate {
-	emu.mutation.ResetColor()
-	emu.mutation.SetColor(i)
-	return emu
-}
-
-// AddColor adds i to the "color" field.
-func (emu *EmbedMessageUpdate) AddColor(i int64) *EmbedMessageUpdate {
-	emu.mutation.AddColor(i)
-	return emu
-}
-
-// SetHeaderText sets the "header_text" field.
-func (emu *EmbedMessageUpdate) SetHeaderText(s string) *EmbedMessageUpdate {
-	emu.mutation.SetHeaderText(s)
-	return emu
-}
-
-// SetHeaderSubtext sets the "header_subtext" field.
-func (emu *EmbedMessageUpdate) SetHeaderSubtext(s string) *EmbedMessageUpdate {
-	emu.mutation.SetHeaderSubtext(s)
-	return emu
-}
-
-// SetHeaderURL sets the "header_url" field.
-func (emu *EmbedMessageUpdate) SetHeaderURL(s string) *EmbedMessageUpdate {
-	emu.mutation.SetHeaderURL(s)
-	return emu
-}
-
-// SetHeaderIcon sets the "header_icon" field.
-func (emu *EmbedMessageUpdate) SetHeaderIcon(s string) *EmbedMessageUpdate {
-	emu.mutation.SetHeaderIcon(s)
-	return emu
-}
-
-// SetFooterText sets the "footer_text" field.
-func (emu *EmbedMessageUpdate) SetFooterText(s string) *EmbedMessageUpdate {
-	emu.mutation.SetFooterText(s)
-	return emu
-}
-
-// SetFooterSubtext sets the "footer_subtext" field.
-func (emu *EmbedMessageUpdate) SetFooterSubtext(s string) *EmbedMessageUpdate {
-	emu.mutation.SetFooterSubtext(s)
-	return emu
-}
-
-// SetFooterURL sets the "footer_url" field.
-func (emu *EmbedMessageUpdate) SetFooterURL(s string) *EmbedMessageUpdate {
-	emu.mutation.SetFooterURL(s)
-	return emu
-}
-
-// SetFooterIcon sets the "footer_icon" field.
-func (emu *EmbedMessageUpdate) SetFooterIcon(s string) *EmbedMessageUpdate {
-	emu.mutation.SetFooterIcon(s)
+// SetData sets the "data" field.
+func (emu *EmbedMessageUpdate) SetData(v *v1.Embed) *EmbedMessageUpdate {
+	emu.mutation.SetData(v)
 	return emu
 }
 
@@ -236,88 +170,11 @@ func (emu *EmbedMessageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := emu.mutation.Title(); ok {
+	if value, ok := emu.mutation.Data(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeJSON,
 			Value:  value,
-			Column: embedmessage.FieldTitle,
-		})
-	}
-	if value, ok := emu.mutation.Body(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldBody,
-		})
-	}
-	if value, ok := emu.mutation.Color(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: embedmessage.FieldColor,
-		})
-	}
-	if value, ok := emu.mutation.AddedColor(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: embedmessage.FieldColor,
-		})
-	}
-	if value, ok := emu.mutation.HeaderText(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldHeaderText,
-		})
-	}
-	if value, ok := emu.mutation.HeaderSubtext(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldHeaderSubtext,
-		})
-	}
-	if value, ok := emu.mutation.HeaderURL(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldHeaderURL,
-		})
-	}
-	if value, ok := emu.mutation.HeaderIcon(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldHeaderIcon,
-		})
-	}
-	if value, ok := emu.mutation.FooterText(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldFooterText,
-		})
-	}
-	if value, ok := emu.mutation.FooterSubtext(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldFooterSubtext,
-		})
-	}
-	if value, ok := emu.mutation.FooterURL(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldFooterURL,
-		})
-	}
-	if value, ok := emu.mutation.FooterIcon(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldFooterIcon,
+			Column: embedmessage.FieldData,
 		})
 	}
 	if emu.mutation.EmbedFieldCleared() {
@@ -427,76 +284,9 @@ type EmbedMessageUpdateOne struct {
 	mutation *EmbedMessageMutation
 }
 
-// SetTitle sets the "title" field.
-func (emuo *EmbedMessageUpdateOne) SetTitle(s string) *EmbedMessageUpdateOne {
-	emuo.mutation.SetTitle(s)
-	return emuo
-}
-
-// SetBody sets the "body" field.
-func (emuo *EmbedMessageUpdateOne) SetBody(s string) *EmbedMessageUpdateOne {
-	emuo.mutation.SetBody(s)
-	return emuo
-}
-
-// SetColor sets the "color" field.
-func (emuo *EmbedMessageUpdateOne) SetColor(i int64) *EmbedMessageUpdateOne {
-	emuo.mutation.ResetColor()
-	emuo.mutation.SetColor(i)
-	return emuo
-}
-
-// AddColor adds i to the "color" field.
-func (emuo *EmbedMessageUpdateOne) AddColor(i int64) *EmbedMessageUpdateOne {
-	emuo.mutation.AddColor(i)
-	return emuo
-}
-
-// SetHeaderText sets the "header_text" field.
-func (emuo *EmbedMessageUpdateOne) SetHeaderText(s string) *EmbedMessageUpdateOne {
-	emuo.mutation.SetHeaderText(s)
-	return emuo
-}
-
-// SetHeaderSubtext sets the "header_subtext" field.
-func (emuo *EmbedMessageUpdateOne) SetHeaderSubtext(s string) *EmbedMessageUpdateOne {
-	emuo.mutation.SetHeaderSubtext(s)
-	return emuo
-}
-
-// SetHeaderURL sets the "header_url" field.
-func (emuo *EmbedMessageUpdateOne) SetHeaderURL(s string) *EmbedMessageUpdateOne {
-	emuo.mutation.SetHeaderURL(s)
-	return emuo
-}
-
-// SetHeaderIcon sets the "header_icon" field.
-func (emuo *EmbedMessageUpdateOne) SetHeaderIcon(s string) *EmbedMessageUpdateOne {
-	emuo.mutation.SetHeaderIcon(s)
-	return emuo
-}
-
-// SetFooterText sets the "footer_text" field.
-func (emuo *EmbedMessageUpdateOne) SetFooterText(s string) *EmbedMessageUpdateOne {
-	emuo.mutation.SetFooterText(s)
-	return emuo
-}
-
-// SetFooterSubtext sets the "footer_subtext" field.
-func (emuo *EmbedMessageUpdateOne) SetFooterSubtext(s string) *EmbedMessageUpdateOne {
-	emuo.mutation.SetFooterSubtext(s)
-	return emuo
-}
-
-// SetFooterURL sets the "footer_url" field.
-func (emuo *EmbedMessageUpdateOne) SetFooterURL(s string) *EmbedMessageUpdateOne {
-	emuo.mutation.SetFooterURL(s)
-	return emuo
-}
-
-// SetFooterIcon sets the "footer_icon" field.
-func (emuo *EmbedMessageUpdateOne) SetFooterIcon(s string) *EmbedMessageUpdateOne {
-	emuo.mutation.SetFooterIcon(s)
+// SetData sets the "data" field.
+func (emuo *EmbedMessageUpdateOne) SetData(v *v1.Embed) *EmbedMessageUpdateOne {
+	emuo.mutation.SetData(v)
 	return emuo
 }
 
@@ -640,88 +430,11 @@ func (emuo *EmbedMessageUpdateOne) sqlSave(ctx context.Context) (_node *EmbedMes
 			}
 		}
 	}
-	if value, ok := emuo.mutation.Title(); ok {
+	if value, ok := emuo.mutation.Data(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeJSON,
 			Value:  value,
-			Column: embedmessage.FieldTitle,
-		})
-	}
-	if value, ok := emuo.mutation.Body(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldBody,
-		})
-	}
-	if value, ok := emuo.mutation.Color(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: embedmessage.FieldColor,
-		})
-	}
-	if value, ok := emuo.mutation.AddedColor(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: embedmessage.FieldColor,
-		})
-	}
-	if value, ok := emuo.mutation.HeaderText(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldHeaderText,
-		})
-	}
-	if value, ok := emuo.mutation.HeaderSubtext(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldHeaderSubtext,
-		})
-	}
-	if value, ok := emuo.mutation.HeaderURL(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldHeaderURL,
-		})
-	}
-	if value, ok := emuo.mutation.HeaderIcon(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldHeaderIcon,
-		})
-	}
-	if value, ok := emuo.mutation.FooterText(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldFooterText,
-		})
-	}
-	if value, ok := emuo.mutation.FooterSubtext(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldFooterSubtext,
-		})
-	}
-	if value, ok := emuo.mutation.FooterURL(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldFooterURL,
-		})
-	}
-	if value, ok := emuo.mutation.FooterIcon(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: embedmessage.FieldFooterIcon,
+			Column: embedmessage.FieldData,
 		})
 	}
 	if emuo.mutation.EmbedFieldCleared() {

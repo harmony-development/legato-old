@@ -3,14 +3,15 @@ package ent_shared
 import (
 	"github.com/golang/protobuf/proto"
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
-	"github.com/harmony-development/legato/server/db/ent/entgen"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
+	"github.com/harmony-development/legato/server/db/types"
 )
 
-func (d *DB) CreateGuild(owner, id, channelID uint64, guildName, picture string) (guild *entgen.Guild, err error) {
+func (d *DB) CreateGuild(owner, id, channelID uint64, guildName, picture string) (guild *types.GuildData, err error) {
 	defer doRecovery(&err)
-	guild = d.Guild.Create().
+	guild = &types.GuildData{}
+	data := d.Guild.Create().
 		SetID(id).
 		SetOwner(owner).
 		SetName(guildName).
@@ -24,6 +25,10 @@ func (d *DB) CreateGuild(owner, id, channelID uint64, guildName, picture string)
 				SaveX(ctx),
 		).
 		SaveX(ctx)
+	guild.ID = data.ID
+	guild.Name = data.Name
+	guild.Owner = data.Owner
+	guild.Picture = data.Picture
 	return
 }
 
@@ -54,9 +59,15 @@ func (d *DB) IsBanned(guildID, userID uint64) (banned bool, err error) {
 	return
 }
 
-func (d *DB) GetGuildByID(guildID uint64) (guild *entgen.Guild, err error) {
+func (d *DB) GetGuildByID(guildID uint64) (guild *types.GuildData, err error) {
 	defer doRecovery(&err)
-	guild = d.Guild.GetX(ctx, guildID)
+	data := d.Guild.GetX(ctx, guildID)
+	guild = &types.GuildData{
+		ID:      data.ID,
+		Owner:   data.Owner,
+		Name:    data.Name,
+		Picture: data.Picture,
+	}
 	return
 }
 

@@ -18,14 +18,25 @@ type Message struct {
 // Fields of the Message.
 func (Message) Fields() []ent.Field {
 	return []ent.Field{
-		field.Uint64("id").Unique(),
-		field.Time("createdat").Default(func() time.Time {
-			return time.Now()
-		}),
-		field.Time("editedat").Optional(),
-		field.JSON("actions", []*harmonytypesv1.Action{}).Optional(),
-		field.JSON("metadata", &harmonytypesv1.Metadata{}).Optional(),
-		field.Bytes("overrides").Optional(),
+		field.
+			Uint64("id").
+			Unique(),
+		field.
+			Time("createdat").
+			Default(
+				func() time.Time {
+					return time.Now()
+				},
+			),
+		field.
+			Time("editedat").
+			Optional(),
+		field.
+			JSON("metadata", &harmonytypesv1.Metadata{}).
+			Optional(),
+		field.
+			JSON("override", &harmonytypesv1.Override{}).
+			Optional(),
 	}
 }
 

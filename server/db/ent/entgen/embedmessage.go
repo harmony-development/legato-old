@@ -3,10 +3,12 @@
 package entgen
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+	v1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen/embedmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
 )
@@ -16,28 +18,8 @@ type EmbedMessage struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// Title holds the value of the "title" field.
-	Title string `json:"title,omitempty"`
-	// Body holds the value of the "body" field.
-	Body string `json:"body,omitempty"`
-	// Color holds the value of the "color" field.
-	Color int64 `json:"color,omitempty"`
-	// HeaderText holds the value of the "header_text" field.
-	HeaderText string `json:"header_text,omitempty"`
-	// HeaderSubtext holds the value of the "header_subtext" field.
-	HeaderSubtext string `json:"header_subtext,omitempty"`
-	// HeaderURL holds the value of the "header_url" field.
-	HeaderURL string `json:"header_url,omitempty"`
-	// HeaderIcon holds the value of the "header_icon" field.
-	HeaderIcon string `json:"header_icon,omitempty"`
-	// FooterText holds the value of the "footer_text" field.
-	FooterText string `json:"footer_text,omitempty"`
-	// FooterSubtext holds the value of the "footer_subtext" field.
-	FooterSubtext string `json:"footer_subtext,omitempty"`
-	// FooterURL holds the value of the "footer_url" field.
-	FooterURL string `json:"footer_url,omitempty"`
-	// FooterIcon holds the value of the "footer_icon" field.
-	FooterIcon string `json:"footer_icon,omitempty"`
+	// Data holds the value of the "data" field.
+	Data *v1.Embed `json:"data,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the EmbedMessageQuery when eager-loading is set.
 	Edges                 EmbedMessageEdges `json:"edges"`
@@ -83,10 +65,10 @@ func (*EmbedMessage) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case embedmessage.FieldID, embedmessage.FieldColor:
+		case embedmessage.FieldData:
+			values[i] = &[]byte{}
+		case embedmessage.FieldID:
 			values[i] = &sql.NullInt64{}
-		case embedmessage.FieldTitle, embedmessage.FieldBody, embedmessage.FieldHeaderText, embedmessage.FieldHeaderSubtext, embedmessage.FieldHeaderURL, embedmessage.FieldHeaderIcon, embedmessage.FieldFooterText, embedmessage.FieldFooterSubtext, embedmessage.FieldFooterURL, embedmessage.FieldFooterIcon:
-			values[i] = &sql.NullString{}
 		case embedmessage.ForeignKeys[0]: // message_embed_message
 			values[i] = &sql.NullInt64{}
 		default:
@@ -110,71 +92,14 @@ func (em *EmbedMessage) assignValues(columns []string, values []interface{}) err
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			em.ID = int(value.Int64)
-		case embedmessage.FieldTitle:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field title", values[i])
-			} else if value.Valid {
-				em.Title = value.String
-			}
-		case embedmessage.FieldBody:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field body", values[i])
-			} else if value.Valid {
-				em.Body = value.String
-			}
-		case embedmessage.FieldColor:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field color", values[i])
-			} else if value.Valid {
-				em.Color = value.Int64
-			}
-		case embedmessage.FieldHeaderText:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field header_text", values[i])
-			} else if value.Valid {
-				em.HeaderText = value.String
-			}
-		case embedmessage.FieldHeaderSubtext:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field header_subtext", values[i])
-			} else if value.Valid {
-				em.HeaderSubtext = value.String
-			}
-		case embedmessage.FieldHeaderURL:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field header_url", values[i])
-			} else if value.Valid {
-				em.HeaderURL = value.String
-			}
-		case embedmessage.FieldHeaderIcon:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field header_icon", values[i])
-			} else if value.Valid {
-				em.HeaderIcon = value.String
-			}
-		case embedmessage.FieldFooterText:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field footer_text", values[i])
-			} else if value.Valid {
-				em.FooterText = value.String
-			}
-		case embedmessage.FieldFooterSubtext:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field footer_subtext", values[i])
-			} else if value.Valid {
-				em.FooterSubtext = value.String
-			}
-		case embedmessage.FieldFooterURL:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field footer_url", values[i])
-			} else if value.Valid {
-				em.FooterURL = value.String
-			}
-		case embedmessage.FieldFooterIcon:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field footer_icon", values[i])
-			} else if value.Valid {
-				em.FooterIcon = value.String
+		case embedmessage.FieldData:
+
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field data", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &em.Data); err != nil {
+					return fmt.Errorf("unmarshal field data: %w", err)
+				}
 			}
 		case embedmessage.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -221,28 +146,8 @@ func (em *EmbedMessage) String() string {
 	var builder strings.Builder
 	builder.WriteString("EmbedMessage(")
 	builder.WriteString(fmt.Sprintf("id=%v", em.ID))
-	builder.WriteString(", title=")
-	builder.WriteString(em.Title)
-	builder.WriteString(", body=")
-	builder.WriteString(em.Body)
-	builder.WriteString(", color=")
-	builder.WriteString(fmt.Sprintf("%v", em.Color))
-	builder.WriteString(", header_text=")
-	builder.WriteString(em.HeaderText)
-	builder.WriteString(", header_subtext=")
-	builder.WriteString(em.HeaderSubtext)
-	builder.WriteString(", header_url=")
-	builder.WriteString(em.HeaderURL)
-	builder.WriteString(", header_icon=")
-	builder.WriteString(em.HeaderIcon)
-	builder.WriteString(", footer_text=")
-	builder.WriteString(em.FooterText)
-	builder.WriteString(", footer_subtext=")
-	builder.WriteString(em.FooterSubtext)
-	builder.WriteString(", footer_url=")
-	builder.WriteString(em.FooterURL)
-	builder.WriteString(", footer_icon=")
-	builder.WriteString(em.FooterIcon)
+	builder.WriteString(", data=")
+	builder.WriteString(fmt.Sprintf("%v", em.Data))
 	builder.WriteByte(')')
 	return builder.String()
 }

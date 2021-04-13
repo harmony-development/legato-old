@@ -239,23 +239,42 @@ func (m *Action) Validate() error {
 		return nil
 	}
 
-	// no validation rules for Text
-
-	// no validation rules for Url
+	// no validation rules for ActionType
 
 	// no validation rules for Id
 
-	// no validation rules for Type
+	switch m.Kind.(type) {
 
-	// no validation rules for Presentation
+	case *Action_Button_:
 
-	for idx, item := range m.GetChildren() {
-		_, _ = idx, item
-
-		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+		if v, ok := interface{}(m.GetButton()).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				return ActionValidationError{
-					field:  fmt.Sprintf("Children[%v]", idx),
+					field:  "Button",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *Action_Dropdown_:
+
+		if v, ok := interface{}(m.GetDropdown()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ActionValidationError{
+					field:  "Dropdown",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *Action_Input_:
+
+		if v, ok := interface{}(m.GetInput()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ActionValidationError{
+					field:  "Input",
 					reason: "embedded message failed validation",
 					cause:  err,
 				}
@@ -523,21 +542,6 @@ func (m *Embed) Validate() error {
 			if err := v.Validate(); err != nil {
 				return EmbedValidationError{
 					field:  fmt.Sprintf("Fields[%v]", idx),
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
-	for idx, item := range m.GetActions() {
-		_, _ = idx, item
-
-		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return EmbedValidationError{
-					field:  fmt.Sprintf("Actions[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
 				}
@@ -835,19 +839,14 @@ func (m *ContentEmbed) Validate() error {
 		return nil
 	}
 
-	for idx, item := range m.GetEmbeds() {
-		_, _ = idx, item
-
-		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return ContentEmbedValidationError{
-					field:  fmt.Sprintf("Embeds[%v]", idx),
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
+	if v, ok := interface{}(m.GetEmbeds()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ContentEmbedValidationError{
+				field:  "Embeds",
+				reason: "embedded message failed validation",
+				cause:  err,
 			}
 		}
-
 	}
 
 	return nil
@@ -992,21 +991,6 @@ var _ interface {
 func (m *Content) Validate() error {
 	if m == nil {
 		return nil
-	}
-
-	for idx, item := range m.GetActions() {
-		_, _ = idx, item
-
-		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return ContentValidationError{
-					field:  fmt.Sprintf("Actions[%v]", idx),
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
 	}
 
 	switch m.Content.(type) {
@@ -1299,3 +1283,208 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ErrorValidationError{}
+
+// Validate checks the field values on Action_Button with the rules defined in
+// the proto definition for this message. If any rules are violated, an error
+// is returned.
+func (m *Action_Button) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Text
+
+	// no validation rules for Url
+
+	return nil
+}
+
+// Action_ButtonValidationError is the validation error returned by
+// Action_Button.Validate if the designated constraints aren't met.
+type Action_ButtonValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e Action_ButtonValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e Action_ButtonValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e Action_ButtonValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e Action_ButtonValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e Action_ButtonValidationError) ErrorName() string { return "Action_ButtonValidationError" }
+
+// Error satisfies the builtin error interface
+func (e Action_ButtonValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAction_Button.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = Action_ButtonValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = Action_ButtonValidationError{}
+
+// Validate checks the field values on Action_Dropdown with the rules defined
+// in the proto definition for this message. If any rules are violated, an
+// error is returned.
+func (m *Action_Dropdown) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Text
+
+	return nil
+}
+
+// Action_DropdownValidationError is the validation error returned by
+// Action_Dropdown.Validate if the designated constraints aren't met.
+type Action_DropdownValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e Action_DropdownValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e Action_DropdownValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e Action_DropdownValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e Action_DropdownValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e Action_DropdownValidationError) ErrorName() string { return "Action_DropdownValidationError" }
+
+// Error satisfies the builtin error interface
+func (e Action_DropdownValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAction_Dropdown.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = Action_DropdownValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = Action_DropdownValidationError{}
+
+// Validate checks the field values on Action_Input with the rules defined in
+// the proto definition for this message. If any rules are violated, an error
+// is returned.
+func (m *Action_Input) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Label
+
+	// no validation rules for Wide
+
+	return nil
+}
+
+// Action_InputValidationError is the validation error returned by
+// Action_Input.Validate if the designated constraints aren't met.
+type Action_InputValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e Action_InputValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e Action_InputValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e Action_InputValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e Action_InputValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e Action_InputValidationError) ErrorName() string { return "Action_InputValidationError" }
+
+// Error satisfies the builtin error interface
+func (e Action_InputValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAction_Input.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = Action_InputValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = Action_InputValidationError{}

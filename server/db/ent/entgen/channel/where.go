@@ -112,13 +112,6 @@ func Position(v string) predicate.Channel {
 	})
 }
 
-// Metadata applies equality check predicate on the "metadata" field. It's identical to MetadataEQ.
-func Metadata(v []byte) predicate.Channel {
-	return predicate.Channel(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMetadata), v))
-	})
-}
-
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.Channel {
 	return predicate.Channel(func(s *sql.Selector) {
@@ -414,82 +407,6 @@ func PositionEqualFold(v string) predicate.Channel {
 func PositionContainsFold(v string) predicate.Channel {
 	return predicate.Channel(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldPosition), v))
-	})
-}
-
-// MetadataEQ applies the EQ predicate on the "metadata" field.
-func MetadataEQ(v []byte) predicate.Channel {
-	return predicate.Channel(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMetadata), v))
-	})
-}
-
-// MetadataNEQ applies the NEQ predicate on the "metadata" field.
-func MetadataNEQ(v []byte) predicate.Channel {
-	return predicate.Channel(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldMetadata), v))
-	})
-}
-
-// MetadataIn applies the In predicate on the "metadata" field.
-func MetadataIn(vs ...[]byte) predicate.Channel {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Channel(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldMetadata), v...))
-	})
-}
-
-// MetadataNotIn applies the NotIn predicate on the "metadata" field.
-func MetadataNotIn(vs ...[]byte) predicate.Channel {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Channel(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldMetadata), v...))
-	})
-}
-
-// MetadataGT applies the GT predicate on the "metadata" field.
-func MetadataGT(v []byte) predicate.Channel {
-	return predicate.Channel(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldMetadata), v))
-	})
-}
-
-// MetadataGTE applies the GTE predicate on the "metadata" field.
-func MetadataGTE(v []byte) predicate.Channel {
-	return predicate.Channel(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldMetadata), v))
-	})
-}
-
-// MetadataLT applies the LT predicate on the "metadata" field.
-func MetadataLT(v []byte) predicate.Channel {
-	return predicate.Channel(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldMetadata), v))
-	})
-}
-
-// MetadataLTE applies the LTE predicate on the "metadata" field.
-func MetadataLTE(v []byte) predicate.Channel {
-	return predicate.Channel(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldMetadata), v))
 	})
 }
 

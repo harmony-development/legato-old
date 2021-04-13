@@ -9,6 +9,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/harmony-development/legato/server/db/ent/entgen/file"
 	"github.com/harmony-development/legato/server/db/ent/entgen/filemessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 )
@@ -26,9 +27,45 @@ func (fmu *FileMessageUpdate) Where(ps ...predicate.FileMessage) *FileMessageUpd
 	return fmu
 }
 
+// AddFileIDs adds the "file" edge to the File entity by IDs.
+func (fmu *FileMessageUpdate) AddFileIDs(ids ...string) *FileMessageUpdate {
+	fmu.mutation.AddFileIDs(ids...)
+	return fmu
+}
+
+// AddFile adds the "file" edges to the File entity.
+func (fmu *FileMessageUpdate) AddFile(f ...*File) *FileMessageUpdate {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fmu.AddFileIDs(ids...)
+}
+
 // Mutation returns the FileMessageMutation object of the builder.
 func (fmu *FileMessageUpdate) Mutation() *FileMessageMutation {
 	return fmu.mutation
+}
+
+// ClearFile clears all "file" edges to the File entity.
+func (fmu *FileMessageUpdate) ClearFile() *FileMessageUpdate {
+	fmu.mutation.ClearFile()
+	return fmu
+}
+
+// RemoveFileIDs removes the "file" edge to File entities by IDs.
+func (fmu *FileMessageUpdate) RemoveFileIDs(ids ...string) *FileMessageUpdate {
+	fmu.mutation.RemoveFileIDs(ids...)
+	return fmu
+}
+
+// RemoveFile removes "file" edges to File entities.
+func (fmu *FileMessageUpdate) RemoveFile(f ...*File) *FileMessageUpdate {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fmu.RemoveFileIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -100,6 +137,60 @@ func (fmu *FileMessageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if fmu.mutation.FileCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   filemessage.FileTable,
+			Columns: []string{filemessage.FileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: file.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fmu.mutation.RemovedFileIDs(); len(nodes) > 0 && !fmu.mutation.FileCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   filemessage.FileTable,
+			Columns: []string{filemessage.FileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: file.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fmu.mutation.FileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   filemessage.FileTable,
+			Columns: []string{filemessage.FileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: file.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, fmu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{filemessage.Label}
@@ -118,9 +209,45 @@ type FileMessageUpdateOne struct {
 	mutation *FileMessageMutation
 }
 
+// AddFileIDs adds the "file" edge to the File entity by IDs.
+func (fmuo *FileMessageUpdateOne) AddFileIDs(ids ...string) *FileMessageUpdateOne {
+	fmuo.mutation.AddFileIDs(ids...)
+	return fmuo
+}
+
+// AddFile adds the "file" edges to the File entity.
+func (fmuo *FileMessageUpdateOne) AddFile(f ...*File) *FileMessageUpdateOne {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fmuo.AddFileIDs(ids...)
+}
+
 // Mutation returns the FileMessageMutation object of the builder.
 func (fmuo *FileMessageUpdateOne) Mutation() *FileMessageMutation {
 	return fmuo.mutation
+}
+
+// ClearFile clears all "file" edges to the File entity.
+func (fmuo *FileMessageUpdateOne) ClearFile() *FileMessageUpdateOne {
+	fmuo.mutation.ClearFile()
+	return fmuo
+}
+
+// RemoveFileIDs removes the "file" edge to File entities by IDs.
+func (fmuo *FileMessageUpdateOne) RemoveFileIDs(ids ...string) *FileMessageUpdateOne {
+	fmuo.mutation.RemoveFileIDs(ids...)
+	return fmuo
+}
+
+// RemoveFile removes "file" edges to File entities.
+func (fmuo *FileMessageUpdateOne) RemoveFile(f ...*File) *FileMessageUpdateOne {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fmuo.RemoveFileIDs(ids...)
 }
 
 // Save executes the query and returns the updated FileMessage entity.
@@ -196,6 +323,60 @@ func (fmuo *FileMessageUpdateOne) sqlSave(ctx context.Context) (_node *FileMessa
 				ps[i](selector)
 			}
 		}
+	}
+	if fmuo.mutation.FileCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   filemessage.FileTable,
+			Columns: []string{filemessage.FileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: file.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fmuo.mutation.RemovedFileIDs(); len(nodes) > 0 && !fmuo.mutation.FileCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   filemessage.FileTable,
+			Columns: []string{filemessage.FileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: file.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fmuo.mutation.FileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   filemessage.FileTable,
+			Columns: []string{filemessage.FileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: file.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &FileMessage{config: fmuo.config}
 	_spec.Assign = _node.assignValues

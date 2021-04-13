@@ -15,6 +15,27 @@ type FileMessage struct {
 	config
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the FileMessageQuery when eager-loading is set.
+	Edges FileMessageEdges `json:"edges"`
+}
+
+// FileMessageEdges holds the relations/edges for other nodes in the graph.
+type FileMessageEdges struct {
+	// File holds the value of the file edge.
+	File []*File `json:"file,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// FileOrErr returns the File value or an error if the edge
+// was not loaded in eager-loading.
+func (e FileMessageEdges) FileOrErr() ([]*File, error) {
+	if e.loadedTypes[0] {
+		return e.File, nil
+	}
+	return nil, &NotLoadedError{edge: "file"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -48,6 +69,11 @@ func (fm *FileMessage) assignValues(columns []string, values []interface{}) erro
 		}
 	}
 	return nil
+}
+
+// QueryFile queries the "file" edge of the FileMessage entity.
+func (fm *FileMessage) QueryFile() *FileQuery {
+	return (&FileMessageClient{config: fm.config}).QueryFile(fm)
 }
 
 // Update returns a builder for updating this FileMessage.

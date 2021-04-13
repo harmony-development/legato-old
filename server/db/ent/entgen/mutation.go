@@ -20,6 +20,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/emotepack"
 	"github.com/harmony-development/legato/server/db/ent/entgen/file"
 	"github.com/harmony-development/legato/server/db/ent/entgen/filehash"
+	"github.com/harmony-development/legato/server/db/ent/entgen/filemessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/foreignuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guildlistentry"
@@ -1107,7 +1108,7 @@ type ChannelMutation struct {
 	kind                   *uint64
 	addkind                *uint64
 	position               *string
-	metadata               *[]byte
+	metadata               **v1.Metadata
 	clearedFields          map[string]struct{}
 	guild                  *uint64
 	clearedguild           bool
@@ -1339,12 +1340,12 @@ func (m *ChannelMutation) ResetPosition() {
 }
 
 // SetMetadata sets the "metadata" field.
-func (m *ChannelMutation) SetMetadata(b []byte) {
-	m.metadata = &b
+func (m *ChannelMutation) SetMetadata(v *v1.Metadata) {
+	m.metadata = &v
 }
 
 // Metadata returns the value of the "metadata" field in the mutation.
-func (m *ChannelMutation) Metadata() (r []byte, exists bool) {
+func (m *ChannelMutation) Metadata() (r *v1.Metadata, exists bool) {
 	v := m.metadata
 	if v == nil {
 		return
@@ -1355,7 +1356,7 @@ func (m *ChannelMutation) Metadata() (r []byte, exists bool) {
 // OldMetadata returns the old "metadata" field's value of the Channel entity.
 // If the Channel object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ChannelMutation) OldMetadata(ctx context.Context) (v []byte, err error) {
+func (m *ChannelMutation) OldMetadata(ctx context.Context) (v *v1.Metadata, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldMetadata is only allowed on UpdateOne operations")
 	}
@@ -1663,7 +1664,7 @@ func (m *ChannelMutation) SetField(name string, value ent.Value) error {
 		m.SetPosition(v)
 		return nil
 	case channel.FieldMetadata:
-		v, ok := value.([]byte)
+		v, ok := value.(*v1.Metadata)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -3163,18 +3164,7 @@ type EmbedMessageMutation struct {
 	op                 Op
 	typ                string
 	id                 *int
-	title              *string
-	body               *string
-	color              *int64
-	addcolor           *int64
-	header_text        *string
-	header_subtext     *string
-	header_url         *string
-	header_icon        *string
-	footer_text        *string
-	footer_subtext     *string
-	footer_url         *string
-	footer_icon        *string
+	data               **v1.Embed
 	clearedFields      map[string]struct{}
 	embed_field        map[int]struct{}
 	removedembed_field map[int]struct{}
@@ -3265,420 +3255,40 @@ func (m *EmbedMessageMutation) ID() (id int, exists bool) {
 	return *m.id, true
 }
 
-// SetTitle sets the "title" field.
-func (m *EmbedMessageMutation) SetTitle(s string) {
-	m.title = &s
+// SetData sets the "data" field.
+func (m *EmbedMessageMutation) SetData(v *v1.Embed) {
+	m.data = &v
 }
 
-// Title returns the value of the "title" field in the mutation.
-func (m *EmbedMessageMutation) Title() (r string, exists bool) {
-	v := m.title
+// Data returns the value of the "data" field in the mutation.
+func (m *EmbedMessageMutation) Data() (r *v1.Embed, exists bool) {
+	v := m.data
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldTitle returns the old "title" field's value of the EmbedMessage entity.
+// OldData returns the old "data" field's value of the EmbedMessage entity.
 // If the EmbedMessage object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EmbedMessageMutation) OldTitle(ctx context.Context) (v string, err error) {
+func (m *EmbedMessageMutation) OldData(ctx context.Context) (v *v1.Embed, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldTitle is only allowed on UpdateOne operations")
+		return v, fmt.Errorf("OldData is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldTitle requires an ID field in the mutation")
+		return v, fmt.Errorf("OldData requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+		return v, fmt.Errorf("querying old value for OldData: %w", err)
 	}
-	return oldValue.Title, nil
+	return oldValue.Data, nil
 }
 
-// ResetTitle resets all changes to the "title" field.
-func (m *EmbedMessageMutation) ResetTitle() {
-	m.title = nil
-}
-
-// SetBody sets the "body" field.
-func (m *EmbedMessageMutation) SetBody(s string) {
-	m.body = &s
-}
-
-// Body returns the value of the "body" field in the mutation.
-func (m *EmbedMessageMutation) Body() (r string, exists bool) {
-	v := m.body
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldBody returns the old "body" field's value of the EmbedMessage entity.
-// If the EmbedMessage object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EmbedMessageMutation) OldBody(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldBody is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldBody requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldBody: %w", err)
-	}
-	return oldValue.Body, nil
-}
-
-// ResetBody resets all changes to the "body" field.
-func (m *EmbedMessageMutation) ResetBody() {
-	m.body = nil
-}
-
-// SetColor sets the "color" field.
-func (m *EmbedMessageMutation) SetColor(i int64) {
-	m.color = &i
-	m.addcolor = nil
-}
-
-// Color returns the value of the "color" field in the mutation.
-func (m *EmbedMessageMutation) Color() (r int64, exists bool) {
-	v := m.color
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldColor returns the old "color" field's value of the EmbedMessage entity.
-// If the EmbedMessage object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EmbedMessageMutation) OldColor(ctx context.Context) (v int64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldColor is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldColor requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldColor: %w", err)
-	}
-	return oldValue.Color, nil
-}
-
-// AddColor adds i to the "color" field.
-func (m *EmbedMessageMutation) AddColor(i int64) {
-	if m.addcolor != nil {
-		*m.addcolor += i
-	} else {
-		m.addcolor = &i
-	}
-}
-
-// AddedColor returns the value that was added to the "color" field in this mutation.
-func (m *EmbedMessageMutation) AddedColor() (r int64, exists bool) {
-	v := m.addcolor
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetColor resets all changes to the "color" field.
-func (m *EmbedMessageMutation) ResetColor() {
-	m.color = nil
-	m.addcolor = nil
-}
-
-// SetHeaderText sets the "header_text" field.
-func (m *EmbedMessageMutation) SetHeaderText(s string) {
-	m.header_text = &s
-}
-
-// HeaderText returns the value of the "header_text" field in the mutation.
-func (m *EmbedMessageMutation) HeaderText() (r string, exists bool) {
-	v := m.header_text
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldHeaderText returns the old "header_text" field's value of the EmbedMessage entity.
-// If the EmbedMessage object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EmbedMessageMutation) OldHeaderText(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldHeaderText is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldHeaderText requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHeaderText: %w", err)
-	}
-	return oldValue.HeaderText, nil
-}
-
-// ResetHeaderText resets all changes to the "header_text" field.
-func (m *EmbedMessageMutation) ResetHeaderText() {
-	m.header_text = nil
-}
-
-// SetHeaderSubtext sets the "header_subtext" field.
-func (m *EmbedMessageMutation) SetHeaderSubtext(s string) {
-	m.header_subtext = &s
-}
-
-// HeaderSubtext returns the value of the "header_subtext" field in the mutation.
-func (m *EmbedMessageMutation) HeaderSubtext() (r string, exists bool) {
-	v := m.header_subtext
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldHeaderSubtext returns the old "header_subtext" field's value of the EmbedMessage entity.
-// If the EmbedMessage object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EmbedMessageMutation) OldHeaderSubtext(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldHeaderSubtext is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldHeaderSubtext requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHeaderSubtext: %w", err)
-	}
-	return oldValue.HeaderSubtext, nil
-}
-
-// ResetHeaderSubtext resets all changes to the "header_subtext" field.
-func (m *EmbedMessageMutation) ResetHeaderSubtext() {
-	m.header_subtext = nil
-}
-
-// SetHeaderURL sets the "header_url" field.
-func (m *EmbedMessageMutation) SetHeaderURL(s string) {
-	m.header_url = &s
-}
-
-// HeaderURL returns the value of the "header_url" field in the mutation.
-func (m *EmbedMessageMutation) HeaderURL() (r string, exists bool) {
-	v := m.header_url
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldHeaderURL returns the old "header_url" field's value of the EmbedMessage entity.
-// If the EmbedMessage object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EmbedMessageMutation) OldHeaderURL(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldHeaderURL is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldHeaderURL requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHeaderURL: %w", err)
-	}
-	return oldValue.HeaderURL, nil
-}
-
-// ResetHeaderURL resets all changes to the "header_url" field.
-func (m *EmbedMessageMutation) ResetHeaderURL() {
-	m.header_url = nil
-}
-
-// SetHeaderIcon sets the "header_icon" field.
-func (m *EmbedMessageMutation) SetHeaderIcon(s string) {
-	m.header_icon = &s
-}
-
-// HeaderIcon returns the value of the "header_icon" field in the mutation.
-func (m *EmbedMessageMutation) HeaderIcon() (r string, exists bool) {
-	v := m.header_icon
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldHeaderIcon returns the old "header_icon" field's value of the EmbedMessage entity.
-// If the EmbedMessage object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EmbedMessageMutation) OldHeaderIcon(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldHeaderIcon is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldHeaderIcon requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHeaderIcon: %w", err)
-	}
-	return oldValue.HeaderIcon, nil
-}
-
-// ResetHeaderIcon resets all changes to the "header_icon" field.
-func (m *EmbedMessageMutation) ResetHeaderIcon() {
-	m.header_icon = nil
-}
-
-// SetFooterText sets the "footer_text" field.
-func (m *EmbedMessageMutation) SetFooterText(s string) {
-	m.footer_text = &s
-}
-
-// FooterText returns the value of the "footer_text" field in the mutation.
-func (m *EmbedMessageMutation) FooterText() (r string, exists bool) {
-	v := m.footer_text
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldFooterText returns the old "footer_text" field's value of the EmbedMessage entity.
-// If the EmbedMessage object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EmbedMessageMutation) OldFooterText(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldFooterText is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldFooterText requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldFooterText: %w", err)
-	}
-	return oldValue.FooterText, nil
-}
-
-// ResetFooterText resets all changes to the "footer_text" field.
-func (m *EmbedMessageMutation) ResetFooterText() {
-	m.footer_text = nil
-}
-
-// SetFooterSubtext sets the "footer_subtext" field.
-func (m *EmbedMessageMutation) SetFooterSubtext(s string) {
-	m.footer_subtext = &s
-}
-
-// FooterSubtext returns the value of the "footer_subtext" field in the mutation.
-func (m *EmbedMessageMutation) FooterSubtext() (r string, exists bool) {
-	v := m.footer_subtext
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldFooterSubtext returns the old "footer_subtext" field's value of the EmbedMessage entity.
-// If the EmbedMessage object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EmbedMessageMutation) OldFooterSubtext(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldFooterSubtext is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldFooterSubtext requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldFooterSubtext: %w", err)
-	}
-	return oldValue.FooterSubtext, nil
-}
-
-// ResetFooterSubtext resets all changes to the "footer_subtext" field.
-func (m *EmbedMessageMutation) ResetFooterSubtext() {
-	m.footer_subtext = nil
-}
-
-// SetFooterURL sets the "footer_url" field.
-func (m *EmbedMessageMutation) SetFooterURL(s string) {
-	m.footer_url = &s
-}
-
-// FooterURL returns the value of the "footer_url" field in the mutation.
-func (m *EmbedMessageMutation) FooterURL() (r string, exists bool) {
-	v := m.footer_url
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldFooterURL returns the old "footer_url" field's value of the EmbedMessage entity.
-// If the EmbedMessage object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EmbedMessageMutation) OldFooterURL(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldFooterURL is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldFooterURL requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldFooterURL: %w", err)
-	}
-	return oldValue.FooterURL, nil
-}
-
-// ResetFooterURL resets all changes to the "footer_url" field.
-func (m *EmbedMessageMutation) ResetFooterURL() {
-	m.footer_url = nil
-}
-
-// SetFooterIcon sets the "footer_icon" field.
-func (m *EmbedMessageMutation) SetFooterIcon(s string) {
-	m.footer_icon = &s
-}
-
-// FooterIcon returns the value of the "footer_icon" field in the mutation.
-func (m *EmbedMessageMutation) FooterIcon() (r string, exists bool) {
-	v := m.footer_icon
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldFooterIcon returns the old "footer_icon" field's value of the EmbedMessage entity.
-// If the EmbedMessage object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EmbedMessageMutation) OldFooterIcon(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldFooterIcon is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldFooterIcon requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldFooterIcon: %w", err)
-	}
-	return oldValue.FooterIcon, nil
-}
-
-// ResetFooterIcon resets all changes to the "footer_icon" field.
-func (m *EmbedMessageMutation) ResetFooterIcon() {
-	m.footer_icon = nil
+// ResetData resets all changes to the "data" field.
+func (m *EmbedMessageMutation) ResetData() {
+	m.data = nil
 }
 
 // AddEmbedFieldIDs adds the "embed_field" edge to the EmbedField entity by ids.
@@ -3787,39 +3397,9 @@ func (m *EmbedMessageMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *EmbedMessageMutation) Fields() []string {
-	fields := make([]string, 0, 11)
-	if m.title != nil {
-		fields = append(fields, embedmessage.FieldTitle)
-	}
-	if m.body != nil {
-		fields = append(fields, embedmessage.FieldBody)
-	}
-	if m.color != nil {
-		fields = append(fields, embedmessage.FieldColor)
-	}
-	if m.header_text != nil {
-		fields = append(fields, embedmessage.FieldHeaderText)
-	}
-	if m.header_subtext != nil {
-		fields = append(fields, embedmessage.FieldHeaderSubtext)
-	}
-	if m.header_url != nil {
-		fields = append(fields, embedmessage.FieldHeaderURL)
-	}
-	if m.header_icon != nil {
-		fields = append(fields, embedmessage.FieldHeaderIcon)
-	}
-	if m.footer_text != nil {
-		fields = append(fields, embedmessage.FieldFooterText)
-	}
-	if m.footer_subtext != nil {
-		fields = append(fields, embedmessage.FieldFooterSubtext)
-	}
-	if m.footer_url != nil {
-		fields = append(fields, embedmessage.FieldFooterURL)
-	}
-	if m.footer_icon != nil {
-		fields = append(fields, embedmessage.FieldFooterIcon)
+	fields := make([]string, 0, 1)
+	if m.data != nil {
+		fields = append(fields, embedmessage.FieldData)
 	}
 	return fields
 }
@@ -3829,28 +3409,8 @@ func (m *EmbedMessageMutation) Fields() []string {
 // schema.
 func (m *EmbedMessageMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case embedmessage.FieldTitle:
-		return m.Title()
-	case embedmessage.FieldBody:
-		return m.Body()
-	case embedmessage.FieldColor:
-		return m.Color()
-	case embedmessage.FieldHeaderText:
-		return m.HeaderText()
-	case embedmessage.FieldHeaderSubtext:
-		return m.HeaderSubtext()
-	case embedmessage.FieldHeaderURL:
-		return m.HeaderURL()
-	case embedmessage.FieldHeaderIcon:
-		return m.HeaderIcon()
-	case embedmessage.FieldFooterText:
-		return m.FooterText()
-	case embedmessage.FieldFooterSubtext:
-		return m.FooterSubtext()
-	case embedmessage.FieldFooterURL:
-		return m.FooterURL()
-	case embedmessage.FieldFooterIcon:
-		return m.FooterIcon()
+	case embedmessage.FieldData:
+		return m.Data()
 	}
 	return nil, false
 }
@@ -3860,28 +3420,8 @@ func (m *EmbedMessageMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *EmbedMessageMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case embedmessage.FieldTitle:
-		return m.OldTitle(ctx)
-	case embedmessage.FieldBody:
-		return m.OldBody(ctx)
-	case embedmessage.FieldColor:
-		return m.OldColor(ctx)
-	case embedmessage.FieldHeaderText:
-		return m.OldHeaderText(ctx)
-	case embedmessage.FieldHeaderSubtext:
-		return m.OldHeaderSubtext(ctx)
-	case embedmessage.FieldHeaderURL:
-		return m.OldHeaderURL(ctx)
-	case embedmessage.FieldHeaderIcon:
-		return m.OldHeaderIcon(ctx)
-	case embedmessage.FieldFooterText:
-		return m.OldFooterText(ctx)
-	case embedmessage.FieldFooterSubtext:
-		return m.OldFooterSubtext(ctx)
-	case embedmessage.FieldFooterURL:
-		return m.OldFooterURL(ctx)
-	case embedmessage.FieldFooterIcon:
-		return m.OldFooterIcon(ctx)
+	case embedmessage.FieldData:
+		return m.OldData(ctx)
 	}
 	return nil, fmt.Errorf("unknown EmbedMessage field %s", name)
 }
@@ -3891,82 +3431,12 @@ func (m *EmbedMessageMutation) OldField(ctx context.Context, name string) (ent.V
 // type.
 func (m *EmbedMessageMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case embedmessage.FieldTitle:
-		v, ok := value.(string)
+	case embedmessage.FieldData:
+		v, ok := value.(*v1.Embed)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetTitle(v)
-		return nil
-	case embedmessage.FieldBody:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetBody(v)
-		return nil
-	case embedmessage.FieldColor:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetColor(v)
-		return nil
-	case embedmessage.FieldHeaderText:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetHeaderText(v)
-		return nil
-	case embedmessage.FieldHeaderSubtext:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetHeaderSubtext(v)
-		return nil
-	case embedmessage.FieldHeaderURL:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetHeaderURL(v)
-		return nil
-	case embedmessage.FieldHeaderIcon:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetHeaderIcon(v)
-		return nil
-	case embedmessage.FieldFooterText:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetFooterText(v)
-		return nil
-	case embedmessage.FieldFooterSubtext:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetFooterSubtext(v)
-		return nil
-	case embedmessage.FieldFooterURL:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetFooterURL(v)
-		return nil
-	case embedmessage.FieldFooterIcon:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetFooterIcon(v)
+		m.SetData(v)
 		return nil
 	}
 	return fmt.Errorf("unknown EmbedMessage field %s", name)
@@ -3975,21 +3445,13 @@ func (m *EmbedMessageMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *EmbedMessageMutation) AddedFields() []string {
-	var fields []string
-	if m.addcolor != nil {
-		fields = append(fields, embedmessage.FieldColor)
-	}
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *EmbedMessageMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case embedmessage.FieldColor:
-		return m.AddedColor()
-	}
 	return nil, false
 }
 
@@ -3998,13 +3460,6 @@ func (m *EmbedMessageMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *EmbedMessageMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case embedmessage.FieldColor:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddColor(v)
-		return nil
 	}
 	return fmt.Errorf("unknown EmbedMessage numeric field %s", name)
 }
@@ -4032,38 +3487,8 @@ func (m *EmbedMessageMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *EmbedMessageMutation) ResetField(name string) error {
 	switch name {
-	case embedmessage.FieldTitle:
-		m.ResetTitle()
-		return nil
-	case embedmessage.FieldBody:
-		m.ResetBody()
-		return nil
-	case embedmessage.FieldColor:
-		m.ResetColor()
-		return nil
-	case embedmessage.FieldHeaderText:
-		m.ResetHeaderText()
-		return nil
-	case embedmessage.FieldHeaderSubtext:
-		m.ResetHeaderSubtext()
-		return nil
-	case embedmessage.FieldHeaderURL:
-		m.ResetHeaderURL()
-		return nil
-	case embedmessage.FieldHeaderIcon:
-		m.ResetHeaderIcon()
-		return nil
-	case embedmessage.FieldFooterText:
-		m.ResetFooterText()
-		return nil
-	case embedmessage.FieldFooterSubtext:
-		m.ResetFooterSubtext()
-		return nil
-	case embedmessage.FieldFooterURL:
-		m.ResetFooterURL()
-		return nil
-	case embedmessage.FieldFooterIcon:
-		m.ResetFooterIcon()
+	case embedmessage.FieldData:
+		m.ResetData()
 		return nil
 	}
 	return fmt.Errorf("unknown EmbedMessage field %s", name)
@@ -5821,6 +5246,9 @@ type FileMessageMutation struct {
 	typ           string
 	id            *int
 	clearedFields map[string]struct{}
+	file          map[string]struct{}
+	removedfile   map[string]struct{}
+	clearedfile   bool
 	done          bool
 	oldValue      func(context.Context) (*FileMessage, error)
 	predicates    []predicate.FileMessage
@@ -5903,6 +5331,59 @@ func (m *FileMessageMutation) ID() (id int, exists bool) {
 		return
 	}
 	return *m.id, true
+}
+
+// AddFileIDs adds the "file" edge to the File entity by ids.
+func (m *FileMessageMutation) AddFileIDs(ids ...string) {
+	if m.file == nil {
+		m.file = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.file[ids[i]] = struct{}{}
+	}
+}
+
+// ClearFile clears the "file" edge to the File entity.
+func (m *FileMessageMutation) ClearFile() {
+	m.clearedfile = true
+}
+
+// FileCleared returns if the "file" edge to the File entity was cleared.
+func (m *FileMessageMutation) FileCleared() bool {
+	return m.clearedfile
+}
+
+// RemoveFileIDs removes the "file" edge to the File entity by IDs.
+func (m *FileMessageMutation) RemoveFileIDs(ids ...string) {
+	if m.removedfile == nil {
+		m.removedfile = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.removedfile[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedFile returns the removed IDs of the "file" edge to the File entity.
+func (m *FileMessageMutation) RemovedFileIDs() (ids []string) {
+	for id := range m.removedfile {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// FileIDs returns the "file" edge IDs in the mutation.
+func (m *FileMessageMutation) FileIDs() (ids []string) {
+	for id := range m.file {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetFile resets all changes to the "file" edge.
+func (m *FileMessageMutation) ResetFile() {
+	m.file = nil
+	m.clearedfile = false
+	m.removedfile = nil
 }
 
 // Op returns the operation name.
@@ -5993,49 +5474,85 @@ func (m *FileMessageMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *FileMessageMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.file != nil {
+		edges = append(edges, filemessage.EdgeFile)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *FileMessageMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case filemessage.EdgeFile:
+		ids := make([]ent.Value, 0, len(m.file))
+		for id := range m.file {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *FileMessageMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.removedfile != nil {
+		edges = append(edges, filemessage.EdgeFile)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *FileMessageMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case filemessage.EdgeFile:
+		ids := make([]ent.Value, 0, len(m.removedfile))
+		for id := range m.removedfile {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *FileMessageMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedfile {
+		edges = append(edges, filemessage.EdgeFile)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *FileMessageMutation) EdgeCleared(name string) bool {
+	switch name {
+	case filemessage.EdgeFile:
+		return m.clearedfile
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *FileMessageMutation) ClearEdge(name string) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown FileMessage unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *FileMessageMutation) ResetEdge(name string) error {
+	switch name {
+	case filemessage.EdgeFile:
+		m.ResetFile()
+		return nil
+	}
 	return fmt.Errorf("unknown FileMessage edge %s", name)
 }
 
@@ -8879,9 +8396,8 @@ type MessageMutation struct {
 	id                   *uint64
 	createdat            *time.Time
 	editedat             *time.Time
-	actions              *[]*v1.Action
 	metadata             **v1.Metadata
-	overrides            *[]byte
+	override             **v1.Override
 	clearedFields        map[string]struct{}
 	user                 *uint64
 	cleareduser          bool
@@ -9073,55 +8589,6 @@ func (m *MessageMutation) ResetEditedat() {
 	delete(m.clearedFields, message.FieldEditedat)
 }
 
-// SetActions sets the "actions" field.
-func (m *MessageMutation) SetActions(v []*v1.Action) {
-	m.actions = &v
-}
-
-// Actions returns the value of the "actions" field in the mutation.
-func (m *MessageMutation) Actions() (r []*v1.Action, exists bool) {
-	v := m.actions
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldActions returns the old "actions" field's value of the Message entity.
-// If the Message object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MessageMutation) OldActions(ctx context.Context) (v []*v1.Action, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldActions is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldActions requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldActions: %w", err)
-	}
-	return oldValue.Actions, nil
-}
-
-// ClearActions clears the value of the "actions" field.
-func (m *MessageMutation) ClearActions() {
-	m.actions = nil
-	m.clearedFields[message.FieldActions] = struct{}{}
-}
-
-// ActionsCleared returns if the "actions" field was cleared in this mutation.
-func (m *MessageMutation) ActionsCleared() bool {
-	_, ok := m.clearedFields[message.FieldActions]
-	return ok
-}
-
-// ResetActions resets all changes to the "actions" field.
-func (m *MessageMutation) ResetActions() {
-	m.actions = nil
-	delete(m.clearedFields, message.FieldActions)
-}
-
 // SetMetadata sets the "metadata" field.
 func (m *MessageMutation) SetMetadata(v *v1.Metadata) {
 	m.metadata = &v
@@ -9171,53 +8638,53 @@ func (m *MessageMutation) ResetMetadata() {
 	delete(m.clearedFields, message.FieldMetadata)
 }
 
-// SetOverrides sets the "overrides" field.
-func (m *MessageMutation) SetOverrides(b []byte) {
-	m.overrides = &b
+// SetOverride sets the "override" field.
+func (m *MessageMutation) SetOverride(v *v1.Override) {
+	m.override = &v
 }
 
-// Overrides returns the value of the "overrides" field in the mutation.
-func (m *MessageMutation) Overrides() (r []byte, exists bool) {
-	v := m.overrides
+// Override returns the value of the "override" field in the mutation.
+func (m *MessageMutation) Override() (r *v1.Override, exists bool) {
+	v := m.override
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldOverrides returns the old "overrides" field's value of the Message entity.
+// OldOverride returns the old "override" field's value of the Message entity.
 // If the Message object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MessageMutation) OldOverrides(ctx context.Context) (v []byte, err error) {
+func (m *MessageMutation) OldOverride(ctx context.Context) (v *v1.Override, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldOverrides is only allowed on UpdateOne operations")
+		return v, fmt.Errorf("OldOverride is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldOverrides requires an ID field in the mutation")
+		return v, fmt.Errorf("OldOverride requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldOverrides: %w", err)
+		return v, fmt.Errorf("querying old value for OldOverride: %w", err)
 	}
-	return oldValue.Overrides, nil
+	return oldValue.Override, nil
 }
 
-// ClearOverrides clears the value of the "overrides" field.
-func (m *MessageMutation) ClearOverrides() {
-	m.overrides = nil
-	m.clearedFields[message.FieldOverrides] = struct{}{}
+// ClearOverride clears the value of the "override" field.
+func (m *MessageMutation) ClearOverride() {
+	m.override = nil
+	m.clearedFields[message.FieldOverride] = struct{}{}
 }
 
-// OverridesCleared returns if the "overrides" field was cleared in this mutation.
-func (m *MessageMutation) OverridesCleared() bool {
-	_, ok := m.clearedFields[message.FieldOverrides]
+// OverrideCleared returns if the "override" field was cleared in this mutation.
+func (m *MessageMutation) OverrideCleared() bool {
+	_, ok := m.clearedFields[message.FieldOverride]
 	return ok
 }
 
-// ResetOverrides resets all changes to the "overrides" field.
-func (m *MessageMutation) ResetOverrides() {
-	m.overrides = nil
-	delete(m.clearedFields, message.FieldOverrides)
+// ResetOverride resets all changes to the "override" field.
+func (m *MessageMutation) ResetOverride() {
+	m.override = nil
+	delete(m.clearedFields, message.FieldOverride)
 }
 
 // SetUserID sets the "user" edge to the User entity by id.
@@ -9521,21 +8988,18 @@ func (m *MessageMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MessageMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 4)
 	if m.createdat != nil {
 		fields = append(fields, message.FieldCreatedat)
 	}
 	if m.editedat != nil {
 		fields = append(fields, message.FieldEditedat)
 	}
-	if m.actions != nil {
-		fields = append(fields, message.FieldActions)
-	}
 	if m.metadata != nil {
 		fields = append(fields, message.FieldMetadata)
 	}
-	if m.overrides != nil {
-		fields = append(fields, message.FieldOverrides)
+	if m.override != nil {
+		fields = append(fields, message.FieldOverride)
 	}
 	return fields
 }
@@ -9549,12 +9013,10 @@ func (m *MessageMutation) Field(name string) (ent.Value, bool) {
 		return m.Createdat()
 	case message.FieldEditedat:
 		return m.Editedat()
-	case message.FieldActions:
-		return m.Actions()
 	case message.FieldMetadata:
 		return m.Metadata()
-	case message.FieldOverrides:
-		return m.Overrides()
+	case message.FieldOverride:
+		return m.Override()
 	}
 	return nil, false
 }
@@ -9568,12 +9030,10 @@ func (m *MessageMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldCreatedat(ctx)
 	case message.FieldEditedat:
 		return m.OldEditedat(ctx)
-	case message.FieldActions:
-		return m.OldActions(ctx)
 	case message.FieldMetadata:
 		return m.OldMetadata(ctx)
-	case message.FieldOverrides:
-		return m.OldOverrides(ctx)
+	case message.FieldOverride:
+		return m.OldOverride(ctx)
 	}
 	return nil, fmt.Errorf("unknown Message field %s", name)
 }
@@ -9597,13 +9057,6 @@ func (m *MessageMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetEditedat(v)
 		return nil
-	case message.FieldActions:
-		v, ok := value.([]*v1.Action)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetActions(v)
-		return nil
 	case message.FieldMetadata:
 		v, ok := value.(*v1.Metadata)
 		if !ok {
@@ -9611,12 +9064,12 @@ func (m *MessageMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetMetadata(v)
 		return nil
-	case message.FieldOverrides:
-		v, ok := value.([]byte)
+	case message.FieldOverride:
+		v, ok := value.(*v1.Override)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetOverrides(v)
+		m.SetOverride(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Message field %s", name)
@@ -9651,14 +9104,11 @@ func (m *MessageMutation) ClearedFields() []string {
 	if m.FieldCleared(message.FieldEditedat) {
 		fields = append(fields, message.FieldEditedat)
 	}
-	if m.FieldCleared(message.FieldActions) {
-		fields = append(fields, message.FieldActions)
-	}
 	if m.FieldCleared(message.FieldMetadata) {
 		fields = append(fields, message.FieldMetadata)
 	}
-	if m.FieldCleared(message.FieldOverrides) {
-		fields = append(fields, message.FieldOverrides)
+	if m.FieldCleared(message.FieldOverride) {
+		fields = append(fields, message.FieldOverride)
 	}
 	return fields
 }
@@ -9677,14 +9127,11 @@ func (m *MessageMutation) ClearField(name string) error {
 	case message.FieldEditedat:
 		m.ClearEditedat()
 		return nil
-	case message.FieldActions:
-		m.ClearActions()
-		return nil
 	case message.FieldMetadata:
 		m.ClearMetadata()
 		return nil
-	case message.FieldOverrides:
-		m.ClearOverrides()
+	case message.FieldOverride:
+		m.ClearOverride()
 		return nil
 	}
 	return fmt.Errorf("unknown Message nullable field %s", name)
@@ -9700,14 +9147,11 @@ func (m *MessageMutation) ResetField(name string) error {
 	case message.FieldEditedat:
 		m.ResetEditedat()
 		return nil
-	case message.FieldActions:
-		m.ResetActions()
-		return nil
 	case message.FieldMetadata:
 		m.ResetMetadata()
 		return nil
-	case message.FieldOverrides:
-		m.ResetOverrides()
+	case message.FieldOverride:
+		m.ResetOverride()
 		return nil
 	}
 	return fmt.Errorf("unknown Message field %s", name)

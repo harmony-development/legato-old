@@ -54,21 +54,15 @@ func (mc *MessageCreate) SetNillableEditedat(t *time.Time) *MessageCreate {
 	return mc
 }
 
-// SetActions sets the "actions" field.
-func (mc *MessageCreate) SetActions(v []*v1.Action) *MessageCreate {
-	mc.mutation.SetActions(v)
-	return mc
-}
-
 // SetMetadata sets the "metadata" field.
 func (mc *MessageCreate) SetMetadata(v *v1.Metadata) *MessageCreate {
 	mc.mutation.SetMetadata(v)
 	return mc
 }
 
-// SetOverrides sets the "overrides" field.
-func (mc *MessageCreate) SetOverrides(b []byte) *MessageCreate {
-	mc.mutation.SetOverrides(b)
+// SetOverride sets the "override" field.
+func (mc *MessageCreate) SetOverride(v *v1.Override) *MessageCreate {
+	mc.mutation.SetOverride(v)
 	return mc
 }
 
@@ -319,14 +313,6 @@ func (mc *MessageCreate) createSpec() (*Message, *sqlgraph.CreateSpec) {
 		})
 		_node.Editedat = value
 	}
-	if value, ok := mc.mutation.Actions(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: message.FieldActions,
-		})
-		_node.Actions = value
-	}
 	if value, ok := mc.mutation.Metadata(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
@@ -335,13 +321,13 @@ func (mc *MessageCreate) createSpec() (*Message, *sqlgraph.CreateSpec) {
 		})
 		_node.Metadata = value
 	}
-	if value, ok := mc.mutation.Overrides(); ok {
+	if value, ok := mc.mutation.Override(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBytes,
+			Type:   field.TypeJSON,
 			Value:  value,
-			Column: message.FieldOverrides,
+			Column: message.FieldOverride,
 		})
-		_node.Overrides = value
+		_node.Override = value
 	}
 	if nodes := mc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

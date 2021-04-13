@@ -3,32 +3,27 @@ package ent_shared
 import (
 	"time"
 
-	proto "github.com/golang/protobuf/proto"
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen"
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
 	"github.com/harmony-development/legato/server/db/ent/entgen/textmessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func mustBytes(m proto.Message) []byte {
-	data, err := proto.Marshal(m)
-	if err != nil {
-		panic(err)
-	}
-	return data
-}
-
 // TODO: overrides, actions
-func (d *DB) addMessageStem(channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata) *entgen.MessageCreate {
+func (d *DB) addMessageStem(channelID, messageID uint64, authorID uint64, replyTo *uint64, override *harmonytypesv1.Override, metadata *harmonytypesv1.Metadata) *entgen.MessageCreate {
 	msg := d.Message.Create().
 		SetID(messageID).
 		SetChannelID(channelID).
 		SetUserID(authorID).
 		SetMetadata(metadata).
-		SetActions(actions).
-		SetOverrides(mustBytes(overrides))
+		SetCreatedat(time.Now())
+
+	if override != nil {
+		msg.SetOverride(override)
+	}
 
 	if replyTo != nil {
 		msg.AddReplyIDs(*replyTo)
@@ -37,20 +32,52 @@ func (d *DB) addMessageStem(channelID, messageID uint64, authorID uint64, action
 	return msg
 }
 
-func (d *DB) AddTextMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, content string) (t time.Time, e error) {
+func (d *DB) AddTextMessage(guildID, channelID, messageID uint64, authorID uint64, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, content string) (t time.Time, e error) {
 	defer doRecovery(&e)
+	msg :=
+		d.addMessageStem(channelID, messageID, authorID, replyTo, overrides, metadata).
+			SetTextMessage(
+				d.TextMessage.
+					Create().
+					SetContent(content).
+					SaveX(ctx),
+			).
+			SaveX(ctx)
 
-	msg := d.addMessageStem(channelID, messageID, authorID, actions, overrides, replyTo, metadata).SaveX(ctx)
-	msg.Update().SetTextmessage(d.TextMessage.Create().SetMessage(msg).SetContent(content).SaveX(ctx)).SaveX(ctx)
+	t = msg.Createdat
 
-	return msg.Createdat, nil
+	return
 }
 
-func (d *DB) AddFilesMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, files []*harmonytypesv1.Attachment) (t time.Time, e error) {
-	panic("unimplemented")
+func (d *DB) AddFilesMessage(guildID, channelID, messageID uint64, authorID uint64, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, files []string) (t time.Time, e error) {
+	defer doRecovery(&e)
+	msg :=
+		d.addMessageStem(channelID, messageID, authorID, replyTo, overrides, metadata).
+			SetFileMessage(
+				d.FileMessage.
+					Create().
+					AddFileIDs(files...).
+					SaveX(ctx),
+			).
+			SaveX(ctx)
+
+	t = msg.Createdat
+
+	return
 }
-func (d *DB) AddEmbedMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, embeds []*harmonytypesv1.Embed) (t time.Time, e error) {
-	panic("unimplemented")
+
+func (d *DB) AddEmbedMessage(guildID, channelID, messageID uint64, authorID uint64, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, embed *harmonytypesv1.Embed) (t time.Time, e error) {
+	defer doRecovery(&e)
+	msg :=
+		d.addMessageStem(channelID, messageID, authorID, replyTo, overrides, metadata).
+			SetEmbedMessage(
+				d.EmbedMessage.Create().
+					SetData(embed).
+					SaveX(ctx),
+			).
+			SaveX(ctx)
+	t = msg.Createdat
+	return
 }
 
 func (d *DB) DeleteMessage(messageID uint64) (err error) {
@@ -61,13 +88,57 @@ func (d *DB) DeleteMessage(messageID uint64) (err error) {
 	return
 }
 
-func (d *DB) GetMessage(messageID uint64) (msg *entgen.Message, err error) {
+func (d *DB) GetMessage(messageID uint64) (msg *harmonytypesv1.Message, err error) {
 	defer doRecovery(&err)
-	msg = d.Message.GetX(ctx, messageID)
+	data := d.Message.
+		Query().
+		Where(
+			message.ID(messageID),
+		).
+		WithChannel(func(cq *entgen.ChannelQuery) {
+			cq.WithGuild()
+		}).
+		WithUser().
+		WithParent().
+		WithTextMessage().
+		WithEmbedMessage().
+		WithFileMessage(func(fmq *entgen.FileMessageQuery) {
+			fmq.WithFile()
+		}).
+		OnlyX(ctx)
+
+	msg = &harmonytypesv1.Message{
+		GuildId:   data.Edges.Channel.Edges.Guild.ID,
+		ChannelId: data.Edges.Channel.ID,
+		MessageId: data.ID,
+		AuthorId:  data.Edges.User.ID,
+		CreatedAt: timestamppb.New(data.Createdat),
+		EditedAt:  timestamppb.New(data.Editedat),
+		InReplyTo: data.Edges.Parent.ID,
+	}
+
+	if data.Edges.TextMessage != nil {
+		msg.Content = &harmonytypesv1.Content{
+			Content: &harmonytypesv1.Content_TextMessage{
+				TextMessage: &harmonytypesv1.ContentText{
+					Content: data.Edges.TextMessage.Content,
+				},
+			},
+		}
+	} else if data.Edges.FileMessage != nil {
+		msg.Content = &harmonytypesv1.Content{
+			Content: &harmonytypesv1.Content_FilesMessage{
+				FilesMessage: &harmonytypesv1.ContentFiles{
+					Attachments: data.Edges.FileMessage.Edges.File,
+				},
+			},
+		}
+	}
+
 	return
 }
 
-func (d *DB) GetMessages(channelID uint64) (msgs []*entgen.Message, err error) {
+func (d *DB) GetMessages(channelID uint64) (msgs []*harmonytypesv1.Message, err error) {
 	defer doRecovery(&err)
 	msgs = d.Channel.
 		GetX(ctx, channelID).

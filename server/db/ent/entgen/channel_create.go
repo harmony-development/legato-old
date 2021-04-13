@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	v1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
@@ -42,8 +43,8 @@ func (cc *ChannelCreate) SetPosition(s string) *ChannelCreate {
 }
 
 // SetMetadata sets the "metadata" field.
-func (cc *ChannelCreate) SetMetadata(b []byte) *ChannelCreate {
-	cc.mutation.SetMetadata(b)
+func (cc *ChannelCreate) SetMetadata(v *v1.Metadata) *ChannelCreate {
+	cc.mutation.SetMetadata(v)
 	return cc
 }
 
@@ -239,7 +240,7 @@ func (cc *ChannelCreate) createSpec() (*Channel, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := cc.mutation.Metadata(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBytes,
+			Type:   field.TypeJSON,
 			Value:  value,
 			Column: channel.FieldMetadata,
 		})

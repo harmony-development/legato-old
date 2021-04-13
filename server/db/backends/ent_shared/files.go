@@ -1,8 +1,8 @@
 package ent_shared
 
 import (
-	"github.com/harmony-development/legato/server/db/ent/entgen"
 	"github.com/harmony-development/legato/server/db/ent/entgen/filehash"
+	"github.com/harmony-development/legato/server/db/types"
 )
 
 func (d *DB) AddFileHash(fileID string, hash []byte) (err error) {
@@ -27,9 +27,16 @@ func (d *DB) GetFileIDByHash(hash []byte) (fileID string, err error) {
 	return
 }
 
-func (d *DB) GetFileMetadata(fileID string) (file *entgen.File, err error) {
+func (d *DB) GetFileMetadata(fileID string) (file *types.FileData, err error) {
 	defer doRecovery(&err)
-	file = d.File.GetX(ctx, fileID)
+	data := d.File.GetX(ctx, fileID)
+
+	file = &types.FileData{
+		FileID:      data.ID,
+		ContentType: data.Contenttype,
+		Name:        data.Name,
+		Size:        data.Size,
+	}
 	return
 }
 

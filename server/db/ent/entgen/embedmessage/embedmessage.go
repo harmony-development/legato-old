@@ -7,28 +7,8 @@ const (
 	Label = "embed_message"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldTitle holds the string denoting the title field in the database.
-	FieldTitle = "title"
-	// FieldBody holds the string denoting the body field in the database.
-	FieldBody = "body"
-	// FieldColor holds the string denoting the color field in the database.
-	FieldColor = "color"
-	// FieldHeaderText holds the string denoting the header_text field in the database.
-	FieldHeaderText = "header_text"
-	// FieldHeaderSubtext holds the string denoting the header_subtext field in the database.
-	FieldHeaderSubtext = "header_subtext"
-	// FieldHeaderURL holds the string denoting the header_url field in the database.
-	FieldHeaderURL = "header_url"
-	// FieldHeaderIcon holds the string denoting the header_icon field in the database.
-	FieldHeaderIcon = "header_icon"
-	// FieldFooterText holds the string denoting the footer_text field in the database.
-	FieldFooterText = "footer_text"
-	// FieldFooterSubtext holds the string denoting the footer_subtext field in the database.
-	FieldFooterSubtext = "footer_subtext"
-	// FieldFooterURL holds the string denoting the footer_url field in the database.
-	FieldFooterURL = "footer_url"
-	// FieldFooterIcon holds the string denoting the footer_icon field in the database.
-	FieldFooterIcon = "footer_icon"
+	// FieldData holds the string denoting the data field in the database.
+	FieldData = "data"
 	// EdgeEmbedField holds the string denoting the embed_field edge name in mutations.
 	EdgeEmbedField = "embed_field"
 	// EdgeMessage holds the string denoting the message edge name in mutations.
@@ -54,17 +34,7 @@ const (
 // Columns holds all SQL columns for embedmessage fields.
 var Columns = []string{
 	FieldID,
-	FieldTitle,
-	FieldBody,
-	FieldColor,
-	FieldHeaderText,
-	FieldHeaderSubtext,
-	FieldHeaderURL,
-	FieldHeaderIcon,
-	FieldFooterText,
-	FieldFooterSubtext,
-	FieldFooterURL,
-	FieldFooterIcon,
+	FieldData,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "embed_messages"

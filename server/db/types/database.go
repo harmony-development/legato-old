@@ -16,12 +16,12 @@ type IHarmonyDB interface {
 	CreateInvite(guildID uint64, possibleUses int32, name string) (*InviteData, error)
 	UpdateChannelInformation(guildID, channelID uint64, name *string, metadata []byte) error
 	AddMemberToGuild(userID, guildID uint64) error
-	AddChannelToGuild(guildID, channelID uint64, channelName string, previous, next *uint64, kind ChannelKind, md []byte) (c ChannelData, err error)
+	AddChannelToGuild(guildID, channelID uint64, channelName string, previous, next *uint64, kind ChannelKind, md *harmonytypesv1.Metadata) (c ChannelData, err error)
 	DeleteChannelFromGuild(guildID, channelID uint64) error
 
-	AddTextMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, content string) (time.Time, error)
-	AddFilesMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, files []*harmonytypesv1.Attachment) (time.Time, error)
-	AddEmbedMessage(guildID, channelID, messageID uint64, authorID uint64, actions []*harmonytypesv1.Action, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, embeds []*harmonytypesv1.Embed) (time.Time, error)
+	AddTextMessage(guildID, channelID, messageID uint64, authorID uint64, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, content string) (time.Time, error)
+	AddFilesMessage(guildID, channelID, messageID uint64, authorID uint64, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, files []string) (time.Time, error)
+	AddEmbedMessage(guildID, channelID, messageID uint64, authorID uint64, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, embed *harmonytypesv1.Embed) (time.Time, error)
 
 	UpdateTextMessage(messageID uint64, content string) (time.Time, error)
 

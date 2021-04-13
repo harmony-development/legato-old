@@ -4,6 +4,7 @@ package entgen
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -11,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/harmony-development/legato/server/db/ent/entgen/file"
 	"github.com/harmony-development/legato/server/db/ent/entgen/filemessage"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 )
@@ -23,6 +25,8 @@ type FileMessageQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.FileMessage
+	// eager-loading edges.
+	withFile *FileQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -50,6 +54,28 @@ func (fmq *FileMessageQuery) Offset(offset int) *FileMessageQuery {
 func (fmq *FileMessageQuery) Order(o ...OrderFunc) *FileMessageQuery {
 	fmq.order = append(fmq.order, o...)
 	return fmq
+}
+
+// QueryFile chains the current query on the "file" edge.
+func (fmq *FileMessageQuery) QueryFile() *FileQuery {
+	query := &FileQuery{config: fmq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := fmq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := fmq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(filemessage.Table, filemessage.FieldID, selector),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, filemessage.FileTable, filemessage.FileColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(fmq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first FileMessage entity from the query.
@@ -233,10 +259,22 @@ func (fmq *FileMessageQuery) Clone() *FileMessageQuery {
 		offset:     fmq.offset,
 		order:      append([]OrderFunc{}, fmq.order...),
 		predicates: append([]predicate.FileMessage{}, fmq.predicates...),
+		withFile:   fmq.withFile.Clone(),
 		// clone intermediate query.
 		sql:  fmq.sql.Clone(),
 		path: fmq.path,
 	}
+}
+
+// WithFile tells the query-builder to eager-load the nodes that are connected to
+// the "file" edge. The optional arguments are used to configure the query builder of the edge.
+func (fmq *FileMessageQuery) WithFile(opts ...func(*FileQuery)) *FileMessageQuery {
+	query := &FileQuery{config: fmq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	fmq.withFile = query
+	return fmq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -278,8 +316,11 @@ func (fmq *FileMessageQuery) prepareQuery(ctx context.Context) error {
 
 func (fmq *FileMessageQuery) sqlAll(ctx context.Context) ([]*FileMessage, error) {
 	var (
-		nodes = []*FileMessage{}
-		_spec = fmq.querySpec()
+		nodes       = []*FileMessage{}
+		_spec       = fmq.querySpec()
+		loadedTypes = [1]bool{
+			fmq.withFile != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &FileMessage{config: fmq.config}
@@ -291,6 +332,7 @@ func (fmq *FileMessageQuery) sqlAll(ctx context.Context) ([]*FileMessage, error)
 			return fmt.Errorf("entgen: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if err := sqlgraph.QueryNodes(ctx, fmq.driver, _spec); err != nil {
@@ -299,6 +341,36 @@ func (fmq *FileMessageQuery) sqlAll(ctx context.Context) ([]*FileMessage, error)
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := fmq.withFile; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*FileMessage)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.File = []*File{}
+		}
+		query.withFKs = true
+		query.Where(predicate.File(func(s *sql.Selector) {
+			s.Where(sql.InValues(filemessage.FileColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.file_message_file
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "file_message_file" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "file_message_file" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.File = append(node.Edges.File, n)
+		}
+	}
+
 	return nodes, nil
 }
 
