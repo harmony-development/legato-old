@@ -158,8 +158,13 @@ func Into(msg *entgen.Message) *MessageData {
 		AuthorId:  msg.Edges.User.ID,
 		CreatedAt: timestamppb.New(msg.Createdat),
 		EditedAt:  timestamppb.New(msg.Editedat),
-		InReplyTo: msg.Edges.Parent.ID,
-		Content:   msg.Content,
+		InReplyTo: func() uint64 {
+			if msg.Edges.Parent != nil {
+				return msg.Edges.Parent.ID
+			}
+			return 0
+		}(),
+		Content: msg.Content,
 	}
 }
 

@@ -73,6 +73,11 @@ func (d *DB) GetMessages(channelID uint64) (msgs []*types.MessageData, err error
 	messages := d.Channel.
 		GetX(ctx, channelID).
 		QueryMessage().
+		WithChannel(func(cq *entgen.ChannelQuery) {
+			cq.WithGuild()
+		}).
+		WithUser().
+		WithParent().
 		Limit(50).
 		AllX(ctx)
 
@@ -92,6 +97,11 @@ func (d *DB) GetMessagesBefore(channelID uint64, date time.Time) (msgs []*types.
 				),
 			),
 		).
+		WithChannel(func(cq *entgen.ChannelQuery) {
+			cq.WithGuild()
+		}).
+		WithUser().
+		WithParent().
 		AllX(ctx)
 	return types.IntoMany(messages), nil
 }
