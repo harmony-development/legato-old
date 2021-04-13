@@ -4,6 +4,7 @@ package entgen
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -29,19 +30,6 @@ type GuildUpdate struct {
 // Where adds a new predicate for the GuildUpdate builder.
 func (gu *GuildUpdate) Where(ps ...predicate.Guild) *GuildUpdate {
 	gu.mutation.predicates = append(gu.mutation.predicates, ps...)
-	return gu
-}
-
-// SetOwner sets the "owner" field.
-func (gu *GuildUpdate) SetOwner(u uint64) *GuildUpdate {
-	gu.mutation.ResetOwner()
-	gu.mutation.SetOwner(u)
-	return gu
-}
-
-// AddOwner adds u to the "owner" field.
-func (gu *GuildUpdate) AddOwner(u uint64) *GuildUpdate {
-	gu.mutation.AddOwner(u)
 	return gu
 }
 
@@ -136,6 +124,17 @@ func (gu *GuildUpdate) AddPermissionNode(p ...*PermissionNode) *GuildUpdate {
 		ids[i] = p[i].ID
 	}
 	return gu.AddPermissionNodeIDs(ids...)
+}
+
+// SetOwnerID sets the "owner" edge to the User entity by ID.
+func (gu *GuildUpdate) SetOwnerID(id uint64) *GuildUpdate {
+	gu.mutation.SetOwnerID(id)
+	return gu
+}
+
+// SetOwner sets the "owner" edge to the User entity.
+func (gu *GuildUpdate) SetOwner(u *User) *GuildUpdate {
+	return gu.SetOwnerID(u.ID)
 }
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
@@ -263,6 +262,12 @@ func (gu *GuildUpdate) RemovePermissionNode(p ...*PermissionNode) *GuildUpdate {
 	return gu.RemovePermissionNodeIDs(ids...)
 }
 
+// ClearOwner clears the "owner" edge to the User entity.
+func (gu *GuildUpdate) ClearOwner() *GuildUpdate {
+	gu.mutation.ClearOwner()
+	return gu
+}
+
 // ClearUser clears all "user" edges to the User entity.
 func (gu *GuildUpdate) ClearUser() *GuildUpdate {
 	gu.mutation.ClearUser()
@@ -291,12 +296,18 @@ func (gu *GuildUpdate) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	if len(gu.hooks) == 0 {
+		if err = gu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = gu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*GuildMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = gu.check(); err != nil {
+				return 0, err
 			}
 			gu.mutation = mutation
 			affected, err = gu.sqlSave(ctx)
@@ -335,6 +346,14 @@ func (gu *GuildUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (gu *GuildUpdate) check() error {
+	if _, ok := gu.mutation.OwnerID(); gu.mutation.OwnerCleared() && !ok {
+		return errors.New("entgen: clearing a required unique edge \"owner\"")
+	}
+	return nil
+}
+
 func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -352,20 +371,6 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := gu.mutation.Owner(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: guild.FieldOwner,
-		})
-	}
-	if value, ok := gu.mutation.AddedOwner(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: guild.FieldOwner,
-		})
 	}
 	if value, ok := gu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -658,6 +663,41 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if gu.mutation.OwnerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   guild.OwnerTable,
+			Columns: []string{guild.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := gu.mutation.OwnerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   guild.OwnerTable,
+			Columns: []string{guild.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if gu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -729,19 +769,6 @@ type GuildUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *GuildMutation
-}
-
-// SetOwner sets the "owner" field.
-func (guo *GuildUpdateOne) SetOwner(u uint64) *GuildUpdateOne {
-	guo.mutation.ResetOwner()
-	guo.mutation.SetOwner(u)
-	return guo
-}
-
-// AddOwner adds u to the "owner" field.
-func (guo *GuildUpdateOne) AddOwner(u uint64) *GuildUpdateOne {
-	guo.mutation.AddOwner(u)
-	return guo
 }
 
 // SetName sets the "name" field.
@@ -835,6 +862,17 @@ func (guo *GuildUpdateOne) AddPermissionNode(p ...*PermissionNode) *GuildUpdateO
 		ids[i] = p[i].ID
 	}
 	return guo.AddPermissionNodeIDs(ids...)
+}
+
+// SetOwnerID sets the "owner" edge to the User entity by ID.
+func (guo *GuildUpdateOne) SetOwnerID(id uint64) *GuildUpdateOne {
+	guo.mutation.SetOwnerID(id)
+	return guo
+}
+
+// SetOwner sets the "owner" edge to the User entity.
+func (guo *GuildUpdateOne) SetOwner(u *User) *GuildUpdateOne {
+	return guo.SetOwnerID(u.ID)
 }
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
@@ -962,6 +1000,12 @@ func (guo *GuildUpdateOne) RemovePermissionNode(p ...*PermissionNode) *GuildUpda
 	return guo.RemovePermissionNodeIDs(ids...)
 }
 
+// ClearOwner clears the "owner" edge to the User entity.
+func (guo *GuildUpdateOne) ClearOwner() *GuildUpdateOne {
+	guo.mutation.ClearOwner()
+	return guo
+}
+
 // ClearUser clears all "user" edges to the User entity.
 func (guo *GuildUpdateOne) ClearUser() *GuildUpdateOne {
 	guo.mutation.ClearUser()
@@ -997,12 +1041,18 @@ func (guo *GuildUpdateOne) Save(ctx context.Context) (*Guild, error) {
 		node *Guild
 	)
 	if len(guo.hooks) == 0 {
+		if err = guo.check(); err != nil {
+			return nil, err
+		}
 		node, err = guo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*GuildMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = guo.check(); err != nil {
+				return nil, err
 			}
 			guo.mutation = mutation
 			node, err = guo.sqlSave(ctx)
@@ -1041,6 +1091,14 @@ func (guo *GuildUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (guo *GuildUpdateOne) check() error {
+	if _, ok := guo.mutation.OwnerID(); guo.mutation.OwnerCleared() && !ok {
+		return errors.New("entgen: clearing a required unique edge \"owner\"")
+	}
+	return nil
+}
+
 func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -1075,20 +1133,6 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := guo.mutation.Owner(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: guild.FieldOwner,
-		})
-	}
-	if value, ok := guo.mutation.AddedOwner(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: guild.FieldOwner,
-		})
 	}
 	if value, ok := guo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -1373,6 +1417,41 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: permissionnode.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if guo.mutation.OwnerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   guild.OwnerTable,
+			Columns: []string{guild.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := guo.mutation.OwnerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   guild.OwnerTable,
+			Columns: []string{guild.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
 				},
 			},
 		}

@@ -136,17 +136,24 @@ var (
 	// GuildsColumns holds the columns for the "guilds" table.
 	GuildsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint64, Increment: true},
-		{Name: "owner", Type: field.TypeUint64},
 		{Name: "name", Type: field.TypeString},
 		{Name: "picture", Type: field.TypeString},
 		{Name: "metadata", Type: field.TypeBytes},
+		{Name: "guild_owner", Type: field.TypeUint64, Nullable: true},
 	}
 	// GuildsTable holds the schema information for the "guilds" table.
 	GuildsTable = &schema.Table{
-		Name:        "guilds",
-		Columns:     GuildsColumns,
-		PrimaryKey:  []*schema.Column{GuildsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "guilds",
+		Columns:    GuildsColumns,
+		PrimaryKey: []*schema.Column{GuildsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "guilds_users_owner",
+				Columns:    []*schema.Column{GuildsColumns[4]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// GuildListEntriesColumns holds the columns for the "guild_list_entries" table.
 	GuildListEntriesColumns = []*schema.Column{
@@ -503,6 +510,7 @@ func init() {
 	EmotePacksTable.ForeignKeys[0].RefTable = UsersTable
 	EmotePacksTable.ForeignKeys[1].RefTable = UsersTable
 	ForeignUsersTable.ForeignKeys[0].RefTable = UsersTable
+	GuildsTable.ForeignKeys[0].RefTable = UsersTable
 	GuildListEntriesTable.ForeignKeys[0].RefTable = UsersTable
 	InvitesTable.ForeignKeys[0].RefTable = GuildsTable
 	LocalUsersTable.ForeignKeys[0].RefTable = UsersTable

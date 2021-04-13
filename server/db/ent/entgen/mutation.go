@@ -2960,8 +2960,6 @@ type GuildMutation struct {
 	op                     Op
 	typ                    string
 	id                     *uint64
-	owner                  *uint64
-	addowner               *uint64
 	name                   *string
 	picture                *string
 	metadata               **v1.Metadata
@@ -2981,6 +2979,8 @@ type GuildMutation struct {
 	permission_node        map[int]struct{}
 	removedpermission_node map[int]struct{}
 	clearedpermission_node bool
+	owner                  *uint64
+	clearedowner           bool
 	user                   map[uint64]struct{}
 	removeduser            map[uint64]struct{}
 	cleareduser            bool
@@ -3072,62 +3072,6 @@ func (m *GuildMutation) ID() (id uint64, exists bool) {
 		return
 	}
 	return *m.id, true
-}
-
-// SetOwner sets the "owner" field.
-func (m *GuildMutation) SetOwner(u uint64) {
-	m.owner = &u
-	m.addowner = nil
-}
-
-// Owner returns the value of the "owner" field in the mutation.
-func (m *GuildMutation) Owner() (r uint64, exists bool) {
-	v := m.owner
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldOwner returns the old "owner" field's value of the Guild entity.
-// If the Guild object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *GuildMutation) OldOwner(ctx context.Context) (v uint64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldOwner is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldOwner requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldOwner: %w", err)
-	}
-	return oldValue.Owner, nil
-}
-
-// AddOwner adds u to the "owner" field.
-func (m *GuildMutation) AddOwner(u uint64) {
-	if m.addowner != nil {
-		*m.addowner += u
-	} else {
-		m.addowner = &u
-	}
-}
-
-// AddedOwner returns the value that was added to the "owner" field in this mutation.
-func (m *GuildMutation) AddedOwner() (r uint64, exists bool) {
-	v := m.addowner
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetOwner resets all changes to the "owner" field.
-func (m *GuildMutation) ResetOwner() {
-	m.owner = nil
-	m.addowner = nil
 }
 
 // SetName sets the "name" field.
@@ -3503,6 +3447,45 @@ func (m *GuildMutation) ResetPermissionNode() {
 	m.removedpermission_node = nil
 }
 
+// SetOwnerID sets the "owner" edge to the User entity by id.
+func (m *GuildMutation) SetOwnerID(id uint64) {
+	m.owner = &id
+}
+
+// ClearOwner clears the "owner" edge to the User entity.
+func (m *GuildMutation) ClearOwner() {
+	m.clearedowner = true
+}
+
+// OwnerCleared reports if the "owner" edge to the User entity was cleared.
+func (m *GuildMutation) OwnerCleared() bool {
+	return m.clearedowner
+}
+
+// OwnerID returns the "owner" edge ID in the mutation.
+func (m *GuildMutation) OwnerID() (id uint64, exists bool) {
+	if m.owner != nil {
+		return *m.owner, true
+	}
+	return
+}
+
+// OwnerIDs returns the "owner" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// OwnerID instead. It exists only for internal usage by the builders.
+func (m *GuildMutation) OwnerIDs() (ids []uint64) {
+	if id := m.owner; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetOwner resets all changes to the "owner" edge.
+func (m *GuildMutation) ResetOwner() {
+	m.owner = nil
+	m.clearedowner = false
+}
+
 // AddUserIDs adds the "user" edge to the User entity by ids.
 func (m *GuildMutation) AddUserIDs(ids ...uint64) {
 	if m.user == nil {
@@ -3570,10 +3553,7 @@ func (m *GuildMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GuildMutation) Fields() []string {
-	fields := make([]string, 0, 4)
-	if m.owner != nil {
-		fields = append(fields, guild.FieldOwner)
-	}
+	fields := make([]string, 0, 3)
 	if m.name != nil {
 		fields = append(fields, guild.FieldName)
 	}
@@ -3591,8 +3571,6 @@ func (m *GuildMutation) Fields() []string {
 // schema.
 func (m *GuildMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case guild.FieldOwner:
-		return m.Owner()
 	case guild.FieldName:
 		return m.Name()
 	case guild.FieldPicture:
@@ -3608,8 +3586,6 @@ func (m *GuildMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *GuildMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case guild.FieldOwner:
-		return m.OldOwner(ctx)
 	case guild.FieldName:
 		return m.OldName(ctx)
 	case guild.FieldPicture:
@@ -3625,13 +3601,6 @@ func (m *GuildMutation) OldField(ctx context.Context, name string) (ent.Value, e
 // type.
 func (m *GuildMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case guild.FieldOwner:
-		v, ok := value.(uint64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetOwner(v)
-		return nil
 	case guild.FieldName:
 		v, ok := value.(string)
 		if !ok {
@@ -3660,21 +3629,13 @@ func (m *GuildMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *GuildMutation) AddedFields() []string {
-	var fields []string
-	if m.addowner != nil {
-		fields = append(fields, guild.FieldOwner)
-	}
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *GuildMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case guild.FieldOwner:
-		return m.AddedOwner()
-	}
 	return nil, false
 }
 
@@ -3683,13 +3644,6 @@ func (m *GuildMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *GuildMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case guild.FieldOwner:
-		v, ok := value.(uint64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddOwner(v)
-		return nil
 	}
 	return fmt.Errorf("unknown Guild numeric field %s", name)
 }
@@ -3717,9 +3671,6 @@ func (m *GuildMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *GuildMutation) ResetField(name string) error {
 	switch name {
-	case guild.FieldOwner:
-		m.ResetOwner()
-		return nil
 	case guild.FieldName:
 		m.ResetName()
 		return nil
@@ -3735,7 +3686,7 @@ func (m *GuildMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *GuildMutation) AddedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.invite != nil {
 		edges = append(edges, guild.EdgeInvite)
 	}
@@ -3750,6 +3701,9 @@ func (m *GuildMutation) AddedEdges() []string {
 	}
 	if m.permission_node != nil {
 		edges = append(edges, guild.EdgePermissionNode)
+	}
+	if m.owner != nil {
+		edges = append(edges, guild.EdgeOwner)
 	}
 	if m.user != nil {
 		edges = append(edges, guild.EdgeUser)
@@ -3791,6 +3745,10 @@ func (m *GuildMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case guild.EdgeOwner:
+		if id := m.owner; id != nil {
+			return []ent.Value{*id}
+		}
 	case guild.EdgeUser:
 		ids := make([]ent.Value, 0, len(m.user))
 		for id := range m.user {
@@ -3803,7 +3761,7 @@ func (m *GuildMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *GuildMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.removedinvite != nil {
 		edges = append(edges, guild.EdgeInvite)
 	}
@@ -3871,7 +3829,7 @@ func (m *GuildMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *GuildMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.clearedinvite {
 		edges = append(edges, guild.EdgeInvite)
 	}
@@ -3886,6 +3844,9 @@ func (m *GuildMutation) ClearedEdges() []string {
 	}
 	if m.clearedpermission_node {
 		edges = append(edges, guild.EdgePermissionNode)
+	}
+	if m.clearedowner {
+		edges = append(edges, guild.EdgeOwner)
 	}
 	if m.cleareduser {
 		edges = append(edges, guild.EdgeUser)
@@ -3907,6 +3868,8 @@ func (m *GuildMutation) EdgeCleared(name string) bool {
 		return m.clearedrole
 	case guild.EdgePermissionNode:
 		return m.clearedpermission_node
+	case guild.EdgeOwner:
+		return m.clearedowner
 	case guild.EdgeUser:
 		return m.cleareduser
 	}
@@ -3917,6 +3880,9 @@ func (m *GuildMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *GuildMutation) ClearEdge(name string) error {
 	switch name {
+	case guild.EdgeOwner:
+		m.ClearOwner()
+		return nil
 	}
 	return fmt.Errorf("unknown Guild unique edge %s", name)
 }
@@ -3939,6 +3905,9 @@ func (m *GuildMutation) ResetEdge(name string) error {
 		return nil
 	case guild.EdgePermissionNode:
 		m.ResetPermissionNode()
+		return nil
+	case guild.EdgeOwner:
+		m.ResetOwner()
 		return nil
 	case guild.EdgeUser:
 		m.ResetUser()

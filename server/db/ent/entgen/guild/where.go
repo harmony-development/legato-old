@@ -92,13 +92,6 @@ func IDLTE(id uint64) predicate.Guild {
 	})
 }
 
-// Owner applies equality check predicate on the "owner" field. It's identical to OwnerEQ.
-func Owner(v uint64) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldOwner), v))
-	})
-}
-
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.Guild {
 	return predicate.Guild(func(s *sql.Selector) {
@@ -117,82 +110,6 @@ func Picture(v string) predicate.Guild {
 func Metadata(v *v1.Metadata) predicate.Guild {
 	return predicate.Guild(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldMetadata), v))
-	})
-}
-
-// OwnerEQ applies the EQ predicate on the "owner" field.
-func OwnerEQ(v uint64) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldOwner), v))
-	})
-}
-
-// OwnerNEQ applies the NEQ predicate on the "owner" field.
-func OwnerNEQ(v uint64) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldOwner), v))
-	})
-}
-
-// OwnerIn applies the In predicate on the "owner" field.
-func OwnerIn(vs ...uint64) predicate.Guild {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldOwner), v...))
-	})
-}
-
-// OwnerNotIn applies the NotIn predicate on the "owner" field.
-func OwnerNotIn(vs ...uint64) predicate.Guild {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldOwner), v...))
-	})
-}
-
-// OwnerGT applies the GT predicate on the "owner" field.
-func OwnerGT(v uint64) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldOwner), v))
-	})
-}
-
-// OwnerGTE applies the GTE predicate on the "owner" field.
-func OwnerGTE(v uint64) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldOwner), v))
-	})
-}
-
-// OwnerLT applies the LT predicate on the "owner" field.
-func OwnerLT(v uint64) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldOwner), v))
-	})
-}
-
-// OwnerLTE applies the LTE predicate on the "owner" field.
-func OwnerLTE(v uint64) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldOwner), v))
 	})
 }
 
@@ -625,6 +542,34 @@ func HasPermissionNodeWith(preds ...predicate.PermissionNode) predicate.Guild {
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(PermissionNodeInverseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, PermissionNodeTable, PermissionNodeColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasOwner applies the HasEdge predicate on the "owner" edge.
+func HasOwner() predicate.Guild {
+	return predicate.Guild(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(OwnerTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, OwnerTable, OwnerColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasOwnerWith applies the HasEdge predicate on the "owner" edge with a given conditions (other predicates).
+func HasOwnerWith(preds ...predicate.User) predicate.Guild {
+	return predicate.Guild(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(OwnerInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, OwnerTable, OwnerColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

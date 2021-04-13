@@ -16,7 +16,6 @@ type Guild struct {
 func (Guild) Fields() []ent.Field {
 	return []ent.Field{
 		field.Uint64("id").Unique(),
-		field.Uint64("owner"),
 		field.String("name"),
 		field.String("picture"),
 		field.Bytes("metadata").GoType(&harmonytypesv1.Metadata{}),
@@ -36,6 +35,8 @@ func (Guild) Edges() []ent.Edge {
 			To("role", Role.Type),
 		edge.
 			To("permission_node", PermissionNode.Type),
+		edge.
+			To("owner", User.Type).Required().Unique(),
 		edge.
 			From("user", User.Type).Ref("guild"),
 	}

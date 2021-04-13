@@ -284,13 +284,17 @@ func (v1 *V1) GetGuildChannels(c echo.Context, r *chatv1.GetGuildChannelsRequest
 	roles := ctx.UserRoles
 
 	for _, channel := range chans {
+		println("channel")
 		if ctx.IsOwner || v1.Perms.Check("messages.view", roles, r.GuildId, channel.ID) {
+			println("add")
 			ret = append(ret, &chatv1.GetGuildChannelsResponse_Channel{
 				ChannelId:   channel.ID,
 				ChannelName: channel.Name,
 				Metadata:    channel.Metadata,
 				IsCategory:  channel.Kind == uint64(types.ChannelKindCategory),
 			})
+		} else {
+			println("discard")
 		}
 	}
 	return &chatv1.GetGuildChannelsResponse{

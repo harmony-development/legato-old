@@ -7,8 +7,6 @@ const (
 	Label = "guild"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldOwner holds the string denoting the owner field in the database.
-	FieldOwner = "owner"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldPicture holds the string denoting the picture field in the database.
@@ -25,6 +23,8 @@ const (
 	EdgeRole = "role"
 	// EdgePermissionNode holds the string denoting the permission_node edge name in mutations.
 	EdgePermissionNode = "permission_node"
+	// EdgeOwner holds the string denoting the owner edge name in mutations.
+	EdgeOwner = "owner"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// Table holds the table name of the guild in the database.
@@ -62,6 +62,13 @@ const (
 	PermissionNodeInverseTable = "permission_nodes"
 	// PermissionNodeColumn is the table column denoting the permission_node relation/edge.
 	PermissionNodeColumn = "guild_permission_node"
+	// OwnerTable is the table the holds the owner relation/edge.
+	OwnerTable = "guilds"
+	// OwnerInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	OwnerInverseTable = "users"
+	// OwnerColumn is the table column denoting the owner relation/edge.
+	OwnerColumn = "guild_owner"
 	// UserTable is the table the holds the user relation/edge. The primary key declared below.
 	UserTable = "user_guild"
 	// UserInverseTable is the table name for the User entity.
@@ -72,10 +79,15 @@ const (
 // Columns holds all SQL columns for guild fields.
 var Columns = []string{
 	FieldID,
-	FieldOwner,
 	FieldName,
 	FieldPicture,
 	FieldMetadata,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the "guilds"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"guild_owner",
 }
 
 var (
@@ -91,6 +103,11 @@ var (
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}

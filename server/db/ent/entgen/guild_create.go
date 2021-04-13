@@ -26,12 +26,6 @@ type GuildCreate struct {
 	hooks    []Hook
 }
 
-// SetOwner sets the "owner" field.
-func (gc *GuildCreate) SetOwner(u uint64) *GuildCreate {
-	gc.mutation.SetOwner(u)
-	return gc
-}
-
 // SetName sets the "name" field.
 func (gc *GuildCreate) SetName(s string) *GuildCreate {
 	gc.mutation.SetName(s)
@@ -131,6 +125,17 @@ func (gc *GuildCreate) AddPermissionNode(p ...*PermissionNode) *GuildCreate {
 	return gc.AddPermissionNodeIDs(ids...)
 }
 
+// SetOwnerID sets the "owner" edge to the User entity by ID.
+func (gc *GuildCreate) SetOwnerID(id uint64) *GuildCreate {
+	gc.mutation.SetOwnerID(id)
+	return gc
+}
+
+// SetOwner sets the "owner" edge to the User entity.
+func (gc *GuildCreate) SetOwner(u *User) *GuildCreate {
+	return gc.SetOwnerID(u.ID)
+}
+
 // AddUserIDs adds the "user" edge to the User entity by IDs.
 func (gc *GuildCreate) AddUserIDs(ids ...uint64) *GuildCreate {
 	gc.mutation.AddUserIDs(ids...)
@@ -197,9 +202,6 @@ func (gc *GuildCreate) SaveX(ctx context.Context) *Guild {
 
 // check runs all checks and user-defined validators on the builder.
 func (gc *GuildCreate) check() error {
-	if _, ok := gc.mutation.Owner(); !ok {
-		return &ValidationError{Name: "owner", err: errors.New("entgen: missing required field \"owner\"")}
-	}
 	if _, ok := gc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New("entgen: missing required field \"name\"")}
 	}
@@ -208,6 +210,9 @@ func (gc *GuildCreate) check() error {
 	}
 	if _, ok := gc.mutation.Metadata(); !ok {
 		return &ValidationError{Name: "metadata", err: errors.New("entgen: missing required field \"metadata\"")}
+	}
+	if _, ok := gc.mutation.OwnerID(); !ok {
+		return &ValidationError{Name: "owner", err: errors.New("entgen: missing required edge \"owner\"")}
 	}
 	return nil
 }
@@ -241,14 +246,6 @@ func (gc *GuildCreate) createSpec() (*Guild, *sqlgraph.CreateSpec) {
 	if id, ok := gc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
-	}
-	if value, ok := gc.mutation.Owner(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: guild.FieldOwner,
-		})
-		_node.Owner = value
 	}
 	if value, ok := gc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -367,6 +364,26 @@ func (gc *GuildCreate) createSpec() (*Guild, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := gc.mutation.OwnerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   guild.OwnerTable,
+			Columns: []string{guild.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint64,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.guild_owner = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := gc.mutation.UserIDs(); len(nodes) > 0 {

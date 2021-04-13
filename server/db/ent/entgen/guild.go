@@ -10,6 +10,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 
 	v1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
+	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 )
 
 // Guild is the model entity for the Guild schema.
@@ -17,8 +18,6 @@ type Guild struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uint64 `json:"id,omitempty"`
-	// Owner holds the value of the "owner" field.
-	Owner uint64 `json:"owner,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Picture holds the value of the "picture" field.
@@ -27,7 +26,8 @@ type Guild struct {
 	Metadata *v1.Metadata `json:"metadata,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GuildQuery when eager-loading is set.
-	Edges GuildEdges `json:"edges"`
+	Edges       GuildEdges `json:"edges"`
+	guild_owner *uint64
 }
 
 // GuildEdges holds the relations/edges for other nodes in the graph.
@@ -42,11 +42,13 @@ type GuildEdges struct {
 	Role []*Role `json:"role,omitempty"`
 	// PermissionNode holds the value of the permission_node edge.
 	PermissionNode []*PermissionNode `json:"permission_node,omitempty"`
+	// Owner holds the value of the owner edge.
+	Owner *User `json:"owner,omitempty"`
 	// User holds the value of the user edge.
 	User []*User `json:"user,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [7]bool
 }
 
 // InviteOrErr returns the Invite value or an error if the edge
@@ -94,10 +96,24 @@ func (e GuildEdges) PermissionNodeOrErr() ([]*PermissionNode, error) {
 	return nil, &NotLoadedError{edge: "permission_node"}
 }
 
+// OwnerOrErr returns the Owner value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e GuildEdges) OwnerOrErr() (*User, error) {
+	if e.loadedTypes[5] {
+		if e.Owner == nil {
+			// The edge owner was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: user.Label}
+		}
+		return e.Owner, nil
+	}
+	return nil, &NotLoadedError{edge: "owner"}
+}
+
 // UserOrErr returns the User value or an error if the edge
 // was not loaded in eager-loading.
 func (e GuildEdges) UserOrErr() ([]*User, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[6] {
 		return e.User, nil
 	}
 	return nil, &NotLoadedError{edge: "user"}
@@ -108,12 +124,14 @@ func (*Guild) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case guild.FieldID, guild.FieldOwner:
+		case guild.FieldID:
 			values[i] = new(sql.NullInt64)
 		case guild.FieldName, guild.FieldPicture:
 			values[i] = new(sql.NullString)
 		case guild.FieldMetadata:
 			values[i] = new(v1.Metadata)
+		case guild.ForeignKeys[0]: // guild_owner
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Guild", columns[i])
 		}
@@ -135,12 +153,6 @@ func (gu *Guild) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			gu.ID = uint64(value.Int64)
-		case guild.FieldOwner:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field owner", values[i])
-			} else if value.Valid {
-				gu.Owner = uint64(value.Int64)
-			}
 		case guild.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
@@ -158,6 +170,13 @@ func (gu *Guild) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field metadata", values[i])
 			} else if value != nil {
 				gu.Metadata = value
+			}
+		case guild.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field guild_owner", value)
+			} else if value.Valid {
+				gu.guild_owner = new(uint64)
+				*gu.guild_owner = uint64(value.Int64)
 			}
 		}
 	}
@@ -189,6 +208,11 @@ func (gu *Guild) QueryPermissionNode() *PermissionNodeQuery {
 	return (&GuildClient{config: gu.config}).QueryPermissionNode(gu)
 }
 
+// QueryOwner queries the "owner" edge of the Guild entity.
+func (gu *Guild) QueryOwner() *UserQuery {
+	return (&GuildClient{config: gu.config}).QueryOwner(gu)
+}
+
 // QueryUser queries the "user" edge of the Guild entity.
 func (gu *Guild) QueryUser() *UserQuery {
 	return (&GuildClient{config: gu.config}).QueryUser(gu)
@@ -217,8 +241,6 @@ func (gu *Guild) String() string {
 	var builder strings.Builder
 	builder.WriteString("Guild(")
 	builder.WriteString(fmt.Sprintf("id=%v", gu.ID))
-	builder.WriteString(", owner=")
-	builder.WriteString(fmt.Sprintf("%v", gu.Owner))
 	builder.WriteString(", name=")
 	builder.WriteString(gu.Name)
 	builder.WriteString(", picture=")

@@ -1,13 +1,14 @@
 package ent_shared
 
-import "github.com/harmony-development/legato/server/db/ent/entgen/guild"
+import (
+	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
+)
 
 func (d *DB) GetOwner(guildID uint64) (userID uint64, err error) {
 	defer doRecovery(&err)
-	userID = d.Guild.
-		Query().
-		Where(guild.ID(guildID)).
-		OnlyX(ctx).Owner
+
+	userID = d.Guild.QueryOwner(d.Guild.GetX(ctx, guildID)).OnlyIDX(ctx)
+
 	return
 }
 

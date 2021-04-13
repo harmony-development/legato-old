@@ -1069,6 +1069,22 @@ func (c *GuildClient) QueryPermissionNode(gu *Guild) *PermissionNodeQuery {
 	return query
 }
 
+// QueryOwner queries the owner edge of a Guild.
+func (c *GuildClient) QueryOwner(gu *Guild) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := gu.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(guild.Table, guild.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, guild.OwnerTable, guild.OwnerColumn),
+		)
+		fromV = sqlgraph.Neighbors(gu.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryUser queries the user edge of a Guild.
 func (c *GuildClient) QueryUser(gu *Guild) *UserQuery {
 	query := &UserQuery{config: c.config}

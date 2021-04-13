@@ -8,8 +8,9 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	v1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
+
+	v1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 )
 

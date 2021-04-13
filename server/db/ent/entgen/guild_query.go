@@ -36,7 +36,9 @@ type GuildQuery struct {
 	withChannel        *ChannelQuery
 	withRole           *RoleQuery
 	withPermissionNode *PermissionNodeQuery
+	withOwner          *UserQuery
 	withUser           *UserQuery
+	withFKs            bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -176,6 +178,28 @@ func (gq *GuildQuery) QueryPermissionNode() *PermissionNodeQuery {
 			sqlgraph.From(guild.Table, guild.FieldID, selector),
 			sqlgraph.To(permissionnode.Table, permissionnode.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, guild.PermissionNodeTable, guild.PermissionNodeColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryOwner chains the current query on the "owner" edge.
+func (gq *GuildQuery) QueryOwner() *UserQuery {
+	query := &UserQuery{config: gq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := gq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(guild.Table, guild.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, guild.OwnerTable, guild.OwnerColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 		return fromU, nil
@@ -391,6 +415,7 @@ func (gq *GuildQuery) Clone() *GuildQuery {
 		withChannel:        gq.withChannel.Clone(),
 		withRole:           gq.withRole.Clone(),
 		withPermissionNode: gq.withPermissionNode.Clone(),
+		withOwner:          gq.withOwner.Clone(),
 		withUser:           gq.withUser.Clone(),
 		// clone intermediate query.
 		sql:  gq.sql.Clone(),
@@ -453,6 +478,17 @@ func (gq *GuildQuery) WithPermissionNode(opts ...func(*PermissionNodeQuery)) *Gu
 	return gq
 }
 
+// WithOwner tells the query-builder to eager-load the nodes that are connected to
+// the "owner" edge. The optional arguments are used to configure the query builder of the edge.
+func (gq *GuildQuery) WithOwner(opts ...func(*UserQuery)) *GuildQuery {
+	query := &UserQuery{config: gq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	gq.withOwner = query
+	return gq
+}
+
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
 func (gq *GuildQuery) WithUser(opts ...func(*UserQuery)) *GuildQuery {
@@ -470,12 +506,12 @@ func (gq *GuildQuery) WithUser(opts ...func(*UserQuery)) *GuildQuery {
 // Example:
 //
 //	var v []struct {
-//		Owner uint64 `json:"owner,omitempty"`
+//		Name string `json:"name,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Guild.Query().
-//		GroupBy(guild.FieldOwner).
+//		GroupBy(guild.FieldName).
 //		Aggregate(entgen.Count()).
 //		Scan(ctx, &v)
 //
@@ -497,11 +533,11 @@ func (gq *GuildQuery) GroupBy(field string, fields ...string) *GuildGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Owner uint64 `json:"owner,omitempty"`
+//		Name string `json:"name,omitempty"`
 //	}
 //
 //	client.Guild.Query().
-//		Select(guild.FieldOwner).
+//		Select(guild.FieldName).
 //		Scan(ctx, &v)
 //
 func (gq *GuildQuery) Select(field string, fields ...string) *GuildSelect {
@@ -528,16 +564,24 @@ func (gq *GuildQuery) prepareQuery(ctx context.Context) error {
 func (gq *GuildQuery) sqlAll(ctx context.Context) ([]*Guild, error) {
 	var (
 		nodes       = []*Guild{}
+		withFKs     = gq.withFKs
 		_spec       = gq.querySpec()
-		loadedTypes = [6]bool{
+		loadedTypes = [7]bool{
 			gq.withInvite != nil,
 			gq.withBans != nil,
 			gq.withChannel != nil,
 			gq.withRole != nil,
 			gq.withPermissionNode != nil,
+			gq.withOwner != nil,
 			gq.withUser != nil,
 		}
 	)
+	if gq.withOwner != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, guild.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Guild{config: gq.config}
 		nodes = append(nodes, node)
@@ -736,6 +780,35 @@ func (gq *GuildQuery) sqlAll(ctx context.Context) ([]*Guild, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "guild_permission_node" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.PermissionNode = append(node.Edges.PermissionNode, n)
+		}
+	}
+
+	if query := gq.withOwner; query != nil {
+		ids := make([]uint64, 0, len(nodes))
+		nodeids := make(map[uint64][]*Guild)
+		for i := range nodes {
+			if nodes[i].guild_owner == nil {
+				continue
+			}
+			fk := *nodes[i].guild_owner
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(user.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "guild_owner" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Owner = n
+			}
 		}
 	}
 

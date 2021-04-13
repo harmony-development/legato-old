@@ -12,24 +12,26 @@ func (d *DB) CreateGuild(owner, id, channelID uint64, guildName, picture string)
 	guild = &types.GuildData{}
 	data := d.Guild.Create().
 		SetID(id).
-		SetOwner(owner).
+		SetOwnerID(owner).
 		SetName(guildName).
 		SetPicture(picture).
-		AddChannel(
-			d.Channel.
-				Create().
-				SetKind(0).
-				SetID(channelID).
-				SetName("general").
-				SetPosition("").
-				SetMetadata(&harmonytypesv1.Metadata{}).
-				SaveX(ctx),
-		).
 		SetMetadata(&harmonytypesv1.Metadata{}).
 		SaveX(ctx)
+
+	channel := d.Channel.
+		Create().
+		SetKind(0).
+		SetID(channelID).
+		SetName("general").
+		SetPosition("").
+		SetMetadata(&harmonytypesv1.Metadata{}).
+		SaveX(ctx)
+
+	data.Update().AddUserIDs(owner).AddChannel(channel).ExecX(ctx)
+
 	guild.ID = data.ID
 	guild.Name = data.Name
-	guild.Owner = data.Owner
+	guild.Owner = owner
 	guild.Picture = data.Picture
 	return
 }
@@ -61,12 +63,14 @@ func (d *DB) IsBanned(guildID, userID uint64) (banned bool, err error) {
 	return
 }
 
-func (d *DB) GetGuildByID(guildID uint64) (guild *types.GuildData, err error) {
+func (d *DB) GetGuildByID(guildID uint64) (g *types.GuildData, err error) {
 	defer doRecovery(&err)
-	data := d.Guild.GetX(ctx, guildID)
-	guild = &types.GuildData{
+
+	data := d.Guild.Query().WithOwner().Where(guild.ID(guildID)).OnlyX(ctx)
+
+	g = &types.GuildData{
 		ID:      data.ID,
-		Owner:   data.Owner,
+		Owner:   data.Edges.Owner.ID,
 		Name:    data.Name,
 		Picture: data.Picture,
 	}
