@@ -4,7 +4,6 @@ package entgen
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -115,6 +114,14 @@ func (pu *ProfileUpdate) SetUserID(id uint64) *ProfileUpdate {
 	return pu
 }
 
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (pu *ProfileUpdate) SetNillableUserID(id *uint64) *ProfileUpdate {
+	if id != nil {
+		pu = pu.SetUserID(*id)
+	}
+	return pu
+}
+
 // SetUser sets the "user" edge to the User entity.
 func (pu *ProfileUpdate) SetUser(u *User) *ProfileUpdate {
 	return pu.SetUserID(u.ID)
@@ -138,18 +145,12 @@ func (pu *ProfileUpdate) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	if len(pu.hooks) == 0 {
-		if err = pu.check(); err != nil {
-			return 0, err
-		}
 		affected, err = pu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ProfileMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = pu.check(); err != nil {
-				return 0, err
 			}
 			pu.mutation = mutation
 			affected, err = pu.sqlSave(ctx)
@@ -186,14 +187,6 @@ func (pu *ProfileUpdate) ExecX(ctx context.Context) {
 	if err := pu.Exec(ctx); err != nil {
 		panic(err)
 	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (pu *ProfileUpdate) check() error {
-	if _, ok := pu.mutation.UserID(); pu.mutation.UserCleared() && !ok {
-		return errors.New("entgen: clearing a required unique edge \"user\"")
-	}
-	return nil
 }
 
 func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -408,6 +401,14 @@ func (puo *ProfileUpdateOne) SetUserID(id uint64) *ProfileUpdateOne {
 	return puo
 }
 
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (puo *ProfileUpdateOne) SetNillableUserID(id *uint64) *ProfileUpdateOne {
+	if id != nil {
+		puo = puo.SetUserID(*id)
+	}
+	return puo
+}
+
 // SetUser sets the "user" edge to the User entity.
 func (puo *ProfileUpdateOne) SetUser(u *User) *ProfileUpdateOne {
 	return puo.SetUserID(u.ID)
@@ -438,18 +439,12 @@ func (puo *ProfileUpdateOne) Save(ctx context.Context) (*Profile, error) {
 		node *Profile
 	)
 	if len(puo.hooks) == 0 {
-		if err = puo.check(); err != nil {
-			return nil, err
-		}
 		node, err = puo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ProfileMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = puo.check(); err != nil {
-				return nil, err
 			}
 			puo.mutation = mutation
 			node, err = puo.sqlSave(ctx)
@@ -486,14 +481,6 @@ func (puo *ProfileUpdateOne) ExecX(ctx context.Context) {
 	if err := puo.Exec(ctx); err != nil {
 		panic(err)
 	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (puo *ProfileUpdateOne) check() error {
-	if _, ok := puo.mutation.UserID(); puo.mutation.UserCleared() && !ok {
-		return errors.New("entgen: clearing a required unique edge \"user\"")
-	}
-	return nil
 }
 
 func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err error) {

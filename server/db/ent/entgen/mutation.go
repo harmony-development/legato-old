@@ -2964,7 +2964,7 @@ type GuildMutation struct {
 	addowner               *uint64
 	name                   *string
 	picture                *string
-	metadata               *[]byte
+	metadata               **v1.Metadata
 	clearedFields          map[string]struct{}
 	invite                 map[string]struct{}
 	removedinvite          map[string]struct{}
@@ -3203,12 +3203,12 @@ func (m *GuildMutation) ResetPicture() {
 }
 
 // SetMetadata sets the "metadata" field.
-func (m *GuildMutation) SetMetadata(b []byte) {
-	m.metadata = &b
+func (m *GuildMutation) SetMetadata(v *v1.Metadata) {
+	m.metadata = &v
 }
 
 // Metadata returns the value of the "metadata" field in the mutation.
-func (m *GuildMutation) Metadata() (r []byte, exists bool) {
+func (m *GuildMutation) Metadata() (r *v1.Metadata, exists bool) {
 	v := m.metadata
 	if v == nil {
 		return
@@ -3219,7 +3219,7 @@ func (m *GuildMutation) Metadata() (r []byte, exists bool) {
 // OldMetadata returns the old "metadata" field's value of the Guild entity.
 // If the Guild object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *GuildMutation) OldMetadata(ctx context.Context) (v []byte, err error) {
+func (m *GuildMutation) OldMetadata(ctx context.Context) (v *v1.Metadata, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldMetadata is only allowed on UpdateOne operations")
 	}
@@ -3647,7 +3647,7 @@ func (m *GuildMutation) SetField(name string, value ent.Value) error {
 		m.SetPicture(v)
 		return nil
 	case guild.FieldMetadata:
-		v, ok := value.([]byte)
+		v, ok := value.(*v1.Metadata)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -5350,7 +5350,7 @@ type MessageMutation struct {
 	editedat       *time.Time
 	metadata       **v1.Metadata
 	override       **v1.Override
-	_Content       **v1.Content
+	content        **v1.Content
 	clearedFields  map[string]struct{}
 	user           *uint64
 	cleareduser    bool
@@ -5634,21 +5634,21 @@ func (m *MessageMutation) ResetOverride() {
 	delete(m.clearedFields, message.FieldOverride)
 }
 
-// SetContent sets the "Content" field.
+// SetContent sets the "content" field.
 func (m *MessageMutation) SetContent(v *v1.Content) {
-	m._Content = &v
+	m.content = &v
 }
 
-// Content returns the value of the "Content" field in the mutation.
+// Content returns the value of the "content" field in the mutation.
 func (m *MessageMutation) Content() (r *v1.Content, exists bool) {
-	v := m._Content
+	v := m.content
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldContent returns the old "Content" field's value of the Message entity.
+// OldContent returns the old "content" field's value of the Message entity.
 // If the Message object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *MessageMutation) OldContent(ctx context.Context) (v *v1.Content, err error) {
@@ -5665,9 +5665,9 @@ func (m *MessageMutation) OldContent(ctx context.Context) (v *v1.Content, err er
 	return oldValue.Content, nil
 }
 
-// ResetContent resets all changes to the "Content" field.
+// ResetContent resets all changes to the "content" field.
 func (m *MessageMutation) ResetContent() {
-	m._Content = nil
+	m.content = nil
 }
 
 // SetUserID sets the "user" edge to the User entity by id.
@@ -5867,7 +5867,7 @@ func (m *MessageMutation) Fields() []string {
 	if m.override != nil {
 		fields = append(fields, message.FieldOverride)
 	}
-	if m._Content != nil {
+	if m.content != nil {
 		fields = append(fields, message.FieldContent)
 	}
 	return fields

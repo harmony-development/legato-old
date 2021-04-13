@@ -9,8 +9,10 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
+
+	v1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
+	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/ent/entgen/invite"
 	"github.com/harmony-development/legato/server/db/ent/entgen/permissionnode"
 	"github.com/harmony-development/legato/server/db/ent/entgen/role"
@@ -43,8 +45,8 @@ func (gc *GuildCreate) SetPicture(s string) *GuildCreate {
 }
 
 // SetMetadata sets the "metadata" field.
-func (gc *GuildCreate) SetMetadata(b []byte) *GuildCreate {
-	gc.mutation.SetMetadata(b)
+func (gc *GuildCreate) SetMetadata(v *v1.Metadata) *GuildCreate {
+	gc.mutation.SetMetadata(v)
 	return gc
 }
 
@@ -206,9 +208,6 @@ func (gc *GuildCreate) check() error {
 	}
 	if _, ok := gc.mutation.Metadata(); !ok {
 		return &ValidationError{Name: "metadata", err: errors.New("entgen: missing required field \"metadata\"")}
-	}
-	if len(gc.mutation.UserIDs()) == 0 {
-		return &ValidationError{Name: "user", err: errors.New("entgen: missing required edge \"user\"")}
 	}
 	return nil
 }

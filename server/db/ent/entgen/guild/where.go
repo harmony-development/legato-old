@@ -5,6 +5,7 @@ package guild
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	v1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen/predicate"
 )
 
@@ -113,7 +114,7 @@ func Picture(v string) predicate.Guild {
 }
 
 // Metadata applies equality check predicate on the "metadata" field. It's identical to MetadataEQ.
-func Metadata(v []byte) predicate.Guild {
+func Metadata(v *v1.Metadata) predicate.Guild {
 	return predicate.Guild(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldMetadata), v))
 	})
@@ -418,21 +419,21 @@ func PictureContainsFold(v string) predicate.Guild {
 }
 
 // MetadataEQ applies the EQ predicate on the "metadata" field.
-func MetadataEQ(v []byte) predicate.Guild {
+func MetadataEQ(v *v1.Metadata) predicate.Guild {
 	return predicate.Guild(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldMetadata), v))
 	})
 }
 
 // MetadataNEQ applies the NEQ predicate on the "metadata" field.
-func MetadataNEQ(v []byte) predicate.Guild {
+func MetadataNEQ(v *v1.Metadata) predicate.Guild {
 	return predicate.Guild(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldMetadata), v))
 	})
 }
 
 // MetadataIn applies the In predicate on the "metadata" field.
-func MetadataIn(vs ...[]byte) predicate.Guild {
+func MetadataIn(vs ...*v1.Metadata) predicate.Guild {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -449,7 +450,7 @@ func MetadataIn(vs ...[]byte) predicate.Guild {
 }
 
 // MetadataNotIn applies the NotIn predicate on the "metadata" field.
-func MetadataNotIn(vs ...[]byte) predicate.Guild {
+func MetadataNotIn(vs ...*v1.Metadata) predicate.Guild {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -466,28 +467,28 @@ func MetadataNotIn(vs ...[]byte) predicate.Guild {
 }
 
 // MetadataGT applies the GT predicate on the "metadata" field.
-func MetadataGT(v []byte) predicate.Guild {
+func MetadataGT(v *v1.Metadata) predicate.Guild {
 	return predicate.Guild(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldMetadata), v))
 	})
 }
 
 // MetadataGTE applies the GTE predicate on the "metadata" field.
-func MetadataGTE(v []byte) predicate.Guild {
+func MetadataGTE(v *v1.Metadata) predicate.Guild {
 	return predicate.Guild(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldMetadata), v))
 	})
 }
 
 // MetadataLT applies the LT predicate on the "metadata" field.
-func MetadataLT(v []byte) predicate.Guild {
+func MetadataLT(v *v1.Metadata) predicate.Guild {
 	return predicate.Guild(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldMetadata), v))
 	})
 }
 
 // MetadataLTE applies the LTE predicate on the "metadata" field.
-func MetadataLTE(v []byte) predicate.Guild {
+func MetadataLTE(v *v1.Metadata) predicate.Guild {
 	return predicate.Guild(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldMetadata), v))
 	})

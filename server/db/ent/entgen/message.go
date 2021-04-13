@@ -3,7 +3,6 @@
 package entgen
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -29,8 +28,8 @@ type Message struct {
 	Metadata *v1.Metadata `json:"metadata,omitempty"`
 	// Override holds the value of the "override" field.
 	Override *v1.Override `json:"override,omitempty"`
-	// Content holds the value of the "Content" field.
-	Content *v1.Content `json:"Content,omitempty"`
+	// Content holds the value of the "content" field.
+	Content *v1.Content `json:"content,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MessageQuery when eager-loading is set.
 	Edges           MessageEdges `json:"edges"`
@@ -110,14 +109,16 @@ func (*Message) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case message.FieldMetadata, message.FieldOverride:
-			values[i] = new([]byte)
 		case message.FieldID:
 			values[i] = new(sql.NullInt64)
 		case message.FieldCreatedat, message.FieldEditedat:
 			values[i] = new(sql.NullTime)
 		case message.FieldContent:
 			values[i] = new(v1.Content)
+		case message.FieldMetadata:
+			values[i] = new(v1.Metadata)
+		case message.FieldOverride:
+			values[i] = new(v1.Override)
 		case message.ForeignKeys[0]: // channel_message
 			values[i] = new(sql.NullInt64)
 		case message.ForeignKeys[1]: // message_replies
@@ -158,26 +159,20 @@ func (m *Message) assignValues(columns []string, values []interface{}) error {
 				m.Editedat = value.Time
 			}
 		case message.FieldMetadata:
-
-			if value, ok := values[i].(*[]byte); !ok {
+			if value, ok := values[i].(*v1.Metadata); !ok {
 				return fmt.Errorf("unexpected type %T for field metadata", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &m.Metadata); err != nil {
-					return fmt.Errorf("unmarshal field metadata: %w", err)
-				}
+			} else if value != nil {
+				m.Metadata = value
 			}
 		case message.FieldOverride:
-
-			if value, ok := values[i].(*[]byte); !ok {
+			if value, ok := values[i].(*v1.Override); !ok {
 				return fmt.Errorf("unexpected type %T for field override", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &m.Override); err != nil {
-					return fmt.Errorf("unmarshal field override: %w", err)
-				}
+			} else if value != nil {
+				m.Override = value
 			}
 		case message.FieldContent:
 			if value, ok := values[i].(*v1.Content); !ok {
-				return fmt.Errorf("unexpected type %T for field Content", values[i])
+				return fmt.Errorf("unexpected type %T for field content", values[i])
 			} else if value != nil {
 				m.Content = value
 			}
@@ -258,7 +253,7 @@ func (m *Message) String() string {
 	builder.WriteString(fmt.Sprintf("%v", m.Metadata))
 	builder.WriteString(", override=")
 	builder.WriteString(fmt.Sprintf("%v", m.Override))
-	builder.WriteString(", Content=")
+	builder.WriteString(", content=")
 	builder.WriteString(fmt.Sprintf("%v", m.Content))
 	builder.WriteByte(')')
 	return builder.String()

@@ -8,6 +8,8 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
+
+	v1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 )
 
 // Guild is the model entity for the Guild schema.
@@ -22,7 +24,7 @@ type Guild struct {
 	// Picture holds the value of the "picture" field.
 	Picture string `json:"picture,omitempty"`
 	// Metadata holds the value of the "metadata" field.
-	Metadata []byte `json:"metadata,omitempty"`
+	Metadata *v1.Metadata `json:"metadata,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GuildQuery when eager-loading is set.
 	Edges GuildEdges `json:"edges"`
@@ -106,12 +108,12 @@ func (*Guild) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case guild.FieldMetadata:
-			values[i] = new([]byte)
 		case guild.FieldID, guild.FieldOwner:
 			values[i] = new(sql.NullInt64)
 		case guild.FieldName, guild.FieldPicture:
 			values[i] = new(sql.NullString)
+		case guild.FieldMetadata:
+			values[i] = new(v1.Metadata)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Guild", columns[i])
 		}
@@ -152,10 +154,10 @@ func (gu *Guild) assignValues(columns []string, values []interface{}) error {
 				gu.Picture = value.String
 			}
 		case guild.FieldMetadata:
-			if value, ok := values[i].(*[]byte); !ok {
+			if value, ok := values[i].(*v1.Metadata); !ok {
 				return fmt.Errorf("unexpected type %T for field metadata", values[i])
 			} else if value != nil {
-				gu.Metadata = *value
+				gu.Metadata = value
 			}
 		}
 	}

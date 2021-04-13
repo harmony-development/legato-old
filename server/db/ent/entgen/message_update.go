@@ -88,7 +88,7 @@ func (mu *MessageUpdate) ClearOverride() *MessageUpdate {
 	return mu
 }
 
-// SetContent sets the "Content" field.
+// SetContent sets the "content" field.
 func (mu *MessageUpdate) SetContent(v *v1.Content) *MessageUpdate {
 	mu.mutation.SetContent(v)
 	return mu
@@ -301,27 +301,27 @@ func (mu *MessageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := mu.mutation.Metadata(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
+			Type:   field.TypeBytes,
 			Value:  value,
 			Column: message.FieldMetadata,
 		})
 	}
 	if mu.mutation.MetadataCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
+			Type:   field.TypeBytes,
 			Column: message.FieldMetadata,
 		})
 	}
 	if value, ok := mu.mutation.Override(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
+			Type:   field.TypeBytes,
 			Value:  value,
 			Column: message.FieldOverride,
 		})
 	}
 	if mu.mutation.OverrideCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
+			Type:   field.TypeBytes,
 			Column: message.FieldOverride,
 		})
 	}
@@ -568,7 +568,7 @@ func (muo *MessageUpdateOne) ClearOverride() *MessageUpdateOne {
 	return muo
 }
 
-// SetContent sets the "Content" field.
+// SetContent sets the "content" field.
 func (muo *MessageUpdateOne) SetContent(v *v1.Content) *MessageUpdateOne {
 	muo.mutation.SetContent(v)
 	return muo
@@ -805,27 +805,27 @@ func (muo *MessageUpdateOne) sqlSave(ctx context.Context) (_node *Message, err e
 	}
 	if value, ok := muo.mutation.Metadata(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
+			Type:   field.TypeBytes,
 			Value:  value,
 			Column: message.FieldMetadata,
 		})
 	}
 	if muo.mutation.MetadataCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
+			Type:   field.TypeBytes,
 			Column: message.FieldMetadata,
 		})
 	}
 	if value, ok := muo.mutation.Override(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
+			Type:   field.TypeBytes,
 			Value:  value,
 			Column: message.FieldOverride,
 		})
 	}
 	if muo.mutation.OverrideCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
+			Type:   field.TypeBytes,
 			Column: message.FieldOverride,
 		})
 	}

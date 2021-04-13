@@ -9,6 +9,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	v1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/invite"
@@ -57,8 +58,8 @@ func (gu *GuildUpdate) SetPicture(s string) *GuildUpdate {
 }
 
 // SetMetadata sets the "metadata" field.
-func (gu *GuildUpdate) SetMetadata(b []byte) *GuildUpdate {
-	gu.mutation.SetMetadata(b)
+func (gu *GuildUpdate) SetMetadata(v *v1.Metadata) *GuildUpdate {
+	gu.mutation.SetMetadata(v)
 	return gu
 }
 
@@ -756,8 +757,8 @@ func (guo *GuildUpdateOne) SetPicture(s string) *GuildUpdateOne {
 }
 
 // SetMetadata sets the "metadata" field.
-func (guo *GuildUpdateOne) SetMetadata(b []byte) *GuildUpdateOne {
-	guo.mutation.SetMetadata(b)
+func (guo *GuildUpdateOne) SetMetadata(v *v1.Metadata) *GuildUpdateOne {
+	guo.mutation.SetMetadata(v)
 	return guo
 }
 

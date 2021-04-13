@@ -1,7 +1,6 @@
 package ent_shared
 
 import (
-	"github.com/golang/protobuf/proto"
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
@@ -22,8 +21,11 @@ func (d *DB) CreateGuild(owner, id, channelID uint64, guildName, picture string)
 				SetKind(0).
 				SetID(channelID).
 				SetName("general").
+				SetPosition("").
+				SetMetadata(&harmonytypesv1.Metadata{}).
 				SaveX(ctx),
 		).
+		SetMetadata(&harmonytypesv1.Metadata{}).
 		SaveX(ctx)
 	guild.ID = data.ID
 	guild.Name = data.Name
@@ -113,11 +115,7 @@ func (d *DB) UpdateGuildInformation(guildID uint64, name, picture string, metada
 		update.SetPicture(picture)
 	}
 	if updateMetadata {
-		marshalled, err := proto.Marshal(metadata)
-		if err != nil {
-			panic(err)
-		}
-		update.SetMetadata(marshalled)
+		update.SetMetadata(metadata)
 	}
 	update.ExecX(ctx)
 	return

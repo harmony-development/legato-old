@@ -3,6 +3,7 @@ package ent_shared
 import (
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
+	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/lexorank"
 	"github.com/harmony-development/legato/server/db/types"
 )
@@ -13,23 +14,21 @@ func (d *DB) AddChannelToGuild(guildID, channelID uint64, channelName string, pr
 	previousChannelPos := ""
 	nextChannelPos := ""
 
-	if previous != nil {
+	if previous != nil && *previous != 0 {
 		previousChannelPos = d.Channel.GetX(ctx, *previous).Position
 	}
-	if next != nil {
+	if next != nil && *next != 0 {
 		nextChannelPos = d.Channel.GetX(ctx, *next).Position
 	}
 
-	d.Guild.UpdateOneID(guildID).AddChannel(
-		d.Channel.Create().
-			SetID(channelID).
-			SetGuildID(guildID).
-			SetPosition(lexorank.Rank(previousChannelPos, nextChannelPos)).
-			SetName(channelName).
-			SetKind(uint64(kind)).
-			SetMetadata(md).
-			SaveX(ctx),
-	).ExecX(ctx)
+	d.Channel.Create().
+		SetID(channelID).
+		SetGuildID(guildID).
+		SetPosition(lexorank.Rank(previousChannelPos, nextChannelPos)).
+		SetName(channelName).
+		SetKind(uint64(kind)).
+		SetMetadata(md).
+		SaveX(ctx)
 
 	c.ID = channelID
 	c.Metadata = md
@@ -49,19 +48,16 @@ func (d *DB) DeleteChannelFromGuild(guildID, channelID uint64) (err error) {
 func (d *DB) ChannelsForGuild(guildID uint64) (chans []*types.ChannelData, err error) {
 	defer doRecovery(&err)
 
-	channels := d.Guild.
-		GetX(ctx, guildID).
-		QueryChannel().
-		AllX(ctx)
+	channels := d.Channel.Query().Where(channel.HasGuildWith(guild.ID(guildID))).AllX(ctx)
 
 	for _, c := range channels {
-		chans[c.ID] = &types.ChannelData{
+		chans = append(chans, &types.ChannelData{
 			ID:       c.ID,
 			Name:     c.Name,
 			Metadata: c.Metadata,
 			Position: c.Position,
 			Kind:     c.Kind,
-		}
+		})
 	}
 
 	return

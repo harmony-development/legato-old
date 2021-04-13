@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 )
 
 // Guild holds the schema definition for the Guild entity.
@@ -18,7 +19,7 @@ func (Guild) Fields() []ent.Field {
 		field.Uint64("owner"),
 		field.String("name"),
 		field.String("picture"),
-		field.Bytes("metadata"),
+		field.Bytes("metadata").GoType(&harmonytypesv1.Metadata{}),
 	}
 }
 
@@ -36,6 +37,6 @@ func (Guild) Edges() []ent.Edge {
 		edge.
 			To("permission_node", PermissionNode.Type),
 		edge.
-			From("user", User.Type).Ref("guild").Required(),
+			From("user", User.Type).Ref("guild"),
 	}
 }

@@ -82,6 +82,14 @@ func (pc *ProfileCreate) SetUserID(id uint64) *ProfileCreate {
 	return pc
 }
 
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (pc *ProfileCreate) SetNillableUserID(id *uint64) *ProfileCreate {
+	if id != nil {
+		pc = pc.SetUserID(*id)
+	}
+	return pc
+}
+
 // SetUser sets the "user" edge to the User entity.
 func (pc *ProfileCreate) SetUser(u *User) *ProfileCreate {
 	return pc.SetUserID(u.ID)
@@ -149,9 +157,6 @@ func (pc *ProfileCreate) defaults() {
 func (pc *ProfileCreate) check() error {
 	if _, ok := pc.mutation.IsBot(); !ok {
 		return &ValidationError{Name: "is_bot", err: errors.New("entgen: missing required field \"is_bot\"")}
-	}
-	if _, ok := pc.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user", err: errors.New("entgen: missing required edge \"user\"")}
 	}
 	return nil
 }

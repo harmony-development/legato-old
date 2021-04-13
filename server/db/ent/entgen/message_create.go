@@ -63,7 +63,7 @@ func (mc *MessageCreate) SetOverride(v *v1.Override) *MessageCreate {
 	return mc
 }
 
-// SetContent sets the "Content" field.
+// SetContent sets the "content" field.
 func (mc *MessageCreate) SetContent(v *v1.Content) *MessageCreate {
 	mc.mutation.SetContent(v)
 	return mc
@@ -211,7 +211,7 @@ func (mc *MessageCreate) check() error {
 		return &ValidationError{Name: "createdat", err: errors.New("entgen: missing required field \"createdat\"")}
 	}
 	if _, ok := mc.mutation.Content(); !ok {
-		return &ValidationError{Name: "Content", err: errors.New("entgen: missing required field \"Content\"")}
+		return &ValidationError{Name: "content", err: errors.New("entgen: missing required field \"content\"")}
 	}
 	return nil
 }
@@ -264,7 +264,7 @@ func (mc *MessageCreate) createSpec() (*Message, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := mc.mutation.Metadata(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
+			Type:   field.TypeBytes,
 			Value:  value,
 			Column: message.FieldMetadata,
 		})
@@ -272,7 +272,7 @@ func (mc *MessageCreate) createSpec() (*Message, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := mc.mutation.Override(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
+			Type:   field.TypeBytes,
 			Value:  value,
 			Column: message.FieldOverride,
 		})

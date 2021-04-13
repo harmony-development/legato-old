@@ -108,7 +108,21 @@ func Editedat(v time.Time) predicate.Message {
 	})
 }
 
-// Content applies equality check predicate on the "Content" field. It's identical to ContentEQ.
+// Metadata applies equality check predicate on the "metadata" field. It's identical to MetadataEQ.
+func Metadata(v *v1.Metadata) predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldMetadata), v))
+	})
+}
+
+// Override applies equality check predicate on the "override" field. It's identical to OverrideEQ.
+func Override(v *v1.Override) predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOverride), v))
+	})
+}
+
+// Content applies equality check predicate on the "content" field. It's identical to ContentEQ.
 func Content(v *v1.Content) predicate.Message {
 	return predicate.Message(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldContent), v))
@@ -281,6 +295,82 @@ func EditedatNotNil() predicate.Message {
 	})
 }
 
+// MetadataEQ applies the EQ predicate on the "metadata" field.
+func MetadataEQ(v *v1.Metadata) predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldMetadata), v))
+	})
+}
+
+// MetadataNEQ applies the NEQ predicate on the "metadata" field.
+func MetadataNEQ(v *v1.Metadata) predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldMetadata), v))
+	})
+}
+
+// MetadataIn applies the In predicate on the "metadata" field.
+func MetadataIn(vs ...*v1.Metadata) predicate.Message {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Message(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldMetadata), v...))
+	})
+}
+
+// MetadataNotIn applies the NotIn predicate on the "metadata" field.
+func MetadataNotIn(vs ...*v1.Metadata) predicate.Message {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Message(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldMetadata), v...))
+	})
+}
+
+// MetadataGT applies the GT predicate on the "metadata" field.
+func MetadataGT(v *v1.Metadata) predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldMetadata), v))
+	})
+}
+
+// MetadataGTE applies the GTE predicate on the "metadata" field.
+func MetadataGTE(v *v1.Metadata) predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldMetadata), v))
+	})
+}
+
+// MetadataLT applies the LT predicate on the "metadata" field.
+func MetadataLT(v *v1.Metadata) predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldMetadata), v))
+	})
+}
+
+// MetadataLTE applies the LTE predicate on the "metadata" field.
+func MetadataLTE(v *v1.Metadata) predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldMetadata), v))
+	})
+}
+
 // MetadataIsNil applies the IsNil predicate on the "metadata" field.
 func MetadataIsNil() predicate.Message {
 	return predicate.Message(func(s *sql.Selector) {
@@ -292,6 +382,82 @@ func MetadataIsNil() predicate.Message {
 func MetadataNotNil() predicate.Message {
 	return predicate.Message(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldMetadata)))
+	})
+}
+
+// OverrideEQ applies the EQ predicate on the "override" field.
+func OverrideEQ(v *v1.Override) predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOverride), v))
+	})
+}
+
+// OverrideNEQ applies the NEQ predicate on the "override" field.
+func OverrideNEQ(v *v1.Override) predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldOverride), v))
+	})
+}
+
+// OverrideIn applies the In predicate on the "override" field.
+func OverrideIn(vs ...*v1.Override) predicate.Message {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Message(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldOverride), v...))
+	})
+}
+
+// OverrideNotIn applies the NotIn predicate on the "override" field.
+func OverrideNotIn(vs ...*v1.Override) predicate.Message {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Message(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldOverride), v...))
+	})
+}
+
+// OverrideGT applies the GT predicate on the "override" field.
+func OverrideGT(v *v1.Override) predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldOverride), v))
+	})
+}
+
+// OverrideGTE applies the GTE predicate on the "override" field.
+func OverrideGTE(v *v1.Override) predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldOverride), v))
+	})
+}
+
+// OverrideLT applies the LT predicate on the "override" field.
+func OverrideLT(v *v1.Override) predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldOverride), v))
+	})
+}
+
+// OverrideLTE applies the LTE predicate on the "override" field.
+func OverrideLTE(v *v1.Override) predicate.Message {
+	return predicate.Message(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldOverride), v))
 	})
 }
 
@@ -309,21 +475,21 @@ func OverrideNotNil() predicate.Message {
 	})
 }
 
-// ContentEQ applies the EQ predicate on the "Content" field.
+// ContentEQ applies the EQ predicate on the "content" field.
 func ContentEQ(v *v1.Content) predicate.Message {
 	return predicate.Message(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldContent), v))
 	})
 }
 
-// ContentNEQ applies the NEQ predicate on the "Content" field.
+// ContentNEQ applies the NEQ predicate on the "content" field.
 func ContentNEQ(v *v1.Content) predicate.Message {
 	return predicate.Message(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldContent), v))
 	})
 }
 
-// ContentIn applies the In predicate on the "Content" field.
+// ContentIn applies the In predicate on the "content" field.
 func ContentIn(vs ...*v1.Content) predicate.Message {
 	v := make([]interface{}, len(vs))
 	for i := range v {
@@ -340,7 +506,7 @@ func ContentIn(vs ...*v1.Content) predicate.Message {
 	})
 }
 
-// ContentNotIn applies the NotIn predicate on the "Content" field.
+// ContentNotIn applies the NotIn predicate on the "content" field.
 func ContentNotIn(vs ...*v1.Content) predicate.Message {
 	v := make([]interface{}, len(vs))
 	for i := range v {
@@ -357,28 +523,28 @@ func ContentNotIn(vs ...*v1.Content) predicate.Message {
 	})
 }
 
-// ContentGT applies the GT predicate on the "Content" field.
+// ContentGT applies the GT predicate on the "content" field.
 func ContentGT(v *v1.Content) predicate.Message {
 	return predicate.Message(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldContent), v))
 	})
 }
 
-// ContentGTE applies the GTE predicate on the "Content" field.
+// ContentGTE applies the GTE predicate on the "content" field.
 func ContentGTE(v *v1.Content) predicate.Message {
 	return predicate.Message(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldContent), v))
 	})
 }
 
-// ContentLT applies the LT predicate on the "Content" field.
+// ContentLT applies the LT predicate on the "content" field.
 func ContentLT(v *v1.Content) predicate.Message {
 	return predicate.Message(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldContent), v))
 	})
 }
 
-// ContentLTE applies the LTE predicate on the "Content" field.
+// ContentLTE applies the LTE predicate on the "content" field.
 func ContentLTE(v *v1.Content) predicate.Message {
 	return predicate.Message(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldContent), v))
