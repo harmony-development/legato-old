@@ -72,7 +72,6 @@ func (d *DB) GetMessages(channelID uint64) (msgs []*types.MessageData, err error
 	defer doRecovery(&err)
 
 	messages := d.
-		Debug().
 		Message.
 		Query().
 		Where(message.HasChannelWith(channel.ID(channelID))).
@@ -89,7 +88,7 @@ func (d *DB) GetMessages(channelID uint64) (msgs []*types.MessageData, err error
 
 func (d *DB) GetMessagesBefore(channelID uint64, date time.Time) (msgs []*types.MessageData, err error) {
 	defer doRecovery(&err)
-	messages := d.Debug().Message.
+	messages := d.Message.
 		Query().
 		Limit(50).
 		Where(
