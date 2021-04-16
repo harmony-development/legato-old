@@ -1,13 +1,13 @@
 package ent_shared
 
 import (
+	"fmt"
 	"time"
 
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/ent/entgen"
 	"github.com/harmony-development/legato/server/db/ent/entgen/channel"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
-	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 	"github.com/harmony-development/legato/server/db/types"
 )
 
@@ -119,6 +119,8 @@ func (d *DB) HasMessageWithID(messageID uint64) (exists bool, err error) {
 func (d *DB) UpdateTextMessage(messageID uint64, content string) (t time.Time, err error) {
 	defer doRecovery(&err)
 
+	fmt.Printf("message ID: %+v", messageID)
+
 	data := d.Message.GetX(ctx, messageID)
 
 	v := data.Content.Content.(*harmonytypesv1.Content_TextMessage)
@@ -132,15 +134,8 @@ func (d *DB) UpdateTextMessage(messageID uint64, content string) (t time.Time, e
 
 func (d *DB) GetMessageOwner(messageID uint64) (userID uint64, err error) {
 	defer doRecovery(&err)
-	userID = d.Message.
-		Query().
-		Where(
-			message.ID(messageID),
-			message.HasUserWith(
-				user.ID(userID),
-			),
-		).
-		OnlyX(ctx).
-		ID
+
+	userID = d.Message.Query().WithUser().Where(message.ID(messageID)).OnlyX(ctx).Edges.User.ID
+
 	return
 }
