@@ -132,6 +132,7 @@ type MessageData struct {
 func (v *MessageData) ToV1() *harmonytypesv1.Message {
 	return &harmonytypesv1.Message{
 		Metadata:  v.Metadata,
+		ChannelId: v.ChannelId,
 		Overrides: v.Overrides,
 		GuildId:   v.GuildId,
 		MessageId: v.MessageId,

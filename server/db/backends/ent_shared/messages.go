@@ -70,9 +70,12 @@ func (d *DB) GetMessage(messageID uint64) (msg *types.MessageData, err error) {
 
 func (d *DB) GetMessages(channelID uint64) (msgs []*types.MessageData, err error) {
 	defer doRecovery(&err)
-	messages := d.Channel.
-		GetX(ctx, channelID).
-		QueryMessage().
+
+	messages := d.
+		Debug().
+		Message.
+		Query().
+		Where(message.HasChannelWith(channel.ID(channelID))).
 		WithChannel(func(cq *entgen.ChannelQuery) {
 			cq.WithGuild()
 		}).
@@ -86,7 +89,7 @@ func (d *DB) GetMessages(channelID uint64) (msgs []*types.MessageData, err error
 
 func (d *DB) GetMessagesBefore(channelID uint64, date time.Time) (msgs []*types.MessageData, err error) {
 	defer doRecovery(&err)
-	messages := d.Message.
+	messages := d.Debug().Message.
 		Query().
 		Limit(50).
 		Where(
@@ -103,6 +106,7 @@ func (d *DB) GetMessagesBefore(channelID uint64, date time.Time) (msgs []*types.
 		WithUser().
 		WithParent().
 		AllX(ctx)
+
 	return types.IntoMany(messages), nil
 }
 
