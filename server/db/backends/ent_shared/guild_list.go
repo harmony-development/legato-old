@@ -40,6 +40,18 @@ func (d *DB) AddGuildToList(userID, guildID uint64, homeServer string) (err erro
 		tx.GuildListEntry.Create().
 			SetID(guildID).SetHost(homeServer).
 			SetUserID(userID).
+			SetPosition(
+				lexorank.Rank(
+					func() string {
+						pos, err := d.GetGuildListPosition(userID, guildID, homeServer)
+						if err != nil {
+							panic(err)
+						}
+						return pos
+					}(),
+					"",
+				),
+			).
 			SaveX(ctx),
 	).ExecX(ctx)
 	if err := tx.Commit(); err != nil {
