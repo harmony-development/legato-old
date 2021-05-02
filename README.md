@@ -16,7 +16,7 @@ Required dependecies:
 - libvips-dev
 
 Then run:
-```
+```sh
 go get -v -t -d ./...
 go build
 ```
