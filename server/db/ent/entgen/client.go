@@ -300,7 +300,9 @@ func (c *ChannelClient) DeleteOneID(id uint64) *ChannelDeleteOne {
 
 // Query returns a query builder for Channel.
 func (c *ChannelClient) Query() *ChannelQuery {
-	return &ChannelQuery{config: c.config}
+	return &ChannelQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Channel entity by its id.
@@ -452,7 +454,9 @@ func (c *EmoteClient) DeleteOneID(id string) *EmoteDeleteOne {
 
 // Query returns a query builder for Emote.
 func (c *EmoteClient) Query() *EmoteQuery {
-	return &EmoteQuery{config: c.config}
+	return &EmoteQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Emote entity by its id.
@@ -556,7 +560,9 @@ func (c *EmotePackClient) DeleteOneID(id uint64) *EmotePackDeleteOne {
 
 // Query returns a query builder for EmotePack.
 func (c *EmotePackClient) Query() *EmotePackQuery {
-	return &EmotePackQuery{config: c.config}
+	return &EmotePackQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a EmotePack entity by its id.
@@ -692,7 +698,9 @@ func (c *FileClient) DeleteOneID(id string) *FileDeleteOne {
 
 // Query returns a query builder for File.
 func (c *FileClient) Query() *FileQuery {
-	return &FileQuery{config: c.config}
+	return &FileQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a File entity by its id.
@@ -780,7 +788,9 @@ func (c *FileHashClient) DeleteOneID(id int) *FileHashDeleteOne {
 
 // Query returns a query builder for FileHash.
 func (c *FileHashClient) Query() *FileHashQuery {
-	return &FileHashQuery{config: c.config}
+	return &FileHashQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a FileHash entity by its id.
@@ -868,7 +878,9 @@ func (c *ForeignUserClient) DeleteOneID(id int) *ForeignUserDeleteOne {
 
 // Query returns a query builder for ForeignUser.
 func (c *ForeignUserClient) Query() *ForeignUserQuery {
-	return &ForeignUserQuery{config: c.config}
+	return &ForeignUserQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a ForeignUser entity by its id.
@@ -972,7 +984,9 @@ func (c *GuildClient) DeleteOneID(id uint64) *GuildDeleteOne {
 
 // Query returns a query builder for Guild.
 func (c *GuildClient) Query() *GuildQuery {
-	return &GuildQuery{config: c.config}
+	return &GuildQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Guild entity by its id.
@@ -1172,7 +1186,9 @@ func (c *GuildListEntryClient) DeleteOneID(id uint64) *GuildListEntryDeleteOne {
 
 // Query returns a query builder for GuildListEntry.
 func (c *GuildListEntryClient) Query() *GuildListEntryQuery {
-	return &GuildListEntryQuery{config: c.config}
+	return &GuildListEntryQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a GuildListEntry entity by its id.
@@ -1276,7 +1292,9 @@ func (c *InviteClient) DeleteOneID(id string) *InviteDeleteOne {
 
 // Query returns a query builder for Invite.
 func (c *InviteClient) Query() *InviteQuery {
-	return &InviteQuery{config: c.config}
+	return &InviteQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Invite entity by its id.
@@ -1380,7 +1398,9 @@ func (c *LocalUserClient) DeleteOneID(id int) *LocalUserDeleteOne {
 
 // Query returns a query builder for LocalUser.
 func (c *LocalUserClient) Query() *LocalUserQuery {
-	return &LocalUserQuery{config: c.config}
+	return &LocalUserQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a LocalUser entity by its id.
@@ -1500,7 +1520,9 @@ func (c *MessageClient) DeleteOneID(id uint64) *MessageDeleteOne {
 
 // Query returns a query builder for Message.
 func (c *MessageClient) Query() *MessageQuery {
-	return &MessageQuery{config: c.config}
+	return &MessageQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Message entity by its id.
@@ -1652,7 +1674,9 @@ func (c *PermissionNodeClient) DeleteOneID(id int) *PermissionNodeDeleteOne {
 
 // Query returns a query builder for PermissionNode.
 func (c *PermissionNodeClient) Query() *PermissionNodeQuery {
-	return &PermissionNodeQuery{config: c.config}
+	return &PermissionNodeQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a PermissionNode entity by its id.
@@ -1788,7 +1812,9 @@ func (c *ProfileClient) DeleteOneID(id int) *ProfileDeleteOne {
 
 // Query returns a query builder for Profile.
 func (c *ProfileClient) Query() *ProfileQuery {
-	return &ProfileQuery{config: c.config}
+	return &ProfileQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Profile entity by its id.
@@ -1892,7 +1918,9 @@ func (c *RoleClient) DeleteOneID(id uint64) *RoleDeleteOne {
 
 // Query returns a query builder for Role.
 func (c *RoleClient) Query() *RoleQuery {
-	return &RoleQuery{config: c.config}
+	return &RoleQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Role entity by its id.
@@ -2028,7 +2056,9 @@ func (c *SessionClient) DeleteOneID(id string) *SessionDeleteOne {
 
 // Query returns a query builder for Session.
 func (c *SessionClient) Query() *SessionQuery {
-	return &SessionQuery{config: c.config}
+	return &SessionQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Session entity by its id.
@@ -2132,7 +2162,9 @@ func (c *UserClient) DeleteOneID(id uint64) *UserDeleteOne {
 
 // Query returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
-	return &UserQuery{config: c.config}
+	return &UserQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a User entity by its id.
@@ -2396,7 +2428,9 @@ func (c *UserMetaClient) DeleteOneID(id string) *UserMetaDeleteOne {
 
 // Query returns a query builder for UserMeta.
 func (c *UserMetaClient) Query() *UserMetaQuery {
-	return &UserMetaQuery{config: c.config}
+	return &UserMetaQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a UserMeta entity by its id.
