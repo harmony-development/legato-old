@@ -22,6 +22,9 @@ type Config struct {
 		StorageBackend string `hcl:"StorageBackend,optional" default:"PureFlatfile"`
 		SnowflakeStart int64  `hcl:"SnowflakeStart,optional" default:"0"`
 		UseCORS        bool   `hcl:"UseCORS,optional" default:"true"`
+		UseTLS         bool   `hcl:"UseTLS,optional" default:"false"`
+		TLSCert        string `hcl:"TLSCert,optional"`
+		TLSKey         string `hcl:"TLSKey,optional"`
 
 		Policies struct {
 			EnablePasswordResetForm bool `hcl:"EnablePasswordResetForm,optional" default:"false"`

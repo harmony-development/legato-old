@@ -37,7 +37,10 @@ func (d *DB) AddGuildToList(userID, guildID uint64, homeServer string) (err erro
 	defer doRecovery(&err)
 	tx := d.TxX()
 	tx.User.UpdateOneID(userID).AddListentry(
-		tx.GuildListEntry.Create().SaveX(ctx),
+		tx.GuildListEntry.Create().
+			SetID(guildID).SetHost(homeServer).
+			SetUserID(userID).
+			SaveX(ctx),
 	).ExecX(ctx)
 	if err := tx.Commit(); err != nil {
 		panic(err)
