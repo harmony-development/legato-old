@@ -19,7 +19,7 @@ func (m Middlewares) MethodMetadataInterceptor(meth *descriptorpb.MethodDescript
 		ctx := c.(HarmonyContext)
 		opts := proto.GetExtension(meth.Options, harmonytypesv1.E_Metadata).(*harmonytypesv1.HarmonyMethodMetadata)
 		if opts == nil {
-			goto finally
+			goto afterPermissions
 		}
 
 		{
@@ -40,8 +40,8 @@ func (m Middlewares) MethodMetadataInterceptor(meth *descriptorpb.MethodDescript
 				goto afterLocal
 			}
 
-			err := m.DB.UserIsLocal(ctx.UserID)
-			if err != nil {
+			isLocal, err := m.DB.UserIsLocal(ctx.UserID)
+			if !isLocal || err != nil {
 				return nil, err
 			}
 		}
@@ -57,24 +57,6 @@ func (m Middlewares) MethodMetadataInterceptor(meth *descriptorpb.MethodDescript
 		// Permissions
 		{
 			if opts.RequiresPermissionNode == "" {
-				if GetRPCConfig(fmt.Sprintf("/%s.%s/%s", d.GetPackage(), serv.GetName(), meth.GetName())).WantsRoles {
-					location, ok := req.(interface {
-						GetGuildId() uint64
-					})
-					if !ok {
-						panic("wants roles middleware used on message without a location")
-					}
-					roles, err := m.DB.RolesForUser(location.GetGuildId(), ctx.UserID)
-					if err != nil {
-						return nil, err
-					}
-					ctx.UserRoles = roles
-					owner, err := m.DB.GetOwner(location.GetGuildId())
-					if err != nil {
-						return nil, err
-					}
-					ctx.IsOwner = owner == ctx.UserID
-				}
 				goto afterPermissions
 			}
 
@@ -90,6 +72,7 @@ func (m Middlewares) MethodMetadataInterceptor(meth *descriptorpb.MethodDescript
 				return nil, err
 			}
 			if owner == ctx.UserID {
+				ctx.IsOwner = true
 				goto afterPermissions
 			}
 
@@ -112,8 +95,27 @@ func (m Middlewares) MethodMetadataInterceptor(meth *descriptorpb.MethodDescript
 			}
 		}
 	afterPermissions:
+		if (opts != nil && opts.RequiresPermissionNode == "") || opts == nil {
+			if GetRPCConfig(fmt.Sprintf("/%s.%s/%s", d.GetPackage(), serv.GetName(), meth.GetName())).WantsRoles {
+				location, ok := req.(interface {
+					GetGuildId() uint64
+				})
+				if !ok {
+					panic("wants roles middleware used on message without a location")
+				}
+				roles, err := m.DB.RolesForUser(location.GetGuildId(), ctx.UserID)
+				if err != nil {
+					return nil, err
+				}
+				ctx.UserRoles = roles
+				owner, err := m.DB.GetOwner(location.GetGuildId())
+				if err != nil {
+					return nil, err
+				}
 
-	finally:
+				ctx.IsOwner = owner == ctx.UserID
+			}
+		}
 		return h(ctx, req)
 	}
 }

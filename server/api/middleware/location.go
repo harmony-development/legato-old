@@ -68,7 +68,7 @@ func (m Middlewares) LocationHandler(req interface{}, fullMethod string, userID 
 				if messageID == 0 {
 					return responses.NewError(responses.MissingMessageID)
 				}
-				ok, err := m.DB.HasMessageWithID(guildID, channelID, messageID)
+				ok, err := m.DB.HasMessageWithID(messageID)
 				if err != nil {
 					return err
 				}

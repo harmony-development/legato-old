@@ -6,6 +6,7 @@ import (
 	"github.com/dyatlov/go-opengraph/opengraph"
 	mediaproxyv1 "github.com/harmony-development/legato/gen/mediaproxy/v1"
 	"github.com/harmony-development/legato/server/api/middleware"
+	lru "github.com/hashicorp/golang-lru"
 	"github.com/labstack/echo/v4"
 )
 
@@ -18,10 +19,9 @@ func init() {
 	}, "/protocol.mediaproxy.v1.MediaProxyService/FetchLinkMetadata")
 }
 
-// TODO use this struct somewhere
-// type linkData struct {
-// 	linkLRU *lru.ARCCache
-// }
+type linkData struct {
+	linkLRU *lru.ARCCache
+}
 
 func copyOGIntoProtobuf(og *opengraph.OpenGraph, md *mediaproxyv1.SiteMetadata) {
 	md.Description = og.Description
@@ -34,21 +34,19 @@ func copyOGIntoProtobuf(og *opengraph.OpenGraph, md *mediaproxyv1.SiteMetadata) 
 	md.SiteTitle = og.SiteName
 }
 
-// TODO use this function
-// func (v1 *V1) obtainOG(url string, out *mediaproxyv1.SiteMetadata) error {
-// 	data, err := v1.fetch(url)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	copyOGIntoProtobuf((*opengraph.OpenGraph)(data.OG), out)
+func (v1 *V1) obtainOG(url string, out *mediaproxyv1.SiteMetadata) error {
+	data, err := v1.fetch(url)
+	if err != nil {
+		return err
+	}
+	copyOGIntoProtobuf((*opengraph.OpenGraph)(data.OG), out)
 
-// 	return nil
-// }
+	return nil
+}
 
 // FetchLinkMetadata implements the FetchLinkMetadata RPC
 func (v1 *V1) FetchLinkMetadata(c echo.Context, r *mediaproxyv1.FetchLinkMetadataRequest) (resp *mediaproxyv1.FetchLinkMetadataResponse, err error) {
-	// TODO use this response
-	// resp = &mediaproxyv1.FetchLinkMetadataResponse{}
+	resp = &mediaproxyv1.FetchLinkMetadataResponse{}
 
 	data, err := v1.fetch(r.Url)
 	if err != nil {

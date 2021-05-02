@@ -14,9 +14,7 @@ import (
 	"github.com/harmony-development/legato/server/api/chat/v1/permissions"
 	"github.com/harmony-development/legato/server/api/middleware"
 	"github.com/harmony-development/legato/server/config"
-	"github.com/harmony-development/legato/server/db/queries"
 	"github.com/harmony-development/legato/server/db/types"
-	"github.com/harmony-development/legato/server/db/utilities"
 	"github.com/harmony-development/legato/server/http/attachments/backend"
 	"github.com/harmony-development/legato/server/logger"
 	"github.com/harmony-development/legato/server/responses"
@@ -24,7 +22,6 @@ import (
 	"github.com/sony/sonyflake"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // Dependencies are the backend services this package needs
@@ -103,9 +100,6 @@ func init() {
 // CreateGuild implements the CreateGuild RPC
 func (v1 *V1) CreateGuild(c echo.Context, r *chatv1.CreateGuildRequest) (*chatv1.CreateGuildResponse, error) {
 	ctx := c.(middleware.HarmonyContext)
-	if len(r.GuildName) > v1.Config.Server.Policies.Guild.MaxLength {
-		return nil, responses.NewError(responses.NameTooLong)
-	}
 	guildID, err := v1.Sonyflake.NextID()
 	if err != nil {
 		return nil, err
@@ -119,7 +113,7 @@ func (v1 *V1) CreateGuild(c echo.Context, r *chatv1.CreateGuildRequest) (*chatv1
 		return nil, err
 	}
 	return &chatv1.CreateGuildResponse{
-		GuildId: guild.GuildID,
+		GuildId: guild.ID,
 	}, nil
 }
 
@@ -145,7 +139,7 @@ func (v1 *V1) CreateInvite(c echo.Context, r *chatv1.CreateInviteRequest) (*chat
 		return nil, err
 	}
 	return &chatv1.CreateInviteResponse{
-		Name: invite.InviteID,
+		Name: invite.ID,
 	}, nil
 }
 
@@ -162,15 +156,18 @@ func init() {
 
 // CreateChannel implements the CreateChannel RPC
 func (v1 *V1) CreateChannel(c echo.Context, r *chatv1.CreateChannelRequest) (*chatv1.CreateChannelResponse, error) {
-	channel, err := v1.DB.AddChannelToGuild(r.GuildId, r.ChannelName, r.PreviousId, r.NextId, r.IsCategory, r.Metadata)
+	channelID, err := v1.Sonyflake.NextID()
 	if err != nil {
+		return nil, err
+	}
+	if _, err := v1.DB.AddChannelToGuild(r.GuildId, channelID, r.ChannelName, &r.PreviousId, &r.NextId, types.ChannelKindText, r.Metadata); err != nil {
 		return nil, err
 	}
 	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
 		Event: &chatv1.Event_CreatedChannel{
 			CreatedChannel: &chatv1.Event_ChannelCreated{
 				GuildId:    r.GuildId,
-				ChannelId:  channel.ChannelID,
+				ChannelId:  channelID,
 				Name:       r.ChannelName,
 				PreviousId: r.PreviousId,
 				NextId:     r.NextId,
@@ -179,7 +176,7 @@ func (v1 *V1) CreateChannel(c echo.Context, r *chatv1.CreateChannelRequest) (*ch
 		},
 	})
 	return &chatv1.CreateChannelResponse{
-		ChannelId: channel.ChannelID,
+		ChannelId: channelID,
 	}, nil
 }
 
@@ -204,9 +201,9 @@ func (v1 *V1) GetGuild(c echo.Context, r *chatv1.GetGuildRequest) (*chatv1.GetGu
 		return nil, err
 	}
 	return &chatv1.GetGuildResponse{
-		GuildName:    guild.GuildName,
-		GuildOwner:   guild.OwnerID,
-		GuildPicture: guild.PictureUrl,
+		GuildName:    guild.Name,
+		GuildOwner:   guild.Owner,
+		GuildPicture: guild.Picture,
 	}, nil
 }
 
@@ -231,14 +228,9 @@ func (v1 *V1) GetGuildInvites(c echo.Context, r *chatv1.GetGuildInvitesRequest) 
 		Invites: func() (ret []*chatv1.GetGuildInvitesResponse_Invite) {
 			for _, inv := range invites {
 				ret = append(ret, &chatv1.GetGuildInvitesResponse_Invite{
-					InviteId: inv.InviteID,
-					PossibleUses: func() int32 {
-						if inv.PossibleUses.Valid {
-							return inv.PossibleUses.Int32
-						}
-						return -1
-					}(),
-					UseCount: inv.Uses,
+					InviteId:     inv.ID,
+					PossibleUses: int32(inv.PossibleUses),
+					UseCount:     int32(inv.Uses),
 				})
 			}
 			return
@@ -292,13 +284,17 @@ func (v1 *V1) GetGuildChannels(c echo.Context, r *chatv1.GetGuildChannelsRequest
 	roles := ctx.UserRoles
 
 	for _, channel := range chans {
-		if ctx.IsOwner || v1.Perms.Check("messages.view", roles, r.GuildId, channel.ChannelID) {
+		println("channel")
+		if ctx.IsOwner || v1.Perms.Check("messages.view", roles, r.GuildId, channel.ID) {
+			println("add")
 			ret = append(ret, &chatv1.GetGuildChannelsResponse_Channel{
-				ChannelId:   channel.ChannelID,
-				ChannelName: channel.ChannelName,
-				IsCategory:  channel.Category,
-				Metadata:    utilities.DeserializeMetadata(channel.Metadata),
+				ChannelId:   channel.ID,
+				ChannelName: channel.Name,
+				Metadata:    channel.Metadata,
+				IsCategory:  channel.Kind == uint64(types.ChannelKindCategory),
 			})
+		} else {
+			println("discard")
 		}
 	}
 	return &chatv1.GetGuildChannelsResponse{
@@ -319,57 +315,12 @@ func init() {
 
 // GetMessage implements the GetMessage RPC
 func (v1 *V1) GetMessage(c echo.Context, r *chatv1.GetMessageRequest) (*chatv1.GetMessageResponse, error) {
-	message, err := v1.DB.GetMessage(r.MessageId)
+	data, err := v1.DB.GetMessage(r.MessageId)
 	if err != nil {
 		return nil, err
 	}
-	createdAt, _ := ptypes.TimestampProto(message.CreatedAt.UTC())
-	var editedAt *timestamppb.Timestamp
-	if message.EditedAt.Valid {
-		editedAt, _ = ptypes.TimestampProto(editedAt.AsTime().UTC())
-	}
-	var embeds []*harmonytypesv1.Embed
-	var actions []*harmonytypesv1.Action
-	attachments := []*harmonytypesv1.Attachment{}
-	var override *harmonytypesv1.Override
-	if err := json.Unmarshal(message.Embeds, &embeds); err != nil {
-		return nil, err
-	}
-	if err := json.Unmarshal(message.Actions, &actions); err != nil {
-		return nil, err
-	}
-	if len(message.Overrides) > 0 {
-		override = new(harmonytypesv1.Override)
-		if err := proto.Unmarshal(message.Overrides, override); err != nil {
-			return nil, err
-		}
-	}
-	for _, a := range message.Attachments {
-		contentType, fileName, size, err := v1.StorageBackend.GetMetadata(a)
-		if err == nil {
-			attachments = append(attachments, &harmonytypesv1.Attachment{
-				Id:   a,
-				Name: fileName,
-				Type: contentType,
-				Size: size,
-			})
-		}
-	}
 	return &chatv1.GetMessageResponse{
-		Message: &harmonytypesv1.Message{
-			GuildId:     message.GuildID,
-			ChannelId:   message.ChannelID,
-			MessageId:   message.MessageID,
-			AuthorId:    message.UserID,
-			CreatedAt:   createdAt,
-			EditedAt:    editedAt,
-			Content:     message.Content,
-			Embeds:      embeds,
-			Attachments: attachments,
-			Actions:     actions,
-			Overrides:   override,
-			InReplyTo:   uint64(message.ReplyToID.Int64),
-		},
+		Message: data.ToV1(),
 	}, nil
 }
 
@@ -394,8 +345,8 @@ func (v1 *V1) PreviewGuild(c echo.Context, r *chatv1.PreviewGuildRequest) (*chat
 		return nil, err
 	}
 
-	ret.Avatar = guildData.PictureUrl
-	ret.Name = guildData.GuildName
+	ret.Avatar = guildData.Picture
+	ret.Name = guildData.Name
 	count := int64(0)
 	count, err = v1.DB.CountMembersInGuild(data)
 	if err != nil {
@@ -419,76 +370,27 @@ func init() {
 
 // GetChannelMessages implements the GetChannelMessages RPC
 func (v1 *V1) GetChannelMessages(c echo.Context, r *chatv1.GetChannelMessagesRequest) (*chatv1.GetChannelMessagesResponse, error) {
-	var err error
-	var messages []queries.Message
+	var messages []*harmonytypesv1.Message
 	if r.BeforeMessage != 0 {
-		time, err := v1.DB.GetMessageDate(r.BeforeMessage)
+		beforeMsg, err := v1.DB.GetMessage(r.BeforeMessage)
 		if err != nil {
 			return nil, err
 		}
-		messages, err = v1.DB.GetMessagesBefore(r.GuildId, r.ChannelId, time)
+		it, err := v1.DB.GetMessagesBefore(r.ChannelId, beforeMsg.CreatedAt.AsTime())
 		if err != nil && err != sql.ErrNoRows {
 			return nil, err
 		}
+		messages = types.ManyMessageDataInto(it)
 	} else {
-		messages, err = v1.DB.GetMessages(r.GuildId, r.ChannelId)
+		it, err := v1.DB.GetMessages(r.ChannelId)
 		if err != nil && err != sql.ErrNoRows {
 			return nil, err
 		}
+		messages = types.ManyMessageDataInto(it)
 	}
 	return &chatv1.GetChannelMessagesResponse{
 		ReachedTop: len(messages) < v1.Config.Server.Policies.APIs.Messages.MaximumGetAmount,
-		Messages: func() (ret []*harmonytypesv1.Message) {
-			for _, message := range messages {
-				createdAt, _ := ptypes.TimestampProto(message.CreatedAt.UTC())
-				var editedAt *timestamppb.Timestamp
-				if message.EditedAt.Valid {
-					editedAt, _ = ptypes.TimestampProto(editedAt.AsTime().UTC())
-				}
-				var embeds []*harmonytypesv1.Embed
-				var actions []*harmonytypesv1.Action
-				var overrides *harmonytypesv1.Override
-				attachments := []*harmonytypesv1.Attachment{}
-				if err := json.Unmarshal(message.Embeds, &embeds); err != nil {
-					continue
-				}
-				if err := json.Unmarshal(message.Actions, &actions); err != nil {
-					continue
-				}
-				if len(message.Overrides) > 0 {
-					overrides = new(harmonytypesv1.Override)
-					if err := proto.Unmarshal(message.Overrides, overrides); err != nil {
-						continue
-					}
-				}
-				for _, a := range message.Attachments {
-					contentType, fileName, size, err := v1.StorageBackend.GetMetadata(a)
-					if err == nil {
-						attachments = append(attachments, &harmonytypesv1.Attachment{
-							Id:   a,
-							Name: fileName,
-							Type: contentType,
-							Size: size,
-						})
-					}
-				}
-				ret = append(ret, &harmonytypesv1.Message{
-					GuildId:     message.GuildID,
-					ChannelId:   message.ChannelID,
-					MessageId:   message.MessageID,
-					AuthorId:    message.UserID,
-					CreatedAt:   createdAt,
-					EditedAt:    editedAt,
-					Content:     message.Content,
-					Attachments: attachments,
-					Embeds:      embeds,
-					Actions:     actions,
-					Overrides:   overrides,
-					InReplyTo:   uint64(message.ReplyToID.Int64),
-				})
-			}
-			return
-		}(),
+		Messages:   messages,
 	}, nil
 }
 
@@ -538,7 +440,11 @@ func init() {
 
 // UpdateChannelInformation implements the UpdateChannelInformation RPC
 func (v1 *V1) UpdateChannelInformation(c echo.Context, r *chatv1.UpdateChannelInformationRequest) (*empty.Empty, error) {
-	if err := v1.DB.UpdateChannelInformation(r.GuildId, r.ChannelId, r.Name, r.UpdateName, r.Metadata, r.UpdateMetadata); err != nil {
+	var name *string
+	if r.UpdateName {
+		name = &r.Name
+	}
+	if err := v1.DB.UpdateChannelInformation(r.GuildId, r.ChannelId, name, r.Metadata); err != nil {
 		return nil, err
 	}
 	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
@@ -569,7 +475,7 @@ func init() {
 
 // UpdateChannelOrder implements the UpdateChannelOrder RPC
 func (v1 *V1) UpdateChannelOrder(c echo.Context, r *chatv1.UpdateChannelOrderRequest) (*empty.Empty, error) {
-	if err := v1.DB.MoveChannel(r.GuildId, r.ChannelId, r.PreviousId, r.NextId); err != nil {
+	if err := v1.DB.MoveChannel(r.ChannelId, &r.PreviousId, &r.NextId); err != nil {
 		return nil, err
 	}
 	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
@@ -598,11 +504,8 @@ func init() {
 }
 
 // UpdateMessage implements the UpdateMessage RPC
-func (v1 *V1) UpdateMessage(c echo.Context, r *chatv1.UpdateMessageRequest) (*empty.Empty, error) {
+func (v1 *V1) UpdateMessageText(c echo.Context, r *chatv1.UpdateMessageTextRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
-	if !r.UpdateActions && !r.UpdateEmbeds && !r.UpdateContent && !r.UpdateOverrides {
-		return nil, responses.NewError(responses.EntirelyBlank)
-	}
 
 	owner, err := v1.DB.GetMessageOwner(r.MessageId)
 	if err != nil {
@@ -612,60 +515,20 @@ func (v1 *V1) UpdateMessage(c echo.Context, r *chatv1.UpdateMessageRequest) (*em
 		return nil, responses.NewError(responses.NotOwner)
 	}
 
-	var actions *[]byte
-	var embeds *[]byte
-	var overrides *[]byte
-	var attachments *[]string
-	attachmentsData := []*harmonytypesv1.Attachment{}
-	if r.UpdateActions {
-		val := v1.ProtoToActions(r.Actions)
-		actions = &val
-	}
-	if r.UpdateEmbeds {
-		val := v1.ProtoToEmbeds(r.Embeds)
-		embeds = &val
-	}
-	if r.UpdateOverrides {
-		val := v1.ProtoToOverrides(r.Overrides)
-		overrides = &val
-	}
-	if r.UpdateAttachments {
-		attachments = &r.Attachments
-
-		for _, a := range r.Attachments {
-			contentType, fileName, size, err := v1.StorageBackend.GetMetadata(a)
-			if err == nil {
-				attachmentsData = append(attachmentsData, &harmonytypesv1.Attachment{
-					Id:   a,
-					Name: fileName,
-					Type: contentType,
-					Size: size,
-				})
-			}
-		}
-	}
-	tiempo, err := v1.DB.UpdateMessage(r.MessageId, &r.Content, embeds, actions, overrides, attachments, r.Metadata, r.UpdateMetadata)
+	tenpo, err := v1.DB.UpdateTextMessage(r.MessageId, r.NewContent)
 	if err != nil {
 		return nil, err
 	}
-	editedAt, _ := ptypes.TimestampProto(tiempo.UTC())
+	editedAt, _ := ptypes.TimestampProto(tenpo.UTC())
+
 	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
 		Event: &chatv1.Event_EditedMessage{
 			EditedMessage: &chatv1.Event_MessageUpdated{
-				GuildId:        r.GuildId,
-				ChannelId:      r.ChannelId,
-				MessageId:      r.MessageId,
-				Content:        r.Content,
-				UpdateContent:  r.UpdateContent,
-				Embeds:         r.Embeds,
-				UpdateEmbeds:   r.UpdateEmbeds,
-				Actions:        r.Actions,
-				UpdateActions:  r.UpdateActions,
-				Overrides:      r.Overrides,
-				EditedAt:       editedAt,
-				Attachments:    attachmentsData,
-				Metadata:       r.Metadata,
-				UpdateMetadata: r.UpdateMetadata,
+				GuildId:   r.GuildId,
+				ChannelId: r.ChannelId,
+				MessageId: r.MessageId,
+				Content:   r.NewContent,
+				EditedAt:  editedAt,
 			},
 		},
 	})
@@ -767,7 +630,7 @@ func (v1 *V1) DeleteMessage(c echo.Context, r *chatv1.DeleteMessageRequest) (*em
 	if ctx.UserID != owner && !(ctx.IsOwner || v1.Perms.Check("messages.manage.delete", ctx.UserRoles, r.GuildId, r.ChannelId)) {
 		return nil, responses.NewError(responses.NotEnoughPermissions)
 	}
-	if err := v1.DB.DeleteMessage(r.MessageId, r.ChannelId, r.GuildId); err != nil {
+	if err := v1.DB.DeleteMessage(r.MessageId); err != nil {
 		return nil, err
 	}
 	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
@@ -780,6 +643,21 @@ func (v1 *V1) DeleteMessage(c echo.Context, r *chatv1.DeleteMessageRequest) (*em
 		},
 	})
 	return &emptypb.Empty{}, nil
+}
+
+func init() {
+	middleware.RegisterRPCConfig(middleware.RPCConfig{
+		RateLimit: middleware.RateLimit{
+			Duration: 5 * time.Second,
+			Burst:    5,
+		},
+
+		Location: middleware.NoLocation,
+	}, "/protocol.chat.v1.ChatService/GetUserBulk")
+}
+
+func (v1 *V1) GetUserBulk(c echo.Context, r *chatv1.GetUserBulkRequest) (*chatv1.GetUserBulkResponse, error) {
+	panic("unimplemented")
 }
 
 func init() {
@@ -809,12 +687,6 @@ func (v1 *V1) JoinGuild(c echo.Context, r *chatv1.JoinGuildRequest) (*chatv1.Joi
 		}
 		return nil, responses.NewError(responses.BannedFromGuild)
 	}
-	if inGuild, err := v1.DB.UserInGuild(ctx.UserID, guildID); inGuild || err != nil {
-		if err != nil {
-			return nil, responses.NewError(responses.InternalServerError)
-		}
-		return nil, responses.NewError(responses.AlreadyInGuild)
-	}
 	if err := v1.DB.AddMemberToGuild(ctx.UserID, guildID); err != nil {
 		return nil, err
 	}
@@ -829,11 +701,6 @@ func (v1 *V1) JoinGuild(c echo.Context, r *chatv1.JoinGuildRequest) (*chatv1.Joi
 			},
 		},
 	})
-	if data, err := v1.DB.GetFirstChannel(guildID); err == nil {
-		if err := v1.sendMessage(guildID, data, fmt.Sprintf("Everyone welcome <@%d>", ctx.UserID), "System"); err != nil {
-			v1.Logger.CheckException(err)
-		}
-	}
 	return &chatv1.JoinGuildResponse{
 		GuildId: guildID,
 	}, nil
@@ -858,13 +725,12 @@ func (v1 *V1) LeaveGuild(c echo.Context, r *chatv1.LeaveGuildRequest) (*empty.Em
 	} else if isOwner {
 		return nil, responses.NewError(responses.IsOwner)
 	}
-	if inGuild, err := v1.DB.UserInGuild(ctx.UserID, r.GuildId); !inGuild || err != nil {
-		if err != nil {
-			return nil, responses.NewError(responses.InternalServerError)
-		}
-		return nil, responses.NewError(responses.NotJoined)
-	}
+
 	if err := v1.DB.DeleteMember(r.GuildId, ctx.UserID); err != nil {
+		return nil, err
+	}
+
+	if err := v1.DB.RemoveGuildFromList(ctx.UserID, r.GuildId, ""); err != nil {
 		return nil, err
 	}
 
@@ -936,8 +802,8 @@ func (v1 *V1) StreamEvents(c echo.Context, in chan *chatv1.StreamEventsRequest, 
 			case *chatv1.StreamEventsRequest_SubscribeToActions_:
 				v1.Streams.AddActionSubscription(out)
 			case *chatv1.StreamEventsRequest_SubscribeToHomeserverEvents_:
-				err = v1.DB.UserIsLocal(userID)
-				if err != nil {
+				isLocal, err := v1.DB.UserIsLocal(userID)
+				if !isLocal || err != nil {
 					continue
 				}
 				v1.Streams.AddHomeserverSubscription(out)
@@ -963,23 +829,26 @@ func (v1 *V1) TriggerAction(c echo.Context, r *chatv1.TriggerActionRequest) (*em
 	if err != nil {
 		return nil, err
 	}
-	if msg.ChannelID != r.ChannelId || msg.GuildID != r.GuildId {
+	embedMsg := msg.Content.GetEmbedMessage()
+	if msg.ChannelId != r.ChannelId || msg.GuildId != r.GuildId || embedMsg == nil {
 		return nil, responses.NewError(responses.BadAction)
 	}
-	for _, action := range v1.ActionsToProto(msg.Actions) {
-		if action.Id == r.ActionId {
-			v1.Streams.BroadcastAction(ctx.UserID, &chatv1.Event{
-				Event: &chatv1.Event_ActionPerformed_{
-					ActionPerformed: &chatv1.Event_ActionPerformed{
-						GuildId:    r.GuildId,
-						ChannelId:  r.ChannelId,
-						MessageId:  r.MessageId,
-						ActionData: r.ActionData,
-						ActionId:   r.ActionId,
+	for _, field := range embedMsg.Embeds.Fields {
+		for _, action := range field.Actions {
+			if action.Id == r.ActionId {
+				v1.Streams.BroadcastAction(ctx.UserID, &chatv1.Event{
+					Event: &chatv1.Event_ActionPerformed_{
+						ActionPerformed: &chatv1.Event_ActionPerformed{
+							GuildId:    r.GuildId,
+							ChannelId:  r.ChannelId,
+							MessageId:  r.MessageId,
+							ActionData: r.ActionData,
+							ActionId:   r.ActionId,
+						},
 					},
-				},
-			})
-			return &emptypb.Empty{}, nil
+				})
+				return &emptypb.Empty{}, nil
+			}
 		}
 	}
 	return nil, responses.NewError(responses.BadAction)
@@ -1003,56 +872,36 @@ func (v1 *V1) SendMessage(c echo.Context, r *chatv1.SendMessageRequest) (*chatv1
 	if err != nil {
 		return nil, err
 	}
-	msg, err := v1.DB.AddMessage(
-		r.ChannelId,
-		r.GuildId,
-		ctx.UserID,
-		messageID,
-		r.Content,
-		r.Attachments,
-		v1.ProtoToEmbeds(r.Embeds),
-		v1.ProtoToActions(r.Actions),
-		v1.ProtoToOverrides(r.Overrides),
-		sql.NullInt64{
-			Int64: int64(r.InReplyTo),
-			Valid: r.InReplyTo != 0,
-		},
-		r.Metadata,
+
+	var replyTo *uint64
+	if r.InReplyTo == 0 {
+		replyTo = nil
+	} else {
+		replyTo = &r.InReplyTo
+	}
+
+	var (
+		t time.Time
 	)
+
+	t, err = v1.DB.AddMessage(r.GuildId, r.ChannelId, messageID, ctx.UserID, r.Overrides, replyTo, r.Metadata, r.Content)
+
 	if err != nil {
 		return nil, err
 	}
 
-	attachments := []*harmonytypesv1.Attachment{}
-
-	for _, a := range r.Attachments {
-		contentType, fileName, size, err := v1.StorageBackend.GetMetadata(a)
-		if err == nil {
-			attachments = append(attachments, &harmonytypesv1.Attachment{
-				Id:   a,
-				Name: fileName,
-				Type: contentType,
-				Size: size,
-			})
-		}
-	}
-
+	createdAt, _ := ptypes.TimestampProto(t.UTC())
 	message := harmonytypesv1.Message{
-		GuildId:     r.GuildId,
-		ChannelId:   r.ChannelId,
-		MessageId:   messageID,
-		AuthorId:    ctx.UserID,
-		Content:     r.Content,
-		Attachments: attachments,
-		Embeds:      r.Embeds,
-		Actions:     r.Actions,
-		Overrides:   r.Overrides,
-		InReplyTo:   r.InReplyTo,
-		Metadata:    r.Metadata,
+		GuildId:   r.GuildId,
+		ChannelId: r.ChannelId,
+		MessageId: messageID,
+		AuthorId:  ctx.UserID,
+		Content:   r.Content,
+		Overrides: r.Overrides,
+		InReplyTo: r.InReplyTo,
+		Metadata:  r.Metadata,
+		CreatedAt: createdAt,
 	}
-	createdAt, _ := ptypes.TimestampProto(msg.CreatedAt.UTC())
-	message.CreatedAt = createdAt
-	message.AuthorId = ctx.UserID
 	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
 		Event: &chatv1.Event_SentMessage{
 			SentMessage: &chatv1.Event_MessageSent{
@@ -1087,8 +936,8 @@ func (v1 *V1) GetGuildList(c echo.Context, r *chatv1.GetGuildListRequest) (*chat
 	var out []*chatv1.GetGuildListResponse_GuildListEntry
 	for _, guildEntry := range data {
 		out = append(out, &chatv1.GetGuildListResponse_GuildListEntry{
-			GuildId: guildEntry.GuildID,
-			Host:    guildEntry.HomeServer,
+			GuildId: guildEntry.ID,
+			Host:    guildEntry.Host,
 		})
 	}
 	return &chatv1.GetGuildListResponse{
@@ -1234,16 +1083,17 @@ func (v1 *V1) GetEmotePacks(c echo.Context, r *chatv1.GetEmotePacksRequest) (*ch
 	if err != nil {
 		return nil, err
 	}
-	outPacks := []*chatv1.GetEmotePacksResponse_EmotePack{}
-	for _, pack := range packs {
-		outPacks = append(outPacks, &chatv1.GetEmotePacksResponse_EmotePack{
-			PackId:    pack.PackID,
-			PackOwner: pack.UserID,
-			PackName:  pack.PackName,
-		})
-	}
 	return &chatv1.GetEmotePacksResponse{
-		Packs: outPacks,
+		Packs: func() (f []*chatv1.GetEmotePacksResponse_EmotePack) {
+			for _, pack := range packs {
+				f = append(f, &chatv1.GetEmotePacksResponse_EmotePack{
+					PackName:  pack.Name,
+					PackId:    pack.PackID,
+					PackOwner: pack.OwnerID,
+				})
+			}
+			return
+		}(),
 	}, nil
 }
 
@@ -1253,15 +1103,16 @@ func (v1 *V1) GetEmotePackEmotes(c echo.Context, r *chatv1.GetEmotePackEmotesReq
 	if err != nil {
 		return nil, err
 	}
-	outEmotes := []*chatv1.GetEmotePackEmotesResponse_Emote{}
-	for _, emote := range emotes {
-		outEmotes = append(outEmotes, &chatv1.GetEmotePackEmotesResponse_Emote{
-			ImageId: emote.ImageID,
-			Name:    emote.EmoteName,
-		})
-	}
 	return &chatv1.GetEmotePackEmotesResponse{
-		Emotes: outEmotes,
+		Emotes: func() (f []*chatv1.GetEmotePackEmotesResponse_Emote) {
+			for _, emote := range emotes {
+				f = append(f, &chatv1.GetEmotePackEmotesResponse_Emote{
+					ImageId: emote.ImageID,
+					Name:    emote.Name,
+				})
+			}
+			return
+		}(),
 	}, nil
 }
 
@@ -1284,7 +1135,7 @@ func (v1 *V1) AddGuildRole(c echo.Context, r *chatv1.AddGuildRoleRequest) (*chat
 	}
 
 	r.Role.RoleId = roleID
-	err = v1.DB.AddRoleToGuild(r.GuildId, r.Role)
+	err = v1.DB.AddRoleToGuild(r.GuildId, r.Role.RoleId, r.Role.Name, int(r.Role.Color), r.Role.Hoist, r.Role.Pingable)
 	if err != nil {
 		return nil, err
 	}
@@ -1342,7 +1193,18 @@ func init() {
 func (v1 *V1) GetGuildRoles(c echo.Context, r *chatv1.GetGuildRolesRequest) (*chatv1.GetGuildRolesResponse, error) {
 	roles, err := v1.DB.GetGuildRoles(r.GuildId)
 	return &chatv1.GetGuildRolesResponse{
-		Roles: roles,
+		Roles: func() (f []*chatv1.Role) {
+			for _, role := range roles {
+				f = append(f, &chatv1.Role{
+					RoleId:   role.ID,
+					Name:     role.Name,
+					Color:    int32(role.Color),
+					Hoist:    role.Hoist,
+					Pingable: role.Pingable,
+				})
+			}
+			return
+		}(),
 	}, err
 }
 
@@ -1441,7 +1303,7 @@ func init() {
 }
 
 func (v1 *V1) ModifyGuildRole(c echo.Context, r *chatv1.ModifyGuildRoleRequest) (*empty.Empty, error) {
-	return &empty.Empty{}, v1.DB.ModifyRole(r.GuildId, r.Role.RoleId, r.Role.Name, r.Role.Color, r.Role.Hoist, r.Role.Pingable, r.ModifyName, r.ModifyColor, r.ModifyHoist, r.ModifyPingable)
+	return &empty.Empty{}, v1.DB.ModifyRole(r.Role.RoleId, r.Role.Name, int(r.Role.Color), r.Role.Hoist, r.Role.Pingable, r.ModifyName, r.ModifyColor, r.ModifyHoist, r.ModifyPingable)
 }
 
 func init() {
@@ -1503,49 +1365,9 @@ func (v1 *V1) GetUser(c echo.Context, r *chatv1.GetUserRequest) (*chatv1.GetUser
 	}
 	return &chatv1.GetUserResponse{
 		UserName:   res.Username,
-		UserAvatar: res.Avatar.String,
+		UserAvatar: res.Avatar,
 		UserStatus: harmonytypesv1.UserStatus(res.Status),
 		IsBot:      res.IsBot,
-	}, nil
-}
-
-func init() {
-	middleware.RegisterRPCConfig(middleware.RPCConfig{
-		RateLimit: middleware.RateLimit{
-			Duration: 10 * time.Second,
-			Burst:    4,
-		},
-	}, "/protocol.chat.v1.ChatService/GetUserBulk")
-}
-
-// TODO: implemenet a more performant query to reduce round trips to the DB
-func (v1 *V1) GetUserBulk(c echo.Context, r *chatv1.GetUserBulkRequest) (*chatv1.GetUserBulkResponse, error) {
-	if err := r.Validate(); err != nil {
-		return nil, err
-	}
-	if len(r.UserIds) > 64 {
-		return nil, errors.New("too many user ids in request")
-	}
-	users := []*chatv1.GetUserResponse{}
-	for _, userID := range r.UserIds {
-		res, err := v1.DB.GetUserByID(userID)
-		if err != nil {
-			if errors.Is(err, sql.ErrNoRows) {
-				return nil, responses.NewError(responses.BadUserID)
-			}
-			v1.Logger.Exception(err)
-			return nil, err
-		}
-		users = append(users, &chatv1.GetUserResponse{
-			UserName:   res.Username,
-			UserAvatar: res.Avatar.String,
-			UserStatus: harmonytypesv1.UserStatus(res.Status),
-			IsBot:      res.IsBot,
-		})
-	}
-
-	return &chatv1.GetUserBulkResponse{
-		Users: users,
 	}, nil
 }
 
@@ -1676,62 +1498,6 @@ func (v1 *V1) Typing(c echo.Context, r *chatv1.TypingRequest) (*empty.Empty, err
 	})
 
 	return &emptypb.Empty{}, nil
-}
-
-func (v1 *V1) sendMessage(guildID, channelID uint64, content, displayUsername string) error {
-	messageID, err := v1.Sonyflake.NextID()
-	if err != nil {
-		return err
-	}
-	msg, err := v1.DB.AddMessage(
-		channelID,
-		guildID,
-		0,
-		messageID,
-		content,
-		[]string{},
-		v1.ProtoToEmbeds([]*harmonytypesv1.Embed{}),
-		v1.ProtoToActions([]*harmonytypesv1.Action{}),
-		v1.ProtoToOverrides(&harmonytypesv1.Override{
-			Name: displayUsername,
-		}),
-		sql.NullInt64{
-			Int64: int64(0),
-			Valid: false,
-		},
-		nil,
-	)
-	if err != nil {
-		return err
-	}
-
-	message := harmonytypesv1.Message{
-		GuildId:     guildID,
-		ChannelId:   channelID,
-		MessageId:   messageID,
-		AuthorId:    0,
-		Content:     content,
-		Attachments: nil,
-		Embeds:      nil,
-		Actions:     nil,
-		Overrides: &harmonytypesv1.Override{
-			Name:   displayUsername,
-			Reason: &harmonytypesv1.Override_SystemMessage{},
-		},
-		InReplyTo: 0,
-		Metadata:  nil,
-	}
-	createdAt, _ := ptypes.TimestampProto(msg.CreatedAt.UTC())
-	message.CreatedAt = createdAt
-	v1.Streams.BroadcastGuild(guildID, &chatv1.Event{
-		Event: &chatv1.Event_SentMessage{
-			SentMessage: &chatv1.Event_MessageSent{
-				EchoId:  0,
-				Message: &message,
-			},
-		},
-	})
-	return nil
 }
 
 func init() {

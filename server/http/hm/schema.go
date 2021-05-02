@@ -6,7 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/harmony-development/legato/server/responses"
+	"github.com/harmony-development/legato/server/http/responses"
 )
 
 func (m *Middlewares) Schema(schema interface{}) echo.MiddlewareFunc {
@@ -21,7 +21,7 @@ func (m *Middlewares) Schema(schema interface{}) echo.MiddlewareFunc {
 				if m.Config.Server.Policies.Debug.RespondWithErrors {
 					return echo.NewHTTPError(http.StatusBadRequest, err)
 				}
-				return echo.NewHTTPError(http.StatusBadRequest, responses.BadRequest)
+				return echo.NewHTTPError(http.StatusBadRequest, responses.InvalidRequest)
 			}
 			ctx.Data = reflect.ValueOf(data).Elem().Interface()
 			return handler(ctx)

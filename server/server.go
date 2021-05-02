@@ -98,11 +98,7 @@ func (inst Instance) Start() {
 	errChan := make(chan error)
 
 	go func() {
-		if inst.Config.Server.UseTLS {
-			errChan <- inst.API.StartTLS(fmt.Sprintf("%s:%d", inst.Config.Server.Host, inst.Config.Server.Port), inst.Config.Server.TLSCert, inst.Config.Server.TLSKey)
-		} else {
-			errChan <- inst.API.Start(fmt.Sprintf("%s:%d", inst.Config.Server.Host, inst.Config.Server.Port))
-		}
+		errChan <- inst.API.Start(fmt.Sprintf("%s:%d", inst.Config.Server.Host, inst.Config.Server.Port))
 	}()
 
 	terminateChan := make(chan os.Signal, 1)

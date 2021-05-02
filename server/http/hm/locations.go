@@ -59,7 +59,7 @@ func (m *Middlewares) WithMessage(handler echo.HandlerFunc) echo.HandlerFunc {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError)
 		}
-		ctx.Location.Message = &msg
+		ctx.Location.Message = msg.ToV1()
 		return handler(ctx)
 	}
 }

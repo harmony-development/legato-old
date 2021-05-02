@@ -7,7 +7,7 @@ import (
 	"runtime/debug"
 
 	"github.com/harmony-development/hrpc/server"
-	"github.com/harmony-development/legato/server/responses"
+	"github.com/harmony-development/legato/server/http/responses"
 	"github.com/labstack/echo/v4"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/descriptorpb"

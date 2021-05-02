@@ -571,12 +571,12 @@ func (client *ChatServiceClient) UpdateChannelOrder(r *UpdateChannelOrderRequest
 	return output, nil
 }
 
-func (client *ChatServiceClient) UpdateMessage(r *UpdateMessageRequest) (*empty.Empty, error) {
+func (client *ChatServiceClient) UpdateMessageText(r *UpdateMessageTextRequest) (*empty.Empty, error) {
 	input, err := proto.Marshal(r)
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/UpdateMessage", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.chat.v1.ChatService/UpdateMessageText", client.HTTPProto, client.serverURL), bytes.NewReader(input))
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
@@ -1324,10 +1324,6 @@ func (client *ChatServiceClient) StreamEvents() (in chan<- *StreamEventsRequest,
 	}()
 
 	return inC, outC, nil
-}
-
-func (client *ChatServiceClient) Sync(r *SyncRequest) (chan *SyncEvent, error) {
-	panic("unimplemented")
 }
 
 func (client *ChatServiceClient) GetUser(r *GetUserRequest) (*GetUserResponse, error) {

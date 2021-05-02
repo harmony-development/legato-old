@@ -8,6 +8,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
+	_ "github.com/harmony-development/legato/server/db/backends/ent_shared"
 	_ "github.com/harmony-development/legato/server/db/backends/postgres"
 	_ "github.com/harmony-development/legato/server/db/backends/sqlite"
 )

@@ -1,16 +1,14 @@
 package sqlite
 
 import (
-	"context"
 	"fmt"
-	"runtime"
 
 	"github.com/harmony-development/legato/server/config"
 	"github.com/harmony-development/legato/server/db"
-	"github.com/harmony-development/legato/server/db/backends/sqlite/ent"
+	"github.com/harmony-development/legato/server/db/backends/ent_shared"
+	"github.com/harmony-development/legato/server/db/ent/entgen"
 	"github.com/harmony-development/legato/server/db/types"
 	"github.com/harmony-development/legato/server/logger"
-	"github.com/ztrue/tracerr"
 
 	// backend
 	_ "github.com/mattn/go-sqlite3"
@@ -32,57 +30,20 @@ func init() {
 }
 
 type database struct {
-	*ent.Client
-	types.DummyDB
-}
-
-var ctx = context.Background()
-
-func doRecovery(err *error) {
-	r := recover()
-	if r == nil {
-		return
-	}
-	ierr, ok := r.(error)
-	if !ok {
-		panic(r)
-	}
-
-	frames := make([]tracerr.Frame, 0, 40)
-	skip := 0
-	for {
-		pc, path, line, ok := runtime.Caller(skip)
-		if !ok {
-			break
-		}
-		fn := runtime.FuncForPC(pc)
-		frame := tracerr.Frame{
-			Func: fn.Name(),
-			Line: line,
-			Path: path,
-		}
-		frames = append(frames, frame)
-		skip++
-	}
-
-	*err = tracerr.CustomError(ierr, frames)
+	*ent_shared.DB
 }
 
 // New creates a new DB connection
 func New(cfg *config.Config, logger logger.ILogger, idgen *sonyflake.Sonyflake) (types.IHarmonyDB, error) {
-	db := &database{}
-	var err error
-
-	db.Client, err = ent.Open("sqlite3", fmt.Sprintf("file:%s?_fk=1", cfg.Database.Filename))
+	c, err := entgen.Open("sqlite3", fmt.Sprintf("file:%s?_fk=1", cfg.Database.Filename))
 	if err != nil {
-		return nil, tracerr.Wrap(err)
+		return nil, err
 	}
-	err = db.Schema.Create(context.Background())
+	db, err := ent_shared.New(c, logger)
 	if err != nil {
-		return nil, tracerr.Wrap(err)
+		return nil, err
 	}
-
-	//go db.SessionExpireRoutine()
-
-	return db, nil
+	return &database{
+		DB: db,
+	}, nil
 }
