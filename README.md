@@ -1,9 +1,10 @@
-<h1 align=center>
- <a href="https://github.com/harmony-development"><img align=center width="15%" src="https://i.imgur.com/lx2RCZj.png" /></a> Harmony
-</h1>
-A free and open source communications platform.
-<br>Designed as an open source Discord replacement; with messaging, guilds, roles and permissions. 
-<br>Join our <a href="https://discord.gg/jypXPA4">project chat</a> for announcements, support and contribution.
+# Legato
+
+The reference implementation for Harmony, a federated and decentralised chat service, combining the amenities of mainstream messengers with an extensible and decentralised core.
+
+Legato is designed for public-facing deployments. For personal deployments, check out [Scherzo](https://github.com/harmony-development/scherzo/), which requires zero setup to get an instance running.
+
+<br>Join our <a href="https://discord.gg/Abr3upBjHy">project chat</a> for announcements, support and contribution.
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/harmony-development/legato/Harmony%20Build?style=for-the-badge)
 ![Codecov](https://img.shields.io/codecov/c/gh/harmony-development/legato?style=for-the-badge)
