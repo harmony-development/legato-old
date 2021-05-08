@@ -1,6 +1,7 @@
 package ent_shared
 
 import (
+	"github.com/harmony-development/legato/server/db/ent/entgen"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guildlistentry"
 	"github.com/harmony-development/legato/server/db/ent/entgen/user"
 	"github.com/harmony-development/legato/server/db/lexorank"
@@ -36,24 +37,24 @@ func (d *DB) GetGuildListPosition(userID, guildID uint64, host string) (pos stri
 func (d *DB) AddGuildToList(userID, guildID uint64, homeServer string) (err error) {
 	defer doRecovery(&err)
 	tx := d.TxX()
-	tx.User.UpdateOneID(userID).AddListentry(
-		tx.GuildListEntry.Create().
-			SetID(guildID).SetHost(homeServer).
-			SetUserID(userID).
-			SetPosition(
-				lexorank.Rank(
-					func() string {
-						pos, err := d.GetGuildListPosition(userID, guildID, homeServer)
-						if err != nil {
-							panic(err)
-						}
-						return pos
-					}(),
-					"",
-				),
-			).
-			SaveX(ctx),
-	).ExecX(ctx)
+
+	tx.GuildListEntry.Create().
+		SetID(guildID).SetHost(homeServer).
+		SetUserID(userID).
+		SetPosition(
+			lexorank.Rank(
+				func() string {
+					pos, err := d.GetGuildListPosition(userID, guildID, homeServer)
+					if err != nil && !entgen.IsNotFound(err) {
+						panic(err)
+					}
+					return pos
+				}(),
+				"",
+			),
+		).
+		SaveX(ctx)
+
 	if err := tx.Commit(); err != nil {
 		panic(err)
 	}

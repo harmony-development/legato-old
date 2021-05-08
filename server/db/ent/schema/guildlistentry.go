@@ -23,6 +23,6 @@ func (GuildListEntry) Fields() []ent.Field {
 // Edges of the GuildListEntry.
 func (GuildListEntry) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user", User.Type).Ref("listentry").Unique(),
+		edge.From("user", User.Type).Ref("listentry").Unique().Required(),
 	}
 }
