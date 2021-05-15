@@ -1466,10 +1466,6 @@ func (v1 *V1) ProfileUpdate(c echo.Context, r *chatv1.ProfileUpdateRequest) (*em
 	return &emptypb.Empty{}, nil
 }
 
-func (v1 *V1) Sync(c echo.Context, r *chatv1.SyncRequest, out chan *chatv1.SyncEvent) {
-
-}
-
 func init() {
 	middleware.RegisterRPCConfig(middleware.RPCConfig{
 		RateLimit: middleware.RateLimit{
