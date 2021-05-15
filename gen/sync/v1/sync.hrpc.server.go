@@ -119,7 +119,9 @@ func (h *PostboxServiceHandler) Routes() map[string]echo.HandlerFunc {
 
 func (h *PostboxServiceHandler) SyncHandler(c echo.Context) error {
 
-	ws, err := h.upgrader.Upgrade(c.Response(), c.Request(), nil)
+	ws, err := h.upgrader.Upgrade(c.Response(), c.Request(), map[string][]string{
+		"Sec-WebSocket-Protocol": {"harmony"},
+	})
 	if err != nil {
 		c.Logger().Error(err)
 		return nil
