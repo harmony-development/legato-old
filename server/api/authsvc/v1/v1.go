@@ -486,3 +486,7 @@ func (v1 *V1) Register(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 
 	return s, nil
 }
+
+func (v1 *V1) CheckLoggedIn(c echo.Context, r *emptypb.Empty) (*emptypb.Empty, error) {
+	return &emptypb.Empty{}, nil
+}

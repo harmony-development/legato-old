@@ -784,6 +784,7 @@ func (v1 *V1) StreamEvents(c echo.Context, in chan *chatv1.StreamEventsRequest, 
 		for {
 			dat, ok := <-in
 			if !ok {
+				v1.Logger.Warn("invalid data received")
 				return
 			}
 

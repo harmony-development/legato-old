@@ -87,7 +87,7 @@ func (l Logger) Exception(err error) {
 // Warn warns
 func (l Logger) Warn(fm string, v ...interface{}) {
 	if l.Config.Server.Policies.Debug.LogErrors {
-		logrus.Warnf("%s", v...)
+		logrus.Warnf(fm, v...)
 	}
 }
 
