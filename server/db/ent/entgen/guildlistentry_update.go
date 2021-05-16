@@ -4,6 +4,7 @@ package entgen
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -45,14 +46,6 @@ func (gleu *GuildListEntryUpdate) SetUserID(id uint64) *GuildListEntryUpdate {
 	return gleu
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (gleu *GuildListEntryUpdate) SetNillableUserID(id *uint64) *GuildListEntryUpdate {
-	if id != nil {
-		gleu = gleu.SetUserID(*id)
-	}
-	return gleu
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (gleu *GuildListEntryUpdate) SetUser(u *User) *GuildListEntryUpdate {
 	return gleu.SetUserID(u.ID)
@@ -76,12 +69,18 @@ func (gleu *GuildListEntryUpdate) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	if len(gleu.hooks) == 0 {
+		if err = gleu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = gleu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*GuildListEntryMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = gleu.check(); err != nil {
+				return 0, err
 			}
 			gleu.mutation = mutation
 			affected, err = gleu.sqlSave(ctx)
@@ -118,6 +117,14 @@ func (gleu *GuildListEntryUpdate) ExecX(ctx context.Context) {
 	if err := gleu.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (gleu *GuildListEntryUpdate) check() error {
+	if _, ok := gleu.mutation.UserID(); gleu.mutation.UserCleared() && !ok {
+		return errors.New("entgen: clearing a required unique edge \"user\"")
+	}
+	return nil
 }
 
 func (gleu *GuildListEntryUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -224,14 +231,6 @@ func (gleuo *GuildListEntryUpdateOne) SetUserID(id uint64) *GuildListEntryUpdate
 	return gleuo
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (gleuo *GuildListEntryUpdateOne) SetNillableUserID(id *uint64) *GuildListEntryUpdateOne {
-	if id != nil {
-		gleuo = gleuo.SetUserID(*id)
-	}
-	return gleuo
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (gleuo *GuildListEntryUpdateOne) SetUser(u *User) *GuildListEntryUpdateOne {
 	return gleuo.SetUserID(u.ID)
@@ -262,12 +261,18 @@ func (gleuo *GuildListEntryUpdateOne) Save(ctx context.Context) (*GuildListEntry
 		node *GuildListEntry
 	)
 	if len(gleuo.hooks) == 0 {
+		if err = gleuo.check(); err != nil {
+			return nil, err
+		}
 		node, err = gleuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*GuildListEntryMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = gleuo.check(); err != nil {
+				return nil, err
 			}
 			gleuo.mutation = mutation
 			node, err = gleuo.sqlSave(ctx)
@@ -304,6 +309,14 @@ func (gleuo *GuildListEntryUpdateOne) ExecX(ctx context.Context) {
 	if err := gleuo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (gleuo *GuildListEntryUpdateOne) check() error {
+	if _, ok := gleuo.mutation.UserID(); gleuo.mutation.UserCleared() && !ok {
+		return errors.New("entgen: clearing a required unique edge \"user\"")
+	}
+	return nil
 }
 
 func (gleuo *GuildListEntryUpdateOne) sqlSave(ctx context.Context) (_node *GuildListEntry, err error) {

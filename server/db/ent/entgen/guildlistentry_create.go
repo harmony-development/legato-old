@@ -44,14 +44,6 @@ func (glec *GuildListEntryCreate) SetUserID(id uint64) *GuildListEntryCreate {
 	return glec
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (glec *GuildListEntryCreate) SetNillableUserID(id *uint64) *GuildListEntryCreate {
-	if id != nil {
-		glec = glec.SetUserID(*id)
-	}
-	return glec
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (glec *GuildListEntryCreate) SetUser(u *User) *GuildListEntryCreate {
 	return glec.SetUserID(u.ID)
@@ -113,6 +105,9 @@ func (glec *GuildListEntryCreate) check() error {
 	}
 	if _, ok := glec.mutation.Position(); !ok {
 		return &ValidationError{Name: "position", err: errors.New("entgen: missing required field \"position\"")}
+	}
+	if _, ok := glec.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user", err: errors.New("entgen: missing required edge \"user\"")}
 	}
 	return nil
 }

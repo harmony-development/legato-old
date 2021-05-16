@@ -18,7 +18,9 @@ func (Guild) Fields() []ent.Field {
 		field.Uint64("id").Unique(),
 		field.String("name"),
 		field.String("picture"),
-		field.Bytes("metadata").GoType(&harmonytypesv1.Metadata{}),
+		field.
+			Bytes("metadata").
+			GoType(&harmonytypesv1.Metadata{}),
 	}
 }
 
