@@ -80,6 +80,7 @@ func (d *DB) GetMessages(channelID uint64) (msgs []*types.MessageData, err error
 		}).
 		WithUser().
 		WithParent().
+		Order(entgen.Desc(message.FieldCreatedat)).
 		Limit(50).
 		AllX(ctx)
 
@@ -90,6 +91,7 @@ func (d *DB) GetMessagesBefore(channelID uint64, date time.Time) (msgs []*types.
 	defer doRecovery(&err)
 	messages := d.Message.
 		Query().
+		Order(entgen.Desc(message.FieldCreatedat)).
 		Limit(50).
 		Where(
 			message.And(
