@@ -41,6 +41,11 @@ type Logger struct {
 
 // New creates a Logger with a given configuration
 func New(cfg *config.Config) *Logger {
+	logrus.SetFormatter(&logrus.TextFormatter{
+		DisableColors: false,
+		FullTimestamp: true,
+		DisableQuote:  true,
+	})
 	return &Logger{
 		Config: cfg,
 	}
