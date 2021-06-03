@@ -388,6 +388,9 @@ func (v1 *V1) LocalLogin(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 	if f == nil {
 		return nil, responses.NewError(responses.MissingForm)
 	}
+	if len(f.Fields) != 2 {
+		return nil, responses.NewError(responses.BadFormData)
+	}
 
 	email := f.Fields[0].GetString_()
 	password := f.Fields[1].GetBytes()
@@ -428,6 +431,10 @@ func (v1 *V1) Register(r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 	f := r.GetForm()
 	if f == nil {
 		return nil, responses.NewError(responses.MissingForm)
+	}
+
+	if len(f.Fields) != 3 {
+		return nil, responses.NewError(responses.BadFormData)
 	}
 
 	email := f.Fields[0].GetString_()

@@ -50,6 +50,8 @@ const (
 
 	MissingForm = "h.missing-form"
 
+	BadFormData = "h.bad-form-data"
+
 	BannedFromGuild = "h.banned-from-guild"
 )
 
