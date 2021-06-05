@@ -12,6 +12,13 @@ import (
 
 func (d *DB) AddRoleToGuild(guildID, roleID uint64, name string, color int, hoist, pingable bool) (err error) {
 	defer doRecovery(&err)
+
+	roles := d.Guild.GetX(ctx, guildID).QueryRole().Order(entgen.Asc(role.FieldPosition)).AllX(ctx)
+	pos := ""
+	if len(roles) != 0 {
+		pos = lexorank.Rank(roles[len(roles)-1].Position, "")
+	}
+
 	d.Guild.
 		UpdateOneID(guildID).
 		AddRole(
@@ -21,6 +28,7 @@ func (d *DB) AddRoleToGuild(guildID, roleID uint64, name string, color int, hois
 				SetColor(color).
 				SetHoist(hoist).
 				SetPingable(pingable).
+				SetPosition(pos).
 				SaveX(ctx),
 		).
 		ExecX(ctx)
