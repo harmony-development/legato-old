@@ -107,6 +107,11 @@ func (d *DB) SetPermissions(guildID uint64, channelID uint64, roleID uint64, per
 
 func (d *DB) GetPermissionsData(guildID uint64) (data types.PermissionsData, err error) {
 	defer doRecovery(&err)
+
+	data.Categories = make(map[uint64][]uint64)
+	data.Channels = make(map[uint64]map[uint64][]types.PermissionsNode)
+	data.Roles = make(map[uint64][]types.PermissionsNode)
+
 	roles := d.Guild.GetX(ctx, guildID).QueryRole().WithPermissionNode().AllX(ctx)
 	for _, role := range roles {
 		if perms, err := d.GetPermissions(role.ID); err != nil {
@@ -117,7 +122,7 @@ func (d *DB) GetPermissionsData(guildID uint64) (data types.PermissionsData, err
 	}
 	chans := d.Guild.Query().Where(guild.ID(guildID)).QueryChannel().Order(entgen.Asc(channel.FieldPosition)).WithRole().AllX(ctx)
 	var category uint64 = 0
-	data.Channels = make(map[uint64]map[uint64][]types.PermissionsNode)
+
 	for _, c := range chans {
 		if c.Kind == uint64(types.ChannelKindCategory) {
 			category = c.ID
@@ -130,6 +135,9 @@ func (d *DB) GetPermissionsData(guildID uint64) (data types.PermissionsData, err
 			if perms, err := d.GetPermissions(role.ID); err != nil {
 				panic(err)
 			} else {
+				if data.Channels[c.ID] == nil {
+					data.Channels[c.ID] = make(map[uint64][]types.PermissionsNode)
+				}
 				data.Channels[c.ID][role.ID] = perms
 			}
 		}
