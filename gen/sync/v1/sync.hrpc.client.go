@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/gorilla/websocket"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -29,16 +31,77 @@ func NewPostboxServiceClient(url string) *PostboxServiceClient {
 	}
 }
 
-func (client *PostboxServiceClient) Sync(r *SyncRequest) (chan *PostBoxEvent, error) {
-	panic("unimplemented")
+func (client *PostboxServiceClient) Pull() (in chan<- *Ack, out <-chan *Syn, err error) {
+	u := url.URL{Scheme: client.WSProto, Host: client.serverURL, Path: "/protocol.sync.v1.PostboxService/Pull"}
+
+	c, _, err := websocket.DefaultDialer.Dial(u.String(), client.Header)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	inC := make(chan *Ack)
+	outC := make(chan *Syn)
+
+	go func() {
+		defer c.Close()
+
+		msgs := make(chan []byte)
+
+		go func() {
+			for {
+				_, message, err := c.ReadMessage()
+				if err != nil {
+					close(msgs)
+					break
+				}
+				msgs <- message
+			}
+		}()
+
+		for {
+			select {
+			case msg, ok := <-msgs:
+				if !ok {
+					close(inC)
+					close(outC)
+					return
+				}
+
+				thing := new(Syn)
+				err = proto.Unmarshal(msg, thing)
+				if err != nil {
+					return
+				}
+
+				outC <- thing
+			case send, ok := <-inC:
+				if !ok {
+					close(outC)
+					return
+				}
+
+				data, err := proto.Marshal(send)
+				if err != nil {
+					return
+				}
+
+				err = c.WriteMessage(websocket.BinaryMessage, data)
+				if err != nil {
+					return
+				}
+			}
+		}
+	}()
+
+	return inC, outC, nil
 }
 
-func (client *PostboxServiceClient) PostEvent(r *PostEventRequest) (*empty.Empty, error) {
+func (client *PostboxServiceClient) Push(r *Event) (*empty.Empty, error) {
 	input, err := proto.Marshal(r)
 	if err != nil {
 		return nil, fmt.Errorf("could not martial request: %w", err)
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.sync.v1.PostboxService/PostEvent", client.HTTPProto, client.serverURL), bytes.NewReader(input))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s/protocol.sync.v1.PostboxService/Push", client.HTTPProto, client.serverURL), bytes.NewReader(input))
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}

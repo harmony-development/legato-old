@@ -4,16 +4,19 @@ import (
 	"unsafe"
 
 	"github.com/alecthomas/repr"
+	"github.com/enriquebris/goconcurrentqueue"
 	"github.com/harmony-development/hrpc/server"
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
 	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
 	mediaproxyv1 "github.com/harmony-development/legato/gen/mediaproxy/v1"
+	syncv1 "github.com/harmony-development/legato/gen/sync/v1"
 	voicev1 "github.com/harmony-development/legato/gen/voice/v1"
 	"github.com/harmony-development/legato/server/api/authsvc"
 	"github.com/harmony-development/legato/server/api/chat"
 	"github.com/harmony-development/legato/server/api/chat/v1/permissions"
 	"github.com/harmony-development/legato/server/api/mediaproxy"
 	hm "github.com/harmony-development/legato/server/api/middleware"
+	"github.com/harmony-development/legato/server/api/sync"
 	voicev1impl "github.com/harmony-development/legato/server/api/voice/v1"
 	"github.com/harmony-development/legato/server/auth"
 	"github.com/harmony-development/legato/server/config"
@@ -122,6 +125,22 @@ func New(deps Dependencies) *API {
 		StorageBackend: api.StorageBackend,
 	})
 
+	ssServ := sync.New(&sync.Dependencies{
+		DB:          deps.DB,
+		Logger:      deps.Logger,
+		Config:      deps.Config,
+		AuthManager: deps.AuthManager,
+		Middlewares: m,
+	})
+	ssServ.EventDispatcher = func(s string, e *syncv1.Event) {
+		switch e := e.Kind.(type) {
+		case *syncv1.Event_UserRemovedFromGuild_:
+			deps.DB.RemoveGuildFromList(e.UserRemovedFromGuild.UserId, e.UserRemovedFromGuild.GuildId, s)
+		case *syncv1.Event_UserAddedToGuild_:
+			deps.DB.RemoveGuildFromList(e.UserAddedToGuild.UserId, e.UserAddedToGuild.GuildId, s)
+		}
+	}
+	syncService := syncv1.NewPostboxServiceHandler(ssServ.V1)
 	authService := authv1.NewAuthServiceHandler(authsvc.New(&authsvc.Dependencies{
 		DB:          deps.DB,
 		Logger:      deps.Logger,
@@ -137,6 +156,15 @@ func New(deps Dependencies) *API {
 		Config:         deps.Config,
 		StorageBackend: deps.StorageBackend,
 		Middlewares:    m,
+		Dispatcher: func(s string, e *syncv1.Event) {
+			it := ssServ.V1
+			if _, ok := it.Queues[s]; !ok {
+				it.Queues[s] = goconcurrentqueue.NewFIFO()
+				it.GetQueue(s)
+			}
+			it.Queues[s].Enqueue(e)
+			it.PersistQueue(s)
+		},
 	}).V1)
 	mediaProxyService := mediaproxyv1.NewMediaProxyServiceHandler(mediaproxy.New(&mediaproxy.Dependencies{
 		DB:     deps.DB,
@@ -149,7 +177,7 @@ func New(deps Dependencies) *API {
 		},
 	})
 
-	hrpcServer := server.NewHRPCServer(api.Echo, authService, chatService, mediaProxyService, voiceService)
+	hrpcServer := server.NewHRPCServer(api.Echo, authService, chatService, mediaProxyService, voiceService, syncService)
 
 	hrpcServer.SetUnaryPre(server.ChainHandlerTransformers(
 		m.UnaryRecoveryFunc,

@@ -15,6 +15,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/dyatlov/go-opengraph v0.0.0-20210112100619-dae8665a5b09
+	github.com/enriquebris/goconcurrentqueue v0.6.0 // indirect
 	github.com/go-errors/errors v1.1.1 // indirect
 	github.com/go-test/deep v1.0.7 // indirect
 	github.com/gobwas/glob v0.2.3

@@ -17,6 +17,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/foreignuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guildlistentry"
+	"github.com/harmony-development/legato/server/db/ent/entgen/host"
 	"github.com/harmony-development/legato/server/db/ent/entgen/invite"
 	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
@@ -53,6 +54,8 @@ type Client struct {
 	Guild *GuildClient
 	// GuildListEntry is the client for interacting with the GuildListEntry builders.
 	GuildListEntry *GuildListEntryClient
+	// Host is the client for interacting with the Host builders.
+	Host *HostClient
 	// Invite is the client for interacting with the Invite builders.
 	Invite *InviteClient
 	// LocalUser is the client for interacting with the LocalUser builders.
@@ -92,6 +95,7 @@ func (c *Client) init() {
 	c.ForeignUser = NewForeignUserClient(c.config)
 	c.Guild = NewGuildClient(c.config)
 	c.GuildListEntry = NewGuildListEntryClient(c.config)
+	c.Host = NewHostClient(c.config)
 	c.Invite = NewInviteClient(c.config)
 	c.LocalUser = NewLocalUserClient(c.config)
 	c.Message = NewMessageClient(c.config)
@@ -142,6 +146,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ForeignUser:    NewForeignUserClient(cfg),
 		Guild:          NewGuildClient(cfg),
 		GuildListEntry: NewGuildListEntryClient(cfg),
+		Host:           NewHostClient(cfg),
 		Invite:         NewInviteClient(cfg),
 		LocalUser:      NewLocalUserClient(cfg),
 		Message:        NewMessageClient(cfg),
@@ -177,6 +182,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ForeignUser:    NewForeignUserClient(cfg),
 		Guild:          NewGuildClient(cfg),
 		GuildListEntry: NewGuildListEntryClient(cfg),
+		Host:           NewHostClient(cfg),
 		Invite:         NewInviteClient(cfg),
 		LocalUser:      NewLocalUserClient(cfg),
 		Message:        NewMessageClient(cfg),
@@ -223,6 +229,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.ForeignUser.Use(hooks...)
 	c.Guild.Use(hooks...)
 	c.GuildListEntry.Use(hooks...)
+	c.Host.Use(hooks...)
 	c.Invite.Use(hooks...)
 	c.LocalUser.Use(hooks...)
 	c.Message.Use(hooks...)
@@ -300,9 +307,7 @@ func (c *ChannelClient) DeleteOneID(id uint64) *ChannelDeleteOne {
 
 // Query returns a query builder for Channel.
 func (c *ChannelClient) Query() *ChannelQuery {
-	return &ChannelQuery{
-		config: c.config,
-	}
+	return &ChannelQuery{config: c.config}
 }
 
 // Get returns a Channel entity by its id.
@@ -454,9 +459,7 @@ func (c *EmoteClient) DeleteOneID(id string) *EmoteDeleteOne {
 
 // Query returns a query builder for Emote.
 func (c *EmoteClient) Query() *EmoteQuery {
-	return &EmoteQuery{
-		config: c.config,
-	}
+	return &EmoteQuery{config: c.config}
 }
 
 // Get returns a Emote entity by its id.
@@ -560,9 +563,7 @@ func (c *EmotePackClient) DeleteOneID(id uint64) *EmotePackDeleteOne {
 
 // Query returns a query builder for EmotePack.
 func (c *EmotePackClient) Query() *EmotePackQuery {
-	return &EmotePackQuery{
-		config: c.config,
-	}
+	return &EmotePackQuery{config: c.config}
 }
 
 // Get returns a EmotePack entity by its id.
@@ -698,9 +699,7 @@ func (c *FileClient) DeleteOneID(id string) *FileDeleteOne {
 
 // Query returns a query builder for File.
 func (c *FileClient) Query() *FileQuery {
-	return &FileQuery{
-		config: c.config,
-	}
+	return &FileQuery{config: c.config}
 }
 
 // Get returns a File entity by its id.
@@ -788,9 +787,7 @@ func (c *FileHashClient) DeleteOneID(id int) *FileHashDeleteOne {
 
 // Query returns a query builder for FileHash.
 func (c *FileHashClient) Query() *FileHashQuery {
-	return &FileHashQuery{
-		config: c.config,
-	}
+	return &FileHashQuery{config: c.config}
 }
 
 // Get returns a FileHash entity by its id.
@@ -878,9 +875,7 @@ func (c *ForeignUserClient) DeleteOneID(id int) *ForeignUserDeleteOne {
 
 // Query returns a query builder for ForeignUser.
 func (c *ForeignUserClient) Query() *ForeignUserQuery {
-	return &ForeignUserQuery{
-		config: c.config,
-	}
+	return &ForeignUserQuery{config: c.config}
 }
 
 // Get returns a ForeignUser entity by its id.
@@ -984,9 +979,7 @@ func (c *GuildClient) DeleteOneID(id uint64) *GuildDeleteOne {
 
 // Query returns a query builder for Guild.
 func (c *GuildClient) Query() *GuildQuery {
-	return &GuildQuery{
-		config: c.config,
-	}
+	return &GuildQuery{config: c.config}
 }
 
 // Get returns a Guild entity by its id.
@@ -1186,9 +1179,7 @@ func (c *GuildListEntryClient) DeleteOneID(id uint64) *GuildListEntryDeleteOne {
 
 // Query returns a query builder for GuildListEntry.
 func (c *GuildListEntryClient) Query() *GuildListEntryQuery {
-	return &GuildListEntryQuery{
-		config: c.config,
-	}
+	return &GuildListEntryQuery{config: c.config}
 }
 
 // Get returns a GuildListEntry entity by its id.
@@ -1224,6 +1215,94 @@ func (c *GuildListEntryClient) QueryUser(gle *GuildListEntry) *UserQuery {
 // Hooks returns the client hooks.
 func (c *GuildListEntryClient) Hooks() []Hook {
 	return c.hooks.GuildListEntry
+}
+
+// HostClient is a client for the Host schema.
+type HostClient struct {
+	config
+}
+
+// NewHostClient returns a client for the Host from the given config.
+func NewHostClient(c config) *HostClient {
+	return &HostClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `host.Hooks(f(g(h())))`.
+func (c *HostClient) Use(hooks ...Hook) {
+	c.hooks.Host = append(c.hooks.Host, hooks...)
+}
+
+// Create returns a create builder for Host.
+func (c *HostClient) Create() *HostCreate {
+	mutation := newHostMutation(c.config, OpCreate)
+	return &HostCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Host entities.
+func (c *HostClient) CreateBulk(builders ...*HostCreate) *HostCreateBulk {
+	return &HostCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Host.
+func (c *HostClient) Update() *HostUpdate {
+	mutation := newHostMutation(c.config, OpUpdate)
+	return &HostUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *HostClient) UpdateOne(h *Host) *HostUpdateOne {
+	mutation := newHostMutation(c.config, OpUpdateOne, withHost(h))
+	return &HostUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *HostClient) UpdateOneID(id int) *HostUpdateOne {
+	mutation := newHostMutation(c.config, OpUpdateOne, withHostID(id))
+	return &HostUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Host.
+func (c *HostClient) Delete() *HostDelete {
+	mutation := newHostMutation(c.config, OpDelete)
+	return &HostDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *HostClient) DeleteOne(h *Host) *HostDeleteOne {
+	return c.DeleteOneID(h.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *HostClient) DeleteOneID(id int) *HostDeleteOne {
+	builder := c.Delete().Where(host.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &HostDeleteOne{builder}
+}
+
+// Query returns a query builder for Host.
+func (c *HostClient) Query() *HostQuery {
+	return &HostQuery{config: c.config}
+}
+
+// Get returns a Host entity by its id.
+func (c *HostClient) Get(ctx context.Context, id int) (*Host, error) {
+	return c.Query().Where(host.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *HostClient) GetX(ctx context.Context, id int) *Host {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *HostClient) Hooks() []Hook {
+	return c.hooks.Host
 }
 
 // InviteClient is a client for the Invite schema.
@@ -1292,9 +1371,7 @@ func (c *InviteClient) DeleteOneID(id string) *InviteDeleteOne {
 
 // Query returns a query builder for Invite.
 func (c *InviteClient) Query() *InviteQuery {
-	return &InviteQuery{
-		config: c.config,
-	}
+	return &InviteQuery{config: c.config}
 }
 
 // Get returns a Invite entity by its id.
@@ -1398,9 +1475,7 @@ func (c *LocalUserClient) DeleteOneID(id int) *LocalUserDeleteOne {
 
 // Query returns a query builder for LocalUser.
 func (c *LocalUserClient) Query() *LocalUserQuery {
-	return &LocalUserQuery{
-		config: c.config,
-	}
+	return &LocalUserQuery{config: c.config}
 }
 
 // Get returns a LocalUser entity by its id.
@@ -1520,9 +1595,7 @@ func (c *MessageClient) DeleteOneID(id uint64) *MessageDeleteOne {
 
 // Query returns a query builder for Message.
 func (c *MessageClient) Query() *MessageQuery {
-	return &MessageQuery{
-		config: c.config,
-	}
+	return &MessageQuery{config: c.config}
 }
 
 // Get returns a Message entity by its id.
@@ -1674,9 +1747,7 @@ func (c *PermissionNodeClient) DeleteOneID(id int) *PermissionNodeDeleteOne {
 
 // Query returns a query builder for PermissionNode.
 func (c *PermissionNodeClient) Query() *PermissionNodeQuery {
-	return &PermissionNodeQuery{
-		config: c.config,
-	}
+	return &PermissionNodeQuery{config: c.config}
 }
 
 // Get returns a PermissionNode entity by its id.
@@ -1812,9 +1883,7 @@ func (c *ProfileClient) DeleteOneID(id int) *ProfileDeleteOne {
 
 // Query returns a query builder for Profile.
 func (c *ProfileClient) Query() *ProfileQuery {
-	return &ProfileQuery{
-		config: c.config,
-	}
+	return &ProfileQuery{config: c.config}
 }
 
 // Get returns a Profile entity by its id.
@@ -1918,9 +1987,7 @@ func (c *RoleClient) DeleteOneID(id uint64) *RoleDeleteOne {
 
 // Query returns a query builder for Role.
 func (c *RoleClient) Query() *RoleQuery {
-	return &RoleQuery{
-		config: c.config,
-	}
+	return &RoleQuery{config: c.config}
 }
 
 // Get returns a Role entity by its id.
@@ -2056,9 +2123,7 @@ func (c *SessionClient) DeleteOneID(id string) *SessionDeleteOne {
 
 // Query returns a query builder for Session.
 func (c *SessionClient) Query() *SessionQuery {
-	return &SessionQuery{
-		config: c.config,
-	}
+	return &SessionQuery{config: c.config}
 }
 
 // Get returns a Session entity by its id.
@@ -2162,9 +2227,7 @@ func (c *UserClient) DeleteOneID(id uint64) *UserDeleteOne {
 
 // Query returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
-	return &UserQuery{
-		config: c.config,
-	}
+	return &UserQuery{config: c.config}
 }
 
 // Get returns a User entity by its id.
@@ -2428,9 +2491,7 @@ func (c *UserMetaClient) DeleteOneID(id string) *UserMetaDeleteOne {
 
 // Query returns a query builder for UserMeta.
 func (c *UserMetaClient) Query() *UserMetaQuery {
-	return &UserMetaQuery{
-		config: c.config,
-	}
+	return &UserMetaQuery{config: c.config}
 }
 
 // Get returns a UserMeta entity by its id.

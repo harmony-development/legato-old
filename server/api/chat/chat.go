@@ -1,6 +1,7 @@
 package chat
 
 import (
+	syncv1 "github.com/harmony-development/legato/gen/sync/v1"
 	v1 "github.com/harmony-development/legato/server/api/chat/v1"
 	"github.com/harmony-development/legato/server/api/chat/v1/permissions"
 	"github.com/harmony-development/legato/server/api/chat/v1/pubsub_backends/inprocess"
@@ -21,6 +22,8 @@ type Dependencies struct {
 	Config         *config.Config
 	Middlewares    *middleware.Middlewares
 	StorageBackend backend.AttachmentBackend
+
+	Dispatcher func(string, *syncv1.Event)
 }
 
 // Service contains the chat service
@@ -48,6 +51,7 @@ func New(deps *Dependencies) *Service {
 			Config:         deps.Config,
 			StorageBackend: deps.StorageBackend,
 			Middleware:     chat.Middlewares,
+			Dispatcher:     deps.Dispatcher,
 		},
 	}
 	return chat

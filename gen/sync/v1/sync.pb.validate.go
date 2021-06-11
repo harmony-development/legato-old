@@ -36,99 +36,47 @@ var (
 // define the regex for a UUID once up-front
 var _sync_uuidPattern = regexp.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 
-// Validate checks the field values on SyncRequest with the rules defined in
-// the proto definition for this message. If any rules are violated, an error
-// is returned.
-func (m *SyncRequest) Validate() error {
+// Validate checks the field values on Event with the rules defined in the
+// proto definition for this message. If any rules are violated, an error is returned.
+func (m *Event) Validate() error {
 	if m == nil {
 		return nil
 	}
 
-	// no validation rules for Token
+	switch m.Kind.(type) {
 
-	// no validation rules for Host
+	case *Event_UserRemovedFromGuild_:
 
-	return nil
-}
-
-// SyncRequestValidationError is the validation error returned by
-// SyncRequest.Validate if the designated constraints aren't met.
-type SyncRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e SyncRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e SyncRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e SyncRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e SyncRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e SyncRequestValidationError) ErrorName() string { return "SyncRequestValidationError" }
-
-// Error satisfies the builtin error interface
-func (e SyncRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sSyncRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = SyncRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = SyncRequestValidationError{}
-
-// Validate checks the field values on PostBoxEvent with the rules defined in
-// the proto definition for this message. If any rules are violated, an error
-// is returned.
-func (m *PostBoxEvent) Validate() error {
-	if m == nil {
-		return nil
-	}
-
-	if v, ok := interface{}(m.GetEvent()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return PostBoxEventValidationError{
-				field:  "Event",
-				reason: "embedded message failed validation",
-				cause:  err,
+		if v, ok := interface{}(m.GetUserRemovedFromGuild()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return EventValidationError{
+					field:  "UserRemovedFromGuild",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
 			}
 		}
+
+	case *Event_UserAddedToGuild_:
+
+		if v, ok := interface{}(m.GetUserAddedToGuild()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return EventValidationError{
+					field:  "UserAddedToGuild",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
 	}
 
 	return nil
 }
 
-// PostBoxEventValidationError is the validation error returned by
-// PostBoxEvent.Validate if the designated constraints aren't met.
-type PostBoxEventValidationError struct {
+// EventValidationError is the validation error returned by Event.Validate if
+// the designated constraints aren't met.
+type EventValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -136,22 +84,22 @@ type PostBoxEventValidationError struct {
 }
 
 // Field function returns field value.
-func (e PostBoxEventValidationError) Field() string { return e.field }
+func (e EventValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e PostBoxEventValidationError) Reason() string { return e.reason }
+func (e EventValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e PostBoxEventValidationError) Cause() error { return e.cause }
+func (e EventValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e PostBoxEventValidationError) Key() bool { return e.key }
+func (e EventValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e PostBoxEventValidationError) ErrorName() string { return "PostBoxEventValidationError" }
+func (e EventValidationError) ErrorName() string { return "EventValidationError" }
 
 // Error satisfies the builtin error interface
-func (e PostBoxEventValidationError) Error() string {
+func (e EventValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -163,14 +111,14 @@ func (e PostBoxEventValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sPostBoxEvent.%s: %s%s",
+		"invalid %sEvent.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = PostBoxEventValidationError{}
+var _ error = EventValidationError{}
 
 var _ interface {
 	Field() string
@@ -178,7 +126,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = PostBoxEventValidationError{}
+} = EventValidationError{}
 
 // Validate checks the field values on PostEventRequest with the rules defined
 // in the proto definition for this message. If any rules are violated, an
@@ -186,16 +134,6 @@ var _ interface {
 func (m *PostEventRequest) Validate() error {
 	if m == nil {
 		return nil
-	}
-
-	if v, ok := interface{}(m.GetSyncRequest()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return PostEventRequestValidationError{
-				field:  "SyncRequest",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
 	}
 
 	if v, ok := interface{}(m.GetEvent()).(interface{ Validate() error }); ok {
@@ -264,3 +202,287 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = PostEventRequestValidationError{}
+
+// Validate checks the field values on Ack with the rules defined in the proto
+// definition for this message. If any rules are violated, an error is returned.
+func (m *Ack) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for EventId
+
+	return nil
+}
+
+// AckValidationError is the validation error returned by Ack.Validate if the
+// designated constraints aren't met.
+type AckValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AckValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AckValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AckValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AckValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AckValidationError) ErrorName() string { return "AckValidationError" }
+
+// Error satisfies the builtin error interface
+func (e AckValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAck.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AckValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AckValidationError{}
+
+// Validate checks the field values on Syn with the rules defined in the proto
+// definition for this message. If any rules are violated, an error is returned.
+func (m *Syn) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for EventId
+
+	if v, ok := interface{}(m.GetEvent()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return SynValidationError{
+				field:  "Event",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	return nil
+}
+
+// SynValidationError is the validation error returned by Syn.Validate if the
+// designated constraints aren't met.
+type SynValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e SynValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e SynValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e SynValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e SynValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e SynValidationError) ErrorName() string { return "SynValidationError" }
+
+// Error satisfies the builtin error interface
+func (e SynValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sSyn.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = SynValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = SynValidationError{}
+
+// Validate checks the field values on Event_UserRemovedFromGuild with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *Event_UserRemovedFromGuild) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for UserId
+
+	// no validation rules for GuildId
+
+	return nil
+}
+
+// Event_UserRemovedFromGuildValidationError is the validation error returned
+// by Event_UserRemovedFromGuild.Validate if the designated constraints aren't met.
+type Event_UserRemovedFromGuildValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e Event_UserRemovedFromGuildValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e Event_UserRemovedFromGuildValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e Event_UserRemovedFromGuildValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e Event_UserRemovedFromGuildValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e Event_UserRemovedFromGuildValidationError) ErrorName() string {
+	return "Event_UserRemovedFromGuildValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e Event_UserRemovedFromGuildValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sEvent_UserRemovedFromGuild.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = Event_UserRemovedFromGuildValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = Event_UserRemovedFromGuildValidationError{}
+
+// Validate checks the field values on Event_UserAddedToGuild with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *Event_UserAddedToGuild) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for UserId
+
+	// no validation rules for GuildId
+
+	return nil
+}
+
+// Event_UserAddedToGuildValidationError is the validation error returned by
+// Event_UserAddedToGuild.Validate if the designated constraints aren't met.
+type Event_UserAddedToGuildValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e Event_UserAddedToGuildValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e Event_UserAddedToGuildValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e Event_UserAddedToGuildValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e Event_UserAddedToGuildValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e Event_UserAddedToGuildValidationError) ErrorName() string {
+	return "Event_UserAddedToGuildValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e Event_UserAddedToGuildValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sEvent_UserAddedToGuild.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = Event_UserAddedToGuildValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = Event_UserAddedToGuildValidationError{}

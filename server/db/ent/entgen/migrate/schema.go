@@ -176,6 +176,19 @@ var (
 			},
 		},
 	}
+	// HostsColumns holds the columns for the "hosts" table.
+	HostsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "host", Type: field.TypeString, Unique: true},
+		{Name: "eventqueue", Type: field.TypeBytes},
+	}
+	// HostsTable holds the schema information for the "hosts" table.
+	HostsTable = &schema.Table{
+		Name:        "hosts",
+		Columns:     HostsColumns,
+		PrimaryKey:  []*schema.Column{HostsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
 	// InvitesColumns holds the columns for the "invites" table.
 	InvitesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
@@ -489,6 +502,7 @@ var (
 		ForeignUsersTable,
 		GuildsTable,
 		GuildListEntriesTable,
+		HostsTable,
 		InvitesTable,
 		LocalUsersTable,
 		MessagesTable,

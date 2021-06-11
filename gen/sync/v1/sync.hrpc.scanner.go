@@ -7,28 +7,11 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func (x *SyncRequest) Value() (driver.Value, error) {
+func (x *Event) Value() (driver.Value, error) {
 	return proto.Marshal(x)
 }
 
-func (x *SyncRequest) Scan(src interface{}) error {
-	if src == nil {
-		return nil
-	}
-	if b, ok := src.([]byte); ok {
-		if err := proto.Unmarshal(b, x); err != nil {
-			return err
-		}
-		return nil
-	}
-	return fmt.Errorf("unexpected type %T", src)
-}
-
-func (x *PostBoxEvent) Value() (driver.Value, error) {
-	return proto.Marshal(x)
-}
-
-func (x *PostBoxEvent) Scan(src interface{}) error {
+func (x *Event) Scan(src interface{}) error {
 	if src == nil {
 		return nil
 	}
@@ -46,6 +29,40 @@ func (x *PostEventRequest) Value() (driver.Value, error) {
 }
 
 func (x *PostEventRequest) Scan(src interface{}) error {
+	if src == nil {
+		return nil
+	}
+	if b, ok := src.([]byte); ok {
+		if err := proto.Unmarshal(b, x); err != nil {
+			return err
+		}
+		return nil
+	}
+	return fmt.Errorf("unexpected type %T", src)
+}
+
+func (x *Ack) Value() (driver.Value, error) {
+	return proto.Marshal(x)
+}
+
+func (x *Ack) Scan(src interface{}) error {
+	if src == nil {
+		return nil
+	}
+	if b, ok := src.([]byte); ok {
+		if err := proto.Unmarshal(b, x); err != nil {
+			return err
+		}
+		return nil
+	}
+	return fmt.Errorf("unexpected type %T", src)
+}
+
+func (x *Syn) Value() (driver.Value, error) {
+	return proto.Marshal(x)
+}
+
+func (x *Syn) Scan(src interface{}) error {
 	if src == nil {
 		return nil
 	}

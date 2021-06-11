@@ -113,6 +113,19 @@ func (f GuildListEntryFunc) Mutate(ctx context.Context, m entgen.Mutation) (entg
 	return f(ctx, mv)
 }
 
+// The HostFunc type is an adapter to allow the use of ordinary
+// function as Host mutator.
+type HostFunc func(context.Context, *entgen.HostMutation) (entgen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f HostFunc) Mutate(ctx context.Context, m entgen.Mutation) (entgen.Value, error) {
+	mv, ok := m.(*entgen.HostMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entgen.HostMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The InviteFunc type is an adapter to allow the use of ordinary
 // function as Invite mutator.
 type InviteFunc func(context.Context, *entgen.InviteMutation) (entgen.Value, error)

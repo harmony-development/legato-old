@@ -27,7 +27,11 @@ type IHarmonyDB interface {
 	IncrementInvite(inviteID string) error
 	DeleteInvite(inviteID string) error
 	SessionToUserID(session string) (uint64, error)
+	LocalUserIDToForeignUserID(id uint64) (uint64, string, error)
 	UserInGuild(userID, guildID uint64) (bool, error)
+
+	GetHostQueue(host string) ([]byte, error)
+	SetHostQueue(host string, data []byte) error
 
 	AddMessage(guildID, channelID, messageID uint64, authorID uint64, overrides *harmonytypesv1.Override, replyTo *uint64, metadata *harmonytypesv1.Metadata, content *harmonytypesv1.Content) (time.Time, error)
 	GetMessage(messageID uint64) (*MessageData, error)

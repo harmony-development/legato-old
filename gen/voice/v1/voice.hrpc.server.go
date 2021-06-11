@@ -159,9 +159,7 @@ func (h *VoiceServiceHandler) ConnectHandler(c echo.Context) error {
 
 func (h *VoiceServiceHandler) StreamStateHandler(c echo.Context) error {
 
-	ws, err := h.upgrader.Upgrade(c.Response(), c.Request(), map[string][]string{
-		"Sec-WebSocket-Protocol": {"harmony"},
-	})
+	ws, err := h.upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		c.Logger().Error(err)
 		return nil

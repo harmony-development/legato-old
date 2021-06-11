@@ -60,6 +60,14 @@ func (d *DB) AddLocalUser(userID uint64, email, username string, passwordHash []
 	return
 }
 
+func (d *DB) LocalUserIDToForeignUserID(id uint64) (ret uint64, host string, err error) {
+	defer doRecovery(&err)
+
+	data := d.User.GetX(ctx, id).QueryForeignUser().OnlyX(ctx)
+
+	return data.Foreignid, data.Host, nil
+}
+
 func (d *DB) EmailExists(email string) (exists bool, err error) {
 	defer doRecovery(&err)
 	exists = d.LocalUser.Query().Where(localuser.Email(email)).ExistX(ctx)

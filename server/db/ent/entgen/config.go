@@ -32,6 +32,7 @@ type hooks struct {
 	ForeignUser    []ent.Hook
 	Guild          []ent.Hook
 	GuildListEntry []ent.Hook
+	Host           []ent.Hook
 	Invite         []ent.Hook
 	LocalUser      []ent.Hook
 	Message        []ent.Hook

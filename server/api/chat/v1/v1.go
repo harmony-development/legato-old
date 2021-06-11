@@ -11,9 +11,11 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
+	syncv1 "github.com/harmony-development/legato/gen/sync/v1"
 	"github.com/harmony-development/legato/server/api/chat/v1/permissions"
 	"github.com/harmony-development/legato/server/api/middleware"
 	"github.com/harmony-development/legato/server/config"
+	"github.com/harmony-development/legato/server/db/ent/entgen"
 	"github.com/harmony-development/legato/server/db/types"
 	"github.com/harmony-development/legato/server/http/attachments/backend"
 	"github.com/harmony-development/legato/server/logger"
@@ -34,6 +36,8 @@ type Dependencies struct {
 	Config         *config.Config
 	StorageBackend backend.AttachmentBackend
 	Middleware     *middleware.Middlewares
+
+	Dispatcher func(string, *syncv1.Event)
 }
 
 // V1 contains the gRPC handler for v1
@@ -687,8 +691,33 @@ func (v1 *V1) JoinGuild(c echo.Context, r *chatv1.JoinGuildRequest) (*chatv1.Joi
 		}
 		return nil, responses.NewError(responses.BannedFromGuild)
 	}
-	if err := v1.DB.AddMemberToGuild(ctx.UserID, guildID); err != nil {
+
+	foreign, host, err := v1.DB.LocalUserIDToForeignUserID(ctx.UserID)
+	if err != nil && !entgen.IsNotFound(err) {
 		return nil, err
+	}
+
+	if foreign != 0 {
+		v1.Dispatcher(host, &syncv1.Event{
+			Kind: &syncv1.Event_UserAddedToGuild_{
+				UserAddedToGuild: &syncv1.Event_UserAddedToGuild{
+					UserId:  foreign,
+					GuildId: guildID,
+				},
+			},
+		})
+	} else {
+		if err := v1.DB.RemoveGuildFromList(ctx.UserID, guildID, ""); err != nil {
+			return nil, err
+		}
+		v1.Streams.BroadcastHomeserver(ctx.UserID, &chatv1.Event{
+			Event: &chatv1.Event_GuildAddedToList_{
+				GuildAddedToList: &chatv1.Event_GuildAddedToList{
+					GuildId:    guildID,
+					Homeserver: "",
+				},
+			},
+		})
 	}
 	if err := v1.DB.IncrementInvite(r.InviteId); err != nil {
 		return nil, err
@@ -717,6 +746,53 @@ func init() {
 	}, "/protocol.chat.v1.ChatService/LeaveGuild")
 }
 
+func (v1 *V1) removeUser(guildID, userID uint64, reason chatv1.Event_LeaveReason) error {
+	if err := v1.DB.DeleteMember(guildID, userID); err != nil {
+		return err
+	}
+
+	foreign, host, err := v1.DB.LocalUserIDToForeignUserID(userID)
+	if err != nil && !entgen.IsNotFound(err) {
+		return err
+	}
+
+	if foreign != 0 {
+		v1.Dispatcher(host, &syncv1.Event{
+			Kind: &syncv1.Event_UserRemovedFromGuild_{
+				UserRemovedFromGuild: &syncv1.Event_UserRemovedFromGuild{
+					UserId:  foreign,
+					GuildId: guildID,
+				},
+			},
+		})
+	} else {
+		if err := v1.DB.RemoveGuildFromList(userID, guildID, ""); err != nil {
+			return err
+		}
+		v1.Streams.BroadcastHomeserver(userID, &chatv1.Event{
+			Event: &chatv1.Event_GuildRemovedFromList_{
+				GuildRemovedFromList: &chatv1.Event_GuildRemovedFromList{
+					GuildId:    guildID,
+					Homeserver: "",
+				},
+			},
+		})
+	}
+
+	v1.Streams.RemoveGuildSubscription(guildID, userID)
+	v1.Streams.BroadcastGuild(guildID, &chatv1.Event{
+		Event: &chatv1.Event_LeftMember{
+			LeftMember: &chatv1.Event_MemberLeft{
+				MemberId:    userID,
+				GuildId:     guildID,
+				LeaveReason: reason,
+			},
+		},
+	})
+
+	return nil
+}
+
 // LeaveGuild implements the LeaveGuild RPC
 func (v1 *V1) LeaveGuild(c echo.Context, r *chatv1.LeaveGuildRequest) (*empty.Empty, error) {
 	ctx := c.(middleware.HarmonyContext)
@@ -726,32 +802,9 @@ func (v1 *V1) LeaveGuild(c echo.Context, r *chatv1.LeaveGuildRequest) (*empty.Em
 		return nil, responses.NewError(responses.IsOwner)
 	}
 
-	if err := v1.DB.DeleteMember(r.GuildId, ctx.UserID); err != nil {
+	if err := v1.removeUser(r.GuildId, ctx.UserID, chatv1.Event_willingly); err != nil {
 		return nil, err
 	}
-
-	if err := v1.DB.RemoveGuildFromList(ctx.UserID, r.GuildId, ""); err != nil {
-		return nil, err
-	}
-
-	v1.Streams.RemoveGuildSubscription(r.GuildId, ctx.UserID)
-	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
-		Event: &chatv1.Event_LeftMember{
-			LeftMember: &chatv1.Event_MemberLeft{
-				MemberId: ctx.UserID,
-				GuildId:  r.GuildId,
-			},
-		},
-	})
-
-	v1.Streams.BroadcastHomeserver(ctx.UserID, &chatv1.Event{
-		Event: &chatv1.Event_GuildRemovedFromList_{
-			GuildRemovedFromList: &chatv1.Event_GuildRemovedFromList{
-				GuildId:    r.GuildId,
-				Homeserver: "",
-			},
-		},
-	})
 
 	return &emptypb.Empty{}, nil
 }
@@ -944,64 +997,6 @@ func (v1 *V1) GetGuildList(c echo.Context, r *chatv1.GetGuildListRequest) (*chat
 	return &chatv1.GetGuildListResponse{
 		Guilds: out,
 	}, nil
-}
-
-func init() {
-	middleware.RegisterRPCConfig(middleware.RPCConfig{
-		RateLimit: middleware.RateLimit{
-			Duration: 5 * time.Second,
-			Burst:    10,
-		},
-
-		Location: middleware.NoLocation,
-	}, "/protocol.chat.v1.ChatService/AddGuildToGuildList")
-}
-
-// AddGuildToGuildList implements the AddGuildToGuildList RPC
-func (v1 *V1) AddGuildToGuildList(c echo.Context, r *chatv1.AddGuildToGuildListRequest) (*chatv1.AddGuildToGuildListResponse, error) {
-	ctx := c.(middleware.HarmonyContext)
-	err := v1.DB.AddGuildToList(ctx.UserID, r.GuildId, r.Homeserver)
-	if err != nil {
-		return nil, err
-	}
-	v1.Streams.BroadcastHomeserver(ctx.UserID, &chatv1.Event{
-		Event: &chatv1.Event_GuildAddedToList_{
-			GuildAddedToList: &chatv1.Event_GuildAddedToList{
-				GuildId:    r.GuildId,
-				Homeserver: r.Homeserver,
-			},
-		},
-	})
-	return &chatv1.AddGuildToGuildListResponse{}, nil
-}
-
-func init() {
-	middleware.RegisterRPCConfig(middleware.RPCConfig{
-		RateLimit: middleware.RateLimit{
-			Duration: 5 * time.Second,
-			Burst:    10,
-		},
-
-		Location: middleware.NoLocation,
-	}, "/protocol.chat.v1.ChatService/RemoveGuildFromGuildList")
-}
-
-// RemoveGuildFromGuildList implements the RemoveGuildFromGuildList RPC
-func (v1 *V1) RemoveGuildFromGuildList(c echo.Context, r *chatv1.RemoveGuildFromGuildListRequest) (*chatv1.RemoveGuildFromGuildListResponse, error) {
-	ctx := c.(middleware.HarmonyContext)
-	err := v1.DB.RemoveGuildFromList(ctx.UserID, r.GuildId, r.Homeserver)
-	if err != nil {
-		return nil, err
-	}
-	v1.Streams.BroadcastHomeserver(ctx.UserID, &chatv1.Event{
-		Event: &chatv1.Event_GuildRemovedFromList_{
-			GuildRemovedFromList: &chatv1.Event_GuildRemovedFromList{
-				GuildId:    r.GuildId,
-				Homeserver: r.Homeserver,
-			},
-		},
-	})
-	return &chatv1.RemoveGuildFromGuildListResponse{}, nil
 }
 
 // CreateEmotePack implements the CreateEmotePack RPC
@@ -1508,21 +1503,12 @@ func init() {
 }
 
 func (v1 *V1) BanUser(c echo.Context, r *chatv1.BanUserRequest) (*empty.Empty, error) {
-	if err := v1.DB.DeleteMember(r.GuildId, r.UserId); err != nil {
+	if err := v1.removeUser(r.GuildId, r.UserId, chatv1.Event_banned); err != nil {
 		return nil, err
 	}
 	if err := v1.DB.BanUser(r.GuildId, r.UserId); err != nil {
 		return nil, err
 	}
-	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
-		Event: &chatv1.Event_LeftMember{
-			LeftMember: &chatv1.Event_MemberLeft{
-				MemberId:    r.UserId,
-				GuildId:     r.GuildId,
-				LeaveReason: chatv1.Event_banned,
-			},
-		},
-	})
 	return &emptypb.Empty{}, nil
 }
 
@@ -1537,18 +1523,9 @@ func init() {
 }
 
 func (v1 *V1) KickUser(c echo.Context, r *chatv1.KickUserRequest) (*empty.Empty, error) {
-	if err := v1.DB.DeleteMember(r.GuildId, r.UserId); err != nil {
+	if err := v1.removeUser(r.GuildId, r.UserId, chatv1.Event_kicked); err != nil {
 		return nil, err
 	}
-	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
-		Event: &chatv1.Event_LeftMember{
-			LeftMember: &chatv1.Event_MemberLeft{
-				MemberId:    r.UserId,
-				GuildId:     r.GuildId,
-				LeaveReason: chatv1.Event_kicked,
-			},
-		},
-	})
 	return &emptypb.Empty{}, nil
 }
 

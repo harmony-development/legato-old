@@ -18,6 +18,7 @@ import (
 	"github.com/harmony-development/legato/server/db/ent/entgen/foreignuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guild"
 	"github.com/harmony-development/legato/server/db/ent/entgen/guildlistentry"
+	"github.com/harmony-development/legato/server/db/ent/entgen/host"
 	"github.com/harmony-development/legato/server/db/ent/entgen/invite"
 	"github.com/harmony-development/legato/server/db/ent/entgen/localuser"
 	"github.com/harmony-development/legato/server/db/ent/entgen/message"
@@ -55,6 +56,7 @@ func columnChecker(table string) func(string) error {
 		foreignuser.Table:    foreignuser.ValidColumn,
 		guild.Table:          guild.ValidColumn,
 		guildlistentry.Table: guildlistentry.ValidColumn,
+		host.Table:           host.ValidColumn,
 		invite.Table:         invite.ValidColumn,
 		localuser.Table:      localuser.ValidColumn,
 		message.Table:        message.ValidColumn,

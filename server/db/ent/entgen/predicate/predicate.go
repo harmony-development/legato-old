@@ -30,6 +30,9 @@ type Guild func(*sql.Selector)
 // GuildListEntry is the predicate function for guildlistentry builders.
 type GuildListEntry func(*sql.Selector)
 
+// Host is the predicate function for host builders.
+type Host func(*sql.Selector)
+
 // Invite is the predicate function for invite builders.
 type Invite func(*sql.Selector)
 
