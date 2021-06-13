@@ -1566,14 +1566,5 @@ func (v1 *V1) UnbanUser(c echo.Context, r *chatv1.UnbanUserRequest) (*empty.Empt
 	if err := v1.DB.UnbanUser(r.GuildId, r.UserId); err != nil {
 		return nil, err
 	}
-	v1.Streams.BroadcastGuild(r.GuildId, &chatv1.Event{
-		Event: &chatv1.Event_LeftMember{
-			LeftMember: &chatv1.Event_MemberLeft{
-				MemberId:    r.UserId,
-				GuildId:     r.GuildId,
-				LeaveReason: chatv1.Event_kicked,
-			},
-		},
-	})
 	return &emptypb.Empty{}, nil
 }
