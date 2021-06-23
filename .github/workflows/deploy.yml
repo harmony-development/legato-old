@@ -24,3 +24,9 @@ jobs:
         shell: bash
         env:
           SSH_HOST: ${{secrets.ACTIONS_SSH_HOST}}
+      - name: Trigger integration testing
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.INTEGRATION_TEST_PAT }}
+          repository: harmony-development/integration-testing
+          event-type: dep-updated
