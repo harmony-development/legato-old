@@ -727,7 +727,7 @@ func (v1 *V1) JoinGuild(c echo.Context, r *chatv1.JoinGuildRequest) (*chatv1.Joi
 			},
 		})
 	} else {
-		if err := v1.DB.RemoveGuildFromList(ctx.UserID, guildID, ""); err != nil {
+		if err := v1.DB.AddGuildToList(ctx.UserID, guildID, ""); err != nil {
 			return nil, err
 		}
 		v1.Streams.BroadcastHomeserver(ctx.UserID, &chatv1.Event{
