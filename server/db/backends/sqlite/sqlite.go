@@ -43,6 +43,12 @@ func New(cfg *config.Config, logger logger.ILogger, idgen *sonyflake.Sonyflake) 
 	if err != nil {
 		return nil, err
 	}
+	if cfg.Server.Policies.Debug.VerboseDatabase {
+		dab := &database{}
+		db.Client = db.Debug()
+		dab.DB = db
+		return dab, nil
+	}
 	return &database{
 		DB: db,
 	}, nil

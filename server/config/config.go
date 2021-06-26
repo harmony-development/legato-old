@@ -52,6 +52,7 @@ type Config struct {
 			Debug struct {
 				LogErrors                  bool `hcl:"LogErrors,optional" default:"true"`
 				LogRequests                bool `hcl:"LogRequests,optional" default:"true"`
+				VerboseDatabase            bool `hcl:"VerboseDatabase,optional" default:"false"`
 				RespondWithErrors          bool `hcl:"RespondWithErrors,optional" default:"false"`
 				ResponseErrorsIncludeTrace bool `hcl:"ResponseErrorsIncludeTrace" default:"true"`
 				VerboseStreamHandling      bool `hcl:"VerboseStreamHandling" default:"false"`
