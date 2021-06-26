@@ -163,28 +163,33 @@ func (d *DB) updateProfileStem(userID uint64) *entgen.ProfileUpdate {
 
 func (d *DB) SetAvatar(userID uint64, avatar string) (err error) {
 	defer doRecovery(&err)
-	d.updateProfileStem(userID).SetAvatar(avatar)
+	d.updateProfileStem(userID).
+		SetAvatar(avatar).
+		SaveX(ctx)
 	return
 }
 
 func (d *DB) SetIsBot(userID uint64, isBot bool) (err error) {
 	defer doRecovery(&err)
 	d.updateProfileStem(userID).
-		SetIsBot(isBot)
+		SetIsBot(isBot).
+		SaveX(ctx)
 	return
 }
 
 func (d *DB) SetStatus(userID uint64, status harmonytypesv1.UserStatus) (err error) {
 	defer doRecovery(&err)
 	d.updateProfileStem(userID).
-		SetStatus(int16(status))
+		SetStatus(int16(status)).
+		SaveX(ctx)
 	return
 }
 
 func (d *DB) SetUsername(userID uint64, username string) (err error) {
 	defer doRecovery(&err)
 	d.updateProfileStem(userID).
-		SetUsername(username)
+		SetUsername(username).
+		SaveX(ctx)
 	return
 }
 
