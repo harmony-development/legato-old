@@ -661,7 +661,27 @@ func init() {
 }
 
 func (v1 *V1) GetUserBulk(c echo.Context, r *chatv1.GetUserBulkRequest) (*chatv1.GetUserBulkResponse, error) {
-	panic("unimplemented")
+	if err := r.Validate(); err != nil {
+		return nil, err
+	}
+	res, err := v1.DB.GetUsersByID(r.UserIds)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, responses.NewError(responses.BadUserID)
+		}
+		v1.Logger.Exception(err)
+		return nil, err
+	}
+	data := &chatv1.GetUserBulkResponse{}
+	for _, res := range res {
+		data.Users = append(data.Users, &chatv1.GetUserResponse{
+			UserName:   res.Username,
+			UserAvatar: res.Avatar,
+			UserStatus: harmonytypesv1.UserStatus(res.Status),
+			IsBot:      res.IsBot,
+		})
+	}
+	return data, nil
 }
 
 func init() {

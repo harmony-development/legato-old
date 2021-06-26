@@ -51,6 +51,7 @@ type IHarmonyDB interface {
 	CountMembersInGuild(guildID uint64) (int64, error)
 	GetUserByEmail(email string) (UserData, error)
 	GetUserByID(userID uint64) (UserData, error)
+	GetUsersByID(userID []uint64) ([]UserData, error)
 	AddSession(userID uint64, session string) error
 	ExtendSession(session string) error
 	GetLocalUserForForeignUser(userID uint64, host string) (uint64, error)

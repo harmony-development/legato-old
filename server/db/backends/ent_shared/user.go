@@ -124,6 +124,18 @@ func (d *DB) GetUserByID(userID uint64) (userData types.UserData, err error) {
 	return
 }
 
+func (d *DB) GetUsersByID(userID []uint64) (data []types.UserData, err error) {
+	defer doRecovery(&err)
+
+	dat := d.User.Query().Where(user.IDIn(userID...)).WithProfile().AllX(ctx)
+
+	for _, it := range dat {
+		data = append(data, d.getUserStem(it, it.Edges.Profile))
+	}
+
+	return
+}
+
 func (d *DB) GetUserMetadata(userID uint64, appID string) (meta string, err error) {
 	defer doRecovery(&err)
 	meta = d.User.
