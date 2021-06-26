@@ -1153,7 +1153,7 @@ func (c *GuildListEntryClient) UpdateOne(gle *GuildListEntry) *GuildListEntryUpd
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *GuildListEntryClient) UpdateOneID(id uint64) *GuildListEntryUpdateOne {
+func (c *GuildListEntryClient) UpdateOneID(id int) *GuildListEntryUpdateOne {
 	mutation := newGuildListEntryMutation(c.config, OpUpdateOne, withGuildListEntryID(id))
 	return &GuildListEntryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1170,7 +1170,7 @@ func (c *GuildListEntryClient) DeleteOne(gle *GuildListEntry) *GuildListEntryDel
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *GuildListEntryClient) DeleteOneID(id uint64) *GuildListEntryDeleteOne {
+func (c *GuildListEntryClient) DeleteOneID(id int) *GuildListEntryDeleteOne {
 	builder := c.Delete().Where(guildlistentry.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1183,12 +1183,12 @@ func (c *GuildListEntryClient) Query() *GuildListEntryQuery {
 }
 
 // Get returns a GuildListEntry entity by its id.
-func (c *GuildListEntryClient) Get(ctx context.Context, id uint64) (*GuildListEntry, error) {
+func (c *GuildListEntryClient) Get(ctx context.Context, id int) (*GuildListEntry, error) {
 	return c.Query().Where(guildlistentry.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *GuildListEntryClient) GetX(ctx context.Context, id uint64) *GuildListEntry {
+func (c *GuildListEntryClient) GetX(ctx context.Context, id int) *GuildListEntry {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)

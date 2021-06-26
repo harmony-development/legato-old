@@ -28,6 +28,19 @@ func (gleu *GuildListEntryUpdate) Where(ps ...predicate.GuildListEntry) *GuildLi
 	return gleu
 }
 
+// SetGuildID sets the "guild_id" field.
+func (gleu *GuildListEntryUpdate) SetGuildID(u uint64) *GuildListEntryUpdate {
+	gleu.mutation.ResetGuildID()
+	gleu.mutation.SetGuildID(u)
+	return gleu
+}
+
+// AddGuildID adds u to the "guild_id" field.
+func (gleu *GuildListEntryUpdate) AddGuildID(u uint64) *GuildListEntryUpdate {
+	gleu.mutation.AddGuildID(u)
+	return gleu
+}
+
 // SetHost sets the "host" field.
 func (gleu *GuildListEntryUpdate) SetHost(s string) *GuildListEntryUpdate {
 	gleu.mutation.SetHost(s)
@@ -133,7 +146,7 @@ func (gleu *GuildListEntryUpdate) sqlSave(ctx context.Context) (n int, err error
 			Table:   guildlistentry.Table,
 			Columns: guildlistentry.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUint64,
+				Type:   field.TypeInt,
 				Column: guildlistentry.FieldID,
 			},
 		},
@@ -144,6 +157,20 @@ func (gleu *GuildListEntryUpdate) sqlSave(ctx context.Context) (n int, err error
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := gleu.mutation.GuildID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint64,
+			Value:  value,
+			Column: guildlistentry.FieldGuildID,
+		})
+	}
+	if value, ok := gleu.mutation.AddedGuildID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint64,
+			Value:  value,
+			Column: guildlistentry.FieldGuildID,
+		})
 	}
 	if value, ok := gleu.mutation.Host(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -211,6 +238,19 @@ type GuildListEntryUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *GuildListEntryMutation
+}
+
+// SetGuildID sets the "guild_id" field.
+func (gleuo *GuildListEntryUpdateOne) SetGuildID(u uint64) *GuildListEntryUpdateOne {
+	gleuo.mutation.ResetGuildID()
+	gleuo.mutation.SetGuildID(u)
+	return gleuo
+}
+
+// AddGuildID adds u to the "guild_id" field.
+func (gleuo *GuildListEntryUpdateOne) AddGuildID(u uint64) *GuildListEntryUpdateOne {
+	gleuo.mutation.AddGuildID(u)
+	return gleuo
 }
 
 // SetHost sets the "host" field.
@@ -325,7 +365,7 @@ func (gleuo *GuildListEntryUpdateOne) sqlSave(ctx context.Context) (_node *Guild
 			Table:   guildlistentry.Table,
 			Columns: guildlistentry.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUint64,
+				Type:   field.TypeInt,
 				Column: guildlistentry.FieldID,
 			},
 		},
@@ -353,6 +393,20 @@ func (gleuo *GuildListEntryUpdateOne) sqlSave(ctx context.Context) (_node *Guild
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := gleuo.mutation.GuildID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint64,
+			Value:  value,
+			Column: guildlistentry.FieldGuildID,
+		})
+	}
+	if value, ok := gleuo.mutation.AddedGuildID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint64,
+			Value:  value,
+			Column: guildlistentry.FieldGuildID,
+		})
 	}
 	if value, ok := gleuo.mutation.Host(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{

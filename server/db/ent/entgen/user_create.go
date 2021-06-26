@@ -182,14 +182,14 @@ func (uc *UserCreate) AddCreatedpacks(e ...*EmotePack) *UserCreate {
 }
 
 // AddListentryIDs adds the "listentry" edge to the GuildListEntry entity by IDs.
-func (uc *UserCreate) AddListentryIDs(ids ...uint64) *UserCreate {
+func (uc *UserCreate) AddListentryIDs(ids ...int) *UserCreate {
 	uc.mutation.AddListentryIDs(ids...)
 	return uc
 }
 
 // AddListentry adds the "listentry" edges to the GuildListEntry entity.
 func (uc *UserCreate) AddListentry(g ...*GuildListEntry) *UserCreate {
-	ids := make([]uint64, len(g))
+	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
@@ -475,7 +475,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint64,
+					Type:   field.TypeInt,
 					Column: guildlistentry.FieldID,
 				},
 			},

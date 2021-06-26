@@ -3923,7 +3923,9 @@ type GuildListEntryMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *uint64
+	id            *int
+	guild_id      *uint64
+	addguild_id   *uint64
 	host          *string
 	position      *string
 	clearedFields map[string]struct{}
@@ -3954,7 +3956,7 @@ func newGuildListEntryMutation(c config, op Op, opts ...guildlistentryOption) *G
 }
 
 // withGuildListEntryID sets the ID field of the mutation.
-func withGuildListEntryID(id uint64) guildlistentryOption {
+func withGuildListEntryID(id int) guildlistentryOption {
 	return func(m *GuildListEntryMutation) {
 		var (
 			err   error
@@ -4004,19 +4006,69 @@ func (m GuildListEntryMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of GuildListEntry entities.
-func (m *GuildListEntryMutation) SetID(id uint64) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID
 // is only available if it was provided to the builder.
-func (m *GuildListEntryMutation) ID() (id uint64, exists bool) {
+func (m *GuildListEntryMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
 	return *m.id, true
+}
+
+// SetGuildID sets the "guild_id" field.
+func (m *GuildListEntryMutation) SetGuildID(u uint64) {
+	m.guild_id = &u
+	m.addguild_id = nil
+}
+
+// GuildID returns the value of the "guild_id" field in the mutation.
+func (m *GuildListEntryMutation) GuildID() (r uint64, exists bool) {
+	v := m.guild_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGuildID returns the old "guild_id" field's value of the GuildListEntry entity.
+// If the GuildListEntry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GuildListEntryMutation) OldGuildID(ctx context.Context) (v uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldGuildID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldGuildID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGuildID: %w", err)
+	}
+	return oldValue.GuildID, nil
+}
+
+// AddGuildID adds u to the "guild_id" field.
+func (m *GuildListEntryMutation) AddGuildID(u uint64) {
+	if m.addguild_id != nil {
+		*m.addguild_id += u
+	} else {
+		m.addguild_id = &u
+	}
+}
+
+// AddedGuildID returns the value that was added to the "guild_id" field in this mutation.
+func (m *GuildListEntryMutation) AddedGuildID() (r uint64, exists bool) {
+	v := m.addguild_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetGuildID resets all changes to the "guild_id" field.
+func (m *GuildListEntryMutation) ResetGuildID() {
+	m.guild_id = nil
+	m.addguild_id = nil
 }
 
 // SetHost sets the "host" field.
@@ -4144,7 +4196,10 @@ func (m *GuildListEntryMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GuildListEntryMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
+	if m.guild_id != nil {
+		fields = append(fields, guildlistentry.FieldGuildID)
+	}
 	if m.host != nil {
 		fields = append(fields, guildlistentry.FieldHost)
 	}
@@ -4159,6 +4214,8 @@ func (m *GuildListEntryMutation) Fields() []string {
 // schema.
 func (m *GuildListEntryMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case guildlistentry.FieldGuildID:
+		return m.GuildID()
 	case guildlistentry.FieldHost:
 		return m.Host()
 	case guildlistentry.FieldPosition:
@@ -4172,6 +4229,8 @@ func (m *GuildListEntryMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *GuildListEntryMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case guildlistentry.FieldGuildID:
+		return m.OldGuildID(ctx)
 	case guildlistentry.FieldHost:
 		return m.OldHost(ctx)
 	case guildlistentry.FieldPosition:
@@ -4185,6 +4244,13 @@ func (m *GuildListEntryMutation) OldField(ctx context.Context, name string) (ent
 // type.
 func (m *GuildListEntryMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case guildlistentry.FieldGuildID:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGuildID(v)
+		return nil
 	case guildlistentry.FieldHost:
 		v, ok := value.(string)
 		if !ok {
@@ -4206,13 +4272,21 @@ func (m *GuildListEntryMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *GuildListEntryMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addguild_id != nil {
+		fields = append(fields, guildlistentry.FieldGuildID)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *GuildListEntryMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case guildlistentry.FieldGuildID:
+		return m.AddedGuildID()
+	}
 	return nil, false
 }
 
@@ -4221,6 +4295,13 @@ func (m *GuildListEntryMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *GuildListEntryMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case guildlistentry.FieldGuildID:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGuildID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown GuildListEntry numeric field %s", name)
 }
@@ -4248,6 +4329,9 @@ func (m *GuildListEntryMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *GuildListEntryMutation) ResetField(name string) error {
 	switch name {
+	case guildlistentry.FieldGuildID:
+		m.ResetGuildID()
+		return nil
 	case guildlistentry.FieldHost:
 		m.ResetHost()
 		return nil
@@ -8827,8 +8911,8 @@ type UserMutation struct {
 	createdpacks        map[uint64]struct{}
 	removedcreatedpacks map[uint64]struct{}
 	clearedcreatedpacks bool
-	listentry           map[uint64]struct{}
-	removedlistentry    map[uint64]struct{}
+	listentry           map[int]struct{}
+	removedlistentry    map[int]struct{}
 	clearedlistentry    bool
 	role                map[uint64]struct{}
 	removedrole         map[uint64]struct{}
@@ -9359,9 +9443,9 @@ func (m *UserMutation) ResetCreatedpacks() {
 }
 
 // AddListentryIDs adds the "listentry" edge to the GuildListEntry entity by ids.
-func (m *UserMutation) AddListentryIDs(ids ...uint64) {
+func (m *UserMutation) AddListentryIDs(ids ...int) {
 	if m.listentry == nil {
-		m.listentry = make(map[uint64]struct{})
+		m.listentry = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.listentry[ids[i]] = struct{}{}
@@ -9379,9 +9463,9 @@ func (m *UserMutation) ListentryCleared() bool {
 }
 
 // RemoveListentryIDs removes the "listentry" edge to the GuildListEntry entity by IDs.
-func (m *UserMutation) RemoveListentryIDs(ids ...uint64) {
+func (m *UserMutation) RemoveListentryIDs(ids ...int) {
 	if m.removedlistentry == nil {
-		m.removedlistentry = make(map[uint64]struct{})
+		m.removedlistentry = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removedlistentry[ids[i]] = struct{}{}
@@ -9389,7 +9473,7 @@ func (m *UserMutation) RemoveListentryIDs(ids ...uint64) {
 }
 
 // RemovedListentry returns the removed IDs of the "listentry" edge to the GuildListEntry entity.
-func (m *UserMutation) RemovedListentryIDs() (ids []uint64) {
+func (m *UserMutation) RemovedListentryIDs() (ids []int) {
 	for id := range m.removedlistentry {
 		ids = append(ids, id)
 	}
@@ -9397,7 +9481,7 @@ func (m *UserMutation) RemovedListentryIDs() (ids []uint64) {
 }
 
 // ListentryIDs returns the "listentry" edge IDs in the mutation.
-func (m *UserMutation) ListentryIDs() (ids []uint64) {
+func (m *UserMutation) ListentryIDs() (ids []int) {
 	for id := range m.listentry {
 		ids = append(ids, id)
 	}

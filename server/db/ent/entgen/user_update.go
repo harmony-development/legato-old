@@ -184,14 +184,14 @@ func (uu *UserUpdate) AddCreatedpacks(e ...*EmotePack) *UserUpdate {
 }
 
 // AddListentryIDs adds the "listentry" edge to the GuildListEntry entity by IDs.
-func (uu *UserUpdate) AddListentryIDs(ids ...uint64) *UserUpdate {
+func (uu *UserUpdate) AddListentryIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddListentryIDs(ids...)
 	return uu
 }
 
 // AddListentry adds the "listentry" edges to the GuildListEntry entity.
 func (uu *UserUpdate) AddListentry(g ...*GuildListEntry) *UserUpdate {
-	ids := make([]uint64, len(g))
+	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
@@ -369,14 +369,14 @@ func (uu *UserUpdate) ClearListentry() *UserUpdate {
 }
 
 // RemoveListentryIDs removes the "listentry" edge to GuildListEntry entities by IDs.
-func (uu *UserUpdate) RemoveListentryIDs(ids ...uint64) *UserUpdate {
+func (uu *UserUpdate) RemoveListentryIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveListentryIDs(ids...)
 	return uu
 }
 
 // RemoveListentry removes "listentry" edges to GuildListEntry entities.
 func (uu *UserUpdate) RemoveListentry(g ...*GuildListEntry) *UserUpdate {
-	ids := make([]uint64, len(g))
+	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
@@ -911,7 +911,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint64,
+					Type:   field.TypeInt,
 					Column: guildlistentry.FieldID,
 				},
 			},
@@ -927,7 +927,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint64,
+					Type:   field.TypeInt,
 					Column: guildlistentry.FieldID,
 				},
 			},
@@ -946,7 +946,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint64,
+					Type:   field.TypeInt,
 					Column: guildlistentry.FieldID,
 				},
 			},
@@ -1177,14 +1177,14 @@ func (uuo *UserUpdateOne) AddCreatedpacks(e ...*EmotePack) *UserUpdateOne {
 }
 
 // AddListentryIDs adds the "listentry" edge to the GuildListEntry entity by IDs.
-func (uuo *UserUpdateOne) AddListentryIDs(ids ...uint64) *UserUpdateOne {
+func (uuo *UserUpdateOne) AddListentryIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddListentryIDs(ids...)
 	return uuo
 }
 
 // AddListentry adds the "listentry" edges to the GuildListEntry entity.
 func (uuo *UserUpdateOne) AddListentry(g ...*GuildListEntry) *UserUpdateOne {
-	ids := make([]uint64, len(g))
+	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
@@ -1362,14 +1362,14 @@ func (uuo *UserUpdateOne) ClearListentry() *UserUpdateOne {
 }
 
 // RemoveListentryIDs removes the "listentry" edge to GuildListEntry entities by IDs.
-func (uuo *UserUpdateOne) RemoveListentryIDs(ids ...uint64) *UserUpdateOne {
+func (uuo *UserUpdateOne) RemoveListentryIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveListentryIDs(ids...)
 	return uuo
 }
 
 // RemoveListentry removes "listentry" edges to GuildListEntry entities.
 func (uuo *UserUpdateOne) RemoveListentry(g ...*GuildListEntry) *UserUpdateOne {
-	ids := make([]uint64, len(g))
+	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
@@ -1928,7 +1928,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint64,
+					Type:   field.TypeInt,
 					Column: guildlistentry.FieldID,
 				},
 			},
@@ -1944,7 +1944,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint64,
+					Type:   field.TypeInt,
 					Column: guildlistentry.FieldID,
 				},
 			},
@@ -1963,7 +1963,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint64,
+					Type:   field.TypeInt,
 					Column: guildlistentry.FieldID,
 				},
 			},

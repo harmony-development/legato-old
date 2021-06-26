@@ -14,7 +14,7 @@ func (d *DB) GetGuildList(userID uint64) (guilds []*types.GuildListEntryData, er
 	guilds = make([]*types.GuildListEntryData, len(data))
 	for i, entry := range data {
 		guilds[i] = &types.GuildListEntryData{
-			ID:       entry.ID,
+			ID:       entry.GuildID,
 			Host:     entry.Host,
 			Position: entry.Position,
 		}
@@ -28,7 +28,7 @@ func (d *DB) GetGuildListPosition(userID, guildID uint64, host string) (pos stri
 		guildlistentry.And(
 			guildlistentry.HasUserWith(user.ID(userID)),
 			guildlistentry.Host(host),
-			guildlistentry.ID(guildID),
+			guildlistentry.GuildID(guildID),
 		),
 	).OnlyX(ctx)
 	return
@@ -38,7 +38,7 @@ func (d *DB) AddGuildToList(userID, guildID uint64, homeServer string) (err erro
 	defer doRecovery(&err)
 
 	d.GuildListEntry.Create().
-		SetID(guildID).SetHost(homeServer).
+		SetGuildID(guildID).SetHost(homeServer).
 		SetUserID(userID).
 		SetPosition(
 			lexorank.Rank(
@@ -68,7 +68,7 @@ func (d *DB) MoveGuild(userID, guildID uint64, host string, nextGuildID, prevGui
 			guildlistentry.HasUserWith(
 				user.ID(userID),
 			),
-			guildlistentry.ID(guildID),
+			guildlistentry.GuildID(guildID),
 			guildlistentry.Host(host),
 		),
 	).SetPosition(
@@ -83,7 +83,7 @@ func (d *DB) RemoveGuildFromList(userID, guildID uint64, host string) (err error
 		guildlistentry.HasUserWith(
 			user.ID(userID),
 		),
-		guildlistentry.ID(guildID),
+		guildlistentry.GuildID(guildID),
 		guildlistentry.Host(host),
 	),
 	).ExecX(ctx)

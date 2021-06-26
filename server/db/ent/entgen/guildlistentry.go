@@ -15,7 +15,9 @@ import (
 type GuildListEntry struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID uint64 `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
+	// GuildID holds the value of the "guild_id" field.
+	GuildID uint64 `json:"guild_id,omitempty"`
 	// Host holds the value of the "host" field.
 	Host string `json:"host,omitempty"`
 	// Position holds the value of the "position" field.
@@ -54,7 +56,7 @@ func (*GuildListEntry) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case guildlistentry.FieldID:
+		case guildlistentry.FieldID, guildlistentry.FieldGuildID:
 			values[i] = new(sql.NullInt64)
 		case guildlistentry.FieldHost, guildlistentry.FieldPosition:
 			values[i] = new(sql.NullString)
@@ -80,7 +82,13 @@ func (gle *GuildListEntry) assignValues(columns []string, values []interface{}) 
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			gle.ID = uint64(value.Int64)
+			gle.ID = int(value.Int64)
+		case guildlistentry.FieldGuildID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field guild_id", values[i])
+			} else if value.Valid {
+				gle.GuildID = uint64(value.Int64)
+			}
 		case guildlistentry.FieldHost:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field host", values[i])
@@ -133,6 +141,8 @@ func (gle *GuildListEntry) String() string {
 	var builder strings.Builder
 	builder.WriteString("GuildListEntry(")
 	builder.WriteString(fmt.Sprintf("id=%v", gle.ID))
+	builder.WriteString(", guild_id=")
+	builder.WriteString(fmt.Sprintf("%v", gle.GuildID))
 	builder.WriteString(", host=")
 	builder.WriteString(gle.Host)
 	builder.WriteString(", position=")

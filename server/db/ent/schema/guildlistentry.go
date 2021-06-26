@@ -14,7 +14,7 @@ type GuildListEntry struct {
 // Fields of the GuildListEntry.
 func (GuildListEntry) Fields() []ent.Field {
 	return []ent.Field{
-		field.Uint64("id"),
+		field.Uint64("guild_id"),
 		field.String("host"),
 		field.String("position"),
 	}

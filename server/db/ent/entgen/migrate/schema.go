@@ -157,7 +157,8 @@ var (
 	}
 	// GuildListEntriesColumns holds the columns for the "guild_list_entries" table.
 	GuildListEntriesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUint64, Increment: true},
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "guild_id", Type: field.TypeUint64},
 		{Name: "host", Type: field.TypeString},
 		{Name: "position", Type: field.TypeString},
 		{Name: "user_listentry", Type: field.TypeUint64, Nullable: true},
@@ -170,7 +171,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "guild_list_entries_users_listentry",
-				Columns:    []*schema.Column{GuildListEntriesColumns[3]},
+				Columns:    []*schema.Column{GuildListEntriesColumns[4]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

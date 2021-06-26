@@ -20,6 +20,12 @@ type GuildListEntryCreate struct {
 	hooks    []Hook
 }
 
+// SetGuildID sets the "guild_id" field.
+func (glec *GuildListEntryCreate) SetGuildID(u uint64) *GuildListEntryCreate {
+	glec.mutation.SetGuildID(u)
+	return glec
+}
+
 // SetHost sets the "host" field.
 func (glec *GuildListEntryCreate) SetHost(s string) *GuildListEntryCreate {
 	glec.mutation.SetHost(s)
@@ -29,12 +35,6 @@ func (glec *GuildListEntryCreate) SetHost(s string) *GuildListEntryCreate {
 // SetPosition sets the "position" field.
 func (glec *GuildListEntryCreate) SetPosition(s string) *GuildListEntryCreate {
 	glec.mutation.SetPosition(s)
-	return glec
-}
-
-// SetID sets the "id" field.
-func (glec *GuildListEntryCreate) SetID(u uint64) *GuildListEntryCreate {
-	glec.mutation.SetID(u)
 	return glec
 }
 
@@ -100,6 +100,9 @@ func (glec *GuildListEntryCreate) SaveX(ctx context.Context) *GuildListEntry {
 
 // check runs all checks and user-defined validators on the builder.
 func (glec *GuildListEntryCreate) check() error {
+	if _, ok := glec.mutation.GuildID(); !ok {
+		return &ValidationError{Name: "guild_id", err: errors.New("entgen: missing required field \"guild_id\"")}
+	}
 	if _, ok := glec.mutation.Host(); !ok {
 		return &ValidationError{Name: "host", err: errors.New("entgen: missing required field \"host\"")}
 	}
@@ -120,10 +123,8 @@ func (glec *GuildListEntryCreate) sqlSave(ctx context.Context) (*GuildListEntry,
 		}
 		return nil, err
 	}
-	if _node.ID == 0 {
-		id := _spec.ID.Value.(int64)
-		_node.ID = uint64(id)
-	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -133,14 +134,18 @@ func (glec *GuildListEntryCreate) createSpec() (*GuildListEntry, *sqlgraph.Creat
 		_spec = &sqlgraph.CreateSpec{
 			Table: guildlistentry.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUint64,
+				Type:   field.TypeInt,
 				Column: guildlistentry.FieldID,
 			},
 		}
 	)
-	if id, ok := glec.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
+	if value, ok := glec.mutation.GuildID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint64,
+			Value:  value,
+			Column: guildlistentry.FieldGuildID,
+		})
+		_node.GuildID = value
 	}
 	if value, ok := glec.mutation.Host(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -220,10 +225,8 @@ func (glecb *GuildListEntryCreateBulk) Save(ctx context.Context) ([]*GuildListEn
 				if err != nil {
 					return nil, err
 				}
-				if nodes[i].ID == 0 {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = uint64(id)
-				}
+				id := specs[i].ID.Value.(int64)
+				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

@@ -7,6 +7,8 @@ const (
 	Label = "guild_list_entry"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldGuildID holds the string denoting the guild_id field in the database.
+	FieldGuildID = "guild_id"
 	// FieldHost holds the string denoting the host field in the database.
 	FieldHost = "host"
 	// FieldPosition holds the string denoting the position field in the database.
@@ -27,6 +29,7 @@ const (
 // Columns holds all SQL columns for guildlistentry fields.
 var Columns = []string{
 	FieldID,
+	FieldGuildID,
 	FieldHost,
 	FieldPosition,
 }

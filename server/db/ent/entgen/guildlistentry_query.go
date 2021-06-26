@@ -110,8 +110,8 @@ func (gleq *GuildListEntryQuery) FirstX(ctx context.Context) *GuildListEntry {
 
 // FirstID returns the first GuildListEntry ID from the query.
 // Returns a *NotFoundError when no GuildListEntry ID was found.
-func (gleq *GuildListEntryQuery) FirstID(ctx context.Context) (id uint64, err error) {
-	var ids []uint64
+func (gleq *GuildListEntryQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = gleq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -123,7 +123,7 @@ func (gleq *GuildListEntryQuery) FirstID(ctx context.Context) (id uint64, err er
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (gleq *GuildListEntryQuery) FirstIDX(ctx context.Context) uint64 {
+func (gleq *GuildListEntryQuery) FirstIDX(ctx context.Context) int {
 	id, err := gleq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -161,8 +161,8 @@ func (gleq *GuildListEntryQuery) OnlyX(ctx context.Context) *GuildListEntry {
 // OnlyID is like Only, but returns the only GuildListEntry ID in the query.
 // Returns a *NotSingularError when exactly one GuildListEntry ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (gleq *GuildListEntryQuery) OnlyID(ctx context.Context) (id uint64, err error) {
-	var ids []uint64
+func (gleq *GuildListEntryQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = gleq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -178,7 +178,7 @@ func (gleq *GuildListEntryQuery) OnlyID(ctx context.Context) (id uint64, err err
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (gleq *GuildListEntryQuery) OnlyIDX(ctx context.Context) uint64 {
+func (gleq *GuildListEntryQuery) OnlyIDX(ctx context.Context) int {
 	id, err := gleq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -204,8 +204,8 @@ func (gleq *GuildListEntryQuery) AllX(ctx context.Context) []*GuildListEntry {
 }
 
 // IDs executes the query and returns a list of GuildListEntry IDs.
-func (gleq *GuildListEntryQuery) IDs(ctx context.Context) ([]uint64, error) {
-	var ids []uint64
+func (gleq *GuildListEntryQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := gleq.Select(guildlistentry.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -213,7 +213,7 @@ func (gleq *GuildListEntryQuery) IDs(ctx context.Context) ([]uint64, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (gleq *GuildListEntryQuery) IDsX(ctx context.Context) []uint64 {
+func (gleq *GuildListEntryQuery) IDsX(ctx context.Context) []int {
 	ids, err := gleq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -291,12 +291,12 @@ func (gleq *GuildListEntryQuery) WithUser(opts ...func(*UserQuery)) *GuildListEn
 // Example:
 //
 //	var v []struct {
-//		Host string `json:"host,omitempty"`
+//		GuildID uint64 `json:"guild_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.GuildListEntry.Query().
-//		GroupBy(guildlistentry.FieldHost).
+//		GroupBy(guildlistentry.FieldGuildID).
 //		Aggregate(entgen.Count()).
 //		Scan(ctx, &v)
 //
@@ -318,11 +318,11 @@ func (gleq *GuildListEntryQuery) GroupBy(field string, fields ...string) *GuildL
 // Example:
 //
 //	var v []struct {
-//		Host string `json:"host,omitempty"`
+//		GuildID uint64 `json:"guild_id,omitempty"`
 //	}
 //
 //	client.GuildListEntry.Query().
-//		Select(guildlistentry.FieldHost).
+//		Select(guildlistentry.FieldGuildID).
 //		Scan(ctx, &v)
 //
 func (gleq *GuildListEntryQuery) Select(field string, fields ...string) *GuildListEntrySelect {
@@ -432,7 +432,7 @@ func (gleq *GuildListEntryQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   guildlistentry.Table,
 			Columns: guildlistentry.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUint64,
+				Type:   field.TypeInt,
 				Column: guildlistentry.FieldID,
 			},
 		},

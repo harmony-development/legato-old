@@ -9,28 +9,28 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id uint64) predicate.GuildListEntry {
+func ID(id int) predicate.GuildListEntry {
 	return predicate.GuildListEntry(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id uint64) predicate.GuildListEntry {
+func IDEQ(id int) predicate.GuildListEntry {
 	return predicate.GuildListEntry(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id uint64) predicate.GuildListEntry {
+func IDNEQ(id int) predicate.GuildListEntry {
 	return predicate.GuildListEntry(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldID), id))
 	})
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...uint64) predicate.GuildListEntry {
+func IDIn(ids ...int) predicate.GuildListEntry {
 	return predicate.GuildListEntry(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -47,7 +47,7 @@ func IDIn(ids ...uint64) predicate.GuildListEntry {
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...uint64) predicate.GuildListEntry {
+func IDNotIn(ids ...int) predicate.GuildListEntry {
 	return predicate.GuildListEntry(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -64,30 +64,37 @@ func IDNotIn(ids ...uint64) predicate.GuildListEntry {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id uint64) predicate.GuildListEntry {
+func IDGT(id int) predicate.GuildListEntry {
 	return predicate.GuildListEntry(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldID), id))
 	})
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id uint64) predicate.GuildListEntry {
+func IDGTE(id int) predicate.GuildListEntry {
 	return predicate.GuildListEntry(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldID), id))
 	})
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id uint64) predicate.GuildListEntry {
+func IDLT(id int) predicate.GuildListEntry {
 	return predicate.GuildListEntry(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldID), id))
 	})
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id uint64) predicate.GuildListEntry {
+func IDLTE(id int) predicate.GuildListEntry {
 	return predicate.GuildListEntry(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
+	})
+}
+
+// GuildID applies equality check predicate on the "guild_id" field. It's identical to GuildIDEQ.
+func GuildID(v uint64) predicate.GuildListEntry {
+	return predicate.GuildListEntry(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldGuildID), v))
 	})
 }
 
@@ -102,6 +109,82 @@ func Host(v string) predicate.GuildListEntry {
 func Position(v string) predicate.GuildListEntry {
 	return predicate.GuildListEntry(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldPosition), v))
+	})
+}
+
+// GuildIDEQ applies the EQ predicate on the "guild_id" field.
+func GuildIDEQ(v uint64) predicate.GuildListEntry {
+	return predicate.GuildListEntry(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldGuildID), v))
+	})
+}
+
+// GuildIDNEQ applies the NEQ predicate on the "guild_id" field.
+func GuildIDNEQ(v uint64) predicate.GuildListEntry {
+	return predicate.GuildListEntry(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldGuildID), v))
+	})
+}
+
+// GuildIDIn applies the In predicate on the "guild_id" field.
+func GuildIDIn(vs ...uint64) predicate.GuildListEntry {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.GuildListEntry(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldGuildID), v...))
+	})
+}
+
+// GuildIDNotIn applies the NotIn predicate on the "guild_id" field.
+func GuildIDNotIn(vs ...uint64) predicate.GuildListEntry {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.GuildListEntry(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldGuildID), v...))
+	})
+}
+
+// GuildIDGT applies the GT predicate on the "guild_id" field.
+func GuildIDGT(v uint64) predicate.GuildListEntry {
+	return predicate.GuildListEntry(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldGuildID), v))
+	})
+}
+
+// GuildIDGTE applies the GTE predicate on the "guild_id" field.
+func GuildIDGTE(v uint64) predicate.GuildListEntry {
+	return predicate.GuildListEntry(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldGuildID), v))
+	})
+}
+
+// GuildIDLT applies the LT predicate on the "guild_id" field.
+func GuildIDLT(v uint64) predicate.GuildListEntry {
+	return predicate.GuildListEntry(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldGuildID), v))
+	})
+}
+
+// GuildIDLTE applies the LTE predicate on the "guild_id" field.
+func GuildIDLTE(v uint64) predicate.GuildListEntry {
+	return predicate.GuildListEntry(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldGuildID), v))
 	})
 }
 
