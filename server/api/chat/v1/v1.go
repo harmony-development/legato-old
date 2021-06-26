@@ -116,6 +116,34 @@ func (v1 *V1) CreateGuild(c echo.Context, r *chatv1.CreateGuildRequest) (*chatv1
 	if err != nil {
 		return nil, err
 	}
+
+	foreign, host, err := v1.DB.LocalUserIDToForeignUserID(ctx.UserID)
+	if err != nil && !entgen.IsNotFound(err) {
+		return nil, err
+	}
+	if foreign != 0 {
+		v1.Dispatcher(host, &syncv1.Event{
+			Kind: &syncv1.Event_UserAddedToGuild_{
+				UserAddedToGuild: &syncv1.Event_UserAddedToGuild{
+					UserId:  foreign,
+					GuildId: guildID,
+				},
+			},
+		})
+	} else {
+		if err := v1.DB.AddGuildToList(ctx.UserID, guildID, ""); err != nil {
+			return nil, err
+		}
+		v1.Streams.BroadcastHomeserver(ctx.UserID, &chatv1.Event{
+			Event: &chatv1.Event_GuildAddedToList_{
+				GuildAddedToList: &chatv1.Event_GuildAddedToList{
+					GuildId:    guildID,
+					Homeserver: "",
+				},
+			},
+		})
+	}
+
 	return &chatv1.CreateGuildResponse{
 		GuildId: guild.ID,
 	}, nil
