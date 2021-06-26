@@ -739,6 +739,9 @@ func (v1 *V1) JoinGuild(c echo.Context, r *chatv1.JoinGuildRequest) (*chatv1.Joi
 			},
 		})
 	}
+	if err := v1.DB.AddMemberToGuild(ctx.UserID, guildID); err != nil {
+		return nil, err
+	}
 	if err := v1.DB.IncrementInvite(r.InviteId); err != nil {
 		return nil, err
 	}
@@ -798,6 +801,8 @@ func (v1 *V1) removeUser(guildID, userID uint64, reason chatv1.Event_LeaveReason
 			},
 		})
 	}
+
+	v1.DB.DeleteMember(guildID, userID)
 
 	v1.Streams.RemoveGuildSubscription(guildID, userID)
 	v1.Streams.BroadcastGuild(guildID, &chatv1.Event{
