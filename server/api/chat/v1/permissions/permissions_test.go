@@ -159,6 +159,19 @@ func TestPermissions(t *testing.T) {
 	}
 }
 
+// TestPermissionsTwo is like TestPermissions, but duplicated
+func TestPermissionsTwo(t *testing.T) {
+	for name, data := range Yeet {
+		t.Logf("Testing user '%s'...", name)
+
+		for _, item := range data.Check {
+			if PermissionData.Check(item.Node, data.Roles, item.In) != item.Expected {
+				t.FailNow()
+			}
+		}
+	}
+}
+
 func TestSerialize(t *testing.T) {
 	data, err := json.Marshal(PermissionData)
 	if err != nil {
