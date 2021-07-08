@@ -1,0 +1,17 @@
+rule updatesubmodules
+    command = git submodule update --recursive --remote
+
+rule gobuild
+    command = GO111MODULE=on go build
+
+rule genprotos
+    command = ./build/genprotos.sh
+
+build submodules: updatesubmodules
+build protocol: genprotos
+
+build bin: gobuild protocol
+
+build updateproto: genprotos submodules
+
+default bin
