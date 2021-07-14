@@ -21,11 +21,11 @@ func (d *DB) addMessageStem(channelID, messageID uint64, authorID uint64, replyT
 		SetCreatedat(time.Now())
 
 	if override != nil {
-		msg.SetOverride(override)
+		msg = msg.SetOverride(override)
 	}
 
 	if replyTo != nil {
-		msg.AddReplyIDs(*replyTo)
+		msg = msg.AddReplyIDs(*replyTo)
 	}
 
 	return msg

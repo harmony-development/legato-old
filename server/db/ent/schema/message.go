@@ -19,7 +19,7 @@ type Message struct {
 func (Message) Fields() []ent.Field {
 	return []ent.Field{
 		field.
-			Uint64("id").
+			Uint64("messageID").
 			Unique(),
 		field.
 			Time("createdat").

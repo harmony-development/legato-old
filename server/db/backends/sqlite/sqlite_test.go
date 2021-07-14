@@ -3,6 +3,7 @@ package sqlite
 import (
 	"testing"
 
+	v1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 	"github.com/harmony-development/legato/server/db/backends/ent_shared"
 	"github.com/harmony-development/legato/server/db/ent/entgen"
 )
@@ -28,6 +29,54 @@ func makeLocalUser(db *database, userID uint64, email, username string, t *testi
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
+	}
+}
+
+func makeGuild(db *database, userID, guildID, channelID uint64, name string, t *testing.T) {
+	_, err := db.CreateGuild(userID, guildID, channelID, "hi", "")
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+}
+
+func TestOverrides(t *testing.T) {
+	db := createDatabase()
+	defer db.DB.Close()
+
+	userID := uint64(1)
+	email := "aa@aa.aa"
+	username := "aa"
+
+	guildID := uint64(1)
+	channelID := uint64(1)
+	gname := "ee"
+
+	messageID := uint64(0)
+
+	makeLocalUser(db, userID, email, username, t)
+	makeGuild(db, userID, guildID, channelID, gname, t)
+
+	_, err := db.AddMessage(guildID, channelID, messageID, userID, &v1.Override{
+		Name: "geil",
+	}, nil, nil, &v1.Content{
+		Content: &v1.Content_TextMessage{
+			TextMessage: &v1.ContentText{
+				Content: "hi",
+			},
+		},
+	})
+	if err != nil {
+		t.Error(err)
+	}
+
+	msg, err := db.GetMessage(messageID)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if msg.Overrides.Name != "geil" {
+		t.Errorf("Expected override name to be geil, got %s", msg.Overrides.Name)
 	}
 }
 
