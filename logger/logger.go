@@ -21,12 +21,14 @@ func New() *Logger {
 	}
 }
 
-func Indent(level log.Level, s string, finish string) string {
+func Indent(level log.Level, s string, finish *string) string {
 	var output strings.Builder
 	for _, line := range strings.Split(s, "\n") {
 		output.WriteRune('\n')
 		output.WriteString(cli.Colors[level].Sprintf("   ║  ") + line)
 	}
-	output.WriteString(cli.Colors[level].Sprintf("\n   ╚  ") + finish)
+	if finish != nil {
+		output.WriteString(cli.Colors[level].Sprintf("\n   ╚  ") + *finish)
+	}
 	return output.String()
 }

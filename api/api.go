@@ -24,7 +24,6 @@ func FiberRPCHandler(handler server.RawHandler) fiber.Handler {
 func RegisterHandlers(l log.Interface, app *fiber.App, all ...server.HRPCServiceHandler) {
 	l.Info("Registering services...")
 	for _, handler := range all {
-		l.Infof("Registering %s", handler.Name())
 		serviceLog := l.WithFields(log.Fields{
 			"service": handler.Name(),
 		})

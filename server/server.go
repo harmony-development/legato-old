@@ -7,6 +7,7 @@ import (
 	"github.com/apex/log"
 	"github.com/fatih/color"
 	"github.com/gofiber/fiber/v2"
+	fiberLogger "github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/harmony-development/legato/api"
 	"github.com/harmony-development/legato/build"
 	"github.com/harmony-development/legato/config"
@@ -36,15 +37,19 @@ func New(l log.Interface, cfg *config.Config) *Server {
 		c: cfg,
 		l: l,
 	}
+	s.Use(fiberLogger.New(fiberLogger.Config{
+		Format: "[${time}] ${status} |${green}${method}${white}|  ${path}  ↑${bytesSent} bytes  ↓${bytesReceived} bytes ${reqHeader:Authorization}\n",
+	}))
 	api.Setup(l, s.App)
 	return s
 }
 
 func (s *Server) printStartup() {
+	listenText := color.HiMagentaString(fmt.Sprintf("Listening on %s:%d", s.c.Address, s.c.Port))
 	display := logger.Indent(
 		log.InfoLevel,
 		startupMessage,
-		color.HiMagentaString(fmt.Sprintf("Listening on %s:%d", s.c.Address, s.c.Port)),
+		&listenText,
 	)
 	versionString := color.GreenString(build.Version)
 	gitString := color.GreenString(

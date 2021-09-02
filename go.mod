@@ -34,6 +34,7 @@ require (
 
 require (
 	github.com/andybalholm/brotli v1.0.2 // indirect
+	github.com/gofiber/fiber v1.14.6
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/harmony-development/hrpc v0.0.0-20210901202850-e6464054e1ee // indirect
 	github.com/klauspost/compress v1.13.4 // indirect
@@ -45,4 +46,9 @@ require (
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a // indirect
 	golang.org/x/net v0.0.0-20210510120150-4163338589ed // indirect
+)
+
+require (
+	github.com/gofiber/utils v0.0.10 // indirect
+	github.com/gorilla/schema v1.1.0 // indirect
 )
