@@ -1,0 +1,4 @@
+CREATE TABLE AuthSessions (
+    SessionID TEXT PRIMARY KEY,
+    UserID BIGINT NOT NULL
+);
