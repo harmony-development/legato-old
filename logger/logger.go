@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"bufio"
 	"os"
 	"strings"
 
@@ -9,15 +10,17 @@ import (
 )
 
 type Logger struct {
+	inputReader bufio.Reader
 	log.Interface
 }
 
-func New() *Logger {
+func New(input *os.File) *Logger {
 	return &Logger{
 		Interface: &log.Logger{
-			Handler: cli.New(os.Stdout),
+			Handler: cli.New(input),
 			Level:   log.DebugLevel,
 		},
+		inputReader: *bufio.NewReader(input),
 	}
 }
 

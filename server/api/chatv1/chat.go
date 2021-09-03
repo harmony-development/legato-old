@@ -1,4 +1,4 @@
-package authv1impl
+package chatv1impl
 
 import chatv1 "github.com/harmony-development/legato/gen/chat/v1"
 

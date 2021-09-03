@@ -1,2 +1,4 @@
 address: 0.0.0.0
 port: 2289
+public_key_path: "harmony-key.pem"
+private_key_path: "harmony-key.pub"

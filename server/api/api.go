@@ -4,10 +4,6 @@ import (
 	"github.com/apex/log"
 	"github.com/gofiber/fiber/v2"
 	"github.com/harmony-development/hrpc/server"
-	authv1impl "github.com/harmony-development/legato/api/authv1"
-	chatv1impl "github.com/harmony-development/legato/api/chatv1"
-	authv1 "github.com/harmony-development/legato/gen/auth/v1"
-	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
 )
 
 // FiberRPCHandler converts a RPC handler to a Fiber handler
@@ -35,9 +31,8 @@ func RegisterHandlers(l log.Interface, app *fiber.App, all ...server.HRPCService
 }
 
 // Setup registers the Harmony protocol API
-func Setup(l log.Interface, app *fiber.App) {
-	RegisterHandlers(l, app,
-		authv1.NewAuthServiceHandler(authv1impl.AuthV1{}),
-		chatv1.NewChatServiceHandler(chatv1impl.ChatV1{}),
-	)
+func Setup(l log.Interface, app *fiber.App) func(all ...server.HRPCServiceHandler) {
+	return func(all ...server.HRPCServiceHandler) {
+		RegisterHandlers(l, app, all...)
+	}
 }

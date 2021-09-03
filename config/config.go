@@ -16,7 +16,9 @@ type Config struct {
 	// The address to listen on for HTTP requests.
 	Address string
 	// The port to listen on for HTTP requests.
-	Port int
+	Port           int
+	PublicKeyPath  string `mapstructure:"public_key_path"`
+	PrivateKeyPath string `mapstructure:"private_key_path"`
 }
 
 type ConfigReader struct {
