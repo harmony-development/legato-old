@@ -4,16 +4,16 @@ import (
 	"context"
 
 	"github.com/harmony-development/legato/db"
+	dynamicauth "github.com/harmony-development/legato/dynamic_auth"
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
-	dynamicauth "github.com/harmony-development/legato/server/dynamic_auth"
-	"github.com/harmony-development/legato/server/key"
+	"github.com/harmony-development/legato/key"
 	"github.com/thanhpk/randstr"
 )
 
 type AuthV1 struct {
 	authv1.DefaultAuthService
 	keyManager key.KeyManager
-	db         db.DB
+	db         db.AuthDB
 }
 
 var steps = []dynamicauth.Step{
@@ -49,7 +49,7 @@ func init() {
 	}
 }
 
-func New(keyManager key.KeyManager, db db.DB) *AuthV1 {
+func New(keyManager key.KeyManager, db db.AuthDB) *AuthV1 {
 	return &AuthV1{
 		keyManager: keyManager,
 		db:         db,
