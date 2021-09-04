@@ -84,4 +84,5 @@ require (
 	github.com/go-redis/redis/v8 v8.11.3 // indirect
 	github.com/jackc/puddle v1.1.3 // indirect
 	github.com/rs/zerolog v1.24.0 // indirect
+	github.com/thanhpk/randstr v1.0.4 // indirect
 )

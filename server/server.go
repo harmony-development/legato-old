@@ -67,6 +67,7 @@ func New(l *logger.Logger, cfg *config.Config, db db.DB) (*Server, error) {
 	register(authv1.NewAuthServiceHandler(
 		authv1impl.New(
 			keyManager,
+			db,
 		),
 	))
 	register(chatv1.NewChatServiceHandler(chatv1impl.ChatV1{}))

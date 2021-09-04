@@ -1,14 +1,11 @@
 package harmonydb
 
-import "github.com/harmony-development/legato/db/sql/gen"
+import "time"
 
-func (db *HarmonyDB) GetSession(session string) (int64, error) {
-	return db.queries.GetSession(db, session)
+func (db *HarmonyDB) GetCurrentStep(authID string) (string, error) {
+	return db.rdb.Get(db, authID).Result()
 }
 
-func (db *HarmonyDB) SetSession(session string, userID int64) error {
-	return db.queries.SetSession(db, gen.SetSessionParams{
-		Userid:    userID,
-		Sessionid: session,
-	})
+func (db *HarmonyDB) SetStep(authID string, step string) error {
+	return db.rdb.Set(db, authID, step, 10*time.Minute).Err()
 }
