@@ -2,5 +2,6 @@ version: 1
 packages:
   - path: "db/sql/gen"
     engine: "postgresql"
+    sql_package: "pgx/v4"
     schema: "./db/sql/schema"
     queries: "./db/sql/query"

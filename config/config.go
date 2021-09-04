@@ -19,6 +19,21 @@ type Config struct {
 	Port           int
 	PublicKeyPath  string `mapstructure:"public_key_path"`
 	PrivateKeyPath string `mapstructure:"private_key_path"`
+	Postgres       *PostgresConfig
+	Redis          *RedisConfig
+}
+
+type RedisConfig struct {
+	Hosts    []string
+	Password string
+}
+
+type PostgresConfig struct {
+	Username string
+	Password string
+	Host     string
+	Port     int
+	DB       string
 }
 
 type ConfigReader struct {

@@ -12,7 +12,7 @@ DELETE FROM AuthSessions WHERE SessionID = $1
 `
 
 func (q *Queries) DeleteSession(ctx context.Context, sessionid string) error {
-	_, err := q.db.ExecContext(ctx, deleteSession, sessionid)
+	_, err := q.db.Exec(ctx, deleteSession, sessionid)
 	return err
 }
 
@@ -21,7 +21,7 @@ SELECT UserID FROM AuthSessions WHERE SessionID = $1
 `
 
 func (q *Queries) GetSession(ctx context.Context, sessionid string) (int64, error) {
-	row := q.db.QueryRowContext(ctx, getSession, sessionid)
+	row := q.db.QueryRow(ctx, getSession, sessionid)
 	var userid int64
 	err := row.Scan(&userid)
 	return userid, err
@@ -37,6 +37,6 @@ type SetSessionParams struct {
 }
 
 func (q *Queries) SetSession(ctx context.Context, arg SetSessionParams) error {
-	_, err := q.db.ExecContext(ctx, setSession, arg.Userid, arg.Sessionid)
+	_, err := q.db.Exec(ctx, setSession, arg.Userid, arg.Sessionid)
 	return err
 }

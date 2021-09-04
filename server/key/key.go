@@ -47,15 +47,29 @@ func (manager *Ed25519KeyManager) GetPublicKey() []byte {
 	return manager.pubKey
 }
 
-func WriteEd25519Keys(privKeyPath string, pubKeyPath string) error {
+func WriteEd25519KeysToFile(privKeyPath string, pubKeyPath string) error {
+	privFile, err := os.Create(privKeyPath)
+	if err != nil {
+		return err
+	}
+	defer privFile.Close()
+	pubFile, err := os.Create(pubKeyPath)
+	if err != nil {
+		return err
+	}
+	defer pubFile.Close()
+	return WriteEd25519Keys(privFile, pubFile)
+}
+
+func WriteEd25519Keys(privKeyWriter io.Writer, pubKeyWriter io.Writer) error {
 	pub, priv, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
 		return err
 	}
-	if err := os.WriteFile(privKeyPath, priv, 0644); err != nil {
+	if _, err := privKeyWriter.Write(priv); err != nil {
 		return err
 	}
-	if err := os.WriteFile(pubKeyPath, pub, 0644); err != nil {
+	if _, err := pubKeyWriter.Write(pub); err != nil {
 		return err
 	}
 	return nil

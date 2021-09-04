@@ -11,6 +11,7 @@ import (
 	fiberLogger "github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/harmony-development/legato/build"
 	"github.com/harmony-development/legato/config"
+	"github.com/harmony-development/legato/db"
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
 	chatv1 "github.com/harmony-development/legato/gen/chat/v1"
 	"github.com/harmony-development/legato/logger"
@@ -35,8 +36,7 @@ var startupMessage = `Version %s
         /___/ Commit %s
 `
 
-func New(l *logger.Logger, cfg *config.Config) (*Server, error) {
-	l.Debugf("%v", cfg)
+func New(l *logger.Logger, cfg *config.Config, db db.DB) (*Server, error) {
 	s := &Server{
 		App: fiber.New(fiber.Config{
 			AppName:               "legato",
@@ -50,7 +50,9 @@ func New(l *logger.Logger, cfg *config.Config) (*Server, error) {
 	keyManager, err := key.NewEd25519KeyManagerFromFile(s.c.PrivateKeyPath, s.c.PublicKeyPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			key.WriteEd25519Keys(s.c.PrivateKeyPath, s.c.PublicKeyPath)
+			if err := key.WriteEd25519KeysToFile(s.c.PrivateKeyPath, s.c.PublicKeyPath); err != nil {
+				return nil, err
+			}
 			keyManager, err = key.NewEd25519KeyManagerFromFile(s.c.PrivateKeyPath, s.c.PublicKeyPath)
 			if err != nil {
 				return nil, err

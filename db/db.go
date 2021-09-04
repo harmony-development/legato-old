@@ -5,3 +5,7 @@ type Auth interface {
 	GetSession(session string) (int64, error)
 	SetSession(session string, userID int64) error
 }
+
+type DB interface {
+	Auth
+}
