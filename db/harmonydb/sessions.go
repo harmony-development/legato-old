@@ -1,13 +1,17 @@
 package harmonydb
 
-import "github.com/harmony-development/legato/db/sql/gen"
+import (
+	"context"
 
-func (db *HarmonyDB) GetSession(session string) (int64, error) {
-	return db.queries.GetSession(db, session)
+	"github.com/harmony-development/legato/db/sql/gen"
+)
+
+func (db *HarmonySessionDB) GetSession(ctx context.Context, session string) (int64, error) {
+	return db.queries.GetSession(ctx, session)
 }
 
-func (db *HarmonyDB) SetSession(session string, userID int64) error {
-	return db.queries.SetSession(db, gen.SetSessionParams{
+func (db *HarmonySessionDB) SetSession(ctx context.Context, session string, userID int64) error {
+	return db.queries.SetSession(ctx, gen.SetSessionParams{
 		Userid:    userID,
 		Sessionid: session,
 	})

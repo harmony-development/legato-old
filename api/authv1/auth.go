@@ -13,7 +13,7 @@ import (
 type AuthV1 struct {
 	authv1.DefaultAuthService
 	keyManager key.KeyManager
-	auth       db.AuthDB
+	auth       db.EpheremalDatabase
 }
 
 var rawSteps = toRawSteps(
@@ -32,7 +32,7 @@ func toRawSteps(steps ...dynamicauth.Step) map[string]*authv1.AuthStep {
 	return ret
 }
 
-func New(keyManager key.KeyManager, auth db.AuthDB) *AuthV1 {
+func New(keyManager key.KeyManager, auth db.EpheremalDatabase) *AuthV1 {
 	return &AuthV1{
 		keyManager: keyManager,
 		auth:       auth,
@@ -49,7 +49,7 @@ func (v1 *AuthV1) Key(context.Context, *authv1.KeyRequest) (*authv1.KeyResponse,
 func (v1 *AuthV1) BeginAuth(c context.Context, r *authv1.BeginAuthRequest) (*authv1.BeginAuthResponse, error) {
 	id := randstr.Hex(16)
 	// typesafe ftw
-	if err := v1.auth.SetStep(id, initialStep.ID()); err != nil {
+	if err := v1.auth.SetStep(c, id, initialStep.ID()); err != nil {
 		return nil, err
 	}
 	return &authv1.BeginAuthResponse{
@@ -58,7 +58,7 @@ func (v1 *AuthV1) BeginAuth(c context.Context, r *authv1.BeginAuthRequest) (*aut
 }
 
 func (v1 *AuthV1) NextStep(c context.Context, r *authv1.NextStepRequest) (*authv1.NextStepResponse, error) {
-	currentStep, err := v1.auth.GetCurrentStep(r.AuthId)
+	currentStep, err := v1.auth.GetCurrentStep(c, r.AuthId)
 	if err != nil {
 		return nil, err
 	}

@@ -7,19 +7,54 @@ import (
 	"github.com/apex/log"
 	"github.com/go-redis/redis/v8"
 	"github.com/harmony-development/legato/config"
+	"github.com/harmony-development/legato/db"
 	"github.com/harmony-development/legato/db/sql/gen"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 // The default Harmony DB implementation. This uses sqlc.
 type HarmonyDB struct {
-	// embed a context for easy use in queries
-	context.Context
-	queries *gen.Queries
-	rdb     *redis.ClusterClient
+	db.InitNothing
+
+	*HarmonySessionDB
+	*HarmonyAuthDB
 }
 
-func New(l log.Interface, cfg *config.Config) (*HarmonyDB, error) {
+type HarmonySessionDB struct {
+	db.InitNothing
+
+	// embed a context for easy use in queries
+	ctx     context.Context
+	queries *gen.Queries
+}
+
+type HarmonyAuthDB struct {
+	db.InitNothing
+
+	// embed a context for easy use in queries
+	ctx context.Context
+	rdb *redis.ClusterClient
+}
+
+func NewAuth(l log.Interface, cfg *config.Config) (*HarmonyAuthDB, error) {
+	ctx := context.TODO()
+
+	rdb := redis.NewClusterClient(&redis.ClusterOptions{
+		Addrs:    cfg.Redis.Hosts,
+		Password: cfg.Redis.Password,
+	})
+
+	if _, err := rdb.Ping(ctx).Result(); err != nil {
+		return nil, err
+	}
+
+	return &HarmonyAuthDB{
+		ctx: ctx,
+		rdb: rdb,
+	}, nil
+}
+
+func NewSession(l log.Interface, cfg *config.Config) (*HarmonySessionDB, error) {
 	ctx := context.TODO()
 
 	username, password, host, port, db :=
@@ -42,20 +77,27 @@ func New(l log.Interface, cfg *config.Config) (*HarmonyDB, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	q := gen.New(conn)
 
-	rdb := redis.NewClusterClient(&redis.ClusterOptions{
-		Addrs:    cfg.Redis.Hosts,
-		Password: cfg.Redis.Password,
-	})
+	return &HarmonySessionDB{
+		ctx:     ctx,
+		queries: q,
+	}, nil
+}
 
-	if _, err := rdb.Ping(ctx).Result(); err != nil {
+func New(l log.Interface, cfg *config.Config) (*HarmonyDB, error) {
+	auth, err := NewAuth(l, cfg)
+	if err != nil {
+		return nil, err
+	}
+	sesh, err := NewSession(l, cfg)
+	if err != nil {
 		return nil, err
 	}
 
 	return &HarmonyDB{
-		Context: ctx,
-		queries: q,
-		rdb:     rdb,
+		HarmonySessionDB: sesh,
+		HarmonyAuthDB:    auth,
 	}, nil
 }
