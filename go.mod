@@ -11,7 +11,7 @@ require (
 	google.golang.org/protobuf v1.27.1
 )
 
-require github.com/harmony-development/hrpc v0.0.0-20210906090146-771889b5b660
+require github.com/harmony-development/hrpc v0.0.0-20210907001704-79d3509faa2a
 
 require (
 	github.com/jackc/pgconn v1.10.0
@@ -21,6 +21,7 @@ require (
 require (
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/go-redis/redis v6.15.9+incompatible // indirect
+	github.com/golang/protobuf v1.5.2
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/mattn/go-sqlite3 v1.14.8 // indirect
 	github.com/onsi/gomega v1.15.0 // indirect
@@ -36,6 +37,6 @@ require (
 	golang.org/x/sys v0.0.0-20210903071746-97244b99971b // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
-	gorm.io/driver/sqlite v1.1.4 // indirect
-	gorm.io/gorm v1.21.14 // indirect
+	gorm.io/driver/sqlite v1.1.4
+	gorm.io/gorm v1.21.14
 )
