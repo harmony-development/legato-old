@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2021 Danil Korennykh <bluskript@gmail.com>
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+address: 0.0.0.0
+port: 2289
+private-key-path: harmony-key.pub
+public-key-path: harmony-key.pem
+database:
+  backend: sqlite
+  sqlite:
+    file: test.db
+epheremal:
+  backend: bigcache
+debug:
+  respond-with-errors: true
+  log-errors: true
