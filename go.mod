@@ -1,8 +1,6 @@
 module github.com/harmony-development/legato
 
-go 1.17
-
-replace github.com/harmony-development/hrpc => ../hrpc
+go 1.16
 
 require (
 	github.com/apex/log v1.9.0
