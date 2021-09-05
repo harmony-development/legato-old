@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2021 Danil Korennykh <bluskript@gmail.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package dynamicauth
 
 import authv1 "github.com/harmony-development/legato/gen/auth/v1"
