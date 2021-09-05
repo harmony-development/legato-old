@@ -13,46 +13,29 @@ import (
 type AuthV1 struct {
 	authv1.DefaultAuthService
 	keyManager key.KeyManager
-	db         db.AuthDB
+	auth       db.AuthDB
 }
 
-var steps = []dynamicauth.Step{
-	dynamicauth.NewChoiceStep([]string{
-		"login",
-		"register",
-		"other-options",
-	}, "initial-step", false),
+var rawSteps = toRawSteps(
+	initialStep,
+	loginStep,
+	registerStep,
+	otherOptionsStep,
+	resetPasswordStep,
+)
 
-	dynamicauth.NewFormStep([]dynamicauth.FormField{
-		{Name: "email", FieldType: "email"},
-		{Name: "password", FieldType: "password"},
-	}, "login", true),
-	dynamicauth.NewFormStep([]dynamicauth.FormField{
-		{Name: "email", FieldType: "email"},
-		{Name: "username", FieldType: "username"},
-		{Name: "password", FieldType: "new-password"},
-	}, "register", true),
-
-	dynamicauth.NewChoiceStep([]string{
-		"reset-password",
-	}, "other-options", true),
-	dynamicauth.NewFormStep([]dynamicauth.FormField{
-		{Name: "email", FieldType: "email"},
-	}, "reset-password", true),
-}
-
-var rawSteps = map[string]*authv1.AuthStep{}
-
-func init() {
+func toRawSteps(steps ...dynamicauth.Step) map[string]*authv1.AuthStep {
+	ret := map[string]*authv1.AuthStep{}
 	for _, step := range steps {
-		rawSteps[step.ID()] = step.ToProtoV1()
+		ret[step.ID()] = step.ToProtoV1()
 	}
+	return ret
 }
 
-func New(keyManager key.KeyManager, db db.AuthDB) *AuthV1 {
+func New(keyManager key.KeyManager, auth db.AuthDB) *AuthV1 {
 	return &AuthV1{
 		keyManager: keyManager,
-		db:         db,
+		auth:       auth,
 	}
 }
 
@@ -65,7 +48,8 @@ func (v1 *AuthV1) Key(context.Context, *authv1.KeyRequest) (*authv1.KeyResponse,
 
 func (v1 *AuthV1) BeginAuth(c context.Context, r *authv1.BeginAuthRequest) (*authv1.BeginAuthResponse, error) {
 	id := randstr.Hex(16)
-	if err := v1.db.SetStep(id, "initial-step"); err != nil {
+	// typesafe ftw
+	if err := v1.auth.SetStep(id, initialStep.ID()); err != nil {
 		return nil, err
 	}
 	return &authv1.BeginAuthResponse{
@@ -74,7 +58,7 @@ func (v1 *AuthV1) BeginAuth(c context.Context, r *authv1.BeginAuthRequest) (*aut
 }
 
 func (v1 *AuthV1) NextStep(c context.Context, r *authv1.NextStepRequest) (*authv1.NextStepResponse, error) {
-	currentStep, err := v1.db.GetCurrentStep(r.AuthId)
+	currentStep, err := v1.auth.GetCurrentStep(r.AuthId)
 	if err != nil {
 		return nil, err
 	}
