@@ -5,7 +5,7 @@
 package kv
 
 import (
-	"github.com/harmony-development/legato/db"
+	"github.com/harmony-development/legato/db/ephemeral"
 	"github.com/philippgille/gokv"
 )
 
@@ -13,7 +13,7 @@ type database struct {
 	store gokv.Store
 }
 
-func NewKVBackend(store gokv.Store) db.EpheremalDatabase {
+func NewKVBackend(store gokv.Store) ephemeral.Database {
 	return &database{
 		store: store,
 	}

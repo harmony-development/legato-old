@@ -3,10 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-package db
+package persist
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/apex/log"
 	"github.com/harmony-development/legato/config"
@@ -22,6 +23,20 @@ type Database interface {
 	sessionDB
 }
 
-type DatabaseFactory interface {
+type Factory interface {
 	NewDatabase(ctx context.Context, l log.Interface, cfg *config.Config) (Database, error)
+}
+
+var backends = map[string]Factory{}
+
+func RegisterBackend(name string, factory Factory) {
+	backends[name] = factory
+}
+
+func GetBackend(name string) (Factory, error) {
+	factory, ok := backends[name]
+	if !ok {
+		return nil, fmt.Errorf("database backend not found: %s", name)
+	}
+	return factory, nil
 }

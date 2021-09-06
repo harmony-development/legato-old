@@ -7,7 +7,7 @@ package authv1impl
 import (
 	"context"
 
-	"github.com/harmony-development/legato/db"
+	"github.com/harmony-development/legato/db/ephemeral"
 	dynamicauth "github.com/harmony-development/legato/dynamic_auth"
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
 	"github.com/harmony-development/legato/key"
@@ -17,7 +17,7 @@ import (
 type AuthV1 struct {
 	authv1.DefaultAuthService
 	keyManager key.KeyManager
-	auth       db.EpheremalDatabase
+	auth       ephemeral.Database
 }
 
 var rawSteps = toRawSteps(
@@ -36,7 +36,7 @@ func toRawSteps(steps ...dynamicauth.Step) map[string]*authv1.AuthStep {
 	return ret
 }
 
-func New(keyManager key.KeyManager, auth db.EpheremalDatabase) *AuthV1 {
+func New(keyManager key.KeyManager, auth ephemeral.Database) *AuthV1 {
 	return &AuthV1{
 		keyManager: keyManager,
 		auth:       auth,

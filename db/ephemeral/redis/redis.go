@@ -10,16 +10,20 @@ import (
 
 	"github.com/apex/log"
 	"github.com/harmony-development/legato/config"
-	"github.com/harmony-development/legato/db"
+	"github.com/harmony-development/legato/db/ephemeral"
 	"github.com/harmony-development/legato/db/ephemeral/kv"
 	"github.com/philippgille/gokv/redis"
 )
 
 type factory struct{}
 
-var Factory db.EpheremalDatabaseFactory = factory{}
+var Factory ephemeral.Factory = factory{}
 
-func (factory) NewEpheremalDatabase(ctx context.Context, l log.Interface, cfg *config.Config) (db.EpheremalDatabase, error) {
+func init() {
+	ephemeral.RegisterBackend("redis", Factory)
+}
+
+func (factory) NewEpheremalDatabase(ctx context.Context, l log.Interface, cfg *config.Config) (ephemeral.Database, error) {
 	rdb, err := redis.NewClient(redis.Options{
 		Address:  cfg.Epheremal.Redis.Hosts[0],
 		Password: cfg.Epheremal.Redis.Password,

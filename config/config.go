@@ -18,6 +18,22 @@ import (
 //go:embed default.yml
 var defaultConfig []byte
 
+// TODO: get this to use the actual registered backends list
+var (
+	persistBackends   = StringSet{}
+	ephemeralBackends = StringSet{}
+)
+
+func init() {
+	persistBackends.Add(
+		"postgres",
+	)
+	ephemeralBackends.Add(
+		"bigcache",
+		"redis",
+	)
+}
+
 type Config struct {
 	// The address to listen on for HTTP requests.
 	Address string
@@ -29,40 +45,30 @@ type Config struct {
 	Epheremal      Epheremal
 }
 
-type DatabaseBackend int
+type PersistBackend string
 
-const (
-	Postgres DatabaseBackend = iota
-)
-
-func (e *DatabaseBackend) UnmarshalText(text []byte) error {
-	switch string(text) {
-	case "postgres":
-		*e = Postgres
-		return nil
-	default:
-		return errors.New("database backend must be one of [postgres]")
+func (e *PersistBackend) UnmarshalText(text []byte) error {
+	ok := persistBackends.Has(string(text))
+	if !ok {
+		return fmt.Errorf("persist backend must be one of: %v", persistBackends.Values())
 	}
+	*e = PersistBackend(text)
+	return nil
 }
 
-type EpheremalBackend int
-
-const (
-	Redis EpheremalBackend = iota
-)
+type EpheremalBackend string
 
 func (e *EpheremalBackend) UnmarshalText(text []byte) error {
-	switch string(text) {
-	case "redis":
-		*e = Redis
-		return nil
-	default:
-		return errors.New("database backend must be one of [postgres]")
+	ok := ephemeralBackends.Has(string(text))
+	if !ok {
+		return fmt.Errorf("ephemeral backend must be one of: %v", ephemeralBackends.Values())
 	}
+	*e = EpheremalBackend(text)
+	return nil
 }
 
 type Database struct {
-	Backend  DatabaseBackend
+	Backend  PersistBackend
 	Postgres *PostgresConfig
 }
 
@@ -119,4 +125,25 @@ func (c *ConfigReader) ParseConfig() (*Config, error) {
 	}
 
 	return conf, nil
+}
+
+type StringSet map[string]struct{}
+
+func (set StringSet) Has(s string) bool {
+	_, ok := set[s]
+	return ok
+}
+
+func (set StringSet) Add(vals ...string) {
+	for _, v := range vals {
+		set[v] = struct{}{}
+	}
+}
+
+func (set StringSet) Values() []string {
+	ret := []string{}
+	for k := range set {
+		ret = append(ret, k)
+	}
+	return ret
 }

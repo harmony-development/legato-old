@@ -18,12 +18,16 @@ import (
 	authv1impl "github.com/harmony-development/legato/api/authv1"
 	"github.com/harmony-development/legato/build"
 	"github.com/harmony-development/legato/config"
-	"github.com/harmony-development/legato/db"
-	"github.com/harmony-development/legato/db/ephemeral/redis"
-	"github.com/harmony-development/legato/db/postgres"
+	"github.com/harmony-development/legato/db/ephemeral"
+	"github.com/harmony-development/legato/db/persist"
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
 	"github.com/harmony-development/legato/key"
 	"github.com/harmony-development/legato/logger"
+
+	// DATABASE BACKENDS
+	_ "github.com/harmony-development/legato/db/ephemeral/bigcache"
+	_ "github.com/harmony-development/legato/db/ephemeral/redis"
+	_ "github.com/harmony-development/legato/db/persist/postgres"
 )
 
 var startupMessage = `Version %s
@@ -46,43 +50,34 @@ func main() {
 	if err != nil {
 		l.WithError(err).Fatal("Failed to initialize key manager")
 	}
-
-	var dataFact db.DatabaseFactory
-
-	switch cfg.Database.Backend {
-	case config.Postgres:
-		dataFact = postgres.Factory
-	default:
-		panic("unhandled case")
+	persistFactory, err := persist.GetBackend(string(cfg.Database.Backend))
+	if err != nil {
+		l.WithError(err).Fatal("Failed to initialize persistent database")
 	}
 
-	var ephFact db.EpheremalDatabaseFactory
-
-	switch cfg.Epheremal.Backend {
-	case config.Redis:
-		ephFact = redis.Factory
-	default:
-		panic("unhandled case")
-	}
-
-	data, err := dataFact.NewDatabase(context.TODO(), l, cfg)
+	persist, err := persistFactory.NewDatabase(context.TODO(), l, cfg)
 	if err != nil {
 		l.WithError(err).Fatal("Failed to connect to database")
 	}
 
-	eph, err := ephFact.NewEpheremalDatabase(context.TODO(), l, cfg)
+	_ = persist
+
+	ephemeralFactory, err := ephemeral.GetBackend(string(cfg.Epheremal.Backend))
+	if err != nil {
+		l.WithError(err).Fatal("Failed to initialize ephemeral database")
+	}
+
+	ephemeral, err := ephemeralFactory.NewEpheremalDatabase(context.TODO(), l, cfg)
 	if err != nil {
 		l.WithError(err).Fatal("Failed to connect to epheremal database")
 	}
-
-	_ = data
 
 	s := newServer()
 	registerServices := api.Setup(l, s)
 
 	registerServices(
 		authv1.NewAuthServiceHandler(
-			authv1impl.New(keyManager, eph),
+			authv1impl.New(keyManager, ephemeral),
 		),
 	)
 

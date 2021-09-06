@@ -8,7 +8,7 @@ package postgres
 import (
 	"context"
 
-	"github.com/harmony-development/legato/db/sql/gen"
+	"github.com/harmony-development/legato/db/persist/sql/gen"
 )
 
 func (db *database) GetSession(ctx context.Context, session string) (int64, error) {

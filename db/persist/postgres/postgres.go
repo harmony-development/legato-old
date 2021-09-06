@@ -11,8 +11,8 @@ import (
 
 	"github.com/apex/log"
 	"github.com/harmony-development/legato/config"
-	"github.com/harmony-development/legato/db"
-	"github.com/harmony-development/legato/db/sql/gen"
+	"github.com/harmony-development/legato/db/persist"
+	"github.com/harmony-development/legato/db/persist/sql/gen"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
@@ -22,9 +22,13 @@ type database struct {
 
 type factory struct{}
 
-var Factory db.DatabaseFactory = factory{}
+var Factory persist.Factory = factory{}
 
-func (factory) NewDatabase(ctx context.Context, l log.Interface, cfg *config.Config) (db.Database, error) {
+func init() {
+	persist.RegisterBackend("postgres", Factory)
+}
+
+func (factory) NewDatabase(ctx context.Context, l log.Interface, cfg *config.Config) (persist.Database, error) {
 	username, password, host, port, db :=
 		cfg.Database.Postgres.Username,
 		cfg.Database.Postgres.Password,

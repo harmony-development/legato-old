@@ -9,7 +9,7 @@ import (
 
 	"github.com/apex/log"
 	"github.com/harmony-development/legato/config"
-	"github.com/harmony-development/legato/db"
+	"github.com/harmony-development/legato/db/ephemeral"
 	"github.com/harmony-development/legato/db/ephemeral/kv"
 	"github.com/philippgille/gokv/bigcache"
 	"github.com/philippgille/gokv/encoding"
@@ -17,9 +17,13 @@ import (
 
 type factory struct{}
 
-var Factory db.EpheremalDatabaseFactory = factory{}
+var Factory ephemeral.Factory = factory{}
 
-func (factory) NewEpheremalDatabase(ctx context.Context, l log.Interface, cfg *config.Config) (db.EpheremalDatabase, error) {
+func init() {
+	ephemeral.RegisterBackend("bigcache", Factory)
+}
+
+func (factory) NewEpheremalDatabase(ctx context.Context, l log.Interface, cfg *config.Config) (ephemeral.Database, error) {
 	cache, err := bigcache.NewStore(bigcache.Options{
 		Codec: encoding.Gob,
 	})

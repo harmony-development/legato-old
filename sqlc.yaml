@@ -4,8 +4,8 @@
 
 version: 1
 packages:
-  - path: "db/sql/gen"
+  - path: "db/persist/sql/gen"
     engine: "postgresql"
     sql_package: "pgx/v4"
-    schema: "./db/sql/schema"
-    queries: "./db/sql/query"
+    schema: "./db/persist/sql/schema"
+    queries: "./db/persist/sql/query"
