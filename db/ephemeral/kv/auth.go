@@ -7,13 +7,17 @@ package kv
 
 import (
 	"context"
+	"errors"
 )
 
 func (db *database) GetCurrentStep(ctx context.Context, authID string) (string, error) {
 	var step string
-	_, err := db.store.Get(authID, &step)
+	ok, err := db.store.Get(authID, &step)
 	if err != nil {
 		return "", err
+	}
+	if !ok {
+		return "", errors.New("key not found")
 	}
 	return step, nil
 }

@@ -7,9 +7,11 @@ package api
 import harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 
 const (
-	InternalServerError = "h.internal-server-error"
+	ErrorBadAuthID = "h.bad-auth-id"
+	ErrorBadChoice = "h.bad-auth-choice"
 
-	Other = "h.other"
+	ErrorInternalServerError = "h.internal-server-error"
+	ErrorOther               = "h.other"
 )
 
 type Error harmonytypesv1.Error
@@ -26,7 +28,7 @@ func NewError(code string) error {
 
 func NewOther(msg string) error {
 	return &Error{
-		Identifier:   Other,
+		Identifier:   ErrorOther,
 		HumanMessage: msg,
 	}
 }

@@ -19,6 +19,7 @@ type FormField struct {
 func NewFormStep(fields []FormField, id string, canGoBack bool) *FormStep {
 	return &FormStep{
 		&BaseStep{
+			StepTypeForm,
 			id,
 			canGoBack,
 		},

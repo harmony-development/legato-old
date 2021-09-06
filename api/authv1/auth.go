@@ -7,6 +7,7 @@ package authv1impl
 import (
 	"context"
 
+	"github.com/harmony-development/legato/api"
 	"github.com/harmony-development/legato/db/ephemeral"
 	dynamicauth "github.com/harmony-development/legato/dynamic_auth"
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
@@ -20,7 +21,7 @@ type AuthV1 struct {
 	auth       ephemeral.Database
 }
 
-var rawSteps = toRawSteps(
+var steps = toStepMap(
 	initialStep,
 	loginStep,
 	registerStep,
@@ -28,10 +29,10 @@ var rawSteps = toRawSteps(
 	resetPasswordStep,
 )
 
-func toRawSteps(steps ...dynamicauth.Step) map[string]*authv1.AuthStep {
-	ret := map[string]*authv1.AuthStep{}
+func toStepMap(steps ...dynamicauth.Step) map[string]dynamicauth.Step {
+	ret := map[string]dynamicauth.Step{}
 	for _, step := range steps {
-		ret[step.ID()] = step.ToProtoV1()
+		ret[step.ID()] = step
 	}
 	return ret
 }
@@ -62,11 +63,32 @@ func (v1 *AuthV1) BeginAuth(c context.Context, r *authv1.BeginAuthRequest) (*aut
 }
 
 func (v1 *AuthV1) NextStep(c context.Context, r *authv1.NextStepRequest) (*authv1.NextStepResponse, error) {
-	currentStep, err := v1.auth.GetCurrentStep(c, r.AuthId)
+	currentStepID, err := v1.auth.GetCurrentStep(c, r.AuthId)
 	if err != nil {
-		return nil, err
+		return nil, api.NewError(api.ErrorBadAuthID)
 	}
+
+	step := steps[currentStepID]
+	if choiceStep, ok := step.(*dynamicauth.ChoiceStep); ok {
+		res, err := v1.choiceHandler(choiceStep, r)
+		return &authv1.NextStepResponse{
+			Step: res,
+		}, err
+	}
+
 	return &authv1.NextStepResponse{
-		Step: rawSteps[currentStep],
+		Step: steps[currentStepID].ToProtoV1(),
 	}, nil
+}
+
+func (v1 *AuthV1) choiceHandler(choiceStep *dynamicauth.ChoiceStep, r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
+	c := r.GetChoice()
+	if c == nil {
+		return choiceStep.ToProtoV1(), nil
+	}
+	if !choiceStep.HasOption(c.Choice) {
+		return nil, api.NewError(api.ErrorBadChoice)
+	}
+	nextStep := steps[c.Choice]
+	return nextStep.ToProtoV1(), nil
 }

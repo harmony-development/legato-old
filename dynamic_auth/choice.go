@@ -8,16 +8,24 @@ import authv1 "github.com/harmony-development/legato/gen/auth/v1"
 
 type ChoiceStep struct {
 	*BaseStep
-	Options []string
+	Options   []string
+	optionMap map[string]struct{}
 }
 
-func NewChoiceStep(choices []string, id string, canGoBack bool) *ChoiceStep {
+func NewChoiceStep(options []string, id string, canGoBack bool) *ChoiceStep {
+	optionMap := map[string]struct{}{}
+	for _, o := range options {
+		optionMap[o] = struct{}{}
+	}
+
 	return &ChoiceStep{
 		&BaseStep{
+			StepTypeChoice,
 			id,
 			canGoBack,
 		},
-		choices,
+		options,
+		optionMap,
 	}
 }
 
@@ -31,4 +39,9 @@ func (c *ChoiceStep) ToProtoV1() *authv1.AuthStep {
 			},
 		},
 	}
+}
+
+func (c *ChoiceStep) HasOption(option string) bool {
+	_, ok := c.optionMap[option]
+	return ok
 }

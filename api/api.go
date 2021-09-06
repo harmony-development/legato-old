@@ -68,7 +68,7 @@ func FiberErrorHandler(l log.Interface, cfg *config.Config) fiber.ErrorHandler {
 			return c.Status(http.StatusBadRequest).Send(data)
 		default:
 			err := &harmonytypesv1.Error{
-				Identifier: InternalServerError,
+				Identifier: ErrorInternalServerError,
 			}
 			if cfg.Debug.RespondWithErrors {
 				err.HumanMessage = v.Error()
