@@ -15,6 +15,7 @@ var (
 func init() {
 	persistBackends.Add(
 		"postgres",
+		"sqlite",
 	)
 	ephemeralBackends.Add(
 		"bigcache",
