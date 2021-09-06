@@ -9,6 +9,7 @@ import "context"
 
 type UserInformation struct {
 	ID       uint64
+	Email    string
 	Password []byte
 }
 

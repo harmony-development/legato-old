@@ -38,6 +38,7 @@ type Debug struct {
 type Database struct {
 	Backend  PersistBackend
 	Postgres *PostgresConfig
+	SQLite   *SQLiteConfig
 }
 
 type Epheremal struct {
@@ -56,6 +57,10 @@ type PostgresConfig struct {
 	Host     string
 	Port     int
 	DB       string
+}
+
+type SQLiteConfig struct {
+	File string
 }
 
 type ConfigReader struct {

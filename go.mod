@@ -22,6 +22,7 @@ require (
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/go-redis/redis v6.15.9+incompatible // indirect
 	github.com/kr/pretty v0.2.1 // indirect
+	github.com/mattn/go-sqlite3 v1.14.8 // indirect
 	github.com/onsi/gomega v1.15.0 // indirect
 	github.com/philippgille/gokv v0.6.0
 	github.com/philippgille/gokv/bigcache v0.6.0
@@ -35,4 +36,6 @@ require (
 	golang.org/x/sys v0.0.0-20210903071746-97244b99971b // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+	gorm.io/driver/sqlite v1.1.4 // indirect
+	gorm.io/gorm v1.21.14 // indirect
 )
