@@ -18,5 +18,5 @@ epheremal:
     hosts:
       - 127.0.0.1
     password: ""
-private_key_path: harmony-key.pub
-public_key_path: harmony-key.pem
+private-key-path: harmony-key.pub
+public-key-path: harmony-key.pem
