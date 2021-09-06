@@ -7,9 +7,29 @@ package postgres
 import (
 	"context"
 
-	"github.com/harmony-development/legato/db/persist/sql/gen"
+	"github.com/harmony-development/legato/db/persist"
 )
 
-func (db *database) GetUserByEmail(ctx context.Context, email string) (gen.GetUserByEmailRow, error) {
-	return db.queries.GetUserByEmail(ctx, email)
+type users struct {
+	*database
+}
+
+func (db *users) Add(ctx context.Context, persist persist.UserInformation) error {
+	panic("unimplemented")
+}
+
+func (db *users) Get(ctx context.Context, id uint64) (persist.UserInformation, error) {
+	panic("unimplemented")
+}
+
+func (db *users) GetByEmail(ctx context.Context, email string) (persist.UserInformation, error) {
+	it, err := db.queries.GetUserByEmail(ctx, email)
+	if err != nil {
+		return persist.UserInformation{}, err
+	}
+
+	return persist.UserInformation{
+		ID:       uint64(it.Userid),
+		Password: it.Passwd,
+	}, nil
 }

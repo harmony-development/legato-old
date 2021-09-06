@@ -11,13 +11,22 @@ import (
 	"github.com/harmony-development/legato/db/persist/sql/gen"
 )
 
-func (db *database) GetSession(ctx context.Context, session string) (int64, error) {
-	return db.queries.GetSession(ctx, session)
+type sessions struct {
+	*database
 }
 
-func (db *database) AddSession(ctx context.Context, session string, userID int64) error {
+func (db *sessions) Get(ctx context.Context, session string) (uint64, error) {
+	val, err := db.queries.GetSession(ctx, session)
+	if err != nil {
+		return 0, err
+	}
+
+	return uint64(val), nil
+}
+
+func (db *sessions) Add(ctx context.Context, session string, userID uint64) error {
 	return db.queries.AddSession(ctx, gen.AddSessionParams{
-		Userid:    userID,
+		Userid:    int64(userID),
 		Sessionid: session,
 	})
 }

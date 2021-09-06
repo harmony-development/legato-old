@@ -104,11 +104,11 @@ func (v1 *AuthV1) loginFormHandler(c context.Context, formStep *dynamicauth.Form
 	email := f.Fields[0].GetString_()
 	provided := f.Fields[1].GetBytes()
 
-	user, err := v1.persist.GetUserByEmail(c, email)
+	user, err := v1.persist.Users().GetByEmail(c, email)
 	if err != nil {
 		return nil, api.NewError(api.ErrorBadCredentials)
 	}
-	if err := bcrypt.CompareHashAndPassword(user.Passwd, provided); err != nil {
+	if err := bcrypt.CompareHashAndPassword(user.Password, provided); err != nil {
 		// intentionally generic error to give less information to the user
 		return nil, api.NewError(api.ErrorBadCredentials)
 	}
@@ -117,7 +117,7 @@ func (v1 *AuthV1) loginFormHandler(c context.Context, formStep *dynamicauth.Form
 
 	sessionID := randstr.Hex(16)
 
-	if err := v1.persist.AddSession(c, sessionID, user.Userid); err != nil {
+	if err := v1.persist.Sessions().Add(c, sessionID, user.ID); err != nil {
 		return nil, err
 	}
 
@@ -128,7 +128,7 @@ func (v1 *AuthV1) loginFormHandler(c context.Context, formStep *dynamicauth.Form
 	return &authv1.AuthStep{
 		Step: &authv1.AuthStep_Session{
 			Session: &authv1.Session{
-				UserId:       uint64(user.Userid),
+				UserId:       user.ID,
 				SessionToken: sessionID,
 			},
 		},

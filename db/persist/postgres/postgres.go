@@ -18,6 +18,17 @@ import (
 
 type database struct {
 	queries *gen.Queries
+
+	s *sessions
+	u *users
+}
+
+func (d *database) Sessions() persist.Sessions {
+	return d.s
+}
+
+func (d *database) Users() persist.Users {
+	return d.u
 }
 
 type factory struct{}
