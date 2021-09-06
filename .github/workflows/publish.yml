@@ -1,0 +1,42 @@
+# SPDX-FileCopyrightText: None
+#
+# SPDX-License-Identifier: CC0-1.0
+
+name: Publish Legato
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build Legato
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        sudo apt update -yy
+        sudo apt install -yy --no-install-recommends upx
+    - name: Download Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: '^1.16.6'
+    - name: Build Legato
+      run: |
+        go build -ldflags="-s -w -X 'github.com/harmony-development/legato/build.GitCommit=$(git rev-list -1 HEAD)'"
+    - name: Pack with UPX
+      run: |
+        upx legato
+    - name: Upload Release
+      if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+          wget -q https://github.com/TheAssassin/pyuploadtool/releases/download/continuous/pyuploadtool-x86_64.AppImage
+          chmod +x pyuploadtool-x86_64.AppImage
+          ./pyuploadtool-x86_64.AppImage legato
