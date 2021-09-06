@@ -11,7 +11,6 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/apex/log"
 	"github.com/fsnotify/fsnotify"
 	"gopkg.in/yaml.v3"
 )
@@ -60,20 +59,17 @@ type PostgresConfig struct {
 }
 
 type ConfigReader struct {
-	l          log.Interface
 	ConfigName string
 }
 
-func New(l log.Interface, name string) *ConfigReader {
+func New(name string) *ConfigReader {
 	return &ConfigReader{
-		l:          l,
 		ConfigName: name + ".yaml",
 	}
 }
 
 func (c *ConfigReader) ParseConfig() (*Config, error) {
 	conf := &Config{}
-	c.l.Info("Reading config...")
 
 	dat, err := ioutil.ReadFile(c.ConfigName)
 	if err != nil {

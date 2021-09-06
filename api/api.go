@@ -12,7 +12,6 @@ import (
 	"github.com/harmony-development/hrpc/server"
 	"github.com/harmony-development/legato/config"
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
-	"google.golang.org/protobuf/proto"
 )
 
 // FiberRPCHandler converts a RPC handler to a Fiber handler
@@ -54,13 +53,15 @@ func FiberErrorHandler(l log.Interface, cfg *config.Config) fiber.ErrorHandler {
 			}).Error("error in http handler")
 		}
 
+		contentType := string(c.Request().Header.Peek("Content-Type"))
+
 		switch v := e.(type) {
 		case *Error:
-			data, err := proto.Marshal(&harmonytypesv1.Error{
+			data, err := server.MarshalHRPC(&harmonytypesv1.Error{
 				Identifier:   v.Identifier,
 				HumanMessage: v.HumanMessage,
 				MoreDetails:  v.MoreDetails,
-			})
+			}, contentType)
 			if err != nil {
 				return err
 			}
@@ -72,7 +73,7 @@ func FiberErrorHandler(l log.Interface, cfg *config.Config) fiber.ErrorHandler {
 			if cfg.Debug.RespondWithErrors {
 				err.HumanMessage = v.Error()
 			}
-			data, marshalErr := proto.Marshal(err)
+			data, marshalErr := server.MarshalHRPC(err, contentType)
 			if marshalErr != nil {
 				return marshalErr
 			}

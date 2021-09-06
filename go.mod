@@ -11,7 +11,7 @@ require (
 	google.golang.org/protobuf v1.27.1
 )
 
-require github.com/harmony-development/hrpc v0.0.0-20210905215522-63260ec7ae67
+require github.com/harmony-development/hrpc v0.0.0-20210906090146-771889b5b660
 
 require (
 	github.com/jackc/pgconn v1.10.0
@@ -19,10 +19,8 @@ require (
 )
 
 require (
-	github.com/andybalholm/brotli v1.0.3 // indirect
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/go-redis/redis v6.15.9+incompatible // indirect
-	github.com/klauspost/compress v1.13.5 // indirect
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/onsi/gomega v1.15.0 // indirect
 	github.com/philippgille/gokv v0.6.0
@@ -30,8 +28,11 @@ require (
 	github.com/philippgille/gokv/encoding v0.6.0
 	github.com/philippgille/gokv/redis v0.6.0
 	github.com/philippgille/gokv/util v0.6.0 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/thanhpk/randstr v1.0.4
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
+	golang.org/x/net v0.0.0-20210825183410-e898025ed96a // indirect
 	golang.org/x/sys v0.0.0-20210903071746-97244b99971b // indirect
+	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )

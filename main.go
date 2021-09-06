@@ -42,7 +42,8 @@ var startupMessage = `Version %s
 func main() {
 	l := logger.New(os.Stdin)
 
-	configReader := config.New(l, "configuration")
+	l.Info("Reading config...")
+	configReader := config.New("configuration")
 	cfg, err := configReader.ParseConfig()
 	if err != nil {
 		l.WithError(err).Fatal("Failed to read config")
