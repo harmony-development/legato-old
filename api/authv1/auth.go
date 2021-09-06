@@ -104,11 +104,11 @@ func (v1 *AuthV1) loginFormHandler(c context.Context, formStep *dynamicauth.Form
 	email := f.Fields[0].GetString_()
 	provided := f.Fields[1].GetBytes()
 
-	user, err := v1.persist.Users().GetByEmail(c, email)
+	user, local, err := v1.persist.Users().GetLocalByEmail(c, email)
 	if err != nil {
 		return nil, api.NewError(api.ErrorBadCredentials)
 	}
-	if err := bcrypt.CompareHashAndPassword(user.Password, provided); err != nil {
+	if err := bcrypt.CompareHashAndPassword(local.Password, provided); err != nil {
 		// intentionally generic error to give less information to the user
 		return nil, api.NewError(api.ErrorBadCredentials)
 	}
