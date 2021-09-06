@@ -72,7 +72,7 @@ func main() {
 		l.WithError(err).Fatal("Failed to connect to epheremal database")
 	}
 
-	s := newServer()
+	s := newServer(l, cfg)
 	registerServices := api.Setup(l, s)
 
 	registerServices(
@@ -85,9 +85,10 @@ func main() {
 	s.Listen(cfg.Address + ":" + strconv.Itoa(cfg.Port))
 }
 
-func newServer() *fiber.App {
+func newServer(l log.Interface, cfg *config.Config) *fiber.App {
 	s := fiber.New(fiber.Config{
 		DisableStartupMessage: true,
+		ErrorHandler:          api.FiberErrorHandler(l, cfg),
 	})
 
 	s.Use(fiberLogger.New(fiberLogger.Config{

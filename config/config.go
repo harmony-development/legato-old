@@ -18,22 +18,6 @@ import (
 //go:embed default.yml
 var defaultConfig []byte
 
-// TODO: get this to use the actual registered backends list
-var (
-	persistBackends   = StringSet{}
-	ephemeralBackends = StringSet{}
-)
-
-func init() {
-	persistBackends.Add(
-		"postgres",
-	)
-	ephemeralBackends.Add(
-		"bigcache",
-		"redis",
-	)
-}
-
 type Config struct {
 	// The address to listen on for HTTP requests.
 	Address string
@@ -41,30 +25,14 @@ type Config struct {
 	Port           int
 	PublicKeyPath  string `yaml:"public-key-path"`
 	PrivateKeyPath string `yaml:"private-key-path"`
+	Debug          Debug
 	Database       Database
 	Epheremal      Epheremal
 }
 
-type PersistBackend string
-
-func (e *PersistBackend) UnmarshalText(text []byte) error {
-	ok := persistBackends.Has(string(text))
-	if !ok {
-		return fmt.Errorf("persist backend must be one of: %v", persistBackends.Values())
-	}
-	*e = PersistBackend(text)
-	return nil
-}
-
-type EpheremalBackend string
-
-func (e *EpheremalBackend) UnmarshalText(text []byte) error {
-	ok := ephemeralBackends.Has(string(text))
-	if !ok {
-		return fmt.Errorf("ephemeral backend must be one of: %v", ephemeralBackends.Values())
-	}
-	*e = EpheremalBackend(text)
-	return nil
+type Debug struct {
+	RespondWithErrors bool `yaml:"respond-with-errors"`
+	LogErrors         bool `yaml:"log-errors"`
 }
 
 type Database struct {
