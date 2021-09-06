@@ -9,31 +9,24 @@ import (
 	"context"
 
 	"github.com/apex/log"
-	"github.com/go-redis/redis/v8"
 	"github.com/harmony-development/legato/config"
 	"github.com/harmony-development/legato/db"
+	"github.com/harmony-development/legato/db/ephemeral/kv"
+	"github.com/philippgille/gokv/redis"
 )
 
-type database struct {
-	rdb *redis.ClusterClient
-}
-
-type factory struct {
-}
+type factory struct{}
 
 var Factory db.EpheremalDatabaseFactory = factory{}
 
 func (factory) NewEpheremalDatabase(ctx context.Context, l log.Interface, cfg *config.Config) (db.EpheremalDatabase, error) {
-	rdb := redis.NewClusterClient(&redis.ClusterOptions{
-		Addrs:    cfg.Epheremal.Redis.Hosts,
+	rdb, err := redis.NewClient(redis.Options{
+		Address:  cfg.Epheremal.Redis.Hosts[0],
 		Password: cfg.Epheremal.Redis.Password,
 	})
-
-	if _, err := rdb.Ping(ctx).Result(); err != nil {
+	if err != nil {
 		return nil, err
 	}
 
-	return &database{
-		rdb: rdb,
-	}, nil
+	return kv.NewKVBackend(rdb), nil
 }

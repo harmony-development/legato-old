@@ -3,21 +3,25 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-package redis
+package kv
 
 import (
 	"context"
-	"time"
 )
 
 func (db *database) GetCurrentStep(ctx context.Context, authID string) (string, error) {
-	return db.rdb.Get(ctx, authID).Result()
+	var step string
+	_, err := db.store.Get(authID, &step)
+	if err != nil {
+		return "", err
+	}
+	return step, nil
 }
 
 func (db *database) SetStep(ctx context.Context, authID string, step string) error {
-	return db.rdb.Set(ctx, authID, step, 10*time.Minute).Err()
+	return db.store.Set(authID, step)
 }
 
 func (db *database) DeleteSession(ctx context.Context, authID string) error {
-	return db.rdb.Del(ctx, authID).Err()
+	return db.store.Delete(authID)
 }
