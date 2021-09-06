@@ -5,12 +5,14 @@
 package config
 
 import (
-	"bytes"
 	_ "embed"
 	"errors"
+	"fmt"
+	"io/ioutil"
+	"os"
 
 	"github.com/apex/log"
-	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
 )
 
 //go:embed default.yml
@@ -21,10 +23,52 @@ type Config struct {
 	Address string
 	// The port to listen on for HTTP requests.
 	Port           int
-	PublicKeyPath  string `mapstructure:"public_key_path"`
-	PrivateKeyPath string `mapstructure:"private_key_path"`
-	Postgres       *PostgresConfig
-	Redis          *RedisConfig
+	PublicKeyPath  string `yaml:"public-key-path"`
+	PrivateKeyPath string `yaml:"private-key-path"`
+	Database       Database
+	Epheremal      Epheremal
+}
+
+type DatabaseBackend int
+
+const (
+	Postgres DatabaseBackend = iota
+)
+
+func (e *DatabaseBackend) UnmarshalText(text []byte) error {
+	switch string(text) {
+	case "postgres":
+		*e = Postgres
+		return nil
+	default:
+		return errors.New("database backend must be one of [postgres]")
+	}
+}
+
+type EpheremalBackend int
+
+const (
+	Redis EpheremalBackend = iota
+)
+
+func (e *EpheremalBackend) UnmarshalText(text []byte) error {
+	switch string(text) {
+	case "redis":
+		*e = Redis
+		return nil
+	default:
+		return errors.New("database backend must be one of [postgres]")
+	}
+}
+
+type Database struct {
+	Backend  DatabaseBackend
+	Postgres *PostgresConfig
+}
+
+type Epheremal struct {
+	Backend EpheremalBackend
+	Redis   *RedisConfig
 }
 
 type RedisConfig struct {
@@ -46,35 +90,33 @@ type ConfigReader struct {
 }
 
 func New(l log.Interface, name string) *ConfigReader {
-	viper.AddConfigPath(".")
-	viper.SetConfigName(name)
-	viper.SetConfigType("yaml")
-
 	return &ConfigReader{
 		l:          l,
-		ConfigName: name,
+		ConfigName: name + ".yaml",
 	}
 }
 
 func (c *ConfigReader) ParseConfig() (*Config, error) {
 	conf := &Config{}
 	c.l.Info("Reading config...")
-	if err := viper.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			c.l.Warn("Config does not exist, creating...")
-			if err := viper.ReadConfig(bytes.NewReader(defaultConfig)); err != nil {
-				return nil, err
+
+	dat, err := ioutil.ReadFile(c.ConfigName)
+	if err != nil {
+		if os.IsNotExist(err) {
+			err := ioutil.WriteFile(c.ConfigName, defaultConfig, 0o660)
+			if err != nil {
+				return nil, fmt.Errorf("failed to write default config: %+w", err)
 			}
-			if err := viper.SafeWriteConfig(); err != nil {
-				return nil, err
-			}
-			return nil, errors.New("Default configuration has been created, please edit it")
-		} else {
-			return nil, err
+
+			return nil, errors.New("default configuration has been created, please edit it")
 		}
+
+		return nil, fmt.Errorf("failed to read config file: %+w", err)
 	}
-	if err := viper.Unmarshal(conf); err != nil {
-		return nil, err
+	err = yaml.Unmarshal(dat, conf)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse config file: %+w", err)
 	}
+
 	return conf, nil
 }

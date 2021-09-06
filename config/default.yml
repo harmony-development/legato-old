@@ -4,15 +4,19 @@
 
 address: 0.0.0.0
 port: 2289
-postgres:
-  db: harmony
-  host: 127.0.0.1
-  password: ""
-  port: "5432"
-  username: harmony
-redis:
-  hosts:
-    - 127.0.0.1
-  password: ""
+database:
+  backend: postgres
+  postgres:
+    db: harmony
+    host: 127.0.0.1
+    password: ""
+    port: 5432
+    username: harmony
+epheremal:
+  backend: redis
+  redis:
+    hosts:
+      - 127.0.0.1
+    password: ""
 private_key_path: harmony-key.pub
 public_key_path: harmony-key.pem

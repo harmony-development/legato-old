@@ -3,21 +3,21 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-package harmonydb
+package redis
 
 import (
 	"context"
 	"time"
 )
 
-func (db *HarmonyAuthDB) GetCurrentStep(ctx context.Context, authID string) (string, error) {
+func (db *database) GetCurrentStep(ctx context.Context, authID string) (string, error) {
 	return db.rdb.Get(ctx, authID).Result()
 }
 
-func (db *HarmonyAuthDB) SetStep(ctx context.Context, authID string, step string) error {
+func (db *database) SetStep(ctx context.Context, authID string, step string) error {
 	return db.rdb.Set(ctx, authID, step, 10*time.Minute).Err()
 }
 
-func (db *HarmonyAuthDB) DeleteSession(ctx context.Context, authID string) error {
+func (db *database) DeleteSession(ctx context.Context, authID string) error {
 	return db.rdb.Del(ctx, authID).Err()
 }

@@ -8,7 +8,6 @@ require (
 	github.com/fatih/color v1.7.0
 	github.com/gofiber/fiber/v2 v2.18.0
 	github.com/mattn/go-isatty v0.0.13 // indirect
-	github.com/spf13/viper v1.8.1
 	google.golang.org/protobuf v1.27.1
 )
 
@@ -24,4 +23,5 @@ require (
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/thanhpk/randstr v1.0.4
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )

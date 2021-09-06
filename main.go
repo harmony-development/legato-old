@@ -5,6 +5,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strconv"
@@ -17,7 +18,9 @@ import (
 	authv1impl "github.com/harmony-development/legato/api/authv1"
 	"github.com/harmony-development/legato/build"
 	"github.com/harmony-development/legato/config"
-	"github.com/harmony-development/legato/db/harmonydb"
+	"github.com/harmony-development/legato/db"
+	"github.com/harmony-development/legato/db/postgres"
+	"github.com/harmony-development/legato/db/redis"
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
 	"github.com/harmony-development/legato/key"
 	"github.com/harmony-development/legato/logger"
@@ -44,17 +47,42 @@ func main() {
 		l.WithError(err).Fatal("Failed to initialize key manager")
 	}
 
-	db, err := harmonydb.New(l, cfg)
+	var dataFact db.DatabaseFactory
+
+	switch cfg.Database.Backend {
+	case config.Postgres:
+		dataFact = postgres.Factory
+	default:
+		panic("unhandled case")
+	}
+
+	var ephFact db.EpheremalDatabaseFactory
+
+	switch cfg.Epheremal.Backend {
+	case config.Redis:
+		ephFact = redis.Factory
+	default:
+		panic("unhandled case")
+	}
+
+	data, err := dataFact.NewDatabase(context.TODO(), l, cfg)
 	if err != nil {
 		l.WithError(err).Fatal("Failed to connect to database")
 	}
+
+	eph, err := ephFact.NewEpheremalDatabase(context.TODO(), l, cfg)
+	if err != nil {
+		l.WithError(err).Fatal("Failed to connect to epheremal database")
+	}
+
+	_ = data
 
 	s := newServer()
 	registerServices := api.Setup(l, s)
 
 	registerServices(
 		authv1.NewAuthServiceHandler(
-			authv1impl.New(keyManager, db),
+			authv1impl.New(keyManager, eph),
 		),
 	)
 
