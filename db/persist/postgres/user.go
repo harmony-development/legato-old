@@ -14,22 +14,14 @@ type users struct {
 	*database
 }
 
-func (db *users) Add(ctx context.Context, persist persist.UserInformation) error {
+func (db *users) Add(ctx context.Context, pers persist.UserInformation, ext persist.ExtendedUserInformation) error {
 	panic("unimplemented")
 }
 
-func (db *users) Get(ctx context.Context, id uint64) (persist.UserInformation, error) {
+func (db *users) Get(ctx context.Context, id uint64) (ui persist.UserInformation, eui persist.ExtendedUserInformation, err error) {
 	panic("unimplemented")
 }
 
-func (db *users) GetByEmail(ctx context.Context, email string) (persist.UserInformation, error) {
-	it, err := db.queries.GetUserByEmail(ctx, email)
-	if err != nil {
-		return persist.UserInformation{}, err
-	}
-
-	return persist.UserInformation{
-		ID:       uint64(it.Userid),
-		Password: it.Passwd,
-	}, nil
+func (db *users) GetLocalByEmail(ctx context.Context, email string) (persist.UserInformation, persist.LocalUserInformation, error) {
+	panic("unimplemented")
 }
