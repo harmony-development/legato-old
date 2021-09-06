@@ -8,14 +8,28 @@ package persist
 import "context"
 
 type UserInformation struct {
-	ID       uint64
+	ID uint64
+}
+
+type ExtendedUserInformation interface{ IsUserInfo() }
+type isUserInfo struct{}
+
+func (isUserInfo) IsUserInfo() {}
+
+type LocalUserInformation struct {
 	Email    string
 	Password []byte
+
+	isUserInfo
+}
+
+type ForeignUserInformation struct {
+	isUserInfo
 }
 
 type Users interface {
-	Add(ctx context.Context, user UserInformation) error
+	Add(ctx context.Context, user UserInformation, info ExtendedUserInformation) error
 
-	Get(ctx context.Context, id uint64) (UserInformation, error)
-	GetByEmail(ctx context.Context, email string) (UserInformation, error)
+	Get(ctx context.Context, id uint64) (UserInformation, ExtendedUserInformation, error)
+	GetLocalByEmail(ctx context.Context, email string) (UserInformation, LocalUserInformation, error)
 }
