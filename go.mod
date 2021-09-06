@@ -20,6 +20,7 @@ require (
 
 require (
 	github.com/andybalholm/brotli v1.0.3 // indirect
+	github.com/fsnotify/fsnotify v1.5.1
 	github.com/go-redis/redis v6.15.9+incompatible // indirect
 	github.com/klauspost/compress v1.13.5 // indirect
 	github.com/kr/pretty v0.2.1 // indirect

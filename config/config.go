@@ -12,6 +12,7 @@ import (
 	"os"
 
 	"github.com/apex/log"
+	"github.com/fsnotify/fsnotify"
 	"gopkg.in/yaml.v3"
 )
 
@@ -95,23 +96,26 @@ func (c *ConfigReader) ParseConfig() (*Config, error) {
 	return conf, nil
 }
 
-type StringSet map[string]struct{}
-
-func (set StringSet) Has(s string) bool {
-	_, ok := set[s]
-	return ok
-}
-
-func (set StringSet) Add(vals ...string) {
-	for _, v := range vals {
-		set[v] = struct{}{}
+func (c *ConfigReader) WatchConfig(onChange func(fsnotify.Event), onError func(error)) error {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		return err
 	}
-}
 
-func (set StringSet) Values() []string {
-	ret := []string{}
-	for k := range set {
-		ret = append(ret, k)
+	go func() {
+		for {
+			select {
+			case event := <-watcher.Events:
+				onChange(event)
+			case err := <-watcher.Errors:
+				onError(err)
+			}
+		}
+	}()
+
+	if err := watcher.Add(c.ConfigName); err != nil {
+		return err
 	}
-	return ret
+
+	return nil
 }

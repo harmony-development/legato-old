@@ -12,6 +12,7 @@ import (
 
 	"github.com/apex/log"
 	"github.com/fatih/color"
+	"github.com/fsnotify/fsnotify"
 	"github.com/gofiber/fiber/v2"
 	fiberLogger "github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/harmony-development/legato/api"
@@ -41,10 +42,21 @@ var startupMessage = `Version %s
 func main() {
 	l := logger.New(os.Stdin)
 
-	cfg, err := config.New(l, "configuration").ParseConfig()
+	configReader := config.New(l, "configuration")
+	cfg, err := configReader.ParseConfig()
 	if err != nil {
 		l.WithError(err).Fatal("Failed to read config")
 	}
+
+	configReader.WatchConfig(func(ev fsnotify.Event) {
+		l.Info("Config change detected, reloading...")
+		newConfig, err := configReader.ParseConfig()
+		if err != nil {
+			l.WithError(err).Error("Failed to reload config")
+			return
+		}
+		*cfg = *newConfig
+	}, func(error) {})
 
 	keyManager, err := tryMakeKeyManager(cfg.PrivateKeyPath, cfg.PublicKeyPath)
 	if err != nil {
