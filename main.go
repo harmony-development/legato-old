@@ -29,6 +29,7 @@ import (
 	_ "github.com/harmony-development/legato/db/ephemeral/bigcache"
 	_ "github.com/harmony-development/legato/db/ephemeral/redis"
 	_ "github.com/harmony-development/legato/db/persist/postgres"
+	_ "github.com/harmony-development/legato/db/persist/sqlite"
 )
 
 var startupMessage = `Version %s
