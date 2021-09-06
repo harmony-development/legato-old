@@ -4,7 +4,11 @@
 
 package dynamicauth
 
-import authv1 "github.com/harmony-development/legato/gen/auth/v1"
+import (
+	"errors"
+
+	authv1 "github.com/harmony-development/legato/gen/auth/v1"
+)
 
 type FormStep struct {
 	*BaseStep
@@ -45,4 +49,11 @@ func (s *FormStep) ToProtoV1() *authv1.AuthStep {
 			},
 		},
 	}
+}
+
+func (s *FormStep) ValidateFormV1(form *authv1.NextStepRequest_Form) error {
+	if len(form.Fields) < len(s.Fields) {
+		return errors.New("invalid form")
+	}
+	return nil
 }

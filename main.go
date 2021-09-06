@@ -73,8 +73,6 @@ func main() {
 		l.WithError(err).Fatal("Failed to connect to database")
 	}
 
-	_ = persist
-
 	ephemeralFactory, err := ephemeral.GetBackend(string(cfg.Epheremal.Backend))
 	if err != nil {
 		l.WithError(err).Fatal("Failed to initialize ephemeral database")
@@ -90,7 +88,7 @@ func main() {
 
 	registerServices(
 		authv1.NewAuthServiceHandler(
-			authv1impl.New(keyManager, ephemeral),
+			authv1impl.New(keyManager, ephemeral, persist),
 		),
 	)
 

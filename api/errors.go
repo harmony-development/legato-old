@@ -7,8 +7,10 @@ package api
 import harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 
 const (
-	ErrorBadAuthID = "h.bad-auth-id"
-	ErrorBadChoice = "h.bad-auth-choice"
+	ErrorBadAuthID      = "h.bad-auth-id"
+	ErrorBadChoice      = "h.bad-auth-choice"
+	ErrorBadFormData    = "h.bad-form-data"
+	ErrorBadCredentials = "h.bad-credentials"
 
 	ErrorInternalServerError = "h.internal-server-error"
 	ErrorOther               = "h.other"

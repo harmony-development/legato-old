@@ -11,16 +11,22 @@ import (
 
 	"github.com/apex/log"
 	"github.com/harmony-development/legato/config"
+	"github.com/harmony-development/legato/db/persist/sql/gen"
 )
 
 type sessionDB interface {
 	GetSession(ctx context.Context, session string) (int64, error)
-	SetSession(ctx context.Context, session string, userID int64) error
+	AddSession(ctx context.Context, session string, userID int64) error
+}
+
+type userDB interface {
+	GetUserByEmail(ctx context.Context, email string) (gen.GetUserByEmailRow, error)
 }
 
 // Database handles access to long-lived data
 type Database interface {
 	sessionDB
+	userDB
 }
 
 type Factory interface {

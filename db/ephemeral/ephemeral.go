@@ -16,7 +16,7 @@ import (
 type authDB interface {
 	GetCurrentStep(ctx context.Context, authID string) (string, error)
 	SetStep(ctx context.Context, authID string, step string) error
-	DeleteSession(ctx context.Context, authID string) error
+	DeleteAuthID(ctx context.Context, authID string) error
 }
 
 // Database handles access to short-lived data and pubsub

@@ -12,3 +12,9 @@ type Authsession struct {
 	Sessionid string
 	Userid    int64
 }
+
+type User struct {
+	Userid int64
+	Email  string
+	Passwd []byte
+}

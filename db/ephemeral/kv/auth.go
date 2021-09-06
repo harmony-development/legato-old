@@ -26,6 +26,6 @@ func (db *database) SetStep(ctx context.Context, authID string, step string) err
 	return db.store.Set(authID, step)
 }
 
-func (db *database) DeleteSession(ctx context.Context, authID string) error {
+func (db *database) DeleteAuthID(ctx context.Context, authID string) error {
 	return db.store.Delete(authID)
 }

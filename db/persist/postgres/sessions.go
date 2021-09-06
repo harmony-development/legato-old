@@ -15,8 +15,8 @@ func (db *database) GetSession(ctx context.Context, session string) (int64, erro
 	return db.queries.GetSession(ctx, session)
 }
 
-func (db *database) SetSession(ctx context.Context, session string, userID int64) error {
-	return db.queries.SetSession(ctx, gen.SetSessionParams{
+func (db *database) AddSession(ctx context.Context, session string, userID int64) error {
+	return db.queries.AddSession(ctx, gen.AddSessionParams{
 		Userid:    userID,
 		Sessionid: session,
 	})
