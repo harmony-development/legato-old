@@ -56,8 +56,6 @@ func (factory) NewDatabase(ctx context.Context, l log.Interface, cfg *config.Con
 		db,
 	)
 
-	println(connString)
-
 	conn, err := pgxpool.Connect(ctx, connString)
 	if err != nil {
 		return nil, err

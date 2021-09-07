@@ -9,7 +9,6 @@ package syncv1
 import (
 	bytes "bytes"
 	context "context"
-	errors "errors"
 	proto "google.golang.org/protobuf/proto"
 	ioutil "io/ioutil"
 	http "net/http"
