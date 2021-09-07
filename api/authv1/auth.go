@@ -7,6 +7,7 @@ package authv1impl
 import (
 	"context"
 	"fmt"
+	"math/rand"
 
 	"github.com/harmony-development/legato/api"
 	"github.com/harmony-development/legato/db/ephemeral"
@@ -56,7 +57,8 @@ func New(keyManager key.KeyManager, eph ephemeral.Database, persist persist.Data
 		eph:        eph,
 		persist:    persist,
 		formHandlers: map[string]formHandlerFunc{
-			loginStep.ID(): a.loginFormHandler,
+			loginStep.ID():    a.loginFormHandler,
+			registerStep.ID(): a.registerHandler,
 		},
 	}
 }
@@ -145,6 +147,42 @@ func (v1 *AuthV1) loginFormHandler(c context.Context, submission *authv1.NextSte
 
 	// login succeessful
 	session, err := v1.finishAuth(c, r.AuthId, user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &authv1.AuthStep{
+		Step: &authv1.AuthStep_Session{
+			Session: session,
+		},
+	}, nil
+}
+
+// registerHandler handles the register form step
+func (v1 *AuthV1) registerHandler(c context.Context, submission *authv1.NextStepRequest_Form, r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
+	email := submission.Fields[0].GetString_()
+	username := submission.Fields[1].GetString_()
+	password := submission.Fields[2].GetBytes()
+	id := rand.Uint64()
+
+	pass, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
+	if err != nil {
+		return nil, api.NewError(api.ErrorInternalServerError)
+	}
+
+	err = v1.persist.Users().Add(c, persist.UserInformation{
+		ID:       id,
+		Username: username,
+	}, persist.LocalUserInformation{
+		Email:    email,
+		Password: pass,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// login succeessful
+	session, err := v1.finishAuth(c, r.AuthId, id)
 	if err != nil {
 		return nil, err
 	}
