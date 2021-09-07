@@ -3,7 +3,12 @@
 # SPDX-License-Identifier: CC0-1.0
 
 name: Lint Commit Messages
-on: [push, pull_request]
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   commitlint:
