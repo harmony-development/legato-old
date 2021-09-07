@@ -21,10 +21,12 @@ import (
 	"github.com/harmony-development/legato/config"
 	"github.com/harmony-development/legato/db/ephemeral"
 
-	// DATABASE BACKENDS.
+	// ephemeral backends.
 	_ "github.com/harmony-development/legato/db/ephemeral/bigcache"
 	_ "github.com/harmony-development/legato/db/ephemeral/redis"
 	"github.com/harmony-development/legato/db/persist"
+
+	// persistent backends.
 	_ "github.com/harmony-development/legato/db/persist/postgres"
 	_ "github.com/harmony-development/legato/db/persist/sqlite"
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
@@ -101,28 +103,22 @@ func (s *Server) Listen() {
 	s.App.Listen(s.cfg.Address + ":" + strconv.Itoa(s.cfg.Port))
 }
 
-func setupStorage(l log.Interface, cfg *config.Config) (persist.Database, ephemeral.Database, error) {
+func setupStorage(l log.Interface, cfg *config.Config) (pb persist.Database, eb ephemeral.Database, err error) {
 	persistFactory, err := persist.GetBackend(string(cfg.Database.Backend))
 	if err != nil {
-		return nil, nil, err
+		return
 	}
 
-	persist, err := persistFactory(context.TODO(), l, cfg)
-	if err != nil {
-		return nil, nil, err
-	}
+	pb, err = persistFactory(context.TODO(), l, cfg)
 
 	ephemeralFactory, err := ephemeral.GetBackend(string(cfg.Epheremal.Backend))
 	if err != nil {
-		return nil, nil, err
+		return
 	}
 
-	ephemeral, err := ephemeralFactory(context.TODO(), l, cfg)
-	if err != nil {
-		return nil, nil, err
-	}
+	eb, err = ephemeralFactory(context.TODO(), l, cfg)
 
-	return persist, ephemeral, nil
+	return
 }
 
 func newServer(l log.Interface, cfg *config.Config) *fiber.App {
@@ -159,16 +155,12 @@ func formatStartup(address string, port int) string {
 
 func tryMakeKeyManager(privKeyPath string, pubKeyPath string) (key.KeyManager, error) {
 	keyManager, err := key.NewEd25519KeyManagerFromFile(privKeyPath, pubKeyPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			if err := key.WriteEd25519KeysToFile(privKeyPath, pubKeyPath); err != nil {
-				return nil, err
-			}
-
-			return key.NewEd25519KeyManagerFromFile(privKeyPath, pubKeyPath)
-		} else {
+	if err != nil && os.IsNotExist(err) {
+		if err := key.WriteEd25519KeysToFile(privKeyPath, pubKeyPath); err != nil {
 			return nil, err
 		}
+
+		return key.NewEd25519KeyManagerFromFile(privKeyPath, pubKeyPath)
 	}
 
 	return keyManager, nil

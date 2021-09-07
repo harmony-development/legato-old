@@ -13,6 +13,8 @@ type UserInformation struct {
 }
 
 type (
+	// ExtendedUserInformation is a general interface for any additional user info.
+	// (Local and Foreign users have different field associations).
 	ExtendedUserInformation interface{ IsUserInfo() }
 	isUserInfo              struct{}
 )

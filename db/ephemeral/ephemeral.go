@@ -24,14 +24,18 @@ type Database interface {
 	authDB
 }
 
+// FactoryFunc constructs a new Database.
 type FactoryFunc = func(ctx context.Context, l log.Interface, cfg *config.Config) (Database, error)
 
 var backends = map[string]FactoryFunc{}
 
+// RegisterBackend registers a new database backend with a name and a factory function.
 func RegisterBackend(name string, factory FactoryFunc) {
 	backends[name] = factory
 }
 
+// GetBackend gets a factory function by name,
+// or returns an error if there isn't one with that name.
 func GetBackend(name string) (FactoryFunc, error) {
 	factory, ok := backends[name]
 	if !ok {
