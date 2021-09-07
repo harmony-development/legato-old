@@ -24,6 +24,8 @@ type Database interface {
 	authDB
 }
 
+const StepNotFoundErr = "step not found"
+
 // FactoryFunc constructs a new Database.
 type FactoryFunc = func(ctx context.Context, l log.Interface, cfg *config.Config) (Database, error)
 

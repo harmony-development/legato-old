@@ -8,20 +8,15 @@ import "fmt"
 
 // TODO: get this to use the actual registered backends list.
 var (
-	persistBackends   = StringSet{}
-	ephemeralBackends = StringSet{}
-)
-
-func init() {
-	persistBackends.Add(
+	persistBackends = NewStringSet(
 		"postgres",
 		"sqlite",
 	)
-	ephemeralBackends.Add(
+	ephemeralBackends = NewStringSet(
 		"bigcache",
 		"redis",
 	)
-}
+)
 
 type PersistBackend string
 
@@ -30,7 +25,9 @@ func (e *PersistBackend) UnmarshalText(text []byte) error {
 	if !ok {
 		return fmt.Errorf("persist backend must be one of: %v", persistBackends.Values())
 	}
+
 	*e = PersistBackend(text)
+
 	return nil
 }
 
@@ -41,6 +38,8 @@ func (e *EpheremalBackend) UnmarshalText(text []byte) error {
 	if !ok {
 		return fmt.Errorf("ephemeral backend must be one of: %v", ephemeralBackends.Values())
 	}
+
 	*e = EpheremalBackend(text)
+
 	return nil
 }

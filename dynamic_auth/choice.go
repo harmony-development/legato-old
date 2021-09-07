@@ -43,5 +43,6 @@ func (c *ChoiceStep) ToProtoV1() *authv1.AuthStep {
 
 func (c *ChoiceStep) HasOption(option string) bool {
 	_, ok := c.optionMap[option]
+
 	return ok
 }

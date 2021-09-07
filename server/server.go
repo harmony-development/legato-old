@@ -99,8 +99,8 @@ func ProduceServer() *Server {
 }
 
 // Listen begins listening to the configured port.
-func (s *Server) Listen() {
-	s.App.Listen(s.cfg.Address + ":" + strconv.Itoa(s.cfg.Port))
+func (s *Server) Listen() error {
+	return fmt.Errorf("error occurred while listening %w", s.App.Listen(s.cfg.Address+":"+strconv.Itoa(s.cfg.Port)))
 }
 
 func setupStorage(l log.Interface, cfg *config.Config) (pb persist.Database, eb ephemeral.Database, err error) {
@@ -110,6 +110,9 @@ func setupStorage(l log.Interface, cfg *config.Config) (pb persist.Database, eb 
 	}
 
 	pb, err = persistFactory(context.TODO(), l, cfg)
+	if err != nil {
+		return
+	}
 
 	ephemeralFactory, err := ephemeral.GetBackend(string(cfg.Epheremal.Backend))
 	if err != nil {
@@ -153,14 +156,19 @@ func formatStartup(address string, port int) string {
 	return fmt.Sprintf(display, versionString, gitString)
 }
 
-func tryMakeKeyManager(privKeyPath string, pubKeyPath string) (key.KeyManager, error) {
+func tryMakeKeyManager(privKeyPath string, pubKeyPath string) (key.Manager, error) {
 	keyManager, err := key.NewEd25519KeyManagerFromFile(privKeyPath, pubKeyPath)
 	if err != nil && os.IsNotExist(err) {
 		if err := key.WriteEd25519KeysToFile(privKeyPath, pubKeyPath); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to save keys: %w", err)
 		}
 
-		return key.NewEd25519KeyManagerFromFile(privKeyPath, pubKeyPath)
+		keyManager, err := key.NewEd25519KeyManagerFromFile(privKeyPath, pubKeyPath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to make key manager %w", err)
+		}
+
+		return keyManager, nil
 	}
 
 	return keyManager, nil

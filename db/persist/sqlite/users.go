@@ -68,14 +68,15 @@ func (db *users) Get(ctx context.Context, id uint64) (ui persist.UserInformation
 	ui.ID = user.ID
 	ui.Username = user.Username
 
-	if user.Local != nil {
+	switch {
+	case user.Local != nil:
 		eui = persist.LocalUserInformation{
 			Email:    user.Local.Email,
 			Password: user.Local.Password,
 		}
-	} else if user.Foreign != nil {
+	case user.Foreign != nil:
 		eui = persist.ForeignUserInformation{}
-	} else {
+	default:
 		panic("unhandled / invalid db")
 	}
 
@@ -84,12 +85,13 @@ func (db *users) Get(ctx context.Context, id uint64) (ui persist.UserInformation
 
 func (db *users) GetLocalByEmail(ctx context.Context, email string) (persist.UserInformation, persist.LocalUserInformation, error) {
 	var luser localuser
-	var user user
 
 	err := db.db.First(&luser, "email = ?", email).Error
 	if err != nil {
 		return persist.UserInformation{}, persist.LocalUserInformation{}, err
 	}
+
+	var user user
 
 	err = db.db.First(&user, "id = ?", luser.UserID).Error
 	if err != nil {

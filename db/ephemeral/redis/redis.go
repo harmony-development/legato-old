@@ -7,6 +7,7 @@ package redis
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/apex/log"
 	"github.com/harmony-development/legato/config"
@@ -26,7 +27,7 @@ func New(ctx context.Context, l log.Interface, cfg *config.Config) (ephemeral.Da
 		Password: cfg.Epheremal.Redis.Password,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to connect to redis %w", err)
 	}
 
 	return kv.NewKVBackend(rdb), nil

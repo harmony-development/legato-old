@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-package auth
+package auth_test
 
 import (
 	"strings"
@@ -18,6 +18,7 @@ func contains(s string, ss []string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -32,6 +33,7 @@ func beginAuth(client authv1.HTTPTestAuthServiceClient, authid *string) func(t *
 		if err != nil {
 			t.Fatalf("error: %s", err)
 		}
+
 		*authid = resp.AuthId
 	}
 }
@@ -69,6 +71,7 @@ func formAuthStep(client authv1.HTTPTestAuthServiceClient, authid, step string) 
 		if err != nil {
 			t.Fatalf("error: %s", err)
 		}
+
 		_, ok := resp.Step.Step.(*authv1.AuthStep_Form_)
 		if !ok {
 			t.Fatalf("step wasn't form")
@@ -110,6 +113,7 @@ func register(client authv1.HTTPTestAuthServiceClient, authid, username, email, 
 		if !ok {
 			t.Fatalf("register wasn't session, got %+v", resp.Step.Step)
 		}
+
 		_ = session
 	}
 }
@@ -143,6 +147,7 @@ func login(client authv1.HTTPTestAuthServiceClient, authid, email, password stri
 		if !ok {
 			t.Fatalf("login wasn't session, got %+v", resp.Step.Step)
 		}
+
 		_ = session
 	}
 }

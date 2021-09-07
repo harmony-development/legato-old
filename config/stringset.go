@@ -8,13 +8,17 @@ type StringSet map[string]struct{}
 
 func (set StringSet) Has(s string) bool {
 	_, ok := set[s]
+
 	return ok
 }
 
-func (set StringSet) Add(vals ...string) {
+func NewStringSet(vals ...string) StringSet {
+	set := StringSet{}
 	for _, v := range vals {
 		set[v] = struct{}{}
 	}
+
+	return set
 }
 
 func (set StringSet) Values() []string {
@@ -22,5 +26,6 @@ func (set StringSet) Values() []string {
 	for k := range set {
 		ret = append(ret, k)
 	}
+
 	return ret
 }

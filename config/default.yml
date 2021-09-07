@@ -4,8 +4,8 @@
 
 address: 0.0.0.0
 port: 2289
-private-key-path: harmony-key.pub
-public-key-path: harmony-key.pem
+privateKeyPath: harmony-key.pub
+publicKeyPath: harmony-key.pem
 database:
   backend: postgres
   postgres:
@@ -21,5 +21,5 @@ epheremal:
       - 127.0.0.1
     password: ""
 debug:
-  respond-with-errors: true
-  log-errors: true
+  respondWithErrors: true
+  logErrors: true
