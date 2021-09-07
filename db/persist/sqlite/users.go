@@ -14,21 +14,21 @@ type user struct {
 	ID       uint64 `gorm:"primarykey"`
 	Username string `gorm:"unique"`
 
-	LocalID   int
-	Local     *localuser
-	ForeignID int
-	Foreign   *foreignuser
+	Local   *localuser
+	Foreign *foreignuser
 }
 
 type localuser struct {
 	Email    string `gorm:"unique"`
 	Password []byte
 
-	ID int `gorm:"primarykey"`
+	UserID uint64
+	ID     int `gorm:"primarykey"`
 }
 
 type foreignuser struct {
-	ID int `gorm:"primarykey"`
+	UserID uint64
+	ID     int `gorm:"primarykey"`
 }
 
 type users struct {
@@ -83,12 +83,20 @@ func (db *users) Get(ctx context.Context, id uint64) (ui persist.UserInformation
 }
 
 func (db *users) GetLocalByEmail(ctx context.Context, email string) (persist.UserInformation, persist.LocalUserInformation, error) {
+	var luser localuser
 	var user user
 
-	err := db.db.Preload("Local").First(&user, "email = ?", email).Error
+	err := db.db.First(&luser, "email = ?", email).Error
 	if err != nil {
 		return persist.UserInformation{}, persist.LocalUserInformation{}, err
 	}
+
+	err = db.db.First(&user, "id = ?", luser.UserID).Error
+	if err != nil {
+		return persist.UserInformation{}, persist.LocalUserInformation{}, err
+	}
+
+	user.Local = &luser
 
 	return persist.UserInformation{
 			ID: user.ID,
