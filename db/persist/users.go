@@ -8,7 +8,8 @@ package persist
 import "context"
 
 type UserInformation struct {
-	ID uint64
+	ID       uint64
+	Username string
 }
 
 type ExtendedUserInformation interface{ IsUserInfo() }
