@@ -6,9 +6,9 @@ name: Lint Commit Messages
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   commitlint:
@@ -20,3 +20,12 @@ jobs:
       - uses: wagoid/commitlint-github-action@v4
         with:
           configFile: .github/workflows/commitlint.config.js
+  golangci:
+    name: Lint Legato
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.29
