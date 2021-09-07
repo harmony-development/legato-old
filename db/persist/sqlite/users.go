@@ -13,8 +13,11 @@ import (
 type user struct {
 	ID       uint64 `gorm:"primarykey"`
 	Username string `gorm:"unique"`
-	Local    *localuser
-	Foreign  *foreignuser
+
+	LocalID   int
+	Local     *localuser
+	ForeignID int
+	Foreign   *foreignuser
 }
 
 type localuser struct {
