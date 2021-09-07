@@ -15,15 +15,11 @@ import (
 	"github.com/philippgille/gokv/encoding"
 )
 
-type factory struct{}
-
-var Factory ephemeral.Factory = factory{}
-
 func init() {
-	ephemeral.RegisterBackend("bigcache", Factory)
+	ephemeral.RegisterBackend("bigcache", New)
 }
 
-func (factory) NewEpheremalDatabase(ctx context.Context, l log.Interface, cfg *config.Config) (ephemeral.Database, error) {
+func New(ctx context.Context, l log.Interface, cfg *config.Config) (ephemeral.Database, error) {
 	cache, err := bigcache.NewStore(bigcache.Options{
 		Codec: encoding.Gob,
 	})

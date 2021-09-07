@@ -19,15 +19,11 @@ type database struct {
 	db *gorm.DB
 }
 
-type factory struct{}
-
-var Factory persist.Factory = factory{}
-
 func init() {
-	persist.RegisterBackend("sqlite", Factory)
+	persist.RegisterBackend("sqlite", New)
 }
 
-func (factory) NewDatabase(ctx context.Context, l log.Interface, cfg *config.Config) (persist.Database, error) {
+func New(ctx context.Context, l log.Interface, cfg *config.Config) (persist.Database, error) {
 	db, err := gorm.Open(sqlite.Open(cfg.Database.SQLite.File), &gorm.Config{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %+w", err)

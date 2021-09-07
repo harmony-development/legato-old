@@ -24,20 +24,19 @@ type Database interface {
 	authDB
 }
 
-type Factory interface {
-	NewEpheremalDatabase(ctx context.Context, l log.Interface, cfg *config.Config) (Database, error)
-}
+type FactoryFunc = func(ctx context.Context, l log.Interface, cfg *config.Config) (Database, error)
 
-var backends = map[string]Factory{}
+var backends = map[string]FactoryFunc{}
 
-func RegisterBackend(name string, factory Factory) {
+func RegisterBackend(name string, factory FactoryFunc) {
 	backends[name] = factory
 }
 
-func GetBackend(name string) (Factory, error) {
+func GetBackend(name string) (FactoryFunc, error) {
 	factory, ok := backends[name]
 	if !ok {
 		return nil, fmt.Errorf("ephemeral backend not found: %s", name)
 	}
+
 	return factory, nil
 }

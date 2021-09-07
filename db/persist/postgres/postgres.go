@@ -31,15 +31,11 @@ func (d *database) Users() persist.Users {
 	return d.u
 }
 
-type factory struct{}
-
-var Factory persist.Factory = factory{}
-
 func init() {
-	persist.RegisterBackend("postgres", Factory)
+	persist.RegisterBackend("postgres", New)
 }
 
-func (factory) NewDatabase(ctx context.Context, l log.Interface, cfg *config.Config) (persist.Database, error) {
+func New(ctx context.Context, l log.Interface, cfg *config.Config) (persist.Database, error) {
 	username, password, host, port, db :=
 		cfg.Database.Postgres.Username,
 		cfg.Database.Postgres.Password,
