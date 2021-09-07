@@ -11,9 +11,10 @@ import (
 )
 
 type user struct {
-	ID      uint64 `gorm:"primarykey"`
-	Local   *localuser
-	Foreign *foreignuser
+	ID       uint64 `gorm:"primarykey"`
+	Username string `gorm:"unique"`
+	Local    *localuser
+	Foreign  *foreignuser
 }
 
 type localuser struct {
@@ -35,12 +36,14 @@ func (db *users) Add(ctx context.Context, pers persist.UserInformation, ext pers
 	switch data := ext.(type) {
 	case persist.ForeignUserInformation:
 		return db.db.Create(&user{
-			ID:      pers.ID,
-			Foreign: &foreignuser{},
+			ID:       pers.ID,
+			Username: pers.Username,
+			Foreign:  &foreignuser{},
 		}).Error
 	case persist.LocalUserInformation:
 		return db.db.Create(&user{
-			ID: pers.ID,
+			ID:       pers.ID,
+			Username: pers.Username,
 			Local: &localuser{
 				Email:    data.Email,
 				Password: data.Password,
@@ -60,6 +63,7 @@ func (db *users) Get(ctx context.Context, id uint64) (ui persist.UserInformation
 	}
 
 	ui.ID = user.ID
+	ui.Username = user.Username
 
 	if user.Local != nil {
 		eui = persist.LocalUserInformation{
