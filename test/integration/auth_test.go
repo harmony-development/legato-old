@@ -76,6 +76,77 @@ func formAuthStep(client authv1.HTTPTestAuthServiceClient, authid, step string) 
 	}
 }
 
+func register(client authv1.HTTPTestAuthServiceClient, authid, username, email, password string) func(t *testing.T, i int) {
+	return func(t *testing.T, i int) {
+		resp, err := client.NextStep(&authv1.NextStepRequest{
+			AuthId: authid,
+			Step: &authv1.NextStepRequest_Form_{
+				Form: &authv1.NextStepRequest_Form{
+					Fields: []*authv1.NextStepRequest_FormFields{
+						{
+							Field: &authv1.NextStepRequest_FormFields_String_{
+								String_: email,
+							},
+						},
+						{
+							Field: &authv1.NextStepRequest_FormFields_String_{
+								String_: username,
+							},
+						},
+						{
+							Field: &authv1.NextStepRequest_FormFields_Bytes{
+								Bytes: []byte(password),
+							},
+						},
+					},
+				},
+			},
+		})
+		if err != nil {
+			t.Fatalf("error: %s", err)
+		}
+
+		session, ok := resp.Step.Step.(*authv1.AuthStep_Session)
+		if !ok {
+			t.Fatalf("register wasn't session, got %+v", resp.Step.Step)
+		}
+		_ = session
+	}
+}
+
+func login(client authv1.HTTPTestAuthServiceClient, authid, email, password string) func(t *testing.T, i int) {
+	return func(t *testing.T, i int) {
+		resp, err := client.NextStep(&authv1.NextStepRequest{
+			AuthId: authid,
+			Step: &authv1.NextStepRequest_Form_{
+				Form: &authv1.NextStepRequest_Form{
+					Fields: []*authv1.NextStepRequest_FormFields{
+						{
+							Field: &authv1.NextStepRequest_FormFields_String_{
+								String_: email,
+							},
+						},
+						{
+							Field: &authv1.NextStepRequest_FormFields_Bytes{
+								Bytes: []byte(password),
+							},
+						},
+					},
+				},
+			},
+		})
+		if err != nil {
+			t.Fatalf("error: %s", err)
+		}
+
+		session, ok := resp.Step.Step.(*authv1.AuthStep_Session)
+		if !ok {
+			t.Fatalf("login wasn't session, got %+v", resp.Step.Step)
+		}
+		_ = session
+	}
+}
+
 func TestAuth(t *testing.T) {
 	serv := server.ProduceServer()
 
@@ -96,40 +167,12 @@ func TestAuth(t *testing.T) {
 		test("first auth step", t, i, firstAuthStep(client, authid, "register"))
 		test("get register form", t, i, formAuthStep(client, authid, "register"))
 
-		test("register account", t, i, func(t *testing.T, i int) {
-			resp, err := client.NextStep(&authv1.NextStepRequest{
-				AuthId: authid,
-				Step: &authv1.NextStepRequest_Form_{
-					Form: &authv1.NextStepRequest_Form{
-						Fields: []*authv1.NextStepRequest_FormFields{
-							{
-								Field: &authv1.NextStepRequest_FormFields_String_{
-									String_: email,
-								},
-							},
-							{
-								Field: &authv1.NextStepRequest_FormFields_String_{
-									String_: username,
-								},
-							},
-							{
-								Field: &authv1.NextStepRequest_FormFields_Bytes{
-									Bytes: []byte(password),
-								},
-							},
-						},
-					},
-				},
-			})
-			if err != nil {
-				t.Fatalf("error: %s", err)
-			}
+		test("register account", t, i, register(client, authid, username, email, password))
 
-			session, ok := resp.Step.Step.(*authv1.AuthStep_Session)
-			if !ok {
-				t.Fatalf("register wasn't session, got %+v", resp.Step.Step)
-			}
-			_ = session
-		})
+		test("begin auth again", t, i, beginAuth(client, &authid))
+		test("first auth step again", t, i, firstAuthStep(client, authid, "login"))
+		test("get login form", t, i, formAuthStep(client, authid, "login"))
+
+		test("login account", t, i, login(client, authid, email, password))
 	})
 }
