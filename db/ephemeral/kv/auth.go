@@ -8,17 +8,22 @@ package kv
 import (
 	"context"
 	"errors"
+
+	"github.com/harmony-development/legato/db/ephemeral"
 )
 
 func (db *database) GetCurrentStep(ctx context.Context, authID string) (string, error) {
 	var step string
+
 	ok, err := db.store.Get(authID, &step)
 	if err != nil {
 		return "", err
 	}
+
 	if !ok {
-		return "", errors.New("key not found")
+		return "", errors.New(ephemeral.StepNotFoundErr)
 	}
+
 	return step, nil
 }
 

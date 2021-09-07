@@ -6,7 +6,7 @@ package logger
 
 import (
 	"bufio"
-	"os"
+	"io"
 	"strings"
 
 	"github.com/apex/log"
@@ -18,7 +18,7 @@ type Logger struct {
 	log.Interface
 }
 
-func New(input *os.File) *Logger {
+func New(input io.ReadWriter) *Logger {
 	return &Logger{
 		Interface: &log.Logger{
 			Handler: cli.New(input),
@@ -34,8 +34,10 @@ func Indent(level log.Level, s string, finish *string) string {
 		output.WriteRune('\n')
 		output.WriteString(cli.Colors[level].Sprintf("   ║  ") + line)
 	}
+
 	if finish != nil {
 		output.WriteString(cli.Colors[level].Sprintf("\n   ╚  ") + *finish)
 	}
+
 	return output.String()
 }

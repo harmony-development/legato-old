@@ -11,7 +11,7 @@ import (
 	"os"
 )
 
-type KeyManager interface {
+type Manager interface {
 	GetPublicKey() []byte
 }
 
@@ -20,27 +20,33 @@ type Ed25519KeyManager struct {
 	privKey ed25519.PrivateKey
 }
 
-func NewEd25519KeyManagerFromFile(privKeyPath string, pubKeyPath string) (KeyManager, error) {
+func NewEd25519KeyManagerFromFile(privKeyPath string, pubKeyPath string) (Manager, error) {
 	var privKeyFile, pubKeyFile *os.File
+
 	var err error
+
 	if privKeyFile, err = os.Open(privKeyPath); err != nil {
 		return nil, err
 	}
+
 	if pubKeyFile, err = os.Open(pubKeyPath); err != nil {
 		return nil, err
 	}
+
 	return NewEd25519KeyManager(privKeyFile, pubKeyFile)
 }
 
-func NewEd25519KeyManager(privKeyReader io.Reader, pubKeyReader io.Reader) (KeyManager, error) {
+func NewEd25519KeyManager(privKeyReader io.Reader, pubKeyReader io.Reader) (Manager, error) {
 	privKey, err := io.ReadAll(privKeyReader)
 	if err != nil {
 		return nil, err
 	}
+
 	pubKey, err := io.ReadAll(pubKeyReader)
 	if err != nil {
 		return nil, err
 	}
+
 	return &Ed25519KeyManager{
 		privKey: ed25519.PrivateKey(privKey),
 		pubKey:  ed25519.PublicKey(pubKey),

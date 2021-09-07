@@ -8,3 +8,6 @@ run:
     - ".*\\.hrpc\\.*.go"
 linters:
   enable-all: true
+  disable:
+    - exhaustivestruct
+    - gochecknoinits

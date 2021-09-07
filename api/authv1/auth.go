@@ -23,7 +23,7 @@ type formHandlerFunc = func(c context.Context, submission *authv1.NextStepReques
 
 type AuthV1 struct {
 	authv1.DefaultAuthService
-	keyManager   key.KeyManager
+	keyManager   key.Manager
 	eph          ephemeral.Database
 	persist      persist.Database
 	formHandlers map[string]formHandlerFunc
@@ -45,7 +45,7 @@ func toStepMap(steps ...dynamicauth.Step) map[string]dynamicauth.Step {
 	return ret
 }
 
-func New(keyManager key.KeyManager, eph ephemeral.Database, persist persist.Database) *AuthV1 {
+func New(keyManager key.Manager, eph ephemeral.Database, persist persist.Database) *AuthV1 {
 	a := &AuthV1{
 		keyManager: keyManager,
 		eph:        eph,
@@ -198,10 +198,10 @@ func (v1 *AuthV1) finishAuth(c context.Context, authID string, userID uint64) (*
 	sessionID := randstr.Hex(16)
 
 	if err := v1.persist.Sessions().Add(c, sessionID, userID); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to add session %w", err)
 	}
 	if err := v1.eph.DeleteAuthID(c, authID); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to delete auth ID %w", err)
 	}
 
 	return &authv1.Session{

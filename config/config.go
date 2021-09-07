@@ -8,13 +8,13 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/fsnotify/fsnotify"
 	"gopkg.in/yaml.v3"
 )
 
+// nolint
 //go:embed default.yml
 var defaultConfig []byte
 
@@ -23,16 +23,17 @@ type Config struct {
 	Address string
 	// The port to listen on for HTTP requests.
 	Port           int
-	PublicKeyPath  string `yaml:"public-key-path"`
-	PrivateKeyPath string `yaml:"private-key-path"`
+	PublicKeyPath  string `yaml:"publicKeyPath"`
+	PrivateKeyPath string `yaml:"privateKeyPath"`
+	AuthIDLength   int    `yaml:"authIdLength"`
 	Debug          Debug
 	Database       Database
 	Epheremal      Epheremal
 }
 
 type Debug struct {
-	RespondWithErrors bool `yaml:"respond-with-errors"`
-	LogErrors         bool `yaml:"log-errors"`
+	RespondWithErrors bool `yaml:"respondWithErrors"`
+	LogErrors         bool `yaml:"logErrors"`
 }
 
 type Database struct {
@@ -76,12 +77,14 @@ func New(name string) *ConfigReader {
 func (c *ConfigReader) ParseConfig() (*Config, error) {
 	conf := &Config{}
 
-	dat, err := ioutil.ReadFile(c.ConfigName)
+	dat, err := os.ReadFile(c.ConfigName)
 	if err != nil {
 		if os.IsNotExist(err) {
-			err := ioutil.WriteFile(c.ConfigName, defaultConfig, 0o660)
+			// stdlib doesn't have any permission bit enums so a "magic" number is ok here
+			// nolint
+			err := os.WriteFile(c.ConfigName, defaultConfig, 0o660)
 			if err != nil {
-				return nil, fmt.Errorf("failed to write default config: %+w", err)
+				return nil, fmt.Errorf("failed to write default config: %w", err)
 			}
 
 			return nil, errors.New("default configuration has been created, please edit it")
@@ -89,8 +92,8 @@ func (c *ConfigReader) ParseConfig() (*Config, error) {
 
 		return nil, fmt.Errorf("failed to read config file: %+w", err)
 	}
-	err = yaml.Unmarshal(dat, conf)
-	if err != nil {
+
+	if err := yaml.Unmarshal(dat, conf); err != nil {
 		return nil, fmt.Errorf("failed to parse config file: %+w", err)
 	}
 
