@@ -21,6 +21,8 @@ module.exports = {
         "logger",
         "config",
         "api",
+        "ci",
+        "docs",
 
         "auth",
         "auth/federation",
@@ -40,6 +42,7 @@ module.exports = {
       "never",
       ["sentence-case", "start-case", "pascal-case", "upper-case"],
     ],
+    "scope-empty": [2, "never"],
     "subject-empty": [2, "never"],
     "subject-full-stop": [2, "never", "."],
     "type-case": [2, "always", "lower-case"],
@@ -49,8 +52,6 @@ module.exports = {
       "always",
       [
         "build",
-        "ci",
-        "docs",
         "feat",
         "fix",
         "perf",
