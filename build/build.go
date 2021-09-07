@@ -4,7 +4,10 @@
 
 package build
 
-// this is injected via ldflags.
+// GitCommit is injected via ldflags.
+// This cannot be made a constant so the global check is invalid here
+// nolint
 var GitCommit string
 
-var Version string = "0.0.1"
+// Version is the version of legato running.
+const Version = "0.0.1"

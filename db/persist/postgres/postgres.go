@@ -35,6 +35,7 @@ func init() {
 	persist.RegisterBackend("postgres", New)
 }
 
+// New creates a new persistent backend using postgres.
 func New(ctx context.Context, l log.Interface, cfg *config.Config) (persist.Database, error) {
 	username, password, host, port, db :=
 		cfg.Database.Postgres.Username,

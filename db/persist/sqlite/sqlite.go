@@ -23,6 +23,7 @@ func init() {
 	persist.RegisterBackend("sqlite", New)
 }
 
+// New creates a new persistent backend using sqlite.
 func New(ctx context.Context, l log.Interface, cfg *config.Config) (persist.Database, error) {
 	db, err := gorm.Open(sqlite.Open(cfg.Database.SQLite.File), &gorm.Config{})
 	if err != nil {

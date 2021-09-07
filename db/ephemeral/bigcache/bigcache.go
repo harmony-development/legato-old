@@ -19,6 +19,7 @@ func init() {
 	ephemeral.RegisterBackend("bigcache", New)
 }
 
+// New creates a new ephemeral backend using bigcache.
 func New(ctx context.Context, l log.Interface, cfg *config.Config) (ephemeral.Database, error) {
 	cache, err := bigcache.NewStore(bigcache.Options{
 		Codec: encoding.Gob,

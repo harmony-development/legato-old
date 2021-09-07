@@ -19,6 +19,7 @@ func init() {
 	ephemeral.RegisterBackend("redis", New)
 }
 
+// New creates a new ephemeral backend using redis.
 func New(ctx context.Context, l log.Interface, cfg *config.Config) (ephemeral.Database, error) {
 	rdb, err := redis.NewClient(redis.Options{
 		Address:  cfg.Epheremal.Redis.Hosts[0],
