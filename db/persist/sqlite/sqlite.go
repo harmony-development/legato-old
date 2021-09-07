@@ -33,7 +33,12 @@ func (factory) NewDatabase(ctx context.Context, l log.Interface, cfg *config.Con
 		return nil, fmt.Errorf("failed to open database: %+w", err)
 	}
 
-	err = db.AutoMigrate()
+	err = db.AutoMigrate(
+		&user{},
+		&session{},
+		&foreignuser{},
+		&localuser{},
+	)
 	if err != nil {
 		return nil, fmt.Errorf("database migration failed: %+w", err)
 	}
