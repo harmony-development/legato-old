@@ -20,16 +20,16 @@ import (
 	"github.com/harmony-development/legato/build"
 	"github.com/harmony-development/legato/config"
 	"github.com/harmony-development/legato/db/ephemeral"
+
+	// DATABASE BACKENDS.
+	_ "github.com/harmony-development/legato/db/ephemeral/bigcache"
+	_ "github.com/harmony-development/legato/db/ephemeral/redis"
 	"github.com/harmony-development/legato/db/persist"
+	_ "github.com/harmony-development/legato/db/persist/postgres"
+	_ "github.com/harmony-development/legato/db/persist/sqlite"
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
 	"github.com/harmony-development/legato/key"
 	"github.com/harmony-development/legato/logger"
-
-	// DATABASE BACKENDS
-	_ "github.com/harmony-development/legato/db/ephemeral/bigcache"
-	_ "github.com/harmony-development/legato/db/ephemeral/redis"
-	_ "github.com/harmony-development/legato/db/persist/postgres"
-	_ "github.com/harmony-development/legato/db/persist/sqlite"
 )
 
 var startupMessage = `Version %s
@@ -40,7 +40,7 @@ var startupMessage = `Version %s
         /___/ Commit %s
 `
 
-// ProduceServer creates a new server
+// ProduceServer creates a new server.
 func ProduceServer() *Server {
 	l := logger.New(os.Stdin)
 
@@ -51,7 +51,7 @@ func ProduceServer() *Server {
 		l.WithError(err).Fatal("Failed to read config")
 	}
 
-	configReader.WatchConfig(func(ev fsnotify.Event) {
+	if err := configReader.WatchConfig(func(ev fsnotify.Event) {
 		l.Info("Config change detected, reloading...")
 		newConfig, err := configReader.ParseConfig()
 		if err != nil {
@@ -59,7 +59,9 @@ func ProduceServer() *Server {
 			return
 		}
 		*cfg = *newConfig
-	}, func(error) {})
+	}, func(error) {}); err != nil {
+		l.WithError(err).Warn("Unable to watch config")
+	}
 
 	keyManager, err := tryMakeKeyManager(cfg.PrivateKeyPath, cfg.PublicKeyPath)
 	if err != nil {
@@ -99,13 +101,13 @@ func ProduceServer() *Server {
 	return &Server{s, cfg}
 }
 
-// Server is an instance of Legato
+// Server is an instance of Legato.
 type Server struct {
 	*fiber.App
 	cfg *config.Config
 }
 
-// Listen begins listening to the configured port
+// Listen begins listening to the configured port.
 func (s *Server) Listen() {
 	s.App.Listen(s.cfg.Address + ":" + strconv.Itoa(s.cfg.Port))
 }

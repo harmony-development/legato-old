@@ -12,8 +12,10 @@ type UserInformation struct {
 	Username string
 }
 
-type ExtendedUserInformation interface{ IsUserInfo() }
-type isUserInfo struct{}
+type (
+	ExtendedUserInformation interface{ IsUserInfo() }
+	isUserInfo              struct{}
+)
 
 func (isUserInfo) IsUserInfo() {}
 

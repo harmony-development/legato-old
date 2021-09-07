@@ -19,7 +19,7 @@ type authDB interface {
 	DeleteAuthID(ctx context.Context, authID string) error
 }
 
-// Database handles access to short-lived data and pubsub
+// Database handles access to short-lived data and pubsub.
 type Database interface {
 	authDB
 }

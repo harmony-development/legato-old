@@ -63,7 +63,7 @@ func New(keyManager key.KeyManager, eph ephemeral.Database, persist persist.Data
 	}
 }
 
-// Key responds with the homeserver's public key
+// Key responds with the homeserver's public key.
 func (v1 *AuthV1) Key(context.Context, *authv1.KeyRequest) (*authv1.KeyResponse, error) {
 	return &authv1.KeyResponse{
 		Key: v1.keyManager.GetPublicKey(),
@@ -81,7 +81,7 @@ func (v1 *AuthV1) BeginAuth(c context.Context, r *authv1.BeginAuthRequest) (*aut
 	}, nil
 }
 
-// NextStep handles dyhnamic auth steps
+// NextStep handles dyhnamic auth steps.
 func (v1 *AuthV1) NextStep(ctx context.Context, r *authv1.NextStepRequest) (*authv1.NextStepResponse, error) {
 	// the ID of the step the user is on
 	currentStepID, err := v1.eph.GetCurrentStep(ctx, r.AuthId)
@@ -113,7 +113,7 @@ func (v1 *AuthV1) handleStep(ctx context.Context, currentStep dynamicauth.Step, 
 	}
 }
 
-// choiceHandler contains logic related to any choice step
+// choiceHandler contains logic related to any choice step.
 func (v1 *AuthV1) choiceHandler(ctx context.Context, choiceStep *dynamicauth.ChoiceStep, r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 	c := r.GetChoice()
 	if c == nil {
@@ -131,7 +131,7 @@ func (v1 *AuthV1) choiceHandler(ctx context.Context, choiceStep *dynamicauth.Cho
 	return nextStep.ToProtoV1(), nil
 }
 
-// loginFormHandler handles the login form step
+// loginFormHandler handles the login form step.
 func (v1 *AuthV1) loginFormHandler(c context.Context, submission *authv1.NextStepRequest_Form, r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 	email := submission.Fields[0].GetString_()
 	provided := submission.Fields[1].GetBytes()
@@ -158,7 +158,7 @@ func (v1 *AuthV1) loginFormHandler(c context.Context, submission *authv1.NextSte
 	}, nil
 }
 
-// registerHandler handles the register form step
+// registerHandler handles the register form step.
 func (v1 *AuthV1) registerHandler(c context.Context, submission *authv1.NextStepRequest_Form, r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
 	email := submission.Fields[0].GetString_()
 	username := submission.Fields[1].GetString_()
