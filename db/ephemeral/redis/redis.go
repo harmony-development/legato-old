@@ -15,15 +15,11 @@ import (
 	"github.com/philippgille/gokv/redis"
 )
 
-type factory struct{}
-
-var Factory ephemeral.Factory = factory{}
-
 func init() {
-	ephemeral.RegisterBackend("redis", Factory)
+	ephemeral.RegisterBackend("redis", New)
 }
 
-func (factory) NewEpheremalDatabase(ctx context.Context, l log.Interface, cfg *config.Config) (ephemeral.Database, error) {
+func New(ctx context.Context, l log.Interface, cfg *config.Config) (ephemeral.Database, error) {
 	rdb, err := redis.NewClient(redis.Options{
 		Address:  cfg.Epheremal.Redis.Hosts[0],
 		Password: cfg.Epheremal.Redis.Password,

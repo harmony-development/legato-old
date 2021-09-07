@@ -32,7 +32,7 @@ import (
 	"github.com/harmony-development/legato/logger"
 )
 
-var startupMessage = `Version %s
+const startupMessage = `Version %s
    __                  __      
   / /___  ___ _ ___ _ / /_ ___ 
  / // -_)/ _ ` + "`" + `// _ ` + "`" + `// __// _ \
@@ -40,12 +40,20 @@ var startupMessage = `Version %s
         /___/ Commit %s
 `
 
+// Server is an instance of Legato.
+type Server struct {
+	*fiber.App
+	cfg *config.Config
+}
+
 // ProduceServer creates a new server.
 func ProduceServer() *Server {
 	l := logger.New(os.Stdin)
 
 	l.Info("Reading config...")
+
 	configReader := config.New("configuration")
+
 	cfg, err := configReader.ParseConfig()
 	if err != nil {
 		l.WithError(err).Fatal("Failed to read config")
@@ -56,6 +64,7 @@ func ProduceServer() *Server {
 		newConfig, err := configReader.ParseConfig()
 		if err != nil {
 			l.WithError(err).Error("Failed to reload config")
+
 			return
 		}
 		*cfg = *newConfig
@@ -63,28 +72,14 @@ func ProduceServer() *Server {
 		l.WithError(err).Warn("Unable to watch config")
 	}
 
+	persist, ephemeral, err := setupStorage(l, cfg)
+	if err != nil {
+		l.WithError(err).Fatal("Failed to setup storage")
+	}
+
 	keyManager, err := tryMakeKeyManager(cfg.PrivateKeyPath, cfg.PublicKeyPath)
 	if err != nil {
 		l.WithError(err).Fatal("Failed to initialize key manager")
-	}
-	persistFactory, err := persist.GetBackend(string(cfg.Database.Backend))
-	if err != nil {
-		l.WithError(err).Fatal("Failed to initialize persistent database")
-	}
-
-	persist, err := persistFactory.NewDatabase(context.TODO(), l, cfg)
-	if err != nil {
-		l.WithError(err).Fatal("Failed to connect to database")
-	}
-
-	ephemeralFactory, err := ephemeral.GetBackend(string(cfg.Epheremal.Backend))
-	if err != nil {
-		l.WithError(err).Fatal("Failed to initialize ephemeral database")
-	}
-
-	ephemeral, err := ephemeralFactory.NewEpheremalDatabase(context.TODO(), l, cfg)
-	if err != nil {
-		l.WithError(err).Fatal("Failed to connect to epheremal database")
 	}
 
 	s := newServer(l, cfg)
@@ -101,15 +96,33 @@ func ProduceServer() *Server {
 	return &Server{s, cfg}
 }
 
-// Server is an instance of Legato.
-type Server struct {
-	*fiber.App
-	cfg *config.Config
-}
-
 // Listen begins listening to the configured port.
 func (s *Server) Listen() {
 	s.App.Listen(s.cfg.Address + ":" + strconv.Itoa(s.cfg.Port))
+}
+
+func setupStorage(l log.Interface, cfg *config.Config) (persist.Database, ephemeral.Database, error) {
+	persistFactory, err := persist.GetBackend(string(cfg.Database.Backend))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	persist, err := persistFactory(context.TODO(), l, cfg)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	ephemeralFactory, err := ephemeral.GetBackend(string(cfg.Epheremal.Backend))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	ephemeral, err := ephemeralFactory(context.TODO(), l, cfg)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return persist, ephemeral, nil
 }
 
 func newServer(l log.Interface, cfg *config.Config) *fiber.App {
@@ -118,8 +131,12 @@ func newServer(l log.Interface, cfg *config.Config) *fiber.App {
 		ErrorHandler:          api.FiberErrorHandler(l, cfg),
 	})
 
+	// TODO: move to config variable or smth but make this line shorter
+	// nolint
+	logFormat := "[${time}] ${status} |${green}${method}${white}|  ${path}  ↑${bytesSent} bytes  ↓${bytesReceived} bytes ${reqHeader:Authorization}\n"
+
 	s.Use(fiberLogger.New(fiberLogger.Config{
-		Format: "[${time}] ${status} |${green}${method}${white}|  ${path}  ↑${bytesSent} bytes  ↓${bytesReceived} bytes ${reqHeader:Authorization}\n",
+		Format: logFormat,
 	}))
 
 	return s
@@ -136,6 +153,7 @@ func formatStartup(address string, port int) string {
 	gitString := color.GreenString(
 		fmt.Sprintf("%.7s", build.GitCommit),
 	)
+
 	return fmt.Sprintf(display, versionString, gitString)
 }
 
@@ -146,13 +164,12 @@ func tryMakeKeyManager(privKeyPath string, pubKeyPath string) (key.KeyManager, e
 			if err := key.WriteEd25519KeysToFile(privKeyPath, pubKeyPath); err != nil {
 				return nil, err
 			}
-			keyManager, err = key.NewEd25519KeyManagerFromFile(privKeyPath, pubKeyPath)
-			if err != nil {
-				return nil, err
-			}
+
+			return key.NewEd25519KeyManagerFromFile(privKeyPath, pubKeyPath)
 		} else {
 			return nil, err
 		}
 	}
+
 	return keyManager, nil
 }
