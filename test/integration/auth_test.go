@@ -154,9 +154,7 @@ func TestAuth(t *testing.T) {
 	client.Client = serv
 
 	test("client auth", t, 0, func(t *testing.T, i int) {
-		var (
-			authid string
-		)
+		var authid string
 		const (
 			username = "kili-test"
 			email    = "uhh@eee@aaa"

@@ -14,7 +14,7 @@ import (
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 )
 
-// FiberRPCHandler converts a RPC handler to a Fiber handler
+// FiberRPCHandler converts a RPC handler to a Fiber handler.
 func FiberRPCHandler(handler server.RawHandler) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		resp, err := handler(c.Context(), c.Request())
@@ -38,7 +38,7 @@ func RegisterHandlers(l log.Interface, app *fiber.App, all ...server.HRPCService
 	}
 }
 
-// Setup registers the Harmony protocol API
+// Setup registers the Harmony protocol API.
 func Setup(l log.Interface, app *fiber.App) func(all ...server.HRPCServiceHandler) {
 	return func(all ...server.HRPCServiceHandler) {
 		RegisterHandlers(l, app, all...)

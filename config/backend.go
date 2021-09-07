@@ -6,7 +6,7 @@ package config
 
 import "fmt"
 
-// TODO: get this to use the actual registered backends list
+// TODO: get this to use the actual registered backends list.
 var (
 	persistBackends   = StringSet{}
 	ephemeralBackends = StringSet{}

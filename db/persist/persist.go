@@ -13,7 +13,7 @@ import (
 	"github.com/harmony-development/legato/config"
 )
 
-// Database handles access to long-lived data
+// Database handles access to long-lived data.
 type Database interface {
 	Sessions() Sessions
 	Users() Users
