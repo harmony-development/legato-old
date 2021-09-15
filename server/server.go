@@ -58,26 +58,9 @@ func New(l log.Interface) (*Server, error) {
 		redis.Backend(),
 	)
 
-	l.Info("Reading config...")
-
-	configReader := config.New("configuration")
-
-	cfg, err := configReader.ParseConfig()
+	cfg, err := newConfig(l, "configuration")
 	if err != nil {
-		l.WithError(err).Fatal("Failed to read config")
-	}
-
-	if err := configReader.WatchConfig(func(ev fsnotify.Event) {
-		l.Info("Config change detected, reloading...")
-		newConfig, err := configReader.ParseConfig()
-		if err != nil {
-			l.WithError(err).Error("Failed to reload config")
-
-			return
-		}
-		*cfg = *newConfig
-	}, func(error) {}); err != nil {
-		l.WithError(err).Warn("Unable to watch config")
+		return nil, err
 	}
 
 	persist, err := persistFactory.New(string(cfg.Database.Backend), context.TODO(), l, cfg)
@@ -110,6 +93,32 @@ func (s *Server) Listen() error {
 	s.l.Info(formatStartup(s.cfg.Address, s.cfg.Port))
 
 	return fmt.Errorf("error occurred while listening %w", s.App.Listen(s.cfg.Address+":"+strconv.Itoa(s.cfg.Port)))
+}
+
+func newConfig(l log.Interface, name string) (*config.Config, error) {
+	l.Info("Reading config...")
+
+	configReader := config.New(name)
+
+	cfg, err := configReader.ParseConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	if err := configReader.WatchConfig(func(ev fsnotify.Event) {
+		l.Info("Config change detected, reloading...")
+		newConfig, err := configReader.ParseConfig()
+		if err != nil {
+			l.WithError(err).Error("Failed to reload config")
+
+			return
+		}
+		*cfg = *newConfig
+	}, func(error) {}); err != nil {
+		return nil, err
+	}
+
+	return cfg, nil
 }
 
 func newFiber(l log.Interface, cfg *config.Config) *fiber.App {
