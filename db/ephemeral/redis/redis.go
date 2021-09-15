@@ -16,12 +16,18 @@ import (
 	"github.com/philippgille/gokv/redis"
 )
 
-func init() {
-	ephemeral.RegisterBackend("redis", New)
+type backend struct{}
+
+func Backend() ephemeral.Backend {
+	return backend{}
+}
+
+func (backend) Name() string {
+	return "redis"
 }
 
 // New creates a new ephemeral backend using redis.
-func New(ctx context.Context, l log.Interface, cfg *config.Config) (ephemeral.Database, error) {
+func (backend) New(ctx context.Context, l log.Interface, cfg *config.Config) (ephemeral.Database, error) {
 	rdb, err := redis.NewClient(redis.Options{
 		Address:  cfg.Epheremal.Redis.Hosts[0],
 		Password: cfg.Epheremal.Redis.Password,

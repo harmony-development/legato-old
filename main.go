@@ -5,10 +5,19 @@
 package main
 
 import (
+	"log"
+	"os"
+
+	"github.com/harmony-development/legato/logger"
 	"github.com/harmony-development/legato/server"
 )
 
 func main() {
-	it := server.ProduceServer()
-	it.Listen()
+	l := logger.New(os.Stdin)
+	server, err := server.New(l)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Fatal(server.Listen())
 }
