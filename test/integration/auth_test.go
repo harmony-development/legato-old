@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
+	"github.com/harmony-development/legato/logger"
 	"github.com/harmony-development/legato/server"
 )
 
@@ -153,7 +154,12 @@ func login(client authv1.HTTPTestAuthServiceClient, authid, email, password stri
 }
 
 func TestAuth(t *testing.T) {
-	serv := server.ProduceServer()
+	l := logger.NewNoop()
+
+	serv, err := server.New(l)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	client := authv1.HTTPTestAuthServiceClient{}
 	client.Client = serv

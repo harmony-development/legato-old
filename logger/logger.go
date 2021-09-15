@@ -11,6 +11,7 @@ import (
 
 	"github.com/apex/log"
 	"github.com/apex/log/handlers/cli"
+	"github.com/apex/log/handlers/discard"
 )
 
 type Logger struct {
@@ -25,6 +26,13 @@ func New(input io.ReadWriter) *Logger {
 			Level:   log.DebugLevel,
 		},
 		inputReader: *bufio.NewReader(input),
+	}
+}
+
+func NewNoop() log.Interface {
+	return &log.Logger{
+		Level:   log.DebugLevel,
+		Handler: discard.New(),
 	}
 }
 

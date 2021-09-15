@@ -1,4 +1,5 @@
 // SPDX-FileCopyrightText: 2021 Carson Black <uhhadd@gmail.com>
+// SPDX-FileCopyrightText: 2021 Danil Korennykh <bluskript@gmail.com>
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -20,15 +21,11 @@ import (
 	"github.com/harmony-development/legato/build"
 	"github.com/harmony-development/legato/config"
 	"github.com/harmony-development/legato/db/ephemeral"
-
-	// ephemeral backends.
-	_ "github.com/harmony-development/legato/db/ephemeral/bigcache"
-	_ "github.com/harmony-development/legato/db/ephemeral/redis"
+	"github.com/harmony-development/legato/db/ephemeral/bigcache"
+	"github.com/harmony-development/legato/db/ephemeral/redis"
 	"github.com/harmony-development/legato/db/persist"
-
-	// persistent backends.
-	_ "github.com/harmony-development/legato/db/persist/postgres"
-	_ "github.com/harmony-development/legato/db/persist/sqlite"
+	"github.com/harmony-development/legato/db/persist/postgres"
+	"github.com/harmony-development/legato/db/persist/sqlite"
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
 	"github.com/harmony-development/legato/key"
 	"github.com/harmony-development/legato/logger"
@@ -46,11 +43,20 @@ const startupMessage = `Version %s
 type Server struct {
 	*fiber.App
 	cfg *config.Config
+	l   log.Interface
 }
 
-// ProduceServer creates a new server.
-func ProduceServer() *Server {
-	l := logger.New(os.Stdin)
+// New creates a new server.
+func New(l log.Interface) (*Server, error) {
+	persistFactory := persist.NewFactory(
+		postgres.Backend(),
+		sqlite.Backend(),
+	)
+
+	ephemeralFactory := ephemeral.NewFactory(
+		bigcache.Backend(),
+		redis.Backend(),
+	)
 
 	l.Info("Reading config...")
 
@@ -74,57 +80,39 @@ func ProduceServer() *Server {
 		l.WithError(err).Warn("Unable to watch config")
 	}
 
-	persist, ephemeral, err := setupStorage(l, cfg)
+	persist, err := persistFactory.New(string(cfg.Database.Backend), context.TODO(), l, cfg)
 	if err != nil {
-		l.WithError(err).Fatal("Failed to setup storage")
+		return nil, err
+	}
+
+	ephemeral, err := ephemeralFactory.New(string(cfg.Epheremal.Backend), context.TODO(), l, cfg)
+	if err != nil {
+		return nil, err
 	}
 
 	keyManager, err := tryMakeKeyManager(cfg.PrivateKeyPath, cfg.PublicKeyPath)
 	if err != nil {
-		l.WithError(err).Fatal("Failed to initialize key manager")
+		return nil, err
 	}
 
-	s := newServer(l, cfg)
-	registerServices := api.Setup(l, s)
-
-	registerServices(
+	s := newFiber(l, cfg)
+	api.Setup(l, s)(
 		authv1.NewAuthServiceHandler(
 			authv1impl.New(keyManager, ephemeral, persist),
 		),
 	)
 
-	l.Info(formatStartup(cfg.Address, cfg.Port))
-
-	return &Server{s, cfg}
+	return &Server{s, cfg, l}, nil
 }
 
 // Listen begins listening to the configured port.
 func (s *Server) Listen() error {
+	s.l.Info(formatStartup(s.cfg.Address, s.cfg.Port))
+
 	return fmt.Errorf("error occurred while listening %w", s.App.Listen(s.cfg.Address+":"+strconv.Itoa(s.cfg.Port)))
 }
 
-func setupStorage(l log.Interface, cfg *config.Config) (pb persist.Database, eb ephemeral.Database, err error) {
-	persistFactory, err := persist.GetBackend(string(cfg.Database.Backend))
-	if err != nil {
-		return
-	}
-
-	pb, err = persistFactory(context.TODO(), l, cfg)
-	if err != nil {
-		return
-	}
-
-	ephemeralFactory, err := ephemeral.GetBackend(string(cfg.Epheremal.Backend))
-	if err != nil {
-		return
-	}
-
-	eb, err = ephemeralFactory(context.TODO(), l, cfg)
-
-	return
-}
-
-func newServer(l log.Interface, cfg *config.Config) *fiber.App {
+func newFiber(l log.Interface, cfg *config.Config) *fiber.App {
 	s := fiber.New(fiber.Config{
 		DisableStartupMessage: true,
 		ErrorHandler:          api.FiberErrorHandler(l, cfg),

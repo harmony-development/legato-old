@@ -23,20 +23,18 @@ type database struct {
 	u *users
 }
 
-func (d *database) Sessions() persist.Sessions {
-	return d.s
+type backend struct{}
+
+func Backend() persist.Backend {
+	return backend{}
 }
 
-func (d *database) Users() persist.Users {
-	return d.u
-}
-
-func init() {
-	persist.RegisterBackend("postgres", New)
+func (b backend) Name() string {
+	return "postgres"
 }
 
 // New creates a new persistent backend using postgres.
-func New(ctx context.Context, l log.Interface, cfg *config.Config) (persist.Database, error) {
+func (b backend) New(ctx context.Context, l log.Interface, cfg *config.Config) (persist.Database, error) {
 	username, password, host, port, db :=
 		cfg.Database.Postgres.Username,
 		cfg.Database.Postgres.Password,
@@ -63,4 +61,12 @@ func New(ctx context.Context, l log.Interface, cfg *config.Config) (persist.Data
 	return &database{
 		queries: q,
 	}, nil
+}
+
+func (d *database) Sessions() persist.Sessions {
+	return d.s
+}
+
+func (d *database) Users() persist.Users {
+	return d.u
 }

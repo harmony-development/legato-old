@@ -19,12 +19,18 @@ type database struct {
 	db *gorm.DB
 }
 
-func init() {
-	persist.RegisterBackend("sqlite", New)
+type backend struct{}
+
+func Backend() persist.Backend {
+	return backend{}
+}
+
+func (b backend) Name() string {
+	return "sqlite"
 }
 
 // New creates a new persistent backend using sqlite.
-func New(ctx context.Context, l log.Interface, cfg *config.Config) (persist.Database, error) {
+func (b backend) New(ctx context.Context, l log.Interface, cfg *config.Config) (persist.Database, error) {
 	db, err := gorm.Open(sqlite.Open(cfg.Database.SQLite.File), &gorm.Config{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %+w", err)
