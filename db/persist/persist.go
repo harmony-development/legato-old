@@ -8,13 +8,13 @@ package persist
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/apex/log"
 	"github.com/harmony-development/legato/config"
+	"github.com/harmony-development/legato/errwrap"
 )
 
-const DatabaseNotFoundError = "database not found"
+var ErrDatabaseNotFound = errors.New("backend not found")
 
 // Database handles access to long-lived data.
 type Database interface {
@@ -43,8 +43,10 @@ func NewFactory(backends ...Backend) Factory {
 func (b Factory) New(name string, ctx context.Context, l log.Interface, cfg *config.Config) (Database, error) {
 	backend, ok := b[name]
 	if !ok {
-		return nil, fmt.Errorf("%w: %s", errors.New(DatabaseNotFoundError), name)
+		return nil, errwrap.Wrapf(ErrDatabaseNotFound, "unknown persist backend %s", name)
 	}
 
-	return backend.New(ctx, l, cfg)
+	db, err := backend.New(ctx, l, cfg)
+
+	return db, errwrap.Wrap(err, "failed to create persist backend")
 }
