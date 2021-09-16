@@ -18,10 +18,24 @@ func (db *users) Add(ctx context.Context, pers persist.UserInformation, ext pers
 	panic("unimplemented")
 }
 
-func (db *users) Get(ctx context.Context, id uint64) (ui persist.UserInformation, eui persist.ExtendedUserInformation, err error) {
+func (db *users) Get(
+	ctx context.Context,
+	id uint64,
+) (
+	ui persist.UserInformation,
+	eui persist.ExtendedUserInformation,
+	err error,
+) {
 	panic("unimplemented")
 }
 
-func (db *users) GetLocalByEmail(ctx context.Context, email string) (persist.UserInformation, persist.LocalUserInformation, error) {
+func (db *users) GetLocalByEmail(
+	ctx context.Context,
+	email string,
+) (
+	persist.UserInformation,
+	persist.LocalUserInformation,
+	error,
+) {
 	panic("unimplemented")
 }

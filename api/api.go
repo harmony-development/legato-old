@@ -72,21 +72,21 @@ func FiberErrorHandler(l log.Interface, cfg *config.Config) fiber.ErrorHandler {
 
 			// nolint
 			return c.Status(http.StatusBadRequest).Send(data)
-		} else {
-			err := &harmonytypesv1.Error{
-				Identifier: ErrorInternalServerError,
-			}
-			if cfg.Debug.RespondWithErrors {
-				err.HumanMessage = e.Error()
-			}
-
-			data, marshalErr := server.MarshalHRPC(err, contentType)
-			if marshalErr != nil {
-				return errwrap.Wrapf(marshalErr, "failed to marshal error: (%s, %v)", contentType, err)
-			}
-
-			// nolint
-			return c.Status(http.StatusInternalServerError).Send(data)
 		}
+
+		err := &harmonytypesv1.Error{
+			Identifier: ErrorInternalServerError,
+		}
+		if cfg.Debug.RespondWithErrors {
+			err.HumanMessage = e.Error()
+		}
+
+		data, marshalErr := server.MarshalHRPC(err, contentType)
+		if marshalErr != nil {
+			return errwrap.Wrapf(marshalErr, "failed to marshal error: (%s, %v)", contentType, err)
+		}
+
+		// nolint
+		return c.Status(http.StatusInternalServerError).Send(data)
 	}
 }

@@ -6,15 +6,15 @@ package authv1impl
 
 import (
 	"context"
-	"fmt"
-	"math/rand"
 
 	"github.com/harmony-development/legato/api"
+	"github.com/harmony-development/legato/config"
 	"github.com/harmony-development/legato/db/ephemeral"
 	"github.com/harmony-development/legato/db/persist"
 	dynamicauth "github.com/harmony-development/legato/dynamic_auth"
 	"github.com/harmony-development/legato/errwrap"
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
+	"github.com/harmony-development/legato/id"
 	"github.com/harmony-development/legato/key"
 	"github.com/thanhpk/randstr"
 	"golang.org/x/crypto/bcrypt"
@@ -34,6 +34,8 @@ type AuthV1 struct {
 	keyManager   key.Manager
 	eph          ephemeral.Database
 	persist      persist.Database
+	cfg          *config.Config
+	idGen        id.Generator
 	steps        map[string]dynamicauth.Step
 	formHandlers map[string]formHandlerFunc
 }
@@ -47,11 +49,19 @@ func toStepMap(steps ...dynamicauth.Step) map[string]dynamicauth.Step {
 	return ret
 }
 
-func New(keyManager key.Manager, eph ephemeral.Database, persist persist.Database) *AuthV1 {
+func New(
+	keyManager key.Manager,
+	eph ephemeral.Database,
+	persist persist.Database,
+	idGen id.Generator,
+	cfg *config.Config,
+) *AuthV1 {
 	a := &AuthV1{
 		keyManager: keyManager,
 		eph:        eph,
 		persist:    persist,
+		cfg:        cfg,
+		idGen:      idGen,
 		steps: toStepMap(
 			initialStep,
 			loginStep,
@@ -77,13 +87,13 @@ func (v1 *AuthV1) Key(context.Context, *authv1.KeyRequest) (*authv1.KeyResponse,
 }
 
 func (v1 *AuthV1) BeginAuth(c context.Context, r *authv1.BeginAuthRequest) (*authv1.BeginAuthResponse, error) {
-	id := randstr.Hex(16)
-	if err := v1.eph.SetStep(c, id, initialStep.ID()); err != nil {
+	sessionID := randstr.Hex(v1.cfg.AuthIDLength)
+	if err := v1.eph.SetStep(c, sessionID, initialStep.ID()); err != nil {
 		return nil, errwrap.Wrap(err, "failed to set step")
 	}
 
 	return &authv1.BeginAuthResponse{
-		AuthId: id,
+		AuthId: sessionID,
 	}, nil
 }
 
@@ -102,7 +112,14 @@ func (v1 *AuthV1) NextStep(ctx context.Context, r *authv1.NextStepRequest) (*aut
 	}, err
 }
 
-func (v1 *AuthV1) handleStep(ctx context.Context, currentStep dynamicauth.Step, r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
+func (v1 *AuthV1) handleStep(
+	ctx context.Context,
+	currentStep dynamicauth.Step,
+	r *authv1.NextStepRequest,
+) (
+	*authv1.AuthStep,
+	error,
+) {
 	switch currentStep := currentStep.(type) {
 	case *dynamicauth.ChoiceStep:
 		return v1.choiceHandler(ctx, currentStep, r)
@@ -123,7 +140,14 @@ func (v1 *AuthV1) handleStep(ctx context.Context, currentStep dynamicauth.Step, 
 }
 
 // choiceHandler contains logic related to any choice step.
-func (v1 *AuthV1) choiceHandler(ctx context.Context, choiceStep *dynamicauth.ChoiceStep, r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
+func (v1 *AuthV1) choiceHandler(
+	ctx context.Context,
+	choiceStep *dynamicauth.ChoiceStep,
+	r *authv1.NextStepRequest,
+) (
+	*authv1.AuthStep,
+	error,
+) {
 	c := r.GetChoice()
 	if c == nil {
 		return choiceStep.ToProtoV1(), nil
@@ -138,11 +162,19 @@ func (v1 *AuthV1) choiceHandler(ctx context.Context, choiceStep *dynamicauth.Cho
 	}
 
 	nextStep := v1.steps[c.Choice]
+
 	return nextStep.ToProtoV1(), nil
 }
 
 // loginFormHandler handles the login form step.
-func (v1 *AuthV1) loginFormHandler(c context.Context, submission *authv1.NextStepRequest_Form, r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
+func (v1 *AuthV1) loginFormHandler(
+	c context.Context,
+	submission *authv1.NextStepRequest_Form,
+	r *authv1.NextStepRequest,
+) (
+	*authv1.AuthStep,
+	error,
+) {
 	email := submission.Fields[0].GetString_()
 	provided := submission.Fields[1].GetBytes()
 
@@ -170,11 +202,22 @@ func (v1 *AuthV1) loginFormHandler(c context.Context, submission *authv1.NextSte
 }
 
 // registerHandler handles the register form step.
-func (v1 *AuthV1) registerHandler(c context.Context, submission *authv1.NextStepRequest_Form, r *authv1.NextStepRequest) (*authv1.AuthStep, error) {
+func (v1 *AuthV1) registerHandler(
+	c context.Context,
+	submission *authv1.NextStepRequest_Form,
+	r *authv1.NextStepRequest,
+) (
+	*authv1.AuthStep,
+	error,
+) {
 	email := submission.Fields[0].GetString_()
 	username := submission.Fields[1].GetString_()
 	password := submission.Fields[2].GetBytes()
-	id := rand.Uint64()
+
+	id, err := v1.idGen.NextID()
+	if err != nil {
+		return nil, errwrap.Wrap(err, "unable to generate new user ID")
+	}
 
 	pass, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
 	if err != nil {
@@ -206,14 +249,14 @@ func (v1 *AuthV1) registerHandler(c context.Context, submission *authv1.NextStep
 }
 
 func (v1 *AuthV1) finishAuth(c context.Context, authID string, userID uint64) (*authv1.Session, error) {
-	sessionID := randstr.Hex(16)
+	sessionID := randstr.Hex(v1.cfg.AuthIDLength)
 
 	if err := v1.persist.Sessions().Add(c, sessionID, userID); err != nil {
-		return nil, fmt.Errorf("failed to add session %w", err)
+		return nil, errwrap.Wrap(err, "failed to add session")
 	}
 
 	if err := v1.eph.DeleteAuthID(c, authID); err != nil {
-		return nil, fmt.Errorf("failed to delete auth ID %w", err)
+		return nil, errwrap.Wrap(err, "failed to delete auth ID")
 	}
 
 	return &authv1.Session{

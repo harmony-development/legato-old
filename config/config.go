@@ -9,7 +9,6 @@ import (
 	// for embedding default config.
 	_ "embed"
 	"errors"
-	"fmt"
 	"os"
 
 	"github.com/fsnotify/fsnotify"
@@ -29,6 +28,7 @@ type Config struct {
 	PublicKeyPath  string `yaml:"publicKeyPath"`
 	PrivateKeyPath string `yaml:"privateKeyPath"`
 	AuthIDLength   int    `yaml:"authIdLength"`
+	IDStart        int64  `yaml:"idStart"`
 	Debug          Debug
 	Database       Database
 	Epheremal      Epheremal
@@ -40,13 +40,13 @@ type Debug struct {
 }
 
 type Database struct {
-	Backend  PersistBackend
+	Backend  string
 	Postgres *PostgresConfig
 	SQLite   *SQLiteConfig
 }
 
 type Epheremal struct {
-	Backend EpheremalBackend
+	Backend string
 	Redis   *RedisConfig
 }
 
@@ -71,6 +71,8 @@ type Reader struct {
 	ConfigName string
 }
 
+var ErrDefaultConfigCreated = errors.New("default configuration has been created, please edit it")
+
 func New(name string) *Reader {
 	return &Reader{
 		ConfigName: name + ".yaml",
@@ -87,17 +89,17 @@ func (c *Reader) ParseConfig() (*Config, error) {
 			// nolint
 			err := os.WriteFile(c.ConfigName, defaultConfig, 0o660)
 			if err != nil {
-				return nil, fmt.Errorf("failed to write default config: %w", err)
+				return nil, errwrap.Wrap(err, "failed to write default config")
 			}
 
-			return nil, errors.New("default configuration has been created, please edit it")
+			return nil, ErrDefaultConfigCreated
 		}
 
-		return nil, fmt.Errorf("failed to read config file: %+w", err)
+		return nil, errwrap.Wrap(err, "failed to read config file")
 	}
 
 	if err := yaml.Unmarshal(dat, conf); err != nil {
-		return nil, fmt.Errorf("failed to parse config file: %+w", err)
+		return nil, errwrap.Wrap(err, "failed to parse config file")
 	}
 
 	return conf, nil

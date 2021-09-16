@@ -6,8 +6,6 @@
 
 package gen
 
-import ()
-
 type Authsession struct {
 	Sessionid string
 	Userid    int64

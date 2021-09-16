@@ -40,7 +40,7 @@ func NewFactory(backends ...Backend) Factory {
 
 // New creates a new backend by name,
 // or returns an error if there isn't one with that name or it fails to construct.
-func (b Factory) New(name string, ctx context.Context, l log.Interface, cfg *config.Config) (Database, error) {
+func (b Factory) New(ctx context.Context, name string, l log.Interface, cfg *config.Config) (Database, error) {
 	backend, ok := b[name]
 	if !ok {
 		return nil, errwrap.Wrapf(ErrDatabaseNotFound, "unknown persist backend %s", name)

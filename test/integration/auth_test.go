@@ -23,13 +23,16 @@ func contains(s string, ss []string) bool {
 	return false
 }
 
-func test(s string, t *testing.T, i int, fn func(t *testing.T, i int)) {
+func test(t *testing.T, s string, i int, fn func(t *testing.T, i int)) {
+	t.Helper()
 	t.Logf("%sTesting %s", strings.Repeat("\t", i), s)
 	fn(t, i+1)
 }
 
 func beginAuth(client authv1.HTTPTestAuthServiceClient, authid *string) func(t *testing.T, i int) {
 	return func(t *testing.T, i int) {
+		t.Helper()
+
 		resp, err := client.BeginAuth(&authv1.BeginAuthRequest{})
 		if err != nil {
 			t.Fatalf("error: %s", err)
@@ -41,6 +44,8 @@ func beginAuth(client authv1.HTTPTestAuthServiceClient, authid *string) func(t *
 
 func firstAuthStep(client authv1.HTTPTestAuthServiceClient, authid, is string) func(t *testing.T, i int) {
 	return func(t *testing.T, i int) {
+		t.Helper()
+
 		resp, err := client.NextStep(&authv1.NextStepRequest{
 			AuthId: authid,
 		})
@@ -61,6 +66,8 @@ func firstAuthStep(client authv1.HTTPTestAuthServiceClient, authid, is string) f
 
 func formAuthStep(client authv1.HTTPTestAuthServiceClient, authid, step string) func(t *testing.T, i int) {
 	return func(t *testing.T, i int) {
+		t.Helper()
+
 		resp, err := client.NextStep(&authv1.NextStepRequest{
 			AuthId: authid,
 			Step: &authv1.NextStepRequest_Choice_{
@@ -80,8 +87,16 @@ func formAuthStep(client authv1.HTTPTestAuthServiceClient, authid, step string) 
 	}
 }
 
-func register(client authv1.HTTPTestAuthServiceClient, authid, username, email, password string) func(t *testing.T, i int) {
+func register(
+	client authv1.HTTPTestAuthServiceClient,
+	authid,
+	username,
+	email,
+	password string,
+) func(t *testing.T, i int) {
 	return func(t *testing.T, i int) {
+		t.Helper()
+
 		resp, err := client.NextStep(&authv1.NextStepRequest{
 			AuthId: authid,
 			Step: &authv1.NextStepRequest_Form_{
@@ -121,6 +136,8 @@ func register(client authv1.HTTPTestAuthServiceClient, authid, username, email, 
 
 func login(client authv1.HTTPTestAuthServiceClient, authid, email, password string) func(t *testing.T, i int) {
 	return func(t *testing.T, i int) {
+		t.Helper()
+
 		resp, err := client.NextStep(&authv1.NextStepRequest{
 			AuthId: authid,
 			Step: &authv1.NextStepRequest_Form_{
@@ -153,6 +170,8 @@ func login(client authv1.HTTPTestAuthServiceClient, authid, email, password stri
 	}
 }
 
+// nolint
+// Integration tests cannot be parallelized
 func TestAuth(t *testing.T) {
 	l := logger.NewNoop()
 
@@ -164,7 +183,7 @@ func TestAuth(t *testing.T) {
 	client := authv1.HTTPTestAuthServiceClient{}
 	client.Client = serv
 
-	test("client auth", t, 0, func(t *testing.T, i int) {
+	test(t, "client auth", 0, func(t *testing.T, i int) {
 		var authid string
 		const (
 			username = "kili-test"
@@ -172,16 +191,16 @@ func TestAuth(t *testing.T) {
 			password = "kala-test"
 		)
 
-		test("begin auth", t, i, beginAuth(client, &authid))
-		test("first auth step", t, i, firstAuthStep(client, authid, "register"))
-		test("get register form", t, i, formAuthStep(client, authid, "register"))
+		test(t, "begin auth", i, beginAuth(client, &authid))
+		test(t, "first auth step", i, firstAuthStep(client, authid, "register"))
+		test(t, "get register form", i, formAuthStep(client, authid, "register"))
 
-		test("register account", t, i, register(client, authid, username, email, password))
+		test(t, "register account", i, register(client, authid, username, email, password))
 
-		test("begin auth again", t, i, beginAuth(client, &authid))
-		test("first auth step again", t, i, firstAuthStep(client, authid, "login"))
-		test("get login form", t, i, formAuthStep(client, authid, "login"))
+		test(t, "begin auth again", i, beginAuth(client, &authid))
+		test(t, "first auth step again", i, firstAuthStep(client, authid, "login"))
+		test(t, "get login form", i, formAuthStep(client, authid, "login"))
 
-		test("login account", t, i, login(client, authid, email, password))
+		test(t, "login account", i, login(client, authid, email, password))
 	})
 }

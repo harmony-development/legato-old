@@ -6,6 +6,7 @@ address: 0.0.0.0
 port: 2289
 privateKeyPath: harmony-key.pub
 publicKeyPath: harmony-key.pem
+idStart: 1627344000
 database:
   backend: postgres
   postgres:
