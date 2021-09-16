@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 run:
+  timeout: 5m
   skip-files:
     - ".*\\.pb\\.go"
     - ".*\\.hrpc\\.*.go"
