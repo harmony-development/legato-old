@@ -13,6 +13,7 @@ import (
 	"github.com/harmony-development/legato/config"
 	"github.com/harmony-development/legato/db/persist"
 	"github.com/harmony-development/legato/db/persist/sql/gen"
+	"github.com/harmony-development/legato/errwrap"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
@@ -53,7 +54,7 @@ func (b backend) New(ctx context.Context, l log.Interface, cfg *config.Config) (
 
 	conn, err := pgxpool.Connect(ctx, connString)
 	if err != nil {
-		return nil, err
+		return nil, errwrap.Wrap(err, "failed to connect to postgres")
 	}
 
 	q := gen.New(conn)

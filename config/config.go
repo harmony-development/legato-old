@@ -5,12 +5,15 @@
 package config
 
 import (
+
+	// for embedding default config.
 	_ "embed"
 	"errors"
 	"fmt"
 	"os"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/harmony-development/legato/errwrap"
 	"gopkg.in/yaml.v3"
 )
 
@@ -64,17 +67,17 @@ type SQLiteConfig struct {
 	File string
 }
 
-type ConfigReader struct {
+type Reader struct {
 	ConfigName string
 }
 
-func New(name string) *ConfigReader {
-	return &ConfigReader{
+func New(name string) *Reader {
+	return &Reader{
 		ConfigName: name + ".yaml",
 	}
 }
 
-func (c *ConfigReader) ParseConfig() (*Config, error) {
+func (c *Reader) ParseConfig() (*Config, error) {
 	conf := &Config{}
 
 	dat, err := os.ReadFile(c.ConfigName)
@@ -100,10 +103,10 @@ func (c *ConfigReader) ParseConfig() (*Config, error) {
 	return conf, nil
 }
 
-func (c *ConfigReader) WatchConfig(onChange func(fsnotify.Event), onError func(error)) error {
+func (c *Reader) WatchConfig(onChange func(fsnotify.Event), onError func(error)) error {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		return err
+		return errwrap.Wrap(err, "failed to start fsnotify watcher")
 	}
 
 	go func() {
@@ -118,7 +121,7 @@ func (c *ConfigReader) WatchConfig(onChange func(fsnotify.Event), onError func(e
 	}()
 
 	if err := watcher.Add(c.ConfigName); err != nil {
-		return err
+		return errwrap.Wrap(err, "failed to add config to watcher")
 	}
 
 	return nil

@@ -5,12 +5,14 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/apex/log"
 	"github.com/gofiber/fiber/v2"
 	"github.com/harmony-development/hrpc/server"
 	"github.com/harmony-development/legato/config"
+	"github.com/harmony-development/legato/errwrap"
 	harmonytypesv1 "github.com/harmony-development/legato/gen/harmonytypes/v1"
 )
 
@@ -21,12 +23,14 @@ func FiberRPCHandler(handler server.RawHandler) fiber.Handler {
 		if err != nil {
 			return err
 		}
-		return c.Send(resp)
+
+		return errwrap.Wrap(c.Send(resp), "")
 	}
 }
 
 func RegisterHandlers(l log.Interface, app *fiber.App, all ...server.HRPCServiceHandler) {
 	l.Info("Registering services...")
+
 	for _, handler := range all {
 		serviceLog := l.WithFields(log.Fields{
 			"service": handler.Name(),
@@ -55,28 +59,33 @@ func FiberErrorHandler(l log.Interface, cfg *config.Config) fiber.ErrorHandler {
 
 		contentType := string(c.Request().Header.Peek("Content-Type"))
 
-		switch v := e.(type) {
-		case *Error:
+		var herr *Error
+		if errors.As(e, &herr) {
 			data, err := server.MarshalHRPC(&harmonytypesv1.Error{
-				Identifier:   v.Identifier,
-				HumanMessage: v.HumanMessage,
-				MoreDetails:  v.MoreDetails,
+				Identifier:   herr.Identifier,
+				HumanMessage: herr.HumanMessage,
+				MoreDetails:  herr.MoreDetails,
 			}, contentType)
 			if err != nil {
-				return err
+				return errwrap.Wrapf(err, "failed to wrap %v", data)
 			}
+
+			// nolint
 			return c.Status(http.StatusBadRequest).Send(data)
-		default:
+		} else {
 			err := &harmonytypesv1.Error{
 				Identifier: ErrorInternalServerError,
 			}
 			if cfg.Debug.RespondWithErrors {
-				err.HumanMessage = v.Error()
+				err.HumanMessage = e.Error()
 			}
+
 			data, marshalErr := server.MarshalHRPC(err, contentType)
 			if marshalErr != nil {
-				return marshalErr
+				return errwrap.Wrapf(marshalErr, "failed to marshal error: (%s, %v)", contentType, err)
 			}
+
+			// nolint
 			return c.Status(http.StatusInternalServerError).Send(data)
 		}
 	}

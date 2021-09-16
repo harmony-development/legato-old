@@ -8,10 +8,10 @@ package ephemeral
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/apex/log"
 	"github.com/harmony-development/legato/config"
+	"github.com/harmony-development/legato/errwrap"
 )
 
 type authDB interface {
@@ -25,9 +25,9 @@ type Database interface {
 	authDB
 }
 
-const (
-	DatabaseNotFoundError = "database not found"
-	StepNotFoundErr       = "step not found"
+var (
+	ErrDatabaseNotFound = errors.New("database not found")
+	ErrStepNotFound     = errors.New("step not found")
 )
 
 type Backend interface {
@@ -48,11 +48,13 @@ func NewFactory(backends ...Backend) Factory {
 
 // New creates a new backend by name,
 // or returns an error if there isn't one with that name or it fails to construct.
-func (b Factory) New(name string, ctx context.Context, l log.Interface, cfg *config.Config) (Database, error) {
+func (b Factory) New(ctx context.Context, name string, l log.Interface, cfg *config.Config) (Database, error) {
 	backend, ok := b[name]
 	if !ok {
-		return nil, fmt.Errorf("%w: %s", errors.New(DatabaseNotFoundError), name)
+		return nil, errwrap.Wrap(ErrDatabaseNotFound, name)
 	}
 
-	return backend.New(ctx, l, cfg)
+	db, err := backend.New(ctx, l, cfg)
+
+	return db, errwrap.Wrap(err, "failed to create backend")
 }

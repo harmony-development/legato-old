@@ -13,35 +13,37 @@ import (
 	"github.com/harmony-development/legato/db/ephemeral"
 	"github.com/harmony-development/legato/db/persist"
 	dynamicauth "github.com/harmony-development/legato/dynamic_auth"
+	"github.com/harmony-development/legato/errwrap"
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
 	"github.com/harmony-development/legato/key"
 	"github.com/thanhpk/randstr"
 	"golang.org/x/crypto/bcrypt"
 )
 
-type formHandlerFunc = func(c context.Context, submission *authv1.NextStepRequest_Form, r *authv1.NextStepRequest) (*authv1.AuthStep, error)
+type formHandlerFunc = func(
+	c context.Context,
+	submission *authv1.NextStepRequest_Form,
+	r *authv1.NextStepRequest,
+) (
+	*authv1.AuthStep,
+	error,
+)
 
 type AuthV1 struct {
 	authv1.DefaultAuthService
 	keyManager   key.Manager
 	eph          ephemeral.Database
 	persist      persist.Database
+	steps        map[string]dynamicauth.Step
 	formHandlers map[string]formHandlerFunc
 }
-
-var steps = toStepMap(
-	initialStep,
-	loginStep,
-	registerStep,
-	otherOptionsStep,
-	resetPasswordStep,
-)
 
 func toStepMap(steps ...dynamicauth.Step) map[string]dynamicauth.Step {
 	ret := map[string]dynamicauth.Step{}
 	for _, step := range steps {
 		ret[step.ID()] = step
 	}
+
 	return ret
 }
 
@@ -50,17 +52,21 @@ func New(keyManager key.Manager, eph ephemeral.Database, persist persist.Databas
 		keyManager: keyManager,
 		eph:        eph,
 		persist:    persist,
+		steps: toStepMap(
+			initialStep,
+			loginStep,
+			registerStep,
+			otherOptionsStep,
+			resetPasswordStep,
+		),
 	}
 
-	return &AuthV1{
-		keyManager: keyManager,
-		eph:        eph,
-		persist:    persist,
-		formHandlers: map[string]formHandlerFunc{
-			loginStep.ID():    a.loginFormHandler,
-			registerStep.ID(): a.registerHandler,
-		},
+	a.formHandlers = map[string]formHandlerFunc{
+		loginStep.ID():    a.loginFormHandler,
+		registerStep.ID(): a.registerHandler,
 	}
+
+	return a
 }
 
 // Key responds with the homeserver's public key.
@@ -72,10 +78,10 @@ func (v1 *AuthV1) Key(context.Context, *authv1.KeyRequest) (*authv1.KeyResponse,
 
 func (v1 *AuthV1) BeginAuth(c context.Context, r *authv1.BeginAuthRequest) (*authv1.BeginAuthResponse, error) {
 	id := randstr.Hex(16)
-	// typesafe ftw
 	if err := v1.eph.SetStep(c, id, initialStep.ID()); err != nil {
-		return nil, err
+		return nil, errwrap.Wrap(err, "failed to set step")
 	}
+
 	return &authv1.BeginAuthResponse{
 		AuthId: id,
 	}, nil
@@ -89,7 +95,8 @@ func (v1 *AuthV1) NextStep(ctx context.Context, r *authv1.NextStepRequest) (*aut
 		return nil, api.NewError(api.ErrorBadAuthID)
 	}
 
-	res, err := v1.handleStep(ctx, steps[currentStepID], r)
+	res, err := v1.handleStep(ctx, v1.steps[currentStepID], r)
+
 	return &authv1.NextStepResponse{
 		Step: res,
 	}, err
@@ -104,12 +111,14 @@ func (v1 *AuthV1) handleStep(ctx context.Context, currentStep dynamicauth.Step, 
 		if formSubmission == nil {
 			return currentStep.ToProtoV1(), nil
 		}
+
 		if err := currentStep.ValidateFormV1(formSubmission); err != nil {
 			return nil, api.NewError(api.ErrorBadFormData)
 		}
+
 		return v1.formHandlers[currentStep.ID()](ctx, formSubmission, r)
 	default:
-		return nil, fmt.Errorf("user is in an invalid step: %v", currentStep)
+		return nil, errwrap.Wrap(api.NewError(api.ErrorBadStep), "invalid auth step")
 	}
 }
 
@@ -119,6 +128,7 @@ func (v1 *AuthV1) choiceHandler(ctx context.Context, choiceStep *dynamicauth.Cho
 	if c == nil {
 		return choiceStep.ToProtoV1(), nil
 	}
+
 	if !choiceStep.HasOption(c.Choice) {
 		return nil, api.NewError(api.ErrorBadChoice)
 	}
@@ -127,7 +137,7 @@ func (v1 *AuthV1) choiceHandler(ctx context.Context, choiceStep *dynamicauth.Cho
 		return nil, api.NewError(api.ErrorInternalServerError)
 	}
 
-	nextStep := steps[c.Choice]
+	nextStep := v1.steps[c.Choice]
 	return nextStep.ToProtoV1(), nil
 }
 
@@ -140,6 +150,7 @@ func (v1 *AuthV1) loginFormHandler(c context.Context, submission *authv1.NextSte
 	if err != nil {
 		return nil, api.NewError(api.ErrorBadCredentials)
 	}
+
 	if err := bcrypt.CompareHashAndPassword(local.Password, provided); err != nil {
 		// intentionally generic error to give less information to the user
 		return nil, api.NewError(api.ErrorBadCredentials)
@@ -178,7 +189,7 @@ func (v1 *AuthV1) registerHandler(c context.Context, submission *authv1.NextStep
 		Password: pass,
 	})
 	if err != nil {
-		return nil, err
+		return nil, errwrap.Wrap(err, "failed to add user")
 	}
 
 	// login succeessful
@@ -200,12 +211,13 @@ func (v1 *AuthV1) finishAuth(c context.Context, authID string, userID uint64) (*
 	if err := v1.persist.Sessions().Add(c, sessionID, userID); err != nil {
 		return nil, fmt.Errorf("failed to add session %w", err)
 	}
+
 	if err := v1.eph.DeleteAuthID(c, authID); err != nil {
 		return nil, fmt.Errorf("failed to delete auth ID %w", err)
 	}
 
 	return &authv1.Session{
-		UserId:       uint64(userID),
+		UserId:       userID,
 		SessionToken: sessionID,
 	}, nil
 }

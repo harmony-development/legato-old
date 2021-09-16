@@ -14,6 +14,7 @@ import (
 
 func main() {
 	l := logger.New(os.Stdin)
+
 	server, err := server.New(l)
 	if err != nil {
 		log.Fatal(err)

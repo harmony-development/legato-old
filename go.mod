@@ -21,7 +21,6 @@ require (
 require (
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/go-redis/redis v6.15.9+incompatible // indirect
-	github.com/golang/protobuf v1.5.2
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/mattn/go-sqlite3 v1.14.8 // indirect
 	github.com/onsi/gomega v1.15.0 // indirect

@@ -18,10 +18,12 @@ type sessions struct {
 
 func (db *sessions) Get(ctx context.Context, sessionID string) (uint64, error) {
 	var ses session
+
 	err := db.db.First(&ses, "id = ?", sessionID).Error
 	if err != nil {
 		return 0, err
 	}
+
 	return ses.UserID, nil
 }
 

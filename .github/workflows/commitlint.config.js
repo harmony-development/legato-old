@@ -15,6 +15,7 @@ module.exports = {
       2,
       "always",
       [
+        "all",
         "codegen",
         "db",
         "sql",
