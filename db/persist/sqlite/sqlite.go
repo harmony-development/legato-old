@@ -6,11 +6,11 @@ package sqlite
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/apex/log"
 	"github.com/harmony-development/legato/config"
 	"github.com/harmony-development/legato/db/persist"
+	"github.com/harmony-development/legato/errwrap"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -33,7 +33,7 @@ func (b backend) Name() string {
 func (b backend) New(ctx context.Context, l log.Interface, cfg *config.Config) (persist.Database, error) {
 	db, err := gorm.Open(sqlite.Open(cfg.Database.SQLite.File), &gorm.Config{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to open database: %+w", err)
+		return nil, errwrap.Wrap(err, "failed to open sqlite database")
 	}
 
 	err = db.AutoMigrate(
@@ -43,7 +43,7 @@ func (b backend) New(ctx context.Context, l log.Interface, cfg *config.Config) (
 		&localuser{},
 	)
 	if err != nil {
-		return nil, fmt.Errorf("database migration failed: %+w", err)
+		return nil, errwrap.Wrap(err, "database migration failed for sqlite")
 	}
 
 	return &database{

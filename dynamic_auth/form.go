@@ -20,6 +20,8 @@ type FormField struct {
 	FieldType string
 }
 
+var ErrInvalidForm = errors.New("invalid form")
+
 func NewFormStep(fields []FormField, id string, canGoBack bool) *FormStep {
 	return &FormStep{
 		&BaseStep{
@@ -53,7 +55,8 @@ func (s *FormStep) ToProtoV1() *authv1.AuthStep {
 
 func (s *FormStep) ValidateFormV1(form *authv1.NextStepRequest_Form) error {
 	if len(form.Fields) < len(s.Fields) {
-		return errors.New("invalid form")
+		return ErrInvalidForm
 	}
+
 	return nil
 }

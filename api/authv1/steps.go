@@ -6,6 +6,8 @@ package authv1impl
 
 import dynamicauth "github.com/harmony-development/legato/dynamic_auth"
 
+// nolint
+// this is a protocol-level constant
 var initialStep = dynamicauth.NewChoiceStep(
 	[]string{
 		"login",

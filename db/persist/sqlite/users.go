@@ -57,33 +57,51 @@ func (db *users) Add(ctx context.Context, pers persist.UserInformation, ext pers
 	}
 }
 
-func (db *users) Get(ctx context.Context, id uint64) (ui persist.UserInformation, eui persist.ExtendedUserInformation, err error) {
+func (db *users) Get(
+	ctx context.Context,
+	id uint64,
+) (
+	persist.UserInformation,
+	persist.ExtendedUserInformation,
+	error,
+) {
 	var user user
 
-	err = db.db.Preload("Local").Preload("Foreign").First(&user, "id = ?", id).Error
+	err := db.db.Preload("Local").Preload("Foreign").First(&user, "id = ?", id).Error
 	if err != nil {
 		return persist.UserInformation{}, nil, err
 	}
 
-	ui.ID = user.ID
-	ui.Username = user.Username
+	userInfo := persist.UserInformation{
+		ID:       user.ID,
+		Username: user.Username,
+	}
+
+	var extendedUserInfo persist.ExtendedUserInformation
 
 	switch {
 	case user.Local != nil:
-		eui = persist.LocalUserInformation{
+		extendedUserInfo = persist.LocalUserInformation{
 			Email:    user.Local.Email,
 			Password: user.Local.Password,
 		}
 	case user.Foreign != nil:
-		eui = persist.ForeignUserInformation{}
+		extendedUserInfo = persist.ForeignUserInformation{}
 	default:
 		panic("unhandled / invalid db")
 	}
 
-	return
+	return userInfo, extendedUserInfo, err
 }
 
-func (db *users) GetLocalByEmail(ctx context.Context, email string) (persist.UserInformation, persist.LocalUserInformation, error) {
+func (db *users) GetLocalByEmail(
+	ctx context.Context,
+	email string,
+) (
+	persist.UserInformation,
+	persist.LocalUserInformation,
+	error,
+) {
 	var luser localuser
 
 	err := db.db.First(&luser, "email = ?", email).Error

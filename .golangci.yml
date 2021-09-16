@@ -9,4 +9,21 @@ run:
 linters:
   enable-all: true
   disable:
-    - gochecknoinits
+    - exhaustivestruct
+    # deprecated modules
+    - golint
+    - maligned
+    - scopelint
+    - interfacer
+linters-settings:
+  wrapcheck:
+    ignoreSigs:
+      - .Errorf(
+      - errors.New(
+      - errors.Unwrap(
+      - .Wrap(
+      - .Wrapf(
+      - .WithMessage(
+      - .WithMessagef(
+      - .WithStack(
+      - api.NewError(

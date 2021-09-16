@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/apex/log"
 	"github.com/fatih/color"
@@ -30,6 +31,7 @@ import (
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
 	"github.com/harmony-development/legato/key"
 	"github.com/harmony-development/legato/logger"
+	"github.com/sony/sonyflake"
 )
 
 const startupMessage = `Version %s
@@ -40,36 +42,39 @@ const startupMessage = `Version %s
         /___/ Commit %s
 `
 
+// nolint
+var persistFactory = persist.NewFactory(
+	postgres.Backend(),
+	sqlite.Backend(),
+)
+
+// nolint
+var ephemeralFactory = ephemeral.NewFactory(
+	bigcache.Backend(),
+	redis.Backend(),
+)
+
 // Server is an instance of Legato.
 type Server struct {
 	*fiber.App
-	cfg *config.Config
-	l   log.Interface
+	cfg       *config.Config
+	l         log.Interface
+	sonyflake *sonyflake.Sonyflake
 }
 
 // New creates a new server.
 func New(l log.Interface) (*Server, error) {
-	persistFactory := persist.NewFactory(
-		postgres.Backend(),
-		sqlite.Backend(),
-	)
-
-	ephemeralFactory := ephemeral.NewFactory(
-		bigcache.Backend(),
-		redis.Backend(),
-	)
-
 	cfg, err := newConfig(l, "configuration")
 	if err != nil {
 		return nil, err
 	}
 
-	persist, err := persistFactory.New(string(cfg.Database.Backend), context.TODO(), l, cfg)
+	persist, err := persistFactory.New(context.TODO(), cfg.Database.Backend, l, cfg)
 	if err != nil {
 		return nil, errwrap.Wrap(err, "failed to create persist backend")
 	}
 
-	ephemeral, err := ephemeralFactory.New(context.TODO(), string(cfg.Epheremal.Backend), l, cfg)
+	ephemeral, err := ephemeralFactory.New(context.TODO(), cfg.Epheremal.Backend, l, cfg)
 	if err != nil {
 		return nil, errwrap.Wrap(err, "failed to create ephemeral backend")
 	}
@@ -79,14 +84,18 @@ func New(l log.Interface) (*Server, error) {
 		return nil, err
 	}
 
+	sonyflake := sonyflake.NewSonyflake(sonyflake.Settings{
+		StartTime: time.UnixMilli(cfg.IDStart),
+	})
+
 	s := newFiber(l, cfg)
 	api.Setup(l, s)(
 		authv1.NewAuthServiceHandler(
-			authv1impl.New(keyManager, ephemeral, persist),
+			authv1impl.New(keyManager, ephemeral, persist, sonyflake, cfg),
 		),
 	)
 
-	return &Server{s, cfg, l}, nil
+	return &Server{s, cfg, l, sonyflake}, nil
 }
 
 // Listen begins listening to the configured port.
