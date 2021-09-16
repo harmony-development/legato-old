@@ -11,6 +11,7 @@ const (
 	ErrorBadChoice      = "h.bad-auth-choice"
 	ErrorBadFormData    = "h.bad-form-data"
 	ErrorBadCredentials = "h.bad-credentials"
+	ErrorBadStep        = "h.bad-step"
 
 	ErrorInternalServerError = "h.internal-server-error"
 	ErrorOther               = "h.other"

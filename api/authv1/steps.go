@@ -14,6 +14,8 @@ var initialStep = dynamicauth.NewChoiceStep(
 	}, "initial-step", false,
 )
 
+// nolint
+// this is a protocol-level constant
 var loginStep = dynamicauth.NewFormStep(
 	[]dynamicauth.FormField{
 		{Name: "email", FieldType: "email"},
@@ -21,6 +23,8 @@ var loginStep = dynamicauth.NewFormStep(
 	}, "login", true,
 )
 
+// nolint
+// this is a protocol-level constant
 var registerStep = dynamicauth.NewFormStep(
 	[]dynamicauth.FormField{
 		{Name: "email", FieldType: "email"},
@@ -29,12 +33,16 @@ var registerStep = dynamicauth.NewFormStep(
 	}, "register", true,
 )
 
+// nolint
+// this is a protocol-level constant
 var otherOptionsStep = dynamicauth.NewChoiceStep(
 	[]string{
 		"reset-password",
 	}, "other-options", true,
 )
 
+// nolint
+// this is a protocol-level constant
 var resetPasswordStep = dynamicauth.NewFormStep(
 	[]dynamicauth.FormField{
 		{Name: "email", FieldType: "email"},

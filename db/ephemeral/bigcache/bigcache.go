@@ -11,6 +11,7 @@ import (
 	"github.com/harmony-development/legato/config"
 	"github.com/harmony-development/legato/db/ephemeral"
 	"github.com/harmony-development/legato/db/ephemeral/kv"
+	"github.com/harmony-development/legato/errwrap"
 	"github.com/philippgille/gokv/bigcache"
 	"github.com/philippgille/gokv/encoding"
 )
@@ -31,7 +32,7 @@ func (backend) New(ctx context.Context, l log.Interface, cfg *config.Config) (ep
 		Codec: encoding.Gob,
 	})
 	if err != nil {
-		return nil, err
+		return nil, errwrap.Wrap(err, "failed to create bigcache store")
 	}
 
 	return kv.NewKVBackend(cache), nil

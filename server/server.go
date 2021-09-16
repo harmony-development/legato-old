@@ -26,6 +26,7 @@ import (
 	"github.com/harmony-development/legato/db/persist"
 	"github.com/harmony-development/legato/db/persist/postgres"
 	"github.com/harmony-development/legato/db/persist/sqlite"
+	"github.com/harmony-development/legato/errwrap"
 	authv1 "github.com/harmony-development/legato/gen/auth/v1"
 	"github.com/harmony-development/legato/key"
 	"github.com/harmony-development/legato/logger"
@@ -65,12 +66,12 @@ func New(l log.Interface) (*Server, error) {
 
 	persist, err := persistFactory.New(string(cfg.Database.Backend), context.TODO(), l, cfg)
 	if err != nil {
-		return nil, err
+		return nil, errwrap.Wrap(err, "failed to create persist backend")
 	}
 
-	ephemeral, err := ephemeralFactory.New(string(cfg.Epheremal.Backend), context.TODO(), l, cfg)
+	ephemeral, err := ephemeralFactory.New(context.TODO(), string(cfg.Epheremal.Backend), l, cfg)
 	if err != nil {
-		return nil, err
+		return nil, errwrap.Wrap(err, "failed to create ephemeral backend")
 	}
 
 	keyManager, err := tryMakeKeyManager(cfg.PrivateKeyPath, cfg.PublicKeyPath)
@@ -102,7 +103,7 @@ func newConfig(l log.Interface, name string) (*config.Config, error) {
 
 	cfg, err := configReader.ParseConfig()
 	if err != nil {
-		return nil, err
+		return nil, errwrap.Wrap(err, "failed to read config")
 	}
 
 	if err := configReader.WatchConfig(func(ev fsnotify.Event) {
@@ -115,7 +116,7 @@ func newConfig(l log.Interface, name string) (*config.Config, error) {
 		}
 		*cfg = *newConfig
 	}, func(error) {}); err != nil {
-		return nil, err
+		return nil, errwrap.Wrap(err, "failed to watch config")
 	}
 
 	return cfg, nil
