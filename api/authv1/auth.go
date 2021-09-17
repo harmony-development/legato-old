@@ -224,14 +224,13 @@ func (v1 *AuthV1) registerHandler(
 		return nil, api.NewError(api.ErrorInternalServerError)
 	}
 
-	err = v1.persist.Users().Add(c, persist.UserInformation{
+	if err := v1.persist.Users().Add(c, persist.UserInformation{
 		ID:       id,
 		Username: username,
 	}, persist.LocalUserInformation{
 		Email:    email,
 		Password: pass,
-	})
-	if err != nil {
+	}); err != nil {
 		return nil, errwrap.Wrap(err, "failed to add user")
 	}
 

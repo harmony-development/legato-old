@@ -87,9 +87,8 @@ func New(l log.Interface) (*Server, error) {
 	sonyflake := sonyflake.NewSonyflake(sonyflake.Settings{
 		StartTime: time.UnixMilli(cfg.IDStart),
 	})
-
 	s := newFiber(l, cfg)
-	api.Setup(l, s)(
+	api.RegisterHandlers(s, l, cfg,
 		authv1.NewAuthServiceHandler(
 			authv1impl.New(keyManager, ephemeral, persist, sonyflake, cfg),
 		),
@@ -165,18 +164,19 @@ func formatStartup(address string, port int) string {
 
 func tryMakeKeyManager(privKeyPath string, pubKeyPath string) (key.Manager, error) {
 	keyManager, err := key.NewEd25519KeyManagerFromFile(privKeyPath, pubKeyPath)
-	if err != nil && os.IsNotExist(err) {
-		if err := key.WriteEd25519KeysToFile(privKeyPath, pubKeyPath); err != nil {
-			return nil, fmt.Errorf("failed to save keys: %w", err)
-		}
-
-		keyManager, err := key.NewEd25519KeyManagerFromFile(privKeyPath, pubKeyPath)
-		if err != nil {
-			return nil, fmt.Errorf("failed to make key manager %w", err)
-		}
-
+	if err == nil {
 		return keyManager, nil
 	}
 
-	return keyManager, nil
+	if !os.IsNotExist(err) {
+		return nil, errwrap.Wrap(err, "unknown error creating key manager")
+	}
+
+	if err := key.WriteEd25519KeysToFile(privKeyPath, pubKeyPath); err != nil {
+		return nil, fmt.Errorf("failed to save keys: %w", err)
+	}
+
+	keyManager, err = key.NewEd25519KeyManagerFromFile(privKeyPath, pubKeyPath)
+
+	return keyManager, errwrap.Wrap(err, "failed to make key manager")
 }

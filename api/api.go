@@ -24,11 +24,11 @@ func FiberRPCHandler(handler server.RawHandler) fiber.Handler {
 			return err
 		}
 
-		return errwrap.Wrap(c.Send(resp), "")
+		return errwrap.Wrap(c.Send(resp), "failed to send response")
 	}
 }
 
-func RegisterHandlers(l log.Interface, app *fiber.App, all ...server.HRPCServiceHandler) {
+func RegisterHandlers(app *fiber.App, l log.Interface, cfg *config.Config, all ...server.HRPCServiceHandler) {
 	l.Info("Registering services...")
 
 	for _, handler := range all {
@@ -42,51 +42,44 @@ func RegisterHandlers(l log.Interface, app *fiber.App, all ...server.HRPCService
 	}
 }
 
-// Setup registers the Harmony protocol API.
-func Setup(l log.Interface, app *fiber.App) func(all ...server.HRPCServiceHandler) {
-	return func(all ...server.HRPCServiceHandler) {
-		RegisterHandlers(l, app, all...)
+func newHarmonyError(cfg *config.Config, e error) (int, *harmonytypesv1.Error) {
+	var herr *Error
+	if errors.As(e, &herr) {
+		return http.StatusBadRequest, &harmonytypesv1.Error{
+			Identifier:   herr.Identifier,
+			HumanMessage: herr.HumanMessage,
+			MoreDetails:  herr.MoreDetails,
+		}
 	}
+
+	err := &harmonytypesv1.Error{
+		Identifier: ErrorInternalServerError,
+	}
+	if cfg.Debug.RespondWithErrors {
+		err.HumanMessage = e.Error()
+	}
+
+	return http.StatusInternalServerError, err
 }
 
 func FiberErrorHandler(l log.Interface, cfg *config.Config) fiber.ErrorHandler {
 	return func(c *fiber.Ctx, e error) error {
 		if cfg.Debug.LogErrors && e != nil {
 			l.WithError(e).WithFields(log.Fields{
-				"path": c.OriginalURL(),
+				"path":  c.OriginalURL(),
+				"error": e,
 			}).Error("error in http handler")
 		}
 
 		contentType := string(c.Request().Header.Peek("Content-Type"))
-
-		var herr *Error
-		if errors.As(e, &herr) {
-			data, err := server.MarshalHRPC(&harmonytypesv1.Error{
-				Identifier:   herr.Identifier,
-				HumanMessage: herr.HumanMessage,
-				MoreDetails:  herr.MoreDetails,
-			}, contentType)
-			if err != nil {
-				return errwrap.Wrapf(err, "failed to wrap %v", data)
-			}
-
-			// nolint
-			return c.Status(http.StatusBadRequest).Send(data)
-		}
-
-		err := &harmonytypesv1.Error{
-			Identifier: ErrorInternalServerError,
-		}
-		if cfg.Debug.RespondWithErrors {
-			err.HumanMessage = e.Error()
-		}
+		statusCode, err := newHarmonyError(cfg, e)
 
 		data, marshalErr := server.MarshalHRPC(err, contentType)
 		if marshalErr != nil {
-			return errwrap.Wrapf(marshalErr, "failed to marshal error: (%s, %v)", contentType, err)
+			return errwrap.Wrapf(marshalErr, "failed to marshal error: (%s, %v)", contentType, e)
 		}
 
 		// nolint
-		return c.Status(http.StatusInternalServerError).Send(data)
+		return c.Status(statusCode).Send(data)
 	}
 }
